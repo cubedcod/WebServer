@@ -1,0 +1,29 @@
+* {vertical-align:top}
+body {font-family: Hack; margin: 0 2em 0 2em; background-color:#000; color: #fff;}
+#up,#down,#prev,#next {font-size: 2.33em; background-color:#000; color: #fff}
+#up,#down {display:block;}
+#prev,#next {position: fixed; height: 100%; padding-top: .89em}
+#up {margin-bottom: .3em}
+#down {margin-top:.3em}
+#prev {left: 0; top: 0}
+#next {right: 0; top: 0}
+a {overflow: hidden; text-decoration: none}
+a,p {max-width: 78ex; border-radius: .18em}
+a.title {font-size:1.08em; background-color: #fff; color: #000}
+a.id {float: right}
+a.date {float: right; font-weight: normal; font-size:.8em; background-color: #000; color:#888}
+a.link {font-size: .92em; background-color: #eee; color: #000}
+tr[name="content"] > td.v a {background-color: #222; color: #fff; border: .08em solid #333}
+.bold {font-weight: bold; font-size: 1.1em; margin-left: .1em}
+.container > .name {color: black; border-radius: 0 0 .2em 0}
+.post {max-width:80ex; background-color:#000; color:#fff; margin-bottom: .2em}
+table, div, pre, p, a {display: inline-block}
+table {border-spacing: 0; border-width: 0}
+td {padding: 0}
+img, video {max-width: 100%}
+div.thumb {background-color: #fff; color: #000}
+img.thumb {max-width: 28em}
+pre {white-space: pre-wrap}
+p {border: 1px solid #222; margin: .05em}
+pre, p, span, td.k > a {background-color: #000; color: #fff}
+:target, :target * {background-color:#0f0 !important; color: #000 !important}

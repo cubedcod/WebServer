@@ -1,0 +1,27 @@
+cache redirects ala shorturl
+announce full updates or existence thereof to curious peers - irvc3, crdt, solid-websocket, matrix etc
+emulatable archives (versioned JS-depchain. tag browser version too? look at archive.org/webpack/WARC prior-art)
+fix twitter (op in thread is invisible, no images)
+HTML extraction of HEAD meta and RDFa/microformats sponger
+week/month/hour paging UI-topbar
+index backlinks at storage time
+troff triplr - .1, .2, (sslsplit docs)
+dedupe repeat titles in presentation
+/ view hostdir to host+/ URI-rewrite
+link Search host-specific remote origins - !tw  URL mapping etc
+directory-index lightweight-summary when trailing-slash is missing. keep full-content with slash, and watch for relURI issues in new rewrite/summary
+generated-URI token stoplist
+use shortURL-mapping DB to deobfuscate at presentation and storage time
+mp3 image extract
+xhr link inliner
+loop-detection so URL deobfuscator can redirect
+replace open-uri with something w/ better redirect handling in GETnode
+QuoteTweet triplr, video triplr
+csp to trackdomain automapping
+move direct/indirect daemon config to filesystem store
+remove installscript
+pseudofeed from frontpage when can't be found  http://www.mysouthend.com/
+killfiles (incl message hashes e.g automod Globe warning)
+extract HTML <head> meta to RDF
+next-prev links for non-HTML (RSS ) when Nextt/Prev isn't in feed or HTTP header , requiring request to htML page. (URi arithmetic bypass optimization also)
+limit chronodir to localhost

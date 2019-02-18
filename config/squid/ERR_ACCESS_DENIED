@@ -1,0 +1,22 @@
+<html><head>
+    <style type="text/css">
+      a {color: #000; background-color: white;
+	 font-weight: bold;
+	 font-family: hack; font-size: .8em;
+	 text-decoration: none; margin: .2em}
+      body {
+	  border: .08em solid #ccc;
+	  background: repeating-linear-gradient(
+	      -45deg,
+	      #000000,
+	      #000000 .92em,
+	      #cccccc .92em,
+	      #cccccc 1em
+	  );
+	  margin: 0;
+	  text-align: center;
+      }
+    </style>
+  </head>
+  <body></body>
+</html>

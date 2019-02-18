@@ -1,0 +1,2 @@
+#!/bin/sh
+mpv http://wmbr.org:8000/hi

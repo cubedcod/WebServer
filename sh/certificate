@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# storage
+cert=$(realpath ~/src/pw/config/CA.pem)
+
+# create certificate
+[ -e $cert ] || openssl req -new -newkey rsa:2048 -sha256 -days 365 -nodes -x509 -extensions v3_ca -keyout myCA.pem -out $cert
+
+# hash
+h=$(openssl x509 -inform PEM -subject_hash_old -in $cert -noout)
+# install
+su -c "cp $cert /system/etc/security/cacerts/$h.0"
+su -c "chmod 644 /system/etc/security/cacerts/$h.0"

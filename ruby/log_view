@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+require 'open3'
+require 'ww'
+log = ARGV[0] || 'log/access.log'
+Open3.popen3("tail -f #{log}") do |stdin, stdout, stderr, thread|
+  hosts = {}
+  while line = stdout.gets do
+    t = line.split ' '
+    status,method,addr,action,mime = [t[3],t[5],t[6],t[8],t[9]]
+
+    hidden = (method == 'CONNECT') ||
+             (action && (action.match? /FIRSTUP_PARENT/))
+    unless hidden
+      origin = false
+      color = case status
+              when /304/
+                '30'
+              when /(40[03]|500|ABORT|DENIED)/
+                '31'
+              when /200/
+                if (action.match? /(ORIGINAL|DIRECT)/) && method != 'CONNECT'
+                  origin = true
+                  if hosts[addr.R.host]
+                    '37'
+                  else
+                    hosts[addr.R.host] = true
+                    '32'
+                  end
+                else
+                  '37'
+                end
+              else
+                '30'
+              end
+      puts "\e[7m" + method + "\e[0m \e[" +
+           color + ";1m" + status + " \e[7m" +
+           (origin ? addr : addr.sub(/^https?:\/\//,'')) +
+           "\e[0m " + "#{action} #{mime}"
+    end
+  end
+
+end
