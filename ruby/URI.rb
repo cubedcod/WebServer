@@ -21,7 +21,7 @@ class WebResource < RDF::URI
   def R; self end
 
   module URIs
-    ConfDir = Pathname.new(__dir__).join('../config').relative_path_from(Dir.pwd)
+    ConfDir = Pathname.new(__dir__).join('../config').relative_path_from Pathname.new Dir.pwd
 
     # common URI prefixes
     W3 = 'http://www.w3.org/'
