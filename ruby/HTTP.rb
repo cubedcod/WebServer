@@ -307,20 +307,22 @@ class WebResource
       (env.has_key? 'HTTP_FEEDURL') || FeedURL[uri] || path == '/feed/'
     end
 
-    def track; env['HTTP_TRACK'] ||= true
+    def trackGET
+      env['HTTP_TRACK'] ||= true
       case env['HTTP_TRACK']
       when /AMP/
         self.AMP
       when /shortened/
         cachedRedirect
       when /storage/
-        if %w{jpg jpeg ogg m4a mp3 mp4 png webm webp}.member? ext.downcase
+        if %w{gif html jpg jpeg ogg m4a mp3 mp4 png webm webp}.member? ext.downcase
           self.GETnode
+        elsif ext == 'js'
+          emptyJS
         else
           deny
         end
-      else # generic tracking
-        # TODO track the trackers in a db for high-scores
+      else
         if ext == 'js'
           emptyJS
         else
@@ -328,7 +330,7 @@ class WebResource
         end
       end
     end
-    alias_method :trackGET, :track
+    alias_method :track, :trackGET
 
     def trackPOST
       env['HTTP_TRACK'] ||= 'Track'

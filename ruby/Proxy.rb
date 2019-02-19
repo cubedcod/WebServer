@@ -61,9 +61,6 @@ www.youtube.com
         end
       } || [200, {'Content-Type' => 'text/html'}, ['<form method="GET"><input name="url" autofocus></form>']] }
 
-    # Cloudflare
-    HostGET['cdnjs.cloudflare.com'] = -> r {r.track? ? r.track : r.GETnode}
-
     # Discourse
     PathGET['/clicks/track'] = -> r {[302,{'Location' => r.q['url']},[]]}
 
@@ -124,18 +121,6 @@ www.youtube.com
     HostGET['instagram.com'] = -> r {[302, {'Location' =>  "https://www.instagram.com" + r.path},[]]}
     HostGET['l.instagram.com'] = -> r {[302,{'Location' => r.q['u']},[]]}
     HostGET['www.instagram.com'] = -> r {r.GETnode}
-
-    # GitHub
-    GitHub = %w{
-     databrary disconnectme
-     gorhill
-     solid
-     termux termux-packages transitd
-}
-
-    HostGET['github.com'] = HostGET['raw.githubusercontent.com'] = -> r { (GitHub.member? r.parts[0]) ? r.GETnode : r.track }
-
-    HostGET['github.githubassets.com'] = -> r {r.ext == 'css' ? r.GETnode : r.track}
 
     ## Google
     HostGET['www.google.com'] = -> r {
