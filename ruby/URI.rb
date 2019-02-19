@@ -21,6 +21,7 @@ class WebResource < RDF::URI
   def R; self end
 
   module URIs
+    ConfDir = Pathname.new(__dir__).join('../config').relative_path_from(Dir.pwd)
 
     # common URI prefixes
     W3 = 'http://www.w3.org/'
@@ -72,9 +73,10 @@ class WebResource < RDF::URI
     def self.fromRelativePath p
       ('/' + p.gsub(' ','%20').gsub('#','%23')).R
     end
+
     def toRelativePath
       URI.unescape case path
-                   when '/' # server root
+                   when '/'
                      '.'
                    when /^\//
                      path[1..-1]
@@ -90,7 +92,7 @@ class WebResource < RDF::URI
     # dirname as string
     def dirname; File.dirname path if path end
 
-    # URI for metadata about file out-of-band of the file
+    # metadata-file location 
     def metafile type = 'meta'
       dir + (dirname[-1] == '/' ? '' : '/') + '.' + basename + '.' + type
     end

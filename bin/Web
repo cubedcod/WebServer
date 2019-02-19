@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-require 'ww'
+require_relative '../ruby/index'
 case ARGV.size
 when 1
   puts WebResource::HTTP.send ARGV[0] if WebResource::HTTP.respond_to? ARGV[0]

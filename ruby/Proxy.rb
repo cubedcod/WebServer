@@ -276,7 +276,7 @@ yt3.ggpht.com
         graph = {Twitter => {'uri' => Twitter,
                              Link => []}}
 
-        '.conf/twitter.com.bu'.R.lines.shuffle.each_slice(16){|s|
+        ConfDir.join('twitter.com.bu').R.lines.shuffle.each_slice(16){|s|
           graph[Twitter][Link].push (Twitter+'/search?f=tweets&vertical=default&q=' + s.map{|u| 'from:' + u.chomp}.intersperse('+OR+').join).R}
 
         [200,{'Content-Type' => 'text/html'},[re.htmlDocument(graph)]]

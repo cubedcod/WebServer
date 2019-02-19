@@ -1,6 +1,0 @@
-#!/usr/bin/env ruby
-require 'fileutils'
-require 'pathname'
-loc = RbConfig::CONFIG["sitelibdir"] + '/'
-FileUtils.mkdir_p loc unless Pathname(loc).exist?
-FileUtils.ln_s (File.expand_path File.dirname __FILE__)+'/ww.rb', loc

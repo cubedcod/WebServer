@@ -107,7 +107,7 @@ class WebResource
     end
 
     def deny
-      ('.conf/squid/ERR_ACCESS_DENIED').R(env).setMIME('text/html').fileResponse
+      ConfDir.join('squid/ERR_ACCESS_DENIED').R(env).setMIME('text/html').fileResponse
     end
 
     def emptyJS

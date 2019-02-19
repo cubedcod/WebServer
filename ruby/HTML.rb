@@ -34,6 +34,9 @@ class WebResource
     def self.colorizeBG k; colorize k end
     def self.colorizeFG k; colorize k, false end
 
+    SiteCSS = ConfDir.join('site.css').read
+    SiteJS  = ConfDir.join('site.js').read
+
     # Graph -> HTML
     def htmlDocument graph = {}
 
@@ -50,11 +53,7 @@ class WebResource
                 map{|e|
         e && URI.unescape(e)}.join(' ') # path + keyword derived title
 
-      # name -> CSS
-      css = -> s {{_: :style, c: ["\n", ".conf/#{s}.css".R.readFile]}}
-      cssFiles = %w{site code}
-
-        # header (k,v) -> HTML
+      # header (k,v) -> HTML
       link = -> key, displayname {
         @r[:links][key].do{|uri|
           [uri.R.data({id: key, label: displayname}),
@@ -87,8 +86,8 @@ class WebResource
                                Markup[Container][treeize[graph], @r]
                               end,
                              link[:down,'&#9660;'],
-                             cssFiles.map{|f|css[f]}, "\n",
-                             {_: :script, c: ["\n", '.conf/site.js'.R.readFile]}, "\n"
+                             {_: :style, c: ["\n", SiteCSS]}, "\n",
+                             {_: :script, c: ["\n", SiteJS]}, "\n"
                             ]}, "\n" ]}]
     end
 
@@ -201,7 +200,10 @@ class WebResource
   include HTML
   module HTTP
 
-    def favicon; '/.conf/icon.png'.R(env).fileResponse end
+    def favicon
+      ConfDir.join('icon.png').R(env).fileResponse
+    end
+
     PathGET['/favicon.ico'] = -> r {r.favicon}
 
   end

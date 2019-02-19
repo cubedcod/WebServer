@@ -1,10 +1,39 @@
-# deps
-%w{cgi csv date digest/sha2 dimensions fileutils httparty icalendar json linkeddata mail nokogiri open-uri pathname rack rdf redcarpet shellwords}.map{|r|require r}
+%w{
+cgi
+csv
+date
+digest/sha2
+dimensions
+fileutils
+httparty
+icalendar
+json
+linkeddata
+mail
+nokogiri
+open-uri
+pathname
+rack
+rdf
+redcarpet
+shellwords
+}.map{|r|require r}
 
-# this
-%w{URI MIME HTML HTTP POSIX Graph Feed Image Msg Proxy Text}.map{|i|require_relative i}
+%w{
+URI
+MIME
+HTML
+HTTP
+POSIX
+Graph
+Feed
+Image
+Msg
+Proxy
+Text
+}.map{|i|require_relative i}
 
-# stdlib additions TODO remove, &. syntax and minor rewrites can facilitate #do replacement
+# stdlib additions, TODO remove - &. syntax and minor rewrites can facilitate #do replacement
 class Array
   def head; self[0] end
   def justArray; self end

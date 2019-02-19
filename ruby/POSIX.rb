@@ -170,8 +170,12 @@ class WebResource
 end
 
 class Pathname
-  def R
-    WebResource::POSIX.fromRelativePath to_s.force_encoding 'UTF-8'
+  def R env=nil
+    if env
+     (WebResource::POSIX.fromRelativePath to_s.force_encoding 'UTF-8').environment env
+    else
+      WebResource::POSIX.fromRelativePath to_s.force_encoding 'UTF-8'
+    end
   end
 end
 

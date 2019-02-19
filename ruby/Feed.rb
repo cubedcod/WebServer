@@ -4,7 +4,7 @@ class WebResource
 
     FeedURL={}
 
-    FeedLists = '.conf/feeds/*.u'.R.glob
+    FeedLists = ConfDir.join('feeds/*.u').R.glob
     FeedLists.map{|list|
       list.lines.map{|u| FeedURL[u] = u.R}}
 

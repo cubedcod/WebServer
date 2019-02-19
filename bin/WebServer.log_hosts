@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
-require 'open3'; require 'ww'
+require 'open3'
+require_relative '../ruby/index'
 Open3.popen3("#{ARGV[0] == 'all' ? 'cat' : 'tail -f'} log/access.log") do |stdin, stdout, stderr, thread|
   hosts = {}
   while line = stdout.gets do

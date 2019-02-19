@@ -1,3 +1,0 @@
-#!/bin/sh
-mpv http://stream0.wfmu.org/freeform-high.aac
-mpv http://stream0.wfmu.org/freeform-128k

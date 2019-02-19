@@ -1,0 +1,22 @@
+#!/bin/sh
+this=WebServer
+base=$(realpath ~/web)
+src=$(realpath ~/src/$this)
+bin=$src/bin
+
+# configure network
+uid=$(id -u)
+su -c "PATH=$PATH:$bin $this.net $uid"
+
+# configure and launch request router/logger
+conf=$src/config
+cd $conf
+mkdir -p $base/log
+squid -f routeHTTP.conf
+
+# launch daemon
+cd $base
+tmux new-session -s $this -d
+tmux send-keys      -t $this:0 "unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 $conf/$this.ru" C-m
+tmux new-window     -t $this:1 -d $bin/$this.log
+tmux attach-session -t $this
