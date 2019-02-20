@@ -191,9 +191,9 @@ class WebResource
       return chronoDir if chronoDir? # time-seg redirect
       return fileResponse if node.file? # static-data response
       if localResource?
-        graphResponse localNodes # local node
+        graphResponse localNodes # local-origin node
       else
-        self.GETnode             # remote node
+        self.GETnode             # remote-origin node
       end
     end
 
@@ -363,7 +363,7 @@ class WebResource
       when /shortened/
         cachedRedirect
       when /storage/
-        if %w{css gif html jpg jpeg ogg m4a mp3 mp4 png webm webp}.member? ext.downcase
+        if %w{css gif html jpg jpeg ogg m4a mp3 mp4 png svg webm webp}.member? ext.downcase
           self.GETnode
         else
           deny
