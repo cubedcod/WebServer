@@ -57,7 +57,7 @@ class WebResource
       resource = ('//' + host + path).R env # bind resource and environment
       resource.send(method).do{|status,head,body| # dispatch request
         # log request
-        color = (if resource.reqType?
+        color = (if resource.env[:deny]
                  '31'
                 elsif method=='POST'
                   '32'
@@ -146,6 +146,7 @@ class WebResource
     end
 
     def deny
+      env[:deny] = true
       ConfDir.join('squid/ERR_ACCESS_DENIED').R(env).setMIME('text/html').fileResponse
     end
 
@@ -223,7 +224,6 @@ class WebResource
 
     def OPTIONSthru
       verbose = false
-      @r.delete 'HTTP_TRACK'
 
       # request
       url = 'https://' + host + path + qs
@@ -263,7 +263,6 @@ class WebResource
 
     # uncached pass-through POST
     def POSTthru
-      @r.delete 'HTTP_TRACK'
       # request
       url = 'https://' + host + path + qs
       headers = HTTP.unmangle env
@@ -343,7 +342,7 @@ class WebResource
     Response_204 = [204, {'Content-Length' => 0}, []]
 
     def reqType?
-      env.has_key? 'HTTP_TRACK'
+      env.has_key? 'HTTP_TYPE'
     end
 
     def feedURL?
@@ -351,13 +350,12 @@ class WebResource
     end
 
     def trackPOST
-      env['HTTP_TRACK'] ||= 'Track'
+      env[:deny] = true
       [202,{},[]]
     end
 
     def typeGET
-      env['HTTP_TRACK'] ||= true
-      case env['HTTP_TRACK']
+      case env['HTTP_TYPE']
       when /AMP/
         self.AMP
       when /shortened/

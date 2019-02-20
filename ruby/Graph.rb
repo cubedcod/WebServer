@@ -178,7 +178,6 @@ class WebResource
 
       # response
       if @r # called over HTTP
-        @r.delete 'HTTP_TRACK'
         if cache.exist?
           # preserve upstream format for runtime preference, static preference or immutable MIME
           if UpstreamToggle[@r['SERVER_NAME']] || UpstreamFormat.member?(@r['SERVER_NAME']) || cache.noTransform?
