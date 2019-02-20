@@ -153,6 +153,7 @@ maps.google.com
     %w{
 ajax.googleapis.com
 books.google.com
+docs.google.com
 encrypted-tbn0.gstatic.com
 encrypted-tbn1.gstatic.com
 encrypted-tbn2.gstatic.com
