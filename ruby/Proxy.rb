@@ -95,7 +95,7 @@ www.youtube.com
       if r.parts[0] == 'rover'
         [302, {'Location' => r.q['mpre']}, []]
       else
-        r.track
+        r.deny
       end
     }
 
@@ -104,7 +104,7 @@ www.youtube.com
       if r.path == '/1/display/resize'
         [302, {'Location' => r.q['url']}, []]
       else
-        r.track
+        r.deny
       end
     }
 
@@ -112,7 +112,7 @@ www.youtube.com
     HostGET['facebook.com'] = HostGET['www.facebook.com'] = -> r {
       case r.parts[0]
       when /campaign|plugin|reaction|security/
-        r.track
+        r.deny
       else
         r.GETnode
       end}
@@ -138,16 +138,8 @@ www.youtube.com
       when 'url'
         [302,{'Location' => r.q['url']},[]]
       else
-        r.track
+        r.deny
       end}
-
-    HostGET['www.googleadservices.com'] = -> r {
-      if r.path == '/pagead/aclk'
-        [302, {'Location' => r.q['adurl']}, []]
-      else
-        r.track
-      end
-    }
 
     # redirection hosts
     %w{
@@ -226,7 +218,7 @@ yt3.ggpht.com
       elsif mode.match? /204$/
         Response_204
       else
-        r.track
+        r.deny
       end}
 
     HostPOST['www.youtube.com'] = -> r {
@@ -271,7 +263,7 @@ yt3.ggpht.com
       elsif path.match?(/\.js$/)
         ('https://s.yimg.com'+path).R.env(r.env).GETnode
       else
-        r.track
+        r.deny
       end
     }
 

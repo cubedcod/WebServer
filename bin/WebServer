@@ -1,6 +1,7 @@
 #!/bin/sh
 this=WebServer
 base=$(realpath ~/web)
+mkdir -p $base/log
 src=$(realpath ~/src/$this)
 bin=$src/bin
 
@@ -8,10 +9,9 @@ bin=$src/bin
 uid=$(id -u)
 su -c "PATH=$PATH:$bin $this.net $uid"
 
-# configure and launch request router/logger
+# configure and launch request router
 conf=$src/config
-cd $conf
-mkdir -p $base/log
+cd $conf/routes
 squid -f routeHTTP.conf
 
 # launch daemon

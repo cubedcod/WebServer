@@ -6,6 +6,46 @@ class WebResource
 
     def cache?; !(pragma && pragma == 'no-cache') end
 
+    def cachedRedirect
+      verbose = false
+      scheme = 'http' + (InsecureShorteners.member?(host) ? '' : 's') + '://'
+      sourcePath = path || ''
+      source = scheme + host + sourcePath
+      dest = nil
+      cache = ('/cache/URL/' + host + (sourcePath[0..2] || '') + '/' + (sourcePath[3..-1] || '') + '.u').R
+      puts "redir #{source} ->" if verbose
+
+      if cache.exist?
+        puts "cached at #{cache}" if verbose
+        dest = cache.readFile
+      else
+        resp = Net::HTTP.get_response (URI.parse source)
+        dest = resp['Location'] || resp['location']
+        if !dest
+          body = Nokogiri::HTML.fragment resp.body
+          refresh = body.css 'meta[http-equiv="refresh"]'
+          if refresh && refresh.size > 0
+            content = refresh.attr('content')
+            if content
+              dest = content.to_s.split('URL=')[-1]
+            end
+          end
+        end
+        cache.writeFile dest if dest
+      end
+
+      puts dest if verbose
+      dest = dest ? dest.R : nil
+      if @r
+        # return URI to caller in document
+        # [200, {'Content-Type' => 'text/html'}, [htmlDocument({source => {Link => dest}})]]
+        # redirect to URI
+        dest ? [302, {'Location' =>  dest},[]] : notfound
+      else
+        dest
+      end
+    end
+
     def self.call env
       method = env['REQUEST_METHOD']
       return [202,{},[]] unless Methods.member? method
@@ -17,7 +57,7 @@ class WebResource
       resource = ('//' + host + path).R env # bind resource and environment
       resource.send(method).do{|status,head,body| # dispatch request
         # log request
-        color = (if resource.track?
+        color = (if resource.reqType?
                  '31'
                 elsif method=='POST'
                   '32'
@@ -144,13 +184,17 @@ class WebResource
     # receive GET
     def GET
       @r[:Response] = {} # response headers
-      @r[:links] = {}    # graph references
-      return PathGET[path][self] if PathGET[path] # path lambda
-      return HostGET[host][self] if HostGET[host] # host lambda
-      return track        if track?     # tracker tracker
-      return chronoDir    if chronoDir? # time-seg redirect
-      return fileResponse if node.file? # on-file response
-      localResource? ? graphResponse(localNodes) : self.GETnode # generic node
+      @r[:links] = {}    # graph-level references
+      return PathGET[path][self] if PathGET[path] # dispatch to lambda binding (path name)
+      return HostGET[host][self] if HostGET[host] # dispatch to lambda binding (host name)
+      return typeGET if reqType? # dispatch on request type-tag applied via upstream rules
+      return chronoDir if chronoDir? # time-seg redirect
+      return fileResponse if node.file? # static-data response
+      if localResource?
+        graphResponse localNodes # local node
+      else
+        self.GETnode             # remote node
+      end
     end
 
     def HEAD
@@ -298,7 +342,7 @@ class WebResource
 
     Response_204 = [204, {'Content-Length' => 0}, []]
 
-    def track?
+    def reqType?
       env.has_key? 'HTTP_TRACK'
     end
 
@@ -306,7 +350,12 @@ class WebResource
       (env.has_key? 'HTTP_FEEDURL') || FeedURL[uri] || path == '/feed/'
     end
 
-    def trackGET
+    def trackPOST
+      env['HTTP_TRACK'] ||= 'Track'
+      [202,{},[]]
+    end
+
+    def typeGET
       env['HTTP_TRACK'] ||= true
       case env['HTTP_TRACK']
       when /AMP/
@@ -316,24 +365,12 @@ class WebResource
       when /storage/
         if %w{css gif html jpg jpeg ogg m4a mp3 mp4 png webm webp}.member? ext.downcase
           self.GETnode
-        elsif ext == 'js'
-          emptyJS
         else
           deny
         end
       else
-        if ext == 'js'
-          emptyJS
-        else
-          deny
-        end
+        deny
       end
-    end
-    alias_method :track, :trackGET
-
-    def trackPOST
-      env['HTTP_TRACK'] ||= 'Track'
-      [202,{},[]]
     end
 
     def self.unmangle env
