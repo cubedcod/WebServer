@@ -39,6 +39,10 @@ www.youtube.com
   end
   module HTTP
 
+    def AMP
+      [302, {'Location' => 'https://' + (host.split('.') - %w{amp}).join('.') + (path.split('/') - %w{amp amphtml}).join('/')}, []]
+    end
+
     # toggle upstream-UI preference
     PathGET['/go-direct'] = -> r {
       r.q['u'].do{|u|
@@ -196,17 +200,6 @@ yt3.ggpht.com
       else # redirect to image file
         UnwrapImage[re]
       end}
-
-    # Medium
-    HostGET['medium.com'] = -> r {
-      if r.q.has_key? 'redirecturl'
-        [302,{'Location' => r.q['redirecturl']},[]]
-      elsif r.track?
-        r.track
-      else
-        r.GETnode
-      end
-    }
 
     # Mixcloud
     HostPOST['www.mixcloud.com'] = -> r {

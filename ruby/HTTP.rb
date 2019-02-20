@@ -4,7 +4,6 @@ class WebResource
     include MIME
     include URIs
 
-    def AMP; [302, {'Location' => 'https://' + (host.split('.') - %w{amp}).join('.') + (path.split('/') - %w{amp amphtml}).join('/')}, []] end
     def cache?; !(pragma && pragma == 'no-cache') end
 
     def self.call env
@@ -315,7 +314,7 @@ class WebResource
       when /shortened/
         cachedRedirect
       when /storage/
-        if %w{gif html jpg jpeg ogg m4a mp3 mp4 png webm webp}.member? ext.downcase
+        if %w{css gif html jpg jpeg ogg m4a mp3 mp4 png webm webp}.member? ext.downcase
           self.GETnode
         elsif ext == 'js'
           emptyJS
