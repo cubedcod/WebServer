@@ -141,40 +141,13 @@ www.youtube.com
         r.deny
       end}
 
-    # redirection hosts
     %w{
 feedproxy.google.com
 gmail.com
 google.com
-maps.google.com
-}.map{|h| HostGET[h] = -> r {r.cachedRedirect}}
+maps.google.com}.map{|h|
+      HostGET[h] = -> r {r.cachedRedirect}}
 
-    # GET-capability hosts
-    %w{
-ajax.googleapis.com
-books.google.com
-docs.google.com
-encrypted-tbn0.gstatic.com
-encrypted-tbn1.gstatic.com
-encrypted-tbn2.gstatic.com
-encrypted-tbn3.gstatic.com
-fonts.googleapis.com
-geo0.ggpht.com
-geo1.ggpht.com
-geo2.ggpht.com
-geo3.ggpht.com
-images.google.com
-kh.google.com
-maps.googleapis.com
-maps.gstatic.com
-patents.google.com
-plus.google.com
-ssl.gstatic.com
-www.gstatic.com
-yt3.ggpht.com
-}.map{|h| HostGET[h] = -> r {r.GETnode}}
-
-    # GET/OPTIONS/POST hosts
     %w{accounts.google.com
          groups.google.com
            mail.google.com}.map{|h|

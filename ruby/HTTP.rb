@@ -354,6 +354,7 @@ class WebResource
       [202,{},[]]
     end
 
+    StoreAnything = %w{ssl.gstatic.com}
     def typeGET
       case env['HTTP_TYPE']
       when /AMP/
@@ -361,7 +362,7 @@ class WebResource
       when /shortened/
         cachedRedirect
       when /storage/
-        if %w{css gif html jpg jpeg ogg m4a mp3 mp4 png svg webm webp}.member? ext.downcase
+        if StoreAnything.member?(host) || %w{css gif html jpg jpeg ogg m4a mp3 mp4 png svg webm webp woff2}.member?(ext.downcase)
           self.GETnode
         else
           deny
