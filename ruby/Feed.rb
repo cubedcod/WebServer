@@ -11,6 +11,10 @@ class WebResource
   end
   module HTTP
 
+    def feedURL?
+      (env.has_key? 'HTTP_FEEDURL') || FeedURL[uri] || path == '/feed/'
+    end
+
     def self.getFeeds
       FeedURL.values.map{|feed| feed.GETnode}
       nil

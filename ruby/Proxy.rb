@@ -39,7 +39,7 @@ www.youtube.com
   end
   module HTTP
 
-    def AMP
+    def amp
       [302, {'Location' => 'https://' + (host.split('.') - %w{amp}).join('.') + (path.split('/') - %w{amp amphtml}).join('/')}, []]
     end
 
@@ -59,9 +59,9 @@ www.youtube.com
         if r.host == 'bit.ly'
           r.cachedRedirect
         elsif %w{png jpg webp}.member? r.ext
-          ('//' + r.host + r.path).R(cache.env).GETnode
+          ('//' + r.host + r.path).R(cache.env).remoteNode
         else
-          r.GETnode
+          r.remoteNode
         end
       } || [200, {'Content-Type' => 'text/html'}, ['<form method="GET"><input name="url" autofocus></form>']] }
 
@@ -81,11 +81,11 @@ www.youtube.com
         when 'ip3'
           re.ext == 'ico' ? re.favicon : re.notfound
         when 'mapboxapi'
-          re.GETnode
+          re.remoteNode
         when 'mapkit'
           original = re.env['QUERY_STRING'].R re.env
           original.env['QUERY_STRING'] = original.query
-          original.GETnode
+          original.remoteNode
         else
           re.notfound
         end}}
@@ -114,7 +114,7 @@ www.youtube.com
       when /campaign|plugin|reaction|security/
         r.deny
       else
-        r.GETnode
+        r.remoteNode
       end}
     HostPOST['www.facebook.com'] = -> r {
       if r.path.match? /comment_fetch/
@@ -124,7 +124,7 @@ www.youtube.com
       end}
     HostGET['instagram.com'] = -> r {[302, {'Location' =>  "https://www.instagram.com" + r.path},[]]}
     HostGET['l.instagram.com'] = -> r {[302,{'Location' => r.q['u']},[]]}
-    HostGET['www.instagram.com'] = -> r {r.GETnode}
+    HostGET['www.instagram.com'] = -> r {r.remoteNode}
 
     ## Google
     HostGET['www.google.com'] = -> r {
@@ -134,7 +134,7 @@ www.youtube.com
       when 'gmail'
         r.cachedRedirect
       when /async|im(ages?|gres)|x?js|logos|maps|search/
-        r.GETnode
+        r.remoteNode
       when 'url'
         [302,{'Location' => r.q['url']},[]]
       else
@@ -151,7 +151,7 @@ maps.google.com}.map{|h|
     %w{accounts.google.com
          groups.google.com
            mail.google.com}.map{|h|
-      HostGET[h] = -> r {r.GETnode}
+      HostGET[h] = -> r {r.remoteNode}
       HostOPTIONS[h] = -> r {r.OPTIONSthru}
       HostPOST[h] = -> r {r.POSTthru}}
 
@@ -159,7 +159,7 @@ maps.google.com}.map{|h|
     HostGET['imgur.com'] = HostGET['i.imgur.com'] = -> re {
       if !re.ext.empty? # file extension
         if 'i.imgur.com' == re.host # image host
-          re.GETnode # cached image
+          re.remoteNode # cached image
         else # redirect to image host
           [301,{'Location' => 'https://i.imgur.com' + re.path},[]]
         end
@@ -176,8 +176,6 @@ maps.google.com}.map{|h|
     HostGET['np.reddit.com'] = HostGET['reddit.com'] = -> re {[302,{'Location' => 'https://www.reddit.com' + re.path + re.qs},[]]}
 
     # Souncloud
-    HostGET['api.soundcloud.com'] = HostGET['api-v2.soundcloud.com'] = -> r {r.GETnode}
-    HostOPTIONS['api.soundcloud.com'] = HostOPTIONS['api-v2.soundcloud.com'] = -> r {r.OPTIONSthru}
     HostGET['exit.sc'] = -> r {[302,{'Location' => r.q['url']},[]]}
 
     # YouTube
@@ -186,7 +184,7 @@ maps.google.com}.map{|h|
       if !mode
         [200, {'Content-Type' => 'text/html'},['<form method="GET" action="/results"><input name="q" autofocus></form>']]
       elsif %w{browse_ajax c channel embed feed get_video_info iframe_api playlist user results signin watch watch_videos yts}.member? mode
-        r.GETnode
+        r.remoteNode
       elsif mode == 'redirect'
         [302, {'Location' =>  r.q['q']},[]]
       elsif mode.match? /204$/
@@ -225,7 +223,7 @@ maps.google.com}.map{|h|
 
         [200,{'Content-Type' => 'text/html'},[re.htmlDocument(graph)]]
       else
-        re.GETnode
+        re.remoteNode
       end}
 
     # Yahoo
@@ -235,7 +233,7 @@ maps.google.com}.map{|h|
       if u = r.path.match(%r{https?://?(.*jpg)})
         [302, {'Location' =>  "https://" + u[1]},[]]
       elsif path.match?(/\.js$/)
-        ('https://s.yimg.com'+path).R.env(r.env).GETnode
+        ('https://s.yimg.com'+path).R.env(r.env).remoteNode
       else
         r.deny
       end

@@ -180,151 +180,33 @@ class WebResource
       end
     end
 
-    alias_method :env, :environment
-
-    # receive GET
+    StoreAnything = %w{encrypted-tbn0.gstatic.com ssl.gstatic.com yt3.ggpht.com}
+    MediaFormats = %w{css gif html jpg jpeg ogg m4a mp3 mp4 png svg txt webm webp woff2}
     def GET
       @r[:Response] = {} # response headers
       @r[:links] = {}    # graph-level references
       return PathGET[path][self] if PathGET[path] # dispatch to lambda binding (path name)
       return HostGET[host][self] if HostGET[host] # dispatch to lambda binding (host name)
-      return self.GETvariants if reqType? # dispatch on request-type
+      return case env['HTTP_TYPE'] # dispatch on request type-tag attached upstream
+             when /AMP/
+               amp
+             when /shortened/
+               cachedRedirect
+             when /storage/
+               if StoreAnything.member?(host) || MediaFormats.member?(ext.downcase)
+                 remoteNode
+               else
+                 deny
+               end
+             else
+               deny
+             end if env.has_key? 'HTTP_TYPE'
       return chronoDir if chronoDir? # time-seg redirect
       return fileResponse if node.file? # static-data response
       if localResource?
-        graphResponse localNodes # local-origin node
+        graphResponse localNodes
       else
-        self.GETnode             # remote-origin node
-      end
-    end
-
-    def GETnode
-      head = HTTP.unmangle env
-      head.delete 'Host'
-      formatSuffix = (host.match?(/reddit.com$/) && !parts.member?('w')) ? '.rss' : ''
-      useExtension = %w{aac atom css html jpg js mp3 mp4 pdf png rdf svg ttf ttl webm webp woff woff2}.member? ext.downcase
-      portNum = port && !([80,443,8000].member? port) && ":#{port}" || ''
-      queryHash = q
-      queryHash.delete 'host'
-      queryString = queryHash.empty? ? '' : (HTTP.qs queryHash)
-      # origin URI
-      urlHTTPS = scheme && scheme=='https' && uri || ('https://' + host + portNum + path + formatSuffix + queryString)
-      urlHTTP  = 'http://'  + host + portNum + (path||'/') + formatSuffix + queryString
-      # local URI
-      cache = ('/' + host + (if FlatMap.member?(host) || (qs && !qs.empty?) # mint a path
-                             hash = ((path||'/') + qs).sha2          # hash origin path
-                             type = useExtension ? ext : 'cache' # append suffix
-                             '/' + hash[0..1] + '/' + hash[1..-1] + '.' + type # plunk in semi-balanced bins
-                            else # preserve upstream path
-                              name = path[-1] == '/' ? path[0..-2] : path # strip trailing-slash
-                              name + (useExtension ? '' : '.cache') # append suffix
-                             end)).R env
-      cacheMeta = cache.metafile
-
-      # lazy updater, called by need
-      updates = []
-      update = -> url {
-        begin # block to catch 304-return "error"
-          # conditional GET
-          open(url, head) do |response| # response
-
-            if @r # HTTP-request calling context - preserve origin bits
-              @r[:Response]['Access-Control-Allow-Origin'] ||= '*'
-              response.meta['set-cookie'].do{|cookie| @r[:Response]['Set-Cookie'] = cookie}
-            end
-
-             # index updates
-            resp = response.read
-            unless cache.e && cache.readFile == resp
-              cache.writeFile resp # cache body
-              mime = response.meta['content-type'].do{|type| type.split(';')[0] } || ''
-              cacheMeta.writeFile [mime, url, ''].join "\n" unless useExtension
-              # index content
-              updates.concat(case mime
-                             when /^application\/atom/
-                               cache.indexFeed
-                             when /^application\/rss/
-                               cache.indexFeed
-                             when /^application\/xml/
-                               cache.indexFeed
-                             when /^text\/html/
-                               if feedURL? # HTML typetag on specified feed URL
-                                 cache.indexFeed
-                               else
-                                 cache.indexHTML host
-                               end
-                             when /^text\/xml/
-                               cache.indexFeed
-                             else
-                               []
-                             end || [])
-            end
-          end
-        rescue OpenURI::HTTPError => e
-          raise unless e.message.match? /304/
-        end}
-
-      # conditional update
-      static = cache? && cache.e && cache.noTransform?
-      throttled = cacheMeta.e && (Time.now - cacheMeta.mtime) < 60
-      unless static || throttled
-        head["If-Modified-Since"] = cache.mtime.httpdate if cache.e
-        begin # prefer HTTPS w/ fallback HTTP attempt
-          update[urlHTTPS]
-        rescue
-          update[urlHTTP]
-        end
-        cacheMeta.touch if cacheMeta.e # bump timestamp
-      end
-
-      # response
-      if @r # called over HTTP
-        if cache.exist?
-          # preserve upstream format for runtime preference, static preference or immutable MIME
-          if UpstreamToggle[@r['SERVER_NAME']] || UpstreamFormat.member?(@r['SERVER_NAME']) || cache.noTransform?
-            cache.fileResponse
-          else # transcoding enabled
-            graphResponse (updates.empty? ? [cache] : updates)
-          end
-        else
-          notfound
-        end
-      else # REPL/script/shell caller
-        updates.empty? ? self : updates
-      end
-
-    rescue Exception => e
-      msg = [uri, e.class, e.message].join " "
-      trace = e.backtrace.join "\n"
-      puts msg, trace
-      @r ? [500, {'Content-Type' => 'text/html'},
-            [htmlDocument({uri => {Content => [{_: :style, c: "body {background-color: red !important}"},
-                                               {_: :h3, c: msg.hrefs}, {_: :pre, c: trace.hrefs},
-                                               {_: :h4, c: 'request'},
-                                               (HTML.kv (HTML.urifyHash head), @r), # request header
-                                               ([{_: :h4, c: "response #{e.io.status[0]}"},
-                                                (HTML.kv (HTML.urifyHash e.io.meta), @r), # response header
-                                                (CGI.escapeHTML e.io.read.to_utf8)] if e.respond_to? :io) # response body
-                                              ]}})]] : self
-    end
-
-    # rules are specified in <../config/routes>
-    StoreAnything = %w{ssl.gstatic.com}
-    MediaFormats = %w{css gif html jpg jpeg ogg m4a mp3 mp4 png svg txt webm webp woff2}
-    def GETvariants
-      case env['HTTP_TYPE']
-      when /AMP/
-        self.AMP
-      when /shortened/
-        cachedRedirect
-      when /storage/
-        if StoreAnything.member?(host) || MediaFormats.member?(ext.downcase)
-          self.GETnode
-        else
-          deny
-        end
-      else
-        deny
+        remoteNode
       end
     end
 
@@ -469,15 +351,117 @@ class WebResource
       }.intersperse("&").join('')
     end
 
+    def remoteNode
+      head = HTTP.unmangle env
+      head.delete 'Host'
+      formatSuffix = (host.match?(/reddit.com$/) && !parts.member?('w')) ? '.rss' : ''
+      useExtension = %w{aac atom css html jpg js mp3 mp4 pdf png rdf svg ttf ttl webm webp woff woff2}.member? ext.downcase
+      portNum = port && !([80,443,8000].member? port) && ":#{port}" || ''
+      queryHash = q
+      queryHash.delete 'host'
+      queryString = queryHash.empty? ? '' : (HTTP.qs queryHash)
+      # origin URI
+      urlHTTPS = scheme && scheme=='https' && uri || ('https://' + host + portNum + path + formatSuffix + queryString)
+      urlHTTP  = 'http://'  + host + portNum + (path||'/') + formatSuffix + queryString
+      # local URI
+      cache = ('/' + host + (if FlatMap.member?(host) || (qs && !qs.empty?) # mint a path
+                             hash = ((path||'/') + qs).sha2          # hash origin path
+                             type = useExtension ? ext : 'cache' # append suffix
+                             '/' + hash[0..1] + '/' + hash[1..-1] + '.' + type # plunk in semi-balanced bins
+                            else # preserve upstream path
+                              name = path[-1] == '/' ? path[0..-2] : path # strip trailing-slash
+                              name + (useExtension ? '' : '.cache') # append suffix
+                             end)).R env
+      cacheMeta = cache.metafile
+
+      # lazy updater, called by need
+      updates = []
+      update = -> url {
+        begin # block to catch 304-return "error"
+          # conditional GET
+          open(url, head) do |response| # response
+
+            if @r # HTTP-request calling context - preserve origin bits
+              @r[:Response]['Access-Control-Allow-Origin'] ||= '*'
+              response.meta['set-cookie'].do{|cookie| @r[:Response]['Set-Cookie'] = cookie}
+            end
+
+             # index updates
+            resp = response.read
+            unless cache.e && cache.readFile == resp
+              cache.writeFile resp # cache body
+              mime = response.meta['content-type'].do{|type| type.split(';')[0] } || ''
+              cacheMeta.writeFile [mime, url, ''].join "\n" unless useExtension
+              # index content
+              updates.concat(case mime
+                             when /^application\/atom/
+                               cache.indexFeed
+                             when /^application\/rss/
+                               cache.indexFeed
+                             when /^application\/xml/
+                               cache.indexFeed
+                             when /^text\/html/
+                               if feedURL? # HTML typetag on specified feed URL
+                                 cache.indexFeed
+                               else
+                                 cache.indexHTML host
+                               end
+                             when /^text\/xml/
+                               cache.indexFeed
+                             else
+                               []
+                             end || [])
+            end
+          end
+        rescue OpenURI::HTTPError => e
+          raise unless e.message.match? /304/
+        end}
+
+      # conditional update
+      static = cache? && cache.e && cache.noTransform?
+      throttled = cacheMeta.e && (Time.now - cacheMeta.mtime) < 60
+      unless static || throttled
+        head["If-Modified-Since"] = cache.mtime.httpdate if cache.e
+        begin # prefer HTTPS w/ fallback HTTP attempt
+          update[urlHTTPS]
+        rescue
+          update[urlHTTP]
+        end
+        cacheMeta.touch if cacheMeta.e # bump timestamp
+      end
+
+      # response
+      if @r # called over HTTP
+        if cache.exist?
+          # preserve upstream format for runtime preference, static preference or immutable MIME
+          if UpstreamToggle[@r['SERVER_NAME']] || UpstreamFormat.member?(@r['SERVER_NAME']) || cache.noTransform?
+            cache.fileResponse
+          else # transcoding enabled
+            graphResponse (updates.empty? ? [cache] : updates)
+          end
+        else
+          notfound
+        end
+      else # REPL/script/shell caller
+        updates.empty? ? self : updates
+      end
+
+    rescue Exception => e
+      msg = [uri, e.class, e.message].join " "
+      trace = e.backtrace.join "\n"
+      puts msg, trace
+      @r ? [500, {'Content-Type' => 'text/html'},
+            [htmlDocument({uri => {Content => [{_: :style, c: "body {background-color: red !important}"},
+                                               {_: :h3, c: msg.hrefs}, {_: :pre, c: trace.hrefs},
+                                               {_: :h4, c: 'request'},
+                                               (HTML.kv (HTML.urifyHash head), @r), # request header
+                                               ([{_: :h4, c: "response #{e.io.status[0]}"},
+                                                (HTML.kv (HTML.urifyHash e.io.meta), @r), # response header
+                                                (CGI.escapeHTML e.io.read.to_utf8)] if e.respond_to? :io) # response body
+                                              ]}})]] : self
+    end
+
     Response_204 = [204, {'Content-Length' => 0}, []]
-
-    def reqType?
-      env.has_key? 'HTTP_TYPE'
-    end
-
-    def feedURL?
-      (env.has_key? 'HTTP_FEEDURL') || FeedURL[uri] || path == '/feed/'
-    end
 
     def trackPOST
       env[:deny] = true
