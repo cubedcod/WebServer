@@ -142,16 +142,11 @@ www.youtube.com
         r.deny
       end}
 
-    %w{
-feedproxy.google.com
-gmail.com
-google.com
-maps.google.com}.map{|h|
+    %w{feedproxy.google.com google.com}.map{|h|
       HostGET[h] = -> r {r.cachedRedirect}}
 
-    %w{accounts.google.com
-         groups.google.com
-           mail.google.com}.map{|h|
+    %w{accounts groups mail news}.map{|name|
+      h = name + '.google.com'
       HostGET[h] = -> r {r.remoteNode}
       HostOPTIONS[h] = -> r {r.OPTIONSthru}
       HostPOST[h] = -> r {r.POSTthru}}
