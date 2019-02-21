@@ -179,9 +179,12 @@ class WebResource
         @r || {}
       end
     end
+    alias_method :env, :environment
 
+    # hosts not subject to storable types list
     StoreAnything = %w{encrypted-tbn0.gstatic.com ssl.gstatic.com yt3.ggpht.com}
     MediaFormats = %w{css gif html jpg jpeg ogg m4a mp3 mp4 png svg txt webm webp woff2}
+
     def GET
       @r[:Response] = {} # response headers
       @r[:links] = {}    # graph-level references

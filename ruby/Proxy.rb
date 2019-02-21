@@ -20,6 +20,7 @@ bos.gl
 f-st.co
 huffp.st
 ow.ly
+rss.cnn.com
 w.bos.gl
 }
 
