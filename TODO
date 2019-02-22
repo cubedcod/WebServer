@@ -24,3 +24,4 @@ killfiles (incl message hashes e.g automod Globe warning)
 extract HTML <head> meta to RDF
 next-prev links for non-HTML (RSS ) when Nextt/Prev isn't in feed or HTTP header , requiring request to htML page. (URi arithmetic bypass optimization also)
 limit chronodir to localhost
+log getFeed errors

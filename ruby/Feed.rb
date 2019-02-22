@@ -3,7 +3,6 @@ class WebResource
   module URIs
 
     FeedURL={}
-
     FeedLists = ConfDir.join('feeds/*.u').R.glob
     FeedLists.map{|list|
       list.lines.map{|u| FeedURL[u] = u.R}}
@@ -11,12 +10,16 @@ class WebResource
   end
   module HTTP
 
+    # explicit feed URLs as MIME-type override
+    # specify in <../config/feeds> (URL)
+    #  <../config/routes/feedPath> (pattern)
     def feedURL?
       (env.has_key? 'HTTP_FEEDURL') || FeedURL[uri] || path == '/feed/'
     end
 
     def self.getFeeds
-      FeedURL.values.map{|feed| feed.GETnode}
+      FeedURL.values.map{|feed|
+        feed.remoteNode}
       nil
     end
 
