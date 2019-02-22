@@ -135,7 +135,7 @@ class WebResource
       bg = env[:Cached] ? '#ffffff' : '#000000'
       [#'<table border="1"><tr><td>',
         {class: :container,
-         style: "background: repeating-linear-gradient(#{rand(8)*45}deg, #{bg}, #{bg} .#{pct * scale}em, #{color} .#{pct * scale}em, #{color} #{scale}em ); border: .1em solid #{color}",
+         style: "background: repeating-linear-gradient(#{rand(8)*45}deg, #{bg}, #{bg} #{pct * scale}em, #{color} #{pct * scale}em, #{color} #{scale}em ); border: .1em solid #{color}",
        c: [title ? Markup[Title][title.justArray[0], env, uri.justArray[0]] : (name ? ("<span class=name style='background-color: #{color}'>"+(CGI.escapeHTML name) + "</span>") : ''),
            contents.map{|c|
              HTML.value(nil,c,env)}.intersperse(' '),

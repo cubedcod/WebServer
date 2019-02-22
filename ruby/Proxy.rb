@@ -179,21 +179,8 @@ www.youtube.com
       else
         r.deny
       end}
-
-    HostPOST['www.youtube.com'] = -> r {
-      if r.path.match? /results|service.*ajax/
-        if r.q['signal']&.match? /INVALIDATION|UNSEEN/
-          r.trackPOST
-        else
-          r.POSTthru
-        end
-      else
-        r.trackPOST
-      end}
-
+    HostGET['youtube.com'] = HostGET['m.youtube.com'] = -> r {[302, {'Location' =>  "https://www.youtube.com" + r.path + r.qs},[]]}
     HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[302,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
-
-    HostGET['m.youtube.com'] = -> r {[302, {'Location' =>  "https://www.youtube.com" + r.path + r.qs},[]]}
 
     # T-Mobile
     HostGET['lookup.t-mobile.com'] = -> re {[200, {'Content-Type' => 'text/html'}, [re.htmlDocument({re.uri => {'dest' => re.q['origurl'].R}})]]}
