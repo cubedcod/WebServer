@@ -1,3 +1,2 @@
 \.(atom|r(df|ss))$
-/(feeds?|rss)(\.|/|\?|$)
-=rss
+[/=](feeds?|rss)(\.|/|\?|$)

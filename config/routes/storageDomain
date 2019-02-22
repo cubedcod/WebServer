@@ -1,7 +1,10 @@
 .aolcdn.com
 .bbci.co.uk
+.blogblog.com
+.blogger.com
 .cdninstagram.com
 .cloudflare.com
+.cloudfront.net
 .dwcdn.net
 .ebaystatic.com
 .fastly.net
@@ -11,7 +14,9 @@
 .google.com
 .googleapis.com
 .gstatic.com
+.llnwd.net
 .media-imdb.com
+.parastorage.com
 .rackcdn.com
 .redd.it
 .redditmedia.com
@@ -23,5 +28,6 @@
 .staticflickr.com
 .storage.googleapis.com
 .twimg.com
+.yimg.com
 .ytimg.com
 .zenfs.com

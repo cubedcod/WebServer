@@ -1,7 +1,6 @@
 cache redirects ala shorturl
 announce full updates or existence thereof to curious peers - irvc3, crdt, solid-websocket, matrix etc
 emulatable archives (versioned JS-depchain. tag browser version too? look at archive.org/webpack/WARC prior-art)
-fix twitter (op in thread is invisible, no images)
 HTML extraction of HEAD meta and RDFa/microformats sponger
 week/month/hour paging UI-topbar
 index backlinks at storage time
