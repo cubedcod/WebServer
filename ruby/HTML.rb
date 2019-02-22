@@ -69,8 +69,6 @@ class WebResource
                         {_: :head,
                          c: [{_: :meta, charset: 'utf-8'},
                              {_: :title, c: title},
-                             {_: :style, c: ["\n", SiteCSS]}, "\n",
-                             {_: :script, c: ["\n", SiteJS]}, "\n",
                              *@r[:links].do{|links|
                                links.map{|type,uri|
                                  {_: :link, rel: type, href: CGI.escapeHTML(uri.to_s)}}}
@@ -87,7 +85,10 @@ class WebResource
                                treeize = Group[q['g']] || Group[path == '/' ? 'topdir' : 'tree']
                                Markup[Container][treeize[graph], @r]
                               end,
-                             link[:down,'&#9660;']]}, "\n" ]}]
+                             link[:down,'&#9660;'],
+                             {_: :style, c: ["\n", SiteCSS]}, "\n",
+                             {_: :script, c: ["\n", SiteJS]}, "\n",
+                            ]}, "\n" ]}]
     end
 
     Markup[Date] = -> date,env=nil {
