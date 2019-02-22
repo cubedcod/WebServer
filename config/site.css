@@ -8,7 +8,8 @@ body {font-family: Hack; margin: 0 2em 0 2em; background-color:#000; color: #fff
 #prev {left: 0; top: 0}
 #next {right: 0; top: 0}
 a {overflow: hidden; text-decoration: none}
-a,p {max-width: 78ex; border-radius: .16em}
+a,p {max-width: 78ex}
+a,p, .container {border-radius: .16em}
 a.title {font-size:1.08em; background-color: #fff; color: #000}
 a.id {float: right}
 a.date {float: right; font-weight: normal; font-size:.8em; background-color: #000; color:#888}

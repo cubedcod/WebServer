@@ -264,7 +264,7 @@ class WebResource
 
       {class: :post,
        c: [titles.map{|title|
-             {_: :a, class: :title, href: uri, c: CGI.escapeHTML(title.to_s)}},
+             Markup[Title][title,env,uri]},
            (Markup[Date][date] if date),
            {_: :a, id: 't'+rand.to_s.sha2, class: :id, c: '🔗', href: uri},
            {_: :table,
