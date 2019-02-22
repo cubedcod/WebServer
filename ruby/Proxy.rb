@@ -107,24 +107,6 @@ www.youtube.com
       end
     }
 
-    # Facebook
-    HostGET['facebook.com'] = HostGET['www.facebook.com'] = -> r {
-      case r.parts[0]
-      when /campaign|plugin|reaction|security/
-        r.deny
-      else
-        r.remoteNode
-      end}
-    HostPOST['www.facebook.com'] = -> r {
-      if r.path.match? /comment_fetch/
-        r.POSTthru
-      else
-        r.trackPOST
-      end}
-    HostGET['instagram.com'] = -> r {[302, {'Location' =>  "https://www.instagram.com" + r.path},[]]}
-    HostGET['l.instagram.com'] = -> r {[302,{'Location' => r.q['u']},[]]}
-    HostGET['www.instagram.com'] = -> r {r.remoteNode}
-
     # Google
     %w{feedproxy.google.com google.com}.map{|h| HostGET[h] = -> r {r.cachedRedirect}}
 
@@ -132,15 +114,18 @@ www.youtube.com
       case r.parts[0]
       when nil
         [200, {'Content-Type' => 'text/html'}, ['<form method="GET" action="/search"><input name="q" autofocus></form>']]
-      when 'gmail'
-        r.cachedRedirect
-      when /async|im(ages?|gres)|x?js|logos|maps|search/
+      when /im(ages?|gres)|logos|search/
         r.remoteNode
       when 'url'
         [302,{'Location' => r.q['url']},[]]
       else
         r.deny
       end}
+
+    # IG
+    HostGET['instagram.com'] = -> r {[302, {'Location' =>  "https://www.instagram.com" + r.path},[]]}
+    HostGET['l.instagram.com'] = -> r {[302,{'Location' => r.q['u']},[]]}
+    HostGET['www.instagram.com'] = -> r {r.remoteNode}
 
     # Imgur
     HostGET['imgur.com'] = HostGET['i.imgur.com'] = -> re {
