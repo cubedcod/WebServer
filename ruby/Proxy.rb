@@ -1,7 +1,7 @@
 class WebResource
   module URIs
 
-    # use sharded-hash rather than upstream path structure
+    # use sharded-hash path structure, ignore upstream path arrangement
     FlatMap = %w{
 a.thumbs.redditmedia.com
 b.thumbs.redditmedia.com
@@ -13,7 +13,6 @@ www.gstatic.com
 www.rfa.org
 }
 
-    # HTTP shorturl hosts
     InsecureShorteners = %w{
 bhne.ws
 bos.gl
@@ -24,7 +23,6 @@ rss.cnn.com
 w.bos.gl
 }
 
-    # no MIME transcoding at proxy
     UpstreamFormat = %w{
 api-v2.soundcloud.com
 bandcamp.com
@@ -127,7 +125,9 @@ www.youtube.com
     HostGET['l.instagram.com'] = -> r {[302,{'Location' => r.q['u']},[]]}
     HostGET['www.instagram.com'] = -> r {r.remoteNode}
 
-    ## Google
+    # Google
+    %w{feedproxy.google.com google.com}.map{|h| HostGET[h] = -> r {r.cachedRedirect}}
+
     HostGET['www.google.com'] = -> r {
       case r.parts[0]
       when nil
@@ -141,15 +141,6 @@ www.youtube.com
       else
         r.deny
       end}
-
-    %w{feedproxy.google.com google.com}.map{|h|
-      HostGET[h] = -> r {r.cachedRedirect}}
-
-    %w{accounts groups mail news}.map{|name|
-      h = name + '.google.com'
-      HostGET[h] = -> r {r.remoteNode}
-      HostOPTIONS[h] = -> r {r.OPTIONSthru}
-      HostPOST[h] = -> r {r.POSTthru}}
 
     # Imgur
     HostGET['imgur.com'] = HostGET['i.imgur.com'] = -> re {
