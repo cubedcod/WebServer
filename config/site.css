@@ -14,11 +14,11 @@ a.title {font-size:1.08em; background-color: #fff; color: #000}
 a.id {float: right}
 a.date {float: right; font-weight: normal; font-size:.8em; background-color: #000; color:#888}
 a.link {font-size: .92em; background-color: #eee; color: #000}
-tr[name="content"] > td.v a {border-radius: 0; background-color: #000; color: #fff; border: .08em dashed #444}
-tr[name="content"] > td.v a:visited {border-radius: 0; background-color: #fff; color: #000; border: .08em dashed #222}
+tr[name="content"] > td.v a {border-radius: 0; background-color: #000; color: #fff}
+tr[name="content"] > td.v a:visited {border-radius: 0; background-color: #fff; color: #000}
 .bold {font-weight: bold; font-size: 1.1em; margin-left: .1em}
 .container > .name {color: black; border-radius: 0 0 .2em 0}
-.post {max-width:80ex; background-color:#000; color:#fff; margin-bottom: .2em}
+.post {max-width:80ex; background-color:#000; color:#fff}
 table, div, pre, p, a {display: inline-block}
 table {border-spacing: 0; border-width: 0}
 td {padding: 0}
@@ -26,7 +26,7 @@ img, video {max-width: 100%}
 div.thumb {background-color: #fff; color: #000}
 img.thumb {max-width: 28em}
 pre {white-space: pre-wrap}
-p {border: 1px dotted #222}
+p {margin: 0}
 pre, p, span, td.k > a {background-color: #000; color: #fff}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
 .highlight .c { color: #586e75 } /* Comment */
