@@ -8,12 +8,13 @@ body {font-family: Hack; margin: 0 2em 0 2em; background-color:#000; color: #fff
 #prev {left: 0; top: 0}
 #next {right: 0; top: 0}
 a {overflow: hidden; text-decoration: none}
-a,p {max-width: 78ex; border-radius: .18em}
+a,p {max-width: 78ex; border-radius: .16em}
 a.title {font-size:1.08em; background-color: #fff; color: #000}
 a.id {float: right}
 a.date {float: right; font-weight: normal; font-size:.8em; background-color: #000; color:#888}
 a.link {font-size: .92em; background-color: #eee; color: #000}
-tr[name="content"] > td.v a {background-color: #222; color: #fff; border: .08em solid #333}
+tr[name="content"] > td.v a {border-radius: 0; background-color: #000; color: #fff; border: .08em dashed #444}
+tr[name="content"] > td.v a:visited {border-radius: 0; background-color: #fff; color: #000; border: .08em dashed #222}
 .bold {font-weight: bold; font-size: 1.1em; margin-left: .1em}
 .container > .name {color: black; border-radius: 0 0 .2em 0}
 .post {max-width:80ex; background-color:#000; color:#fff; margin-bottom: .2em}
