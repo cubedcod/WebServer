@@ -130,10 +130,12 @@ class WebResource
       # child node(s) as Object, array of Object(s) or URI-indexed Hash
       contents = container.delete(Contains).do{|cs|
         cs.class == Hash ? cs.values : cs}.justArray
-
+      scale = rand(3) + 1
+      pct = rand(100) / 100.0
       bg = env[:Cached] ? '#ffffff' : '#000000'
       [#'<table border="1"><tr><td>',
-       {class: :container, style: "background: repeating-linear-gradient( -45deg, #{bg}, #{bg} .92em, #{color} .92em, #{color} 1em ); border: .08em solid #{color}",
+        {class: :container,
+         style: "background: repeating-linear-gradient(#{rand(8)*45}deg, #{bg}, #{bg} .#{pct * scale}em, #{color} .#{pct * scale}em, #{color} #{scale}em ); border: .1em solid #{color}",
        c: [title ? Markup[Title][title.justArray[0], env, uri.justArray[0]] : (name ? ("<span class=name style='background-color: #{color}'>"+(CGI.escapeHTML name) + "</span>") : ''),
            contents.map{|c|
              HTML.value(nil,c,env)}.intersperse(' '),
