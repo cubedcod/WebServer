@@ -1,2 +1,3 @@
 Gemfile.lock
 CA.pem
+*.pid
