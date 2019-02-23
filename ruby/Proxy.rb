@@ -33,6 +33,7 @@ cdnjs.cloudflare.com
 cdn.bitmovin.com
 encrypted-tbn0.gstatic.com
 ssl.gstatic.com
+static1.squarespace.com
 yt3.ggpht.com}
 
     UpstreamFormat = %w{
