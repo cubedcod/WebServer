@@ -15,6 +15,7 @@ mp3 image extract
 imgur video https://i.imgur.com/JuDZN0w.gifv
 stop the http://www.gstatic.com/generate_204 popups and firefox success.txt spammage
 xhr link inliner
+find new base URI from open-uri automagic redirect following
 loop-detection so URL deobfuscator can redirect
 replace open-uri with something w/ better redirect handling in GETnode
 QuoteTweet triplr, video triplr
