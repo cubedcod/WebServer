@@ -23,6 +23,16 @@ rss.cnn.com
 w.bos.gl
 }
 
+    # extensions allowed in storage handler
+    MediaFormats = %w{css gif html jpg jpg:large jpeg ogg m4a mp3 mp4 png svg txt webm webp woff2}
+
+    # Scripts are disallowed in storage handler by default. add here to allow all file types not matched above
+    StoreAnything = %w{
+ajax.googleapis.com
+encrypted-tbn0.gstatic.com
+ssl.gstatic.com
+yt3.ggpht.com}
+
     UpstreamFormat = %w{
 api-v2.soundcloud.com
 bandcamp.com

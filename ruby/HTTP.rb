@@ -106,6 +106,14 @@ class WebResource
       [303, @r[:Response].update({'Location' => '/' + loc + '/' + parts[1..-1].join('/') + qs}), []]
     end
 
+    def cloudStorage
+      if StoreAnything.member?(host) || MediaFormats.member?(ext.downcase)
+        remoteNode
+      else
+        deny
+      end
+    end
+
     def dateMeta
       @r ||= {}
       @r[:links] ||= {}
@@ -181,10 +189,6 @@ class WebResource
     end
     alias_method :env, :environment
 
-    # hosts not subject to storable types list
-    StoreAnything = %w{encrypted-tbn0.gstatic.com ssl.gstatic.com yt3.ggpht.com}
-    MediaFormats = %w{css gif html jpg jpg:large jpeg ogg m4a mp3 mp4 png svg txt webm webp woff2}
-
     def GET
       @r[:Response] = {} # response headers
       @r[:links] = {}    # graph-level references
@@ -196,11 +200,7 @@ class WebResource
              when /shortened/
                cachedRedirect
              when /storage/
-               if StoreAnything.member?(host) || MediaFormats.member?(ext.downcase)
-                 remoteNode
-               else
-                 deny
-               end
+               cloudStorage
              else
                deny
              end if env.has_key? 'HTTP_TYPE'
