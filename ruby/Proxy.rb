@@ -52,11 +52,13 @@ www.youtube.com
       [302, {'Location' => 'https://' + (host.split('.') - %w{amp}).join('.') + (path.split('/') - %w{amp amphtml}).join('/')}, []]
     end
 
-    # toggle upstream-UI preference
+    # toggle upstream-UI preference on
     PathGET['/go-direct'] = -> r {
       r.q['u'].do{|u|
         UpstreamToggle[u.R.host] = true; [302, {'Location' => u}, []]
       } || r.notfound }
+
+    # toggle upstream-UI preference off
     PathGET['/go-indirect'] = -> r {
       r.q['u'].do{|u|
         UpstreamToggle.delete u.R.host; [302, {'Location' => u}, []]
@@ -73,6 +75,8 @@ www.youtube.com
           r.remoteNode
         end
       } || [200, {'Content-Type' => 'text/html'}, ['<form method="GET"><input name="url" autofocus></form>']] }
+
+    PathGET['/generate_204'] = -> _ {Response_204}
 
     # Discourse
     PathGET['/clicks/track'] = -> r {[302,{'Location' => r.q['url']},[]]}
