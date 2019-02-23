@@ -139,7 +139,7 @@ class WebResource
       'text/x-tex'           => [:triplrTeX],
     }
 
-    # formats passed thru without any added compression or rewriting
+    # formats without rewriting or protocol-level compression
     NoTransform = /^(application\/(font|javascript|json|octet-stream|pdf|vnd.google.octet-stream-compressible|(x-)?protobuf(fer)?)|audio|font|image|text\/css|video)/
 
     TriplrHTML = {

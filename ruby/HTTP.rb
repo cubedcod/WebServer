@@ -107,7 +107,7 @@ class WebResource
     end
 
     def cloudStorage
-      if StoreAnything.member?(host) || MediaFormats.member?(ext.downcase)
+      if UpstreamToggle[@r['SERVER_NAME']] || StoreItAll.member?(host) || MediaFormats.member?(ext.downcase)
         remoteNode
       else
         deny
@@ -380,7 +380,8 @@ class WebResource
       # lazy updater, called by need
       updates = []
       update = -> url {
-        begin # block to catch 304-return "error"
+        begin # block to catch 304-response "error"
+
           # conditional GET
           open(url, head) do |response| # response
 
@@ -434,12 +435,12 @@ class WebResource
       end
 
       # response
-      if @r # called over HTTP
+      if @r # HTTP calling context
         if cache.exist?
-          # preserve upstream format for runtime preference, static preference or immutable MIME
+          # preserve upstream format?
           if UpstreamToggle[@r['SERVER_NAME']] || UpstreamFormat.member?(@r['SERVER_NAME']) || cache.noTransform?
             cache.fileResponse
-          else # transcoding enabled
+          else # transformable
             graphResponse (updates.empty? ? [cache] : updates)
           end
         else
