@@ -127,18 +127,14 @@ class WebResource
       name = container.delete :name
       title = container.delete Title
       color = '#%06x' % (rand 16777216)
+      pct = rand(100) / 200.0 + 0.5
       # child node(s) as Object, array of Object(s) or URI-indexed Hash
       contents = container.delete(Contains).do{|cs|
         cs.class == Hash ? cs.values : cs}.justArray
-      scale = rand(100) / 61.8
-      pct = rand(100) / 100.0
-      bg = env[:Cached] ? '#ffffff' : '#000000'
-      {class: :container,
-       style: "border: .1em solid #{color}; background: repeating-linear-gradient(90deg, #{bg}, #{bg} #{pct * scale}em, #{color} #{pct * scale}em, #{color} #{scale}em )",
+      {class: :container,style: "background-color: #{color}; background: repeating-linear-gradient(90deg, #000, #000 #{pct}em, #{color} #{pct}em, #{color} 1em)",
        c: [title ? Markup[Title][title.justArray[0], env, uri.justArray[0]] : (name ? ("<span class=name style='background-color: #{color}'>"+(CGI.escapeHTML name) + "</span>") : ''),
-           contents.map{|c|
-             HTML.value(nil,c,env)}.intersperse(' '),
-           # extra container metadata
+           contents.map{|c| HTML.value(nil,c,env)}.intersperse(' '),
+           # container metadata
            (HTML.kv(container, env) unless container.empty?)]}}
 
     # table {k => v} -> Markup

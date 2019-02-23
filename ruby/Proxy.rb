@@ -154,6 +154,14 @@ www.youtube.com
       r.path == '/graphql' ? r.POSTthru : r.trackPOST
     }
 
+    # Mozilla
+    HostGET['detectportal.firefox.com'] = -> r {
+      if r.path == '/success.txt'
+        [200, {'Content-Type' => 'text/plain'},["success\n"]]
+      else
+        r.deny
+      end}
+
     # Reddit
     HostGET['np.reddit.com'] = HostGET['reddit.com'] = -> re {[302,{'Location' => 'https://www.reddit.com' + re.path + re.qs},[]]}
 
