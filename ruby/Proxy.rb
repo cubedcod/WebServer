@@ -23,12 +23,13 @@ rss.cnn.com
 w.bos.gl
 }
 
-    # extensions allowed in storage handler
+    # extensions allowed by storage handler
     MediaFormats = %w{css gif html jpg jpg:large jpeg ogg m4a mp3 mp4 png svg txt webm webp woff2}
-
-    # Scripts are disallowed in storage handler by default. add here to allow all file types not matched above
+    # JS and other extensions disallowed by storage handler, unless defined here
     StoreAnything = %w{
 ajax.googleapis.com
+cdnjs.cloudflare.com
+cdn.bitmovin.com
 encrypted-tbn0.gstatic.com
 ssl.gstatic.com
 yt3.ggpht.com}
