@@ -18,7 +18,7 @@ tr[name="content"] > td.v a {border-radius: 0; background-color: #000; color: #f
 tr[name="content"] > td.v a:visited {border-radius: 0; background-color: #fff; color: #000}
 .bold {font-weight: bold; font-size: 1.1em; margin-left: .1em}
 .container > .name {color: black; border-radius: 0 0 .2em 0}
-.post {max-width:80ex; background-color:#000; color:#fff}
+.post {max-width:80ex; margin: .1em; background-color:#000; color:#fff}
 table, div, pre, p, a {display: inline-block}
 table {border-spacing: 0; border-width: 0}
 td {padding: 0}
