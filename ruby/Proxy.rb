@@ -165,7 +165,7 @@ www.youtube.com
       mode = r.parts[0]
       if !mode
         [200, {'Content-Type' => 'text/html'},['<form method="GET" action="/results"><input name="q" autofocus></form>']]
-      elsif %w{browse_ajax c channel embed feed get_video_info iframe_api playlist user results signin watch watch_videos yts}.member? mode
+      elsif %w{browse_ajax c channel embed feed get_video_info heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member? mode
         r.remoteNode
       elsif mode == 'redirect'
         [302, {'Location' =>  r.q['q']},[]]
