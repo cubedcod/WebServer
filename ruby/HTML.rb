@@ -134,7 +134,7 @@ class WebResource
       pct = rand(100) / 100.0
       bg = env[:Cached] ? '#ffffff' : '#000000'
       {class: :container,
-       style: "background: repeating-linear-gradient(90deg, #{bg}, #{bg} #{pct * scale}em, #{color} #{pct * scale}em, #{color} #{scale}em )",
+       style: "border: .1em solid #{color}; background: repeating-linear-gradient(90deg, #{bg}, #{bg} #{pct * scale}em, #{color} #{pct * scale}em, #{color} #{scale}em )",
        c: [title ? Markup[Title][title.justArray[0], env, uri.justArray[0]] : (name ? ("<span class=name style='background-color: #{color}'>"+(CGI.escapeHTML name) + "</span>") : ''),
            contents.map{|c|
              HTML.value(nil,c,env)}.intersperse(' '),

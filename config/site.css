@@ -16,11 +16,11 @@ a.date {float: right; font-weight: normal; font-size:.8em; background-color: #00
 .post {max-width:80ex; border: .1em solid #eee; border-radius: .2em}
 table, div, pre, p, a {display: inline-block}
 table {border-spacing: 0; border-width: 0}
-td {padding: 0}
+div,td {padding: 0}
+p {margin: 0}
 img, video {max-width: 100%}
 img.thumb {max-width: 28em}
 pre {white-space: pre-wrap}
-p {margin: .1em}
 a.title, a.link, div.thumb, tr[name="content"] > td.v a:visited {background-color: #fff; color: #000}
 #up,#down,#prev,#next, body, pre, p, span, tr[name="content"] > td.v, tr[name="content"] > td.v a, td.k > a {background-color: #000; color: #fff}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
