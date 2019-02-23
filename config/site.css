@@ -14,7 +14,7 @@ a.date {float: right; font-weight: normal; font-size:.8em; background-color: #00
 a.link {border: 1px solid #777}
 .bold {font-weight: bold; font-size: 1.1em}
 .container > .name {color: black; border-radius: 0 0 .2em 0}
-.post {max-width:80ex; border: 1px solid #ddd; border-radius: .2em; margin: .1em}
+.post {max-width:80ex; border: 1px solid #555; border-radius: .2em; margin: .1em}
 table, div, pre, p, a {display: inline-block}
 table {border-spacing: 0; border-width: 0}
 div,td {padding: 0}

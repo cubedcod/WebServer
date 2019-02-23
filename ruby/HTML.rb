@@ -69,6 +69,8 @@ class WebResource
                         {_: :head,
                          c: [{_: :meta, charset: 'utf-8'},
                              {_: :title, c: title},
+                             {_: :style, c: ["\n", SiteCSS]}, "\n",
+                             {_: :script, c: ["\n", SiteJS]}, "\n",
                              *@r[:links].do{|links|
                                links.map{|type,uri|
                                  {_: :link, rel: type, href: CGI.escapeHTML(uri.to_s)}}}
@@ -85,10 +87,7 @@ class WebResource
                                treeize = Group[q['g']] || Group[path == '/' ? 'topdir' : 'tree']
                                Markup[Container][treeize[graph], @r]
                               end,
-                             link[:down,'&#9660;'],
-                             {_: :style, c: ["\n", SiteCSS]}, "\n",
-                             {_: :script, c: ["\n", SiteJS]}, "\n",
-                            ]}, "\n" ]}]
+                             link[:down,'&#9660;']]}]}]
     end
 
     Markup[Date] = -> date,env=nil {
@@ -127,11 +126,11 @@ class WebResource
       name = container.delete :name
       title = container.delete Title
       color = '#%06x' % (rand 16777216)
-      pct = rand(10) / 10.0
+      pct = rand(100) / 200.0 + 0.5
       # child node(s) as Object, array of Object(s) or URI-indexed Hash
       contents = container.delete(Contains).do{|cs|
         cs.class == Hash ? cs.values : cs}.justArray
-      {class: :container,style: "border: .1em solid #{color}; background: repeating-linear-gradient(#{(rand 45) * 8}deg, #000, #000 #{pct}em, #{color} #{pct}em, #{color} 1em)",
+      {class: :container,style: "border: .1em solid #{color}; background: repeating-linear-gradient(#{(rand 8) * 45}deg, #000, #000 #{pct}em, #{color} #{pct}em, #{color} 1em)",
        c: [title ? Markup[Title][title.justArray[0], env, uri.justArray[0]] : (name ? ("<span class=name style='background-color: #{color}'>"+(CGI.escapeHTML name) + "</span>") : ''),
            contents.map{|c| HTML.value(nil,c,env)}.intersperse(' '),
            # container metadata
