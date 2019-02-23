@@ -1,5 +1,1 @@
 \.(html|php|ttl)(\?|$)
-/(asset|file|upload)s?/
-/(media|static|[Nn][Ee][Ww][Ss])/
-image/
-/wp-(content|includes)/

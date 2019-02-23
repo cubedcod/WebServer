@@ -1,2 +1,5 @@
+/(asset|file|image|upload)s?/
+/(media|static)/
+/wp-[a-z]+/
 cloudfront
 yahoo.com
