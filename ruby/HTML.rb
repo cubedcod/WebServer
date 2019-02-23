@@ -122,29 +122,24 @@ class WebResource
       end}
 
     Markup[Container] = -> container , env {
-
       container.delete Type
       uri = container.delete 'uri'
       name = container.delete :name
       title = container.delete Title
       color = '#%06x' % (rand 16777216)
-
       # child node(s) as Object, array of Object(s) or URI-indexed Hash
       contents = container.delete(Contains).do{|cs|
         cs.class == Hash ? cs.values : cs}.justArray
-      scale = rand(100) / 42.0 + 0.42
+      scale = rand(100) / 61.8
       pct = rand(100) / 100.0
       bg = env[:Cached] ? '#ffffff' : '#000000'
-      [#'<table border="1"><tr><td>',
-        {class: :container,
-         style: "background: repeating-linear-gradient(#{rand(12)*30}deg, #{bg}, #{bg} #{pct * scale}em, #{color} #{pct * scale}em, #{color} #{scale}em ); border: .1em solid #{color}",
+      {class: :container,
+       style: "background: repeating-linear-gradient(90deg, #{bg}, #{bg} #{pct * scale}em, #{color} #{pct * scale}em, #{color} #{scale}em )",
        c: [title ? Markup[Title][title.justArray[0], env, uri.justArray[0]] : (name ? ("<span class=name style='background-color: #{color}'>"+(CGI.escapeHTML name) + "</span>") : ''),
            contents.map{|c|
              HTML.value(nil,c,env)}.intersperse(' '),
            # extra container metadata
-           (HTML.kv(container, env) unless container.empty?)]},
-       #'</td></tr></table>'
-      ]}
+           (HTML.kv(container, env) unless container.empty?)]}}
 
     # table {k => v} -> Markup
     def self.kv hash, env

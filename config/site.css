@@ -1,21 +1,19 @@
-* {vertical-align:top}
-body {font-family: Hack; margin: 0 2em 0 2em}
+body {margin: 0 2em 0 2em; font-family: sans-serif}
 #up,#down,#prev,#next {font-size: 2.33em}
 #up,#down {display:block}
 #prev,#next {position: fixed; height: 100%; padding-top: .89em}
 #up {margin-bottom: .3em}
 #down {margin-top:.3em}
-#prev {left: 0; top: 0}
+#prev {left:  0; top: 0}
 #next {right: 0; top: 0}
 a {overflow: hidden; text-decoration: none}
 a, p {max-width: 78ex}
 a, p, .container {border-radius: .16em}
 a.id {float: right}
 a.date {float: right; font-weight: normal; font-size:.8em; background-color: #000; color:#888}
-a.link {border: .1em dotted #888}
-.bold {font-weight: bold; font-size: 1.1em; margin-left: .1em}
+.bold {font-weight: bold; font-size: 1.1em}
 .container > .name {color: black; border-radius: 0 0 .2em 0}
-.post {max-width:80ex; margin: .1em}
+.post {max-width:80ex; border: .1em solid #eee; border-radius: .2em}
 table, div, pre, p, a {display: inline-block}
 table {border-spacing: 0; border-width: 0}
 td {padding: 0}
@@ -24,7 +22,7 @@ img.thumb {max-width: 28em}
 pre {white-space: pre-wrap}
 p {margin: .1em}
 a.title, a.link, div.thumb, tr[name="content"] > td.v a:visited {background-color: #fff; color: #000}
-#up,#down,#prev,#next, body, pre, p, span, tr[name="content"] > td.v a, td.k > a, .post {background-color: #000; color: #fff}
+#up,#down,#prev,#next, body, pre, p, span, tr[name="content"] > td.v, tr[name="content"] > td.v a, td.k > a {background-color: #000; color: #fff}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
 .highlight .c { color: #586e75 } /* Comment */
 .highlight .err { color: #93a1a1 } /* Error */
