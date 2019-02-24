@@ -20,6 +20,7 @@ bhne.ws
 bos.gl
 f-st.co
 huffp.st
+ihe.art
 nyer.cm
 ow.ly
 rss.cnn.com
@@ -38,6 +39,7 @@ encrypted-tbn0.gstatic.com
 ssl.gstatic.com
 static1.squarespace.com
 www.gstatic.com
+www.mixcloud.com
 yt3.ggpht.com}
 
     UpstreamFormat = %w{
