@@ -10,7 +10,6 @@ use shortURL-mapping DB to deobfuscate at presentation and storage time
 mp3 image extract
 imgur video https://i.imgur.com/JuDZN0w.gifv
 xhr link inliner - nowrapper docs, onlynew updates
-find new base URI from open-uri automagic redirect following - replace open-uri with something w/ better redirect handling?
 Tweet-video triplr
 reddit-video triplr
 pseudofeed from frontpage when can't be found  http://www.mysouthend.com/
@@ -18,3 +17,9 @@ killfiles (incl message hashes e.g automod Globe warning)
 next-prev links for non-HTML (RSS ) when Nextt/Prev isn't in feed or HTTP header , requiring request to htML page. (URi arithmetic bypass optimization also)
 limit chronodir to localhost
 log getFeed errors
+
+
+merge cacheRedirect and remoteNode methods?
+and/or make cRedir try both schemes so InsecureShorteners can go away
+find new base URI from open-uri automagic redirect following - replace open-uri with something w/ better redirect handling?
+.. we want to know abuot redirs anyways in either mmethod

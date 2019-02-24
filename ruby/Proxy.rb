@@ -20,6 +20,7 @@ bhne.ws
 bos.gl
 f-st.co
 huffp.st
+nyer.cm
 ow.ly
 rss.cnn.com
 w.bos.gl
