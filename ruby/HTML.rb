@@ -126,11 +126,11 @@ class WebResource
       name = container.delete :name
       title = container.delete Title
       color = '#%06x' % (rand 16777216)
-      pct = rand(100) / 300.0 + 0.66
+      pct = rand(100) / 500.0 + 0.75
       # child node(s) as Object, array of Object(s) or URI-indexed Hash
       contents = container.delete(Contains).do{|cs|
         cs.class == Hash ? cs.values : cs}.justArray
-      {class: :container,style: "border: .1em solid #{color}; background: repeating-linear-gradient(#{rand(12) * 30}deg, #000, #000 #{pct}em, #{color} #{pct}em, #{color} 1em)",
+      {class: :container,style: "border: .08em solid #{color}; background: repeating-linear-gradient(#{rand(9) * 45}deg, #000, #000 #{pct}em, #{color} #{pct}em, #{color} 1em)",
        c: [title ? Markup[Title][title.justArray[0], env, uri.justArray[0]] : (name ? ("<span class=name style='background-color: #{color}'>"+(CGI.escapeHTML name) + "</span>") : ''),
            contents.map{|c| HTML.value(nil,c,env)}.intersperse(' '),
            # container metadata
@@ -258,7 +258,7 @@ class String
        (resource = link.R
         if blk
           type = case link
-                 when /(gif|jpg|jpeg|jpg:large|png|webp)$/i
+                 when /(gif|jpg|jpeg|jpg:large|png|png:large|webp)$/i
                    WebResource::Image
                  when /(youtube.com|(mkv|mp4|webm)$)/i
                    WebResource::Video

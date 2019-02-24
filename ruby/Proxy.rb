@@ -26,7 +26,7 @@ w.bos.gl
 }
 
     # extensions enabled storage handler
-    MediaFormats = %w{css gif html jpg jpg:large jpeg ogg m4a mp3 mp4 png svg txt webm webp woff2}
+    MediaFormats = %w{css gif html jpg jpg:large jpeg ogg m4a mp3 mp4 png png:large svg txt webm webp woff2}
 
     # .js and other (or missing) extensions by default disallowed in storage handler
     StoreItAll = %w{
