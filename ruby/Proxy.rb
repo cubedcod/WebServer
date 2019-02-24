@@ -1,5 +1,7 @@
 class WebResource
   module URIs
+    # TODO see if we can block origin headers in squid rules so they can't fake these headers to defeat categorization
+    # while also not having the blocked-response-header rules block headers we add. so for now just do it here until delving into squid-config space
 
     # use sharded-hash path structure, ignore upstream path arrangement
     FlatMap = %w{
@@ -131,7 +133,7 @@ www.youtube.com
       case r.parts[0]
       when nil
         [200, {'Content-Type' => 'text/html'}, ['<form method="GET" action="/search"><input name="q" autofocus></form>']]
-      when /im(ages?|gres)|logos|search/
+      when /im(ages?|gres)|logos|maps|search/
         r.remoteNode
       when 'url'
         [302,{'Location' => r.q['url']},[]]
