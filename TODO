@@ -20,8 +20,9 @@ log getFeed errors
 move hostnames out of proxy.rb to the static definitions in config/
 catch 404 in remoteNode
 flatmap large filenames
+BUG direct UI uses cache of indirect if under hammer-threshold time
 
-merge cacheRedirect and remoteNode methods?
+merge: cacheRedirect and remoteNode methods?
 and/or make cRedir try both schemes so InsecureShorteners can go away
 find new base URI from open-uri automagic redirect following - replace open-uri with something w/ better redirect handling?
 .. we want to know abuot redirs anyways in either mmethod
