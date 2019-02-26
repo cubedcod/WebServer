@@ -33,14 +33,12 @@ w.bos.gl
     # .js and other (or missing) extensions by default disallowed in storage handler
     StoreItAll = %w{
 ajax.googleapis.com
-cdnjs.cloudflare.com
 cdn.bitmovin.com
 content.jwplatform.com
 encrypted-tbn0.gstatic.com
 forum.solidproject.org
 ssl.gstatic.com
 static1.squarespace.com
-w3.cdn.anvato.net
 www.gstatic.com
 www.mixcloud.com
 yt3.ggpht.com}
@@ -51,7 +49,6 @@ bandcamp.com
 mail.google.com
 s.ytimg.com
 soundcloud.com
-w3.cdn.anvato.net
 www.instagram.com
 www.google.com
 www.youtube.com
