@@ -19,6 +19,7 @@ limit chronodir to localhost
 log getFeed errors
 move hostnames out of proxy.rb to the static definitions in config/
 catch 404 in remoteNode
+flatmap large filenames
 
 merge cacheRedirect and remoteNode methods?
 and/or make cRedir try both schemes so InsecureShorteners can go away
