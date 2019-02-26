@@ -37,6 +37,7 @@ cdnjs.cloudflare.com
 cdn.bitmovin.com
 content.jwplatform.com
 encrypted-tbn0.gstatic.com
+forum.solidproject.org
 ssl.gstatic.com
 static1.squarespace.com
 w3.cdn.anvato.net
@@ -81,7 +82,7 @@ www.youtube.com
       head = HTTP.unmangle env
       head.delete 'Host'
       formatSuffix = (host.match?(/reddit.com$/) && !parts.member?('w')) ? '.rss' : ''
-      useExtension = %w{aac atom css html jpg js mp3 mp4 pdf png rdf svg ttf ttl webm webp woff woff2}.member? ext.downcase
+      useExtension = %w{aac atom css html jpg js mp3 mp4 ogg pdf png rdf svg ttf ttl webm webp woff woff2}.member? ext.downcase
       portNum = port && !([80,443,8000].member? port) && ":#{port}" || ''
       queryHash = q
       queryHash.delete 'host'

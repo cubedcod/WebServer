@@ -2,4 +2,6 @@
 /(media|static)/
 /wp-[a-z]+/
 cloudfront
+fbcdn
+instagram
 yahoo.com
