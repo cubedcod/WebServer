@@ -35,6 +35,7 @@ w.bos.gl
 ajax.googleapis.com
 cdnjs.cloudflare.com
 cdn.bitmovin.com
+content.jwplatform.com
 encrypted-tbn0.gstatic.com
 ssl.gstatic.com
 static1.squarespace.com
@@ -176,7 +177,7 @@ www.youtube.com
       end}
 
     # Reddit
-    HostGET['np.reddit.com'] = HostGET['reddit.com'] = -> re {[302,{'Location' => 'https://www.reddit.com' + re.path + re.qs},[]]}
+    HostGET['i.reddit.com'] = HostGET['np.reddit.com'] = HostGET['reddit.com'] = -> re {[302,{'Location' => 'https://www.reddit.com' + re.path + re.qs},[]]}
 
     # Souncloud
     HostGET['exit.sc'] = -> r {[302,{'Location' => r.q['url']},[]]}

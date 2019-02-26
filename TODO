@@ -17,7 +17,8 @@ killfiles (incl message hashes e.g automod Globe warning)
 next-prev links for non-HTML (RSS ) when Nextt/Prev isn't in feed or HTTP header , requiring request to htML page. (URi arithmetic bypass optimization also)
 limit chronodir to localhost
 log getFeed errors
-
+move hostnames out of proxy.rb to the static definitions in config/
+catch 404 in remoteNode
 
 merge cacheRedirect and remoteNode methods?
 and/or make cRedir try both schemes so InsecureShorteners can go away

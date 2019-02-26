@@ -381,7 +381,7 @@ class WebResource
       updates = []
       update = -> url {
         begin # block to catch 304-response "error"
-
+          puts "fetch #{url}"
           # conditional GET
           open(url, head) do |response| # response
 
