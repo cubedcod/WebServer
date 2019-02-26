@@ -128,11 +128,15 @@ class WebResource
       color = '#%06x' % (rand 16777216)
       position = rand(100) / 100.0
 
-      # allow child node(s) representable as as Object, array of Object(s) or URI-indexed Hash
-      contents = container.delete(Contains).do{|cs|
-        cs.class == Hash ? cs.values : cs}.justArray
-      {class: :container,style: "border: .08em solid #{color}; background: repeating-linear-gradient(#{rand(9) * 45}deg, #000, #000 #{position}em, #{color} #{position}em, #{color} 1em)",
-       c: [title ? Markup[Title][title.justArray[0], env, uri.justArray[0]] : (name ? ("<span class=name style='background-color: #{color}'>"+(CGI.escapeHTML name) + "</span>") : ''),
+      # child node(s) represented as Object, array of Object(s) or (URI-indexed) Hash
+      contents = container.delete(Contains).do{|cs| cs.class == Hash ? cs.values : cs}.justArray
+
+      multi = contents.size > 1
+      styleC = multi ? "border: .08em solid #{color}; background: repeating-linear-gradient(#{rand(9) * 45}deg, #000, #000 #{position}em, #{color} #{position}em, #{color} 1em)" : ''
+      styleN = multi ? "background-color: #{color}" : ''
+
+      {class: :container, style: styleC,
+       c: [title ? Markup[Title][title.justArray[0], env, uri.justArray[0]] : ((name && multi) ? ("<span class=name style='#{styleN}'>" + (CGI.escapeHTML name) + "</span>") : ''),
            contents.map{|c| HTML.value(nil,c,env)}.intersperse(' '),
            # container metadata
            (HTML.kv(container, env) unless container.empty?)]}}
