@@ -61,7 +61,19 @@ www.youtube.com
   module HTTP
 
     def amp
-      [302, {'Location' => 'https://' + (host.split('.') - %w{amp}).join('.') + (path.split('/') - %w{amp amphtml}).join('/')}, []]
+      if MediaFormats.-(['html']).member? ext
+        cloudStorage
+      else
+        [302, {'Location' => 'https://' + (host.split('.') - %w{amp}).join('.') + (path.split('/') - %w{amp amphtml}).join('/')}, []]
+      end
+    end
+
+    def cloudStorage
+      if UpstreamToggle[@r['SERVER_NAME']] || StoreItAll.member?(host) || MediaFormats.member?(ext.downcase)
+        remoteNode
+      else
+        deny
+      end
     end
 
     # request remote resource, index + cache it locally
@@ -92,8 +104,7 @@ www.youtube.com
       updates = []
       update = -> url {
         begin # block to catch 304-response "error"
-          puts "fetch #{url}"
-          # conditional GET
+#          puts "fetch #{url}"
           open(url, head) do |response| # response
 
             if @r # HTTP-request calling context - preserve origin bits

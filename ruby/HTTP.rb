@@ -106,14 +106,6 @@ class WebResource
       [303, @r[:Response].update({'Location' => '/' + loc + '/' + parts[1..-1].join('/') + qs}), []]
     end
 
-    def cloudStorage
-      if UpstreamToggle[@r['SERVER_NAME']] || StoreItAll.member?(host) || MediaFormats.member?(ext.downcase)
-        remoteNode
-      else
-        deny
-      end
-    end
-
     def dateMeta
       @r ||= {}
       @r[:links] ||= {}
