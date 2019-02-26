@@ -39,6 +39,7 @@ encrypted-tbn0.gstatic.com
 forum.solidproject.org
 ssl.gstatic.com
 static1.squarespace.com
+www.cnet.com
 www.gstatic.com
 www.mixcloud.com
 yt3.ggpht.com}
