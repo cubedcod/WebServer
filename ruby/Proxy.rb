@@ -18,6 +18,7 @@ www.rfa.org
     InsecureShorteners = %w{
 bhne.ws
 bos.gl
+feeds.reuters.com
 f-st.co
 huffp.st
 ihe.art
@@ -37,6 +38,7 @@ cdn.bitmovin.com
 content.jwplatform.com
 encrypted-tbn0.gstatic.com
 forum.solidproject.org
+github.com
 ssl.gstatic.com
 static1.squarespace.com
 www.cnet.com
