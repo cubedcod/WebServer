@@ -343,18 +343,5 @@ www.youtube.com
         re.remoteNode
       end}
 
-    # Yahoo
-    HostGET['s.yimg.com'] = -> r {
-      path = r.env['REQUEST_URI']
-
-      if u = r.path.match(%r{https?://?(.*jpg)})
-        [302, {'Location' =>  "https://" + u[1]},[]]
-      elsif path.match?(/\.js$/)
-        ('https://s.yimg.com'+path).R.env(r.env).remoteNode
-      else
-        r.deny
-      end
-    }
-
   end
 end
