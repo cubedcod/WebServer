@@ -39,6 +39,10 @@ cdn.bitmovin.com
 content.jwplatform.com
 encrypted-tbn0.gstatic.com
 forum.solidproject.org
+geo0.ggpht.com
+geo1.ggpht.com
+geo2.ggpht.com
+geo3.ggpht.com
 github.com
 ssl.gstatic.com
 static1.squarespace.com
