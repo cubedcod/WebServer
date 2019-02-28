@@ -2,6 +2,7 @@ announce full updates or existence thereof to curious peers - irvc3, crdt, solid
 emulatable archives (versioned JS-depchain. tag browser version too? look at archive.org/webpack/WARC prior-art)
 HTML extraction of HEAD meta and RDFa/microformats sponger
 week/month/hour paging UI-bar
+json-schema parsers
 index backlinks at storage time
 troff triplr - .1, .2, (sslsplit docs)
 link Search host-specific remote origins - !tw  URL mapping etc

@@ -78,7 +78,7 @@ class WebResource
                         {_: :body,
                          c: ["\n", link[:up, '&#9650;'], link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              unless localResource?
-                               {_: :a, href: '/go-direct' + HTTP.qs({u: 'https:' + uri}), c: '⮹'} #link to upstream representation
+                               {_: :a, id: :upstreamify, class: :up, href: '/go-direct' + HTTP.qs({u: 'http:' + uri}), c: '⮹'} #link to upstream representation
                              end,
                              if graph.empty?
                                HTML.kv (HTML.urifyHash @r), @r
