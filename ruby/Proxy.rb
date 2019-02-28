@@ -25,6 +25,7 @@ ihe.art
 nyer.cm
 ow.ly
 rss.cnn.com
+rssfeeds.usatoday.com
 w.bos.gl
 }
 
