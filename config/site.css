@@ -14,7 +14,7 @@ a.link {border: 1px solid #777}
 .bold {font-weight: bold; font-size: 1.1em}
 .container > .name {color: #000; background-color: #fff; font-size: .92em; margin-right: .1em}
 .post {max-width:80ex; border: .08em solid #333; background-color: #080808; color: #fff; border-radius: .3em; margin: .1em}
-table, div, pre, p, a {display: inline-block}
+table, div {display: inline-block}
 table {border-spacing: 0; border-width: 0}
 div,td {padding: 0}
 p {margin: 0; border-width: 1px 0 0 0; border-style: dashed; border-color: #333}
