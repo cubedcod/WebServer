@@ -9,6 +9,7 @@ link Search host-specific remote origins - !tw  URL mapping etc
 directory-index lightweight-summary when trailing-slash is missing, relURI rewrite
 use shortURL-mapping DB to deobfuscate at presentation and storage time
 mp3 image extract
+delete <noscript> , lots of invisible pages
 imgur video https://i.imgur.com/JuDZN0w.gifv
 xhr link inliner - nowrapper docs, onlynew updates
 visual indicator of cache-hit

@@ -132,7 +132,7 @@ class WebResource
       contents = container.delete(Contains).do{|cs| cs.class == Hash ? cs.values : cs}.justArray
 
       multi = contents.size > 1
-      styleC = multi ? "border: .08em solid #{color}; background: repeating-linear-gradient(#{rand(9) * 45}deg, #000, #000 #{position}em, #{color} #{position}em, #{color} 1em)" : ''
+      styleC = multi ? "border: .08em solid #{color}; background: repeating-linear-gradient(#{rand 360}deg, #000, #000 #{position}em, #{color} #{position}em, #{color} 1em)" : ''
       styleN = multi ? "background-color: #{color}" : ''
 
       {class: :container, style: styleC,
