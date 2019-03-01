@@ -139,6 +139,48 @@ class WebResource < RDF::URI
 
     HostOPTIONS = {}
 
+    def cachedRedirect
+      verbose = true
+      scheme = 'http' + (InsecureShorteners.member?(host) ? '' : 's') + '://'
+      sourcePath = path || ''
+      source = scheme + host + sourcePath
+      dest = nil
+      cache = ('/cache/URL/' + host + (sourcePath[0..2] || '') + '/' + (sourcePath[3..-1] || '') + '.u').R
+      puts "redir #{source} ->" if verbose
+
+      if cache.exist?
+        puts "cached at #{cache}" if verbose
+        dest = cache.readFile
+      else
+        puts "fetch #{source}" if verbose
+        resp = Net::HTTP.get_response (URI.parse source)
+        puts resp.body if verbose
+        dest = resp['Location'] || resp['location']
+        if !dest
+          body = Nokogiri::HTML.fragment resp.body
+          refresh = body.css 'meta[http-equiv="refresh"]'
+          if refresh && refresh.size > 0
+            content = refresh.attr('content')
+            if content
+              dest = content.to_s.split('URL=')[-1]
+            end
+          end
+        end
+        cache.writeFile dest if dest
+      end
+
+      puts dest if verbose
+      dest = dest ? dest.R : nil
+      if @r
+        # return URI to caller in document
+        # [200, {'Content-Type' => 'text/html'}, [htmlDocument({source => {Link => dest}})]]
+        # redirect to URI
+        dest ? [302, {'Location' =>  dest},[]] : notfound
+      else
+        dest
+      end
+    end
+
   end
   module HTML
     include URIs

@@ -82,6 +82,50 @@ www.youtube.com
       end
     end
 
+    def HTTPthru
+      HostGET[host] = -> r {r.GETthru}
+     HostPOST[host] = -> r {r.POSTthru}
+  HostOPTIONS[host] = -> r {r.OPTIONSthru}
+    end
+
+    def OPTIONSthru
+      verbose = false
+
+      # request
+      url = 'https://' + host + path + qs
+      headers = HTTP.unmangle env
+      body = env['rack.input'].read
+      HTTP.print_header headers if verbose
+      HTTP.print_body body, headers['Content-Type'] if verbose
+
+      # response
+      r = HTTParty.options url, :headers => headers, :body => body
+      s = r.code
+      h = r.headers
+      b = r.body
+      HTTP.print_header h if verbose
+      HTTP.print_body b, h['Content-Type'] if verbose
+      [s, h, [b]]
+    end
+
+    def POSTthru
+      # request
+      url = 'https://' + host + path + qs
+      headers = HTTP.unmangle env
+      body = env['rack.input'].read
+      #HTTP.print_header headers
+      #HTTP.print_body body, headers['Content-Type']
+
+      # response
+      r = HTTParty.post url, :headers => headers, :body => body
+      s = r.code
+      h = r.headers
+      b = r.body
+      #HTTP.print_header h
+      #HTTP.print_body b, h['Content-Type']
+      [s, h, [b]]
+    end
+
     # request remote resource, index + cache it locally
     def remoteNode
       head = HTTP.unmangle env
@@ -192,6 +236,7 @@ www.youtube.com
                                                 (CGI.escapeHTML e.io.read.to_utf8)] if e.respond_to? :io) # response body
                                               ]}})]] : self
     end
+    alias_method :GETthru, :remoteNode
 
     # toggle upstream-UI preference on
     PathGET['/go-direct'] = -> r {
@@ -263,12 +308,14 @@ www.youtube.com
     }
 
     # Google
-    %w{feedproxy.google.com google.com}.map{|h| HostGET[h] = -> r {r.cachedRedirect}}
+    %w{feedproxy.google.com gmail.com google.com}.map{|h| HostGET[h] = -> r {r.cachedRedirect}}
 
     HostGET['www.google.com'] = -> r {
       case r.parts[0]
       when nil
         [200, {'Content-Type' => 'text/html'}, ['<form method="GET" action="/search"><input name="q" autofocus></form>']]
+      when 'gmail'
+        r.cachedRedirect
       when /^im(ages?|gres)|logos|maps|search$/
         r.remoteNode
       when 'url'
@@ -276,6 +323,8 @@ www.youtube.com
       else
         r.deny
       end}
+
+    '//mail.google.com'.R.HTTPthru
 
     # IG
     HostGET['instagram.com'] = -> r {[302, {'Location' =>  "https://www.instagram.com" + r.path},[]]}
