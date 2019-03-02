@@ -30,7 +30,7 @@ w.bos.gl
 }
 
     # extensions enabled storage handler
-    MediaFormats = %w{css html jpg jpg:large jpeg ogg m4a mp3 mp4 pdf png png:large svg txt webm webp woff2}
+    MediaFormats = %w{css html jpg jpg:large jpeg ogg opus m4a mp3 mp4 pdf png png:large svg txt webm webp woff2}
 
     # .js and other (or missing) extensions by default disallowed in storage handler
     StoreItAll = %w{
@@ -131,7 +131,7 @@ www.youtube.com
       head = HTTP.unmangle env
       head.delete 'Host'
       formatSuffix = (host.match?(/reddit.com$/) && !parts.member?('w')) ? '.rss' : ''
-      useExtension = %w{aac atom css html jpg js mp3 mp4 ogg pdf png rdf svg ttf ttl webm webp woff woff2}.member? ext.downcase
+      useExtension = %w{aac atom css html jpg js mp3 mp4 ogg opus pdf png rdf svg ttf ttl webm webp woff woff2}.member? ext.downcase
       portNum = port && !([80,443,8000].member? port) && ":#{port}" || ''
       queryHash = q
       queryHash.delete 'host'
