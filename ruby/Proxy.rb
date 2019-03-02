@@ -308,6 +308,7 @@ www.youtube.com
     }
 
     # Google
+    %w{mail news}.map{|_| "//#{_}.google.com".R.HTTPthru}
     %w{feedproxy.google.com gmail.com google.com}.map{|h| HostGET[h] = -> r {r.cachedRedirect}}
 
     HostGET['www.google.com'] = -> r {
@@ -319,12 +320,10 @@ www.youtube.com
       when /^im(ages?|gres)|logos|maps|search$/
         r.remoteNode
       when 'url'
-        [302,{'Location' => r.q['url']},[]]
+        [302, {'Location' => ( r.q['q'] || r.q['url'] )}, []]
       else
         r.deny
       end}
-
-    '//mail.google.com'.R.HTTPthru
 
     # IG
     HostGET['instagram.com'] = -> r {[302, {'Location' =>  "https://www.instagram.com" + r.path},[]]}
