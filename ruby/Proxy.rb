@@ -29,27 +29,7 @@ rssfeeds.usatoday.com
 w.bos.gl
 }
 
-    # extensions enabled storage handler
     MediaFormats = %w{css html jpg jpg:large jpeg ogg opus m4a mp3 mp4 pdf png png:large svg txt webm webp woff2}
-
-    # .js and other (or missing) extensions by default disallowed in storage handler
-    StoreItAll = %w{
-ajax.googleapis.com
-cdn.bitmovin.com
-content.jwplatform.com
-encrypted-tbn0.gstatic.com
-forum.solidproject.org
-geo0.ggpht.com
-geo1.ggpht.com
-geo2.ggpht.com
-geo3.ggpht.com
-github.com
-ssl.gstatic.com
-static1.squarespace.com
-www.cnet.com
-www.gstatic.com
-www.mixcloud.com
-yt3.ggpht.com}
 
     UpstreamFormat = %w{
 api-v2.soundcloud.com
@@ -68,14 +48,14 @@ www.youtube.com
 
     def amp
       if MediaFormats.-(['html']).member? ext
-        cloudStorage
+        mediaStorage
       else
         [302, {'Location' => 'https://' + (host.split('.') - %w{amp}).join('.') + (path.split('/') - %w{amp amphtml}).join('/')}, []]
       end
     end
 
-    def cloudStorage
-      if UpstreamToggle[@r['SERVER_NAME']] || StoreItAll.member?(host) || MediaFormats.member?(ext.downcase)
+    def mediaStorage
+      if UpstreamToggle[@r['SERVER_NAME']] || MediaFormats.member?(ext.downcase)
         remoteNode
       else
         deny

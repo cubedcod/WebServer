@@ -149,10 +149,10 @@ class WebResource
       return case env['HTTP_TYPE'] # dispatch on request type-tag attached upstream
              when /AMP/
                amp
+             when /media/
+               mediaStorage
              when /shortened/
                cachedRedirect
-             when /storage/
-               cloudStorage
              else
                deny
              end if env.has_key? 'HTTP_TYPE'
