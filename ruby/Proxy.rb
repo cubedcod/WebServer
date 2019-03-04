@@ -294,6 +294,8 @@ www.youtube.com
       case r.parts[0]
       when /^(amp|gmail)$/
         r.cachedRedirect
+      when 'complete'
+        r.deny
       when 'url'
         [302, {'Location' => ( r.q['q'] || r.q['url'] )}, []]
       else
