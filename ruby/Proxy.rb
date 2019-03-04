@@ -290,19 +290,14 @@ www.youtube.com
     # Google
     %w{mail news}.map{|_| "//#{_}.google.com".R.HTTPthru}
     %w{feedproxy.google.com gmail.com google.com}.map{|h| HostGET[h] = -> r {r.cachedRedirect}}
-
     HostGET['www.google.com'] = -> r {
       case r.parts[0]
-      when nil
-        [200, {'Content-Type' => 'text/html'}, ['<form method="GET" action="/search"><input name="q" autofocus></form>']]
-      when 'gmail'
+      when /^(amp|gmail)$/
         r.cachedRedirect
-      when /^im(ages?|gres)|logos|maps|search$/
-        r.remoteNode
       when 'url'
         [302, {'Location' => ( r.q['q'] || r.q['url'] )}, []]
       else
-        r.deny
+        r.remoteNode
       end}
 
     # IG

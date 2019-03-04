@@ -25,6 +25,7 @@ move hostnames out of proxy.rb to the static definitions in config/
 catch 404 in remoteNode
 flatmap large filenames
 BUG direct UI uses cache of indirect if under hammer-threshold time
+add ensure script PATH is proper for WebServer.net on minimalist sh implementations 
 
 merge: cacheRedirect and remoteNode methods?
 and/or make cRedir try both schemes so InsecureShorteners can go away
