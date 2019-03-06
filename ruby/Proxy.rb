@@ -125,20 +125,10 @@ w.bos.gl
               cacheMeta.writeFile [mime, url, ''].join "\n" unless useExtension
               # index content
               updates.concat(case mime
-                             when /^application\/atom/
-                               cache.indexFeed
-                             when /^application\/rss/
-                               cache.indexFeed
-                             when /^application\/xml/
+                             when /^(application|text)\/(atom|rss|xml)/
                                cache.indexFeed
                              when /^text\/html/
-                               if feedURL? # HTML typetag on specified feed URL
-                                 cache.indexFeed
-                               else
-                                 cache.indexHTML host
-                               end
-                             when /^text\/xml/
-                               cache.indexFeed
+                               cache.indexHTML host
                              else
                                []
                              end || [])

@@ -3,19 +3,12 @@ class WebResource
   module URIs
 
     FeedURL={}
-    FeedLists = ConfDir.join('feeds/*.u').R.glob
-    FeedLists.map{|list|
-      list.lines.map{|u| FeedURL[u] = u.R}}
+    ConfDir.join('feeds/*.u').R.glob.map{|list|
+      list.lines.map{|u|
+        FeedURL[u] = u.R }}
 
   end
   module HTTP
-
-    # explicit feed URLs as MIME-type override
-    # specify in <../config/feeds> (URL)
-    #  <../config/routes/feedPath> (pattern)
-    def feedURL?
-      (env.has_key? 'HTTP_FEEDURL') || FeedURL[uri] || path == '/feed/'
-    end
 
     def self.getFeeds
       FeedURL.values.map{|feed|
@@ -23,12 +16,13 @@ class WebResource
       nil
     end
 
-    PathGET['/feeds'] = -> re { re.graphResponse FeedLists }
-
   end
   module Feed
     include URIs
-    def feeds; puts (nokogiri.css '[rel=alternate]').map{|u|join u.attr :href}.uniq end
+
+    def feeds
+      puts (nokogiri.css '[rel=alternate]').map{|u|join u.attr :href}.uniq
+    end
 
     class Format < RDF::Format
       content_type     'application/atom+xml', :extension => :atom

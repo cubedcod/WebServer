@@ -145,6 +145,8 @@ class WebResource
       return case env['HTTP_TYPE'] # dispatch on request type-tag
              when /AMP/
                amp
+             when /feed/
+               remoteNode
              when /hosted/
                if ('/' + host).R.exist?
                  remoteNode
