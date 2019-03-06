@@ -1,40 +1,9 @@
 #!/bin/sh
-allow_port    22 # SSH
-allow_port    43 # whois
-allow_port    53 # DNS
-allow_port    67 # DHCP
-allow_port    68 # DHCP
-allow_port    80 # HTTP
-allow_port   443 # HTTPS
-allow_port  6789 # IRC
-allow_port  8000 # HTTP
-allow_port  8022 # SSH
-allow_port  8073 # SDR
-allow_port  8080 # HTTPS
-allow_port  8081 # HTTP
-allow_port  8082 # HTTPS proxy
-allow_port  9418 # Git
-allow_port 22000 # Syncthing
-allow_port 60001 # Mosh
-allow_port 60002
-allow_port 60003
-ip6tables -A INPUT -i lo -j ACCEPT
-ip6tables -A INPUT -p icmp -j ACCEPT
-ip6tables -A OUTPUT -o lo -j ACCEPT
-ip6tables -A OUTPUT -p icmp -j ACCEPT
 ip6tables -A OUTPUT -p udp --dport 443 -j DROP
 ip6tables -A OUTPUT -p udp --dport 80 -j DROP
-ip6tables -P INPUT DROP
-ip6tables -P OUTPUT DROP
 ip6tables -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8082 -m owner ! --uid-owner $1
 ip6tables -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1
-iptables  -A INPUT -i lo -j ACCEPT
-iptables  -A INPUT -p icmp -j ACCEPT
-iptables  -A OUTPUT -o lo -j ACCEPT
-iptables  -A OUTPUT -p icmp -j ACCEPT
 iptables  -A OUTPUT -p udp --dport 443 -j DROP
 iptables  -A OUTPUT -p udp --dport 80 -j DROP
-iptables  -P INPUT DROP
-iptables  -P OUTPUT DROP
 iptables  -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8082 -m owner ! --uid-owner $1
 iptables  -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1
