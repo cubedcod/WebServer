@@ -305,6 +305,7 @@ w.bos.gl
       end}
     HostGET['youtube.com'] = HostGET['m.youtube.com'] = -> r {[302, {'Location' =>  "https://www.youtube.com" + r.path + r.qs},[]]}
     HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[302,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
+    '//accounts.youtube.com'.R.HTTPthru
 
     # T-Mobile
     HostGET['lookup.t-mobile.com'] = -> re {[200, {'Content-Type' => 'text/html'}, [re.htmlDocument({re.uri => {'dest' => re.q['origurl'].R}})]]}
@@ -316,7 +317,7 @@ w.bos.gl
         graph = {Twitter => {'uri' => Twitter,
                              Link => []}}
 
-        ConfDir.join('twitter.com.bu').R.lines.shuffle.each_slice(16){|s|
+        '/twitter'.R.lines.shuffle.each_slice(16){|s|
           graph[Twitter][Link].push (Twitter+'/search?f=tweets&vertical=default&q=' + s.map{|u| 'from:' + u.chomp}.intersperse('+OR+').join).R}
 
         [200,{'Content-Type' => 'text/html'},[re.htmlDocument(graph)]]
