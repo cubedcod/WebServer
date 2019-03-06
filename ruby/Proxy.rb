@@ -29,8 +29,6 @@ rssfeeds.usatoday.com
 w.bos.gl
 }
 
-    MediaFormats = %w{css html jpg jpg:large jpeg ogg opus m4a mp3 mp4 pdf png png:large svg txt webm webp woff2}
-
   end
   module HTTP
 
