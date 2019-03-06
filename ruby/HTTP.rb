@@ -142,7 +142,7 @@ class WebResource
       @r[:links] = {}    # graph-level references
       return PathGET[path][self] if PathGET[path] # dispatch to lambda binding (path name)
       return HostGET[host][self] if HostGET[host] # dispatch to lambda binding (host name)
-      return case env['HTTP_TYPE'] # dispatch on request type-tag
+      return case env['HTTP_TYPE'] # type-tagged requests
              when /AMP/
                amp
              when /feed/
@@ -153,12 +153,12 @@ class WebResource
                else
                  deny
                end
-             when /shortened/
+             when /short/
                cachedRedirect
              else
                deny
              end if env.has_key? 'HTTP_TYPE'
-      return chronoDir if chronoDir? # current time-seg redirect
+      return chronoDir if chronoDir? # current time-slice redirect
       return fileResponse if node.file? # static data
       if localResource?
         graphResponse localNodes
