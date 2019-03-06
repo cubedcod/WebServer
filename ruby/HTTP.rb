@@ -107,11 +107,7 @@ class WebResource
 
     def deny
       env[:deny] = true
-      ConfDir.join('squid/ERR_ACCESS_DENIED').R(env).setMIME('text/html').fileResponse
-    end
-
-    def emptyJS
-      [200, {'Content-Type' => 'application/javascript'}, []]
+      [200, {'Content-Type' => ext=='js' ? 'application/javascript' : 'text/plain'}, []]
     end
 
     # conditional responder
