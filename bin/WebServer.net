@@ -1,18 +1,4 @@
 #!/bin/sh
-# default policy
-iptables  -P INPUT DROP
-ip6tables -P INPUT DROP
-iptables  -P OUTPUT DROP
-ip6tables -P OUTPUT DROP
-iptables  -A INPUT -p icmp -j ACCEPT
-ip6tables -A INPUT -p icmp -j ACCEPT
-iptables  -A OUTPUT -p icmp -j ACCEPT
-ip6tables -A OUTPUT -p icmp -j ACCEPT
-iptables  -A INPUT -i lo -j ACCEPT
-ip6tables -A INPUT -i lo -j ACCEPT
-iptables  -A OUTPUT -o lo -j ACCEPT
-ip6tables -A OUTPUT -o lo -j ACCEPT
-# open ports
 allow_port    22 # SSH
 allow_port    43 # whois
 allow_port    53 # DNS
@@ -32,12 +18,23 @@ allow_port 22000 # Syncthing
 allow_port 60001 # Mosh
 allow_port 60002
 allow_port 60003
-# transparent HTTPS proxy
-iptables  -A OUTPUT -p udp --dport 80 -j DROP
-ip6tables -A OUTPUT -p udp --dport 80 -j DROP
-iptables  -A OUTPUT -p udp --dport 443 -j DROP
+ip6tables -A INPUT -i lo -j ACCEPT
+ip6tables -A INPUT -p icmp -j ACCEPT
+ip6tables -A OUTPUT -o lo -j ACCEPT
+ip6tables -A OUTPUT -p icmp -j ACCEPT
 ip6tables -A OUTPUT -p udp --dport 443 -j DROP
-iptables  -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8082 -m owner ! --uid-owner $1
+ip6tables -A OUTPUT -p udp --dport 80 -j DROP
+ip6tables -P INPUT DROP
+ip6tables -P OUTPUT DROP
 ip6tables -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8082 -m owner ! --uid-owner $1
-iptables  -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1
 ip6tables -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1
+iptables  -A INPUT -i lo -j ACCEPT
+iptables  -A INPUT -p icmp -j ACCEPT
+iptables  -A OUTPUT -o lo -j ACCEPT
+iptables  -A OUTPUT -p icmp -j ACCEPT
+iptables  -A OUTPUT -p udp --dport 443 -j DROP
+iptables  -A OUTPUT -p udp --dport 80 -j DROP
+iptables  -P INPUT DROP
+iptables  -P OUTPUT DROP
+iptables  -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8082 -m owner ! --uid-owner $1
+iptables  -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1

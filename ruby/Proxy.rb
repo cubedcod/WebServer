@@ -31,35 +31,11 @@ w.bos.gl
 
     MediaFormats = %w{css html jpg jpg:large jpeg ogg opus m4a mp3 mp4 pdf png png:large svg txt webm webp woff2}
 
-    UpstreamFormat = %w{
-api-v2.soundcloud.com
-bandcamp.com
-mail.google.com
-s.ytimg.com
-soundcloud.com
-www.instagram.com
-www.google.com
-www.youtube.com
-}
-    UpstreamToggle = {}
-
   end
   module HTTP
 
     def amp
-      if MediaFormats.-(['html']).member? ext
-        mediaStorage
-      else
-        [302, {'Location' => 'https://' + (host.split('.') - %w{amp}).join('.') + (path.split('/') - %w{amp amphtml}).join('/')}, []]
-      end
-    end
-
-    def mediaStorage
-      if UpstreamToggle[@r['SERVER_NAME']] || MediaFormats.member?(ext.downcase)
-        remoteNode
-      else
-        deny
-      end
+      [302, {'Location' => 'https://' + (host.split('.') - %w{amp}).join('.') + (path.split('/') - %w{amp amphtml}).join('/')}, []]
     end
 
     def HTTPthru
@@ -106,7 +82,6 @@ www.youtube.com
       [s, h, [b]]
     end
 
-    # request remote resource, index + cache it locally
     def remoteNode
       head = HTTP.unmangle env
       head.delete 'Host'
@@ -190,7 +165,7 @@ www.youtube.com
       if @r # HTTP calling context
         if cache.exist?
           # preserve upstream format?
-          if UpstreamToggle[@r['SERVER_NAME']] || UpstreamFormat.member?(@r['SERVER_NAME']) || cache.noTransform?
+          if cache.noTransform?
             cache.fileResponse
           else # transformable
             graphResponse (updates.empty? ? [cache] : updates)
@@ -217,18 +192,6 @@ www.youtube.com
                                               ]}})]] : self
     end
     alias_method :GETthru, :remoteNode
-
-    # toggle upstream-UI preference on
-    PathGET['/go-direct'] = -> r {
-      r.q['u'].do{|u|
-        UpstreamToggle[u.R.host] = true; [302, {'Location' => u}, []]
-      } || r.notfound }
-
-    # toggle upstream-UI preference off
-    PathGET['/go-indirect'] = -> r {
-      r.q['u'].do{|u|
-        UpstreamToggle.delete u.R.host; [302, {'Location' => u}, []]
-      } || r.notfound }
 
     PathGET['/cache'] = -> cache {
       cache.q['url'].do{|url|
@@ -335,7 +298,7 @@ www.youtube.com
     # Reddit
     HostGET['i.reddit.com'] = HostGET['np.reddit.com'] = HostGET['reddit.com'] = -> re {[302,{'Location' => 'https://www.reddit.com' + re.path + re.qs},[]]}
 
-    # Souncloud
+    # Soundcloud
     HostGET['exit.sc'] = -> r {[302,{'Location' => r.q['url']},[]]}
 
     # YouTube

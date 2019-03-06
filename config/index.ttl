@@ -1,6 +1,0 @@
-<code.css> <http://purl.org/dc/terms/note> "CSS for code-highlight" .
-<icon.png> <http://purl.org/dc/terms/note> "site icon" .
-<muttrc> <http://purl.org/dc/terms/note> "configuration for console MUA" .
-<procmailrc> <http://purl.org/dc/terms/note> "procmailrc for hour-dir delivery" .
-<rack.ru> <http://purl.org/dc/terms/note> "Ruby HTTP-daemon configuration" .
-<site.js> <http://purl.org/dc/terms/note> "script for keyboard-navigation" .
