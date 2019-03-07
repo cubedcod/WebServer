@@ -197,7 +197,7 @@ class WebResource
 
     def noTransform?
       return true if mime&.match? NoTransform
-      return true if @r['SERVER_NAME'].match? /(google|(mix|sound)cloud|youtube).com$/
+      return true if @r['SERVER_NAME'].match? /(google|gstatic|(mix|sound)cloud|youtube).com$/
       false
     end
 
