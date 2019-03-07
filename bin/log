@@ -21,7 +21,7 @@ else
       status,method,addr,action,mime = [t[3],t[5],t[6],t[8],t[9]]
 
       hidden = (method == 'CONNECT') ||
-               (action && (action.match? /FIRSTUP_PARENT/))
+               (action && (action.match? /FIRSTUP_PARENT/)) # logged by daemon
       unless hidden
         origin = false
         color = case status

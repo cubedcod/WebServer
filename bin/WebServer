@@ -3,7 +3,7 @@ this=WebServer
 base=$(realpath ~/src/$this)
 
 # first-run initialization
-mkdir log
+mkdir -p log
 touch hosts
 
 squid -f $base/config/squid.conf                         # request tagger
