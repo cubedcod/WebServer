@@ -1,6 +1,11 @@
 #!/bin/sh
 this=WebServer
 base=$(realpath ~/src/$this)
+
+# first-run initialization
+mkdir log
+touch hosts
+
 squid -f $base/config/squid.conf                         # request tagger
 $base/bin/log &                                              # log viewer
 unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 $base/config/$this.ru # daemon
