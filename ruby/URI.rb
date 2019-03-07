@@ -139,6 +139,19 @@ class WebResource < RDF::URI
 
     HostOPTIONS = {}
 
+    InsecureShorteners = %w{
+bhne.ws
+bos.gl
+feeds.reuters.com
+f-st.co
+huffp.st
+ihe.art
+nyer.cm
+ow.ly
+rss.cnn.com
+rssfeeds.usatoday.com
+w.bos.gl
+}
     def cachedRedirect
       verbose = true
       scheme = 'http' + (InsecureShorteners.member?(host) ? '' : 's') + '://'

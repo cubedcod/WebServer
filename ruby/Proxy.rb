@@ -1,37 +1,5 @@
 class WebResource
-  module URIs
-    # TODO see if we can block origin headers in squid rules so they can't fake these headers to defeat categorization
-    # while also not having the blocked-response-header rules block headers we add. so for now just do it here until delving into squid-config space
-
-    # use sharded-hash path structure, ignore upstream path arrangement
-    FlatMap = %w{
-a.thumbs.redditmedia.com
-b.thumbs.redditmedia.com
-i.redd.it
-mail.google.com
-maps.google.com
-www.google.com
-www.gstatic.com
-www.rfa.org
-}
-
-    InsecureShorteners = %w{
-bhne.ws
-bos.gl
-feeds.reuters.com
-f-st.co
-huffp.st
-ihe.art
-nyer.cm
-ow.ly
-rss.cnn.com
-rssfeeds.usatoday.com
-w.bos.gl
-}
-
-  end
   module HTTP
-
     def amp
       [302, {'Location' => 'https://' + (host.split('.') - %w{amp}).join('.') + (path.split('/') - %w{amp amphtml}).join('/')}, []]
     end
@@ -93,7 +61,7 @@ w.bos.gl
       urlHTTPS = scheme && scheme=='https' && uri || ('https://' + host + portNum + path + formatSuffix + queryString)
       urlHTTP  = 'http://'  + host + portNum + (path||'/') + formatSuffix + queryString
       # local URI
-      cache = ('/' + host + (if FlatMap.member?(host) || (qs && !qs.empty?) # mint a path
+      cache = ('/' + host + (if host.match?(/google|gstatic|\.redd/) || (qs && !qs.empty?) # mint a path
                              hash = ((path||'/') + qs).sha2          # hash origin path
                              type = useExtension ? ext : 'cache' # append suffix
                              '/' + hash[0..1] + '/' + hash[1..-1] + '.' + type # plunk in semi-balanced bins
