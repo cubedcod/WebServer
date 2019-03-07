@@ -1,12 +1,11 @@
 ### INSTALL
 ``` sh
-this=WebServer
 mkdir ~/src; cd ~/src
-git clone https://gitlab.com/ix/$this
-cd $this/ruby && bundle install
+git clone https://gitlab.com/ix/WebServer
+cd WebServer/ruby && bundle install
 ```
-
 ### RUN
 ``` sh
-~/src/$this/bin/$this
+mkdir ~/web; cd ~/web
+~/src/WebServer/bin/daemon
 ```
