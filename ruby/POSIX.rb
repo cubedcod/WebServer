@@ -60,8 +60,7 @@ class WebResource
 
     # FIND(1)
     def find p
-      (p && !p.empty?) ? `find #{sh} -ipath #{('*'+p+'*').sh} | head -n 2048`.lines.map{|_|
-                           POSIX.fromRelativePath _.chomp} : []
+      (p && !p.empty?) ? `find #{sh} -ipath #{('*'+p+'*').sh} | head -n 2048`.lines.map{|path| POSIX.fromRelativePath path.chomp} : []
     end
 
     # GLOB(7)
@@ -72,7 +71,7 @@ class WebResource
     def directory?; node.directory? end
     def file?; node.file? end
 
-    # WebResource -> file(s) mapping
+    # WebResource -> file(s)
     def localNodes
       (if directory? # directory
        if q.has_key?('f') && path!='/' # FIND
@@ -82,8 +81,8 @@ class WebResource
          grep q['q']
        else # LS
          index = (self+'index.html').glob
-         if !index.empty? && qs.empty? # no query and static HTML index-compile exists
-           index # static index
+         if !index.empty? && qs.empty? # static HTML index-compile exists and no custom-query?
+           index # return static index
          else
            [self, path[-1] == '/' ? children : []]
          end
