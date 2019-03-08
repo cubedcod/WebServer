@@ -70,9 +70,12 @@ class WebResource
     def dateMeta
       @r ||= {}
       @r[:links] ||= {}
-      dp = [] # date parts
+      n = nil # next page
+      p = nil # prev page
+
+      # date parts
+      dp = []
       dp.push parts.shift.to_i while parts[0] && parts[0].match(/^[0-9]+$/)
-      n = nil; p = nil
       case dp.length
       when 1 # Y
         year = dp[0]
@@ -97,12 +100,12 @@ class WebResource
           n = hour >= 23 ? (day + 1).strftime('/%Y/%m/%d/00') : (day.strftime('/%Y/%m/%d/')+('%02d' % (hour+1)))
         end
       end
-      # preserve trailing slash
-      sl = parts.empty? ? '' : (path[-1] == '/' ? '/' : '')
 
-      # add pointers to HTTP response header
-      @r[:links][:prev] = p + '/' + parts.join('/') + sl + qs + '#prev' if p && p.R.e
-      @r[:links][:next] = n + '/' + parts.join('/') + sl + qs + '#next' if n && n.R.e
+      remainder = parts.empty? ? '' : ['', *parts].join('/')
+      remainder += '/' if path[-1] == '/'
+
+      @r[:links][:prev] = p + remainder + qs + '#prev' if p && p.R.e
+      @r[:links][:next] = n + remainder + qs + '#next' if n && n.R.e
       @r[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs + '#r' + (path||'/').sha2 unless !path || path=='/'
     end
 
