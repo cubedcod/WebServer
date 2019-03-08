@@ -136,9 +136,10 @@ class WebResource
 
       # check for on-file response body
       if set.size == 1 ; this = set[0]
-        # document on file is RDF in BEST MATCH format?
+        # BEST MATCH format doc is on-file
         created = this.isRDF && bestFormat?(this) && this
-        # WEAK MATCH but mutually acceptable: reduced transcoding-load solution
+
+        # WEAK MATCH but mutually acceptable. reduced server-transcoding solution
         # Recommended only for MIME-agile clients and databrowsers ready for RDF
         #created = (sendable? this) && (receivable? this) && this
       end
@@ -151,19 +152,18 @@ class WebResource
       @r[:Response].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format,
                             'ETag' => [set.sort.map{|r|[r,r.m]}, format].join.sha2})
 
-      # lazy body-generator lambda
+      # lazy body-generator
       entity @r, ->{
-        if created # nothing to merge or transcode
-          created  # return body-reference
-        else # merge and/or transcode
+        if created # body already exists
+          created  # return reference
+        else # generate
           if format == 'text/html'
             htmlDocument load set
           elsif format == 'application/atom+xml'
             renderFeed load set
-          else # RDF formats
+          else # RDF
             g = RDF::Graph.new
-            set.map{|n|
-              g.load n.toRDF.localPath, :base_uri => n.stripDoc }
+            set.map{|n| g.load n.toRDF.localPath, :base_uri => n.stripDoc }
             g.dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true
           end
         end}
