@@ -48,11 +48,22 @@ class WebResource
       [s, h, [b]]
     end
 
+    def cacheFile
+      useExtension = %w{aac atom css html jpg js mp3 mp4 ogg opus pdf png rdf svg ttf ttl webm webp woff woff2}.member? ext.downcase
+      ('/' + host + (if host.match?(/google|gstatic|\.redd/) || (qs && !qs.empty?) # new path
+                     hash = ((path||'/') + qs).sha2                    # hash original path
+                     type = useExtension ? ext : 'cache'               # append suffix
+                     '/' + hash[0..1] + '/' + hash[1..-1] + '.' + type # plunk in balanced bins
+                    else # upstream path
+                      name = path[-1] == '/' ? path[0..-2] : path # strip trailing-slash
+                      name + (useExtension ? '' : '.cache') # append suffix
+                     end)).R env
+    end
+
     def remoteNode
       head = HTTP.unmangle env
       head.delete 'Host'
       formatSuffix = (host.match?(/reddit.com$/) && !parts.member?('w')) ? '.rss' : ''
-      useExtension = %w{aac atom css html jpg js mp3 mp4 ogg opus pdf png rdf svg ttf ttl webm webp woff woff2}.member? ext.downcase
       portNum = port && !([80,443,8000].member? port) && ":#{port}" || ''
       queryHash = q
       queryHash.delete 'host'
@@ -60,15 +71,7 @@ class WebResource
       # origin URI
       urlHTTPS = scheme && scheme=='https' && uri || ('https://' + host + portNum + path + formatSuffix + queryString)
       urlHTTP  = 'http://'  + host + portNum + (path||'/') + formatSuffix + queryString
-      # local URI
-      cache = ('/' + host + (if host.match?(/google|gstatic|\.redd/) || (qs && !qs.empty?) # mint a path
-                             hash = ((path||'/') + qs).sha2          # hash origin path
-                             type = useExtension ? ext : 'cache' # append suffix
-                             '/' + hash[0..1] + '/' + hash[1..-1] + '.' + type # plunk in semi-balanced bins
-                            else # preserve upstream path
-                              name = path[-1] == '/' ? path[0..-2] : path # strip trailing-slash
-                              name + (useExtension ? '' : '.cache') # append suffix
-                             end)).R env
+      cache = cacheFile
       cacheMeta = cache.metafile
 
       # lazy updater, called by need
@@ -88,7 +91,7 @@ class WebResource
             unless cache.e && cache.readFile == resp
               cache.writeFile resp # cache body
               mime = response.meta['content-type'].do{|type| type.split(';')[0] } || ''
-              cacheMeta.writeFile [mime, url, ''].join "\n" unless useExtension
+              cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # out-of-band metadata-file
               # index content
               updates.concat(case mime
                              when /^(application|text)\/(atom|rss|xml)/

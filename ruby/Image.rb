@@ -42,7 +42,12 @@ class WebResource
                c: {_: :img, src: if !img.host # thumbnail
                     img.path + '?preview' if img.path
                   else
-                    img.uri
+                    cache = img.cacheFile
+                    if %w{l localhost}.member?(env['SERVER_NAME']) && cache.exist?
+                      cache.uri
+                    else
+                      img.uri
+                    end
                    end}}}
         end
       else
