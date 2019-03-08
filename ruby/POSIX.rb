@@ -74,7 +74,7 @@ class WebResource
 
     # WebResource -> file(s) mapping
     def localNodes
-      (if directory?
+      (if directory? # directory
        if q.has_key?('f') && path!='/' # FIND
          found = find q['f']
          found
@@ -85,16 +85,16 @@ class WebResource
          if !index.empty? && qs.empty? # no query and static HTML index-compile exists
            index # static index
          else
-           [self, children]
+           [self, path[-1] == '/' ? children : []]
          end
        end
-      else # GLOB
-        if match GlobChars
-          files = glob || [] # path glob
-          files.concat ('/' + host + path).R.glob # path on host glob
-        else # default globs
-          files = (self + '.*').glob                # base & ext
-          files = (self + '*').glob if files.empty? # prefix
+      else # files
+        if match GlobChars # glob
+          files = glob || [] # server-wide path
+          files.concat ('/' + host + path).R.glob # path on host
+        else # default file-set
+          files = (self + '.*').glob                # base + extension
+          files = (self + '*').glob if files.empty? # prefix-match
         end
         [self, files]
        end).justArray.flatten.compact.uniq.select &:exist?
@@ -103,7 +103,6 @@ class WebResource
     def self.splitArgs args
       args.shellsplit
     rescue
-      puts "tokenize failure: #{args}"
       args.split /\W/
     end
 
