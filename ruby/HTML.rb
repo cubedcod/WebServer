@@ -109,7 +109,12 @@ class WebResource
     Markup[Creator] = -> c, env, uris=nil {
       if c.respond_to? :uri
         u = c.R
-        name = u.fragment || u.basename.do{|b| ['','/'].member?(b) ? false : b} || u.host.do{|h|h.sub(/\.com$/,'')} || 'user'
+
+        name = u.fragment ||
+               u.basename.do{|b| ['','/'].member?(b) ? false : b} ||
+               u.host.do{|h|h.sub(/\.com$/,'')} ||
+               'user'
+
         color = env[:colors][name] ||= (HTML.colorizeBG name)
         {_: :a, class: :creator, style: color, href: uris.justArray[0] || c.uri, c: name}
       else
