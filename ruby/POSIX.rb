@@ -45,7 +45,7 @@ class WebResource
         f.basename.to_s.index('.')==0
       }.map &:R
     rescue Errno::EACCES
-      puts "access error for #{path}"
+      puts "access error on #{path}"
       []
     end
 

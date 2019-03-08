@@ -76,7 +76,7 @@ class WebResource
       doc = ('/cache/RDF/'+hash[0..2]+'/'+hash[3..-1]+'.e').R
       unless doc.e && doc.m > m
         tree = {}
-        # triplr takes file reference, yields triples (using #yield method in ruby)
+        # triplr takes file reference, yields triples
         triplr = Triplr[mime]
 
         unless triplr
@@ -88,6 +88,7 @@ class WebResource
           tree[s] ||= {'uri' => s}
           tree[s][p] ||= []
           tree[s][p].push o}
+
         doc.writeFile tree.to_json
       end
       doc
@@ -101,32 +102,32 @@ class WebResource
     def load set # file-set
       g = {}                 # Hash
       graph = RDF::Graph.new # RDF graph
-      rdf, non_rdf = set.partition &:isRDF # split for the two input pipelines
 
+      rdf, non_rdf = set.partition &:isRDF
       # RDF
       # load document(s)
       rdf.map{|n|
         opts = {:base_uri => n}
         opts[:format] = :feed if n.feedMIME?
         graph.load n.localPath, opts rescue puts("loaderror: #{n}")}
-      # merge to graph
+      # visit nodes
       graph.each_triple{|s,p,o|
         s = s.to_s; p = p.to_s # subject URI, predicate URI
         o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object
         g[s] ||= {'uri'=>s} # insert subject
         g[s][p] ||= []      # insert predicate
-        g[s][p].push o unless g[s][p].member? o} # insert full triple
-
-      # almost-RDF
-      non_rdf.map{|n| # non-RDF
-        n.rdfize.do{|transcode| # convert to almost-RDF
-          ::JSON.parse(transcode.readFile).map{|s,re| # load almost-RDF resources
-            re.map{|p,o| # (predicate URI, object(s)) tuples for subject URI
-              o.justArray.map{|o| # object URI(s) and/or literals
-                o = o.R if o.class==Hash # cast to WebResource instance
+        g[s][p].push o unless g[s][p].member? o} # add triple
+      # JSON
+      non_rdf.map{|n| # visit non-RDF files
+        n.rdfize.do{|transcode| # transcode to JSON
+          ::JSON.parse(transcode.readFile). # load JSON
+            map{|s,re| # visit resources
+            re.map{|p,o| # predicate URI, object(s)
+              o.justArray.map{|o| # object URI or value
+                o = o.R if o.class==Hash # object URI
                 g[s] ||= {'uri'=>s} # insert subject
                 g[s][p] ||= []      # insert predicate
-                g[s][p].push o unless g[s][p].member? o} unless p == 'uri' }}}} # insert full triple
+                g[s][p].push o unless g[s][p].member? o} unless p == 'uri' }}}} # add triple
 
       g # graph reference for caller
     end
