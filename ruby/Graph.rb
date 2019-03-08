@@ -95,18 +95,19 @@ class WebResource
 
     HostPOST['localhost'] = -> r {[202,{},[]]}
 
-    # merge native-JSON and RDF to loaded graph
+    # load native-JSON and RDF
     def load set # file-set
       g = {}                 # Hash
       graph = RDF::Graph.new # RDF graph
 
       rdf, non_rdf = set.partition &:isRDF
+
       # RDF
       # load document(s)
       rdf.map{|n|
         opts = {:base_uri => n}
         opts[:format] = :feed if n.feedMIME?
-        graph.load n.localPath, opts rescue puts("loaderror: #{n}")}
+        graph.load n.localPath, opts rescue puts("load error on #{n}")}
       # visit nodes
       graph.each_triple{|s,p,o|
         s = s.to_s; p = p.to_s # subject URI, predicate URI
@@ -114,6 +115,7 @@ class WebResource
         g[s] ||= {'uri'=>s} # insert subject
         g[s][p] ||= []      # insert predicate
         g[s][p].push o unless g[s][p].member? o} # add triple
+
       # JSON
       non_rdf.map{|n| # visit non-RDF files
         n.rdfize.do{|transcode| # transcode to JSON
