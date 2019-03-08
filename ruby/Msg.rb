@@ -261,12 +261,17 @@ class WebResource
       date = post.delete(Date).justArray[0]
       from = post.delete(From).justArray
       to = post.delete(To).justArray
-
+      cache = post.R.cacheFile
+      location = if %w{l localhost}.member?(env['SERVER_NAME']) && cache.exist?
+                   cache.uri
+                 else
+                   uri
+                 end
       {class: :post,
        c: [titles.map{|title|
              Markup[Title][title,env,uri]},
            (Markup[Date][date] if date),
-           {_: :a, id: 't'+rand.to_s.sha2, class: :id, c: '🔗', href: uri},
+           {_: :a, id: 't'+rand.to_s.sha2, class: :id, c: '🔗', href: location},
            {_: :table,
             c: {_: :tr,
                 c: [{_: :td, c: from.map{|f|Markup[Creator][f,env]}, class: :from},
