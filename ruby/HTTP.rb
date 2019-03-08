@@ -7,16 +7,16 @@ class WebResource
     def cache?; !(pragma && pragma == 'no-cache') end
 
     def self.call env
-      method = env['REQUEST_METHOD']
-      return [202,{},[]] unless Methods.member? method
-      query = parseQs env['QUERY_STRING']
-      host = query['host'] || env['HTTP_HOST'] || 'localhost'
+      method = env['REQUEST_METHOD']                        # request-method
+      return [202,{},[]] unless Methods.member? method      # undefined method
+      query = parseQs env['QUERY_STRING']                   # parse query
+      host = query['host']|| env['HTTP_HOST']|| 'localhost' # find hostname
       rawpath = env['REQUEST_PATH'].force_encoding('UTF-8').gsub /[\/]+/, '/' # collapse consecutive slashes
-      path  = Pathname.new(rawpath).expand_path.to_s # evaluate path-expression
-      path += '/' if path[-1] != '/' && rawpath[-1] == '/' # trailing-slash preservation
-      env[:Response] = {}; env[:links] = {} # response-header storage
-      resource = ('//' + host + path).R env # bind resource and environment
-      resource.send(method).do{|status,head,body| # dispatch request
+      path  = Pathname.new(rawpath).expand_path.to_s        # evaluate path-expression
+      path += '/' if path[-1] != '/' && rawpath[-1] == '/'  # trailing-slash preservation
+      env[:Response] = {}; env[:links] = {}                 # response-header storage
+      resource = ('//' + host + path).R env                 # bind resource and environment
+      resource.send(method).do{|status,head,body|           # dispatch request
         # log response
         color = (if resource.env[:deny]
                  '31'
@@ -40,6 +40,7 @@ class WebResource
              referrer + "\e[" + color + ";7mhttps://" +
              host + "\e[0m\e[" + color + "m" + path + resource.qs + "\e[0m" +
              location
+
         # response
         [status, head, body]}
     rescue Exception => x
