@@ -14,9 +14,10 @@ class WebResource
       rawpath = env['REQUEST_PATH'].force_encoding('UTF-8').gsub /[\/]+/, '/' # collapse consecutive slashes
       path  = Pathname.new(rawpath).expand_path.to_s # evaluate path-expression
       path += '/' if path[-1] != '/' && rawpath[-1] == '/' # trailing-slash preservation
+      env[:Response] = {}; env[:links] = {} # response-header storage
       resource = ('//' + host + path).R env # bind resource and environment
       resource.send(method).do{|status,head,body| # dispatch request
-        # log request
+        # log response
         color = (if resource.env[:deny]
                  '31'
                 elsif method=='POST'
@@ -39,9 +40,8 @@ class WebResource
              referrer + "\e[" + color + ";7mhttps://" +
              host + "\e[0m\e[" + color + "m" + path + resource.qs + "\e[0m" +
              location
-
-        [status, head, body]
-      }
+        # response
+        [status, head, body]}
     rescue Exception => x
       [500, {'Content-Type'=>'text/plain'}, method=='HEAD' ? [] : [[x.class,x.message,x.backtrace].join("\n")]]
     end
@@ -138,10 +138,8 @@ class WebResource
     alias_method :env, :environment
 
     def GET
-      @r[:Response] = {} # response headers
-      @r[:links] = {}    # graph-level references
-      return PathGET[path][self] if PathGET[path] # dispatch to lambda binding (path name)
-      return HostGET[host][self] if HostGET[host] # dispatch to lambda binding (host name)
+      return PathGET[path][self] if PathGET[path] # path-lambda binding
+      return HostGET[host][self] if HostGET[host] # host-lambda binding
       return case env['HTTP_TYPE'] # type-tagged requests
              when /AMP/
                amp
@@ -158,12 +156,12 @@ class WebResource
              else
                deny
              end if env.has_key? 'HTTP_TYPE'
-      return chronoDir if chronoDir? # current time-slice redirect
+      return chronoDir if chronoDir?    # goto time-slice
       return fileResponse if node.file? # static data
       if localResource?
-        graphResponse localNodes
+        graphResponse localNodes # local resource
       else
-        remoteNode
+        remoteNode               # remote resource
       end
     end
 
@@ -176,7 +174,7 @@ class WebResource
     InternalHeaders = %w{accept-encoding feedurl links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri response script-name server-name server-port server-protocol server-software track unicorn.socket upgrade-insecure-requests version via x-forwarded-for}
 
     def localResource?
-      !q.has_key?('host') && %w{l [::1] 127.0.0.1 localhost}.member?(@r['SERVER_NAME'])
+      %w{l [::1] 127.0.0.1 localhost}.member? @r['SERVER_NAME']
     end
 
     Methods = %w{GET HEAD OPTIONS PUT POST}
