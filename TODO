@@ -6,7 +6,6 @@ json-schema parsers
 index backlinks at storage time
 troff triplr - .1, .2, (sslsplit docs)
 link Search host-specific remote origins - !tw  URL mapping etc
-directory-index lightweight-summary when trailing-slash is missing, relURI rewrite
 use shortURL-mapping DB to deobfuscate at presentation and storage time
 mp3 image extract
 delete <noscript> , lots of invisible pages
@@ -19,7 +18,6 @@ radio.ttl
 pseudofeed from frontpage when can't be found  http://www.mysouthend.com/
 killfiles (incl message hashes e.g automod Globe warning)
 next-prev links for non-HTML (RSS ) when Nextt/Prev isn't in feed or HTTP header , requiring request to htML page. (URi arithmetic bypass optimization also)
-limit chronodir to localhost
 log getFeed errors
 catch 404 in remoteNode
 ##

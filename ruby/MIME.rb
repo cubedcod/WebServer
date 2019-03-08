@@ -49,7 +49,6 @@ class WebResource
       'ino' => 'application/ino',
       'lisp' => 'text/x-lisp',
       'list' => 'text/plain',
-      'log' => 'text/chatlog',
       'mbox' => 'application/mbox',
       'md' => 'text/markdown',
       'msg' => 'message/rfc822',

@@ -87,9 +87,8 @@ class WebResource
                              link[:down,'&#9660;']]}]}]
     end
 
-    Markup[Date] = -> date,env=nil {
-      {_: :a, class: :date,
-       href: 'http://localhost/' + date[0..13].gsub(/[-T:]/,'/'), c: date}}
+    Markup[Date] = -> date, env=nil {
+      {_: :a, class: :date, href: (env && %w{l localhost}.member?(env['SERVER_NAME']) && '/' || 'http://localhost:8000/') + date[0..13].gsub(/[-T:]/,'/'), c: date}}
 
     Markup[Type] = -> t,env=nil {
       if t.respond_to? :uri
