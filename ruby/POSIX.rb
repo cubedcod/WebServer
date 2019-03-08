@@ -134,13 +134,13 @@ class WebResource
       mtime.do{|mt|
         yield s, Mtime, mt.to_i; yield s, Date, mt.iso8601}
 
-      files, dirs = nodes.partition &:directory?
+      dirs, files = nodes.partition &:directory?
 
       # triples about contents
       load(files).map{|s,r|
         r.map{|p,objs|
           objs.justArray.map{|o|
-            yield s, p, o unless p == Content
+            yield s, p, o unless [Content,'uri'].member? p
           }}}
     end
 
