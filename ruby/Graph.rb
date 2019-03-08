@@ -68,31 +68,28 @@ class WebResource
       isRDF ? self : rdfize
     end
 
-    # turn non-RDF into JSON subset of RDF with defined RDF::Reader for parsing to RDF
     # file -> file
-    def rdfize
+    def rdfize # call triplr function mapped to MIME, cache JSON transcode and return file-ref to it
       return self if ext == 'e'
       hash = node.stat.ino.to_s.sha2
-      doc = ('/cache/RDF/'+hash[0..2]+'/'+hash[3..-1]+'.e').R
-      unless doc.e && doc.m > m
-        tree = {}
-        # triplr takes file reference, yields triples
-        triplr = Triplr[mime]
-
-        unless triplr
-          puts "#{uri}: triplr for #{mime} missing"
-          triplr = :triplrFile
-        end
-
-        send(*triplr){|s,p,o|
-          tree[s] ||= {'uri' => s}
-          tree[s][p] ||= []
-          tree[s][p].push o}
-
-        doc.writeFile tree.to_json
+      doc = ('/cache/RDF/' + hash[0..2] + '/' + hash[3..-1] + '.e').R
+      return doc if doc.e && doc.m > m # cache up-to-date
+      graph = {}
+      # look up triple-producer function
+      triplr = Triplr[mime]
+      unless triplr
+        puts "#{uri}: triplr for #{mime} missing"
+        triplr = :triplrFile
       end
-      doc
+      # request triples
+      send(*triplr){|s,p,o|
+        graph[s]    ||= {'uri' => s}
+        graph[s][p] ||= []
+        graph[s][p].push o}
+      # update cache
+      doc.writeFile graph.to_json
     end
+
   end
   module HTTP
 
