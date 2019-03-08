@@ -115,8 +115,10 @@ class WebResource
     def triplrFile
       s = path
       yield s, Title, basename
-      #size.do{|sz| yield s, Size, sz}
-      #mtime.do{|mt| yield s, Mtime, mt.to_i; yield s, Date, mt.iso8601}
+      size.do{|sz|
+        yield s, Size, sz}
+      mtime.do{|mt|
+        yield s, Mtime, mt.to_i; yield s, Date, mt.iso8601}
     end
 
     # directory -> RDF
@@ -125,8 +127,10 @@ class WebResource
       s = s + '/' unless s[-1] == '/'
       yield s, Type, Container.R
       yield s, Title, basename
-      #yield s, Size, children.size
-      #mtime.do{|mt| yield s, Mtime, mt.to_i; yield s, Date, mt.iso8601}
+      nodes = children
+      yield s, Size, nodes.size
+      mtime.do{|mt|
+        yield s, Mtime, mt.to_i; yield s, Date, mt.iso8601}
     end
 
   end
