@@ -161,7 +161,7 @@ class WebResource
             htmlDocument load set
           elsif format == 'application/atom+xml'
             renderFeed load set
-          else # RDF
+          else # RDF format
             g = RDF::Graph.new
             set.map{|n| g.load n.toRDF.localPath, :base_uri => n.stripDoc }
             g.dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true
@@ -175,7 +175,7 @@ class WebResource
   end
   module HTML
 
-    # group stuff at /
+    # group stuff under /
     Group['topdir'] = -> graph {
       containers = {}
       graph.values.map{|resource|

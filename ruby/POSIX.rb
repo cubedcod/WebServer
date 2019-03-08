@@ -125,12 +125,23 @@ class WebResource
     def triplrContainer
       s = path
       s = s + '/' unless s[-1] == '/'
+
+      # triples about container
       yield s, Type, Container.R
       yield s, Title, basename
       nodes = children
       yield s, Size, nodes.size
       mtime.do{|mt|
         yield s, Mtime, mt.to_i; yield s, Date, mt.iso8601}
+
+      files, dirs = nodes.partition &:directory?
+
+      # triples about contents
+      load(files).map{|s,r|
+        r.map{|p,objs|
+          objs.justArray.map{|o|
+            yield s, p, o unless p == Content
+          }}}
     end
 
   end
