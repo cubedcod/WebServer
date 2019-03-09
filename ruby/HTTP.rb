@@ -107,12 +107,14 @@ class WebResource
                amp
              when /feed/
                remoteNode
-             when /hosted/
+             when /hosted/ # host in hosts-list. allow if dir exists, block if not
                if ('/' + host).R.exist?
                  remoteNode
                else
                  deny
                end
+             when /CDN/ # vast pools of unaudited JS. allow non-executable assets
+               noJS
              when /short/
                cachedRedirect
              else
@@ -140,6 +142,14 @@ class WebResource
     end
 
     Methods = %w{GET HEAD OPTIONS PUT POST}
+
+    def noJS
+      if %w{jpg jpeg ogg m4a mp3 mp4 png webm webp}.member? ext.downcase
+        remoteNode
+      else
+        deny
+      end
+    end
 
     def notfound
       dateMeta # page hints as something nearby may exist
