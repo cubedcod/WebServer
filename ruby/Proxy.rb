@@ -198,6 +198,7 @@ class WebResource
     }
 
     # Google
+    PathGET['/generate_204'] = -> _ {Response_204}
     %w{mail news}.map{|_| "//#{_}.google.com".R.HTTPthru}
     %w{feedproxy.google.com gmail.com google.com}.map{|h| HostGET[h] = -> r {r.cachedRedirect}}
     HostGET['www.google.com'] = -> r {
