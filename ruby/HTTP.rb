@@ -35,11 +35,9 @@ class WebResource
                      ''
                    end
         location = head['Location'] ? (" -> " + head['Location']) : ""
-        puts "\e[7m" + (method == 'GET' ? ' ' : '') + method + "\e[" +
-             color + "m "  + status.to_s + "\e[0m " +
-             referrer + "\e[" + color + ";7mhttps://" +
-             host + "\e[0m\e[" + color + "m" + path + resource.qs + "\e[0m" +
-             location
+        puts "\e[7m" + (method == 'GET' ? ' ' : '') + method + "\e[" + color + "m "  + status.to_s + "\e[0m " +
+             referrer + (env['HTTP_TYPE'] || '') + ' ' + "\e[" + color + ";7mhttps://" +
+             host + "\e[0m\e[" + color + "m" + path + resource.qs + "\e[0m" + location
 
         # response
         [status, head, body]}
@@ -102,22 +100,22 @@ class WebResource
     def GET
       return PathGET[path][self] if PathGET[path] # path-lambda binding
       return HostGET[host][self] if HostGET[host] # host-lambda binding
-      return case env['HTTP_TYPE'] # type-tagged requests
-             when /AMP/
+      return case env['HTTP_TYPE'] # type-tag
+             when /AMP/ # redirect to canonical page
                amp
-             when /feed/
+             when /CDN/ # static content
+               noJS
+             when /feed/ # Feed URL
                remoteNode
-             when /hosted/ # host in hosts-list. allow if dir exists, block if not
+             when /hosted/ # host-list match. cache if host-dir exists
                if ('/' + host).R.exist?
                  remoteNode
                else
                  deny
                end
-             when /CDN/ # vast pools of unaudited JS. allow non-executable assets
-               noJS
-             when /short/
+             when /short/ # shortened URL
                cachedRedirect
-             else
+             else # undefined type-tags
                deny
              end if env.has_key? 'HTTP_TYPE'
       return chronoDir if chronoDir?    # goto time-slice
