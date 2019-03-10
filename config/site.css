@@ -23,6 +23,7 @@ img, video {max-width: 100%}
 img.thumb {max-width: 28em}
 pre {white-space: pre-wrap}
 a.title, a.link, div.thumb, tr[name="content"] > td.v a:visited {background-color: #fff; color: #000}
+tr[name="content"] > td.v a {border-width: 0 0 .08em 0; border-style: dotted; border-color: #ddd}
 #up, #down, #prev, #next, body, pre, p, span, tr[name="content"] > td.v, tr[name="content"] > td.v a, td.k > a {background-color: #000; color: #fff}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
 * {vertical-align: top}
