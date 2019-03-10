@@ -140,7 +140,7 @@ class WebResource
     }
 
     # formats without rewriting or protocol-level compression
-    NoTransform = /^(application\/(font|javascript|json|octet-stream|pdf|vnd.google.octet-stream-compressible|(x-)?protobuf(fer)?)|audio|font|image|text\/(css|javascript)|video)/
+    NoTransform = /^(application\/(font|javascript|json|octet-stream|pdf|vnd|(x-)?protobuf(fer)?)|audio|font|image|text\/(css|javascript)|video)/
 
     TriplrHTML = {
       'twitter.com' => :triplrTweets,

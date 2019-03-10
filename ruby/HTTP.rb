@@ -45,6 +45,14 @@ class WebResource
       [500, {'Content-Type'=>'text/plain'}, method=='HEAD' ? [] : [[x.class,x.message,x.backtrace].join("\n")]]
     end
 
+    def cdn
+      if %w{jpg jpeg ogg m3u8 m4a mp3 mp4 png ts webm webp}.member? ext.downcase
+        remoteNode
+      else
+        deny
+      end
+    end
+
     def chronoDir?
       (parts[0]||'').match /^(y(ear)?|m(onth)?|d(ay)?|h(our)?)$/i
     end
@@ -104,10 +112,10 @@ class WebResource
              when /AMP/ # redirect to canonical page
                amp
              when /CDN/ # static content
-               noJS
+               cdn
              when /feed/ # Feed URL
                remoteNode
-             when /hosted/ # host-list match. cache if host-dir exists
+             when /hosted/ # serve if host-dir exists
                if ('/' + host).R.exist?
                  remoteNode
                else
@@ -140,14 +148,6 @@ class WebResource
     end
 
     Methods = %w{GET HEAD OPTIONS PUT POST}
-
-    def noJS
-      if %w{jpg jpeg ogg m4a mp3 mp4 png webm webp}.member? ext.downcase
-        remoteNode
-      else
-        deny
-      end
-    end
 
     def notfound
       dateMeta # page hints as something nearby may exist
