@@ -205,12 +205,12 @@ class WebResource
       case r.parts[0]
       when /^(amp|gmail)$/
         r.cachedRedirect
-      when 'complete'
-        r.deny
+      when /^(maps|search)$/
+        r.remoteNode
       when 'url'
         [302, {'Location' => ( r.q['q'] || r.q['url'] )}, []]
       else
-        r.remoteNode
+        r.deny
       end}
 
     # IG
