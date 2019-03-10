@@ -250,7 +250,7 @@ class WebResource
             RDF::Writer.open(doc.localPath){|f|
               f << graph}
             newResources << doc
-            puts  "\e[32;7mhttp://localhost" + doc.stripDoc +  "\e[0m"
+            puts  "\e[32;7mhttp://localhost:8000" + doc.stripDoc +  "\e[0m"
           end
           true}}
 

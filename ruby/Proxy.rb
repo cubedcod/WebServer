@@ -150,9 +150,9 @@ class WebResource
         else
           r.remoteNode
         end
-      } || [200, {'Content-Type' => 'text/html'}, ['<form method="GET"><input name="url" autofocus></form>']] }
+      } || [200, {'Content-Type' => 'text/html'}, ['<form method="GET"><input name="url" autofocus></form>']]}
 
-    PathGET['/generate_204'] = -> _ {Response_204}
+    PathGET['/music'] = -> r {[302,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'},[]]}
 
     # Discourse
     PathGET['/clicks/track'] = -> r {[302,{'Location' => r.q['url']},[]]}
