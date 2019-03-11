@@ -205,8 +205,8 @@ class WebResource
         zuck.deny
       else
         zuck.remoteNode
-      end
-    }
+      end}
+    PathGET['/safe_image.php'] = -> r {[302,{'Location' => r.q['url']},[]]}
 
     # Google
     %w{mail news}.map{|_|
