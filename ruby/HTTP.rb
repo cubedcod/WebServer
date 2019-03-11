@@ -106,16 +106,19 @@ class WebResource
     alias_method :env, :environment
 
     def GET
-      return PathGET[path][self] if PathGET[path] # path-lambda binding
-      return HostGET[host][self] if HostGET[host] # host-lambda binding
-      return case env['HTTP_TYPE'] # type-tag
+      # path-lambda binding
+      return PathGET[path][self] if PathGET[path]
+      # host-lambda binding
+      return HostGET[host][self] if HostGET[host]
+      # type-tagged request
+      return case env['HTTP_TYPE']
              when /AMP/ # redirect to canonical page
                amp
-             when /CDN/ # static content
+             when /CDN/ # static cache
                cdn
              when /feed/ # Feed URL
                remoteNode
-             when /hosted/ # serve if host-dir exists
+             when /listed/ # serve host-directory
                if ('/' + host).R.exist?
                  remoteNode
                else
@@ -129,9 +132,10 @@ class WebResource
       return chronoDir if chronoDir?    # goto time-slice
       return fileResponse if node.file? # static data
       if localResource?
-        graphResponse localNodes # local resource
+        # local node
+        graphResponse localNodes
       else
-        remoteNode               # remote resource
+        remoteNode
       end
     end
 

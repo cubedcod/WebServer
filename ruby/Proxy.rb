@@ -79,7 +79,7 @@ class WebResource
             unless cache.e && cache.readFile == resp
               cache.writeFile resp # cache body
               mime = response.meta['content-type'].do{|type| type.split(';')[0] } || ''
-              cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # out-of-band metadata-file
+              cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # out-of-band storage of file metadata (TODO POSIX-eattrs)
               # index content
               updates.concat(case mime
                              when /^(application|text)\/(atom|rss|xml)/
@@ -152,6 +152,8 @@ class WebResource
         end
       } || [200, {'Content-Type' => 'text/html'}, ['<form method="GET"><input name="url" autofocus></form>']]}
 
+    PathGET['/generate_204'] = -> _ {Response_204}
+
     PathGET['/music'] = -> r {[302,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'},[]]}
 
     # Discourse
@@ -197,10 +199,22 @@ class WebResource
       end
     }
 
+    # Facebook
+    HostGET['www.facebook.com'] = -> zuck {
+      if zuck.ext == 'php'
+        zuck.deny
+      else
+        zuck.remoteNode
+      end
+    }
+
     # Google
-    PathGET['/generate_204'] = -> _ {Response_204}
-    %w{mail news}.map{|_| "//#{_}.google.com".R.HTTPthru}
-    %w{feedproxy.google.com gmail.com google.com}.map{|h| HostGET[h] = -> r {r.cachedRedirect}}
+    %w{mail news}.map{|_|
+      "//#{_}.google.com".R.HTTPthru}
+
+    %w{feedproxy.google.com gmail.com google.com}.map{|h|
+      HostGET[h] = -> r {r.cachedRedirect}}
+
     HostGET['www.google.com'] = -> r {
       case r.parts[0]
       when /^(amp|gmail)$/
@@ -210,13 +224,12 @@ class WebResource
       when 'url'
         [302, {'Location' => ( r.q['q'] || r.q['url'] )}, []]
       else
-        r.deny
+        r.cdn
       end}
 
     # IG
     HostGET['instagram.com'] = -> r {[302, {'Location' =>  "https://www.instagram.com" + r.path},[]]}
     HostGET['l.instagram.com'] = -> r {[302,{'Location' => r.q['u']},[]]}
-    HostGET['www.instagram.com'] = -> r {r.remoteNode}
 
     # Imgur
     HostGET['imgur.com'] = HostGET['i.imgur.com'] = -> re {
@@ -231,17 +244,10 @@ class WebResource
       end}
 
     # Mixcloud
-    HostPOST['www.mixcloud.com'] = -> r {
-      r.path == '/graphql' ? r.POSTthru : r.trackPOST
-    }
+    HostPOST['www.mixcloud.com'] = -> r {r.path == '/graphql' ? r.POSTthru : r.trackPOST}
 
     # Mozilla
-    HostGET['detectportal.firefox.com'] = -> r {
-      if r.path == '/success.txt'
-        [200, {'Content-Type' => 'text/plain'},["success\n"]]
-      else
-        r.deny
-      end}
+    HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # Reddit
     HostGET['i.reddit.com'] = HostGET['np.reddit.com'] = HostGET['reddit.com'] = -> re {[302,{'Location' => 'https://www.reddit.com' + re.path + re.qs},[]]}
@@ -250,6 +256,9 @@ class WebResource
     HostGET['exit.sc'] = -> r {[302,{'Location' => r.q['url']},[]]}
 
     # YouTube
+    '//accounts.youtube.com'.R.HTTPthru
+    HostGET['youtube.com'] = HostGET['m.youtube.com'] = -> r {[302, {'Location' =>  "https://www.youtube.com" + r.path + r.qs},[]]}
+    HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[302,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
       if !mode
@@ -263,9 +272,6 @@ class WebResource
       else
         r.deny
       end}
-    HostGET['youtube.com'] = HostGET['m.youtube.com'] = -> r {[302, {'Location' =>  "https://www.youtube.com" + r.path + r.qs},[]]}
-    HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[302,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
-    '//accounts.youtube.com'.R.HTTPthru
 
     # T-Mobile
     HostGET['lookup.t-mobile.com'] = -> re {[200, {'Content-Type' => 'text/html'}, [re.htmlDocument({re.uri => {'dest' => re.q['origurl'].R}})]]}
@@ -274,13 +280,12 @@ class WebResource
     HostGET['mobile.twitter.com'] = HostGET['www.twitter.com'] = -> r {[302, {'Location' =>  "https://twitter.com" + r.path},[]]}
     HostGET['twitter.com'] = -> re {
       if re.path == '/'
-        graph = {Twitter => {'uri' => Twitter,
-                             Link => []}}
+        graph = {Twitter => {'uri' => Twitter, Link => []}}
 
         '/twitter'.R.lines.shuffle.each_slice(16){|s|
           graph[Twitter][Link].push (Twitter+'/search?f=tweets&vertical=default&q=' + s.map{|u| 'from:' + u.chomp}.intersperse('+OR+').join).R}
 
-        [200,{'Content-Type' => 'text/html'},[re.htmlDocument(graph)]]
+        [200, {'Content-Type' => 'text/html'}, [re.htmlDocument(graph)]]
       else
         re.remoteNode
       end}
