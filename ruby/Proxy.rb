@@ -243,6 +243,14 @@ class WebResource
         UnwrapImage[re]
       end}
 
+    # Medium
+    HostGET['medium.com'] = -> r {
+      if %w{_ p}.member? r.parts[0]
+        r.deny
+      else
+        r.remoteNode
+      end}
+
     # Mixcloud
     HostPOST['www.mixcloud.com'] = -> r {r.path == '/graphql' ? r.POSTthru : r.trackPOST}
 

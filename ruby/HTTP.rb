@@ -160,6 +160,7 @@ class WebResource
 
     def OPTIONS
       return HostOPTIONS[host][self] if HostOPTIONS[host]
+      print_header
       [202,{},[]]
     end
 
