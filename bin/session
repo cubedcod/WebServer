@@ -1,9 +1,8 @@
 #!/bin/sh
-this=WebServer
-base=$(realpath ~/src/$this)
-uid=$(id -u)
-su -c "sh $base/bin/net $uid"
+base=$(realpath ~/src/WebServer)
+user=$(id -u)
+su -c "sh $base/bin/net $user"
 mkdir -p log
 squid -f $base/config/squid.conf
-unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 $base/config/$this.ru &
+unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 $base/config/daemon.ru &
 $base/bin/log
