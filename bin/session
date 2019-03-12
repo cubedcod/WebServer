@@ -1,7 +1,9 @@
 #!/bin/sh
-base=$(realpath ~/src/WebServer)
 user=$(id -u)
-su -c "sh $base/bin/net $user"                                      # network
-mkdir -p log; squid -f $base/config/squid.conf                      # request router
-unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 $base/config/daemon.ru & # local server
-$base/bin/log                                                       # log viewer
+base=$(realpath ~/src/WebServer)
+bin=$base/bin
+config=$base/config
+su -c "sh $bin/net $user"                                      # network
+mkdir -p log; squid -f $config/squid.conf                      # request router
+unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 $config/daemon.ru & # local server
+$bin/log                                                       # log viewer
