@@ -1,7 +1,7 @@
 class WebResource
   module HTTP
     def amp
-      [302, {'Location' => 'https://' + (host.split('.') - %w{amp}).join('.') + (path.split('/') - %w{amp amphtml}).join('/')}, []]
+      [301, {'Location' => 'https://' + (host.split('.') - %w{amp}).join('.') + (path.split('/') - %w{amp amphtml}).join('/')}, []]
     end
 
     def HTTPthru
@@ -152,21 +152,21 @@ class WebResource
 
     PathGET['/generate_204'] = -> _ {Response_204}
 
-    PathGET['/music'] = -> r {[302,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'},[]]}
+    PathGET['/music'] = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'},[]]}
 
     # Discourse
-    PathGET['/clicks/track'] = -> r {[302,{'Location' => r.q['url']},[]]}
+    PathGET['/clicks/track'] = -> r {[301,{'Location' => r.q['url']},[]]}
 
     # DuckDuckGo
     ['',0,1,2,3,4].map{|n|
       HostGET['proxy'+n.to_s+'.duckduckgo.com'] = -> re {
         case re.parts[0]
         when 'iu'
-          [302,{'Location' => re.q['u'],
+          [301,{'Location' => re.q['u'],
                 'Access-Control-Allow-Origin' => '*'
                },[]]
         when 'iur'
-          [302,{'Location' => re.q['image_host']},[]]
+          [301,{'Location' => re.q['image_host']},[]]
         when 'ip3'
           re.ext == 'ico' ? re.favicon : re.notfound
         when 'mapboxapi'
@@ -182,7 +182,7 @@ class WebResource
     # eBay
     HostGET['rover.ebay.com'] = -> r {
       if r.parts[0] == 'rover'
-        [302, {'Location' => r.q['mpre']}, []]
+        [301, {'Location' => r.q['mpre']}, []]
       else
         r.deny
       end
@@ -191,7 +191,7 @@ class WebResource
     # Embedly
     HostGET['i.embed.ly'] = -> r {
       if r.path == '/1/display/resize'
-        [302, {'Location' => r.q['url']}, []]
+        [301, {'Location' => r.q['url']}, []]
       else
         r.deny
       end
@@ -204,7 +204,7 @@ class WebResource
       else
         zuck.remoteNode
       end}
-    PathGET['/safe_image.php'] = -> r {[302,{'Location' => r.q['url']},[]]}
+    PathGET['/safe_image.php'] = -> r {[301,{'Location' => r.q['url']},[]]}
 
     # Google
     %w{mail news}.map{|_|
@@ -220,14 +220,14 @@ class WebResource
       when /^(maps|search)$/
         r.remoteNode
       when 'url'
-        [302, {'Location' => ( r.q['q'] || r.q['url'] )}, []]
+        [301, {'Location' => ( r.q['q'] || r.q['url'] )}, []]
       else
         r.cdn
       end}
 
     # IG
-    HostGET['instagram.com'] = -> r {[302, {'Location' =>  "https://www.instagram.com" + r.path},[]]}
-    HostGET['l.instagram.com'] = -> r {[302,{'Location' => r.q['u']},[]]}
+    HostGET['instagram.com'] = -> r {[301, {'Location' =>  "https://www.instagram.com" + r.path},[]]}
+    HostGET['l.instagram.com'] = -> r {[301,{'Location' => r.q['u']},[]]}
 
     # Imgur
     HostGET['imgur.com'] = HostGET['i.imgur.com'] = -> re {
@@ -245,6 +245,8 @@ class WebResource
     HostGET['medium.com'] = -> r {
       if %w{_ p}.member? r.parts[0]
         r.deny
+      elsif r.path == '/m/global-identity'
+        [301, {'Location' => r.q['redirecturl']}, []]
       else
         r.remoteNode
       end}
@@ -256,15 +258,15 @@ class WebResource
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # Reddit
-    HostGET['i.reddit.com'] = HostGET['np.reddit.com'] = HostGET['reddit.com'] = -> re {[302,{'Location' => 'https://www.reddit.com' + re.path + re.qs},[]]}
+    HostGET['i.reddit.com'] = HostGET['np.reddit.com'] = HostGET['reddit.com'] = -> re {[301,{'Location' => 'https://www.reddit.com' + re.path + re.qs},[]]}
 
     # Soundcloud
-    HostGET['exit.sc'] = -> r {[302,{'Location' => r.q['url']},[]]}
+    HostGET['exit.sc'] = -> r {[301, {'Location' => r.q['url']},[]]}
 
     # YouTube
     '//accounts.youtube.com'.R.HTTPthru
-    HostGET['youtube.com'] = HostGET['m.youtube.com'] = -> r {[302, {'Location' =>  "https://www.youtube.com" + r.path + r.qs},[]]}
-    HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[302,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
+    HostGET['youtube.com'] = HostGET['m.youtube.com'] = -> r {[301, {'Location' =>  "https://www.youtube.com" + r.path + r.qs},[]]}
+    HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
       if !mode
@@ -272,7 +274,7 @@ class WebResource
       elsif %w{browse_ajax c channel embed feed get_video_info heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member? mode
         r.remoteNode
       elsif mode == 'redirect'
-        [302, {'Location' =>  r.q['q']},[]]
+        [301, {'Location' =>  r.q['q']},[]]
       elsif mode.match? /204$/
         Response_204
       else
@@ -283,7 +285,7 @@ class WebResource
     HostGET['lookup.t-mobile.com'] = -> re {[200, {'Content-Type' => 'text/html'}, [re.htmlDocument({re.uri => {'dest' => re.q['origurl'].R}})]]}
 
     # Twitter
-    HostGET['mobile.twitter.com'] = HostGET['www.twitter.com'] = -> r {[302, {'Location' =>  "https://twitter.com" + r.path},[]]}
+    HostGET['mobile.twitter.com'] = HostGET['www.twitter.com'] = -> r {[301, {'Location' =>  "https://twitter.com" + r.path},[]]}
     HostGET['twitter.com'] = -> re {
       if re.path == '/'
         graph = {Twitter => {'uri' => Twitter, Link => []}}
