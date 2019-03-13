@@ -56,7 +56,6 @@ class WebResource
       queryHash = q
       queryHash.delete 'host'
       queryString = queryHash.empty? ? '' : (HTTP.qs queryHash)
-      # origin URI
       urlHTTPS = scheme && scheme=='https' && uri || ('https://' + host + portNum + path + formatSuffix + queryString)
       urlHTTP  = 'http://'  + host + portNum + (path||'/') + formatSuffix + queryString
       cache = cacheFile
@@ -66,7 +65,6 @@ class WebResource
       updates = []
       update = -> url {
         begin # block to catch 304-response "error"
-#          puts "fetch #{url}"
           open(url, head) do |response| # response
 
             if @r # HTTP-request calling context - preserve origin bits
