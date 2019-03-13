@@ -8,5 +8,5 @@ cd ruby && bundle install
 ### RUN
 ``` sh
 mkdir ~/web ; cd ~/web
-~/src/WebServer/bin/daemon
+~/src/WebServer/bin/session
 ```

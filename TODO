@@ -9,6 +9,7 @@ mp3 image extract
 delete <noscript> 
 xhr link inliner - nowrapper docs, onlynew updates (twitter frontpage support)
 visual indicator of cache-hit
+improve S/N on new-tracker discovery - omit highlighting hosts explicitly browsed to - which appear in browser history.SQLite
 Tweet-video triplr
 reddit-video triplr
 imgur video https://i.imgur.com/JuDZN0w.gifv
