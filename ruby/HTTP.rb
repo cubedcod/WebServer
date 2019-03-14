@@ -45,14 +45,6 @@ class WebResource
       [500, {'Content-Type'=>'text/plain'}, method=='HEAD' ? [] : [[x.class,x.message,x.backtrace].join("\n")]]
     end
 
-    def cdn
-      if %w{css html jpg jpeg ogg m3u8 m4a mp3 mp4 png svg ts webm webp}.member? ext.downcase
-        remoteNode
-      else
-        deny
-      end
-    end
-
     def chronoDir?
       (parts[0]||'').match /^(y(ear)?|m(onth)?|d(ay)?|h(our)?)$/i
     end

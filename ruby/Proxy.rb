@@ -4,6 +4,14 @@ class WebResource
       [301, {'Location' => 'https://' + (host.split('.') - %w{amp}).join('.') + (path.split('/') - %w{amp amphtml}).join('/')}, []]
     end
 
+    def cdn
+      if %w{css html jpg jpeg ogg m3u8 m4a mp3 mp4 png svg ts webm webp}.member? ext.downcase
+        remoteNode
+      else
+        deny
+      end
+    end
+
     def HTTPthru
       HostGET[host] = -> r {r.GETthru}
      HostPOST[host] = -> r {r.POSTthru}
