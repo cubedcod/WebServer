@@ -46,7 +46,7 @@ class WebResource
     end
 
     def cdn
-      if %w{html jpg jpeg ogg m3u8 m4a mp3 mp4 png svg ts webm webp}.member? ext.downcase
+      if %w{css html jpg jpeg ogg m3u8 m4a mp3 mp4 png svg ts webm webp}.member? ext.downcase
         remoteNode
       else
         deny
