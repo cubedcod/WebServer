@@ -236,11 +236,6 @@ class WebResource
 
     Response_204 = [204, {'Content-Length' => 0}, []]
 
-    def trackPOST
-      env[:deny] = true
-      [202,{},[]]
-    end
-
     def self.unmangle env
       head = {}
       env.map{|k,v|

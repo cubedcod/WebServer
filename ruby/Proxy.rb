@@ -146,6 +146,11 @@ class WebResource
     end
     alias_method :GETthru, :remoteNode
 
+    def trackPOST
+      env[:deny] = true
+      [202,{},[]]
+    end
+
     PathGET['/cache'] = -> cache {
       cache.q['url'].do{|url|
         r = url.R cache.env
