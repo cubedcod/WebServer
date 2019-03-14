@@ -41,7 +41,7 @@ class WebResource
             unless cache.e && cache.readFile == resp
               cache.writeFile resp # cache body
               mime = response.meta['content-type'].do{|type| type.split(';')[0] } || ''
-              cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # out-of-band storage of file metadata (TODO POSIX-eattrs)
+              cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # file metadata (TODO POSIX-eattrs for MIME)
               # index content
               updates.concat(case mime
                              when /^(application|text)\/(atom|rss|xml)/
