@@ -12,51 +12,7 @@ class WebResource
       end
     end
 
-    def HTTPthru
-      HostGET[host] = -> r {r.GETthru}
-     HostPOST[host] = -> r {r.POSTthru}
-  HostOPTIONS[host] = -> r {r.OPTIONSthru}
-    end
-
-    def OPTIONSthru
-      verbose = false
-
-      # request
-      url = 'https://' + host + path + qs
-      headers = HTTP.unmangle env
-      body = env['rack.input'].read
-      HTTP.print_header headers if verbose
-      HTTP.print_body body, headers['Content-Type'] if verbose
-
-      # response
-      r = HTTParty.options url, :headers => headers, :body => body
-      s = r.code
-      h = r.headers
-      b = r.body
-      HTTP.print_header h if verbose
-      HTTP.print_body b, h['Content-Type'] if verbose
-      [s, h, [b]]
-    end
-
-    def POSTthru
-      # request
-      url = 'https://' + host + path + qs
-      headers = HTTP.unmangle env
-      body = env['rack.input'].read
-      #HTTP.print_header headers
-      #HTTP.print_body body, headers['Content-Type']
-
-      # response
-      r = HTTParty.post url, :headers => headers, :body => body
-      s = r.code
-      h = r.headers
-      b = r.body
-      #HTTP.print_header h
-      #HTTP.print_body b, h['Content-Type']
-      [s, h, [b]]
-    end
-
-    def remoteNode
+    def GETthru
       head = HTTP.unmangle env
       head.delete 'Host'
       formatSuffix = (host.match?(/reddit.com$/) && !parts.member?('w')) ? '.rss' : ''
@@ -144,7 +100,51 @@ class WebResource
                                                 (CGI.escapeHTML e.io.read.to_utf8)] if e.respond_to? :io) # response body
                                               ]}})]] : self
     end
-    alias_method :GETthru, :remoteNode
+    alias_method :remoteNode, :GETthru
+
+    def HTTPthru
+      HostGET[host] = -> r {r.GETthru}
+     HostPOST[host] = -> r {r.POSTthru}
+  HostOPTIONS[host] = -> r {r.OPTIONSthru}
+    end
+
+    def OPTIONSthru
+      verbose = false
+
+      # request
+      url = 'https://' + host + path + qs
+      headers = HTTP.unmangle env
+      body = env['rack.input'].read
+      HTTP.print_header headers if verbose
+      HTTP.print_body body, headers['Content-Type'] if verbose
+
+      # response
+      r = HTTParty.options url, :headers => headers, :body => body
+      s = r.code
+      h = r.headers
+      b = r.body
+      HTTP.print_header h if verbose
+      HTTP.print_body b, h['Content-Type'] if verbose
+      [s, h, [b]]
+    end
+
+    def POSTthru
+      # request
+      url = 'https://' + host + path + qs
+      headers = HTTP.unmangle env
+      body = env['rack.input'].read
+      #HTTP.print_header headers
+      #HTTP.print_body body, headers['Content-Type']
+
+      # response
+      r = HTTParty.post url, :headers => headers, :body => body
+      s = r.code
+      h = r.headers
+      b = r.body
+      #HTTP.print_header h
+      #HTTP.print_body b, h['Content-Type']
+      [s, h, [b]]
+    end
 
     def trackPOST
       env[:deny] = true
