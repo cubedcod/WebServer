@@ -5,7 +5,7 @@ class WebResource
     end
 
     def cdn
-      if %w{css html jpg jpg:large jpeg ogg m3u8 m4a mp3 mp4 png svg ts webm webp}.member? ext.downcase
+      if %w{css html jpg jpg:large jpeg ogg m3u8 m4a mp3 mp4 pdf png svg ts webm webp}.member? ext.downcase
         remoteNode
       else
         deny
@@ -218,6 +218,15 @@ class WebResource
         zuck.remoteNode
       end}
     PathGET['/safe_image.php'] = -> r {[301,{'Location' => r.q['url']},[]]}
+
+    # Gatehouse
+    HostGET['www.patriotledger.com'] = -> r {
+      if r.parts[0] == 'storyimage' && r.path.match?(/&/)
+        [301, {'Location' => r.path.split('&')[0]},[]]
+      else
+        r.remoteNode
+      end
+    }
 
     # Google
     %w{mail news}.map{|_|
