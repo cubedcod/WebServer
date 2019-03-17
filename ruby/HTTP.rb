@@ -98,37 +98,30 @@ class WebResource
     alias_method :env, :environment
 
     def GET
-      # path-lambda binding
-      return PathGET[path][self] if PathGET[path]
-      # host-lambda binding
-      return HostGET[host][self] if HostGET[host]
-      # type-tagged request
-      return case env['HTTP_TYPE']
-             when /AMP/ # redirect to canonical page
+      return PathGET[path][self] if PathGET[path] # path-lambda
+      return HostGET[host][self] if HostGET[host] # host-lambda
+      return chronoDir if chronoDir?              # time-slice redirect
+      return fileResponse if node.file?           # local static-resource
+      return graphResponse localNodes if localResource? # local resource
+      return case env['HTTP_TYPE'] # type-tagged resource
+             when /AMP/ # accelerated mobile page
                amp
-             when /CDN/ # static cache
+             when /CDN/ # remote static-resource
                cdn
-             when /feed/ # Feed URL
+             when /feed/ # RSS/Atom feed
                remoteNode
-             when /listed/ # serve host-directory
+             when /cache/ # remote resource
                if ('/' + host).R.exist?
                  remoteNode
                else
                  deny
                end
-             when /short/ # shortened URL
+             when /short/ # short URL
                cachedRedirect
-             else # undefined type-tags
+             else # undefined type
                deny
              end if env.has_key? 'HTTP_TYPE'
-      return chronoDir if chronoDir?    # goto time-slice
-      return fileResponse if node.file? # static data
-      if localResource?
-        # local node
-        graphResponse localNodes
-      else
-        remoteNode
-      end
+      self.GETthru # no local handling defined, pass through GET to origin
     end
 
     def HEAD
