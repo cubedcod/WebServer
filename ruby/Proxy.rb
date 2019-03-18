@@ -255,7 +255,7 @@ class WebResource
     HostGET['imgur.com'] = HostGET['i.imgur.com'] = -> re {
       if !re.ext.empty? # file extension
         if 'i.imgur.com' == re.host # image host
-          re.remoteNode # cached image
+          re.cdn # cached image
         else # redirect to image host
           [301,{'Location' => 'https://i.imgur.com' + re.path},[]]
         end
