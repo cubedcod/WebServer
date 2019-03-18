@@ -106,16 +106,16 @@ class WebResource
       return case env['HTTP_TYPE'] # type-tagged resource
              when /AMP/ # accelerated mobile page
                amp
-             when /CDN/ # remote static-resource
-               cdn
-             when /feed/ # RSS/Atom feed
-               remoteNode
              when /cache/ # remote resource
                if ('/' + host).R.exist?
                  remoteNode
                else
                  deny
                end
+             when /CDN/ # remote static-resource
+               cdn
+             when /feed/ # RSS/Atom feed
+               remoteNode
              when /short/ # short URL
                cachedRedirect
              else # undefined type
