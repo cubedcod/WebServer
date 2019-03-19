@@ -100,7 +100,7 @@ class WebResource
       elsif ext=='css'
         [200, {'Content-Type' => 'text/css'}, ["
 body,div,p,pre,td {background-color: #000 !important; color: #fff !important}
-a {color: #cfc; background-color: #000; font-weight: bold; text-decoration: none}
+a {color: #4f4 !important; background-color: #000 !important; font-weight: bold; text-decoration: none}
 "]]
       else
         deny
