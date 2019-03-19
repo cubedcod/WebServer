@@ -101,7 +101,7 @@ class WebResource
       return PathGET[path][self] if PathGET[path] # path-lambda
       return HostGET[host][self] if HostGET[host] # host-lambda
       return chronoDir if chronoDir?              # time-slice redirect
-      return fileResponse if node.file?           # local static-resource
+      return fileResponse if node.file?           # local static resource
       return graphResponse localNodes if localResource? # local resource
       return case env['HTTP_TYPE'] # type-tagged resource
              when /AMP/ # accelerated mobile page
@@ -112,8 +112,8 @@ class WebResource
                else
                  deny
                end
-             when /CDN/ # remote static-resource
-               cdn
+             when /noexec/ # remote static resource
+               renoteNoJS
              when /feed/ # RSS/Atom feed
                remoteNode
              when /short/ # short URL

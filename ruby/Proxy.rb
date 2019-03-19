@@ -4,14 +4,6 @@ class WebResource
       [301, {'Location' => 'https://' + (host.split('.') - %w{amp}).join('.') + (path.split('/') - %w{amp amphtml}).join('/')}, []]
     end
 
-    def cdn
-      if %w{css html jpg jpg:large jpeg ogg m3u8 m4a mp3 mp4 pdf png svg ts webm webp}.member? ext.downcase
-        remoteNode
-      else
-        deny
-      end
-    end
-
     def GETthru
       head = HTTP.unmangle env
       head.delete 'Host'
@@ -101,6 +93,14 @@ class WebResource
                                               ]}})]] : self
     end
     alias_method :remoteNode, :GETthru
+
+    def remoteNoJS
+      if %w{css html jpg jpg:large jpeg ogg m3u8 m4a mp3 mp4 pdf png svg ts webm webp}.member? ext.downcase
+        remoteNode
+      else
+        deny
+      end
+    end
 
     def HTTPthru
       HostGET[host] = -> r {r.GETthru}
@@ -244,7 +244,7 @@ class WebResource
       when 'url'
         [301, {'Location' => ( r.q['q'] || r.q['url'] )}, []]
       else
-        r.cdn
+        r.remoteNoJS
       end}
 
     # IG
@@ -255,7 +255,7 @@ class WebResource
     HostGET['imgur.com'] = HostGET['i.imgur.com'] = -> re {
       if !re.ext.empty? # file extension
         if 'i.imgur.com' == re.host # image host
-          re.cdn # cached image
+          re.remoteNoJS # image
         else # redirect to image host
           [301,{'Location' => 'https://i.imgur.com' + re.path},[]]
         end
