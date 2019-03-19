@@ -113,7 +113,7 @@ class WebResource
                  deny
                end
              when /noexec/ # remote static resource
-               renoteNoJS
+               remoteNoJS
              when /feed/ # RSS/Atom feed
                remoteNode
              when /short/ # short URL

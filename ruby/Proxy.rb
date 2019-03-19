@@ -239,7 +239,7 @@ class WebResource
       case r.parts[0]
       when /^(amp|gmail)$/
         r.cachedRedirect
-      when /^(maps|search)$/
+      when /^(maps|search|xjs)$/
         r.remoteNode
       when 'url'
         [301, {'Location' => ( r.q['q'] || r.q['url'] )}, []]
