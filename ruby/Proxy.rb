@@ -95,8 +95,13 @@ class WebResource
     alias_method :remoteNode, :GETthru
 
     def remoteNoJS
-      if %w{css html jpg jpg:large jpeg ogg m3u8 m4a mp3 mp4 pdf png svg ts webm webp}.member? ext.downcase
+      if %w{html jpg jpg:large jpeg ogg m3u8 m4a mp3 mp4 pdf png svg ts webm webp}.member? ext.downcase
         remoteNode
+      elsif ext=='css'
+        [200, {'Content-Type' => 'text/css'}, ["
+body,div,p,pre,td {background-color: #000 !important; color: #fff !important}
+a {color: #cfc; background-color: #000; font-weight: bold; text-decoration: none}
+"]]
       else
         deny
       end
