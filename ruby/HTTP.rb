@@ -35,9 +35,8 @@ class WebResource
                      ''
                    end
         location = head['Location'] ? (" -> " + head['Location']) : ""
-        puts "\e[7m" + (method == 'GET' ? ' ' : '') + method + "\e[" + color + "m "  + status.to_s + "\e[0m " +
-             referrer + (env['HTTP_TYPE'] || '') + ' ' + "\e[" + color + ";7mhttps://" +
-             host + "\e[0m\e[" + color + "m" + path + resource.qs + "\e[0m" + location
+        puts "\e[7m" + (method == 'GET' ? ' ' : '') + method + "\e[" + color + "m "  + status.to_s + "\e[0m " + referrer + ' ' +
+             "\e[" + color + ";7mhttps://" + host + "\e[0m\e[" + color + "m" + path + resource.qs + "\e[0m" + location
 
         # response
         [status, head, body]}
