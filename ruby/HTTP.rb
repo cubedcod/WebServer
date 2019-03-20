@@ -17,7 +17,8 @@ class WebResource
       env[:Response] = {}; env[:links] = {}                 # response-header storage
       resource = ('//' + host + path).R env                 # bind resource and environment
       resource.send(method).do{|status,head,body|           # dispatch request
-        # log response
+
+        # logging
         color = (if resource.env[:deny]
                  '31'
                 elsif method=='POST'
@@ -35,11 +36,11 @@ class WebResource
                      ''
                    end
         location = head['Location'] ? (" -> " + head['Location']) : ""
+
         puts "\e[7m" + (method == 'GET' ? ' ' : '') + method + "\e[" + color + "m "  + status.to_s + "\e[0m " + referrer + ' ' +
              "\e[" + color + ";7mhttps://" + host + "\e[0m\e[" + color + "m" + path + resource.qs + "\e[0m" + location
 
-        # response
-        [status, head, body]}
+        [status, head, body]} # response
     rescue Exception => x
       [500, {'Content-Type'=>'text/plain'}, method=='HEAD' ? [] : [[x.class,x.message,x.backtrace].join("\n")]]
     end
@@ -100,27 +101,28 @@ class WebResource
       return PathGET[path][self] if PathGET[path] # path-lambda
       return HostGET[host][self] if HostGET[host] # host-lambda
       return chronoDir if chronoDir?              # time-slice redirect
-      return fileResponse if node.file?           # local static-resource
-      return graphResponse localNodes if localResource? # local resource
-      return case env['HTTP_TYPE'] # type-tagged resource
+      return fileResponse if node.file?           # static-resource (local)
+      return graphResponse localNodes if localResource? # resource (local)
+      puts env['HTTP_TYPE']
+      return case env['HTTP_TYPE'] # typed request
              when /AMP/ # accelerated mobile page
                amp
-             when /noexec/ # remote static-resource
+             when /noexec/ # static-resource (remote)
                remoteNoJS
-             when /cache/ # remote resource
-               if ('/' + host).R.exist?
-                 remoteNode
+             when /cache/
+               if ('/' + host).R.exist? # host-dir exists?
+                 remoteNode # resource (remote)
                else
-                 deny
+                 deny # host-dir required for caching
                end
-             when /feed/ # RSS/Atom feed
+             when /feed/ # RSS/Atom
                remoteNode
-             when /short/ # short URL
+             when /short/ # shortened URL
                cachedRedirect
              else # undefined type
                deny
              end if env.has_key? 'HTTP_TYPE'
-      self.GETthru # no local handling defined, pass through GET to origin
+      self.GETthru # local handling undefined, pass request through to origin
     end
 
     def HEAD
