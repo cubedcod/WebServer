@@ -19,7 +19,7 @@ class WebResource
       resource.send(method).do{|status,head,body|           # dispatch request
 
         # logging
-        color = (if resource.env[:deny]
+        color = (if resource.env[:deny] || resource.ext == 'css'
                  '31'
                 elsif method=='POST'
                   '32'
