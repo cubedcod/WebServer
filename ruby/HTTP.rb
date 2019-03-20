@@ -100,19 +100,19 @@ class WebResource
       return PathGET[path][self] if PathGET[path] # path-lambda
       return HostGET[host][self] if HostGET[host] # host-lambda
       return chronoDir if chronoDir?              # time-slice redirect
-      return fileResponse if node.file?           # local static resource
+      return fileResponse if node.file?           # local static-resource
       return graphResponse localNodes if localResource? # local resource
       return case env['HTTP_TYPE'] # type-tagged resource
              when /AMP/ # accelerated mobile page
                amp
+             when /noexec/ # remote static-resource
+               remoteNoJS
              when /cache/ # remote resource
                if ('/' + host).R.exist?
                  remoteNode
                else
                  deny
                end
-             when /noexec/ # remote static resource
-               remoteNoJS
              when /feed/ # RSS/Atom feed
                remoteNode
              when /short/ # short URL
