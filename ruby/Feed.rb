@@ -208,6 +208,7 @@ class WebResource
                inner.match(reLinkRel) ||
                inner.match(reId)).do{|s|s[1]}
 
+          puts "post-identifier search failed #{@base}" unless u
           if u # identifier found
             # resolve URI
             u = @base.join(u).to_s unless u.match /^http/

@@ -99,7 +99,7 @@ class WebResource
         remoteNode
       elsif ext=='css'
         [200, {'Content-Type' => 'text/css'}, ["
-body,div,p,pre,td {background-color: #000 !important; color: #fff !important}
+body {background-color: #000 !important; color: #fff !important}
 a {color: #4f4 !important; background-color: #000 !important; font-weight: bold; text-decoration: none}
 "]]
       else
