@@ -98,12 +98,12 @@ class WebResource
     alias_method :env, :environment
 
     def GET
-      return PathGET[path][self] if PathGET[path] # path-lambda
-      return HostGET[host][self] if HostGET[host] # host-lambda
-      return chronoDir if chronoDir?              # time-slice redirect
+      return PathGET[path][self] if PathGET[path] # path lambda
+      return HostGET[host][self] if HostGET[host] # host lambda
+      return chronoDir if chronoDir?              # timeslice redirect
       return fileResponse if node.file?           # static-resource (local)
       return graphResponse localNodes if localResource? # resource (local)
-      puts env['HTTP_TYPE']
+      #puts env['HTTP_TYPE']
       return case env['HTTP_TYPE'] # typed request
              when /AMP/ # accelerated mobile page
                amp
