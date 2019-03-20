@@ -1,4 +1,5 @@
 announce full updates or existence thereof to curious peers - irvc3, crdt, solid-websocket, matrix etc
+remove cache dir
 HTML extraction of HEAD meta and RDFa/microformats sponger
 json-schema parsers
 index backlinks at storage time

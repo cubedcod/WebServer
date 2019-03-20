@@ -233,6 +233,7 @@ w.bos.gl
         resp = Net::HTTP.get_response (URI.parse source)
         puts resp.body if verbose
         dest = resp['Location'] || resp['location']
+        puts dest if dest && verbose
         if !dest
           body = Nokogiri::HTML.fragment resp.body
           refresh = body.css 'meta[http-equiv="refresh"]'
@@ -240,6 +241,7 @@ w.bos.gl
             content = refresh.attr('content')
             if content
               dest = content.to_s.split('URL=')[-1]
+              puts dest if verbose
             end
           end
         end
