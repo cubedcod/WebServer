@@ -101,6 +101,7 @@ class WebResource
         [200, {'Content-Type' => 'text/css'}, ["
 body {background-color: #000; color: #fff}
 a {color: #4f4 !important; background-color: #000 !important; font-weight: bold; text-decoration: none}
+nav,header,footer {display: none !important}
 "]]
       else
         deny
