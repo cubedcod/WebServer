@@ -231,11 +231,14 @@ class WebResource
       end
     }
 
-    # Google
+    # GitHub
+    HostGET['github.com'] = -> r {r.remoteNode}
+
+   # Google
     %w{mail news}.map{|_|
       "//#{_}.google.com".R.HTTPthru}
 
-    %w{feedproxy.google.com gmail.com google.com}.map{|h|
+    %w{feedproxy.google.com gmail.com google.com maps.google.com}.map{|h|
       HostGET[h] = -> r {r.cachedRedirect}}
 
     HostGET['www.google.com'] = -> r {
