@@ -244,7 +244,7 @@ a {color: #4f4 !important; background-color: #000 !important; font-weight: bold;
       case r.parts[0]
       when /^(amp|gmail)$/
         r.cachedRedirect
-      when /^(maps|search|xjs)$/
+      when /^(imgres|maps|search|xjs)$/
         r.remoteNode
       when 'url'
         [301, {'Location' => ( r.q['q'] || r.q['url'] )}, []]
