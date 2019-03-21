@@ -103,7 +103,6 @@ class WebResource
       return chronoDir if chronoDir?              # timeslice redirect
       return fileResponse if node.file?           # static-resource (local)
       return graphResponse localNodes if localResource? # resource (local)
-      puts env['HTTP_TYPE']
       return case env['HTTP_TYPE'] # typed request
              when /AMP/ # accelerated mobile page
                amp
@@ -122,7 +121,7 @@ class WebResource
              else # undefined type
                deny
              end if env.has_key? 'HTTP_TYPE'
-      self.GETthru # local handling undefined, pass request through to origin
+      self.GETthru # local handling undefined, pass through to origin
     end
 
     def HEAD
