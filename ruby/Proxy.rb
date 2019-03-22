@@ -4,6 +4,11 @@ class WebResource
       [301, {'Location' => 'https://' + (host.split('.') - %w{amp}).join('.') + (path.split('/') - %w{amp amphtml}).join('/')}, []]
     end
 
+    UI = {
+          'www.youtube.com' => true,
+          'soundcloud.com' => true,
+          's.ytimg.com' => true,
+         }
     def GETthru
       head = HTTP.unmangle env
       head.delete 'Host'
@@ -22,19 +27,16 @@ class WebResource
       update = -> url {
         begin # block to catch 304-response "error"
           open(url, head) do |response| # response
-
-            if @r # HTTP-request calling context - preserve origin bits
+            if @r
               @r[:Response]['Access-Control-Allow-Origin'] ||= '*'
-              response.meta['set-cookie'].do{|cookie| @r[:Response]['Set-Cookie'] = cookie}
+              response.meta['set-cookie'].do{|cookie| @r[:Response]['Set-Cookie'] = cookie} if UI[host]
             end
-
-             # index updates
             resp = response.read
             unless cache.e && cache.readFile == resp
-              cache.writeFile resp # cache body
+              cache.writeFile resp # update cache
               mime = response.meta['content-type'].do{|type| type.split(';')[0] } || ''
-              cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # file metadata (TODO POSIX-eattrs for MIME)
-              # index content
+              cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # cache-file metadata (TODO POSIX-eattrs for MIME)
+              # update index
               updates.concat(case mime
                              when /^(application|text)\/(atom|rss|xml)/
                                cache.indexFeed
@@ -66,7 +68,7 @@ class WebResource
       if @r # HTTP calling context
         if cache.exist?
           # preserve upstream format?
-          if cache.noTransform?
+          if cache.noTransform? || UI[@r['SERVER_NAME']]
             cache.fileResponse
           else # transformable
             graphResponse (updates.empty? ? [cache] : updates)
