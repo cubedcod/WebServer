@@ -222,6 +222,14 @@ class WebResource
       end}
     PathGET['/safe_image.php'] = -> r {[301,{'Location' => r.q['url']},[]]}
 
+    # Forbes
+    HostGET['thumbor.forbes.com'] = -> r {
+      if r.parts[0] == 'thumbor'
+        [301, {'Location' =>  URI.unescape(r.path.split(/\/\d+x\d+\//)[-1])},[]]
+      else
+        r.remoteNode
+      end}
+
     # Gatehouse
     HostGET['www.patriotledger.com'] = -> r {
       if r.parts[0] == 'storyimage' && r.path.match?(/&/)
