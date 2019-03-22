@@ -194,11 +194,7 @@ class WebResource
       [mime.split('/')[0], '*'].join '/'
     end
 
-    def noTransform?
-      return true if mime&.match? NoTransform
-      return true if env['SERVER_NAME']&.match? /(google|gstatic|(mix|sound)cloud|youtube).com$/
-      false
-    end
+    def noTransform?; mime&.match? NoTransform end
 
     # work down preference list, terminate when first writer found
     def outputMIME default = 'text/html'
