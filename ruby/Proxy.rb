@@ -7,7 +7,7 @@ class WebResource
     def GETthru
       head = HTTP.unmangle env
       head.delete 'Host'
-      formatSuffix = (host.match?(/reddit.com$/) && !parts.member?('w')) ? '.rss' : ''
+      formatSuffix = (host.match?(/reddit.com$/) && !parts.member?('wiki')) ? '.rss' : ''
       portNum = port && !([80,443,8000].member? port) && ":#{port}" || ''
       queryHash = q
       queryHash.delete 'host'
