@@ -326,5 +326,14 @@ class WebResource
         re.remoteNode
       end}
 
+    # WaPo
+    HostGET['www.washingtonpost.com'] = -> r {
+      if r.parts[0] == 'resizer'
+        [301, {'Location' =>  'https://' + r.path.split(/\/\d+x\d+\//)[-1]},[]]
+      else
+        r.remoteNode
+      end}
+    HostGET['arc-anglerfish-washpost-prod-washpost.s3.amazonaws.com'] = -> r {r.remoteNode}
+
   end
 end
