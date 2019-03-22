@@ -185,12 +185,11 @@ class WebResource
       html = Nokogiri::HTML.fragment body
 
       # clean
-      %w{amp-accordion amp-ad amp-analytics amp-carousel amp-sidebar amp-social-share
- footer .footer form header iframe link[rel='stylesheet'] nav [class*='newsletter'] script .sidebar [class*='social'] style .subscribe svg}.
+      %w{amp-accordion amp-ad amp-analytics amp-carousel amp-sidebar amp-social-share footer .footer form header iframe link[rel='stylesheet'] [class*='newsletter'] script style .subscribe}.
         map{|s|html.css(s).remove}
       html.traverse{|e|
         e.attribute_nodes.map{|a|
-          a.unlink if (a.name.match? /(^[Oo][Nn]|react)/) || (%w{id class style target}.member? a.name)
+          a.unlink if (a.name.match? /(^[Oo][Nn]|react)/) || (%w{class style target}.member? a.name)
           e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-original data-src}.member? a.name
         }}
 
