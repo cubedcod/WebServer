@@ -87,7 +87,7 @@ class WebResource
     rescue Exception => e
       msg = [uri, e.class, e.message].join " "
       trace = e.backtrace.join "\n"
-      puts msg, trace
+      puts msg #, trace
       @r ? [500, {'Content-Type' => 'text/html'},
             [htmlDocument({uri => {Content => [{_: :style, c: "body {background-color: red !important}"},
                                                {_: :h3, c: msg.hrefs}, {_: :pre, c: trace.hrefs},

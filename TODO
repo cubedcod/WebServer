@@ -7,7 +7,6 @@ troff triplr - .1, .2, (sslsplit docs)
 link Search host-specific remote origins - !tw  URL mapping etc
 use shortURL-mapping DB to deobfuscate at presentation and storage time
 mp3 image extract
-delete <noscript> 
 xhr link inliner - nowrapper docs, onlynew updates (twitter frontpage support)
 visual indicator of cache-hit
 improve S/N on new-tracker discovery - omit highlighting hosts explicitly browsed to - which appear in browser history.SQLite
