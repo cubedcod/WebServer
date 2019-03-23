@@ -4,12 +4,16 @@ class WebResource
       [301, {'Location' => 'https://' + (host.split('.') - %w{amp}).join('.') + (path.split('/') - %w{amp amphtml}).join('/')}, []]
     end
 
+    Cookies = %w{}
+
     UI = {
           'www.youtube.com' => true,
           'soundcloud.com' => true,
           's.ytimg.com' => true,
          }
+
     def GETthru
+      hostname = @r['SERVER_NAME']
       head = HTTP.unmangle env
       head.delete 'Host'
       formatSuffix = (host.match?(/reddit.com$/) && !parts.member?('wiki')) ? '.rss' : ''
@@ -29,7 +33,7 @@ class WebResource
           open(url, head) do |response| # response
             if @r
               @r[:Response]['Access-Control-Allow-Origin'] ||= '*'
-              response.meta['set-cookie'].do{|cookie| @r[:Response]['Set-Cookie'] = cookie} if UI[host]
+              response.meta['set-cookie'].do{|cookie| @r[:Response]['Set-Cookie'] = cookie} if UI[hostname] || Cookies.member?(hostname)
             end
             resp = response.read
             unless cache.e && cache.readFile == resp
@@ -68,7 +72,7 @@ class WebResource
       if @r # HTTP calling context
         if cache.exist?
           # preserve upstream format?
-          if cache.noTransform? || UI[@r['SERVER_NAME']]
+          if cache.noTransform? || UI[hostname]
             cache.fileResponse
           else # transformable
             graphResponse (updates.empty? ? [cache] : updates)

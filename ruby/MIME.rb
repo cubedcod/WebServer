@@ -53,6 +53,7 @@ class WebResource
       'md' => 'text/markdown',
       'msg' => 'message/rfc822',
       'ogg' => 'audio/ogg',
+      'opus' => 'audio/opus',
       'opml' => 'text/xml+opml',
       'pid' => 'text/plain',
       'rb' => 'text/x-ruby',
