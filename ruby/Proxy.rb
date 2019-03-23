@@ -17,17 +17,22 @@ class WebResource
 
     def GETthru
       hostname = @r && @r['SERVER_NAME']
-      head = HTTP.unmangle env
-      cookies = Cookies.member? hostname
-      %w{Host Type}.map{|k| head.delete k}
-      head.delete 'Cookie' unless cookies
-      formatSuffix = (host.match?(/reddit.com$/) && !parts.member?('wiki')) ? '.rss' : ''
-      portNum = port && !([80,443,8000].member? port) && ":#{port}" || ''
-      queryHash = q
-      queryHash.delete 'host'
-      queryString = queryHash.empty? ? '' : (HTTP.qs queryHash)
-      urlHTTPS = scheme && scheme=='https' && uri || ('https://' + host + portNum + path + formatSuffix + queryString)
-      urlHTTP  = 'http://'  + host + portNum + (path||'/') + formatSuffix + queryString
+      head = HTTP.unmangle env # deCGIvar-ify header
+      %w{Host Type}.map{|k| head.delete k} # strip headers
+      suffix = (host.match?(/reddit.com$/) && !parts.member?('wiki')) ? '.rss' : '' # explicit-format suffix
+      urlHTTPS = if @r && suffix.empty?
+                   "https://#{host}#{@r['REQUEST_URI']}"
+                 else
+                   queryHash = q
+                   queryHash.delete 'host'
+                   queryString = queryHash.empty? ? '' : (HTTP.qs queryHash)
+
+                   'https://' + host +
+                     (port && !([80,443,8000].member? port) && ":#{port}" || '') +
+                     (path || '/') +
+                     suffix + queryString
+                 end
+      urlHTTP  = urlHTTPS.sub /^https/, 'http'
       cache = cacheFile
       cacheMeta = cache.metafile
 
@@ -35,11 +40,11 @@ class WebResource
       updates = []
       update = -> url {
         begin # block for catching 304-status "error"
-          puts " GET #{url}"
+          #puts " GET #{url}"
           open(url, head) do |response| # response
             if @r
               @r[:Response]['Access-Control-Allow-Origin'] ||= '*'
-              response.meta['set-cookie'].do{|cookie| @r[:Response]['Set-Cookie'] = cookie} if UI[hostname] || cookies
+              response.meta['set-cookie'].do{|cookie| @r[:Response]['Set-Cookie'] = cookie} if UI[hostname] || Cookies.member?(hostname)
             end
             resp = response.read
             unless cache.e && cache.readFile == resp
@@ -124,22 +129,15 @@ class WebResource
     end
 
     def OPTIONSthru
-      verbose = false
-
       # request
       url = 'https://' + host + path + qs
       headers = HTTP.unmangle env
       body = env['rack.input'].read
-      HTTP.print_header headers if verbose
-      HTTP.print_body body, headers['Content-Type'] if verbose
-
       # response
       r = HTTParty.options url, :headers => headers, :body => body
       s = r.code
       h = r.headers
       b = r.body
-      HTTP.print_header h if verbose
-      HTTP.print_body b, h['Content-Type'] if verbose
       [s, h, [b]]
     end
 
@@ -148,16 +146,11 @@ class WebResource
       url = 'https://' + host + path + qs
       headers = HTTP.unmangle env
       body = env['rack.input'].read
-      #HTTP.print_header headers
-      #HTTP.print_body body, headers['Content-Type']
-
       # response
       r = HTTParty.post url, :headers => headers, :body => body
       s = r.code
       h = r.headers
       b = r.body
-      #HTTP.print_header h
-      #HTTP.print_body b, h['Content-Type']
       [s, h, [b]]
     end
 
