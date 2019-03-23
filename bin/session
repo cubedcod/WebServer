@@ -1,6 +1,6 @@
 #!/bin/sh
 user=$(id -u)
 app=$(realpath ~/src/WebServer)
-su -c "sh $base/bin/net $user"                                   # network
+su -c "sh $app/bin/net $user"                                    # network
 mkdir -p log; squid -f $app/config/squid.conf                    # request router
 unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 $app/config/daemon.ru # daemon
