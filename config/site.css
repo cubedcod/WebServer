@@ -28,7 +28,7 @@ pre {white-space: pre-wrap}
 a.title, a.link, div.thumb {background-color: #fff; color: #000}
 tr[name="content"] > td.v a {background-color: #3f3; color: #000}
 tr[name="content"] > td.v a:visited {background-color: #000; color: #3f3; border: .08em solid #3f3}
-tr[name="content"] > td.v footer a, tr[name="content"] > td.v header a {background-color: #000; color: #ccc}
+tr[name="content"] > td.v footer a, tr[name="content"] > td.v header a {background-color: #000; color: #aaa}
 #up, #down, #prev, #next, body, pre, p, span, td.k > a {background-color: #000; color: #fff}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
 * {vertical-align: top}
