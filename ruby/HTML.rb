@@ -77,6 +77,7 @@ class WebResource
                             ].map{|e|['  ',e,"\n"]}}, "\n\n",
                         {_: :body,
                          c: ["\n", link[:up, '&#9650;'], link[:prev, '&#9664;'], link[:next, '&#9654;'],
+                             ({_: :a, id: :originUI, href: '/ui/origin' + HTTP.qs({u: 'http:' + uri}), c: '⮹'} unless localResource?),
                              if graph.empty?
                                HTML.kv (HTML.urifyHash @r), @r
                              else

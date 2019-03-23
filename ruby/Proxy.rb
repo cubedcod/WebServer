@@ -12,10 +12,15 @@ class WebResource
           's.ytimg.com' => true,
          }
 
+    PathGET['/ui/origin'] = -> r {r.q['u'].do{|u| UI[u.R.host] = true; [302, {'Location' => u}, []]} || r.deny }
+    PathGET['/ui/local']  = -> r {r.q['u'].do{|u| UI.delete u.R.host;  [302, {'Location' => u}, []]} || r.deny }
+
     def GETthru
       hostname = @r && @r['SERVER_NAME']
       head = HTTP.unmangle env
-      head.delete 'Host'
+      cookies = Cookies.member? hostname
+      %w{Host Type}.map{|k| head.delete k}
+      head.delete 'Cookie' unless cookies
       formatSuffix = (host.match?(/reddit.com$/) && !parts.member?('wiki')) ? '.rss' : ''
       portNum = port && !([80,443,8000].member? port) && ":#{port}" || ''
       queryHash = q
@@ -29,11 +34,12 @@ class WebResource
       # lazy updater, called by need
       updates = []
       update = -> url {
-        begin # block to catch 304-response "error"
+        begin # block for catching 304-status "error"
+          puts " GET #{url}"
           open(url, head) do |response| # response
             if @r
               @r[:Response]['Access-Control-Allow-Origin'] ||= '*'
-              response.meta['set-cookie'].do{|cookie| @r[:Response]['Set-Cookie'] = cookie} if UI[hostname] || Cookies.member?(hostname)
+              response.meta['set-cookie'].do{|cookie| @r[:Response]['Set-Cookie'] = cookie} if UI[hostname] || cookies
             end
             resp = response.read
             unless cache.e && cache.readFile == resp
