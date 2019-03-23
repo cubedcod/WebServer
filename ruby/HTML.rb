@@ -182,7 +182,7 @@ class WebResource
 
     def self.clean body
       # parse
-      html = Nokogiri::HTML.fragment body
+      html = Nokogiri::HTML.fragment body.gsub(/<\/?(center|noscript)>/,'')
 
       # clean nodes
       %w{amp-accordion amp-ad amp-analytics amp-carousel amp-sidebar amp-social-share footer .footer form header iframe link[rel='stylesheet'] [class*='newsletter'] script style .subscribe}.
@@ -191,7 +191,7 @@ class WebResource
         # clean attributes
         e.attribute_nodes.map{|a|
           e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-original data-src}.member? a.name
-          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{class ping role style tabindex target}.member?(a.name)}}
+          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor class ping role style tabindex target}.member?(a.name)}}
 
       # serialize
       html.to_xhtml(:indent => 0)
