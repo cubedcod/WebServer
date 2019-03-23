@@ -13,7 +13,7 @@ class WebResource
          }
 
     def GETthru
-      hostname = @r['SERVER_NAME']
+      hostname = @r && @r['SERVER_NAME']
       head = HTTP.unmangle env
       head.delete 'Host'
       formatSuffix = (host.match?(/reddit.com$/) && !parts.member?('wiki')) ? '.rss' : ''
