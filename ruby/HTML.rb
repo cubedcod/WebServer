@@ -184,13 +184,14 @@ class WebResource
       # parse
       html = Nokogiri::HTML.fragment body.gsub(/<\/?(center|noscript)>/,'')
 
-      # clean nodes
-      %w{iframe link[as='script'] link[rel='stylesheet'] link[type='text/javascript'] script style}.map{|s|
-        html.css(s).remove}
-      # clean attributes
+      # cleaned nodes
+      %w{iframe link[as='script'] link[rel='stylesheet'] link[type='text/javascript'] script style}.map{|s| html.css(s).remove}
+
+      # attributes
       html.traverse{|e|
         e.attribute_nodes.map{|a|
-          e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-original data-src}.member? a.name
+          e.set_attribute 'src',    a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-original data-src}.member? a.name
+          e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor class height layout ping role style tabindex target width}.member?(a.name)}}
 
       # serialize
