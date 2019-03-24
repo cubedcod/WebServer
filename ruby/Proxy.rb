@@ -5,10 +5,11 @@ class WebResource
     end
 
     UI = {
-          'www.youtube.com' => true,
-          'soundcloud.com' => true,
-          's.ytimg.com' => true,
-         }
+      'www.google.com' => true,
+      'www.youtube.com' => true,
+      'soundcloud.com' => true,
+      's.ytimg.com' => true,
+    }
 
     PathGET['/ui/origin'] = -> r {r.q['u'].do{|u| UI[u.R.host] = true; [302, {'Location' => u}, []]} || r.deny }
     PathGET['/ui/local']  = -> r {r.q['u'].do{|u| UI.delete u.R.host;  [302, {'Location' => u}, []]} || r.deny }
