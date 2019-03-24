@@ -4,8 +4,6 @@ class WebResource
       [301, {'Location' => 'https://' + (host.split('.') - %w{amp}).join('.') + (path.split('/') - %w{amp amphtml}).join('/')}, []]
     end
 
-    Cookies = %w{}
-
     UI = {
           'www.youtube.com' => true,
           'soundcloud.com' => true,
@@ -38,14 +36,14 @@ class WebResource
 
       # lazy updater, called by need
       updates = []
-      update = -> url {
+      update = -> url { #puts " GET #{url}"
         begin # block for catching 304-status "error"
-          #puts " GET #{url}"
           open(url, head) do |response| # response
-            if @r
-              @r[:Response]['Access-Control-Allow-Origin'] ||= '*'
-              response.meta['set-cookie'].do{|cookie| @r[:Response]['Set-Cookie'] = cookie} if UI[hostname] || Cookies.member?(hostname)
-            end
+            %w{
+Access-Control-Allow-Origin
+Access-Control-Allow-Credentials
+Set-Cookie}.map{|k|
+   @r[:Response][k] ||= response.meta[k.downcase]} if @r
             resp = response.read
             unless cache.e && cache.readFile == resp
               cache.writeFile resp # update cache
