@@ -15,21 +15,16 @@ class WebResource
     PathGET['/ui/local']  = -> r {r.q['u'].do{|u| UI.delete u.R.host;  [302, {'Location' => u}, []]} || r.deny }
 
     def GETthru
-      hostname = @r && @r['SERVER_NAME']
-      head = HTTP.unmangle env # deCGIvar-ify header
+      head = HTTP.unmangle env # unCGIify header key-names
       %w{Host Type}.map{|k| head.delete k} # strip headers
-      suffix = (host.match?(/reddit.com$/) && !parts.member?('wiki')) ? '.rss' : '' # explicit-format suffix
+      suffix = (host.match?(/reddit.com$/) && !parts.member?('wiki')) ? '.rss' : '' # format suffix
       urlHTTPS = if @r && suffix.empty?
                    "https://#{host}#{@r['REQUEST_URI']}"
                  else
-                   queryHash = q
-                   queryHash.delete 'host'
-                   queryString = queryHash.empty? ? '' : (HTTP.qs queryHash)
-
                    'https://' + host +
                      (port && !([80,443,8000].member? port) && ":#{port}" || '') +
                      (path || '/') +
-                     suffix + queryString
+                     suffix + qs
                  end
       urlHTTP  = urlHTTPS.sub /^https/, 'http'
       cache = cacheFile
@@ -82,7 +77,7 @@ Set-Cookie}.map{|k|
       if @r # HTTP calling context
         if cache.exist?
           # preserve upstream format?
-          if cache.noTransform? || UI[hostname]
+          if cache.noTransform? || UI[@r['SERVER_NAME']]
             cache.fileResponse
           else # transformable
             graphResponse (updates.empty? ? [cache] : updates)
