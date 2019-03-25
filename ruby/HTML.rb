@@ -184,16 +184,17 @@ class WebResource
     def self.clean body
       # parse
       html = Nokogiri::HTML.fragment body.gsub(/<\/?(center|noscript)>/,'')
-      # strip nodes
-      %w{iframe link[as='script'] link[rel='stylesheet'] link[type='text/javascript'] script style
-header .header #header footer .footer #footer nav
-}.map{|s| html.css(s).remove}
 
+      # strip nodes
+      %w{iframe link[rel='stylesheet'] style link[type='text/javascript'] link[as='script'] script}.map{|s|html.css(s).remove}
+
+      # visit attribute-nodes
       html.traverse{|e|
         e.attribute_nodes.map{|a|
           # move attributes
-          e.set_attribute 'src',    a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-original data-src}.member? a.name
+          e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-original data-src}.member? a.name
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
+
           # strip attributes
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor class height layout ping role style tabindex target width}.member?(a.name)}}
 
