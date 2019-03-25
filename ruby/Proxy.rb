@@ -255,7 +255,7 @@ class WebResource
       when /^(imgres|maps|search|xjs)$/
         r.remoteNode
       when 'url'
-        [301, {'Location' => ( r.q['q'] || r.q['url'] )}, []]
+        [301, {'Location' => ( r.q['url'] || r.q['q'] )}, []]
       else
         r.remoteNoJS
       end}
