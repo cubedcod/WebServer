@@ -18,28 +18,20 @@ class WebResource
       head = HTTP.unmangle env # unCGIify header key-names
       %w{Host Type}.map{|k| head.delete k} # strip headers
       suffix = (host.match?(/reddit.com$/) && !parts.member?('wiki')) ? '.rss' : '' # format suffix
-      urlHTTPS = if @r && suffix.empty?
-                   "https://#{host}#{@r['REQUEST_URI']}"
-                 else
-                   'https://' + host +
-                     (port && !([80,443,8000].member? port) && ":#{port}" || '') +
-                     (path || '/') +
-                     suffix + qs
-                 end
-      urlHTTP  = urlHTTPS.sub /^https/, 'http'
+      url = if @r && suffix.empty?
+              "https://#{host}#{@r['REQUEST_URI']}"
+            else
+              'https://' + host + (port && !([80,443,8000].member? port) && ":#{port}" || '') + (path || '/') + suffix + qs
+            end
       cache = cacheFile
       cacheMeta = cache.metafile
 
-      # lazy updater, called by need
       updates = []
-      update = -> url { #puts " GET #{url}"
+      # lazy updater, called by need
+      update = -> url {
         begin # block for catching 304-status "error"
           open(url, head) do |response| # response
-            %w{
-Access-Control-Allow-Origin
-Access-Control-Allow-Credentials
-Set-Cookie}.map{|k|
-   @r[:Response][k] ||= response.meta[k.downcase]} if @r
+            %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| @r[:Response][k] ||= response.meta[k.downcase]} if @r
             resp = response.read
             unless cache.e && cache.readFile == resp
               cache.writeFile resp # update cache
@@ -65,10 +57,10 @@ Set-Cookie}.map{|k|
       throttled = cacheMeta.e && (Time.now - cacheMeta.mtime) < 60
       unless static || throttled
         head["If-Modified-Since"] = cache.mtime.httpdate if cache.e
-        begin # prefer HTTPS w/ fallback HTTP attempt
-          update[urlHTTPS]
+        begin # prefer HTTPS
+          update[url]
         rescue
-          update[urlHTTP]
+          update[url.sub /^https/, 'http']
         end
         cacheMeta.touch if cacheMeta.e # bump timestamp
       end
