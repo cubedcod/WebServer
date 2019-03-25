@@ -100,9 +100,6 @@ class WebResource
     def remoteNoJS
       if %w{html jpg jpg:large jpeg ogg m3u8 m4a mp3 mp4 pdf png svg ts webm webp}.member? ext.downcase
         remoteNode
-      elsif ext=='css'
-        [200, {'Content-Type' => 'text/css'},
-         ["body {background-color: #000; color: #fff}\na {color: #4f4 !important; background-color: #000 !important; font-weight: bold; text-decoration: none}\nnav,header,footer {display: none}"]]
       else
         deny
       end
