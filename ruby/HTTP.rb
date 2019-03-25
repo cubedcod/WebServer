@@ -5,7 +5,7 @@ class WebResource
     include URIs
 
     def cache?; !(pragma && pragma == 'no-cache') end
-
+    Hosts = {}
     def self.call env
       method = env['REQUEST_METHOD']                        # request-method
       return [202,{},[]] unless Methods.member? method      # undefined method
@@ -19,8 +19,11 @@ class WebResource
       resource.send(method).do{|status,head,body|           # dispatch request
 
         # logging
-        color = (if resource.env[:deny] || resource.ext == 'css'
+        color = (if resource.env[:deny]
                  '31'
+                elsif !Hosts.has_key? host
+                  Hosts[host] = true
+                  '32'
                 elsif method=='POST'
                   '32'
                 elsif status==200
