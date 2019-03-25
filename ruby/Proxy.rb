@@ -166,6 +166,9 @@ class WebResource
         r.remoteNode
       end}
 
+    # Broadcastify
+    HostPOST['www.broadcastify.com'] = -> r {r.POSTthru}
+
     # Discourse
     PathGET['/clicks/track'] = -> r {[301,{'Location' => r.q['url']},[]]}
 
@@ -238,13 +241,7 @@ class WebResource
     # GitHub
     HostGET['github.com'] = -> r {r.remoteNode}
 
-   # Google
-    %w{mail news}.map{|_|
-      "//#{_}.google.com".R.HTTPthru}
-
-    %w{feedproxy.google.com gmail.com google.com maps.google.com}.map{|h|
-      HostGET[h] = -> r {r.cachedRedirect}}
-
+    # Google
     HostGET['www.google.com'] = -> r {
       case r.parts[0]
       when /^(amp|gmail)$/
@@ -256,6 +253,12 @@ class WebResource
       else
         r.remoteNoJS
       end}
+    # allow POST and OPTIONS methods in mail/news apps
+    %w{mail news}.map{|_|"//#{_}.google.com".R.HTTPthru}
+    # allow selected scripts
+    HostGET['ajax.googleapis.com'] = -> r {r.parts.member?('jquery') ? r.remoteNode : r.deny}
+    # redirect-handlers
+    %w{feedproxy.google.com gmail.com google.com maps.google.com}.map{|h|HostGET[h] = -> r {r.cachedRedirect}}
 
     # IG
     HostGET['instagram.com'] = -> r {[301, {'Location' =>  "https://www.instagram.com" + r.path},[]]}
