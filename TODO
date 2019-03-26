@@ -21,3 +21,8 @@ make cacheRedir try both schemes so InsecureShorteners can go away
 relURI in feed identifiers
 find new base URI from open-uri automagic redirect following - replace open-uri with something w/ better redirect handling? http://criticalengineering.org/projects/men-in-grey relative URI wrong base..
 merge: cacheRedirect and remoteNode methods? we want to know about redirs in both
+wsj headers
+ap triplr
+anything actually useful in data- attributes?
+POST adaptors per host
+link to cache file (use HTML extension)
