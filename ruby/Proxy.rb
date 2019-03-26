@@ -348,5 +348,10 @@ class WebResource
       end}
     HostGET['arc-anglerfish-washpost-prod-washpost.s3.amazonaws.com'] = -> r {r.remoteNode}
 
+    # WGBH
+    HostGET['wgbh.brightspotcdn.com'] = -> r {
+      r.q.has_key?('url') ? [301, {'Location' => r.q['url']}, []] : r.remoteNode
+    }
+
   end
 end
