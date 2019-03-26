@@ -192,7 +192,7 @@ class WebResource
       html.traverse{|e|
         e.attribute_nodes.map{|a|
           # move attributes
-          e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-original data-src}.member? a.name
+          e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-menuimg data-original data-src}.member? a.name
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
 
           # strip attributes
