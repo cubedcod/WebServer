@@ -169,6 +169,9 @@ class WebResource
     # Broadcastify
     HostPOST['www.broadcastify.com'] = -> r {r.POSTthru}
 
+    # CNN
+    HostGET['dynaimage.cdn.cnn.com'] = -> r {[301, {'Location' => 'http' + URI.unescape(r.path.split(/http/)[-1])}, []]}
+
     # Discourse
     PathGET['/clicks/track'] = -> r {[301,{'Location' => r.q['url']},[]]}
 
@@ -224,7 +227,7 @@ class WebResource
     # Forbes
     HostGET['thumbor.forbes.com'] = -> r {
       if r.parts[0] == 'thumbor'
-        [301, {'Location' =>  URI.unescape(r.path.split(/\/\d+x\d+\//)[-1])},[]]
+        [301, {'Location' => 'http' + URI.unescape(r.path.split(/http/)[-1])}, []]
       else
         r.remoteNode
       end}
