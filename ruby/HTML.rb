@@ -225,18 +225,22 @@ class WebResource
 
     # HTML -> RDF
     def triplrHTML &f
+
+      # parse HTML
       n = Nokogiri::HTML.parse readFile.to_utf8
+
       triplr = TriplrHTML[@r && @r['SERVER_NAME']]
-      if triplr
+      if triplr # host-specific triplr
         send triplr, &f
       else
         yield uri, Content, HTML.clean(n.css('body').inner_html)
       end
 
-      n.css('title').map{|title|
-        yield uri, Title, title.inner_text }
-      n.css('meta[property="og:image"]').map{|m|
-        yield uri, Image, m.attr("content").R }
+      n.css('title').map{|title| yield uri, Title, title.inner_text }
+
+      n.css('head meta').map{|m|
+        yield uri, (m.attr("name") || m.attr("property")), m.attr("content") }
+
       triplrFile &f
     end
 

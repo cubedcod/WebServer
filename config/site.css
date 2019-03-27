@@ -27,6 +27,7 @@ aside {position: absolute; top: 0; right: 0; z-index: -1}
 footer,.footer,#footer {position: absolute; bottom: 0; left: 0; z-index: -1; color: #aaa}
 pre {white-space: pre-wrap}
 a.title, a.link, div.thumb {background-color: #fff; color: #000}
+tr[name="content"] > td.v {position: relative}
 tr[name="content"] > td.v a {background-color: #3f3; color: #000}
 tr[name="content"] > td.v a:visited {background-color: #000; color: #3f3; border: .08em solid #3f3}
 tr[name="content"] > td.v footer a, tr[name="content"] > td.v header a {background-color: #000; color: #aaa}
