@@ -2,6 +2,7 @@ announce full updates or existence thereof to curious peers - irvc3, crdt, solid
 remove cache dir
 HTML extraction of HEAD meta and RDFa/microformats sponger
 json-schema parsers
+json-ld
 index backlinks at storage time
 troff triplr - .1, .2, (sslsplit docs)
 link Search host-specific remote origins - !tw  URL mapping etc
@@ -25,4 +26,5 @@ wsj headers
 ap triplr
 anything actually useful in data- attributes?
 POST adaptors per host
-link to cache file (use HTML extension)
+link to original cached file (w/ HTML extension) when HTML rewrite is in play
+link to local cache on chainlink icon in more scenarios
