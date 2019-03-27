@@ -204,6 +204,7 @@ class WebResource < RDF::URI
     HostOPTIONS = {}
 
     InsecureShorteners = %w{
+apne.ws
 bhne.ws
 bos.gl
 feeds.reuters.com
