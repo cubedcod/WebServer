@@ -249,15 +249,18 @@ class WebResource
       case r.parts[0]
       when /^(amp|gmail)$/
         r.cachedRedirect
-      when /^(imgres|maps|search|xjs)$/
+      when /^(imgres|maps|recaptcha|search|x?js)$/
         r.remoteNode
       when 'url'
         [301, {'Location' => ( r.q['url'] || r.q['q'] )}, []]
       else
         r.remoteNoJS
       end}
-    # allow POST and OPTIONS methods in mail/news apps
+
+    # allow POST and OPTIONS
     %w{mail news}.map{|_|"//#{_}.google.com".R.HTTPthru}
+    HostPOST['www.google.com'] = -> r {r.parts[0] == 'recaptcha' ? r.POSTthru : r.trackPOST}
+
     # allow selected scripts
     HostGET['ajax.googleapis.com'] = -> r {r.parts.member?('jquery') ? r.remoteNode : r.deny}
     # redirect-handlers
