@@ -172,6 +172,9 @@ class WebResource
     # CNN
     HostGET['dynaimage.cdn.cnn.com'] = -> r {[301, {'Location' => 'http' + URI.unescape(r.path.split(/http/)[-1])}, []]}
 
+    # DataDog
+    '//p.datadoghq.com'.R.HTTPthru
+
     # Discourse
     PathGET['/clicks/track'] = -> r {[301,{'Location' => r.q['url']},[]]}
 
