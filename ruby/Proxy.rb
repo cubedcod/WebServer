@@ -144,14 +144,7 @@ class WebResource
 
     PathGET['/cache'] = -> cache {
       cache.q['url'].do{|url|
-        r = url.R cache.env
-        if r.host == 'bit.ly'
-          r.cachedRedirect
-        elsif %w{png jpg webp}.member? r.ext
-          ('//' + r.host + r.path).R(cache.env).remoteNode
-        else
-          r.remoteNode
-        end
+        url.R(cache.env).remoteNode
       } || [200, {'Content-Type' => 'text/html'}, ['<form method="GET"><input name="url" autofocus></form>']]}
 
     PathGET['/generate_204'] = -> _ {Response_204}
