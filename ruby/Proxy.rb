@@ -239,6 +239,8 @@ class WebResource
     # Google
     HostGET['www.google.com'] = -> r {
       case r.parts[0]
+      when nil
+        r.remoteNode
       when /^(amp|gmail)$/
         r.cachedRedirect
       when /^(imgres|maps|recaptcha|search|x?js)$/
@@ -248,14 +250,11 @@ class WebResource
       else
         r.remoteNoJS
       end}
-
-    # allow POST and OPTIONS
-    %w{mail news}.map{|_|"//#{_}.google.com".R.HTTPthru}
-    HostPOST['www.google.com'] = -> r {r.parts[0] == 'recaptcha' ? r.POSTthru : r.trackPOST}
-
-    # allow selected scripts
     HostGET['ajax.googleapis.com'] = -> r {r.parts.member?('jquery') ? r.remoteNode : r.deny}
-    # redirect-handlers
+    # enable POST and OPTIONS
+    %w{accounts mail news}.map{|_|"//#{_}.google.com".R.HTTPthru}
+    HostPOST['www.google.com'] = -> r {r.parts[0] == 'recaptcha' ? r.POSTthru : r.trackPOST}
+    # redirect handlers
     %w{feedproxy.google.com gmail.com google.com maps.google.com}.map{|h|HostGET[h] = -> r {r.cachedRedirect}}
 
     # IG
