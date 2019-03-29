@@ -13,21 +13,23 @@ class WebResource
     def GETthru
       head = HTTP.unmangle env # unCGIify header key-names
       %w{Host Type}.map{|k| head.delete k} # strip headers
-      suffix = (host.match?(/reddit.com$/) && !parts.member?('wiki')) ? '.rss' : '' # format suffix
-      url = if @r && suffix.empty?
+      suffix = host.match?(/reddit.com$/) && !parts.member?('wiki') && '.rss' # format suffix
+      url = if @r && !suffix
               "https://#{host}#{@r['REQUEST_URI']}"
             else
-              'https://' + host + (port && !([80,443,8000].member? port) && ":#{port}" || '') + (path || '/') + suffix + qs
+              'https://' + host + (path || '') + suffix + qs
             end
       cache = cacheFile
       cacheMeta = cache.metafile
-
       updates = []
-      # lazy updater, called by need
+
+      # lazy updater
       update = -> url {
-        begin # block for catching 304-status "error"
+        begin # block to catch 304-status "error"
           open(url, head) do |response| # response
-            %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| @r[:Response][k] ||= response.meta[k.downcase]} if @r
+            # origin-metadata for caller
+            %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k|
+              @r[:Response][k] ||= response.meta[k.downcase]} if @r
             resp = response.read
             unless cache.e && cache.readFile == resp
               cache.writeFile resp # update cache
@@ -93,8 +95,10 @@ class WebResource
     end
     alias_method :remoteNode, :GETthru
 
-    def remoteNoJS
+    def remoteNoJS allowGIF=false
       if %w{html jpg jpg:large jpeg ogg m3u8 m4a mp3 mp4 pdf png svg ts webm webp}.member? ext.downcase
+        remoteNode
+      elsif allowGIF && ext == 'gif'
         remoteNode
       else
         deny
@@ -213,11 +217,11 @@ class WebResource
       else
         r.remoteNoJS
       end}
-    HostGET['ajax.googleapis.com'] = -> r {r.parts.member?('jquery') ? r.remoteNode : r.deny}
-    # redirect handlers
+    # redirection
     %w{feedproxy.google.com gmail.com google.com maps.google.com}.map{|h|HostGET[h] = -> r {r.cachedRedirect}}
-    # enable POST and OPTIONS
-    # %w{accounts mail news play www}.map{|_|"//#{_}.google.com".R.HTTPthru}
+    # allow POST and OPTIONS
+    # %w{accounts mail news play www}.map{|_|
+    # "//#{_}.google.com".R.HTTPthru}
 
     # IG
     HostGET['instagram.com'] = -> r {[301, {'Location' =>  "https://www.instagram.com" + r.path},[]]}
@@ -225,13 +229,13 @@ class WebResource
 
     # Imgur
     HostGET['imgur.com'] = HostGET['i.imgur.com'] = -> re {
-      if !re.ext.empty? # file extension
-        if 'i.imgur.com' == re.host # image host
-          re.remoteNoJS # image
-        else # redirect to image host
+      if !re.ext.empty? # has extension?
+        if 'i.imgur.com' == re.host # has image-host?
+          re.remoteNoJS true # return image
+        else # redirect to image-host
           [301,{'Location' => 'https://i.imgur.com' + re.path},[]]
         end
-      else # redirect to image file
+      else # redirect to unwrapped image
         UnwrapImage[re]
       end}
 
