@@ -30,3 +30,4 @@ link to original cached file (w/ HTML extension) when HTML rewrite is in play
 link to local cache on chainlink icon in more scenarios
 preserve rewrite/non status across server runs
 slightly rewrite nonrewritten to jump back out
+host CSS
