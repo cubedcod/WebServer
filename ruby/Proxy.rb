@@ -161,42 +161,8 @@ class WebResource
     # CNN
     HostGET['dynaimage.cdn.cnn.com'] = -> r {[301, {'Location' => 'http' + URI.unescape(r.path.split(/http/)[-1])}, []]}
 
-    # DataDog
-    '//p.datadoghq.com'.R.HTTPthru
-
     # Discourse
     PathGET['/clicks/track'] = -> r {[301,{'Location' => r.q['url']},[]]}
-
-    # DuckDuckGo
-    ['',0,1,2,3,4].map{|n|
-      HostGET['proxy'+n.to_s+'.duckduckgo.com'] = -> re {
-        case re.parts[0]
-        when 'iu'
-          [301,{'Location' => re.q['u'],
-                'Access-Control-Allow-Origin' => '*'
-               },[]]
-        when 'iur'
-          [301,{'Location' => re.q['image_host']},[]]
-        when 'ip3'
-          re.ext == 'ico' ? re.favicon : re.notfound
-        when 'mapboxapi'
-          re.remoteNode
-        when 'mapkit'
-          original = re.env['QUERY_STRING'].R re.env
-          original.env['QUERY_STRING'] = original.query
-          original.remoteNode
-        else
-          re.notfound
-        end}}
-
-    # eBay
-    HostGET['rover.ebay.com'] = -> r {
-      if r.parts[0] == 'rover'
-        [301, {'Location' => r.q['mpre']}, []]
-      else
-        r.deny
-      end
-    }
 
     # Embedly
     HostGET['i.embed.ly'] = -> r {
@@ -233,17 +199,14 @@ class WebResource
       end
     }
 
-    # GitHub
-    HostGET['github.com'] = -> r {r.remoteNode}
-
     # Google
     HostGET['www.google.com'] = -> r {
       case r.parts[0]
       when nil
         r.remoteNode
-      when /^(amp|gmail)$/
+      when 'amp'
         r.cachedRedirect
-      when /^(imgres|maps|recaptcha|search|x?js)$/
+      when 'search'
         r.remoteNode
       when 'url'
         [301, {'Location' => ( r.q['url'] || r.q['q'] )}, []]
@@ -271,19 +234,6 @@ class WebResource
       else # redirect to image file
         UnwrapImage[re]
       end}
-
-    # Medium
-    HostGET['medium.com'] = -> r {
-      if %w{_ p}.member? r.parts[0]
-        r.deny
-      elsif r.path == '/m/global-identity'
-        [301, {'Location' => r.q['redirecturl']}, []]
-      else
-        r.remoteNode
-      end}
-
-    # Mixcloud
-    HostPOST['www.mixcloud.com'] = -> r {r.path == '/graphql' ? r.POSTthru : r.trackPOST}
 
     # Mozilla
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
