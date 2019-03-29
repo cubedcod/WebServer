@@ -151,6 +151,15 @@ class WebResource
 
     PathGET['/music'] = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'},[]]}
 
+    # Amazon
+    HostGET['www.amazon.com'] = -> r {
+      if r.parts.member?('dp') || r.parts.member?('gp')
+        r.remoteNode
+      else
+        r.deny
+      end
+    }
+
     # BizJournal
     HostGET['media.bizj.us'] = -> r {
       if r.path.match? /\*/
