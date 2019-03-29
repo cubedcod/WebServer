@@ -4,7 +4,7 @@ body {margin: 0 2em 0 2em; font-family: sans-serif}
 #prev {left:  0}
 #next {right: 0}
 #up, #down {display: block}
-#originUI {position: fixed; top: 0; right: 0}
+#originUI {position: fixed; top: 0; right: 0; z-index: 1}
 a {overflow: hidden; text-decoration: none; border-radius: .16em}
 a, p {max-width: 78ex}
 a.id {float: right}
