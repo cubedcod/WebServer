@@ -1,15 +1,11 @@
 class WebResource
   module HTTP
+
     def amp
       [301, {'Location' => 'https://' + (host.split('.') - %w{amp}).join('.') + (path.split('/') - %w{amp amphtml}).join('/')}, []]
     end
 
-    UI = {
-      'www.google.com' => true,
-      'www.youtube.com' => true,
-      'soundcloud.com' => true,
-      's.ytimg.com' => true,
-    }
+    UI = {'www.youtube.com' => true, 's.ytimg.com' => true}
 
     PathGET['/ui/origin'] = -> r {r.q['u'].do{|u| UI[u.R.host] = true; [302, {'Location' => u}, []]} || r.deny }
     PathGET['/ui/local']  = -> r {r.q['u'].do{|u| UI.delete u.R.host;  [302, {'Location' => u}, []]} || r.deny }
@@ -299,6 +295,15 @@ class WebResource
 
     # Reddit
     HostGET['i.reddit.com'] = HostGET['np.reddit.com'] = HostGET['reddit.com'] = -> re {[301,{'Location' => 'https://www.reddit.com' + re.path + re.qs},[]]}
+
+    # Reuters
+    HostGET['s1.reutersmedia.net'] = HostGET['s2.reutersmedia.net'] = HostGET['s3.reutersmedia.net'] = -> r {
+      if r.q.has_key? 'w'
+        q = r.q ; q.delete 'w'
+        [301, {'Location' => r.path + (HTTP.qs q)}, []]
+      else
+        r.remoteNode
+      end}
 
     # Soundcloud
     HostGET['exit.sc'] = -> r {[301, {'Location' => r.q['url']},[]]}
