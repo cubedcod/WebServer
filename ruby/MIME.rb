@@ -49,6 +49,7 @@ class WebResource
       'ino' => 'application/ino',
       'lisp' => 'text/x-lisp',
       'list' => 'text/plain',
+      'm3u8' => 'application/x-mpegURL',
       'mbox' => 'application/mbox',
       'md' => 'text/markdown',
       'msg' => 'message/rfc822',
@@ -141,7 +142,7 @@ class WebResource
     }
 
     # formats without rewriting or protocol-level compression
-    NoTransform = /^(application\/(font|javascript|json|octet-stream|pdf|vnd|(x-)?protobuf(fer)?)|audio|font|image|text\/(css|javascript)|video)/
+    NoTransform = /^(application\/(font|javascript|json|octet-stream|pdf|vnd|x-mpegURL|(x-)?protobuf(fer)?)|audio|font|image|text\/(css|javascript)|video)/
 
     TriplrHTML = {
       'twitter.com' => :triplrTweets,
