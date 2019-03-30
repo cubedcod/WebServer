@@ -110,7 +110,7 @@ class WebResource
              when /AMP/ # accelerated mobile page
                amp
              when /noexec/ # remote static-resource
-               remoteNoJS
+               remoteFile
              when /hosted/ # listed host
                if ('/' + host).R.exist? # host-dir exists
                  remoteNode # remote resource

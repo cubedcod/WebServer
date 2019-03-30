@@ -95,7 +95,7 @@ class WebResource
     end
     alias_method :remoteNode, :GETthru
 
-    def remoteNoJS allowGIF=false
+    def remoteFile allowGIF=false
       if %w{html jpg jpg:large jpeg ogg m3u8 m4a mp3 mp4 pdf png svg ts webm webp}.member? ext.downcase
         remoteNode
       elsif allowGIF && ext == 'gif'
@@ -224,7 +224,7 @@ class WebResource
       when 'url'
         [301, {'Location' => ( r.q['url'] || r.q['q'] )}, []]
       else
-        r.remoteNoJS
+        r.remoteFile
       end}
     # redirection
     %w{feedproxy.google.com gmail.com google.com maps.google.com}.map{|h|HostGET[h] = -> r {r.cachedRedirect}}
@@ -240,7 +240,7 @@ class WebResource
     HostGET['imgur.com'] = HostGET['i.imgur.com'] = -> re {
       if !re.ext.empty? # has extension?
         if 'i.imgur.com' == re.host # has image-host?
-          re.remoteNoJS true # return image
+          re.remoteFile true # return image
         else # redirect to image-host
           [301,{'Location' => 'https://i.imgur.com' + re.path},[]]
         end
