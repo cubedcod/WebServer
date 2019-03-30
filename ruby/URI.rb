@@ -217,15 +217,13 @@ rss.cnn.com
 rssfeeds.usatoday.com
 w.bos.gl
 }
-    def cachedRedirect
-      verbose = true
+    def cachedRedirect; verbose = false
       scheme = 'http' + (InsecureShorteners.member?(host) ? '' : 's') + '://'
       sourcePath = path || ''
       source = scheme + host + sourcePath
       dest = nil
       cache = ('/cache/URL/' + host + (sourcePath[0..2] || '') + '/' + (sourcePath[3..-1] || '') + '.u').R
       puts "redir #{source} ->" if verbose
-
       if cache.exist?
         puts "cached at #{cache}" if verbose
         dest = cache.readFile
@@ -248,7 +246,6 @@ w.bos.gl
         end
         cache.writeFile dest if dest
       end
-
       puts dest if verbose
       dest = dest ? dest.R : nil
       if @r

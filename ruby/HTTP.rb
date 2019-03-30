@@ -109,18 +109,18 @@ class WebResource
       return case env['HTTP_TYPE'] # typed request
              when /AMP/ # accelerated mobile page
                amp
-             when /noexec/ # remote static-resource
+             when /short/ # shortened URL
+               cachedRedirect
+             when /noexec/ # remote data file
                remoteFile
              when /hosted/ # listed host
-               if ('/' + host).R.exist? # host-dir exists
+               if ('/' + host).R.exist? # host-dir exists?
                  remoteNode # remote resource
                else
                  deny # host-dir required
                end
              when /feed/ # RSS/Atom
                remoteNode
-             when /short/ # shortened URL
-               cachedRedirect
              else # undefined request-type
                deny
              end if env.has_key? 'HTTP_TYPE'
@@ -133,7 +133,7 @@ class WebResource
     end
 
     HeaderAcronyms = %w{cl id spf utc xsrf}
-    InternalHeaders = %w{accept-encoding feedurl links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri response script-name server-name server-port server-protocol server-software track unicorn.socket upgrade-insecure-requests version via x-forwarded-for}
+    InternalHeaders = %w{accept-encoding links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri response script-name server-name server-port server-protocol server-software unicorn.socket upgrade-insecure-requests version via x-forwarded-for}
 
     def localResource?
       %w{l [::1] 127.0.0.1 localhost}.member? @r['SERVER_NAME']
