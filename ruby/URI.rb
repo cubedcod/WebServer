@@ -123,7 +123,7 @@ class WebResource < RDF::URI
 
     def cacheFile
       p = path || ''
-      useExtension = %w{aac atom css html jpeg jpg js m3u8 mp3 mp4 ogg opus pdf png rdf svg ttf ttl webm webp woff woff2}.member? ext.downcase
+      useExtension = %w{aac atom css html jpeg jpg js m3u8 mp3 mp4 ogg opus pdf png rdf svg ttf ttl vtt webm webp woff woff2}.member? ext.downcase
       ((host ? ('/' + host) : '') + (if host&.match?(/google|gstatic|\.redd|8ch/) || (qs && !qs.empty?) # new path
                      hash = (p + qs).sha2                    # hash original path
                      type = useExtension ? ext : 'cache'               # append suffix

@@ -66,6 +66,7 @@ class WebResource
       'tmp' => 'application/octet-stream',
       'ttl' => 'text/turtle',
       'u' => 'text/uri-list',
+      'vtt' => 'text/vtt',
       'webp' => 'image/webp',
       'woff' => 'application/font',
       'yaml' => 'text/plain',
@@ -141,9 +142,9 @@ class WebResource
       'text/x-tex'           => [:triplrTeX],
     }
 
-    # formats without rewriting or protocol-level compression
-    NoTransform = /^(application\/(font|javascript|json|octet-stream|pdf|vnd|x-mpegURL|(x-)?protobuf(fer)?)|audio|font|image|text\/(css|javascript)|video)/
+    NoTransform = /^(application\/(font|javascript|json|octet-stream|pdf|vnd|x-mpegURL|(x-)?protobuf(fer)?)|audio|font|image|text\/(css|javascript|vtt)|video)/
 
+    # host-mapped HTML triplers
     TriplrHTML = {
       'twitter.com' => :triplrTweets,
     }

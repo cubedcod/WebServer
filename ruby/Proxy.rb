@@ -100,7 +100,7 @@ class WebResource
     alias_method :remoteNode, :GETthru
 
     def remoteFile allowGIF=false
-      if %w{html jpg jpg:large jpeg ogg m3u8 m4a mp3 mp4 pdf png svg ts webm webp}.member? ext.downcase
+      if %w{html jpg jpg:large jpeg ogg m3u8 m4a mp3 mp4 pdf png svg ts vtt webm webp}.member? ext.downcase
         remoteNode
       elsif allowGIF && ext == 'gif'
         remoteNode
@@ -307,6 +307,9 @@ class WebResource
       else
         re.remoteNode
       end}
+
+    # Univision
+    HostOPTIONS['api.vmh.univision.com'] = -> r {r.OPTIONSthru}
 
     # WaPo
     HostGET['www.washingtonpost.com'] = -> r {
