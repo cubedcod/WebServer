@@ -272,7 +272,7 @@ class String
        (resource = link.R
         if blk
           type = case link
-                 when /(gif|jpg|jpeg|jpg:large|png|png:large|webp)$/i
+                 when /(gif|jpg|jpeg|(jpg|png):(large|small|thumb)|png|webp)$/i
                    WebResource::Image
                  when /(youtube.com|(mkv|mp4|webm)$)/i
                    WebResource::Video
