@@ -4,15 +4,13 @@ class WebResource
 
     FeedURL={}
     ConfDir.join('feeds/*.u').R.glob.map{|list|
-      list.lines.map{|u|
-        FeedURL[u] = u.R }}
+      list.lines.map{|u| FeedURL[u] = u.R }}
 
   end
   module HTTP
 
     def self.getFeeds
-      FeedURL.values.map{|feed|
-        feed.remoteNode}
+      FeedURL.values.map{|feed| feed.remoteNode}
       nil
     end
 

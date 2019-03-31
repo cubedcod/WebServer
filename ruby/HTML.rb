@@ -1,6 +1,7 @@
 # coding: utf-8
 class WebResource
   module HTML
+
     # Markup -> HTML
     def self.render x
       case x
@@ -8,15 +9,15 @@ class WebResource
         x
       when Hash # element
         void = [:img, :input, :link, :meta].member? x[:_]
-        '<' + (x[:_] || 'div').to_s +                        # open tag
-          (x.keys - [:_,:c]).map{|a|                         # attribute name
-          ' ' + a.to_s + '=' + "'" + x[a].to_s.chars.map{|c| # attribute value
+        '<' + (x[:_] || 'div').to_s +                        # open
+          (x.keys - [:_,:c]).map{|a|                         # attr name
+          ' ' + a.to_s + '=' + "'" + x[a].to_s.chars.map{|c| # attr value
             {"'"=>'%27', '>'=>'%3E', '<'=>'%3C'}[c]||c}.join + "'"}.join +
-          (void ? '/' : '') + '>' + (render x[:c]) +         # child nodes
-          (void ? '' : ('</'+(x[:_]||'div').to_s+'>'))       # close tag
-      when Array # structure
+          (void ? '/' : '') + '>' + (render x[:c]) +         # children
+          (void ? '' : ('</'+(x[:_]||'div').to_s+'>'))       # close
+      when Array
         x.map{|n|render n}.join
-      when WebResource # reference
+      when WebResource
         render({_: :a, href: x.uri, id: x[:id][0] || ('link'+rand.to_s.sha2), class: x[:class][0], c: x[:label][0] || (CGI.escapeHTML x.uri)})
       when NilClass
         ''
@@ -51,7 +52,7 @@ class WebResource
         r[Title].justArray[0]} || # title in RDF
               [*(path||'').split('/'), q['q'], q['f']].
                 map{|e|
-        e && URI.unescape(e)}.join(' ') # path + keyword derived title
+        e && URI.unescape(e)}.join(' ') # path-derived title
 
       # header (k,v) -> HTML
       link = -> key, displayname {
@@ -258,9 +259,9 @@ module Redcarpet
 end
 
 class String
-  # text -> HTML. yield (rel,href) tuples to code-block
+  # text -> HTML. yield (rel,href) tuples to block
   def hrefs &blk
-    # leading/trailing [<>()] stripped, trailing [,.] dropped
+    # leading & trailing [<>()] stripped, trailing [,.] dropped
     pre, link, post = self.partition(/(https?:\/\/(\([^)>\s]*\)|[,.]\S|[^\s),.”\'\"<>\]])+)/)
     pre.gsub('&','&amp;').gsub('<','&lt;').gsub('>','&gt;') + # pre-match
       (link.empty? && '' ||
@@ -279,9 +280,9 @@ class String
         end
         CGI.escapeHTML(resource.uri.sub /^http:../,'')) +
        '</a>') +
-      (post.empty? && '' || post.hrefs(&blk)) # recursion on post-match tail
+      (post.empty? && '' || post.hrefs(&blk)) # recursion on tail
   rescue
-    puts "failed to hypertextify #{self}"
+    puts "failed to scan #{self}"
     ''
   end
 end

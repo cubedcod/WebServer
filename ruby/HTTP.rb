@@ -4,11 +4,11 @@ class WebResource
     include MIME
     include URIs
 
-    def cache?; !(pragma && pragma == 'no-cache') end
-    Hosts = {}
+    Hosts = {} # track seen hosts for new-host highlighting in logger
+
     def self.call env
       method = env['REQUEST_METHOD']                        # request-method
-      return [202,{},[]] unless Methods.member? method      # undefined method
+      return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? method # defined methods
       query = parseQs env['QUERY_STRING']                   # parse query
       host = query['host']|| env['HTTP_HOST']|| 'localhost' # find hostname
       rawpath = env['REQUEST_PATH'].force_encoding('UTF-8').gsub /[\/]+/, '/' # collapse consecutive slashes
@@ -134,15 +134,6 @@ class WebResource
        [ s, h, []]}
     end
 
-    HeaderAcronyms = %w{cl id spf utc xsrf}
-    InternalHeaders = %w{accept-encoding host links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri response script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}
-
-    def localResource?
-      %w{l [::1] 127.0.0.1 localhost}.member? @r['SERVER_NAME']
-    end
-
-    Methods = %w{GET HEAD OPTIONS PUT POST}
-
     def notfound
       dateMeta # page hints as something nearby may exist
       [404,{'Content-Type' => 'text/html'},[htmlDocument]]
@@ -237,14 +228,15 @@ class WebResource
       head = {}
       env.map{|k,v|
         key = k.to_s.downcase.sub(/^http_/,'').split('_').map{|k|
-          if HeaderAcronyms.member? k
+          if %w{cl id spf utc xsrf}.member? k # acronyms
             k = k.upcase
           else
             k[0] = k[0].upcase
           end
           k
         }.join '-'
-        head[key] = v.to_s unless InternalHeaders.member?(key.downcase)}
+        # copy headers intended to be sent upstream. drop rack-internal. Host is added back by fetcher - may vary from current environment
+        head[key] = v.to_s unless %w{accept-encoding host links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri response script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
       head
     end
 

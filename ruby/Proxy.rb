@@ -5,6 +5,12 @@ class WebResource
       [301, {'Location' => 'https://' + (host.split('.') - %w{amp}).join('.') + (path.split('/') - %w{amp amphtml}).join('/')}, []]
     end
 
+    def cache?; !(pragma && pragma == 'no-cache') end
+
+    def localResource?
+      %w{l [::1] 127.0.0.1 localhost}.member? @r['SERVER_NAME']
+    end
+
     UI = {'www.youtube.com' => true,
           's.ytimg.com' => true,
           'sdr.hu' => true,
