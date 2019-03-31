@@ -7,19 +7,6 @@ class WebResource
 
     def cache?; !(pragma && pragma == 'no-cache') end
 
-    def localResource?
-      %w{l [::1] 127.0.0.1 localhost}.member? @r['SERVER_NAME']
-    end
-
-    UI = {'www.youtube.com' => true,
-          's.ytimg.com' => true,
-          'sdr.hu' => true,
-          'e.infogram.com' => true,
-          'cpt-static.gannettdigital.com' => true}
-
-    PathGET['/ui/origin'] = -> r {r.q['u'].do{|u| UI[u.R.host] = true; [302, {'Location' => u}, []]} || r.deny }
-    PathGET['/ui/local']  = -> r {r.q['u'].do{|u| UI.delete u.R.host;  [302, {'Location' => u}, []]} || r.deny }
-
     def GETthru
       head = HTTP.unmangle env # unCGIify header key-names
       suffix = host.match?(/reddit.com$/) && !parts.member?('wiki') && '.rss' # format suffix
@@ -104,14 +91,8 @@ class WebResource
     end
     alias_method :remoteNode, :GETthru
 
-    def remoteFile allowGIF=false
-      if %w{html jpg jpg:large jpeg ogg m3u8 m4a mp3 mp4 pdf png svg ts vtt webm webp}.member? ext.downcase
-        remoteNode
-      elsif allowGIF && ext == 'gif'
-        remoteNode
-      else
-        deny
-      end
+    def localResource?
+      %w{l [::1] 127.0.0.1 localhost}.member? @r['SERVER_NAME']
     end
 
     def HTTPthru
@@ -147,19 +128,41 @@ class WebResource
       [s, h, [b]]
     end
 
+    def remoteFile allowGIF=false
+      if %w{html jpg jpg:large jpeg ogg m3u8 m4a mp3 mp4 pdf png svg ts vtt webm webp}.member? ext.downcase
+        remoteNode
+      elsif allowGIF && ext == 'gif'
+        remoteNode
+      else
+        deny
+      end
+    end
+
     def trackPOST
       env[:deny] = true
       [202,{},[]]
     end
 
+    UI = {'www.youtube.com' => true,
+          's.ytimg.com' => true,
+          'sdr.hu' => true,
+          'e.infogram.com' => true,
+          'cpt-static.gannettdigital.com' => true}
+
+    # toggle UI provider - local vs origin
+    PathGET['/ui/origin'] = -> r {r.q['u'].do{|u| UI[u.R.host] = true; [302, {'Location' => u}, []]} || r.deny }
+    PathGET['/ui/local']  = -> r {r.q['u'].do{|u| UI.delete u.R.host;  [302, {'Location' => u}, []]} || r.deny }
+
+=begin
     PathGET['/cache'] = -> cache {
       cache.q['url'].do{|url|
         url.R(cache.env).remoteNode
       } || [200, {'Content-Type' => 'text/html'}, ['<form method="GET"><input name="url" autofocus></form>']]}
+=end
 
     PathGET['/generate_204'] = -> _ {Response_204}
 
-    PathGET['/music'] = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'},[]]}
+    PathGET['/mu'] = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'},[]]}
 
     # Amazon
     HostGET['www.amazon.com'] = -> r {
