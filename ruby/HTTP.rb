@@ -45,7 +45,9 @@ class WebResource
 
         [status, head, body]} # response
     rescue Exception => x
-      [500, {'Content-Type'=>'text/plain'}, method=='HEAD' ? [] : [[x.class,x.message,x.backtrace].join("\n")]]
+      msg = [x.class,x.message,x.backtrace].join "\n"
+      puts msg
+      [500, {'Content-Type'=>'text/plain'}, method=='HEAD' ? [] : [msg]]
     end
 
     def chronoDir?
@@ -133,7 +135,7 @@ class WebResource
     end
 
     HeaderAcronyms = %w{cl id spf utc xsrf}
-    InternalHeaders = %w{accept-encoding links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri response script-name server-name server-port server-protocol server-software unicorn.socket upgrade-insecure-requests version via x-forwarded-for}
+    InternalHeaders = %w{accept-encoding host links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri response script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}
 
     def localResource?
       %w{l [::1] 127.0.0.1 localhost}.member? @r['SERVER_NAME']

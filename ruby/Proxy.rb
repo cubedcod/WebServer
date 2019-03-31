@@ -16,7 +16,6 @@ class WebResource
 
     def GETthru
       head = HTTP.unmangle env # unCGIify header key-names
-      %w{Host Type}.map{|k| head.delete k} # strip headers
       suffix = host.match?(/reddit.com$/) && !parts.member?('wiki') && '.rss' # format suffix
       url = if @r && !suffix
               "https://#{host}#{@r['REQUEST_URI']}"
@@ -125,6 +124,7 @@ class WebResource
       s = r.code
       h = r.headers
       b = r.body
+      #puts s,b; print_header
       [s, h, [b]]
     end
 
