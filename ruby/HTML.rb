@@ -222,16 +222,19 @@ class WebResource
       n = Nokogiri::HTML.parse readFile.to_utf8
 
       triplr = TriplrHTML[@r && @r['SERVER_NAME']]
-      if triplr # host-specific triplr
+      if triplr # host-mapped triplr
         send triplr, &f
       else
         yield uri, Content, HTML.clean(n.css('body').inner_html)
       end
 
       n.css('title').map{|title| yield uri, Title, title.inner_text }
-
       n.css('head meta').map{|m|
-        yield uri, (m.attr("name") || m.attr("property")), m.attr("content") }
+        (m.attr("name") || m.attr("property")).do{|k|
+          m.attr("content").do{|v|
+            k = {'image' => Image,
+                }[k.split(':')[-1]] || k
+            yield uri, k, HTML.urifyString(v)}}}
 
       triplrFile &f
     end
