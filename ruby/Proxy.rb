@@ -197,6 +197,7 @@ class WebResource
       else
         zuck.remoteNode
       end}
+    HostGET['l.instagram.com'] = -> r {[302,{'Location' => r.q['u']},[]]}
     PathGET['/safe_image.php'] = -> r {[301,{'Location' => r.q['url']},[]]}
 
     # Forbes

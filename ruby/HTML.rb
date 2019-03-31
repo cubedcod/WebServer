@@ -207,15 +207,6 @@ class WebResource
 
   end
   include HTML
-  module HTTP
-
-    def favicon
-      ConfDir.join('icon.png').R(env).fileResponse
-    end
-
-    PathGET['/favicon.ico'] = -> r {r.favicon}
-
-  end
   module Webize
     include URIs
 
