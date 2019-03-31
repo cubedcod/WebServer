@@ -44,6 +44,36 @@ class WebResource
       [s, h, [b]]
     end
 
+    def HTTP.print_body body, mime
+      case mime
+      when /application\/json/
+        puts ::JSON.pretty_generate ::JSON.parse body
+      when /application\/x-www-form-urlencoded/
+        q = HTTP.parseQs body
+        message = q.delete "message"
+        puts q
+        puts ::JSON.pretty_generate ::JSON.parse message if message
+      else
+        puts body
+      end
+    rescue ::JSON::ParserError
+      nil
+    end
+
+    def print_body
+      @r['rack.input'].do{|i|
+        HTTP.print_body i.read, @r['CONTENT_TYPE'] }
+    end
+
+    def HTTP.print_header header
+      header.map{|k,v|
+        puts [k,v].join "\t"}
+    end
+
+    def print_header
+      HTTP.print_header env
+    end
+
     def remoteFile allowGIF=false
       if %w{html jpg jpg:small jpg:large jpg:thumb jpeg ogg m3u8 m4a mp3 mp4 pdf png svg ts vtt webm webp}.member? ext.downcase
         remoteNode
@@ -303,6 +333,7 @@ class WebResource
     HostGET['lookup.t-mobile.com'] = -> re {[200, {'Content-Type' => 'text/html'}, [re.htmlDocument({re.uri => {'dest' => re.q['origurl'].R}})]]}
 
     # Twitter
+    '//api.twitter.com'.R.HTTPthru
     HostGET['mobile.twitter.com'] = HostGET['www.twitter.com'] = -> r {[301, {'Location' =>  "https://twitter.com" + r.path},[]]}
     HostGET['twitter.com'] = -> re {
       if re.path == '/'

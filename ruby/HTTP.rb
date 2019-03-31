@@ -50,46 +50,9 @@ class WebResource
       [500, {'Content-Type'=>'text/plain'}, method=='HEAD' ? [] : [msg]]
     end
 
-    def chronoDir?
-      (parts[0]||'').match /^(y(ear)?|m(onth)?|d(ay)?|h(our)?)$/i
-    end
-
-    def chronoDir
-      time = Time.now
-      loc = time.strftime(case parts[0][0].downcase
-                          when 'y'
-                            '%Y'
-                          when 'm'
-                            '%Y/%m'
-                          when 'd'
-                            '%Y/%m/%d'
-                          when 'h'
-                            '%Y/%m/%d/%H'
-                          else
-                          end)
-      [303, @r[:Response].update({'Location' => '/' + loc + '/' + parts[1..-1].join('/') + qs}), []]
-    end
-
     def deny
       env[:deny] = true
       [200, {'Content-Type' => ext=='js' ? 'application/javascript' : 'text/plain'}, []]
-    end
-
-    # conditional responder
-    def entity env, lambda = nil
-      etags = env['HTTP_IF_NONE_MATCH'].do{|m| m.strip.split /\s*,\s*/ }
-      if etags && (etags.include? env[:Response]['ETag'])
-        [304, {}, []] # client has entity
-      else
-        body = lambda ? lambda.call : self # response body
-        if body.class == WebResource # resource reference
-          # dispatch to file handler
-          (Rack::File.new nil).serving((Rack::Request.new env),body.localPath).do{|s,h,b| # response
-            [s,h.update(env[:Response]),b]} # attach metadata and return
-        else
-          [(env[:Status]||200), env[:Response], [body]]
-        end
-      end
     end
 
     def environment env = nil
@@ -165,36 +128,6 @@ class WebResource
 
     def pragma; env['HTTP_PRAGMA'] end
 
-    def HTTP.print_body body, mime
-      case mime
-      when /application\/json/
-        puts ::JSON.pretty_generate ::JSON.parse body
-      when /application\/x-www-form-urlencoded/
-        q = HTTP.parseQs body
-        message = q.delete "message"
-        puts q
-        puts ::JSON.pretty_generate ::JSON.parse message if message
-      else
-        puts body
-      end
-    rescue ::JSON::ParserError
-      nil
-    end
-
-    def print_body
-      @r['rack.input'].do{|i|
-        HTTP.print_body i.read, @r['CONTENT_TYPE'] }
-    end
-
-    def HTTP.print_header header
-      header.map{|k,v|
-        puts [k,v].join "\t"}
-    end
-
-    def print_header
-      HTTP.print_header env
-    end
-
     def PUT
       [202,{},[]]
     end
@@ -224,6 +157,8 @@ class WebResource
 
     Response_204 = [204, {'Content-Length' => 0}, []]
 
+    # ALL_CAPS CGI/env-vars to HTTP request-header capitalization
+    # is there any way to get the unmangled data from rack?
     def self.unmangle env
       head = {}
       env.map{|k,v|
@@ -235,7 +170,7 @@ class WebResource
           end
           k
         }.join '-'
-        # copy headers intended to be sent upstream. drop rack-internal. Host is added back by fetcher - may vary from current environment
+        # headers for request. drop rack-internal and Type, our typetag. Host is added by fetcher and may vary from current environment
         head[key] = v.to_s unless %w{accept-encoding host links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri response script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
       head
     end
