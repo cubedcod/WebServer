@@ -7,13 +7,60 @@ class WebResource
 
     def cache?; !(pragma && pragma == 'no-cache') end
 
-    def GETthru
+    def localResource?
+      %w{l [::1] 127.0.0.1 localhost}.member? @r['SERVER_NAME']
+    end
+
+    def HTTPthru
+      HostGET[host] = -> r {r.GETthru}
+     HostPOST[host] = -> r {r.POSTthru}
+  HostOPTIONS[host] = -> r {r.OPTIONSthru}
+    end
+
+    def OPTIONSthru
+      # request
+      url = 'https://' + host + path + qs
+      headers = HTTP.unmangle env
+      body = env['rack.input'].read
+      # response
+      r = HTTParty.options url, :headers => headers, :body => body
+      s = r.code
+      h = r.headers
+      b = r.body
+      #puts s,b; print_header
+      [s, h, [b]]
+    end
+
+    def POSTthru
+      # request
+      url = 'https://' + host + path + qs
+      headers = HTTP.unmangle env
+      body = env['rack.input'].read
+      # response
+      r = HTTParty.post url, :headers => headers, :body => body
+      s = r.code
+      h = r.headers
+      b = r.body
+      [s, h, [b]]
+    end
+
+    def remoteFile allowGIF=false
+      if %w{html jpg jpg:large jpeg ogg m3u8 m4a mp3 mp4 pdf png svg ts vtt webm webp}.member? ext.downcase
+        remoteNode
+      elsif allowGIF && ext == 'gif'
+        remoteNode
+      else
+        deny
+      end
+    end
+
+    def remoteNode
       head = HTTP.unmangle env # unCGIify header key-names
       suffix = host.match?(/reddit.com$/) && !parts.member?('wiki') && '.rss' # format suffix
-      url = if @r && !suffix
+      url = if @r && !suffix # unmodified URI from environment
               "https://#{host}#{@r['REQUEST_URI']}"
             else
-              'https://' + host + (path || '') + suffix + qs
+              'https://' + host + (path||'') + (suffix||'') + qs
             end
       cache = cacheFile
       cacheMeta = cache.metafile
@@ -78,7 +125,7 @@ class WebResource
     rescue Exception => e
       msg = [uri, e.class, e.message].join " "
       trace = e.backtrace.join "\n"
-      puts msg #, trace
+      puts msg, trace
       @r ? [500, {'Content-Type' => 'text/html'},
             [htmlDocument({uri => {Content => [{_: :style, c: "body {background-color: red !important}"},
                                                {_: :h3, c: msg.hrefs}, {_: :pre, c: trace.hrefs},
@@ -89,54 +136,7 @@ class WebResource
                                                 (CGI.escapeHTML e.io.read.to_utf8)] if e.respond_to? :io) # response body
                                               ]}})]] : self
     end
-    alias_method :remoteNode, :GETthru
-
-    def localResource?
-      %w{l [::1] 127.0.0.1 localhost}.member? @r['SERVER_NAME']
-    end
-
-    def HTTPthru
-      HostGET[host] = -> r {r.GETthru}
-     HostPOST[host] = -> r {r.POSTthru}
-  HostOPTIONS[host] = -> r {r.OPTIONSthru}
-    end
-
-    def OPTIONSthru
-      # request
-      url = 'https://' + host + path + qs
-      headers = HTTP.unmangle env
-      body = env['rack.input'].read
-      # response
-      r = HTTParty.options url, :headers => headers, :body => body
-      s = r.code
-      h = r.headers
-      b = r.body
-      #puts s,b; print_header
-      [s, h, [b]]
-    end
-
-    def POSTthru
-      # request
-      url = 'https://' + host + path + qs
-      headers = HTTP.unmangle env
-      body = env['rack.input'].read
-      # response
-      r = HTTParty.post url, :headers => headers, :body => body
-      s = r.code
-      h = r.headers
-      b = r.body
-      [s, h, [b]]
-    end
-
-    def remoteFile allowGIF=false
-      if %w{html jpg jpg:large jpeg ogg m3u8 m4a mp3 mp4 pdf png svg ts vtt webm webp}.member? ext.downcase
-        remoteNode
-      elsif allowGIF && ext == 'gif'
-        remoteNode
-      else
-        deny
-      end
-    end
+    alias_method :GETthru, :remoteNode
 
     def trackPOST
       env[:deny] = true
@@ -154,6 +154,7 @@ class WebResource
     PathGET['/ui/local']  = -> r {r.q['u'].do{|u| UI.delete u.R.host;  [302, {'Location' => u}, []]} || r.deny }
 
 =begin
+    # explicit cache-request for URL
     PathGET['/cache'] = -> cache {
       cache.q['url'].do{|url|
         url.R(cache.env).remoteNode
@@ -227,6 +228,7 @@ class WebResource
     }
 
     # Google
+    %w{feedproxy.google.com gmail.com google.com maps.google.com}.map{|h|HostGET[h] = -> r {r.cachedRedirect}}
     HostGET['www.google.com'] = -> r {
       case r.parts[0]
       when nil
@@ -240,15 +242,7 @@ class WebResource
       else
         r.remoteFile
       end}
-    # redirection
-    %w{feedproxy.google.com gmail.com google.com maps.google.com}.map{|h|HostGET[h] = -> r {r.cachedRedirect}}
-    # allow POST and OPTIONS
-    # %w{accounts mail news play www}.map{|_|
-    # "//#{_}.google.com".R.HTTPthru}
-
-    # IG
-    HostGET['instagram.com'] = -> r {[301, {'Location' =>  "https://www.instagram.com" + r.path},[]]}
-    HostGET['l.instagram.com'] = -> r {[301,{'Location' => r.q['u']},[]]}
+    # %w{accounts mail news play www}.map{|_| "//#{_}.google.com".R.HTTPthru}
 
     # Imgur
     HostGET['imgur.com'] = HostGET['i.imgur.com'] = -> re {
@@ -261,6 +255,10 @@ class WebResource
       else # redirect to unwrapped image
         UnwrapImage[re]
       end}
+
+    # Instagram
+    HostGET['instagram.com'] = -> r {[301, {'Location' =>  "https://www.instagram.com" + r.path},[]]}
+    HostGET['l.instagram.com'] = -> r {[301,{'Location' => r.q['u']},[]]}
 
     # Mozilla
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
@@ -280,7 +278,7 @@ class WebResource
         r.remoteNode
       end}
 
-    # Soundcloud
+    # SoundCloud
     HostGET['exit.sc'] = -> r {[301, {'Location' => r.q['url']},[]]}
 
     # YouTube
