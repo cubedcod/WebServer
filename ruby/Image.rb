@@ -1,10 +1,5 @@
 class WebResource
 
-  module URIs
-    Instagram = 'www.instagram.com'
-    YouTube = 'http://www.youtube.com/xml/schemas/2015#'
-  end
-
   # TODO Dedupe video embeds within response representation
   module Webize
 

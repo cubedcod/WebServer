@@ -209,11 +209,20 @@ class WebResource
       else
         r.remoteNode
       end}
+
     # Brightcove
     '//edge.api.brightcove.com'.R.HTTPthru
 
     # Broadcastify
     HostPOST['www.broadcastify.com'] = -> r {r.POSTthru}
+
+    # Cloudflare
+    HostGET['cdnjs.cloudflare.com'] = -> r {
+      if r.path.match? /\/jquery/
+        r.remoteNode
+      else
+        r.deny
+      end}
 
     # CNN
     HostGET['dynaimage.cdn.cnn.com'] = -> r {[301, {'Location' => 'http' + URI.unescape(r.path.split(/http/)[-1])}, []]}
@@ -237,8 +246,10 @@ class WebResource
       else
         zuck.remoteNode
       end}
-    HostGET['l.facebook.com']  = -> r {[302, {'Location' => r.q['u']},   []]}
-    PathGET['/safe_image.php'] = -> r {[301, {'Location' => r.q['url']}, []]}
+    HostGET['instagram.com']   = -> r {[301, {'Location' => "https://www.instagram.com" + r.path},[]]}
+    HostGET['l.facebook.com']  = -> r {[301, {'Location' => r.q['u']},  []]}
+    HostGET['l.instagram.com'] = -> r {[301, {'Location' => r.q['u']},  []]}
+    PathGET['/safe_image.php'] = -> r {[301, {'Location' => r.q['url']},[]]}
 
     # Forbes
     HostGET['thumbor.forbes.com'] = -> r {
@@ -288,10 +299,6 @@ class WebResource
       else # redirect to unwrapped image
         UnwrapImage[re]
       end}
-
-    # Instagram
-    HostGET['instagram.com'] = -> r {[301, {'Location' =>  "https://www.instagram.com" + r.path},[]]}
-    HostGET['l.instagram.com'] = -> r {[301,{'Location' => r.q['u']},[]]}
 
     # Mozilla
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
