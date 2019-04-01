@@ -229,11 +229,29 @@ class WebResource
       end
 
       n.css('title').map{|title| yield uri, Title, title.inner_text }
+
+      # metadata to RDF
       n.css('head meta').map{|m|
-        (m.attr("name") || m.attr("property")).do{|k|
-          m.attr("content").do{|v|
-            k = {'image' => Image,
-                }[k.split(':')[-1]] || k
+        (m.attr("name") || m.attr("property")).do{|k| # predicate
+          m.attr("content").do{|v| # object
+            # mapping table
+            k = {
+              'description' => Abstract,
+              'image' => Image,
+              'msapplication-TileImage' => Image,
+              'og:description' => Abstract,
+              'og:image' => Image,
+              'og:image:height' => Schema + 'height',
+              'og:image:width' => Schema + 'width',
+              'og:image:secure_url' => Image,
+              'og:title' => Title,
+              'thumbnail' => Image,
+              'twitter:creator' => Creator,
+              'twitter:description' => Abstract,
+              'twitter:image' => Image,
+              'twitter:image:src' => Image,
+              'twitter:title' => Title,
+            }[k] || k
             yield uri, k, HTML.urifyString(v)}}}
 
       triplrFile &f
