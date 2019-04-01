@@ -81,10 +81,11 @@ class WebResource
     def remoteNode
       head = HTTP.unmangle env # unCGIify header key-names
       suffix = host.match?(/reddit.com$/) && !parts.member?('wiki') && '.rss' # format suffix
-      url = if @r && !suffix # unmodified URI from environment
+      p = path || ''
+      url = if @r && !suffix && !p.match?(/[\[\]]/) # existing URL
               "https://#{host}#{@r['REQUEST_URI']}"
-            else
-              'https://' + host + (path||'') + (suffix||'') + qs
+            else # new URL
+              'https://' + host + p.gsub('[','%5B').gsub(']','%5D') + (suffix||'') + qs
             end
       cache = cacheFile
       cacheMeta = cache.metafile
