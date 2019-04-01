@@ -27,7 +27,6 @@ class WebResource
       s = r.code
       h = r.headers
       b = r.body
-      #puts s,b; print_header
       [s, h, [b]]
     end
 
@@ -75,7 +74,7 @@ class WebResource
     end
 
     def remoteFile allowGIF=false
-      if %w{html jpg jpg:small jpg:large jpg:thumb jpeg ogg m3u8 m4a mp3 mp4 pdf png svg ts vtt webm webp}.member? ext.downcase
+      if %w{html jpg jpg:small jpg:large jpg:thumb jpeg json ogg m3u8 m4a mp3 mp4 pdf png svg ts vtt webm webp}.member? ext.downcase
         remoteNode
       elsif allowGIF && ext == 'gif'
         remoteNode
@@ -204,6 +203,9 @@ class WebResource
       end
     }
 
+    # Anvato
+    '//tkx2-prod.anvato.net'.R.HTTPthru
+
     # BizJournal
     HostGET['media.bizj.us'] = -> r {
       if r.path.match? /\*/
@@ -305,7 +307,7 @@ class WebResource
     HostGET['i.reddit.com'] = HostGET['np.reddit.com'] = HostGET['reddit.com'] = -> re {[301,{'Location' => 'https://www.reddit.com' + re.path + re.qs},[]]}
 
     # Reuters
-    HostGET['s1.reutersmedia.net'] = HostGET['s2.reutersmedia.net'] = HostGET['s3.reutersmedia.net'] = -> r {
+    HostGET['s1.reutersmedia.net'] = HostGET['s2.reutersmedia.net'] = HostGET['s3.reutersmedia.net'] = HostGET['s4.reutersmedia.net'] = -> r {
       if r.q.has_key? 'w'
         q = r.q ; q.delete 'w'
         [301, {'Location' => r.path + (HTTP.qs q)}, []]
