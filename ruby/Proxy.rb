@@ -250,6 +250,9 @@ class WebResource
         r.remoteNode
       end}
 
+    # Gannett
+    #www.gannett-cdn.com
+
     # Gatehouse
     HostGET['www.patriotledger.com'] = -> r {
       if r.parts[0] == 'storyimage' && r.path.match?(/&/)

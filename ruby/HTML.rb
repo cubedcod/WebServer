@@ -230,6 +230,11 @@ class WebResource
 
       n.css('title').map{|title| yield uri, Title, title.inner_text }
 
+      # video
+      ['video[src]', 'video > source[src]'].map{|vsel|
+        n.css(vsel).map{|v|
+          yield uri, Video, v.attr('src').R }}
+
       # metadata to RDF
       n.css('head meta').map{|m|
         (m.attr("name") || m.attr("property")).do{|k| # predicate
