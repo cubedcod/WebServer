@@ -74,6 +74,8 @@ class WebResource
       return case env['HTTP_TYPE'] # typed request
              when /AMP/ # accelerated mobile page
                amp
+             when /feed/ # RSS/Atom feed
+               remoteNode
              when /short/ # shortened URL
                cachedRedirect
              when /noexec/ # remote data file
@@ -84,8 +86,6 @@ class WebResource
                else
                  deny # host-dir required
                end
-             when /feed/ # RSS/Atom
-               remoteNode
              else # undefined request-type
                deny
              end if env.has_key? 'HTTP_TYPE'
