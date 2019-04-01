@@ -162,11 +162,11 @@ class WebResource
     def self.unmangle env
       head = {}
       env.map{|k,v|
-        key = k.to_s.downcase.sub(/^http_/,'').split('_').map{|k|
-          if %w{cl id spf utc xsrf}.member? k # acronyms
+        key = k.to_s.downcase.sub(/^http_/,'').split('_').map{|k| # chop prefix and tokenize
+          if %w{cl id spf utc xsrf}.member? k # acronyms to capitalize
             k = k.upcase
           else
-            k[0] = k[0].upcase
+            k[0] = k[0].upcase # word
           end
           k
         }.join '-'
