@@ -4,7 +4,7 @@ class WebResource
     include MIME
     include URIs
 
-    Hosts = {} # track seen hosts for new-host highlighting in logger
+    Hosts = {} # track hosts for new-host highlighting in logger
 
     def self.call env
       method = env['REQUEST_METHOD']                        # request-method
@@ -17,8 +17,7 @@ class WebResource
       env[:Response] = {}; env[:links] = {}                 # response-header storage
       resource = ('//' + host + path).R env                 # bind resource and environment
       resource.send(method).do{|status,head,body|           # dispatch request
-
-        # logging
+        # log request
         color = (if resource.env[:deny]
                  '31'
                 elsif !Hosts.has_key? host
@@ -39,7 +38,6 @@ class WebResource
                      ''
                    end
         location = head['Location'] ? (" -> " + head['Location']) : ""
-
         puts "\e[7m" + (method == 'GET' ? ' ' : '') + method + "\e[" + color + "m "  + status.to_s + "\e[0m " + referrer + ' ' +
              "\e[" + color + ";7mhttps://" + host + "\e[0m\e[" + color + "m" + path + resource.qs + "\e[0m" + location
 
