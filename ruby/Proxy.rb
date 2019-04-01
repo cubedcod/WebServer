@@ -35,11 +35,15 @@ class WebResource
       url = 'https://' + host + path + qs
       headers = HTTP.unmangle env
       body = env['rack.input'].read
+      print_header
+      print_body body
       # response
       r = HTTParty.post url, :headers => headers, :body => body
       s = r.code
       h = r.headers
       b = r.body
+      HTTP.print_header h
+      HTTP.print_body b, h['content-type']
       [s, h, [b]]
     end
 
@@ -59,19 +63,10 @@ class WebResource
       nil
     end
 
-    def print_body
-      @r['rack.input'].do{|i|
-        HTTP.print_body i.read, @r['CONTENT_TYPE'] }
-    end
+    def HTTP.print_header header; header.map{|k,v|puts [k,v].join "\t"} end
 
-    def HTTP.print_header header
-      header.map{|k,v|
-        puts [k,v].join "\t"}
-    end
-
-    def print_header
-      HTTP.print_header env
-    end
+    def print_body body; HTTP.print_body body, @r['CONTENT_TYPE'] end
+    def print_header; HTTP.print_header env end
 
     def remoteFile allowGIF=false
       if %w{html jpg jpg:small jpg:large jpg:thumb jpeg json ogg m3u8 m4a mp3 mp4 pdf png svg ts vtt webm webp}.member? ext.downcase
