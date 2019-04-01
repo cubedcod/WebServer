@@ -211,6 +211,8 @@ class WebResource
       else
         r.remoteNode
       end}
+    # Brightcove
+    '//edge.api.brightcove.com'.R.HTTPthru
 
     # Broadcastify
     HostPOST['www.broadcastify.com'] = -> r {r.POSTthru}
