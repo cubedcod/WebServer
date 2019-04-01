@@ -102,6 +102,7 @@ class WebResource
 
     def OPTIONS
       return HostOPTIONS[host][self] if HostOPTIONS[host]
+      env[:deny] = true
       [202,{},[]]
     end
 
