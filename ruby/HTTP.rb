@@ -43,12 +43,15 @@ class WebResource
 
         [status, head, body]} # response
     rescue Exception => e
-      msg = [uri, e.class, e.message].join " "
+      msg = [resource.uri, e.class, e.message].join " "
       trace = e.backtrace.join "\n"
       [500, {'Content-Type' => 'text/html'},
-       [htmlDocument({uri => {Content => [{_: :style, c: "body {background-color: red !important}"},
-                                          {_: :h3, c: msg.hrefs}, {_: :pre, c: trace.hrefs},
-                                          (HTML.kv (HTML.urifyHash head), @r)]}})]]
+       [resource.htmlDocument(
+          {resource.uri => {Content => [
+                              {_: :style, c: "body {background-color: red !important}"}, {_: :h3, c: msg.hrefs},
+                              {_: :pre, c: trace.hrefs},
+                              (HTML.kv (HTML.urifyHash env), env) # request metadata
+                            ]}})]]
     end
 
     def deny
