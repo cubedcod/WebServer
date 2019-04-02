@@ -61,7 +61,7 @@ class WebResource
            "\n"]}}
 
       # filtered graph -> HTML
-      htmlGrep graph, q['q'] if q['q']
+      htmlGrep graph, q['q'] if @r[:grep]
 
       # Markup -> HTML
       HTML.render ["<!DOCTYPE html>\n\n",

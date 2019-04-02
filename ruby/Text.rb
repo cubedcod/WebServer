@@ -3,6 +3,7 @@ class WebResource
   module POSIX
     # grepPattern -> file(s)
     def grep q
+      env[:grep] = true
       args = POSIX.splitArgs q
       case args.size
       when 0
