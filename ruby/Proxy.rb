@@ -241,7 +241,7 @@ class WebResource
 
     # Facebook
     HostGET['www.facebook.com'] = -> zuck {
-      if zuck.ext == 'php'
+      if %w{ajax api plugins si tr}.member?(zuck.parts[0]) || zuck.ext == 'php'
         zuck.deny
       else
         zuck.remoteNode

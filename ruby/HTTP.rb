@@ -70,24 +70,20 @@ class WebResource
       return fileResponse if node.file?           # local static-resource
       return graphResponse localNodes if localResource? # local resource
       return case env['HTTP_TYPE'] # typed request
-             when /AMP/ # accelerated mobile page
-               amp
-             when /feed/ # RSS/Atom feed
-               remoteNode
-             when /short/ # shortened URL
-               cachedRedirect
-             when /noexec/ # remote data file
+             when /nofetch/
+               deny
+             when /noexec/
                remoteFile
-             when /hosted/ # listed host
-               if ('/' + host).R.exist? # host-dir exists?
-                 remoteNode # remote resource
-               else
-                 deny # host-dir required
-               end
-             else # undefined request-type
+             when /AMP/
+               amp
+             when /feed/
+               remoteNode
+             when /short/
+               cachedRedirect
+             else
                deny
              end if env.has_key? 'HTTP_TYPE'
-      remoteNode # local handling undefined -> remote resource
+      remoteNode # local preference undefined
     end
 
     def HEAD
