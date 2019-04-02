@@ -21,7 +21,6 @@ p:first-child {border-width: 0}
 img, video {max-width: 100%}
 img.thumb {max-width: 28em}
 nav, header, .header, #header {position: absolute; top: 0; left: 0; z-index: -1; color: #aaa}
-aside {position: absolute; top: 0; right: 0; z-index: -1}
 footer,.footer,#footer {position: absolute; bottom: 0; left: 0; z-index: -1; color: #aaa}
 pre {white-space: pre-wrap}
 a.title, a.link, div.thumb {background-color: #fff; color: #000}

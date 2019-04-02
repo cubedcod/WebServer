@@ -217,7 +217,7 @@ class WebResource
     HostPOST['www.broadcastify.com'] = -> r {r.POSTthru}
 
     # Cloudflare
-    HostGET['cdnjs.cloudflare.com'] = -> r {
+    HostGET['cdnjs.cloudflare.com'] = HostGET['ajax.googleapis.com'] = -> r {
       if r.path.match? /\/jquery/
         r.remoteNode
       else
