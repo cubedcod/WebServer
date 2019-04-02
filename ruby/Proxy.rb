@@ -68,22 +68,17 @@ class WebResource
     def print_body body; HTTP.print_body body, @r['CONTENT_TYPE'] end
     def print_header; HTTP.print_header env end
 
-    def redirect; verbose = true
+    def redirect
       scheme = 'http' + (InsecureShorteners.member?(host) ? '' : 's') + '://'
       sourcePath = path || ''
       source = scheme + host + sourcePath
       dest = nil
       cache = ('/cache/URL/' + host + (sourcePath[0..2] || '') + '/' + (sourcePath[3..-1] || '') + '.u').R
-      puts "redir #{source} ->" if verbose
       if cache.exist?
-        puts "cached at #{cache}" if verbose
         dest = cache.readFile
       else
-        puts "fetch #{source}" if verbose
         resp = Net::HTTP.get_response (URI.parse source)
-        puts resp.body if verbose
         dest = resp['Location'] || resp['location']
-        puts dest if dest && verbose
         if !dest
           body = Nokogiri::HTML.fragment resp.body
           refresh = body.css 'meta[http-equiv="refresh"]'
@@ -91,19 +86,14 @@ class WebResource
             content = refresh.attr('content')
             if content
               dest = content.to_s.split('URL=')[-1]
-              puts dest if verbose
             end
           end
         end
         cache.writeFile dest if dest
       end
-      puts dest if verbose
       dest = dest ? dest.R : nil
       if @r
-        # return URI to caller in document
-        # [200, {'Content-Type' => 'text/html'}, [htmlDocument({source => {Link => dest}})]]
-        # redirect to URI
-        dest ? [302, {'Location' =>  dest},[]] : notfound
+        dest ? [302, {'Location' =>  dest}, []] : notfound
       else
         dest
       end
@@ -188,20 +178,8 @@ class WebResource
       else # REPL/script/shell caller
         updates.empty? ? self : updates
       end
-
-    rescue Exception => e
-      msg = [uri, e.class, e.message].join " "
-      trace = e.backtrace.join "\n"
-      puts msg, trace
-      @r ? [500, {'Content-Type' => 'text/html'},
-            [htmlDocument({uri => {Content => [{_: :style, c: "body {background-color: red !important}"},
-                                               {_: :h3, c: msg.hrefs}, {_: :pre, c: trace.hrefs},
-                                               {_: :h4, c: 'request'},
-                                               (HTML.kv (HTML.urifyHash head), @r), # request header
-                                               ([{_: :h4, c: "response #{e.io.status[0]}"},
-                                                (HTML.kv (HTML.urifyHash e.io.meta), @r), # response header
-                                                (CGI.escapeHTML e.io.read.to_utf8)] if e.respond_to? :io) # response body
-                                              ]}})]] : self
+    rescue OpenURI::HTTPRedirect
+      redirect
     end
     alias_method :GETthru, :remoteNode
 

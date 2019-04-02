@@ -42,10 +42,13 @@ class WebResource
              "\e[" + color + ";7mhttps://" + host + "\e[0m\e[" + color + "m" + path + resource.qs + "\e[0m" + location
 
         [status, head, body]} # response
-    rescue Exception => x
-      msg = [x.class,x.message,x.backtrace].join "\n"
-      puts msg
-      [500, {'Content-Type'=>'text/plain'}, method=='HEAD' ? [] : [msg]]
+    rescue Exception => e
+      msg = [uri, e.class, e.message].join " "
+      trace = e.backtrace.join "\n"
+      [500, {'Content-Type' => 'text/html'},
+       [htmlDocument({uri => {Content => [{_: :style, c: "body {background-color: red !important}"},
+                                          {_: :h3, c: msg.hrefs}, {_: :pre, c: trace.hrefs},
+                                          (HTML.kv (HTML.urifyHash head), @r)]}})]]
     end
 
     def deny
