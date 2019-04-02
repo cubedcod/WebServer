@@ -174,7 +174,7 @@ class WebResource
         (name = path || ''
          prefix = ((File.basename name).split('.')[0]||'').downcase
          suffix = ((File.extname name)[1..-1]||'').downcase
-         # prefer specification in name-prefix/suffix or metafile w/ sniff as last resort
+         # prefer specification in prefix, suffix or metadata, sniff as last resort
          if node.directory?
            'inode/directory'
          elsif MIMEsuffix[suffix]
@@ -188,10 +188,14 @@ class WebResource
            if meta.exist?
              meta.lines[0]
            else
-             puts "MIME undefined for #{localPath}, sniffing content"
-             `file --mime-type -b #{Shellwords.escape localPath.to_s}`.chomp
+             mimeSniff
            end
          end)
+    end
+
+    def mimeSniff
+      puts "MIME undefined for #{localPath}, sniffing content"
+      `file --mime-type -b #{Shellwords.escape localPath.to_s}`.chomp
     end
 
     def mimeCategory

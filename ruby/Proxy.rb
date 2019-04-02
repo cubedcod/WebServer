@@ -133,7 +133,13 @@ class WebResource
             resp = response.read
             unless cache.e && cache.readFile == resp
               cache.writeFile resp # update cache
-              mime = response.meta['content-type'].do{|type| type.split(';')[0] } || ''
+              mime = if response.meta['content-type'] # explicit MIME from upstream
+                       response.meta['content-type'].split(';')[0]
+                     elsif MIMEsuffix[cache.ext]      # file extension
+                       MIMEsuffix[cache.ext]
+                     else                             # sniff
+                       cache.mimeSniff
+                     end
               cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # cache-file metadata (TODO POSIX-eattrs investigation)
               # update index
               updates.concat(case mime

@@ -73,7 +73,7 @@ class WebResource
       return PathGET[path][self] if PathGET[path] # path lambda
       return HostGET[host][self] if HostGET[host] # host lambda
       return chronoDir if chronoDir?              # time redirect
-      return localFile if node.file?              # local static-resource
+      return localFile if node.file?              # local static-node
       return localNode if localResource?          # local graph-node
       return case env['HTTP_TYPE'] # request type dispatching
              when /nofetch/
