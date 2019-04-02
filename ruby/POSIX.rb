@@ -177,6 +177,11 @@ class WebResource
       end
     end
 
+    # file(s) -> HTTP Response
+    def localNode
+      graphResponse localNodes
+    end
+
   end
   module POSIX
 

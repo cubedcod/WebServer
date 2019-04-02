@@ -74,7 +74,7 @@ class WebResource
       return HostGET[host][self] if HostGET[host] # host lambda
       return chronoDir if chronoDir?              # time redirect
       return localFile if node.file?              # local static-resource
-      return graphResponse localNodes if localResource? # local node
+      return localNode if localResource?          # local graph-node
       return case env['HTTP_TYPE'] # request type dispatching
              when /nofetch/
                deny
@@ -87,7 +87,7 @@ class WebResource
              else
                deny
              end if env.has_key? 'HTTP_TYPE'
-      remoteNode # nonlocal node with no local handling defined
+      remoteNode # nonlocal graph-node
     end
 
     def HEAD
