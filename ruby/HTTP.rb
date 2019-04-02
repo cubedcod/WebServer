@@ -73,9 +73,9 @@ class WebResource
       return PathGET[path][self] if PathGET[path] # path lambda
       return HostGET[host][self] if HostGET[host] # host lambda
       return chronoDir if chronoDir?              # time redirect
-      return fileResponse if node.file?           # local static-resource
-      return graphResponse localNodes if localResource? # local resource
-      return case env['HTTP_TYPE'] # request type
+      return localFile if node.file?              # local static-resource
+      return graphResponse localNodes if localResource? # local node
+      return case env['HTTP_TYPE'] # request type dispatching
              when /nofetch/
                deny
              when /noexec/
@@ -87,7 +87,7 @@ class WebResource
              else
                deny
              end if env.has_key? 'HTTP_TYPE'
-      remoteNode # nonlocal node or local handling undefined
+      remoteNode # nonlocal node with no local handling defined
     end
 
     def HEAD
