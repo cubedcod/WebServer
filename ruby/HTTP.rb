@@ -63,7 +63,7 @@ class WebResource
     end
     alias_method :env, :environment
 
-    def GET
+    def GET     #; puts env['HTTP_TYPE']
       return PathGET[path][self] if PathGET[path] # path lambda
       return HostGET[host][self] if HostGET[host] # host lambda
       return chronoDir if chronoDir?              # timeslice container

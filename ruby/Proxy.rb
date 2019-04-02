@@ -279,7 +279,7 @@ class WebResource
         r.remoteNode
       when 'amp'
         r.cachedRedirect
-      when 'search'
+      when /^(maps|search)$/
         r.remoteNode
       when 'url'
         [301, {'Location' => ( r.q['url'] || r.q['q'] )}, []]
