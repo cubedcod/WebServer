@@ -20,10 +20,7 @@ radio.ttl
 pseudofeed from frontpage when can't be found  http://www.mysouthend.com/
 catch 404 in remoteNode
 emit mp4 links (inside jsonp etc)
-make cacheRedir try both schemes so InsecureShorteners can go away
 relURI in feed identifiers
-find new base URI from open-uri automagic redirect following - replace open-uri with something w/ better redirect handling? http://criticalengineering.org/projects/men-in-grey relative URI wrong base..
-merge: cacheRedirect and remoteNode methods? we want to know about redirs in both
 wsj headers
 ap triplr
 anything actually useful in data- attributes?

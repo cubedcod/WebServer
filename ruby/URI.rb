@@ -193,36 +193,18 @@ class WebResource < RDF::URI
   end
   module HTTP
 
-    # GET lambda tables
+    # handler-lambda tables
     HostGET = {}
     PathGET = {}
-
-    # POST lambda tables
     HostPOST = {}
     PathPOST = {}
-
     HostOPTIONS = {}
-
-    InsecureShorteners = %w{
-apne.ws
-bhne.ws
-bos.gl
-feeds.reuters.com
-f-st.co
-huffp.st
-ihe.art
-nyer.cm
-ow.ly
-rss.cnn.com
-rssfeeds.usatoday.com
-w.bos.gl
-}
 
     def chronoDir?
       (parts[0]||'').match /^(y(ear)?|m(onth)?|d(ay)?|h(our)?)$/i
     end
 
-    # generate URI for current date
+    # redirect to URI for current time-slice
     def chronoDir
       time = Time.now
       loc = time.strftime(case parts[0][0].downcase

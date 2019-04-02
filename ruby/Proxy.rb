@@ -68,8 +68,8 @@ class WebResource
     def print_body body; HTTP.print_body body, @r['CONTENT_TYPE'] end
     def print_header; HTTP.print_header env end
 
-    def redirect
-      scheme = 'http' + (InsecureShorteners.member?(host) ? '' : 's') + '://'
+    def redirect secure = true
+      scheme = 'http' + (secure ? 's' : '') + '://'
       sourcePath = path || ''
       source = scheme + host + sourcePath
       dest = nil
@@ -110,29 +110,33 @@ class WebResource
     end
 
     def remoteNode
-      head = HTTP.unmangle env # unCGIify header key-names
-      head[:redirect] = false
+      head = HTTP.unmangle env # un-CGI header keys
+      head[:redirect] = false if @r # bubble redirect to HTTP caller 
+      head.delete 'User-Agent' if host=='t.co'
+      #HTTP.print_header head
+
       suffix = host.match?(/reddit.com$/) && !parts.member?('wiki') && '.rss' # format suffix
-      p = path || ''
-      url = if @r && !suffix && !p.match?(/[\[\]]/) # existing URL
+      secure = true
+      url = if @r && !suffix && !(path||'').match?(/[\[\]]/) # keep URI
               "https://#{host}#{@r['REQUEST_URI']}"
-            else # new URL
-              'https://' + host + p.gsub('[','%5B').gsub(']','%5D') + (suffix||'') + qs
+            else # new locator
+              'https://' + host + (path||'').gsub('[','%5B').gsub(']','%5D') + (suffix||'') + qs
             end
       cache = cacheFile
+      head["If-Modified-Since"] = cache.mtime.httpdate if cache.e
       cacheMeta = cache.metafile
       updates = []
 
-      # lazy updater
+      # updater lambda
       update = -> url {
-        begin # block to catch 304-status "error"
+        begin
           open(url, head) do |response| # response
             # origin-metadata for caller
             %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k|
               @r[:Response][k] ||= response.meta[k.downcase]} if @r
             resp = response.read
             unless cache.e && cache.readFile == resp
-              cache.writeFile resp # update cache
+              cache.writeFile resp # write cache
               mime = if response.meta['content-type'] # explicit MIME from upstream
                        response.meta['content-type'].split(';')[0]
                      elsif MIMEsuffix[cache.ext]      # file extension
@@ -140,7 +144,7 @@ class WebResource
                      else                             # sniff
                        cache.mimeSniff
                      end
-              cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # cache-file metadata (TODO POSIX-eattrs investigation)
+              cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # write metafile
               # update index
               updates.concat(case mime
                              when /^(application|text)\/(atom|rss|xml)/
@@ -152,41 +156,45 @@ class WebResource
                              end || [])
             end
           end
-        rescue OpenURI::HTTPError => e
-          raise unless e.message.match? /304/
+        rescue Exception => e
+          # not modified and not found handled by normal control-flow 
+          raise unless e.message.match?(/[34]04/)
         end}
 
-      # conditional update
+      # conditional updater
       static = cache? && cache.e && cache.noTransform?
       throttled = cacheMeta.e && (Time.now - cacheMeta.mtime) < 60
       unless static || throttled
-        head["If-Modified-Since"] = cache.mtime.httpdate if cache.e
-        begin # prefer HTTPS
-          update[url]
-        rescue
-          update[url.sub /^https/, 'http']
+        begin
+          update[url] # HTTPS
+        rescue Exception => e
+          raise if e.class == OpenURI::HTTPRedirect
+          puts :http_mode, e.class, e.message
+          secure = false
+          update[url.sub /^https/, 'http'] # HTTP
         end
-        cacheMeta.touch if cacheMeta.e # bump timestamp
+        cacheMeta.touch if cacheMeta.e # mark update
       end
 
-      # response
-      if @r # HTTP calling context
+      # return value
+      if @r # HTTP calling-context
         if cache.exist?
-          # preserve upstream format?
           if cache.noTransform? || UI[@r['SERVER_NAME']]
-            cache.localFile
+            cache.localFile # preserve upstream format
           else # transformable
             graphResponse (updates.empty? ? [cache] : updates)
           end
         else
           notfound
         end
-      else # REPL/script/shell caller
-        updates.empty? ? self : updates
+      else # REPL/script/shell calling-context
+        updates.empty? ? cache : updates
       end
+
     rescue OpenURI::HTTPRedirect
-      redirect
+      redirect secure
     end
+
     alias_method :GETthru, :remoteNode
 
     def trackPOST
@@ -218,12 +226,11 @@ class WebResource
 
     # Amazon
     HostGET['www.amazon.com'] = -> r {
-      if r.parts.member?('dp') || r.parts.member?('gp')
-        r.remoteNode
-      else
+      if %w{gp}.member? r.parts[0]
         r.deny
-      end
-    }
+      else
+        r.remoteNode
+      end}
 
     # Anvato
     '//tkx2-prod.anvato.net'.R.HTTPthru
