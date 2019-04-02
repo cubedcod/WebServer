@@ -68,6 +68,47 @@ class WebResource
     def print_body body; HTTP.print_body body, @r['CONTENT_TYPE'] end
     def print_header; HTTP.print_header env end
 
+    def redirect; verbose = true
+      scheme = 'http' + (InsecureShorteners.member?(host) ? '' : 's') + '://'
+      sourcePath = path || ''
+      source = scheme + host + sourcePath
+      dest = nil
+      cache = ('/cache/URL/' + host + (sourcePath[0..2] || '') + '/' + (sourcePath[3..-1] || '') + '.u').R
+      puts "redir #{source} ->" if verbose
+      if cache.exist?
+        puts "cached at #{cache}" if verbose
+        dest = cache.readFile
+      else
+        puts "fetch #{source}" if verbose
+        resp = Net::HTTP.get_response (URI.parse source)
+        puts resp.body if verbose
+        dest = resp['Location'] || resp['location']
+        puts dest if dest && verbose
+        if !dest
+          body = Nokogiri::HTML.fragment resp.body
+          refresh = body.css 'meta[http-equiv="refresh"]'
+          if refresh && refresh.size > 0
+            content = refresh.attr('content')
+            if content
+              dest = content.to_s.split('URL=')[-1]
+              puts dest if verbose
+            end
+          end
+        end
+        cache.writeFile dest if dest
+      end
+      puts dest if verbose
+      dest = dest ? dest.R : nil
+      if @r
+        # return URI to caller in document
+        # [200, {'Content-Type' => 'text/html'}, [htmlDocument({source => {Link => dest}})]]
+        # redirect to URI
+        dest ? [302, {'Location' =>  dest},[]] : notfound
+      else
+        dest
+      end
+    end
+
     def remoteFile allowGIF=false
       if %w{html jpg jpg:small jpg:large jpg:thumb jpeg json ogg m3u8 m4a mp3 mp4 pdf png svg ts vtt webm webp}.member? ext.downcase
         remoteNode
@@ -80,6 +121,7 @@ class WebResource
 
     def remoteNode
       head = HTTP.unmangle env # unCGIify header key-names
+      head[:redirect] = false
       suffix = host.match?(/reddit.com$/) && !parts.member?('wiki') && '.rss' # format suffix
       p = path || ''
       url = if @r && !suffix && !p.match?(/[\[\]]/) # existing URL
@@ -102,7 +144,7 @@ class WebResource
             unless cache.e && cache.readFile == resp
               cache.writeFile resp # update cache
               mime = response.meta['content-type'].do{|type| type.split(';')[0] } || ''
-              cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # cache-file metadata (TODO POSIX-eattrs for MIME)
+              cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # cache-file metadata (TODO POSIX-eattrs investigation)
               # update index
               updates.concat(case mime
                              when /^(application|text)\/(atom|rss|xml)/
@@ -272,21 +314,17 @@ class WebResource
     }
 
     # Google
-    %w{feedproxy.google.com gmail.com google.com maps.google.com}.map{|h|HostGET[h] = -> r {r.cachedRedirect}}
     HostGET['www.google.com'] = -> r {
       case r.parts[0]
       when nil
         r.remoteNode
-      when 'amp'
-        r.cachedRedirect
-      when /^(maps|search)$/
+      when /^(amp|maps|search)$/
         r.remoteNode
       when 'url'
         [301, {'Location' => ( r.q['url'] || r.q['q'] )}, []]
       else
         r.remoteFile
       end}
-    # %w{accounts mail news play www}.map{|_| "//#{_}.google.com".R.HTTPthru}
 
     # Imgur
     HostGET['imgur.com'] = HostGET['i.imgur.com'] = -> re {

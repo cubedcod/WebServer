@@ -4,17 +4,17 @@ class WebResource
     include MIME
     include URIs
 
-    Hosts = {} # track hosts for new-host highlighting in logger
+    Hosts = {} # track hosts for highlighting in log
 
     def self.call env
       method = env['REQUEST_METHOD']                        # request-method
       return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? method # defined methods
       query = parseQs env['QUERY_STRING']                   # parse query
-      host = query['host']|| env['HTTP_HOST']|| 'localhost' # find hostname
-      rawpath = env['REQUEST_PATH'].force_encoding('UTF-8').gsub /[\/]+/, '/' # collapse consecutive slashes
+      host = query['host']|| env['HTTP_HOST']|| 'localhost' # lookup hostname
+      rawpath = env['REQUEST_PATH'].force_encoding('UTF-8').gsub /[\/]+/, '/' # collapse repeated slashes
       path  = Pathname.new(rawpath).expand_path.to_s        # evaluate path-expression
-      path += '/' if path[-1] != '/' && rawpath[-1] == '/'  # trailing-slash preservation
-      env[:Response] = {}; env[:links] = {}                 # response-header storage
+      path += '/' if path[-1] != '/' && rawpath[-1] == '/'  # preserve trailing-slash
+      env[:Response] = {}; env[:links] = {}                 # init response-headers
       resource = ('//' + host + path).R env                 # bind resource and environment
       resource.send(method).do{|status,head,body|           # dispatch request
         # log request
@@ -63,13 +63,13 @@ class WebResource
     end
     alias_method :env, :environment
 
-    def GET     #; puts env['HTTP_TYPE']
+    def GET
       return PathGET[path][self] if PathGET[path] # path lambda
       return HostGET[host][self] if HostGET[host] # host lambda
-      return chronoDir if chronoDir?              # timeslice container
+      return chronoDir if chronoDir?              # time redirect
       return fileResponse if node.file?           # local static-resource
       return graphResponse localNodes if localResource? # local resource
-      return case env['HTTP_TYPE'] # typed request
+      return case env['HTTP_TYPE'] # request type
              when /nofetch/
                deny
              when /noexec/
@@ -78,12 +78,10 @@ class WebResource
                amp
              when /feed/
                remoteNode
-             when /short/
-               cachedRedirect
              else
                deny
              end if env.has_key? 'HTTP_TYPE'
-      remoteNode # local preference undefined
+      remoteNode # nonlocal node or local handling undefined
     end
 
     def HEAD
