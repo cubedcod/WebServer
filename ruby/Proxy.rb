@@ -34,20 +34,31 @@ class WebResource
       [s, h, [b]]
     end
 
-    def POSTthru
+    def POSTthru ; verbose = true
       # request
       url = 'https://' + host + path + qs
       headers = HTTP.unmangle env
       body = env['rack.input'].read
-      HTTP.print_header headers
-      HTTP.print_body body, @r['CONTENT_TYPE']
+      if verbose
+        puts "POST >>> #{url}"
+        HTTP.print_header headers
+        puts ""
+        HTTP.print_body body, @r['CONTENT_TYPE']
+      end
+
       # response
       r = HTTParty.post url, :headers => headers, :body => body
       s = r.code
       h = r.headers
       b = r.body
-      HTTP.print_header h
-      HTTP.print_body b, h['content-type']
+      if verbose
+        puts "<<<<<<<<<<<<<<<<<<"
+        HTTP.print_header h
+        puts ""
+        HTTP.print_body b, h['content-type']
+        puts ""
+      end
+
       [s, h, [b]]
     end
 
