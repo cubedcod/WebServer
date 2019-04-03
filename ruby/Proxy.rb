@@ -340,7 +340,7 @@ class WebResource
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # QRZ
-    HostGET['qrz.com'] = -> r { r.ext == 'gif' ? r.deny : r.remoteNode }
+    HostGET['qrz.com'] = HostGET['forums.qrz.com'] = -> r { r.ext == 'gif' ? r.deny : r.remoteNode }
 
     # Reddit
     HostGET['i.reddit.com'] = HostGET['np.reddit.com'] = HostGET['reddit.com'] = -> re {[301,{'Location' => 'https://www.reddit.com' + re.path + re.qs},[]]}
