@@ -108,7 +108,7 @@ class WebResource
       head.delete 'Accept-Encoding'
       head.delete 'Host'
       head.delete 'User-Agent' if host=='t.co' # prefer location in HTTP header, not javascript code
-      suffix = host.match?(/reddit.com$/) && !parts.member?('wiki') && '.rss' # format suffix
+      suffix = ext.empty? && host.match?(/reddit.com$/) && !parts.member?('wiki') && '.rss' # format suffix
       url = if @r && !suffix && !(path||'').match?(/[\[\]]/) # keep URI
               "https://#{host}#{@r['REQUEST_URI']}"
             else # new locator
@@ -119,7 +119,6 @@ class WebResource
       cacheMeta = cache.metafile  # cache metadata
       updates = []
       update = -> url { # updater lambda
-        puts " GET #{url}"
         begin
           open(url, head) do |response| # response
             # origin-metadata for caller
@@ -405,7 +404,7 @@ class WebResource
 
         [200, {'Content-Type' => 'text/html'}, [re.htmlDocument(graph)]]
       else
-        re.remoteNode
+        re.ext == 'js' ? re.deny : re.remoteNode
       end}
 
     # Univision
