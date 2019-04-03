@@ -10,7 +10,7 @@ class WebResource
   module HTTP
 
     def self.getFeeds
-      FeedURL.values.map{|feed| feed.remoteNode}
+      FeedURL.values.map{|feed| feed.remoteNode rescue nil}
       nil
     end
 
