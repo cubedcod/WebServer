@@ -87,7 +87,7 @@ class WebResource
     end
 
     def remoteFile allowGIF=false
-      if %w{html jpg jpg:small jpg:large jpg:thumb jpeg json key ogg m3u8 m4a mp3 mp4 pdf png svg ts vtt webm webp}.member? ext.downcase
+      if %w{dash html jpg jpg:small jpg:large jpg:thumb jpeg json key ogg m3u8 m4a mp3 mp4 mpd pdf png svg ts vtt webm webp}.member? ext.downcase
         remoteNode
       elsif allowGIF && ext == 'gif'
         remoteNode
