@@ -1,33 +1,28 @@
 announce full updates or existence thereof to curious peers - irvc3, crdt, solid-websocket, matrix etc
-remove cache dir
-HTML extraction of HEAD meta and RDFa/microformats sponger
-json-schema parsers
-json-ld
+eliminate cache dir
+json-schema parser/triplrs - youtube comments etc
+json-ld in HTML
 index backlinks at storage time
-indexes of remote containers
-troff triplr - .1, .2, (sslsplit docs)
+index browsing on caches of remote containers
+troff triplr - .1, .2, (sslsplit/proxy docs)
 link Search host-specific remote origins - !tw  URL mapping etc
-use shortURL-mapping DB to deobfuscate at presentation and storage time
-mp3 image extract
-xhr link inliner - nowrapper docs, onlynew updates (twitter frontpage support)
-visual indicator of cache-hit
-improve S/N on new-tracker discovery - omit highlighting hosts explicitly browsed to - which appear in browser history.SQLite
+shortURL-mapping DB deobfuscates at presentation and storage time
+mp3 images
+xhr link inliner - nowrapper docs, onlynew updates (twitter frontpage)
 Tweet-video triplr
 reddit-video triplr
 imgur video https://i.imgur.com/JuDZN0w.gifv
-wikipedia HTML with jpg extension https://en.wikipedia.org/wiki/File:Mare_milking_Suusamyr.jpg
+wikipedia HTML with jpg extension https://en.wikipedia.org/wiki/File:Mare_milking_Suusamyr.jpg https://snag.gy/FsYbi9.jpg
 universal path breadcrumbs, Up-header
-radio.ttl
+dokieli / write ui
 pseudofeed from frontpage when can't be found  http://www.mysouthend.com/
-catch 404 in remoteNode
-emit mp4 links (inside jsonp etc)
+emit mp4 links found in static page
 relURI in feed identifiers
-wsj headers
-ap triplr
+wsj drudge headers
+AP triplr
 anything actually useful in data- attributes?
 POST adaptors per host
 cookies in escrow at proxy
-link to original cached file (w/ HTML extension) when HTML rewrite is in play
 link to local cache on chainlink icon in more scenarios
 preserve rewrite/non status across server runs
 slightly rewrite nonrewritten to jump back out
