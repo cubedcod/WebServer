@@ -359,9 +359,9 @@ class WebResource
     HostGET['exit.sc'] = -> r {[301, {'Location' => r.q['url']},[]]}
 
     # YouTube
-    '//accounts.youtube.com'.R.HTTPthru
     HostGET['youtube.com'] = HostGET['m.youtube.com'] = -> r {[301, {'Location' =>  "https://www.youtube.com" + r.path + r.qs},[]]}
     HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
+    HostGET['img.youtube.com'] = -> r {r.remoteFile}
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
       if !mode
