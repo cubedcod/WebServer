@@ -34,7 +34,7 @@ class WebResource
       [s, h, [b]]
     end
 
-    def POSTthru ; verbose = true
+    def POSTthru ; verbose = false
       # request
       url = 'https://' + host + path + qs
       headers = HTTP.unmangle env
@@ -105,6 +105,8 @@ class WebResource
         return location if redirected? # redirect caller
         head[:redirect] = false # don't follow redirects when fetching, exit for bookkeeping
       end
+      head.delete 'Accept-Encoding'
+      head.delete 'Host'
       head.delete 'User-Agent' if host=='t.co' # prefer location in HTTP header, not javascript code
       suffix = host.match?(/reddit.com$/) && !parts.member?('wiki') && '.rss' # format suffix
       url = if @r && !suffix && !(path||'').match?(/[\[\]]/) # keep URI
@@ -206,7 +208,7 @@ class WebResource
         }.join(underscored ? '_' : '-')
         key = key.downcase if underscored
         # headers for request. drop rack-internal and Type, our typetag. Host is added by fetcher and may vary from current environment
-        head[key] = v.to_s unless %w{accept-encoding host links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri response script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
+        head[key] = v.to_s unless %w{links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri response script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
       head
     end
 
