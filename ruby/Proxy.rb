@@ -322,7 +322,7 @@ class WebResource
     }
 
     # Google
-    HostGET['www.google.com'] = -> r {
+    HostGET['google.com'] = HostGET['www.google.com'] = -> r {
       case r.parts[0]
       when nil
         r.remoteNode
@@ -401,6 +401,12 @@ class WebResource
         [200, {'Content-Type' => 'text/html'}, [re.htmlDocument(graph)]]
       else
         re.ext == 'js' ? re.deny : re.remoteNode
+      end}
+    HostGET['t.co'] = -> r {
+      if %w{i}.member? r.parts[0]
+        r.deny
+      else
+        r.remoteNode
       end}
 
     # Univision
