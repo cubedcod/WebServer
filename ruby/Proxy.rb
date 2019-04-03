@@ -39,8 +39,8 @@ class WebResource
       url = 'https://' + host + path + qs
       headers = HTTP.unmangle env
       body = env['rack.input'].read
-      print_header
-      print_body body
+      HTTP.print_header headers
+      HTTP.print_body body, @r['CONTENT_TYPE']
       # response
       r = HTTParty.post url, :headers => headers, :body => body
       s = r.code
@@ -68,9 +68,6 @@ class WebResource
     end
 
     def HTTP.print_header header; header.map{|k,v|puts [k,v].join "\t"} end
-
-    def print_body body; HTTP.print_body body, @r['CONTENT_TYPE'] end
-    def print_header; HTTP.print_header env end
 
     def redirectCache
       ('/cache/URL/' + host + ((path||'')[0..2] || '') + '/' + ((path||'')[3..-1] || '') + '.u').R
@@ -184,11 +181,15 @@ class WebResource
       [302, {'Location' => location}, []]
     end
 
-    UI = {'www.youtube.com' => true,
-          's.ytimg.com' => true,
-          'sdr.hu' => true,
-          'e.infogram.com' => true,
-          'cpt-static.gannettdigital.com' => true}
+    UI = {
+      'cpt-static.gannettdigital.com' => true,
+      'e.infogram.com' => true,
+      'go.cnn.com' => true,
+      's.ytimg.com' => true,
+      'sdr.hu' => true,
+      'sp.auth.adobe.com' => true,
+      'www.youtube.com' => true,
+    }
 
     # toggle UI provider - local vs origin
     PathGET['/ui/origin'] = -> r {r.q['u'].do{|u| UI[u.R.host] = true; [302, {'Location' => u}, []]} || r.deny }
@@ -205,6 +206,9 @@ class WebResource
     PathGET['/generate_204'] = -> _ {Response_204}
 
     PathGET['/mu'] = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'},[]]}
+
+    # Adobe
+    '//sp.auth.adobe.com'.R.HTTPthru
 
     # Amazon
     HostGET['www.amazon.com'] = -> r {

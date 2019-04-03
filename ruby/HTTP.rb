@@ -156,19 +156,22 @@ class WebResource
 
     Response_204 = [204, {'Content-Length' => 0}, []]
 
-    # ALL_CAPS CGI/env-vars to HTTP request-header capitalization
-    # is there any way to get the unmangled data from rack?
+    # ALL_CAPS_CGI format keys to standard HTTP request-header capitalization
+    # is there any way to have Rack not do that to the keys, or get the original?
     def self.unmangle env
       head = {}
       env.map{|k,v|
-        key = k.to_s.downcase.sub(/^http_/,'').split('_').map{|k| # chop prefix and tokenize
+        k = k.to_s
+        underscored = k.match? /(_AP_|PASS_SFP)/i
+        key = k.downcase.sub(/^http_/,'').split('_').map{|k| # chop prefix and tokenize
           if %w{cl id spf utc xsrf}.member? k # acronyms to capitalize
             k = k.upcase
           else
             k[0] = k[0].upcase # word
           end
           k
-        }.join '-'
+        }.join(underscored ? '_' : '-')
+        key = key.downcase if underscored
         # headers for request. drop rack-internal and Type, our typetag. Host is added by fetcher and may vary from current environment
         head[key] = v.to_s unless %w{accept-encoding host links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri response script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
       head
