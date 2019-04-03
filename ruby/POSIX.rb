@@ -164,6 +164,14 @@ class WebResource
       end
     end
 
+    def localNode
+      if file?
+        localFile
+      else
+        localGraph
+      end
+    end
+
     # file -> HTTP Response
     def localFile
       @r[:Response]['Access-Control-Allow-Origin'] ||= '*'
@@ -178,7 +186,7 @@ class WebResource
     end
 
     # file(s) -> HTTP Response
-    def localNode
+    def localGraph
       graphResponse localNodes
     end
 

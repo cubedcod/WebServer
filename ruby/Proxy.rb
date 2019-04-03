@@ -3,7 +3,7 @@ class WebResource
 
     def cache?; !(pragma && pragma == 'no-cache') end
 
-    def localResource?
+    def localNode?
       %w{l [::1] 127.0.0.1 localhost}.member? @r['SERVER_NAME']
     end
 
