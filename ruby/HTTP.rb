@@ -80,8 +80,6 @@ class WebResource
                deny
              when /noexec/
                remoteFile
-             when /AMP/
-               amp
              when /feed/
                remoteNode
              else

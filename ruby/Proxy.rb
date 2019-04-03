@@ -1,10 +1,6 @@
 class WebResource
   module HTTP
 
-    def amp
-      %w{jpg png}.member?(ext) ? remoteFile : [301, {'Location' => 'https://' + (host.split('.') - %w{amp}).join('.') + (path.split('/') - %w{amp amphtml}).join('/')}, []]
-    end
-
     def cache?; !(pragma && pragma == 'no-cache') end
 
     def localResource?
