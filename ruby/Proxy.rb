@@ -11,6 +11,10 @@ class WebResource
       %w{l [::1] 127.0.0.1 localhost}.member? @r['SERVER_NAME']
     end
 
+    def location
+      [302, {'Location' => redirectCache.readFile}, []]
+    end
+
     def HTTPthru
       HostGET[host] = -> r {r.GETthru}
      HostPOST[host] = -> r {r.POSTthru}
@@ -68,35 +72,12 @@ class WebResource
     def print_body body; HTTP.print_body body, @r['CONTENT_TYPE'] end
     def print_header; HTTP.print_header env end
 
-    def redirect secure = true
-      scheme = 'http' + (secure ? 's' : '') + '://'
-      sourcePath = path || ''
-      source = scheme + host + sourcePath
-      dest = nil
-      cache = ('/cache/URL/' + host + (sourcePath[0..2] || '') + '/' + (sourcePath[3..-1] || '') + '.u').R
-      if cache.exist?
-        dest = cache.readFile
-      else
-        resp = Net::HTTP.get_response (URI.parse source)
-        dest = resp['Location'] || resp['location']
-        if !dest
-          body = Nokogiri::HTML.fragment resp.body
-          refresh = body.css 'meta[http-equiv="refresh"]'
-          if refresh && refresh.size > 0
-            content = refresh.attr('content')
-            if content
-              dest = content.to_s.split('URL=')[-1]
-            end
-          end
-        end
-        cache.writeFile dest if dest
-      end
-      dest = dest ? dest.R : nil
-      if @r
-        dest ? [302, {'Location' =>  dest}, []] : notfound
-      else
-        dest
-      end
+    def redirectCache
+      ('/cache/URL/' + host + ((path||'')[0..2] || '') + '/' + ((path||'')[3..-1] || '') + '.u').R
+    end
+
+    def redirected?
+      redirectCache.exist?
     end
 
     def remoteFile allowGIF=false
@@ -109,26 +90,24 @@ class WebResource
       end
     end
 
-    def remoteNode
-      head = HTTP.unmangle env # un-CGI header keys
-      head[:redirect] = false if @r # bubble redirect to HTTP caller 
-      head.delete 'User-Agent' if host=='t.co'
-      #HTTP.print_header head
-
+    def remoteNode; head = HTTP.unmangle env # downcase CGI headers
+      if @r # HTTP calling-context?
+        return location if redirected? # redirect caller
+        head[:redirect] = false # don't follow redirects when fetching, exit for bookkeeping
+      end
+      head.delete 'User-Agent' if host=='t.co' # prefer location in HTTP header, not javascript code
       suffix = host.match?(/reddit.com$/) && !parts.member?('wiki') && '.rss' # format suffix
-      secure = true
       url = if @r && !suffix && !(path||'').match?(/[\[\]]/) # keep URI
               "https://#{host}#{@r['REQUEST_URI']}"
             else # new locator
               'https://' + host + (path||'').gsub('[','%5B').gsub(']','%5D') + (suffix||'') + qs
             end
-      cache = cacheFile
+      cache = cacheFile # cache-storage pointer
       head["If-Modified-Since"] = cache.mtime.httpdate if cache.e
-      cacheMeta = cache.metafile
+      cacheMeta = cache.metafile  # cache metadata
       updates = []
-
-      # updater lambda
-      update = -> url {
+      update = -> url { # updater lambda
+        puts " GET #{url}"
         begin
           open(url, head) do |response| # response
             # origin-metadata for caller
@@ -144,7 +123,7 @@ class WebResource
                      else                             # sniff
                        cache.mimeSniff
                      end
-              cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # write metafile
+              cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # write metadata
               # update index
               updates.concat(case mime
                              when /^(application|text)\/(atom|rss|xml)/
@@ -157,8 +136,8 @@ class WebResource
             end
           end
         rescue Exception => e
-          # not modified and not found handled by normal control-flow 
-          raise unless e.message.match?(/[34]04/)
+          # notModified and notFound responses handled by normal control-flow 
+          raise unless e.message.match? /[34]04/
         end}
 
       # conditional updater
@@ -166,14 +145,12 @@ class WebResource
       throttled = cacheMeta.e && (Time.now - cacheMeta.mtime) < 60
       unless static || throttled
         begin
-          update[url] # HTTPS
+          update[url] # try HTTPS
         rescue Exception => e
-          raise if e.class == OpenURI::HTTPRedirect
-          puts :http_mode, e.class, e.message
-          secure = false
-          update[url.sub /^https/, 'http'] # HTTP
+          raise if e.class == OpenURI::HTTPRedirect # exit with redirection
+          update[url.sub /^https/, 'http'] # fetch HTTP
         end
-        cacheMeta.touch if cacheMeta.e # mark update
+        cacheMeta.touch if cacheMeta.e # mark update-time
       end
 
       # return value
@@ -191,8 +168,8 @@ class WebResource
         updates.empty? ? cache : updates
       end
 
-    rescue OpenURI::HTTPRedirect
-      redirect secure
+    rescue OpenURI::HTTPRedirect => re
+      updateLocation re.io.meta['location']
     end
 
     alias_method :GETthru, :remoteNode
@@ -200,6 +177,11 @@ class WebResource
     def trackPOST
       env[:deny] = true
       [202,{},[]]
+    end
+
+    def updateLocation location
+      redirectCache.writeFile location
+      [302, {'Location' => location}, []]
     end
 
     UI = {'www.youtube.com' => true,
