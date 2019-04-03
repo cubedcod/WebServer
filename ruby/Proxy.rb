@@ -7,10 +7,6 @@ class WebResource
       %w{l [::1] 127.0.0.1 localhost}.member? @r['SERVER_NAME']
     end
 
-    def location
-      [302, {'Location' => redirectCache.readFile}, []]
-    end
-
     def HTTPthru
       HostGET[host] = -> r {r.GETthru}
      HostPOST[host] = -> r {r.POSTthru}
@@ -82,7 +78,11 @@ class WebResource
       ('/cache/URL/' + host + ((path||'')[0..2] || '') + '/' + ((path||'')[3..-1] || '') + '.u').R
     end
 
-    def redirected?
+    def redirect
+      [302, {'Location' => l}, []]
+    end
+
+    def redirection
       redirectCache.exist?
     end
 
@@ -96,25 +96,31 @@ class WebResource
       end
     end
 
-    def remoteNode; head = HTTP.unmangle env # downcase CGI headers
-      if @r # HTTP calling-context?
-        return location if redirected? # redirect caller
-        head[:redirect] = false # don't follow redirects when fetching, exit for bookkeeping
+    def remoteNode
+      head = HTTP.unmangle env # downcase headers
+      if @r # HTTP calling-context
+        if redirection
+          location = redirectCache.readFile.R
+          return redirect unless location.host == host && location.path == path
+        else
+          head[:redirect] = false # don't follow redirects internally. jump out to book-keep and allow client to do same
+        end
       end
       head.delete 'Accept-Encoding'
       head.delete 'Host'
       head.delete 'User-Agent' if host=='t.co' # prefer location in HTTP header, not javascript code
       suffix = ext.empty? && host.match?(/reddit.com$/) && !parts.member?('wiki') && '.rss' # format suffix
-      url = if @r && !suffix && !(path||'').match?(/[\[\]]/) # keep URI
+      url = if @r && !suffix && !(path||'').match?(/[\[\]]/) # preserve URI
               "https://#{host}#{@r['REQUEST_URI']}"
-            else # new locator
+            else # construct locator
               'https://' + host + (path||'').gsub('[','%5B').gsub(']','%5D') + (suffix||'') + qs
             end
       cache = cacheFile # cache-storage pointer
       head["If-Modified-Since"] = cache.mtime.httpdate if cache.e
-      cacheMeta = cache.metafile  # cache metadata
+      cacheMeta = cache.metafile # cache metadata
       updates = []
-      update = -> url { # updater lambda
+
+      update = -> url { # lazy lambda
         begin
           open(url, head) do |response| # response
             # origin-metadata for caller
@@ -143,8 +149,7 @@ class WebResource
             end
           end
         rescue Exception => e
-          # notModified and notFound responses handled by normal control-flow 
-          raise unless e.message.match? /[34]04/
+          raise unless e.message.match? /[34]04/ # notModified and notFound in normal control-flow
         end}
 
       # conditional updater
@@ -187,7 +192,7 @@ class WebResource
     end
 
     # ALL_CAPS_CGI format keys to standard HTTP request-header capitalization
-    # is there any way to have Rack not do that to the keys, or get the original?
+    # is there any way to have Rack not do that to the names, or get the original?
     def self.unmangle env
       head = {}
       env.map{|k,v|
@@ -202,7 +207,7 @@ class WebResource
           k
         }.join(underscored ? '_' : '-')
         key = key.downcase if underscored
-        # headers for request. drop rack-internal and Type, our typetag. Host is added by fetcher and may vary from current environment
+        # drop rack-internals and Type, our typetag
         head[key] = v.to_s unless %w{links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri response script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
       head
     end
@@ -212,27 +217,12 @@ class WebResource
       [302, {'Location' => location}, []]
     end
 
-    UI = {
-      'cpt-static.gannettdigital.com' => true,
-      'e.infogram.com' => true,
-      'go.cnn.com' => true,
-      's.ytimg.com' => true,
-      'sdr.hu' => true,
-      'sp.auth.adobe.com' => true,
-      'www.youtube.com' => true,
-    }
+    UI = {'s.ytimg.com' => true,
+      'www.youtube.com' => true}
 
     # toggle UI provider - local vs origin
     PathGET['/ui/origin'] = -> r {r.q['u'].do{|u| UI[u.R.host] = true; [302, {'Location' => u}, []]} || r.deny }
     PathGET['/ui/local']  = -> r {r.q['u'].do{|u| UI.delete u.R.host;  [302, {'Location' => u}, []]} || r.deny }
-
-=begin
-    # explicit cache-request for URL
-    PathGET['/cache'] = -> cache {
-      cache.q['url'].do{|url|
-        url.R(cache.env).remoteNode
-      } || [200, {'Content-Type' => 'text/html'}, ['<form method="GET"><input name="url" autofocus></form>']]}
-=end
 
     PathGET['/generate_204'] = -> _ {Response_204}
 
