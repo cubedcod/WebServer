@@ -4,6 +4,7 @@ HTML extraction of HEAD meta and RDFa/microformats sponger
 json-schema parsers
 json-ld
 index backlinks at storage time
+indexes of remote containers
 troff triplr - .1, .2, (sslsplit docs)
 link Search host-specific remote origins - !tw  URL mapping etc
 use shortURL-mapping DB to deobfuscate at presentation and storage time

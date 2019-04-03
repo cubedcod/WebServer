@@ -97,13 +97,14 @@ class WebResource
     end
 
     def remoteNode
-      head = HTTP.unmangle env # downcase headers
-      if @r # HTTP calling-context
+      head = HTTP.unmangle env # HTTP header
+      if @r # HTTP calling
         if redirection
-          location = redirectCache.readFile.R
-          return redirect unless (!location.host || location.host == host) && location.path == path
+          location = join(redirectCache.readFile).R
+          #puts [self, ' -> ', location].join ' '
+          return redirect unless location.host==host && location.path==path
         else
-          head[:redirect] = false # don't follow redirects internally. jump out to book-keep and allow client to do same
+          head[:redirect] = false # don't follow redirects internally when fetching
         end
       end
       head.delete 'Accept-Encoding'
