@@ -146,7 +146,7 @@ class WebResource
 
       # response metadata
       format = created && created.mime || outputMIME
-      dateMeta if localResource?
+      dateMeta if localNode?
       @r[:Response].update({'Link' => @r[:links].map{|type,uri|
                               "<#{uri}>; rel=#{type}"}.intersperse(', ').join}) unless @r[:links].empty?
       @r[:Response].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format,
