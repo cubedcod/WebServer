@@ -79,7 +79,7 @@ class WebResource
     end
 
     def redirect
-      [302, {'Location' => l}, []]
+      [302, {'Location' => redirectCache.readFile}, []]
     end
 
     def redirection
