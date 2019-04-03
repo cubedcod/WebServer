@@ -101,7 +101,7 @@ class WebResource
       if @r # HTTP calling-context
         if redirection
           location = redirectCache.readFile.R
-          return redirect unless location.host == host && location.path == path
+          return redirect unless (!location.host || location.host == host) && location.path == path
         else
           head[:redirect] = false # don't follow redirects internally. jump out to book-keep and allow client to do same
         end
