@@ -103,8 +103,7 @@ class WebResource
       if @r # HTTP calling
         if redirection
           location = join(redirectCache.readFile).R
-          #puts [self, ' -> ', location].join ' '
-          return redirect unless location.host==host && location.path==path
+          return redirect unless location.host == host && (location.path || '/') == path
         else
           head[:redirect] = false # don't follow redirects internally when fetching
         end
