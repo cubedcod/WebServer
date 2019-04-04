@@ -50,8 +50,7 @@ class WebResource
           {resource.uri => {Content => [
                               {_: :style, c: "body {background-color: red !important}"}, {_: :h3, c: msg.hrefs},
                               {_: :pre, c: trace.hrefs},
-                              (HTML.kv (HTML.urifyHash env), env) # request metadata
-                            ]}})]]
+                              (HTML.kv (HTML.urifyHash env), env)]}})]]
     end
 
     def deny
@@ -74,15 +73,11 @@ class WebResource
       return HostGET[host][self] if HostGET[host] # host lambda
       return chronoDir           if chronoDir?    # time redirect
       return localNode           if localNode?
-      return case env['HTTP_TYPE'] # request type dispatching
+      return case env['HTTP_TYPE']
              when /nofetch/
                deny
              when /noexec/
                remoteFile
-             when /feed/
-               remoteNode
-             else
-               deny
              end if env.has_key? 'HTTP_TYPE'
       remoteNode
     end
