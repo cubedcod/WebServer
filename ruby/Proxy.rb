@@ -260,7 +260,7 @@ class WebResource
 
     # Cloudflare
     HostGET['cdnjs.cloudflare.com'] = HostGET['ajax.googleapis.com'] = -> r {
-      if r.path.match? /\/jquery/
+      if r.path.match? /\/(babel|jquery|react)/
         r.remoteNode
       else
         r.deny
