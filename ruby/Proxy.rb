@@ -91,6 +91,8 @@ class WebResource
         remoteNode
       elsif allowGIF && ext == 'gif'
         remoteNode
+      elsif env['HTTP_REFERER'] && env['HTTP_REFERER'].R.host == 'www.wbur.org' # referers who can load JS from the 'jungle' CDN-dirs
+        remoteNode
       else
         deny
       end
