@@ -334,18 +334,6 @@ class WebResource
         r.remoteFile
       end}
 
-    # Imgur
-    HostGET['imgur.com'] = HostGET['i.imgur.com'] = -> re {
-      if !re.ext.empty? # has extension?
-        if 'i.imgur.com' == re.host # has image-host?
-          re.remoteFile true # return image
-        else # redirect to image-host
-          [301,{'Location' => 'https://i.imgur.com' + re.path},[]]
-        end
-      else # redirect to unwrapped image
-        UnwrapImage[re]
-      end}
-
     # Mozilla
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
