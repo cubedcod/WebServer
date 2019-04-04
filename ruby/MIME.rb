@@ -51,6 +51,7 @@ class WebResource
       'lisp' => 'text/x-lisp',
       'list' => 'text/plain',
       'm3u8' => 'application/x-mpegURL',
+      'map' => 'application/json',
       'mbox' => 'application/mbox',
       'md' => 'text/markdown',
       'msg' => 'message/rfc822',
