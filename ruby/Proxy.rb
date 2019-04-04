@@ -326,13 +326,14 @@ class WebResource
       case r.parts[0]
       when nil
         r.remoteNode
-      when /^(amp|maps|search)$/
+      when /^(amp|maps|recaptcha|search)$/
         r.remoteNode
       when 'url'
         [301, {'Location' => ( r.q['url'] || r.q['q'] )}, []]
       else
         r.remoteFile
       end}
+    '//www.google.com'.R.HTTPthru
 
     # Mozilla
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
