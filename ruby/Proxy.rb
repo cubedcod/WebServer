@@ -243,6 +243,7 @@ class WebResource
 
     # Anvato
     '//tkx2-prod.anvato.net'.R.HTTPthru
+    '//tkx.apis.anvato.net'.R.HTTPthru
 
     # BizJournal
     HostGET['media.bizj.us'] = -> r {
