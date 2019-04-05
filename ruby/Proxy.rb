@@ -358,6 +358,7 @@ class WebResource
 
     # SoundCloud
     HostGET['exit.sc'] = -> r {[301, {'Location' => r.q['url']},[]]}
+    '//api-v2.soundcloud.com'.R.HTTPthru
 
     # YouTube
     HostGET['youtube.com'] = HostGET['m.youtube.com'] = -> r {[301, {'Location' =>  "https://www.youtube.com" + r.path + r.qs},[]]}
