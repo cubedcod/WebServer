@@ -241,6 +241,7 @@ class WebResource
           m.attr("href").do{|v| # object
             k = {
               'icon' => Image,
+              'apple-touch-icon' => Image,
               'apple-touch-icon-precomposed' => Image,
               'stylesheet' => :drop,
             }[k] || k
@@ -252,14 +253,15 @@ class WebResource
           m.attr("content").do{|v| # object
             # mapping table
             k = {
+              'article:published_time' => Date,
               'description' => Abstract,
               'image' => Image,
               'msapplication-TileImage' => Image,
               'og:description' => Abstract,
               'og:image' => Image,
               'og:image:height' => Schema + 'height',
-              'og:image:width' => Schema + 'width',
               'og:image:secure_url' => Image,
+              'og:image:width' => Schema + 'width',
               'og:title' => Title,
               'thumbnail' => Image,
               'twitter:creator' => Creator,
@@ -268,8 +270,10 @@ class WebResource
               'twitter:image:src' => Image,
               'twitter:title' => Title,
               'viewport' => :drop,
-            }[k] || k
-            yield uri, k, HTML.urifyString(v) unless k == :drop
+            }[k] || k # normalize predicate
+            v = HTML.urifyString v           # find bare URIs (entire string)
+            v = v.hrefs if v.class == String # find URIs in string
+            yield uri, k, v unless k == :drop
           }}}
 
       triplrFile &f
