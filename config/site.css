@@ -1,4 +1,4 @@
-body {font-family: sans-serif}
+body {font-family: sans-serif; margin: 0 2em 0 2em}
 #prev, #next, #up, #down, #originUI {font-size: 2.2em; padding: .1em}
 #prev, #next {position: fixed; top: 0; height: 100%}
 #prev {left:  0}

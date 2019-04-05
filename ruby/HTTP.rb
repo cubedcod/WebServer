@@ -4,7 +4,7 @@ class WebResource
     include MIME
     include URIs
 
-    Hosts = {} # track hosts for highlighting in log
+    Hosts = {} # track hosts for highlighting
 
     def self.call env
       method = env['REQUEST_METHOD']                        # request-method
@@ -20,7 +20,7 @@ class WebResource
         # log request
         color = (if resource.env[:deny]
                  '31'
-                elsif !Hosts.has_key? host
+                elsif !Hosts.has_key? host # new host
                   Hosts[host] = true
                   '32'
                 elsif method=='POST'
