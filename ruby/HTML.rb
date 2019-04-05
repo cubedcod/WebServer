@@ -184,10 +184,11 @@ class WebResource
 
     def self.clean body
       # parse
-      html = Nokogiri::HTML.fragment body.gsub(/<\/?(center|noscript)>/,'')
+      html = Nokogiri::HTML.fragment body.gsub(/<\/?(center|noscript)>/i, '')
 
       # strip nodes
-      %w{iframe link[rel='stylesheet'] style link[type='text/javascript'] link[as='script'] script}.map{|s|html.css(s).remove}
+      %w{iframe link[rel='stylesheet'] style link[type='text/javascript'] link[as='script'] script}.map{|s|
+        html.css(s).remove}
 
       # visit attribute-nodes
       html.traverse{|e|
@@ -219,7 +220,7 @@ class WebResource
     def triplrHTML &f
 
       # parse HTML
-      n = Nokogiri::HTML.parse readFile.to_utf8
+      n = Nokogiri::HTML.parse readFile.to_utf8.gsub(/<\/?(center|noscript)>/i, '')
 
       triplr = TriplrHTML[@r && @r['SERVER_NAME']]
       if triplr # host-mapped triplr
@@ -241,6 +242,7 @@ class WebResource
           m.attr("href").do{|v| # object
             k = {
               'icon' => Image,
+              'image_src' => Image,
               'apple-touch-icon' => Image,
               'apple-touch-icon-precomposed' => Image,
               'stylesheet' => :drop,
@@ -263,6 +265,11 @@ class WebResource
               'og:image:secure_url' => Image,
               'og:image:width' => Schema + 'width',
               'og:title' => Title,
+              'sailthru.image.thumb' => Image,
+              'sailthru.image.full' => Image,
+              'sailthru.lead_image' => Image,
+              'sailthru.secondary_image' => Image,
+              'sailthru.title' => Title,
               'thumbnail' => Image,
               'twitter:creator' => Creator,
               'twitter:description' => Abstract,
