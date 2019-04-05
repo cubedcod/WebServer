@@ -93,15 +93,13 @@ class WebResource
         remoteNode
       elsif env['HTTP_REFERER'] && env['HTTP_REFERER'].R.host == 'www.wbur.org' # hosts which can load JS from the CDN jungle
         remoteNode
-      elsif host.match? /usercontent/
+      elsif host.match? /(content|static)/
         remoteNode.do{|s,h,b|
-          if h['Content-Type'] && h['Content-Type'].match?(/^image/)
+          if h['Content-Type'] && h['Content-Type'].match?(/^(audio|image|video)/)
             [s, h, b]
           else
-            puts "not an image #{uri}"
             deny
-          end
-        }
+          end}
       else
         deny
       end
