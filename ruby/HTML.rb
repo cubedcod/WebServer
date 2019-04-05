@@ -235,7 +235,13 @@ class WebResource
         n.css(vsel).map{|v|
           yield uri, Video, v.attr('src').R }}
 
-      # metadata to RDF
+      # header metadata
+      n.css('head link[rel]').map{|m|
+        m.attr("rel").do{|k| # predicate
+          m.attr("href").do{|v| # object
+            yield uri, k, v.R
+          }}}
+
       n.css('head meta').map{|m|
         (m.attr("name") || m.attr("property")).do{|k| # predicate
           m.attr("content").do{|v| # object
@@ -257,7 +263,8 @@ class WebResource
               'twitter:image:src' => Image,
               'twitter:title' => Title,
             }[k] || k
-            yield uri, k, HTML.urifyString(v)}}}
+            yield uri, k, HTML.urifyString(v)
+          }}}
 
       triplrFile &f
     end

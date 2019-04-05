@@ -8,9 +8,9 @@ class WebResource
     end
 
     def HTTPthru
-      HostGET[host] = -> r {r.GETthru}
-     HostPOST[host] = -> r {r.POSTthru}
-  HostOPTIONS[host] = -> r {r.OPTIONSthru}
+      HostGET[host] ||= -> r {r.GETthru}
+     HostPOST[host] ||= -> r {r.POSTthru}
+  HostOPTIONS[host] ||= -> r {r.OPTIONSthru}
     end
 
     def OPTIONSthru
@@ -111,7 +111,10 @@ class WebResource
       head.delete 'Accept-Encoding'
       head.delete 'Host'
       head.delete 'User-Agent' if host=='t.co' # prefer location in HTTP header, not javascript code
-      suffix = ext.empty? && host.match?(/reddit.com$/) && !parts.member?('wiki') && '.rss' # format suffix
+
+      # explicit-format suffix
+      suffix = ext.empty? && host.match?(/reddit.com$/) && !parts.member?('wiki') && !UI[@r['SERVER_NAME']] && '.rss'
+
       url = if @r && !suffix && !(path||'').match?(/[\[\]]/) # preserve URI
               "https://#{host}#{@r['REQUEST_URI']}"
             else # construct locator
