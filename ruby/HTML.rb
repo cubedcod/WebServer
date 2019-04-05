@@ -241,8 +241,10 @@ class WebResource
           m.attr("href").do{|v| # object
             k = {
               'icon' => Image,
+              'apple-touch-icon-precomposed' => Image,
+              'stylesheet' => :drop,
             }[k] || k
-            yield uri, k, v.R
+            yield uri, k, v.R unless k == :drop
           }}}
 
       n.css('head meta').map{|m|
@@ -265,8 +267,9 @@ class WebResource
               'twitter:image' => Image,
               'twitter:image:src' => Image,
               'twitter:title' => Title,
+              'viewport' => :drop,
             }[k] || k
-            yield uri, k, HTML.urifyString(v)
+            yield uri, k, HTML.urifyString(v) unless k == :drop
           }}}
 
       triplrFile &f

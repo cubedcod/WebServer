@@ -5,7 +5,7 @@ body {font-family: sans-serif; margin: 0 2em 0 2em}
 #next {right: 0}
 #up, #down {display: block}
 #originUI {position: fixed; top: 0; right: 0; z-index: 1}
-a {overflow: hidden; text-decoration: none; border-radius: .16em}
+a {overflow: hidden; text-decoration: none; border-radius: .16em; background-color: #f0f0f0; color: #000}
 a, p {max-width: 78ex}
 a.id {float: right}
 a.date {float: right; font-weight: normal; font-size:.8em; background-color: #000; color:#888}
