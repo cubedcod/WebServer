@@ -90,10 +90,13 @@ class WebResource
       if %w{dash gifv html ico jpg jpg:small jpg:large jpg:thumb jpeg json key ogg m3u8 m4a mp3 mp4 mpd pdf png svg ts vtt webm webp}.member? ext.downcase
         remoteNode
       elsif ext == 'gif' && (allowGIF || (%w{i.imgur.com s.imgur.com}.member? host))
+        # GIF must be whitelisted. primarily used for tracking and ancient icons now
         remoteNode
-      elsif env['HTTP_REFERER'] && env['HTTP_REFERER'].R.host == 'www.wbur.org' # hosts which can load JS from the CDN jungle
+      elsif env['HTTP_REFERER'] && env['HTTP_REFERER'].R.host == 'www.wbur.org'
+        # allowed hosts can load JS from the CDN jungle
         remoteNode
       elsif host.match? /(content|static)/
+        # no suffix-match. fetch and check MIME type
         remoteNode.do{|s,h,b|
           if h['Content-Type'] && h['Content-Type'].match?(/^(audio|image|video)/)
             [s, h, b]
