@@ -87,12 +87,21 @@ class WebResource
     end
 
     def remoteFile allowGIF=false
-      if %w{dash gifv html jpg jpg:small jpg:large jpg:thumb jpeg json key ogg m3u8 m4a mp3 mp4 mpd pdf png svg ts vtt webm webp}.member? ext.downcase
+      if %w{dash gifv html ico jpg jpg:small jpg:large jpg:thumb jpeg json key ogg m3u8 m4a mp3 mp4 mpd pdf png svg ts vtt webm webp}.member? ext.downcase
         remoteNode
       elsif ext == 'gif' && (allowGIF || (%w{i.imgur.com s.imgur.com}.member? host))
         remoteNode
-      elsif env['HTTP_REFERER'] && env['HTTP_REFERER'].R.host == 'www.wbur.org' # referers who can load JS from the 'jungle' CDN-dirs
+      elsif env['HTTP_REFERER'] && env['HTTP_REFERER'].R.host == 'www.wbur.org' # hosts which can load JS from the CDN jungle
         remoteNode
+      elsif host.match? /usercontent/
+        remoteNode.do{|s,h,b|
+          if h['Content-Type'] && h['Content-Type'].match?(/^image/)
+            [s, h, b]
+          else
+            puts "not an image #{uri}"
+            deny
+          end
+        }
       else
         deny
       end
@@ -256,6 +265,15 @@ class WebResource
         r.remoteNode
       end}
 
+    # BusinessWire
+    HostGET['cts.businesswire.com'] = -> r {
+      if r.q.has_key? 'url'
+        [301, {'Location' => r.q['url']}, []]
+      else
+        r.remoteNode
+      end
+    }
+
     # Brightcove
     '//edge.api.brightcove.com'.R.HTTPthru
 
@@ -325,6 +343,7 @@ class WebResource
     }
 
     # Google
+    %w{drive news}.map{|prod| HostGET[prod + '.google.com'] = -> r {r.remoteNode}}
     HostGET['google.com'] = HostGET['www.google.com'] = -> r {
       case r.parts[0]
       when nil

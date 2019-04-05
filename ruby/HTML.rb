@@ -239,6 +239,9 @@ class WebResource
       n.css('head link[rel]').map{|m|
         m.attr("rel").do{|k| # predicate
           m.attr("href").do{|v| # object
+            k = {
+              'icon' => Image,
+            }[k] || k
             yield uri, k, v.R
           }}}
 
