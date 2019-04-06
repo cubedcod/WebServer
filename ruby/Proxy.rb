@@ -97,7 +97,7 @@ class WebResource
       elsif env['HTTP_REFERER'] && env['HTTP_REFERER'].R.host == 'www.wbur.org'
         # allowed hosts can load JS from the CDN jungle
         remoteNode
-      elsif host.match? /(content|static)/
+      elsif host.match? /(content|fastly|static)/
         # no suffix-match. fetch and check MIME type of response
         remoteNode.do{|s,h,b|
           if h['Content-Type'] && h['Content-Type'].match?(/^(audio|image|video)/)

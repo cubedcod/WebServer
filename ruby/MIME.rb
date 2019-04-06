@@ -144,7 +144,7 @@ class WebResource
       'text/x-tex'           => [:triplrTeX],
     }
 
-    NoTransform = /^(application\/(dash|font|(x-)?javascript|json|octet-stream|pdf|vnd|x-mpegURL|(x-)?protobuf(fer)?)|audio|font|image|text\/(css|javascript|vtt)|video)/
+    NoTransform = /^(application\/(dash|font|(x-)?javascript|json|octet-stream|pdf|vnd|x-mpegURL|(x-)?protobuf(fer)?)|audio|binary|font|image|text\/(css|javascript|vtt)|video)/
 
     # host-mapped HTML triplers
     TriplrHTML = {
