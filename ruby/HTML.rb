@@ -280,8 +280,7 @@ class WebResource
               'twitter:title' => Title,
               'viewport' => :drop,
             }[k] || k # normalize predicate
-            v = HTML.urifyString v           # find bare URIs (entire string)
-            v = v.hrefs if v.class == String # find URIs in string
+            v = HTML.urifyString v # bare URIs (entire string) to resource-reference
             yield uri, k, v unless k == :drop
           }}}
 
