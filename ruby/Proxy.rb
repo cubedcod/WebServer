@@ -88,15 +88,16 @@ class WebResource
 
     def remoteFile allowGIF=false
       if %w{dash gifv html ico jpg jpg:small jpg:large jpg:thumb jpeg json key ogg m3u8 m4a mp3 mp4 mpd pdf png svg ts vtt webm webp}.member? ext.downcase
+        # allowed file-extension
         remoteNode
-      elsif ext == 'gif' && (allowGIF || (%w{i.imgur.com s.imgur.com}.member? host))
-        # GIF must be whitelisted. primarily used for tracking and ancient icons now
+      elsif ext == 'gif' && (allowGIF || (%w{i.imgflip.com i.imgur.com s.imgur.com}.member? host))
+        # GIF allow-listing - primarily used for tracking and ancient icons now
         remoteNode
       elsif env['HTTP_REFERER'] && env['HTTP_REFERER'].R.host == 'www.wbur.org'
         # allowed hosts can load JS from the CDN jungle
         remoteNode
       elsif host.match? /(content|static)/
-        # no suffix-match. fetch and check MIME type
+        # no suffix-match. fetch and check MIME type of response
         remoteNode.do{|s,h,b|
           if h['Content-Type'] && h['Content-Type'].match?(/^(audio|image|video)/)
             [s, h, b]

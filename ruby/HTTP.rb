@@ -26,7 +26,11 @@ class WebResource
                 elsif method=='POST'
                   '32'
                 elsif status==200
-                  '37'
+                  if resource.ext == 'js'
+                    '36'
+                  else
+                    '37'
+                  end
                 else
                   '30'
                  end) + ';1'

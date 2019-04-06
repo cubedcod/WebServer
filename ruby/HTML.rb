@@ -265,6 +265,8 @@ class WebResource
               'og:image:secure_url' => Image,
               'og:image:width' => Schema + 'width',
               'og:title' => Title,
+              'sailthru.date' => Date,
+              'sailthru.description' => Abstract,
               'sailthru.image.thumb' => Image,
               'sailthru.image.full' => Image,
               'sailthru.lead_image' => Image,
