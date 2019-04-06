@@ -198,7 +198,7 @@ class WebResource
         @doc.scan(reItem){|m|
           attrs = m[2]
           inner = m[3]
-          # identifier search. prefer RDF, then anything resolvable then blog/tag/hash 
+          # identifier search
           u = (attrs.do{|a|a.match(reRDF)} ||
                inner.match(reLink) ||
                inner.match(reLinkCData) ||

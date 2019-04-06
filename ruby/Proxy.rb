@@ -307,11 +307,11 @@ class WebResource
     }
 
     # Facebook
-    HostGET['www.facebook.com'] = -> zuck {
-      if %w{ajax api plugins si tr}.member?(zuck.parts[0]) || zuck.ext == 'php'
-        zuck.deny
+    HostGET['www.facebook.com'] = -> z {
+      if %w{ajax api plugins si tr}.member?(z.parts[0]) || z.path.match?(/reaction/) || z.ext == 'php'
+        z.deny
       else
-        zuck.remoteNode
+        z.remoteNode
       end}
 
     HostGET['www.instagram.com'] = -> r {
@@ -346,17 +346,34 @@ class WebResource
     }
 
     # Google
-    %w{books drive maps news}.map{|prod| HostGET[prod + '.google.com'] = -> r {r.remoteNode}}
+    %w{books drive images maps news}.map{|prod| HostGET[prod + '.google.com'] = -> r {r.remoteNode}}
     HostGET['google.com'] = HostGET['www.google.com'] = -> r {
       case r.parts[0]
       when nil
         r.remoteNode
-      when /^(amp|maps|search)$/
+      when /^(aclk|amp|maps|search|webhp)$/
         r.remoteNode
       when 'url'
         [301, {'Location' => ( r.q['url'] || r.q['q'] )}, []]
       else
         r.remoteFile
+      end}
+    HostGET["www.googleadservices.com"] = -> r {
+      if r.path == '/pagead/aclk' && r.q.has_key?('adurl')
+        [301, {'Location' => r.q['adurl']}, []]
+      else
+        r.deny
+      end
+    }
+
+    # Medium
+    HostGET['medium.com'] = -> r {
+      if %w{_ p}.member? r.parts[0]
+        r.deny
+      elsif r.path == '/m/global-identity'
+        [301, {'Location' => r.q['redirecturl']}, []]
+      else
+        r.remoteNode
       end}
 
     # Mozilla
@@ -380,24 +397,6 @@ class WebResource
     # SoundCloud
     HostGET['exit.sc'] = -> r {[301, {'Location' => r.q['url']},[]]}
     '//api-v2.soundcloud.com'.R.HTTPthru
-
-    # YouTube
-    HostGET['youtube.com'] = HostGET['m.youtube.com'] = -> r {[301, {'Location' =>  "https://www.youtube.com" + r.path + r.qs},[]]}
-    HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
-    HostGET['img.youtube.com'] = -> r {r.remoteFile}
-    HostGET['www.youtube.com'] = -> r {
-      mode = r.parts[0]
-      if !mode
-        [200, {'Content-Type' => 'text/html'},['<form method="GET" action="/results"><input name="q" autofocus></form>']]
-      elsif %w{browse_ajax c channel embed feed get_video_info heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member? mode
-        r.remoteNode
-      elsif mode == 'redirect'
-        [301, {'Location' =>  r.q['q']},[]]
-      elsif mode.match? /204$/
-        Response_204
-      else
-        r.deny
-      end}
 
     # T-Mobile
     HostGET['lookup.t-mobile.com'] = -> re {[200, {'Content-Type' => 'text/html'}, [re.htmlDocument({re.uri => {'dest' => re.q['origurl'].R}})]]}
@@ -439,6 +438,25 @@ class WebResource
     HostGET['wgbh.brightspotcdn.com'] = -> r {
       r.q.has_key?('url') ? [301, {'Location' => r.q['url']}, []] : r.remoteNode
     }
+
+    # YouTube
+    HostGET['youtube.com'] = HostGET['m.youtube.com'] = -> r {[301, {'Location' =>  "https://www.youtube.com" + r.path + r.qs},[]]}
+    HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
+    HostGET['img.youtube.com'] = -> r {r.remoteFile}
+    HostGET['www.youtube.com'] = -> r {
+      mode = r.parts[0]
+      if !mode
+        [200, {'Content-Type' => 'text/html'},['<form method="GET" action="/results"><input name="q" autofocus></form>']]
+      elsif %w{browse_ajax c channel embed feed get_video_info heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member? mode
+        r.remoteNode
+      elsif mode == 'redirect'
+        [301, {'Location' =>  r.q['q']},[]]
+      elsif mode.match? /204$/
+        Response_204
+      else
+        r.deny
+      end}
+    #'//www.youtube.com'.R.HTTPthru
 
   end
 end
