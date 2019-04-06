@@ -75,7 +75,8 @@ class WebResource
     def HTTP.print_header header; header.map{|k,v|puts [k,v].join "\t"} end
 
     def redirectCache
-      ('/cache/URL/' + host + ((path||'')[0..2] || '') + '/' + ((path||'')[3..-1] || '') + '.u').R
+      hash = (host + (path || '') + qs).sha2
+      ('/cache/location/' + hash[0..2] + '/' + hash[3..-1] + '.u').R
     end
 
     def redirect
@@ -345,7 +346,7 @@ class WebResource
     }
 
     # Google
-    %w{drive news}.map{|prod| HostGET[prod + '.google.com'] = -> r {r.remoteNode}}
+    %w{drive maps news}.map{|prod| HostGET[prod + '.google.com'] = -> r {r.remoteNode}}
     HostGET['google.com'] = HostGET['www.google.com'] = -> r {
       case r.parts[0]
       when nil
