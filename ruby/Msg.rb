@@ -261,6 +261,8 @@ class WebResource
       date = post.delete(Date).justArray[0]
       from = post.delete(From).justArray
       to = post.delete(To).justArray
+      images = post.delete(Image).justArray
+      content = post.delete(Content).justArray
       cache = post.R.cacheFile
       location = if %w{l localhost}.member?(env['SERVER_NAME']) && cache.exist?
                    cache.uri
@@ -270,14 +272,18 @@ class WebResource
       {class: :post,
        c: [titles.map{|title|
              Markup[Title][title,env,uri]},
-           (Markup[Date][date] if date),
-           {_: :a, id: 't'+rand.to_s.sha2, class: :id, c: '🔗', href: location},
+           images.map{|i|
+             Markup[Image][i,env]},
            {_: :table,
             c: {_: :tr,
                 c: [{_: :td, c: from.map{|f|Markup[Creator][f,env]}, class: :from},
                     {_: :td, c: '&rarr;'},
-                    {_: :td, c: to.map{|f|Markup[Creator][f,env]}, class: :to}]}}, '<br>',
-           ((HTML.kv post, env) unless post.empty?)]}}
+                    {_: :td, c: to.map{|f|Markup[Creator][f,env]}, class: :to}]}},
+           content,
+           {_: :a, id: 't'+rand.to_s.sha2, class: :id, c: '🔗', href: location},
+           ((HTML.kv post, env) unless post.empty?),
+           (Markup[Date][date] if date),
+          ]}}
 
     # group by sender
     Group['from'] = -> graph { Group['from-to'][graph,Creator] }
