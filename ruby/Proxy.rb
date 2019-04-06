@@ -358,6 +358,7 @@ class WebResource
       else
         r.remoteFile
       end}
+
     HostGET["www.googleadservices.com"] = -> r {
       if r.path == '/pagead/aclk' && r.q.has_key?('adurl')
         [301, {'Location' => r.q['adurl']}, []]
@@ -458,5 +459,7 @@ class WebResource
       end}
     #'//www.youtube.com'.R.HTTPthru
 
+    # XG
+    HostGET['5123.xg4ken.com'] = -> r {r.q.has_key?('url') ? [301, {'Location' => r.q['url']}, []] : r.deny}
   end
 end
