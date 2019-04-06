@@ -184,7 +184,7 @@ class WebResource
 
     def self.clean body
       # parse
-      html = Nokogiri::HTML.fragment body.gsub(/<\/?(center|noscript)>/i, '')
+      html = Nokogiri::HTML.fragment body
 
       # strip nodes
       %w{iframe link[rel='stylesheet'] style link[type='text/javascript'] link[as='script'] script}.map{|s|
@@ -220,13 +220,13 @@ class WebResource
     def triplrHTML &f
 
       # parse HTML
-      n = Nokogiri::HTML.parse readFile.to_utf8.gsub(/<\/?(center|noscript)>/i, '')
+      n = Nokogiri::HTML.parse readFile.to_utf8
 
       triplr = TriplrHTML[@r && @r['SERVER_NAME']]
       if triplr # host-mapped triplr
         send triplr, &f
       else
-        yield uri, Content, HTML.clean(n.css('body').inner_html)
+        yield uri, Content, HTML.clean(n.css('body').inner_html).gsub(/<\/?(center|noscript)>/i, '')
       end
 
       n.css('title').map{|title| yield uri, Title, title.inner_text }
@@ -241,6 +241,7 @@ class WebResource
         m.attr("rel").do{|k| # predicate
           m.attr("href").do{|v| # object
             k = {
+              'alternate' => DC + 'hasFormat',
               'icon' => Image,
               'image_src' => Image,
               'apple-touch-icon' => Image,

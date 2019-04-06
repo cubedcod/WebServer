@@ -346,7 +346,7 @@ class WebResource
     }
 
     # Google
-    %w{drive maps news}.map{|prod| HostGET[prod + '.google.com'] = -> r {r.remoteNode}}
+    %w{books drive maps news}.map{|prod| HostGET[prod + '.google.com'] = -> r {r.remoteNode}}
     HostGET['google.com'] = HostGET['www.google.com'] = -> r {
       case r.parts[0]
       when nil
