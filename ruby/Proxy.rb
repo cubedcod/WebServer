@@ -87,15 +87,18 @@ class WebResource
       redirectCache.exist?
     end
 
-    def remoteFile allowGIF=false
-      if %w{dash gifv html ico jpg jpg:small jpg:large jpg:thumb jpeg json key ogg m3u8 m4a mp3 mp4 mpd pdf png svg ts vtt webm webp}.member? ext.downcase
-        # allowed file-extension
+    def remoteFiltered allowGIF=false
+      if %w{js}.member? ext.downcase
+        # disallowed name-suffix
+        deny
+      elsif %w{dash gifv html ico jpg jpg:small jpg:large jpg:thumb jpeg json key ogg m3u8 m4a mp3 mp4 mpd pdf png svg ts vtt webm webp}.member? ext.downcase
+        # allowed name-suffix
         remoteNode
       elsif ext == 'gif' && (allowGIF || (%w{i.imgflip.com i.imgur.com s.imgur.com}.member? host))
-        # GIF allow-listing - primarily used for tracking and ancient icons now
+        # GIF conditionally allowed
         remoteNode
       elsif env['HTTP_REFERER'] && env['HTTP_REFERER'].R.host == 'www.wbur.org'
-        # allowed hosts can load JS from the CDN jungle
+        # hosts which can import JS from CDN jungle
         remoteNode
       elsif host.match? /(akamai|content|fastly|static)/
         # no suffix-match. fetch and check MIME type of response
@@ -356,7 +359,7 @@ class WebResource
       when 'url'
         [301, {'Location' => ( r.q['url'] || r.q['q'] )}, []]
       else
-        r.remoteFile
+        r.remoteFiltered
       end}
 
     HostGET["www.googleadservices.com"] = -> r {
@@ -443,7 +446,7 @@ class WebResource
     # YouTube
     HostGET['youtube.com'] = HostGET['m.youtube.com'] = -> r {[301, {'Location' =>  "https://www.youtube.com" + r.path + r.qs},[]]}
     HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
-    HostGET['img.youtube.com'] = -> r {r.remoteFile}
+    HostGET['img.youtube.com'] = -> r {r.remoteFiltered}
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
       if !mode

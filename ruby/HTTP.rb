@@ -80,8 +80,8 @@ class WebResource
       return case env['HTTP_TYPE']
              when /nofetch/
                deny
-             when /noexec/
-               remoteFile
+             when /filter/
+               remoteFiltered
              end if env.has_key? 'HTTP_TYPE'
       remoteNode
     end
