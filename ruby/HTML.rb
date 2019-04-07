@@ -286,7 +286,9 @@ class WebResource
             yield uri, k, v unless k == :drop
           }}}
       # JSON-LD metadata
-      # nokogiri.css('script[type="application/ld+json"]')[0]
+      graph = RDF::Graph.new
+      n.css('script[type="application/ld+json"]').map{|json|
+        graph << ::JSON::LD::API.toRdf(::JSON.parse json)}
 
       triplrFile &f
     end

@@ -69,7 +69,7 @@ class WebResource
     end
 
     # file -> file
-    def rdfize # call triplr function mapped to MIME, cache JSON transcode and return file-ref to it
+    def rdfize # call MIME-mapped triplr function, cache output in JSON and return file-reference
       return self if ext == 'e'
       hash = node.stat.ino.to_s.sha2
       doc = ('/cache/RDF/' + hash[0..2] + '/' + hash[3..-1] + '.e').R
