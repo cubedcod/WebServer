@@ -78,7 +78,7 @@ class WebResource
                             ].map{|e|['  ',e,"\n"]}}, "\n\n",
                         {_: :body,
                          c: ["\n", link[:up, '&#9650;'], link[:prev, '&#9664;'], link[:next, '&#9654;'],
-                             ({_: :a, id: :originUI, href: '/ui/origin' + HTTP.qs({u: 'http:' + uri}), c: '⮹'} unless localNode?),
+                             ({_: :a, id: :originUI, href: '/ui/origin' + HTTP.qs({u: 'http:' + uri}), c: '⌘'} unless localNode?),
                              if graph.empty?
                                HTML.kv (HTML.urifyHash @r), @r
                              else
@@ -251,6 +251,7 @@ class WebResource
             }[k] || k
             yield uri, k, v.R unless k == :drop
           }}}
+
       # <meta>
       n.css('head meta').map{|m|
         (m.attr("name") || m.attr("property")).do{|k| # predicate
@@ -287,8 +288,9 @@ class WebResource
           }}}
 
       # JSON-LD metadata
+
       graph = RDF::Graph.new
-      # load JSON-LD doc-fragments to graph
+      # load doc-fragments to graph
       n.css('script[type="application/ld+json"]').map{|json|
         graph << ::JSON::LD::API.toRdf(::JSON.parse json)}
       # emit triples
