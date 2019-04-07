@@ -211,8 +211,8 @@ class WebResource
       [202,{},[]]
     end
 
-    # ALL_CAPS_CGI format keys to standard HTTP request-header capitalization
-    # is there any way to have Rack not do that to the names, or get the original?
+    # CAPS_CGI format keys to standard HTTP request-header capitalization
+    # is there any way to have Rack not do that to the names?
     def self.unmangle env
       head = {}
       env.map{|k,v|
@@ -374,7 +374,7 @@ class WebResource
     HostGET['medium.com'] = -> r {
       if %w{_ p}.member? r.parts[0]
         r.deny
-      elsif r.path == '/m/global-identity'
+      elsif r.q.has_key? 'redirecturl'
         [301, {'Location' => r.q['redirecturl']}, []]
       else
         r.remoteNode
