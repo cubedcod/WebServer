@@ -16,7 +16,7 @@ a.id {float: right}
 a.link {border: 1px solid #777}
 a.title, a.link, div.thumb {background-color: #fff; color: #000}
 body {font-family: sans-serif; margin: 0 2em 0 2em}
-body, pre, p, span, td.k > a {background-color: #000; color: #fff}
+body, pre, p, span, td.k > a, tr[name="abstract"] > td.v {background-color: #000; color: #fff}
 div,td {padding: 0}
 footer,.footer,#footer {position: absolute; bottom: 0; left: 0; z-index: -1; color: #aaa}
 img, video {max-width: 100%}

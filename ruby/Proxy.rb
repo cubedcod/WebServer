@@ -305,15 +305,10 @@ class WebResource
         z.remoteNode
       end}
 
-    HostGET['www.instagram.com'] = -> r {
-      if false
-        r.deny
-      else
-        r.remoteNode
-      end}
     HostGET['instagram.com']   = -> r {[301, {'Location' => "https://www.instagram.com" + r.path},[]]}
     HostGET['l.facebook.com']  = -> r {[301, {'Location' => r.q['u']},  []]}
     HostGET['l.instagram.com'] = -> r {[301, {'Location' => r.q['u']},  []]}
+    HostGET['www.instagram.com'] = -> r {r.remoteNode}
     PathGET['/safe_image.php'] = -> r {[301, {'Location' => r.q['url']},[]]}
 
     # Forbes
