@@ -236,7 +236,8 @@ class WebResource
         n.css(vsel).map{|v|
           yield uri, Video, v.attr('src').R }}
 
-      # header metadata
+      # doc-header metadata
+      # <link>
       n.css('head link[rel]').map{|m|
         m.attr("rel").do{|k| # predicate
           m.attr("href").do{|v| # object
@@ -250,7 +251,7 @@ class WebResource
             }[k] || k
             yield uri, k, v.R unless k == :drop
           }}}
-
+      # <meta>
       n.css('head meta').map{|m|
         (m.attr("name") || m.attr("property")).do{|k| # predicate
           m.attr("content").do{|v| # object
@@ -284,6 +285,8 @@ class WebResource
             v = HTML.urifyString v # bare URIs (entire string) to resource-reference
             yield uri, k, v unless k == :drop
           }}}
+      # JSON-LD metadata
+      # nokogiri.css('script[type="application/ld+json"]')[0]
 
       triplrFile &f
     end
