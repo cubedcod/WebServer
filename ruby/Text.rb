@@ -119,6 +119,27 @@ class WebResource
             yield id, Type, (ns+'Row').R}}}
     end
   end
+  module HTTP
+
+    def HTTP.print_body body, mime
+      case mime
+      when /application\/json/
+        puts ::JSON.pretty_generate ::JSON.parse body
+      when /application\/x-www-form-urlencoded/
+        q = HTTP.parseQs body
+        message = q.delete "message"
+        puts q
+        puts ::JSON.pretty_generate ::JSON.parse message if message
+      else
+        puts body
+      end
+    rescue ::JSON::ParserError
+      nil
+    end
+
+    def HTTP.print_header header; header.map{|k,v|puts [k,v].join "\t"} end
+
+  end
 end
 
 class String

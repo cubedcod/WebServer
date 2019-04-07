@@ -56,24 +56,6 @@ class WebResource
 
     def pragma; env['HTTP_PRAGMA'] end
 
-    def HTTP.print_body body, mime
-      case mime
-      when /application\/json/
-        puts ::JSON.pretty_generate ::JSON.parse body
-      when /application\/x-www-form-urlencoded/
-        q = HTTP.parseQs body
-        message = q.delete "message"
-        puts q
-        puts ::JSON.pretty_generate ::JSON.parse message if message
-      else
-        puts body
-      end
-    rescue ::JSON::ParserError
-      nil
-    end
-
-    def HTTP.print_header header; header.map{|k,v|puts [k,v].join "\t"} end
-
     def redirectCache
       hash = (host + (path || '') + qs).sha2
       ('/cache/location/' + hash[0..2] + '/' + hash[3..-1] + '.u').R
@@ -206,8 +188,14 @@ class WebResource
 
     alias_method :GETthru, :remoteNode
 
-    def trackPOST
+    def trackPOST; verbose = true
       env[:deny] = true
+      if verbose
+        puts "POST >>> #{url}"
+        HTTP.print_header headers
+        puts ""
+        HTTP.print_body body, @r['CONTENT_TYPE']
+      end
       [202,{},[]]
     end
 
