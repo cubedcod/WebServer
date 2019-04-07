@@ -72,7 +72,7 @@ class WebResource
             # <a>
             content.css('a').map{|a|
               (a.attr 'href').do{|href|
-                # resolve URI relative to subject base
+                # resolve URIs
                 link = subject.join href
                 re = link.R
                 a.set_attribute 'href', link
@@ -88,7 +88,10 @@ class WebResource
             # <img>
             content.css('img').map{|i|
               (i.attr 'src').do{|src|
-                yield s, Image, (subject.join src)}}
+                # TODO find reblogs with relative URIs in content and check RFCish specs on whether relURI base is resource or doc
+                src = subject.join src
+                i.set_attribute 'src', src
+                yield s, Image, src.R}}
 
             # <iframe>
             content.css('iframe').map{|i|
