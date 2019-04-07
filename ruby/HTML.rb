@@ -285,10 +285,15 @@ class WebResource
             v = HTML.urifyString v # bare URIs (entire string) to resource-reference
             yield uri, k, v unless k == :drop
           }}}
+
       # JSON-LD metadata
       graph = RDF::Graph.new
+      # load JSON-LD doc-fragments to graph
       n.css('script[type="application/ld+json"]').map{|json|
         graph << ::JSON::LD::API.toRdf(::JSON.parse json)}
+      # emit triples
+      graph.each_triple{|s,p,o|
+        yield s.to_s, p.to_s, [RDF::Node, RDF::URI].member?(o.class) ? o.R : o.value}
 
       triplrFile &f
     end
