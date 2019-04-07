@@ -52,9 +52,11 @@ class WebResource
       [500, {'Content-Type' => 'text/html'},
        [resource.htmlDocument(
           {resource.uri => {Content => [
-                              {_: :style, c: "body {background-color: red !important}"}, {_: :h3, c: msg.hrefs},
+                              {_: :h3, c: msg.hrefs, style: 'color: red'},
                               {_: :pre, c: trace.hrefs},
-                              (HTML.kv (HTML.urifyHash env), env)]}})]]
+                              (HTML.kv (HTML.urifyHash env), env),
+                              (HTML.kv (HTML.urifyHash e.io.meta), env if e.respond_to? :io)
+                            ]}})]]
     end
 
     def deny
