@@ -5,19 +5,19 @@
 #prev {left:  0}
 #next {right: 0}
 #prev, #next, #up, #down, #originUI {font-size: 2em; padding: .1em; color: #fff}
-* {vertical-align: top}
 .bold {font-weight: bold; font-size: 1.1em}
 .container > .name {color: #000; background-color: #fff; font-size: .92em; margin-right: .1em}
 .post {max-width:80ex; border: .08em solid #333; background-color: #080808; color: #fff; border-radius: .3em; margin: .1em}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
 a {overflow: hidden; text-decoration: none}
 a, p {max-width: 78ex}
+a.tile {vertical-align: top}
 a.date {float: right; font-weight: normal; font-size:.8em; background-color: #000; color:#888}
 a.id {float: right}
 a.link {border: 1px solid #777}
 h1,h2,h3,h4,h5,h6, a.title, a.link, div.thumb {background-color: #fff; color: #000}
 body {font-family: sans-serif; margin: 0 2em 0 2em}
-body, pre, p, span, td.k > a, tr[name="abstract"] > td.v {background-color: #000; color: #fff}
+body, pre, p, span, li, time, td.k > a, tr[name="abstract"] > td.v {background-color: #000; color: #fff}
 div,td {padding: 0}
 footer,.footer,#footer {position: absolute; bottom: 0; left: 0; z-index: -1; color: #aaa}
 img, video {max-width: 100%}
