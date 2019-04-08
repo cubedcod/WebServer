@@ -31,19 +31,8 @@ class WebResource
         if env[:images][img.uri]
         # deduplicated
         else
-          env[:images][img.uri] = true # mark as shown
-          {class: :thumb,
-           c: {_: :a, href: img.uri,
-               c: {_: :img, src: if !img.host # thumbnail
-                    img.path + '?preview' if img.path
-                  else
-                    cache = img.cacheFile
-                    if %w{l localhost}.member?(env['SERVER_NAME']) && cache.exist?
-                      cache.uri
-                    else
-                      img.uri
-                    end
-                   end}}}
+          env[:images][img.uri] = true
+          {class: :thumb, c: {_: :a, href: img.uri, c: {_: :img, src: img.uri}}}
         end
       else
         CGI.escapeHTML image.to_s
