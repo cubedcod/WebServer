@@ -30,6 +30,7 @@ Feed
 Image
 Msg
 Proxy
+Site
 Text
 }.map{|i|require_relative i}
 
