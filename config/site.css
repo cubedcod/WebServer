@@ -27,8 +27,9 @@ p:first-child {border-width: 0}
 pre {white-space: pre-wrap}
 table {border-spacing: 0; border-width: 0}
 table, div {display: inline-block}
-td.k {text-align: right}
+td.k {text-align: right; white-space: nowrap}
 td.v {padding-left: .1em}
+td.v > a {background-color: #eee; color: #000}
 tr[name="content"] > td.v a {background-color: #3f3; color: #000}
 tr[name="content"] > td.v a:visited {background-color: #000; color: #3f3; border: .08em solid #3f3}
 tr[name="content"] > td.v footer a, tr[name="content"] > td.v header a {background-color: #000; color: #aaa}

@@ -239,6 +239,7 @@ class WebResource < RDF::URI
       SIOC + 'reply_of' => '↩️',
       Schema + 'width' => '↔',
       Schema + 'height' => '↕',
+      Twitter => '🐦',
       Video => '📼',
     }
 

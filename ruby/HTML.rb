@@ -226,7 +226,7 @@ class WebResource
       if triplr # host-mapped triplr
         send triplr, &f
       else
-        yield uri, Content, HTML.clean(n.css('body').inner_html).gsub(/<\/?(center|noscript)>/i, '')
+        yield uri, Content, HTML.clean(n.css('body').inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
       end
 
       n.css('title').map{|title| yield uri, Title, title.inner_text }
@@ -256,8 +256,10 @@ class WebResource
       n.css('head meta').map{|m|
         (m.attr("name") || m.attr("property")).do{|k| # predicate
           m.attr("content").do{|v| # object
-            # mapping table
+
+            # normalize predicates
             k = {
+              'article:modified_time' => Date,
               'article:published_time' => Date,
               'description' => Abstract,
               'image' => Image,
@@ -282,7 +284,13 @@ class WebResource
               'twitter:image:src' => Image,
               'twitter:title' => Title,
               'viewport' => :drop,
-            }[k] || k # normalize predicate
+            }[k] || k
+
+            if k == 'twitter:site'
+              k = Twitter
+              v = (Twitter + '/' + v.sub(/^@/,'')).R
+            end
+
             v = HTML.urifyString v # bare URIs (entire string) to resource-reference
             yield uri, k, v unless k == :drop
           }}}

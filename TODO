@@ -20,6 +20,7 @@ emit mp4 links found in static page
 relURI in feed identifiers
 wsj drudge headers
 AP triplr
+enumerate HTML-literal field values (currently Content & Abstract, add hrefized Generator and others)
 anything actually useful in data- attributes?
 POST adaptors per host
 cookies in escrow at proxy
