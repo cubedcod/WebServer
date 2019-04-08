@@ -11,7 +11,7 @@
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
 a {overflow: hidden; text-decoration: none}
 a, p {max-width: 78ex}
-a.tile {vertical-align: top}
+a.title {vertical-align: top}
 a.date {float: right; font-weight: normal; font-size:.8em; background-color: #000; color:#888}
 a.id {float: right}
 a.link {border: 1px solid #777}
