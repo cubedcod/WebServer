@@ -286,12 +286,16 @@ class WebResource
               'viewport' => :drop,
             }[k] || k
 
-            if k == 'twitter:site'
+            case k
+            when 'twitter:site'
               k = Twitter
               v = (Twitter + '/' + v.sub(/^@/,'')).R
+            when Abstract
+              v = v.hrefs # substring URIs to <a href> 
+            else
+              v = HTML.urifyString v # bare URI to resource-reference
             end
 
-            v = HTML.urifyString v # bare URIs (entire string) to resource-reference
             yield uri, k, v unless k == :drop
           }}}
 
