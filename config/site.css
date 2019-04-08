@@ -10,12 +10,12 @@
 .container > .name {color: #000; background-color: #fff; font-size: .92em; margin-right: .1em}
 .post {max-width:80ex; border: .08em solid #333; background-color: #080808; color: #fff; border-radius: .3em; margin: .1em}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
-a {overflow: hidden; text-decoration: none; border-radius: .16em}
+a {overflow: hidden; text-decoration: none}
 a, p {max-width: 78ex}
 a.date {float: right; font-weight: normal; font-size:.8em; background-color: #000; color:#888}
 a.id {float: right}
 a.link {border: 1px solid #777}
-a.title, a.link, div.thumb {background-color: #fff; color: #000}
+h1,h2,h3,h4,h5,h6, a.title, a.link, div.thumb {background-color: #fff; color: #000}
 body {font-family: sans-serif; margin: 0 2em 0 2em}
 body, pre, p, span, td.k > a, tr[name="abstract"] > td.v {background-color: #000; color: #fff}
 div,td {padding: 0}
@@ -23,10 +23,9 @@ footer,.footer,#footer {position: absolute; bottom: 0; left: 0; z-index: -1; col
 img, video {max-width: 100%}
 img.thumb {max-width: 28em; float: left}
 nav, header, .header, #header {position: absolute; top: 0; left: 0; z-index: -1; color: #aaa}
-p {margin: 0; border-width: 1px 0 0 0; border-style: dashed; border-color: #333}
-p:first-child {border-width: 0}
+table, p {margin: 0; border-width: 1px 0 0 0; border-style: dashed; border-color: #333}
+table:first-child, p:first-child {border-width: 0}
 pre {white-space: pre-wrap}
-table {border-spacing: 0; border-width: 0}
 table, div {display: inline-block}
 td.k {text-align: right; white-space: nowrap}
 td.v {padding-left: .1em}

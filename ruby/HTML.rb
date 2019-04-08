@@ -213,8 +213,10 @@ class WebResource
     include URIs
 
     def indexHTML host
-      # slip in link to exit document-supplied UI and return to user preference
-      writeFile readFile.sub(/<body[^>]*>/, "<body><a id='localUI' href='/ui/local#{HTTP.qs({u: 'http://' + host + @r['REQUEST_URI']})}' style='position: fixed; top: 0; right: 0; z-index: 33; color: #000; background-color: #fff; font-size: 1.8em'>⌘</a>") if @r
+      if @r
+        # add button to exit origin-supplied UI and return to user preference
+        writeFile readFile.sub(/<body[^>]*>/, "<body><a id='localUI' href='/ui/local#{HTTP.qs({u: 'http://' + host + @r['REQUEST_URI']})}' style='position: fixed; top: 0; right: 0; z-index: 33; color: #000; background-color: #fff; font-size: 1.8em'>⌘</a>") rescue nil
+      end
       IndexHTML[host].do{|indexer| send indexer } || []
     end
 
@@ -306,7 +308,13 @@ class WebResource
       graph = RDF::Graph.new
       # load doc-fragments to graph
       n.css('script[type="application/ld+json"]').map{|json|
-        graph << ::JSON::LD::API.toRdf(::JSON.parse json)}
+       ast = begin
+               ::JSON.parse json.inner_text
+             rescue
+               puts "JSON parse failed: #{json.inner_text}"
+               {}
+             end
+        graph << ::JSON::LD::API.toRdf(ast)}
       # emit triples
       graph.each_triple{|s,p,o|
         yield s.to_s, p.to_s, [RDF::Node, RDF::URI].member?(o.class) ? o.R : o.value}
