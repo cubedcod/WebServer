@@ -215,13 +215,15 @@ class WebResource
             u = @base.join(u).to_s unless u.match /^http/
             resource = u.R
 
-            # typetags
+            # type-tag
             yield u, Type, BlogPost.R
+
+            # post target (blog, re-blog)
             blogs = [resource.join('/')]
             blogs.push @base.join('/') if @host && @host != resource.host # re-blog
             blogs.map{|blog|
               forum = if resource.host&.match /reddit.com$/
-                        ('https://www.reddit.com/'+resource.parts[0..1].join('/')).R
+                        ('https://www.reddit.com/' + resource.parts[0..1].join('/')).R
                       else
                         blog
                       end

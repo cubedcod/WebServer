@@ -217,7 +217,7 @@ class WebResource
           k
         }.join(underscored ? '_' : '-')
         key = key.downcase if underscored
-        # drop rack-internals and Type, our typetag
+        # drop internal-use headers
         head[key] = v.to_s unless %w{links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri response script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
       head
     end
