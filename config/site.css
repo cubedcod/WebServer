@@ -1,3 +1,4 @@
+#localUI {display: none}
 #originUI {position: fixed; top: 0; right: 0; z-index: 1}
 #prev, #next {position: fixed; top: 0; height: 100%}
 #up, #down {display: block}

@@ -24,7 +24,6 @@ enumerate HTML-literal field values (currently Content & Abstract, add hrefized 
 anything actually useful in data- attributes?
 POST adaptors per host
 cookies in escrow at proxy
-link to local cache on chainlink icon in more scenarios
 preserve rewrite/non status across server runs
 slightly rewrite nonrewritten to jump back out
 host-specific CSS

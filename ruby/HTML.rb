@@ -213,6 +213,8 @@ class WebResource
     include URIs
 
     def indexHTML host
+      # slip in link to exit document-supplied UI and return to user preference
+      writeFile readFile.sub(/<body[^>]*>/, "<body><a id='localUI' href='/ui/local#{HTTP.qs({u: 'http://' + host + @r['REQUEST_URI']})}' style='position: fixed; top: 0; right: 0; z-index: 33; color: #000; background-color: #fff; font-size: 1.8em'>⌘</a>") if @r
       IndexHTML[host].do{|indexer| send indexer } || []
     end
 
@@ -291,7 +293,7 @@ class WebResource
               k = Twitter
               v = (Twitter + '/' + v.sub(/^@/,'')).R
             when Abstract
-              v = v.hrefs # substring URIs to <a href> 
+              v = v.hrefs # substring URIs to <a href>
             else
               v = HTML.urifyString v # bare URI to resource-reference
             end

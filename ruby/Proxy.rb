@@ -170,9 +170,11 @@ class WebResource
       # return value
       if @r # HTTP calling-context
         if cache.exist?
-          if cache.noTransform? || UI[@r['SERVER_NAME']]
-            cache.localFile # preserve upstream format
-          else # transformable
+          if cache.noTransform? # upstream formats
+            cache.localFile
+          elsif UI[@r['SERVER_NAME']]
+            cache.localFile
+          else # transformable data
             graphResponse (updates.empty? ? [cache] : updates)
           end
         else
