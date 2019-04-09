@@ -77,15 +77,9 @@ class WebResource
     def GET
       return PathGET[path][self] if PathGET[path] # path lambda
       return HostGET[host][self] if HostGET[host] # host lambda
-      return chronoDir           if chronoDir?    # time redirect
-      return localNode           if localNode?
-      return case env['HTTP_TYPE']
-             when /nofetch/
-               deny
-             when /filter/
-               remoteFiltered
-             end if env.has_key? 'HTTP_TYPE'
-      remoteNode
+      return chronoDir           if chronoDir?    # timeslice redirect
+      return localNode           if localNode?    # local node
+      remote                                      # remote node
     end
 
     def HEAD

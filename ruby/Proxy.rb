@@ -69,7 +69,24 @@ class WebResource
       redirectCache.exist?
     end
 
+    def remote
+      if env.has_key? 'HTTP_TYPE'
+        case env['HTTP_TYPE']
+        when /nofetch/
+          deny
+        when /filter/
+          remoteFiltered
+        else
+          puts "UNDEFINED REQUEST #{env['HTTP_TYPE']}"
+          deny
+        end
+      else
+        remoteNode
+      end
+    end
+
     def remoteFiltered allowGIF=false
+      puts "FILTER"
       if %w{js}.member? ext.downcase
         # disallowed name-suffixes
         deny

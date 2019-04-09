@@ -9,7 +9,7 @@ class WebResource
       if %w{gp}.member? r.parts[0]
         r.deny
       else
-        r.remoteNode
+        r.remote
       end}
 
     # Anvato
@@ -21,7 +21,7 @@ class WebResource
       if r.path.match? /\*/
         [301, {'Location' => r.path.split(/\*[^.]+\./).join('.')}, []]
       else
-        r.remoteNode
+        r.remote
       end}
 
     # BusinessWire
@@ -29,9 +29,8 @@ class WebResource
       if r.q.has_key? 'url'
         [301, {'Location' => r.q['url']}, []]
       else
-        r.remoteNode
-      end
-    }
+        r.remote
+      end}
 
     # Brightcove
     '//edge.api.brightcove.com'.R.HTTPthru
@@ -67,13 +66,10 @@ class WebResource
       if %w{ajax api plugins si tr}.member?(z.parts[0]) || z.path.match?(/reaction/) || z.ext == 'php'
         z.deny
       else
-        z.remoteNode
+        z.remote
       end}
-
-    HostGET['instagram.com']   = -> r {[301, {'Location' => "https://www.instagram.com" + r.path},[]]}
     HostGET['l.facebook.com']  = -> r {[301, {'Location' => r.q['u']},  []]}
     HostGET['l.instagram.com'] = -> r {[301, {'Location' => r.q['u']},  []]}
-    HostGET['www.instagram.com'] = -> r {r.remoteNode}
     PathGET['/safe_image.php'] = -> r {[301, {'Location' => r.q['url']},[]]}
 
     # Forbes
@@ -81,18 +77,15 @@ class WebResource
       if r.parts[0] == 'thumbor'
         [301, {'Location' => 'http' + URI.unescape(r.path.split(/http/)[-1])}, []]
       else
-        r.remoteNode
+        r.remote
       end}
-
-    # Gannett
-    #www.gannett-cdn.com
 
     # Gatehouse
     HostGET['www.patriotledger.com'] = -> r {
       if r.parts[0] == 'storyimage' && r.path.match?(/&/)
         [301, {'Location' => r.path.split('&')[0]},[]]
       else
-        r.remoteNode
+        r.remote
       end
     }
 
@@ -125,7 +118,7 @@ class WebResource
       elsif r.q.has_key? 'redirecturl'
         [301, {'Location' => r.q['redirecturl']}, []]
       else
-        r.remoteNode
+        r.remote
       end}
 
     # Mozilla
@@ -135,7 +128,7 @@ class WebResource
     #'//samizdat-graphql.nytimes.com'.R.HTTPthru
 
     # QRZ
-    HostGET['qrz.com'] = HostGET['forums.qrz.com'] = -> r { r.ext == 'gif' ? r.deny : r.remoteNode }
+    HostGET['qrz.com'] = HostGET['forums.qrz.com'] = -> r { r.ext == 'gif' ? r.deny : r.remote }
 
     # Reddit
     HostGET['i.reddit.com'] = HostGET['np.reddit.com'] = HostGET['reddit.com'] = -> re {[301,{'Location' => 'https://www.reddit.com' + re.path + re.qs},[]]}
@@ -188,19 +181,15 @@ class WebResource
       if r.parts[0] == 'resizer'
         [301, {'Location' =>  'https://' + r.path.split(/\/\d+x\d+\//)[-1]},[]]
       else
-        r.remoteNode
+        r.remote
       end}
-    HostGET['arc-anglerfish-washpost-prod-washpost.s3.amazonaws.com'] = -> r {r.remoteNode}
 
     # WGBH
-    HostGET['wgbh.brightspotcdn.com'] = -> r {
-      r.q.has_key?('url') ? [301, {'Location' => r.q['url']}, []] : r.remoteNode
-    }
+    HostGET['wgbh.brightspotcdn.com'] = -> r {r.q.has_key?('url') ? [301, {'Location' => r.q['url']}, []] : r.remoteNode}
 
     # YouTube
     HostGET['youtube.com'] = HostGET['m.youtube.com'] = -> r {[301, {'Location' =>  "https://www.youtube.com" + r.path + r.qs},[]]}
     HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
-    HostGET['img.youtube.com'] = -> r {r.remoteFiltered}
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
       if !mode
@@ -216,7 +205,5 @@ class WebResource
       end}
     #'//www.youtube.com'.R.HTTPthru
 
-    # XG
-    HostGET['5123.xg4ken.com'] = -> r {r.q.has_key?('url') ? [301, {'Location' => r.q['url']}, []] : r.deny}
   end
 end
