@@ -71,28 +71,26 @@ class WebResource
 
     def remoteFiltered allowGIF=false
       if %w{js}.member? ext.downcase
-        # disallowed name-suffix
+        # disallowed name-suffixes
         deny
       elsif %w{dash gifv html ico jpg jpg:small jpg:large jpg:thumb jpeg json key ogg m3u8 m4a mp3 mp4 mpd pdf png svg ts vtt webm webp}.member? ext.downcase
-        # allowed name-suffix
+        # allowed name-suffixes
         remoteNode
       elsif ext == 'gif'
-        # conditionally allowed GIF image
+        # conditionally allow GIF images
         if allowGIF || %w{i.imgflip.com i.imgur.com s.imgur.com}.member?(host) #|| qs.empty?
           remoteNode
         else
           deny
         end
-      elsif host.match? /(akamai|content|fastly|static)/
-        # no suffix-match. fetch and check MIME type of response
+      else
+        # fetch and validate MIME type of response
         remoteNode.do{|s,h,b|
-          if h['Content-Type'] && h['Content-Type'].match?(/^(application.*mpeg|audio|image|video)/) && !h['Content-Type'].match?(/^image\/gif/)
+          if h['Content-Type'] && h['Content-Type'].match?(/application\/.*mpeg|audio\/|image\/|video\/|octet-stream/) && !h['Content-Type'].match?(/^image\/gif/)
             [s, h, b]
           else
             deny
           end}
-      else
-        deny
       end
     end
 
