@@ -1,6 +1,6 @@
 #localUI {display: none}
 #originUI {position: fixed; top: 0; right: 0; z-index: 1}
-#prev, #next {position: fixed; top: 0; height: 100%}
+#prev, #next {position: fixed; top: 0; height: 100%; max-width: 1em}
 #up, #down {display: block}
 #prev {left:  0}
 #next {right: 0}
@@ -9,27 +9,27 @@
 .container > .name {color: #000; background-color: #fff; font-size: .92em; margin-right: .1em}
 .post {max-width:80ex; border: .08em solid #333; background-color: #080808; color: #fff; border-radius: .3em; margin: .1em}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
-a {overflow: hidden; text-decoration: none}
-a, p {max-width: 78ex}
-a.title {vertical-align: top}
+a {overflow: hidden; text-decoration: none; max-width:32em; max-height: 2em}
 a.date {float: right; font-weight: normal; font-size:.8em; background-color: #000; color:#888}
 a.id {float: right}
 a.link {border: 1px solid #777}
-h1,h2,h3,h4,h5,h6, a.title, a.link, div.thumb {background-color: #fff; color: #000}
+a.title {vertical-align: top}
 body {font-family: sans-serif; margin: 0 2em 0 2em}
 body, pre, p, span, li, time, td.k > a, tr[name="abstract"] > td.v {background-color: #000; color: #fff}
 div,td {padding: 0}
 footer,.footer,#footer {position: absolute; bottom: 0; left: 0; z-index: -1; color: #aaa}
+h1,h2,h3,h4,h5,h6, a.title, a.link, div.thumb {background-color: #fff; color: #000}
 img, video {max-width: 100%}
 img.thumb {max-width: 28em; float: left}
 nav, header, .header, #header {position: absolute; top: 0; left: 0; z-index: -1; color: #aaa}
-table, p {margin: 0; border-width: 1px 0 0 0; border-style: dashed; border-color: #333}
-table:first-child, p:first-child {border-width: 0}
+p {max-width: 78ex}
 pre {white-space: pre-wrap}
 table, div {display: inline-block}
+table, p {margin: 0; border-spacing: 0; border-width: 1px 0 0 0; border-style: dashed; border-color: #333}
+table:first-child, p:first-child {border-width: 0}
 td.k {text-align: right; white-space: nowrap}
-td.v {padding-left: .1em}
 td.v > a {background-color: #eee; color: #000}
+td.v {padding-left: .1em}
 tr[name="content"] > td.v a {background-color: #3f3; color: #000}
 tr[name="content"] > td.v a:visited {background-color: #000; color: #3f3; border: .08em solid #3f3}
 tr[name="content"] > td.v footer a, tr[name="content"] > td.v header a {background-color: #000; color: #aaa}
