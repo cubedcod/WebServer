@@ -78,7 +78,7 @@ class WebResource
                             ].map{|e|['  ',e,"\n"]}}, "\n\n",
                         {_: :body,
                          c: ["\n", link[:up, '&#9650;'], link[:prev, '&#9664;'], link[:next, '&#9654;'],
-                             ({_: :a, id: :originUI, href: '/ui/origin' + HTTP.qs({u: 'http:' + uri}), c: '⌘'} unless localNode?),
+                             ({_: :a, id: :originUI, href: '/ui/origin' + HTTP.qs({u: 'http://' + host + @r['REQUEST_URI']}), c: '⌘'} unless localNode?),
                              if graph.empty?
                                HTML.kv (HTML.urifyHash @r), @r
                              else
@@ -214,7 +214,7 @@ class WebResource
     def indexHTML host
       if @r
         # add button to exit origin-supplied UI and return to user preference
-        writeFile readFile.sub(/<body[^>]*>/, "<body><a id='localUI' href='/ui/local#{HTTP.qs({u: 'http://' + host + @r['REQUEST_URI']})}' style='position: fixed; top: 0; right: 0; z-index: 33; color: #000; background-color: #fff; font-size: 1.8em'>⌘</a>") rescue nil
+        writeFile readFile.sub(/<body[^>]*>/, "<body><a id='localUI' href='/ui/local#{HTTP.qs({u: 'http://' + host + @r['REQUEST_URI']})}' style='position: fixed; top: 0; right: 0; z-index: 1001; color: #000; background-color: #fff; font-size: 1.8em'>⌘</a>") rescue nil
       end
       IndexHTML[host].do{|indexer| send indexer } || []
     end
