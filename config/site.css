@@ -9,7 +9,7 @@
 .container > .name {color: #000; background-color: #fff; font-size: .92em; margin-right: .1em}
 .post {max-width:80ex; border: .08em solid #333; background-color: #080808; color: #fff; border-radius: .3em; margin: .1em}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
-a {overflow: hidden; text-decoration: none; max-width:32em; max-height: 2em}
+a {overflow: hidden; text-decoration: none; max-width:32em}
 a.date {float: right; font-weight: normal; font-size:.8em; background-color: #000; color:#888}
 a.id {float: right}
 a.link {border: 1px solid #777}

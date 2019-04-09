@@ -78,7 +78,7 @@ class WebResource
         remoteNode
       elsif ext == 'gif'
         # conditionally allowed GIF image
-        if allowGIF || %w{i.imgflip.com i.imgur.com s.imgur.com}.member?(host) || qs.empty?
+        if allowGIF || %w{i.imgflip.com i.imgur.com s.imgur.com}.member?(host) #|| qs.empty?
           remoteNode
         else
           deny
