@@ -313,7 +313,8 @@ class WebResource
                puts "JSON parse failed: #{json.inner_text}"
                {}
              end
-        graph << ::JSON::LD::API.toRdf(ast)}
+       graph << ::JSON::LD::API.toRdf(ast) rescue puts("JSON-LD toRDF error #{uri}")
+      }
       # emit triples
       graph.each_triple{|s,p,o|
         yield s.to_s, p.to_s, [RDF::Node, RDF::URI].member?(o.class) ? o.R : o.value}
