@@ -78,14 +78,11 @@ class WebResource
         remoteNode
       elsif ext == 'gif'
         # conditionally allowed GIF image
-        if allowGIF || %w{i.imgflip.com i.imgur.com s.imgur.com}.member?(host)
+        if allowGIF || %w{i.imgflip.com i.imgur.com s.imgur.com}.member?(host) || qs.empty?
           remoteNode
         else
           deny
         end
-      elsif env['HTTP_REFERER'] && env['HTTP_REFERER'].R.host == 'www.wbur.org'
-        # hosts which can import JS from CDN jungle
-        remoteNode
       elsif host.match? /(akamai|content|fastly|static)/
         # no suffix-match. fetch and check MIME type of response
         remoteNode.do{|s,h,b|
