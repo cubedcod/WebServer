@@ -76,16 +76,20 @@ class WebResource
       elsif %w{dash gifv html ico jpg jpg:small jpg:large jpg:thumb jpeg json key ogg m3u8 m4a mp3 mp4 mpd pdf png svg ts vtt webm webp}.member? ext.downcase
         # allowed name-suffix
         remoteNode
-      elsif ext == 'gif' && (allowGIF || (%w{i.imgflip.com i.imgur.com s.imgur.com}.member? host))
-        # GIF conditionally allowed
-        remoteNode
+      elsif ext == 'gif'
+        # conditionally allowed GIF image
+        if allowGIF || %w{i.imgflip.com i.imgur.com s.imgur.com}.member?(host)
+          remoteNode
+        else
+          deny
+        end
       elsif env['HTTP_REFERER'] && env['HTTP_REFERER'].R.host == 'www.wbur.org'
         # hosts which can import JS from CDN jungle
         remoteNode
       elsif host.match? /(akamai|content|fastly|static)/
         # no suffix-match. fetch and check MIME type of response
         remoteNode.do{|s,h,b|
-          if h['Content-Type'] && h['Content-Type'].match?(/^(application.*mpeg|audio|image|video)/)
+          if h['Content-Type'] && h['Content-Type'].match?(/^(application.*mpeg|audio|image|video)/) && !h['Content-Type'].match?(/^image\/gif/)
             [s, h, b]
           else
             deny
