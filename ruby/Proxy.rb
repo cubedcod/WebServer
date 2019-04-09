@@ -76,7 +76,6 @@ class WebResource
     end
 
     def remoteFiltered allowGIF=false
-      puts "FILTER"
       if %w{js}.member? ext.downcase
         # disallowed name-suffixes
         deny
@@ -91,7 +90,7 @@ class WebResource
           deny
         end
       else
-        # fetch and validate MIME type of response
+        # validate MIME type of resource
         remoteNode.do{|s,h,b|
           if h['Content-Type'] && h['Content-Type'].match?(/application\/.*mpeg|audio\/|image\/|video\/|octet-stream/) && !h['Content-Type'].match?(/^image\/gif/)
             [s, h, b]
