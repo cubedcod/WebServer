@@ -6,6 +6,8 @@ class WebResource
 
     Hosts = {} # track hosts for highlighting
 
+    def cache?; !(pragma && pragma == 'no-cache') end
+
     def self.call env
       method = env['REQUEST_METHOD']                        # request-method
       return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? method # defined methods
@@ -78,13 +80,16 @@ class WebResource
       return PathGET[path][self] if PathGET[path] # path lambda
       return HostGET[host][self] if HostGET[host] # host lambda
       return chronoDir           if chronoDir?    # timeslice redirect
-      return localNode           if localNode?    # local node
-      remote                                      # remote node
+      local || remote
     end
 
     def HEAD
      self.GET.do{| s, h, b|
        [ s, h, []]}
+    end
+
+    def localNode?
+      %w{l [::1] 127.0.0.1 localhost}.member? @r['SERVER_NAME']
     end
 
     def notfound
@@ -117,6 +122,8 @@ class WebResource
       trackPOST
     end
 
+    def pragma; env['HTTP_PRAGMA'] end
+
     def PUT
       [202,{},[]]
     end
@@ -144,7 +151,26 @@ class WebResource
       }.intersperse("&").join('')
     end
 
-    Response_204 = [204, {'Content-Length' => 0}, []]
+    # ALL_CAPS (CGI/env-var) key-names to standard HTTP capitalization
+    # ..is there any way to have Rack give us the names straight out of the HTTP parser?
+    def self.unmangle env
+      head = {}
+      env.map{|k,v|
+        k = k.to_s
+        underscored = k.match? /(_AP_|PASS_SFP)/i
+        key = k.downcase.sub(/^http_/,'').split('_').map{|k| # eat prefix and process tokens
+          if %w{cl id spf utc xsrf}.member? k # acronyms
+            k = k.upcase
+          else
+            k[0] = k[0].upcase # capitalize word
+          end
+          k
+        }.join(underscored ? '_' : '-')
+        key = key.downcase if underscored
+        # drop internal headers
+        head[key] = v.to_s unless %w{links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri response script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
+      head
+    end
 
   end
   include HTTP

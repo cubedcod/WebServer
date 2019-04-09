@@ -164,6 +164,10 @@ class WebResource
       end
     end
 
+    def local
+      localNode if localNode?
+    end
+
     def localNode
       if file?
         localFile

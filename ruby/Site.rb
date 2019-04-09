@@ -199,7 +199,7 @@ class WebResource
       elsif mode == 'redirect'
         [301, {'Location' =>  r.q['q']},[]]
       elsif mode.match? /204$/
-        Response_204
+        [204, {'Content-Length' => 0}, []]
       else
         r.deny
       end}

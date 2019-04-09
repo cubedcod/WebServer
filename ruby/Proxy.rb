@@ -1,12 +1,6 @@
 class WebResource
   module HTTP
 
-    def cache?; !(pragma && pragma == 'no-cache') end
-
-    def localNode?
-      %w{l [::1] 127.0.0.1 localhost}.member? @r['SERVER_NAME']
-    end
-
     def HTTPthru
       HostGET[host] ||= -> r {r.GETthru}
      HostPOST[host] ||= -> r {r.POSTthru}
@@ -54,8 +48,6 @@ class WebResource
       [s, h, [b]]
     end
 
-    def pragma; env['HTTP_PRAGMA'] end
-
     def redirectCache
       hash = (host + (path || '') + qs).sha2
       ('/cache/location/' + hash[0..2] + '/' + hash[3..-1] + '.u').R
@@ -70,15 +62,13 @@ class WebResource
     end
 
     def remote
+      # dispatch typed remote-node handler
       if env.has_key? 'HTTP_TYPE'
         case env['HTTP_TYPE']
         when /nofetch/
           deny
         when /filter/
           remoteFiltered
-        else
-          puts "UNDEFINED REQUEST #{env['HTTP_TYPE']}"
-          deny
         end
       else
         remoteNode
@@ -217,27 +207,6 @@ class WebResource
       [202,{},[]]
     end
 
-    # CAPS_CGI format keys to standard HTTP request-header capitalization
-    # is there any way to have Rack not do that to the names?
-    def self.unmangle env
-      head = {}
-      env.map{|k,v|
-        k = k.to_s
-        underscored = k.match? /(_AP_|PASS_SFP)/i
-        key = k.downcase.sub(/^http_/,'').split('_').map{|k| # chop prefix and tokenize
-          if %w{cl id spf utc xsrf}.member? k # acronyms to capitalize
-            k = k.upcase
-          else
-            k[0] = k[0].upcase # word
-          end
-          k
-        }.join(underscored ? '_' : '-')
-        key = key.downcase if underscored
-        # drop internal-use headers
-        head[key] = v.to_s unless %w{links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri response script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
-      head
-    end
-
     def updateLocation location
       redirectCache.writeFile location
       [302, {'Location' => location}, []]
@@ -250,7 +219,7 @@ class WebResource
     PathGET['/ui/origin'] = -> r {r.q['u'].do{|u| UI[u.R.host] = true; [302, {'Location' => u}, []]} || r.deny }
     PathGET['/ui/local']  = -> r {r.q['u'].do{|u| UI.delete u.R.host;  [302, {'Location' => u}, []]} || r.deny }
 
-    PathGET['/generate_204'] = -> _ {Response_204}
+    PathGET['/generate_204'] = -> _ {[204, {'Content-Length' => 0}, []]}
 
     PathGET['/mu'] = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'},[]]}
 
