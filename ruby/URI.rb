@@ -192,7 +192,7 @@ class WebResource < RDF::URI
   end
   module HTTP
 
-    # handler-lambda tables
+    # URI to lambda mapping tables
     HostGET = {}
     PathGET = {}
     HostPOST = {}
