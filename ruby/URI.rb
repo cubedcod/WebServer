@@ -27,7 +27,6 @@ class WebResource < RDF::URI
     DC       = Purl + 'dc/terms/'
     SIOC     = 'http://rdfs.org/sioc/ns#'
     Stat     = W3   + 'ns/posix/stat#'
-
     Abstract = DC   + 'abstract'
     Atom     = W3   + '2005/Atom#'
     BlogPost = SIOC + 'BlogPost'

@@ -212,6 +212,10 @@ class WebResource
   end
   module Webize
 
+    TriplrHTML = {
+      'twitter.com' => :triplrTweets,
+    }
+
     # Twitter
     def triplrTweets
       Nokogiri::HTML.parse(readFile).css('div.tweet').map{|tweet|
@@ -235,12 +239,13 @@ class WebResource
           yield s, Image, img.attr('src').to_s.R}}
     end
 
-    IndexHTML['twitter.com'] = -> {
+    IndexHTML['twitter.com'] = -> page {
       graph = {}
       posts = []
-
+puts :ixhtml, page, self
       # collect triples
-      triplrTweets{|s,p,o|
+triplrTweets{|s,p,o|
+  puts s
         graph[s] ||= {'uri'=>s}
         graph[s][p] ||= []
         graph[s][p].push o}

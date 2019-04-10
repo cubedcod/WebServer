@@ -211,12 +211,12 @@ class WebResource
   module Webize
     include URIs
 
-    def indexHTML host
-      if @r
-        # add button to exit origin-supplied UI and return to user preference
-        writeFile readFile.sub(/<body[^>]*>/, "<body><a id='localUI' href='/ui/local#{HTTP.qs({u: 'https://' + host + @r['REQUEST_URI']})}' style='position: fixed; top: 0; right: 0; z-index: 1001; color: #000; background-color: #fff; font-size: 1.8em'>⌘</a>") rescue nil
-      end
-      IndexHTML[host].do{|indexer| send indexer } || []
+    def indexHTML
+      # add link to exit origin-supplied UI
+      writeFile readFile.sub(/<body[^>]*>/,
+                             "<body><a id='localUI' href='/ui/local#{HTTP.qs({u: 'https://' + host + @r['REQUEST_URI']})}' style='position: fixed; top: 0; right: 0; z-index: 1001; color: #000; background-color: #fff; font-size: 1.8em'>⌘</a>") rescue nil
+      # call indexer lambda
+      IndexHTML[@r['SERVER_NAME']].do{|indexer| indexer[self] } || []
     end
 
     # HTML -> RDF

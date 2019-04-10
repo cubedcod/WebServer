@@ -24,7 +24,7 @@ img.thumb {max-width: 28em; float: left}
 nav, header, .header, #header {position: absolute; top: 0; left: 0; z-index: -1; color: #aaa}
 p {max-width: 78ex}
 pre {white-space: pre-wrap}
-table, div {display: inline-block}
+table, div, a {display: inline-block}
 table, p {margin: 0; border-spacing: 0; border-width: 1px 0 0 0; border-style: dashed; border-color: #333}
 table:first-child, p:first-child {border-width: 0}
 td.k {text-align: right; white-space: nowrap}

@@ -144,12 +144,12 @@ class WebResource
                        cache.mimeSniff
                      end
               cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # write metadata
-              # update index
+              # call indexer
               updates.concat(case mime
                              when /^(application|text)\/(atom|rss|xml)/
                                cache.indexFeed
                              when /^text\/html/
-                               cache.indexHTML host
+                               cache.indexHTML
                              else
                                []
                              end || [])
