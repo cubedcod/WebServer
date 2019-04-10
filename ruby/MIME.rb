@@ -146,11 +146,6 @@ class WebResource
 
     NoTransform = /^(application\/(dash|font|(x-)?javascript|json|octet-stream|pdf|vnd|x-mpegURL|(x-)?protobuf(fer)?)|audio|binary|font|image|text\/(css|javascript|vtt)|video)/
 
-    # host-mapped HTML triplers
-    TriplrHTML = {
-      'twitter.com' => :triplrTweets,
-    }
-
     # environment -> acceptable formats
     def accept k = 'HTTP_ACCEPT'
       index = {}
