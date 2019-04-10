@@ -1,12 +1,10 @@
 announce full updates or existence thereof to curious peers - irvc3, crdt, solid-websocket, matrix etc
 eliminate cache dir
 json-schema parser/triplrs - youtube comments etc
-json-ld in HTML
-index backlinks at storage time
+index backlinks, expand  shortURL at storage and presentation/loading time
 index browsing on caches of remote containers
 troff triplr - .1, .2, (sslsplit/proxy docs)
 link Search host-specific remote origins - !tw  URL mapping etc
-shortURL-mapping DB deobfuscates at presentation and storage time
 mp3 images
 xhr link inliner - nowrapper docs, onlynew updates (twitter frontpage)
 Tweet-video triplr
@@ -21,10 +19,10 @@ relURI in feed identifiers
 wsj drudge headers
 AP triplr
 enumerate HTML-literal field values (currently Content & Abstract, add hrefized Generator and others)
-anything actually useful in data- attributes?
 POST adaptors per host
 cookies in escrow at proxy
 preserve rewrite/non status across server runs
 slightly rewrite nonrewritten to jump back out
 host-specific CSS
 subscribe-to-feed UI support
+OFFLINE env-var, eventual NetworkManager , Termux-API hookup
