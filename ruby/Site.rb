@@ -66,7 +66,7 @@ class WebResource
       if %w{ajax api plugins si tr}.member?(z.parts[0]) || z.path.match?(/reaction/) || z.ext == 'php'
         z.deny
       else
-        z.remote
+        z.remoteNode
       end}
     HostGET['www.instagram.com'] = -> z {z.remoteNode}
     HostGET['l.facebook.com']  = -> r {[301, {'Location' => r.q['u']},  []]}

@@ -62,10 +62,9 @@ class WebResource
     end
 
     def remote
-      # dispatch typed remote-node handler
       if env.has_key? 'HTTP_TYPE'
         case env['HTTP_TYPE']
-        when /nofetch/
+        when /drop/
           deny
         when /filter/
           remoteFiltered
@@ -77,24 +76,25 @@ class WebResource
 
     def remoteFiltered allowGIF=false
       if %w{js}.member? ext.downcase
-        # disallowed name-suffixes
+        # drop name-suffix
         deny
-      elsif %w{dash gifv html ico jpg jpg:small jpg:large jpg:thumb jpeg json key ogg m3u8 m4a mp3 mp4 mpd pdf png svg ts vtt webm webp}.member? ext.downcase
-        # allowed name-suffixes
+      elsif %w{dash html ico jpg jpeg json key ogg m3u8 m4a mp3 mp4 mpd pdf png svg ts vtt webm webp}.member? ext.downcase
+        # allow name-suffix
         remoteNode
       elsif ext == 'gif'
-        # conditionally allow GIF images
-        if allowGIF || %w{i.imgflip.com i.imgur.com s.imgur.com}.member?(host) #|| qs.empty?
+        # allow GIF images without query data
+        if allowGIF || qs.empty?
           remoteNode
         else
           deny
         end
       else
-        # validate MIME type of resource
         remoteNode.do{|s,h,b|
           if h['Content-Type'] && h['Content-Type'].match?(/application\/.*mpeg|audio\/|image\/|text\/html|video\/|octet-stream/) && !h['Content-Type'].match?(/^image\/gif/)
+            # allow MIME type
             [s, h, b]
           else
+            # drop MIME type
             deny
           end}
       end
@@ -102,17 +102,17 @@ class WebResource
 
     def remoteNode
       head = HTTP.unmangle env # HTTP header
-      if @r # HTTP calling
+      if @r # HTTP context
         if redirection
           location = join(redirectCache.readFile).R
           return redirect unless location.host == host && (location.path || '/') == path
         else
-          head[:redirect] = false # don't follow redirects internally when fetching
-        end
+          head[:redirect] = false # don't follow redirects internally when fetching,
+        end # triggers return of redirect metadata for proxy and client book-keeping
       end
       head.delete 'Accept-Encoding'
       head.delete 'Host'
-      head.delete 'User-Agent' if host=='t.co' # prefer location in HTTP header, not javascript code
+      head.delete 'User-Agent' if host=='t.co' # otherwise redirect only in request-body inside javascript code, not HTTP metadata
 
       # explicit-format suffix
       suffix = ext.empty? && host.match?(/reddit.com$/) && !parts.member?('wiki') && !UI[@r['SERVER_NAME']] && '.rss'
@@ -159,21 +159,21 @@ class WebResource
           raise unless e.message.match? /[34]04/ # notModified and notFound in normal control-flow
         end}
 
-      # conditional updater
+      # update
       static = cache? && cache.e && cache.noTransform?
       throttled = cacheMeta.e && (Time.now - cacheMeta.mtime) < 60
       unless static || throttled
         begin
           update[url] # try HTTPS
         rescue Exception => e
-          raise if e.class == OpenURI::HTTPRedirect # exit with redirection
-          update[url.sub /^https/, 'http'] # fetch HTTP
+          raise if e.class == OpenURI::HTTPRedirect # redirected, go book-keep
+          update[url.sub /^https/, 'http'] # HTTPS failed, try HTTP
         end
-        cacheMeta.touch if cacheMeta.e # mark update-time
+        cacheMeta.touch if cacheMeta.e # update timestamp
       end
 
       # return value
-      if @r # HTTP calling-context
+      if @r # HTTP caller
         if cache.exist?
           if cache.noTransform? # upstream formats
             cache.localFile
@@ -185,7 +185,7 @@ class WebResource
         else
           notfound
         end
-      else # REPL/script/shell calling-context
+      else # REPL/shell caller
         updates.empty? ? cache : updates
       end
 
