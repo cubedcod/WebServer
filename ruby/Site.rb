@@ -38,6 +38,9 @@ class WebResource
     # Broadcastify
     HostPOST['www.broadcastify.com'] = -> r {r.POSTthru}
 
+    # Change A View
+    '//api.changeaview.com'.R.HTTPthru
+
     # Cloudflare
     HostGET['cdnjs.cloudflare.com'] = HostGET['ajax.googleapis.com'] = -> r {
       if r.path.match? /\/(babel|jquery|react)/
@@ -232,27 +235,29 @@ class WebResource
           yield s, Image, img.attr('src').to_s.R}}
     end
 
-    IndexHTML['twitter.com'] = :indexTweets
-
-    def indexTweets
-      newPosts = []
+    IndexHTML['twitter.com'] = -> {
       graph = {}
+      posts = []
+
+      # collect triples
       triplrTweets{|s,p,o|
         graph[s] ||= {'uri'=>s}
         graph[s][p] ||= []
         graph[s][p].push o}
-      graph.map{|u,r| # visit tweet resource
+
+      # store in timeline
+      graph.map{|u,r|
         r[Date].do{|t|
-          # find storage location
           slug = (u.sub(/https?/,'.').gsub(/\W/,'.')).gsub /\.+/,'.'
           time = t[0].to_s.gsub(/[-T]/,'/').sub(':','/').sub /(.00.00|Z)$/, ''
+          # doc identifier
           doc = "/#{time}#{slug}.e".R
-          if !doc.e # update cache
+          # write
+          if !doc.e
             doc.writeFile({u => r}.to_json)
-            newPosts << doc
+            posts << doc
           end}}
-      newPosts
-    end
+      posts}
 
   end
 end
