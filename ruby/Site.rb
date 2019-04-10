@@ -143,7 +143,7 @@ class WebResource
         q = r.q ; q.delete 'w'
         [301, {'Location' => r.path + (HTTP.qs q)}, []]
       else
-        r.remoteNode
+        r.remoteFiltered
       end}
 
     # SoundCloud
@@ -205,6 +205,54 @@ class WebResource
         r.deny
       end}
     #'//www.youtube.com'.R.HTTPthru
+
+  end
+  module Webize
+
+    # Twitter
+    def triplrTweets
+      Nokogiri::HTML.parse(readFile).css('div.tweet').map{|tweet|
+        s = Twitter + tweet.css('.js-permalink').attr('href')
+        authorName = tweet.css('.username b')[0].inner_text
+        author = (Twitter + '/' + authorName).R
+        ts = Time.at(tweet.css('[data-time]')[0].attr('data-time').to_i).iso8601
+        yield s, Type, Post.R
+        yield s, Date, ts
+        yield s, Creator, author
+        yield s, To, Twitter.R
+        content = tweet.css('.tweet-text')[0]
+        if content
+          content.css('a').map{|a|
+            a.set_attribute('id', 'tweetedlink'+rand.to_s.sha2)
+            a.set_attribute('href', Twitter + (a.attr 'href')) if (a.attr 'href').match /^\//
+            yield s, DC+'link', (a.attr 'href').R}
+          yield s, Content, HTML.clean(content.inner_html).gsub(/<\/?span[^>]*>/,'').gsub(/\n/,'').gsub(/\s+/,' ')
+        end
+        tweet.css('img').map{|img|
+          yield s, Image, img.attr('src').to_s.R}}
+    end
+
+    IndexHTML['twitter.com'] = :indexTweets
+
+    def indexTweets
+      newPosts = []
+      graph = {}
+      triplrTweets{|s,p,o|
+        graph[s] ||= {'uri'=>s}
+        graph[s][p] ||= []
+        graph[s][p].push o}
+      graph.map{|u,r| # visit tweet resource
+        r[Date].do{|t|
+          # find storage location
+          slug = (u.sub(/https?/,'.').gsub(/\W/,'.')).gsub /\.+/,'.'
+          time = t[0].to_s.gsub(/[-T]/,'/').sub(':','/').sub /(.00.00|Z)$/, ''
+          doc = "/#{time}#{slug}.e".R
+          if !doc.e # update cache
+            doc.writeFile({u => r}.to_json)
+            newPosts << doc
+          end}}
+      newPosts
+    end
 
   end
 end

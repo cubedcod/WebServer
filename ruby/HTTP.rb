@@ -22,13 +22,13 @@ class WebResource
         # log request
         color = (if resource.env[:deny]
                  '31'
-                elsif !Hosts.has_key? host # new host
+                elsif !Hosts.has_key? host # first-time seen host
                   Hosts[host] = true
                   '32'
                 elsif method=='POST'
                   '32'
                 elsif status==200
-                  if resource.ext == 'js'
+                  if resource.ext == 'js' || (head['Content-Type'] && head['Content-Type'].match?(/script/))
                     '36'
                   else
                     '37'
