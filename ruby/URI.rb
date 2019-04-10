@@ -270,8 +270,9 @@ class WebResource < RDF::URI
 
   end
   module Webize
-    # HTML indexer host->method table
+    # MIME to lambda mapping tables
     IndexHTML = {}
+    TriplrHTML = {}
 
     def triplrUriList addHost = false
       base = stripDoc
