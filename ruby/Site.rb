@@ -163,6 +163,9 @@ class WebResource
     HostGET['exit.sc'] = -> r {[301, {'Location' => r.q['url']},[]]}
     '//api-v2.soundcloud.com'.R.HTTPthru
 
+    # Symantec
+    HostGET['clicktime.symantec.com'] = -> r {[301, {'Location' => r.q['u']},[]]}
+
     # T-Mobile
     HostGET['lookup.t-mobile.com'] = -> re {[200, {'Content-Type' => 'text/html'}, [re.htmlDocument({re.uri => {'dest' => re.q['origurl'].R}})]]}
 
