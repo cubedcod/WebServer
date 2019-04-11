@@ -94,7 +94,9 @@ class WebResource
     }
 
     # Google
-    %w{books drive images photos maps news}.map{|prod| HostGET[prod + '.google.com'] = -> r {r.remoteNode}}
+    %w{books drive images photos maps news}.map{|prod|
+      HostGET[prod + '.google.com'] = -> r {r.remoteNode}}
+
     HostGET['google.com'] = HostGET['www.google.com'] = -> r {
       case r.parts[0]
       when nil
@@ -105,6 +107,14 @@ class WebResource
         [301, {'Location' => ( r.q['url'] || r.q['q'] )}, []]
       else
         r.remoteFiltered
+      end}
+
+    HostPOST['www.google.com'] = -> r {
+      case r.parts[0]
+      when 'recaptcha'
+        r.POSTthru
+      else
+        r.deny
       end}
 
     HostGET["www.googleadservices.com"] = -> r {
@@ -198,7 +208,7 @@ class WebResource
       mode = r.parts[0]
       if !mode
         [200, {'Content-Type' => 'text/html'},['<form method="GET" action="/results"><input name="q" autofocus></form>']]
-      elsif %w{browse_ajax c channel embed feed get_video_info heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member? mode
+      elsif %w{browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member? mode
         r.remoteNode
       elsif mode == 'redirect'
         [301, {'Location' =>  r.q['q']},[]]
