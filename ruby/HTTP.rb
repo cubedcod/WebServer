@@ -119,7 +119,7 @@ class WebResource
     def POST
       return PathPOST[path][self] if PathPOST[path]
       return HostPOST[host][self] if HostPOST[host]
-      trackPOST
+      [202,{},[]]
     end
 
     def pragma; env['HTTP_PRAGMA'] end

@@ -195,17 +195,6 @@ class WebResource
 
     alias_method :GETthru, :remoteNode
 
-    def trackPOST; verbose = true
-      env[:deny] = true
-      if verbose
-        puts "POST >>> #{url}"
-        HTTP.print_header headers
-        puts ""
-        HTTP.print_body body, @r['CONTENT_TYPE']
-      end
-      [202,{},[]]
-    end
-
     def updateLocation location
       redirectCache.writeFile location
       [302, {'Location' => location}, []]
