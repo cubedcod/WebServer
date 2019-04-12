@@ -160,9 +160,9 @@ class WebResource
         end}
 
       # update
-      static = cache? && cache.e && cache.noTransform?
+      immutable = cache? && cache.e && cache.noTransform?
       throttled = cacheMeta.e && (Time.now - cacheMeta.mtime) < 60
-      unless static || throttled
+      unless immutable || offline || throttled
         begin
           update[url] # try HTTPS
         rescue Exception => e

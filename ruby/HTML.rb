@@ -193,9 +193,11 @@ class WebResource
       # traverse attributes
       html.traverse{|e|
         e.attribute_nodes.map{|a|
-          # move source attributes to canonical location
+          # move media-source attributes to canonical location
           e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-menuimg data-original data-src data-src1}.member? a.name
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
+          # move CSS background-image to image element
+
           # strip disallowed attributes
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor class height layout ping role style tabindex target width}.member?(a.name)}}
 
