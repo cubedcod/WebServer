@@ -119,6 +119,7 @@ class WebResource
     def POST
       return PathPOST[path][self] if PathPOST[path]
       return HostPOST[host][self] if HostPOST[host]
+      env[:deny] = true
       [202,{},[]]
     end
 

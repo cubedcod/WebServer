@@ -94,7 +94,7 @@ class WebResource
     }
 
     # Google
-    %w{books drive images photos maps news}.map{|prod|
+    %w{books developers drive images photos maps news}.map{|prod|
       HostGET[prod + '.google.com'] = -> r {r.remoteNode}}
 
     HostGET['google.com'] = HostGET['www.google.com'] = -> r {
