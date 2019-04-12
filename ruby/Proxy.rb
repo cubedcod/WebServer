@@ -1,6 +1,6 @@
 class WebResource
   module HTTP
-    OFF_LINE = ENV.has_key? 'OFFLINE'
+    OFFLINE = ENV.has_key? 'OFFLINE'
 
     def HTTPthru
       HostGET[host] ||= -> r {r.GETthru}
@@ -163,7 +163,7 @@ class WebResource
       # update
       immutable = cache? && cache.e && cache.noTransform?
       throttled = cacheMeta.e && (Time.now - cacheMeta.mtime) < 60
-      unless OFF_LINE || immutable || throttled
+      unless immutable || OFFLINE || throttled
         begin
           update[url] # try HTTPS
         rescue Exception => e
