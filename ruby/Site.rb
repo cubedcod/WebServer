@@ -85,7 +85,7 @@ class WebResource
       end}
 
     # Gatehouse
-    HostGET['www.patriotledger.com'] = -> r {
+    HostGET['www.patriotledger.com'] = HostGET['www.providencejournal.com'] = -> r {
       if r.parts[0] == 'storyimage' && r.path.match?(/&/)
         [301, {'Location' => r.path.split('&')[0]},[]]
       else
@@ -170,8 +170,18 @@ class WebResource
     HostGET['lookup.t-mobile.com'] = -> re {[200, {'Content-Type' => 'text/html'}, [re.htmlDocument({re.uri => {'dest' => re.q['origurl'].R}})]]}
 
     # Twitter
-    '//api.twitter.com'.R.HTTPthru
+
+    #'//api.twitter.com'.R.HTTPthru
+
     HostGET['mobile.twitter.com'] = HostGET['www.twitter.com'] = -> r {[301, {'Location' =>  "https://twitter.com" + r.path},[]]}
+
+    HostGET['t.co'] = -> r {
+      if %w{i}.member? r.parts[0]
+        r.deny
+      else
+        r.remoteNode
+      end}
+
     HostGET['twitter.com'] = -> re {
       if re.path == '/'
         graph = {Twitter => {'uri' => Twitter, Link => []}}
@@ -182,12 +192,6 @@ class WebResource
         [200, {'Content-Type' => 'text/html'}, [re.htmlDocument(graph)]]
       else
         re.ext == 'js' ? re.deny : re.remoteNode
-      end}
-    HostGET['t.co'] = -> r {
-      if %w{i}.member? r.parts[0]
-        r.deny
-      else
-        r.remoteNode
       end}
 
     # Univision
@@ -226,7 +230,7 @@ class WebResource
   module Webize
 
     # Twitter
-    def twitter
+    def tweets
       Nokogiri::HTML.parse(readFile).css('div.tweet').map{|tweet|
         s = Twitter + tweet.css('.js-permalink').attr('href')
         authorName = tweet.css('.username b')[0].inner_text
@@ -249,31 +253,25 @@ class WebResource
     end
     TriplrHTML['twitter.com'] = :twitter
 
-    IndexHTML['twitter.com'] = -> page {
-      graph = {}
-      posts = []
-      puts 'indexing tweets', page, self
-
+    IndexHTML['twitter.com'] = -> page { graph = {}; posts = []
       # collect triples
-      page.twitter{|s,p,o|
-        puts s
+      page.tweets{|s,p,o|
         graph[s] ||= {'uri'=>s}
         graph[s][p] ||= []
         graph[s][p].push o}
-
-      # store in timeline
+      # link to timeline
       graph.map{|u,r|
         r[Date].do{|t|
+          # mint timeline-entry identifier
           slug = (u.sub(/https?/,'.').gsub(/\W/,'.')).gsub /\.+/,'.'
           time = t[0].to_s.gsub(/[-T]/,'/').sub(':','/').sub /(.00.00|Z)$/, ''
-          # doc identifier
           doc = "/#{time}#{slug}.e".R
-          # write
+          # store tweet
           if !doc.e
             doc.writeFile({u => r}.to_json)
             posts << doc
           end}}
-      posts}
+      posts} # indexed tweets
 
   end
 end
