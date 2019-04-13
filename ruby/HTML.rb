@@ -183,12 +183,19 @@ class WebResource
     end
 
     def self.clean body
-      # parse
+      # parse HTML
       html = Nokogiri::HTML.fragment body
 
       # strip disallowed nodes
       %w{iframe link[rel='stylesheet'] style link[type='text/javascript'] link[as='script'] script}.map{|s| html.css(s).remove}
+
+      # strip Javascript URIs
       html.css('a[href]').map{|a| a.remove if a['href'].match? /^javascript/}
+
+      # lift CSS background images to image elements
+      html.css('[style^="background-image"]').map{|node|
+        src = node['style'].match(/url\('([^']+)'/)[1]
+        node.add_child "<img src=\"#{src}\">"}
 
       # traverse attributes
       html.traverse{|e|
@@ -196,12 +203,11 @@ class WebResource
           # move media-source attributes to canonical location
           e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-menuimg data-original data-src data-src1}.member? a.name
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
-          # move CSS background-image to image element
 
           # strip disallowed attributes
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor class height layout ping role style tabindex target width}.member?(a.name)}}
 
-      # serialize
+      # serialize HTML
       html.to_xhtml(:indent => 0)
     end
 
