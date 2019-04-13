@@ -194,8 +194,8 @@ class WebResource
 
       # lift CSS background images to image elements
       html.css('[style^="background-image"]').map{|node|
-        src = node['style'].match(/url\('([^']+)'/)[1]
-        node.add_child "<img src=\"#{src}\">"}
+        node['style'].match(/url\('([^']+)'/).do{|url|
+          node.add_child "<img src=\"#{url[1]}\">"}}
 
       # traverse attributes
       html.traverse{|e|
@@ -258,6 +258,7 @@ class WebResource
               'image_src' => Image,
               'apple-touch-icon' => Image,
               'apple-touch-icon-precomposed' => Image,
+              'shortcut icon' => Image,
               'stylesheet' => :drop,
             }[k] || k
             yield uri, k, v.R unless k == :drop
