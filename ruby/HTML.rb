@@ -192,7 +192,7 @@ class WebResource
       # strip Javascript URIs
       html.css('a[href]').map{|a| a.remove if a['href'].match? /^javascript/}
 
-      # lift CSS background images to image elements
+      # add CSS background-images to contained image elements
       html.css('[style^="background-image"]').map{|node|
         node['style'].match(/url\('([^']+)'/).do{|url|
           node.add_child "<img src=\"#{url[1]}\">"}}
