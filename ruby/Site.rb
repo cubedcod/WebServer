@@ -94,8 +94,8 @@ class WebResource
     }
 
     # Google
-    %w{books developers drive images photos maps news}.map{|prod|
-      HostGET[prod + '.google.com'] = -> r {r.remoteNode}}
+    '//accounts.google.com'.R.HTTPthru
+    %w{books developers drive images photos maps news}.map{|prod| HostGET[prod + '.google.com'] = -> r {r.remoteNode}}
 
     HostGET['google.com'] = HostGET['www.google.com'] = -> r {
       case r.parts[0]
@@ -122,8 +122,25 @@ class WebResource
         [301, {'Location' => r.q['adurl']}, []]
       else
         r.deny
-      end
-    }
+      end}
+
+    '//accounts.youtube.com'.R.HTTPthru
+    HostGET['img.youtube.com'] = -> r {r.remoteFiltered}
+    HostGET['youtube.com'] = HostGET['m.youtube.com'] = -> r {[301, {'Location' =>  "https://www.youtube.com" + r.path + r.qs},[]]}
+    HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
+    HostGET['www.youtube.com'] = -> r {
+      mode = r.parts[0]
+      if !mode
+        [200, {'Content-Type' => 'text/html'},['<form method="GET" action="/results"><input name="q" autofocus></form>']]
+      elsif %w{browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member? mode
+        r.remoteNode
+      elsif mode == 'redirect'
+        [301, {'Location' =>  r.q['q']},[]]
+      elsif mode.match? /204$/
+        [204, {'Content-Length' => 0}, []]
+      else
+        r.deny
+      end}
 
     # Medium
     HostGET['medium.com'] = -> r {
@@ -208,25 +225,6 @@ class WebResource
     # WGBH
     HostGET['wgbh.brightspotcdn.com'] = -> r {r.q.has_key?('url') ? [301, {'Location' => r.q['url']}, []] : r.remoteNode}
 
-    # YouTube
-    HostGET['img.youtube.com'] = -> r {r.remoteFiltered}
-    HostGET['youtube.com'] = HostGET['m.youtube.com'] = -> r {[301, {'Location' =>  "https://www.youtube.com" + r.path + r.qs},[]]}
-    HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
-    HostGET['www.youtube.com'] = -> r {
-      mode = r.parts[0]
-      if !mode
-        [200, {'Content-Type' => 'text/html'},['<form method="GET" action="/results"><input name="q" autofocus></form>']]
-      elsif %w{browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member? mode
-        r.remoteNode
-      elsif mode == 'redirect'
-        [301, {'Location' =>  r.q['q']},[]]
-      elsif mode.match? /204$/
-        [204, {'Content-Length' => 0}, []]
-      else
-        r.deny
-      end}
-    #'//www.youtube.com'.R.HTTPthru
-
   end
   module Webize
 
@@ -252,7 +250,7 @@ class WebResource
         tweet.css('img').map{|img|
           yield s, Image, img.attr('src').to_s.R}}
     end
-    TriplrHTML['twitter.com'] = :twitter
+    TriplrHTML['twitter.com'] = :tweets
 
     IndexHTML['twitter.com'] = -> page { graph = {}; posts = []
       # collect triples
