@@ -94,7 +94,7 @@ class WebResource
     }
 
     # Google
-    '//accounts.google.com'.R.HTTPthru
+    #'//accounts.google.com'.R.HTTPthru
     %w{books developers drive images photos maps news}.map{|prod| HostGET[prod + '.google.com'] = -> r {r.remoteNode}}
 
     HostGET['google.com'] = HostGET['www.google.com'] = -> r {
@@ -124,7 +124,7 @@ class WebResource
         r.deny
       end}
 
-    '//accounts.youtube.com'.R.HTTPthru
+    #'//accounts.youtube.com'.R.HTTPthru
     HostGET['img.youtube.com'] = -> r {r.remoteFiltered}
     HostGET['youtube.com'] = HostGET['m.youtube.com'] = -> r {[301, {'Location' =>  "https://www.youtube.com" + r.path + r.qs},[]]}
     HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
