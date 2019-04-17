@@ -1,9 +1,0 @@
-#!/usr/bin/env ruby
-require_relative '../ruby/index'
-case ARGV.size
-when 1
-  puts WebResource::HTTP.send ARGV[0] if WebResource::HTTP.respond_to? ARGV[0]
-when 2
-  resource = ARGV[1].R
-  puts resource.send ARGV[0] if resource.respond_to? ARGV[0]
-end
