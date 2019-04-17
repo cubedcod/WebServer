@@ -3,4 +3,4 @@ name=WebServer
 srcdir=$(realpath ~/src)
 export src=$srcdir/$name
 git clone https://gitlab.com/ix/$name $src
-cd $src/bin && ./deps
+cd $src/bin && ./DEP
