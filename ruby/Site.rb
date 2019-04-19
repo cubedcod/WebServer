@@ -157,7 +157,6 @@ class WebResource
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # NYTimes
-    #'//samizdat-graphql.nytimes.com'.R.HTTPthru
 
     # QRZ
     HostGET['qrz.com'] = HostGET['forums.qrz.com'] = -> r { r.ext == 'gif' ? r.deny : r.remote }

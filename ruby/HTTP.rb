@@ -79,7 +79,6 @@ class WebResource
     def GET
       return PathGET[path][self] if PathGET[path] # path lambda
       return HostGET[host][self] if HostGET[host] # host lambda
-      return chronoDir           if chronoDir?    # timeslice redirect
       local || remote
     end
 
@@ -98,7 +97,21 @@ class WebResource
     end
 
     def localNode
-      if file?
+      if %w{y year m month d day h hour}.member? parts[0] # local timeline
+        time = Time.now
+        loc = time.strftime(case parts[0][0].downcase
+                            when 'y'
+                              '/%Y/'
+                            when 'm'
+                              '/%Y/%m/'
+                            when 'd'
+                              '/%Y/%m/%d/'
+                            when 'h'
+                              '/%Y/%m/%d/%H/'
+                            else
+                            end)
+        [303, @r[:Response].update({'Location' => loc + parts[1..-1].join('/') + qs}), []]
+      elsif file?
         localFile
       else
         localGraph
@@ -110,7 +123,7 @@ class WebResource
     end
 
     def notfound
-      dateMeta # page hints as something nearby may exist
+      dateMeta # nearby page may exist, look for pointers
       [404,{'Content-Type' => 'text/html'},[htmlDocument]]
     end
 

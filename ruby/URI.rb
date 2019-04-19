@@ -192,33 +192,12 @@ class WebResource < RDF::URI
   end
   module HTTP
 
-    # URI to lambda mapping tables
+    # URI to lambda mapping-tables
     HostGET = {}
     PathGET = {}
     HostPOST = {}
     PathPOST = {}
     HostOPTIONS = {}
-
-    def chronoDir?
-      (parts[0]||'').match /^(y(ear)?|m(onth)?|d(ay)?|h(our)?)$/i
-    end
-
-    # redirect to URI for current time-slice
-    def chronoDir
-      time = Time.now
-      loc = time.strftime(case parts[0][0].downcase
-                          when 'y'
-                            '%Y'
-                          when 'm'
-                            '%Y/%m'
-                          when 'd'
-                            '%Y/%m/%d'
-                          when 'h'
-                            '%Y/%m/%d/%H'
-                          else
-                          end)
-      [303, @r[:Response].update({'Location' => '/' + loc + '/' + parts[1..-1].join('/') + qs}), []]
-    end
 
   end
   module HTML
