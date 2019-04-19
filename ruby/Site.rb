@@ -94,8 +94,8 @@ class WebResource
     }
 
     # Google
-    #'//accounts.google.com'.R.HTTPthru
-    #'//accounts.youtube.com'.R.HTTPthru
+    '//accounts.google.com'.R.HTTPthru
+    '//accounts.youtube.com'.R.HTTPthru
 
     %w{books developers drive images photos maps news}.map{|prod|
       HostGET[prod + '.google.com'] = -> r {

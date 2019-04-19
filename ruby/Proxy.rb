@@ -8,7 +8,7 @@ class WebResource
       headers = HTTP.unmangle env
       body = env['rack.input'].read
       # response
-      r = HTTParty.options url, :headers => headers, :body => body
+      r = HTTParty.get url, :headers => headers, :body => body
       s = r.code
       h = r.headers
       b = r.body
