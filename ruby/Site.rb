@@ -133,9 +133,7 @@ class WebResource
     HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
-      if !mode
-        [200, {'Content-Type' => 'text/html'},['<form method="GET" action="/results"><input name="q" autofocus></form>']]
-      elsif %w{browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member? mode
+      if !mode || %w{browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member?(mode)
         r.remoteNode
       elsif mode == 'redirect'
         [301, {'Location' =>  r.q['q']},[]]
