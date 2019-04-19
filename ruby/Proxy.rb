@@ -2,13 +2,26 @@ class WebResource
   module HTTP
     OFFLINE = ENV.has_key? 'OFFLINE'
 
-    def HTTPthru
+    def GETthru
+      # request
+      url = 'https://' + host + path + qs
+      headers = HTTP.unmangle env
+      body = env['rack.input'].read
+      # response
+      r = HTTParty.options url, :headers => headers, :body => body
+      s = r.code
+      h = r.headers
+      b = r.body
+      [s, h, [b]]
+    end
+
+   def HTTPthru
       HostGET[host] ||= -> r {r.GETthru}
      HostPOST[host] ||= -> r {r.POSTthru}
   HostOPTIONS[host] ||= -> r {r.OPTIONSthru}
     end
 
-    def OPTIONSthru
+   def OPTIONSthru
       # request
       url = 'https://' + host + path + qs
       headers = HTTP.unmangle env
@@ -69,6 +82,8 @@ class WebResource
           deny
         when /filter/
           remoteFiltered
+        when /thru/
+          self.GETthru
         end
       else
         remoteNode
@@ -106,14 +121,15 @@ class WebResource
       if @r # HTTP context
         if redirection
           location = join(redirectCache.readFile).R
+          # direct caller to updated location
           return redirect unless location.host == host && (location.path || '/') == path
         else
-          head[:redirect] = false # don't follow redirects internally when fetching,
-        end # triggers return of redirect metadata for proxy and client book-keeping
+          head[:redirect] = false # don't follow redirects internally
+        end
       end
       head.delete 'Accept-Encoding'
       head.delete 'Host'
-      head.delete 'User-Agent' if host=='t.co' # otherwise redirect only in request-body inside javascript code, not HTTP metadata
+      head.delete 'User-Agent' if host=='t.co' # otherwise relocation handled inside javascript code, not HTTP metadata
 
       # explicit-format suffix
       suffix = ext.empty? && host.match?(/reddit.com$/) && !parts.member?('wiki') && !UI[@r['SERVER_NAME']] && '.rss'
@@ -193,8 +209,6 @@ class WebResource
     rescue OpenURI::HTTPRedirect => re
       updateLocation re.io.meta['location']
     end
-
-    alias_method :GETthru, :remoteNode
 
     def updateLocation location
       redirectCache.writeFile location

@@ -114,7 +114,7 @@ class WebResource
         o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object
         g[s] ||= {'uri'=>s} # insert subject
         g[s][p] ||= []      # insert predicate
-        g[s][p].push o unless g[s][p].member? o} # add triple
+        g[s][p].push o unless g[s][p].member? o} # insert object
 
       # JSON
       non_rdf.map{|n| # visit non-RDF files
@@ -126,7 +126,7 @@ class WebResource
                 o = o.R if o.class==Hash # object URI
                 g[s] ||= {'uri'=>s} # insert subject
                 g[s][p] ||= []      # insert predicate
-                g[s][p].push o unless g[s][p].member? o} unless p == 'uri' }}}} # add triple
+                g[s][p].push o unless g[s][p].member? o} unless p == 'uri' }}}} # insert object
 
       g # graph reference for caller
     end
@@ -250,7 +250,7 @@ class WebResource
             RDF::Writer.open(doc.localPath){|f|
               f << graph}
             newResources << doc
-            puts  "\e[32;7mhttp://localhost:8000" + doc.stripDoc +  "\e[0m"
+            puts  "http://localhost:8000" + doc.stripDoc
           end
           true}}
 

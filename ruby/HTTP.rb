@@ -88,6 +88,23 @@ class WebResource
        [ s, h, []]}
     end
 
+    def local
+      localNode if localNode?
+    end
+
+    # file(s) -> HTTP Response
+    def localGraph
+      graphResponse localNodes
+    end
+
+    def localNode
+      if file?
+        localFile
+      else
+        localGraph
+      end
+    end
+
     def localNode?
       %w{l [::1] 127.0.0.1 localhost}.member? @r['SERVER_NAME']
     end

@@ -1,4 +1,5 @@
 announce full updates or existence thereof to curious peers - irvc3, crdt, solid-websocket, matrix etc
+move chronodir to PathGET bindings
 eliminate cache dir
 json-schema parser/triplrs - youtube comments etc
 index backlinks, expand  shortURL at storage and presentation/loading time
