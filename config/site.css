@@ -20,7 +20,7 @@ div,td {padding: 0}
 footer,.footer,#footer {position: absolute; bottom: 0; left: 0; z-index: -1; color: #aaa}
 h1,h2,h3,h4,h5,h6, a.title, a.link, div.thumb {background-color: #fff; color: #000}
 img, video {max-width: 100%}
-img.thumb {max-width: 28em; float: left}
+img.thumb, svg {max-width: 28em}
 nav, header, .header, #header {position: absolute; top: 0; left: 0; z-index: -1; color: #aaa}
 p {max-width: 78ex}
 pre {white-space: pre-wrap}
