@@ -81,8 +81,8 @@ document.addEventListener("DOMContentLoaded", function(){
 		selectPrevLink();
 	    if(key==78) // [n]ext link
 		selectNextLink();
-	    if(key==83) // [s]ort items
-		gotoLink('sort');
+	    if(key==13) // [enter] item
+		gotoHref();
 	};
     },false);
 }, false);
