@@ -94,40 +94,20 @@ class WebResource
     }
 
     # Google
-    #'//accounts.google.com'.R.HTTPthru
-    #'//accounts.youtube.com'.R.HTTPthru
-
     %w{books developers drive images photos maps news}.map{|prod|
       HostGET[prod + '.google.com'] = -> r {
         r.remoteNode}}
-
     HostGET['google.com'] = HostGET['www.google.com'] = -> r {
       case r.parts[0]
       when nil
         r.remoteNode
-      when /^(aclk|amp|js|maps|recaptcha|search|webhp)$/
+      when /^(maps|search|webhp)$/
         r.remoteNode
       when 'url'
         [301, {'Location' => ( r.q['url'] || r.q['q'] )}, []]
       else
         r.remoteFiltered
       end}
-
-    HostPOST['www.google.com'] = -> r {
-      case r.parts[0]
-      when 'recaptcha'
-        r.POSTthru
-      else
-        r.deny
-      end}
-
-    HostGET["www.googleadservices.com"] = -> r {
-      if r.path == '/pagead/aclk' && r.q.has_key?('adurl')
-        [301, {'Location' => r.q['adurl']}, []]
-      else
-        r.deny
-      end}
-
     HostGET['img.youtube.com'] = -> r {r.remoteFiltered}
     HostGET['youtube.com'] = HostGET['m.youtube.com'] = -> r {[301, {'Location' =>  "https://www.youtube.com" + r.path + r.qs},[]]}
     HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
