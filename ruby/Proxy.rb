@@ -2,6 +2,19 @@ class WebResource
   module HTTP
     OFFLINE = ENV.has_key? 'OFFLINE'
 
+    def cacheFile
+      p = path || ''
+      useExtension = %w{aac atom css html jpeg jpg js m3u8 map mp3 mp4 ogg opus pdf png rdf svg ttf ttl vtt webm webp woff woff2}.member? ext.downcase
+      ((host ? ('/' + host) : '') + (if host&.match?(/google|static|\.redd/) || (qs && !qs.empty?) # mint path
+                     hash = (p + qs).sha2                              # hash upstream path
+                     type = useExtension ? ext : 'cache'               # append format-suffix
+                     '/' + hash[0..1] + '/' + hash[1..-1] + '.' + type # distribute to balanced bins
+                    else                                    # upstream path
+                      name = p[-1] == '/' ? p[0..-2] : p    # strip trailing-slash
+                      name + (useExtension ? '' : '.cache') # append format-suffix
+                     end)).R env
+    end
+
     def GETthru
       # request
       url = 'https://' + host + path + qs
@@ -91,20 +104,23 @@ class WebResource
     end
 
     def remoteFiltered allowGIF=false
-      if %w{js}.member? ext.downcase
-        # drop name-suffix
-        deny
-      elsif %w{dash html ico jpg jpeg json key ogg m3u8 m4a mp3 mp4 mpd pdf png svg ts vtt webm webp}.member? ext.downcase
-        # allow name-suffix
+      # filter URIs
+      if %w{js}.member? ext.downcase # conditionally drop name-suffix
+        if cacheFile.exist?
+          puts "#{uri} cache exists, delivering"
+          cacheFile.localFile
+        else
+          deny
+        end
+      elsif %w{dash html ico jpg jpeg json key ogg m3u8 m4a mp3 mp4 mpd pdf png svg ts vtt webm webp}.member? ext.downcase # allow name-suffixes
         remoteNode
-      elsif ext == 'gif'
-        # allow GIF images without query data
+      elsif ext == 'gif' # strip GIF images with query data
         if allowGIF || qs.empty?
           remoteNode
         else
           deny
         end
-      else
+      else # filter MIME types
         remoteNode.do{|s,h,b|
           if h['Content-Type'] && h['Content-Type'].match?(/application\/.*mpeg|audio\/|image\/|text\/html|video\/|octet-stream/) && !h['Content-Type'].match?(/^image\/gif/)
             # allow MIME type
