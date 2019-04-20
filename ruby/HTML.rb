@@ -221,9 +221,9 @@ class WebResource
 
     def indexHTML
       # add link to exit origin-supplied UI
-      writeFile readFile.sub(/<body[^>]*>/,
+      writeFile readFile.sub(/<body[^>]*>/i,
                              "<body><a id='localUI' href='/ui/local#{HTTP.qs({u: 'https://' + host + @r['REQUEST_URI']})}' style='position: fixed; top: 0; right: 0; z-index: 1001; color: #000; background-color: #fff; font-size: 1.8em'>⌘</a>") rescue nil
-      # call indexer lambda
+      # call indexer
       IndexHTML[@r['SERVER_NAME']].do{|indexer| indexer[self] } || []
     end
 
