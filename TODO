@@ -3,6 +3,7 @@ eliminate cache dir
 json-schema parser/triplrs - youtube comments etc
 index backlinks, expand  shortURL at storage and presentation/loading time
 index browsing on caches of remote containers
+reference cached stories on timeline and in RDF indexes
 troff triplr - .1, .2, (sslsplit/proxy docs)
 link Search host-specific remote origins - !tw  URL mapping etc
 mp3 images
