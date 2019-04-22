@@ -104,7 +104,7 @@ class WebResource
       case r.parts[0]
       when nil
         r.remoteNode
-      when /^(maps|search|webhp)$/
+      when /^(custom|maps|search)$/
         r.remoteNode
       when 'url'
         [301, {'Location' => ( r.q['url'] || r.q['q'] )}, []]
