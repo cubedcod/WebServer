@@ -2,6 +2,11 @@
 user=$(id -u)
 app=$(realpath ~/src/WebServer)
 base=$(realpath ~/web)
-mkdir $base; cd $base; mkdir log
-squid -f $app/config/edge.conf                           # request-router
-unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 $app/config/daemon.ru # daemon
+#mkdir $base
+cd $base
+#mkdir log
+
+# request-router
+squid -f $app/config/edge.conf
+# daemon
+unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 $app/config/daemon.ru
