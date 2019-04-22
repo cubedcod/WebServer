@@ -64,6 +64,7 @@ class WebResource
       s = r.code
       h = r.headers
       b = r.body
+
       if verbose
         puts "<<<<<<<<<<<<<<<<<<"
         HTTP.print_header h
@@ -112,7 +113,7 @@ class WebResource
         else
           deny
         end
-      elsif %w{dash html ico jpg jpeg json key ogg m3u8 m4a mp3 mp4 mpd pdf png svg ts vtt webm webp}.member? ext.downcase # allow name-suffixes
+      elsif %w{css dash html ico jpg jpeg json key ogg m3u8 m4a mp3 mp4 mpd pdf png svg ts vtt webm webp}.member? ext.downcase # allow name-suffixes
         remoteNode
       elsif ext == 'gif' # strip GIF images with query data
         if allowGIF || qs.empty?
