@@ -1,11 +1,6 @@
 #!/bin/sh
-user=$(id -u)
 app=$(realpath ~/src/WebServer)
-base=$(realpath ~/web)
-#mkdir $base
-cd $base
-#mkdir log
-
+cd ~/web
 # request-router
 squid -f $app/config/edge.conf
 # daemon
