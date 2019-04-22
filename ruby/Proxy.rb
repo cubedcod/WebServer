@@ -106,14 +106,14 @@ class WebResource
 
     def remoteFiltered allowGIF=false
       # filter URIs
-      if %w{js}.member? ext.downcase # conditionally drop name-suffix
+      if %w{bin js pb}.member? ext.downcase # drop name-suffix
         if cacheFile.exist?
           puts "#{uri} cache exists, delivering"
           cacheFile.localFile
         else
           deny
         end
-      elsif %w{css dash html ico jpg jpeg json key ogg m3u8 m4a mp3 mp4 mpd pdf png svg ts vtt webm webp}.member? ext.downcase # allow name-suffixes
+      elsif %w{css dash html ico jpg jpeg json key ogg m3u8 m4a mp3 mp4 mpd pdf png svg ts vtt webm webp}.member? ext.downcase # allow name-suffix
         remoteNode
       elsif ext == 'gif' # strip GIF images with query data
         if allowGIF || qs.empty?
