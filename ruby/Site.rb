@@ -100,20 +100,32 @@ class WebResource
     %w{books developers drive images photos maps news}.map{|prod|
       HostGET[prod + '.google.com'] = -> r {
         r.remoteNode}}
+
     HostGET['google.com'] = HostGET['www.google.com'] = -> r {
       case r.parts[0]
       when nil
         r.remoteNode
-      when /^(custom|maps|search)$/
+      when /^(aclk|async|custom|maps|search|x?js)$/
         r.remoteNode
       when 'url'
         [301, {'Location' => ( r.q['url'] || r.q['q'] )}, []]
       else
         r.remoteFiltered
       end}
-    HostGET['img.youtube.com'] = -> r {r.remoteFiltered}
-    HostGET['youtube.com'] = HostGET['m.youtube.com'] = -> r {[301, {'Location' =>  "https://www.youtube.com" + r.path + r.qs},[]]}
+    HostGET['www.googleadservices.com'] = -> r {r.q.has_key?('adurl') ? [301, {'Location' => r.q['adurl']}, []] : r.deny}
+    HostGET['www.gstatic.com'] = -> r {
+      case r.parts[0]
+      when  /^(og)$/
+        r.remoteNode
+      else
+        r.remoteFiltered
+      end
+    }
+
+#    HostGET['youtube.com'] = HostGET['m.youtube.com'] = -> r {[301, {'Location' =>  "https://www.youtube.com" + r.path + r.qs},[]]}
+
     HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
+
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
       if !mode || %w{browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member?(mode)
@@ -125,6 +137,9 @@ class WebResource
       else
         r.deny
       end}
+
+    # GrubHub
+    '//api-gtm.grubhub.com'.R.HTTPthru
 
     # Medium
     HostGET['medium.com'] = -> r {
