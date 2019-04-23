@@ -112,15 +112,6 @@ class WebResource
       else
         r.remoteFiltered
       end}
-    HostGET['www.googleadservices.com'] = -> r {r.q.has_key?('adurl') ? [301, {'Location' => r.q['adurl']}, []] : r.deny}
-    HostGET['www.gstatic.com'] = -> r {
-      case r.parts[0]
-      when  /^(og)$/
-        r.remoteNode
-      else
-        r.remoteFiltered
-      end
-    }
 
 #    HostGET['youtube.com'] = HostGET['m.youtube.com'] = -> r {[301, {'Location' =>  "https://www.youtube.com" + r.path + r.qs},[]]}
 
