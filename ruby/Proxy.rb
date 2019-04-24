@@ -4,14 +4,15 @@ class WebResource
 
     def cacheFile
       p = path || ''
-      useExtension = %w{aac atom css html jpeg jpg js m3u8 map mp3 mp4 ogg opus pdf png rdf svg ttf ttl vtt webm webp woff woff2}.member? ext.downcase
+      # TODO find out who else is serving extension/MIME-mapping mismatched URLs besides wikipedia - "pages about images. with the image-format extension rather than .html or none"
+      keep_ext = %w{aac atom css html jpeg jpg js m3u8 map mp3 mp4 ogg opus pdf png rdf svg ttf ttl vtt webm webp woff woff2}.member?(ext.downcase) && !host&.match?(/\.wiki/)
       ((host ? ('/' + host) : '') + (if host&.match?(/google|static|\.redd/) || (qs && !qs.empty?) # mint path
                      hash = (p + qs).sha2                              # hash upstream path
-                     type = useExtension ? ext : 'cache'               # append format-suffix
+                     type = keep_ext ? ext : 'cache'               # append format-suffix
                      '/' + hash[0..1] + '/' + hash[1..-1] + '.' + type # distribute to balanced bins
                     else                                    # upstream path
                       name = p[-1] == '/' ? p[0..-2] : p    # strip trailing-slash
-                      name + (useExtension ? '' : '.cache') # append format-suffix
+                      name + (keep_ext ? '' : '.cache') # append format-suffix
                      end)).R env
     end
 
