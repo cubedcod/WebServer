@@ -19,12 +19,9 @@ emit mp4 links found in static page
 relURI in feed identifiers
 wsj drudge headers
 AP triplr
-enumerate HTML-literal field values (currently Content & Abstract, add hrefized Generator and others)
 POST adaptors per host
 deal with all-Js pages like https://www.nationalgeographic.org/projects/out-of-eden-walk/articles/2015-01-what-we-talk-about-when-we-talk-about-genocide/
 cookies in escrow at proxy
 preserve rewrite/non status across server runs
 slightly rewrite nonrewritten to jump back out
-host-specific CSS
 subscribe-to-feed UI support
-OFFLINE env-var, eventual NetworkManager , Termux-API hookup
