@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/sh
 app=$(realpath ~/src/WebServer)
 cd ~/web
 # request-router
