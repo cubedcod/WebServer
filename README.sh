@@ -1,9 +1,10 @@
 #!/usr/bin/sh
 name=WebServer
+src=~/src/$name
 
 # INSTALLATION
-git clone https://gitlab.com/ix/$name ~/src
-~/src/$name/bin/INSTALL
+git clone https://gitlab.com/ix/$name $src
+$src/bin/INSTALL
 
 # USAGE
-~/src/$name/bin/session
+$src/bin/session
