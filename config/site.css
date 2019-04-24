@@ -17,11 +17,9 @@ a.title {vertical-align: top}
 body {font-family: sans-serif; margin: 0 2em 0 2em}
 body, pre, p, span, li, time, td.k > a, tr[name="abstract"] > td.v {background-color: #000; color: #fff}
 div,td {padding: 0}
-footer,.footer,#footer {position: absolute; bottom: 0; left: 0; z-index: -1; color: #aaa}
 h1,h2,h3,h4,h5,h6, a.title, a.link, div.thumb {background-color: #fff; color: #000}
 img, video {max-width: 100%}
 img.thumb, svg {max-width: 28em}
-nav, header, .header, #header {position: absolute; top: 0; left: 0; z-index: -1; color: #aaa}
 p {max-width: 78ex}
 pre {white-space: pre-wrap}
 table, div, a {display: inline-block}
@@ -32,7 +30,6 @@ td.v > a {background-color: #eee; color: #000}
 td.v {padding-left: .1em}
 tr[name="content"] > td.v a {background-color: #3f3; color: #000}
 tr[name="content"] > td.v a:visited {background-color: #000; color: #3f3; border: .08em solid #3f3}
-tr[name="content"] > td.v footer a, tr[name="content"] > td.v header a {background-color: #000; color: #aaa}
 tr[name="content"] > td.v {position: relative}
 .highlight .c { color: #586e75 } /* Comment */
 .highlight .err { color: #93a1a1 } /* Error */
