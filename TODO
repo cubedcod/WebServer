@@ -16,3 +16,4 @@ pseudofeed from frontpage when can't be found  http://www.mysouthend.com/
 preserve rewrite/non status across server runs
 slightly rewrite nonrewritten to jump back out
 subscribe-to-feed UI support
+handle overload of / (recursive?-)subdir triplization

@@ -101,10 +101,19 @@ class WebResource
       HostGET[prod + '.google.com'] = -> r {
         r.remoteNode}}
 
+    HostGET['connectivitycheck.gstatic.com'] = -> r {
+      if r.path.match? /204$/
+        [204, {'Content-Length' => 0}, []]
+      else
+        r.deny
+      end}
+
     HostGET['google.com'] = HostGET['www.google.com'] = -> r {
       case r.parts[0]
       when nil
         r.remoteNode
+      when /204$/
+        [204, {'Content-Length' => 0}, []]
       when /^(aclk|async|custom|maps|search|x?js)$/
         r.remoteNode
       when 'url'

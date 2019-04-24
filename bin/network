@@ -1,0 +1,4 @@
+#!/usr/bin/sh
+uid=$(id -u)
+script=$(realpath ~/src/WebServer/bin/network.transparent)
+su -c "sh $script $uid"
