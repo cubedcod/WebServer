@@ -116,12 +116,12 @@ class WebResource
         end
       elsif %w{css dash html ico jpg jpeg json key ogg m3u8 m4a mp3 mp4 mpd pdf png svg ts vtt webm webp}.member? ext.downcase # allow name-suffix
         remoteNode
-      elsif ext == 'gif' # strip GIF images with query data
-        if allowGIF || qs.empty?
-          remoteNode
-        else
+      elsif ext == 'gif'
+#        if allowGIF || qs.empty?
+#          remoteNode
+#        else # strip GIF images with query data
           deny
-        end
+#        end
       else # filter MIME types
         remoteNode.do{|s,h,b|
           if h['Content-Type'] && h['Content-Type'].match?(/application\/.*mpeg|audio\/|image\/|text\/html|video\/|octet-stream/) && !h['Content-Type'].match?(/^image\/gif/)

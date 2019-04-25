@@ -4,14 +4,6 @@ class WebResource
     # Adobe
     '//sp.auth.adobe.com'.R.HTTPthru
 
-    # Amazon
-    HostGET['www.amazon.com'] = -> r {
-      if %w{gp}.member? r.parts[0]
-        r.deny
-      else
-        r.remote
-      end}
-
     # Anvato
     '//tkx2-prod.anvato.net'.R.HTTPthru
     '//tkx.apis.anvato.net'.R.HTTPthru
@@ -97,35 +89,24 @@ class WebResource
     }
 
     # Google
-    %w{books developers drive images photos maps news}.map{|prod|
-      HostGET[prod + '.google.com'] = -> r {
-        r.remoteNode}}
-
     HostGET['connectivitycheck.gstatic.com'] = -> r {
       if r.path.match? /204$/
         [204, {'Content-Length' => 0}, []]
       else
         r.deny
       end}
-
     HostGET['google.com'] = HostGET['www.google.com'] = -> r {
       case r.parts[0]
-      when nil
-        r.remoteNode
       when /204$/
         [204, {'Content-Length' => 0}, []]
-      when /^(aclk|async|custom|maps|search|x?js)$/
-        r.remoteNode
+      when 'search'
+        [301, {'Location' => 'https://duckduckgo.com/' + r.qs}, []]
       when 'url'
         [301, {'Location' => ( r.q['url'] || r.q['q'] )}, []]
       else
         r.remoteFiltered
       end}
-
-#    HostGET['youtube.com'] = HostGET['m.youtube.com'] = -> r {[301, {'Location' =>  "https://www.youtube.com" + r.path + r.qs},[]]}
-
     HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
-
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
       if !mode || %w{browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member?(mode)
