@@ -42,7 +42,7 @@ class WebResource
 
     # Facebook
     HostGET['www.facebook.com'] = -> z {
-      if %w{ajax api plugins si tr}.member?(z.parts[0]) || z.path.match?(/reaction/) || z.ext == 'php'
+      if %w{ajax api connect plugins si tr}.member?(z.parts[0]) || z.path.match?(/reaction/) || z.ext == 'php'
         z.deny
       else
         z.remoteNode
@@ -81,6 +81,8 @@ class WebResource
         [204, {'Content-Length' => 0}, []]
       when 'url'
         [301, {'Location' => ( r.q['url'] || r.q['q'] )}, []]
+      when 'search'
+        r.remoteNode
       else
         r.remoteFiltered
       end}

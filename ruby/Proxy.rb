@@ -4,7 +4,7 @@ class WebResource
 
     def cacheFile
       p = path || ''
-      keep_ext = %w{aac atom css html jpeg jpg js m3u8 map mp3 mp4 ogg opus pdf png rdf svg ttf ttl vtt webm webp woff woff2}.member?(ext.downcase) && !host&.match?(/\.wiki/)
+      keep_ext = %w{aac atom css html jpeg jpg js m3u8 map mp3 mp4 ogg opus pdf png rdf svg ttf ttl vtt webm webp woff woff2}.member?(ext.downcase) && !host&.match?(/openload|\.wiki/)
       ((host ? ('/' + host) : '') + (if host&.match?(/google|static|\.redd/) || (qs && !qs.empty?) # mint path
                      hash = (p + qs).sha2                              # hash upstream path
                      type = keep_ext ? ext : 'cache'               # append format-suffix
@@ -213,11 +213,7 @@ class WebResource
       [302, {'Location' => location}, []]
     end
 
-    UI = {
-      'duckduckgo.com' => true,
-      's.ytimg.com' => true,
-      'www.youtube.com' => true,
-    }
+    UI = {'s.ytimg.com' => true}
 
     # toggle UI provider - local vs origin
     PathGET['/ui/origin'] = -> r {r.q['u'].do{|u| UI[u.R.host] = true; [302, {'Location' => u}, []]} || r.deny }
