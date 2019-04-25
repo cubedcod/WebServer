@@ -28,12 +28,6 @@ class WebResource
       [s, h, [b]]
     end
 
-   def HTTPthru
-      HostGET[host] ||= -> r {r.GETthru}
-     HostPOST[host] ||= -> r {r.POSTthru}
-  HostOPTIONS[host] ||= -> r {r.OPTIONSthru}
-    end
-
    def OPTIONSthru
       # request
       url = 'https://' + host + path + qs
@@ -47,7 +41,7 @@ class WebResource
       [s, h, [b]]
     end
 
-    def POSTthru ; verbose = false
+    def POSTthru
       # request
       url = 'https://' + host + path + qs
       headers = HTTP.unmangle env
@@ -132,7 +126,8 @@ class WebResource
       end
       head.delete 'Accept-Encoding'
       head.delete 'Host'
-      head.delete 'User-Agent' if host=='t.co' # don't advertise JS capability
+      head['User-Agent'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3773.0 Safari/537.36'
+      head.delete 'User-Agent' if %w{t.co}.member? host # don't advertise JS capability
 
       # explicit-format suffix
       suffix = ext.empty? && host.match?(/reddit.com$/) && !parts.member?('wiki') && !UI[@r['SERVER_NAME']] && '.rss'

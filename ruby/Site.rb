@@ -1,13 +1,6 @@
 class WebResource
   module HTTP
 
-    # Adobe
-    '//sp.auth.adobe.com'.R.HTTPthru
-
-    # Anvato
-    '//tkx2-prod.anvato.net'.R.HTTPthru
-    '//tkx.apis.anvato.net'.R.HTTPthru
-
     # BizJournal
     HostGET['media.bizj.us'] = -> r {
       if r.path.match? /\*/
@@ -24,15 +17,6 @@ class WebResource
         r.remote
       end}
 
-    # Brightcove
-    '//edge.api.brightcove.com'.R.HTTPthru
-
-    # Broadcastify
-    HostPOST['www.broadcastify.com'] = -> r {r.POSTthru}
-
-    # Change A View
-    '//api.changeaview.com'.R.HTTPthru
-
     # Cloudflare
     HostGET['cdnjs.cloudflare.com'] = HostGET['ajax.googleapis.com'] = -> r {
       if r.path.match? /\/(babel|jquery|react)/
@@ -43,9 +27,6 @@ class WebResource
 
     # CNN
     HostGET['dynaimage.cdn.cnn.com'] = -> r {[301, {'Location' => 'http' + URI.unescape(r.path.split(/http/)[-1])}, []]}
-
-    # Discord
-    '//discordapp.com'.R.HTTPthru
 
     # Discourse
     PathGET['/clicks/track'] = -> r {[301,{'Location' => r.q['url']},[]]}
@@ -119,9 +100,6 @@ class WebResource
         r.deny
       end}
 
-    # GrubHub
-    '//api-gtm.grubhub.com'.R.HTTPthru
-
     # Medium
     HostGET['medium.com'] = -> r {
       if %w{_ p}.member? r.parts[0]
@@ -157,7 +135,6 @@ class WebResource
 
     # SoundCloud
     HostGET['exit.sc'] = -> r {[301, {'Location' => r.q['url']},[]]}
-    '//api-v2.soundcloud.com'.R.HTTPthru
 
     # Symantec
     HostGET['clicktime.symantec.com'] = -> r {[301, {'Location' => r.q['u']},[]]}
@@ -166,11 +143,6 @@ class WebResource
     HostGET['lookup.t-mobile.com'] = -> re {[200, {'Content-Type' => 'text/html'}, [re.htmlDocument({re.uri => {'dest' => re.q['origurl'].R}})]]}
 
     # Twitter
-
-    #'//api.twitter.com'.R.HTTPthru
-
-    HostGET['mobile.twitter.com'] = HostGET['www.twitter.com'] = -> r {[301, {'Location' =>  "https://twitter.com" + r.path},[]]}
-
     HostGET['t.co'] = -> r {
       if %w{i}.member? r.parts[0]
         r.deny
@@ -181,17 +153,12 @@ class WebResource
     HostGET['twitter.com'] = -> re {
       if re.path == '/'
         graph = {Twitter => {'uri' => Twitter, Link => []}}
-
         '/twitter'.R.lines.shuffle.each_slice(16){|s|
           graph[Twitter][Link].push (Twitter+'/search?f=tweets&vertical=default&q=' + s.map{|u| 'from:' + u.chomp}.intersperse('+OR+').join).R}
-
         [200, {'Content-Type' => 'text/html'}, [re.htmlDocument(graph)]]
       else
         re.ext == 'js' ? re.deny : re.remoteNode
       end}
-
-    # Univision
-    HostOPTIONS['api.vmh.univision.com'] = -> r {r.OPTIONSthru}
 
     # WaPo
     HostGET['www.washingtonpost.com'] = -> r {
