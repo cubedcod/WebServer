@@ -47,7 +47,6 @@ class WebResource
       else
         z.remoteNode
       end}
-    HostGET['instagram.com'] = HostGET['www.instagram.com'] = -> z {z.remoteNode}
     HostGET['l.facebook.com']  = -> r {[301, {'Location' => r.q['u']},  []]}
     HostGET['l.instagram.com'] = -> r {[301, {'Location' => r.q['u']},  []]}
     PathGET['/safe_image.php'] = -> r {[301, {'Location' => r.q['url']},[]]}
@@ -80,8 +79,6 @@ class WebResource
       case r.parts[0]
       when /204$/
         [204, {'Content-Length' => 0}, []]
-      when 'search'
-        [301, {'Location' => 'https://duckduckgo.com/' + r.qs}, []]
       when 'url'
         [301, {'Location' => ( r.q['url'] || r.q['q'] )}, []]
       else
