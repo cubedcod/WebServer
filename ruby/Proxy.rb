@@ -233,8 +233,11 @@ class WebResource
       [302, {'Location' => location}, []]
     end
 
-    UI = {'s.ytimg.com' => true,
-      'www.youtube.com' => true}
+    UI = {
+      'duckduckgo.com' => true,
+      's.ytimg.com' => true,
+      'www.youtube.com' => true,
+    }
 
     # toggle UI provider - local vs origin
     PathGET['/ui/origin'] = -> r {r.q['u'].do{|u| UI[u.R.host] = true; [302, {'Location' => u}, []]} || r.deny }
