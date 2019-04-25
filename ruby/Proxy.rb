@@ -4,7 +4,6 @@ class WebResource
 
     def cacheFile
       p = path || ''
-      # TODO find out who else is serving extension/MIME-mapping mismatched URLs besides wikipedia - "pages about images. with the image-format extension rather than .html or none"
       keep_ext = %w{aac atom css html jpeg jpg js m3u8 map mp3 mp4 ogg opus pdf png rdf svg ttf ttl vtt webm webp woff woff2}.member?(ext.downcase) && !host&.match?(/\.wiki/)
       ((host ? ('/' + host) : '') + (if host&.match?(/google|static|\.redd/) || (qs && !qs.empty?) # mint path
                      hash = (p + qs).sha2                              # hash upstream path
@@ -53,26 +52,12 @@ class WebResource
       url = 'https://' + host + path + qs
       headers = HTTP.unmangle env
       body = env['rack.input'].read
-      if verbose
-        puts "POST >>> #{url}"
-        HTTP.print_header headers
-        puts ""
-        HTTP.print_body body, @r['CONTENT_TYPE']
-      end
 
       # response
       r = HTTParty.post url, :headers => headers, :body => body
       s = r.code
       h = r.headers
       b = r.body
-
-      if verbose
-        puts "<<<<<<<<<<<<<<<<<<"
-        HTTP.print_header h
-        puts ""
-        HTTP.print_body b, h['content-type']
-        puts ""
-      end
 
       [s, h, [b]]
     end
@@ -147,7 +132,7 @@ class WebResource
       end
       head.delete 'Accept-Encoding'
       head.delete 'Host'
-      head.delete 'User-Agent' if host=='t.co' # otherwise relocation handled inside javascript code, not HTTP metadata
+      head.delete 'User-Agent' if host=='t.co' # don't advertise JS capability
 
       # explicit-format suffix
       suffix = ext.empty? && host.match?(/reddit.com$/) && !parts.member?('wiki') && !UI[@r['SERVER_NAME']] && '.rss'
