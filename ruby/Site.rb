@@ -83,7 +83,11 @@ class WebResource
       when 'url'
         [301, {'Location' => ( r.q['url'] || r.q['q'] )}, []]
       when /^(maps|search)$/
-        r.remoteNode
+        if ENV.has_key? 'https_proxy'
+          [301, {'Location' => 'https://duckduckgo.com/' + r.qs}, []]
+        else
+          r.remoteNode
+        end
       else
         r.remoteFiltered
       end}
