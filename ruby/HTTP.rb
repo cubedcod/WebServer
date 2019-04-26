@@ -127,10 +127,15 @@ class WebResource
       [404,{'Content-Type' => 'text/html'},[htmlDocument]]
     end
 
+    POSThosts = /(anvato|brightcove).(com|net)$/
     def OPTIONS
       return HostOPTIONS[host][self] if HostOPTIONS[host]
-      env[:deny] = true
-      [202,{},[]]
+      if host.match? POSThosts
+        self.OPTIONSthru
+      else
+        env[:deny] = true
+        [202,{},[]]
+      end
     end
 
     # String -> Hash
@@ -149,7 +154,7 @@ class WebResource
     def POST
       return PathPOST[path][self] if PathPOST[path]
       return HostPOST[host][self] if HostPOST[host]
-      if host.match? /anvato.net$/
+      if host.match? POSThosts
         self.POSTthru
       else
         env[:deny] = true
