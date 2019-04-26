@@ -149,12 +149,8 @@ class WebResource
     def POST
       return PathPOST[path][self] if PathPOST[path]
       return HostPOST[host][self] if HostPOST[host]
-      if UI[@r['SERVER_NAME']]
-        self.POSTthru
-      else
-        env[:deny] = true
-        [202,{},[]]
-      end
+      env[:deny] = true
+      [202,{},[]]
     end
 
     def pragma; env['HTTP_PRAGMA'] end
