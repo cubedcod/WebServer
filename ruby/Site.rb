@@ -105,6 +105,9 @@ class WebResource
         r.deny
       end}
 
+    # Mail.ru
+    HostGET['img.imgsmail.ru'] = -> r {r.remoteNode}
+
     # Medium
     HostGET['medium.com'] = -> r {
       if %w{_ p}.member? r.parts[0]
