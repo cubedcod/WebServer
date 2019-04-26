@@ -75,17 +75,19 @@ class WebResource
       else
         r.deny
       end}
+
     HostGET['google.com'] = HostGET['www.google.com'] = -> r {
       case r.parts[0]
       when /204$/
         [204, {'Content-Length' => 0}, []]
       when 'url'
         [301, {'Location' => ( r.q['url'] || r.q['q'] )}, []]
-      when 'search'
+      when /^(maps|search)$/
         r.remoteNode
       else
         r.remoteFiltered
       end}
+
     HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
