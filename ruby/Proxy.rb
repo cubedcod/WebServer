@@ -103,11 +103,9 @@ class WebResource
 #        end
       else # filter MIME types
         remoteNode.do{|s,h,b|
-          if h['Content-Type'] && h['Content-Type'].match?(/application\/.*mpeg|audio\/|image\/|text\/html|video\/|octet-stream/) && !h['Content-Type'].match?(/^image\/gif/)
-            # allow MIME type
+          if s.to_s.match?(/30[1-3]/) || (h['Content-Type'] && h['Content-Type'].match?(/application\/.*mpeg|audio\/|image\/|text\/html|video\/|octet-stream/) && !h['Content-Type'].match?(/^image\/gif/))
             [s, h, b]
           else
-            # drop MIME type
             deny
           end}
       end
