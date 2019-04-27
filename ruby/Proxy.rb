@@ -129,30 +129,25 @@ class WebResource
       head.delete 'Host'
       head['User-Agent'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3773.0 Safari/537.36'
       head.delete 'User-Agent' if %w{t.co}.member? host # don't advertise JS capability
-
-      # explicit-format suffix
-      suffix = ext.empty? && host.match?(/reddit.com$/) && !parts.member?('wiki') && !UI[@r['SERVER_NAME']] && '.rss'
-
-      url = if @r && !suffix && !(path||'').match?(/[\[\]]/) # preserve URI
+      suffix = ext.empty? && host.match?(/reddit.com$/) && !parts.member?('wiki') && !UI[@r['SERVER_NAME']] && '.rss' # format suffix
+      url = if @r && !suffix && !(path||'').match?(/[\[\]]/) # preserve locator
               "https://#{host}#{@r['REQUEST_URI']}"
             else # construct locator
               'https://' + host + (path||'').gsub('[','%5B').gsub(']','%5D') + (suffix||'') + qs
             end
-      cache = cacheFile # cache-storage pointer
+      cache = cacheFile # storage pointer
       head["If-Modified-Since"] = cache.mtime.httpdate if cache.e
-      cacheMeta = cache.metafile # cache metadata
+      cacheMeta = cache.metafile # storage metadata
       updates = []
-
-      update = -> url { # lazy lambda
+      update = -> url { # updater lambda
         begin
           open(url, head) do |response| # response
-            # origin-metadata for caller
-            %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k|
-              @r[:Response][k] ||= response.meta[k.downcase]} if @r
+            %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| @r[:Response][k] ||= response.meta[k.downcase] } if @r # origin-metadata to caller
+            puts response.status
             resp = response.read
             unless cache.e && cache.readFile == resp
-              cache.writeFile resp # write cache
-              mime = if response.meta['content-type'] # explicit MIME from upstream
+              cache.writeFile resp # update cache
+              mime = if response.meta['content-type'] # explicit MIME
                        response.meta['content-type'].split(';')[0]
                      elsif MIMEsuffix[cache.ext]      # file extension
                        MIMEsuffix[cache.ext]
@@ -160,7 +155,7 @@ class WebResource
                        cache.mimeSniff
                      end
               cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # write metadata
-              # call indexer
+              # update index
               updates.concat(case mime
                              when /^(application|text)\/(atom|rss|xml)/
                                cache.indexFeed
@@ -172,20 +167,18 @@ class WebResource
             end
           end
         rescue Exception => e
-          raise unless e.message.match? /[34]04/ # notModified and notFound in normal control-flow
+          raise unless e.message.match? /[34]04/ # not-modified/found handled in unexceptional control-flow
         end}
 
       # update
       immutable = cache? && cache.e && cache.noTransform?
-      throttled = cacheMeta.e && (Time.now - cacheMeta.mtime) < 60
-      unless immutable || OFFLINE || throttled
+      unless immutable || OFFLINE
         begin
-          update[url] # try HTTPS
+          update[url] # HTTPS
         rescue Exception => e
-          raise if e.class == OpenURI::HTTPRedirect # redirected, go book-keep
+          raise if e.class == OpenURI::HTTPRedirect # redirect
           update[url.sub /^https/, 'http'] # HTTPS failed, try HTTP
         end
-        cacheMeta.touch if cacheMeta.e # update timestamp
       end
 
       # return value
