@@ -115,14 +115,15 @@ class WebResource
     end
 
     def remoteNode
-      head = HTTP.unmangle env # HTTP header
+      head = HTTP.unmangle env # request header
+      responseHead = {}       # response header
       if @r # HTTP context
         if redirection
           location = join(redirectCache.readFile).R
-          # direct caller to updated location
+          # redirect caller
           return redirect unless location.host == host && (location.path || '/') == path
         else
-          head[:redirect] = false # don't follow redirects internally
+          head[:redirect] = false
         end
       end
       head.delete 'Accept-Encoding'
@@ -138,38 +139,41 @@ class WebResource
       cache = cacheFile # storage pointer
       head["If-Modified-Since"] = cache.mtime.httpdate if cache.e
       cacheMeta = cache.metafile # storage metadata
+      part = nil
       updates = []
       update = -> url { # updater lambda
         begin
-          open(url, head) do |response| # response
-            %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| @r[:Response][k] ||= response.meta[k.downcase] } if @r # origin-metadata to caller
-            puts response.status
-            resp = response.read
-            unless cache.e && cache.readFile == resp
-              cache.writeFile resp # update cache
-              mime = if response.meta['content-type'] # explicit MIME
-                       response.meta['content-type'].split(';')[0]
-                     elsif MIMEsuffix[cache.ext]      # file extension
-                       MIMEsuffix[cache.ext]
-                     else                             # sniff
-                       cache.mimeSniff
-                     end
-              cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # write metadata
-              # update index
-              updates.concat(case mime
-                             when /^(application|text)\/(atom|rss|xml)/
-                               cache.indexFeed
-                             when /^text\/html/
-                               cache.indexHTML
-                             else
-                               []
-                             end || [])
+          open(url, head) do |response|
+            if response.status.to_s.match?(/206/) # partial response
+              responseHead = response.meta
+              part = response.read
+            else # index and store full response
+              %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| @r[:Response][k] ||= response.meta[k.downcase] } if @r # origin-metadata to caller
+              body = response.read
+              unless cache.e && cache.readFile == body
+                cache.writeFile body # update cache
+                mime = if response.meta['content-type'] # explicit MIME
+                         response.meta['content-type'].split(';')[0]
+                       elsif MIMEsuffix[cache.ext]      # file extension
+                         MIMEsuffix[cache.ext]
+                       else                             # sniff
+                         cache.mimeSniff
+                       end
+                cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # write metadata
+                updates.concat(case mime                                              # update index
+                               when /^(application|text)\/(atom|rss|xml)/
+                                 cache.indexFeed
+                               when /^text\/html/
+                                 cache.indexHTML
+                               else
+                                 []
+                               end || [])
+              end
             end
           end
         rescue Exception => e
           raise unless e.message.match? /[34]04/ # not-modified/found handled in unexceptional control-flow
         end}
-
       # update
       immutable = cache? && cache.e && cache.noTransform?
       unless immutable || OFFLINE
@@ -180,11 +184,12 @@ class WebResource
           update[url.sub /^https/, 'http'] # HTTPS failed, try HTTP
         end
       end
-
-      # return value
-      if @r # HTTP caller
-        if cache.exist?
-          if cache.noTransform? # upstream formats
+      # return value to caller
+      if @r # HTTP calling context
+        if part
+          [206, responseHead, [part]]
+        elsif cache.exist?
+          if cache.noTransform?
             cache.localFile
           elsif UI[@r['SERVER_NAME']]
             cache.localFile
@@ -197,8 +202,7 @@ class WebResource
       else # REPL/shell caller
         updates.empty? ? cache : updates
       end
-
-    rescue OpenURI::HTTPRedirect => re
+    rescue OpenURI::HTTPRedirect => re # return redirect-exception as HTTP response
       updateLocation re.io.meta['location']
     end
 
