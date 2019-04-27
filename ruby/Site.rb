@@ -142,7 +142,10 @@ class WebResource
       end}
 
     # SoundCloud
-    HostGET['exit.sc'] = -> r {[301, {'Location' => r.q['url']},[]]}
+    HostGET['exit.sc'] = HostGET['w.soundcloud.com'] = -> r {
+      url = r.q['url']
+      url = '//' + url unless url.match? /^(http|\/)/
+      [301, {'Location' => url},[]]}
 
     # Symantec
     HostGET['clicktime.symantec.com'] = -> r {[301, {'Location' => r.q['u']},[]]}
