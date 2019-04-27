@@ -92,9 +92,6 @@ class WebResource
 
   end
   module HTTP
-
-    HostPOST['localhost'] = -> r {[202,{},[]]}
-
     # load native-JSON and RDF
     def load set # file-set
       g = {}                 # Hash

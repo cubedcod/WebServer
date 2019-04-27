@@ -82,6 +82,8 @@ class WebResource
         [204, {'Content-Length' => 0}, []]
       when 'url'
         [301, {'Location' => ( r.q['url'] || r.q['q'] )}, []]
+      when 'recaptcha'
+        r.remoteNode
       when /^(maps|search)$/
         if ENV.has_key? 'https_proxy'
           [301, {'Location' => 'https://duckduckgo.com/' + r.qs}, []]
@@ -90,6 +92,15 @@ class WebResource
         end
       else
         r.remoteFiltered
+      end}
+
+    HostPOST['www.google.com'] = -> r {
+      case r.parts[0]
+      when 'recaptcha'
+        r.POSTthru
+      else
+        r.env[:deny] = true
+        [202,{},[]]
       end}
 
     HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
