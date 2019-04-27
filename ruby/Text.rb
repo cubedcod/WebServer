@@ -137,7 +137,10 @@ class WebResource
       nil
     end
 
-    def HTTP.print_header header; header.map{|k,v|puts [k,v].join "\t"} end
+    def HTTP.print_header header
+      header.map{|k,v|
+            puts [k,v].join "\t"}
+    end
 
   end
 end

@@ -46,13 +46,16 @@ class WebResource
       url = 'https://' + host + path + qs
       headers = HTTP.unmangle env
       body = env['rack.input'].read
-
+      HTTP.print_header headers
+      HTTP.print_body body, headers['Content-Type']
+      puts ""
       # response
       r = HTTParty.post url, :headers => headers, :body => body
       s = r.code
       h = r.headers
       b = r.body
-
+      HTTP.print_header h
+      HTTP.print_body b, h['content-type']
       [s, h, [b]]
     end
 
