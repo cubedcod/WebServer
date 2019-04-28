@@ -25,9 +25,6 @@ class WebResource
         r.deny
       end}
 
-    # CNN
-    HostGET['dynaimage.cdn.cnn.com'] = -> r {[301, {'Location' => 'http' + URI.unescape(r.path.split(/http/)[-1])}, []]}
-
     # Discourse
     PathGET['/clicks/track'] = -> r {[301,{'Location' => r.q['url']},[]]}
 
@@ -133,13 +130,8 @@ class WebResource
     # Mozilla
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
-    # NYTimes
-
     # QRZ
     HostGET['qrz.com'] = HostGET['forums.qrz.com'] = -> r { r.ext == 'gif' ? r.deny : r.remote }
-
-    # Reddit
-    HostGET['i.reddit.com'] = HostGET['np.reddit.com'] = HostGET['reddit.com'] = -> re {[301,{'Location' => 'https://www.reddit.com' + re.path + re.qs},[]]}
 
     # Redfin
     HostGET['www.redfin.com'] = -> r { %w{rift stingray}.member?(r.parts[0]) ? r.deny : r.remoteNode }
