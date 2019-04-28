@@ -18,3 +18,4 @@ preserve rewrite/non status across server runs
 slightly rewrite nonrewritten to jump back out
 subscribe-to-feed UI support
 handle overload of / (recursive?-)subdir triplization
+bubble up HTML-extracted next/prev to HTTP headers https://www.google.com/search?q=corbett+crew+boston&gbv=1&prmd=ivns&ei=OdTEXPS5OLCKggeExqXoDA&start=10&sa=N
