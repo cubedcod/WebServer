@@ -90,7 +90,13 @@ class WebResource
       else
         r.remoteFiltered
       end}
-    HostGET['www.googleadservices.com'] = -> r {[301, {'Location' => r.q['adurl']}, []]}
+
+    HostGET['www.googleadservices.com'] = -> r {
+      if goto = r.q['adurl']
+        [301, {'Location' => goto}, []]
+      else
+        r.deny
+      end}
 
     HostPOST['www.google.com'] = -> r {
       case r.parts[0]
