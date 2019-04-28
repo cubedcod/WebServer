@@ -73,6 +73,8 @@ class WebResource
         r.deny
       end}
 
+    HostGET['maps.google.com'] = -> r {r.remoteNode}
+
     HostGET['google.com'] = HostGET['www.google.com'] = -> r {
       case r.parts[0]
       when /204$/
@@ -81,7 +83,7 @@ class WebResource
         [301, {'Location' => ( r.q['url'] || r.q['q'] )}, []]
       when 'recaptcha'
         r.remoteNode
-      when /^(maps|search)$/
+      when /^(maps|s|search)$/
         if ENV.has_key? 'https_proxy'
           [301, {'Location' => 'https://duckduckgo.com/' + r.qs}, []]
         else
