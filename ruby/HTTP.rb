@@ -165,6 +165,7 @@ class WebResource
     def pragma; env['HTTP_PRAGMA'] end
 
     def PUT
+      env[:deny] = true
       [202,{},[]]
     end
 

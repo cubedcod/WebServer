@@ -172,7 +172,14 @@ class WebResource
             end
           end
         rescue Exception => e
-          raise unless e.message.match? /[34]04/ # not-modified/found handled in unexceptional control-flow
+          if e.message.match? /[34]04/
+            # not-modified/found handled in normal control-flow
+          elsif e.message.match? /503/
+            puts e.io
+            return [503,{'Content-Type' => 'text/html'}, [503]]
+          else
+            raise # miscellaneous errors
+          end
         end}
       # update
       immutable = cache? && cache.e && cache.noTransform?
