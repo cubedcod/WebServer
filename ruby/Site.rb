@@ -113,17 +113,13 @@ class WebResource
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
       if !mode || %w{browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member?(mode)
-        if r.env.has_key?('HTTP_TYPE') && r.env['HTTP_TYPE'].match?(/drop/)
-          r.deny
-        else
-          r.remoteNode
-        end
+        r.remoteNode
       elsif mode == 'redirect'
         [301, {'Location' =>  r.q['q']},[]]
       elsif mode.match? /204$/
         [204, {'Content-Length' => 0}, []]
       else
-        r.deny
+        r.drop
       end}
 
     # Mail.ru
