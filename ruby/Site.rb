@@ -106,14 +106,14 @@ class WebResource
         [202,{},[]]
       end}
 
-    %w{accounts drive groups news patents}.map{|prod|
+    %w{accounts drive groups images news patents}.map{|prod|
       HostGET[prod+'.google.com'] = -> r { r.remoteNode }}
 
     %w{accounts groups}.map{|p|
       HostOPTIONS[p+'.google.com'] = -> r { r.OPTIONSthru }
       HostPOST[p+'.google.com'] = -> r { r.POSTthru }}
 
-    HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
+    HostGET['accounts.youtube.com'] = -> r { r.remoteNode }
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
       if !mode || %w{browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member?(mode)
@@ -125,6 +125,7 @@ class WebResource
       else
         r.drop
       end}
+    HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
 
     # Mail.ru
     HostGET['img.imgsmail.ru'] = -> r {r.remoteNode}

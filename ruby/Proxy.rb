@@ -45,6 +45,7 @@ class WebResource
       # request
       url = 'https://' + host + path + qs
       headers = HTTP.unmangle env
+      headers.delete 'Accept-Encoding'
       body = env['rack.input'].read
       HTTP.print_header headers
       HTTP.print_body body, headers['Content-Type']
