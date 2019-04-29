@@ -122,9 +122,15 @@ class WebResource
   module HTTP
 
     def HTTP.print_body body, mime
+      puts mime
       case mime
       when /application\/json/
-        puts ::JSON.pretty_generate ::JSON.parse body
+        json = ::JSON.parse body rescue nil
+        if json
+          puts ::JSON.pretty_generate json
+        else
+          puts body
+        end
       when /application\/x-www-form-urlencoded/
         q = HTTP.parseQs body
         message = q.delete "message"
