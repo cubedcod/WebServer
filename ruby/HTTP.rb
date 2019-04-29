@@ -65,6 +65,7 @@ class WebResource
       env[:deny] = true
       [200, {'Content-Type' => ext=='js' ? 'application/javascript' : 'text/plain'}, []]
     end
+    alias_method :drop, :deny
 
     def environment env = nil
       if env
