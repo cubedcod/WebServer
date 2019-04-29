@@ -158,6 +158,9 @@ class WebResource
       if host.match? POSThosts
         self.POSTthru
       else
+        head = HTTP.unmangle env
+        #HTTP.print_header head
+        HTTP.print_body env['rack.input'].read, head['Content-Type']
         env[:deny] = true
         [202,{},[]]
       end
