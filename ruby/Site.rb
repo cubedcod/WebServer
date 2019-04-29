@@ -1,7 +1,7 @@
 class WebResource
   module HTTP
     # JS-lib CDNs - allow JS unless explicitly dropped
-    HostGET['cdnjs.cloudflare.com'] = HostGET['ajax.googleapis.com'] = HostGET['www.gstatic.com'] = -> r {
+    HostGET['cdnjs.cloudflare.com'] = HostGET['ajax.googleapis.com'] = HostGET['www.gstatic.com'] = HostGET['maps.google.com'] = HostGET['maps.googleapis.com'] = -> r {
       if r.env.has_key?('HTTP_TYPE') && r.env['HTTP_TYPE'].match?(/drop/)
         r.deny
       else
@@ -71,8 +71,6 @@ class WebResource
       else
         r.deny
       end}
-
-    HostGET['maps.google.com'] = HostGET['maps.googleapis.com'] = -> r {r.remoteNode}
 
     HostGET['google.com'] = HostGET['www.google.com'] = -> r {
       case r.parts[0]
