@@ -18,7 +18,12 @@ class WebResource
       end}
 
     # Cloudflare
-    HostGET['cdnjs.cloudflare.com'] = HostGET['ajax.googleapis.com'] = -> r {r.remoteNode}
+    HostGET['cdnjs.cloudflare.com'] = HostGET['ajax.googleapis.com'] = -> r {
+      if r.env.has_key?('HTTP_TYPE') && r.env['HTTP_TYPE'].match?(/drop/)
+        r.deny
+      else
+        r.remoteNode
+      end}
 
     # Discourse
     PathGET['/clicks/track'] = -> r {[301,{'Location' => r.q['url']},[]]}
