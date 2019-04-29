@@ -1,5 +1,12 @@
 class WebResource
   module HTTP
+    # JS-lib CDNs - allow JS unless explicitly dropped
+    HostGET['cdnjs.cloudflare.com'] = HostGET['ajax.googleapis.com'] = HostGET['www.gstatic.com'] = -> r {
+      if r.env.has_key?('HTTP_TYPE') && r.env['HTTP_TYPE'].match?(/drop/)
+        r.deny
+      else
+        r.remoteNode
+      end}
 
     # BizJournal
     HostGET['media.bizj.us'] = -> r {
@@ -15,14 +22,6 @@ class WebResource
         [301, {'Location' => r.q['url']}, []]
       else
         r.remote
-      end}
-
-    # Cloudflare
-    HostGET['cdnjs.cloudflare.com'] = HostGET['ajax.googleapis.com'] = -> r {
-      if r.env.has_key?('HTTP_TYPE') && r.env['HTTP_TYPE'].match?(/drop/)
-        r.deny
-      else
-        r.remoteNode
       end}
 
     # Discourse
