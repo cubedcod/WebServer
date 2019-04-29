@@ -106,6 +106,9 @@ class WebResource
         [202,{},[]]
       end}
 
+    %w{drive groups news patents}.map{|prod|
+      HostGET[prod+'.google.com'] = -> r {r.remoteNode}}
+
     HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
