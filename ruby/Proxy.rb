@@ -55,7 +55,7 @@ class WebResource
       h = r.headers
       b = r.body
       HTTP.print_header h
-      HTTP.print_body b, h['content-type']
+      HTTP.print_body (h['content-encoding'].to_s.match?(/zip/) ? Zlib::Inflate.inflate(b) : b), h['content-type']
       [s, h, [b]]
     end
 

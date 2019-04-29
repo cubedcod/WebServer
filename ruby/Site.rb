@@ -1,7 +1,7 @@
 class WebResource
   module HTTP
     # JS-lib CDNs - allow JS unless explicitly dropped
-    HostGET['cdnjs.cloudflare.com'] = HostGET['ajax.googleapis.com'] = HostGET['www.gstatic.com'] = HostGET['maps.google.com'] = HostGET['maps.googleapis.com'] = -> r {
+    HostGET['cdnjs.cloudflare.com'] = HostGET['ajax.googleapis.com'] = HostGET['ssl.gstatic.com'] = HostGET['www.gstatic.com'] = HostGET['maps.google.com'] = HostGET['maps.googleapis.com'] = -> r {
       if r.env.has_key?('HTTP_TYPE') && r.env['HTTP_TYPE'].match?(/drop/)
         r.deny
       else
@@ -106,8 +106,12 @@ class WebResource
         [202,{},[]]
       end}
 
-    %w{drive groups news patents}.map{|prod|
-      HostGET[prod+'.google.com'] = -> r {r.remoteNode}}
+    %w{accounts drive groups news patents}.map{|prod|
+      HostGET[prod+'.google.com'] = -> r { r.remoteNode }}
+
+    %w{accounts groups}.map{|p|
+      HostOPTIONS[p+'.google.com'] = -> r { r.OPTIONSthru }
+      HostPOST[p+'.google.com'] = -> r { r.POSTthru }}
 
     HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
     HostGET['www.youtube.com'] = -> r {

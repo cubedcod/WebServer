@@ -220,6 +220,7 @@ class WebResource
     include URIs
 
     def indexHTML
+      puts "HTML #{uri}"
       doc = Nokogiri::HTML.parse readFile
       body = doc.css('body')[0]
       body.add_child "<a id='localUI' href='/ui/local#{HTTP.qs({u: 'https://' + @r['SERVER_NAME'] + @r['REQUEST_URI']})}' style='position: fixed; top: 0; right: 0; z-index: 1001; color: #000; background-color: #fff; font-size: 1.8em'>⌘</a>"

@@ -133,8 +133,6 @@ class WebResource
       else
         puts body
       end
-    rescue ::JSON::ParserError
-      nil
     end
 
     def HTTP.print_header header
