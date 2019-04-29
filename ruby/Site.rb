@@ -1,12 +1,28 @@
 class WebResource
   module HTTP
-    # JS-lib CDNs - allow JS unless explicitly dropped
+    # JS CDN - allow scripts unless explicitly dropped
     HostGET['cdnjs.cloudflare.com'] = HostGET['ajax.googleapis.com'] = HostGET['ssl.gstatic.com'] = HostGET['www.gstatic.com'] = HostGET['maps.google.com'] = HostGET['maps.googleapis.com'] = -> r {
       if r.env.has_key?('HTTP_TYPE') && r.env['HTTP_TYPE'].match?(/drop/)
         r.deny
       else
         r.remoteNode
       end}
+
+    # Video hosts
+    HostOPTIONS['api.vmh.univision.com'] = -> r {r.OPTIONSthru}
+    HostGET['accounts.youtube.com'] = -> r { r.remoteNode }
+    HostGET['www.youtube.com'] = -> r {
+      mode = r.parts[0]
+      if !mode || %w{browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member?(mode)
+        r.remoteNode
+      elsif mode == 'redirect'
+        [301, {'Location' =>  r.q['q']},[]]
+      elsif mode.match? /204$/
+        [204, {'Content-Length' => 0}, []]
+      else
+        r.drop
+      end}
+    HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
 
     # BizJournal
     HostGET['media.bizj.us'] = -> r {
@@ -113,20 +129,6 @@ class WebResource
       HostOPTIONS[p+'.google.com'] = -> r { r.OPTIONSthru }
       HostPOST[p+'.google.com'] = -> r { r.POSTthru }}
 
-    HostGET['accounts.youtube.com'] = -> r { r.remoteNode }
-    HostGET['www.youtube.com'] = -> r {
-      mode = r.parts[0]
-      if !mode || %w{browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member?(mode)
-        r.remoteNode
-      elsif mode == 'redirect'
-        [301, {'Location' =>  r.q['q']},[]]
-      elsif mode.match? /204$/
-        [204, {'Content-Length' => 0}, []]
-      else
-        r.drop
-      end}
-    HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
-
     # Mail.ru
     HostGET['img.imgsmail.ru'] = -> r {r.remoteNode}
 
@@ -171,6 +173,9 @@ class WebResource
     HostGET['lookup.t-mobile.com'] = -> re {[200, {'Content-Type' => 'text/html'}, [re.htmlDocument({re.uri => {'dest' => re.q['origurl'].R}})]]}
 
     # Twitter
+    HostOPTIONS['api.twitter.com'] = -> r {r.OPTIONSthru}
+    HostPOST['api.twitter.com'] = -> r {r.POSTthru}
+
     HostGET['t.co'] = -> r {
       if %w{i}.member? r.parts[0]
         r.deny
