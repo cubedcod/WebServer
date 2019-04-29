@@ -19,3 +19,4 @@ slightly rewrite nonrewritten to jump back out
 subscribe-to-feed UI support
 handle overload of / (recursive?-)subdir triplization
 bubble up HTML-extracted next/prev to HTTP headers https://www.google.com/search?q=corbett+crew+boston&gbv=1&prmd=ivns&ei=OdTEXPS5OLCKggeExqXoDA&start=10&sa=N
+/crt.sectigo.com/SectigoRSADomainValidationSecureServerCA.crt.cache: triplr for application/x-x509-ca-cert missing                                                                                                                                                                                                              GET 200  https://crt.sectigo.com/SectigoRSADomainValidationSecureServerCA.crt
