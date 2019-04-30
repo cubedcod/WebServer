@@ -59,6 +59,7 @@ class WebResource
       else
         z.remoteNode
       end}
+    HostGET['graph.facebook.com']  = -> r {r.remoteNode}
     HostGET['l.facebook.com']  = -> r {[301, {'Location' => r.q['u']},  []]}
     HostGET['l.instagram.com'] = -> r {[301, {'Location' => r.q['u']},  []]}
     PathGET['/safe_image.php'] = -> r {[301, {'Location' => r.q['url']},[]]}
