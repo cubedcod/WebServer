@@ -219,12 +219,12 @@ class WebResource
   module Webize
     include URIs
 
-    def indexHTML
+    def storeHTML
       puts "HTML #{uri}"
       doc = Nokogiri::HTML.parse readFile
       body = doc.css('body')[0]
       body.add_child "<a id='localUI' href='/ui/local#{HTTP.qs({u: 'https://' + @r['SERVER_NAME'] + @r['REQUEST_URI']})}' style='position: fixed; top: 0; right: 0; z-index: 1001; color: #000; background-color: #fff; font-size: 1.8em'>⌘</a>"
-#      body.add_child "<script src='//cdn.jsdelivr.net/npm/eruda'></script><script>eruda.init();</script>"
+      body.add_child "<script src='//cdn.jsdelivr.net/npm/eruda'></script><script>eruda.init();</script>"
       writeFile doc.to_html
       IndexHTML[@r['SERVER_NAME']].do{|indexer| indexer[self] } || []
     end

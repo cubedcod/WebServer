@@ -170,9 +170,9 @@ class WebResource
                 cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # write metadata
                 updates.concat(case mime                                              # update index
                                when /^(application|text)\/(atom|rss|xml)/
-                                 cache.indexFeed
+                                 cache.storeFeed
                                when /^text\/html/
-                                 cache.indexHTML
+                                 cache.storeHTML
                                else
                                  []
                                end || [])

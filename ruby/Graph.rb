@@ -224,8 +224,7 @@ class WebResource
   module Webize
     include MIME
 
-    # index resources on timeline
-    def indexRDF options = {}
+    def storeRDF options = {}
       newResources = []
       # load resource
       g = RDF::Repository.load self, options
@@ -251,7 +250,6 @@ class WebResource
           end
           true}}
 
-      # indexed resources
       newResources
     end
   end

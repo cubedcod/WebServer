@@ -8,22 +8,6 @@ class WebResource
         r.remoteNode
       end}
 
-    # Video hosts
-    HostOPTIONS['api.vmh.univision.com'] = -> r {r.OPTIONSthru}
-    #HostGET['accounts.youtube.com'] = -> r { r.remoteNode }
-    HostGET['www.youtube.com'] = -> r {
-      mode = r.parts[0]
-      if !mode || %w{browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member?(mode)
-        r.remoteNode
-      elsif mode == 'redirect'
-        [301, {'Location' =>  r.q['q']},[]]
-      elsif mode.match? /204$/
-        [204, {'Content-Length' => 0}, []]
-      else
-        r.drop
-      end}
-    HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
-
     # BizJournal
     HostGET['media.bizj.us'] = -> r {
       if r.path.match? /\*/
@@ -143,6 +127,9 @@ class WebResource
         r.remote
       end}
 
+    # MFC
+    HostPOST['www.myfreecams.com'] = -> r {r.POSTthru}
+
     # Mozilla
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
@@ -194,6 +181,9 @@ class WebResource
         re.ext == 'js' ? re.deny : re.remoteNode
       end}
 
+    # Univision
+    HostOPTIONS['api.vmh.univision.com'] = -> r {r.OPTIONSthru}
+    
     # WaPo
     HostGET['www.washingtonpost.com'] = -> r {
       if r.parts[0] == 'resizer'
@@ -204,6 +194,23 @@ class WebResource
 
     # WGBH
     HostGET['wgbh.brightspotcdn.com'] = -> r {r.q.has_key?('url') ? [301, {'Location' => r.q['url']}, []] : r.remoteNode}
+
+    # YouTube
+    #HostGET['accounts.youtube.com'] = -> r { r.remoteNode }
+
+    HostGET['www.youtube.com'] = -> r {
+      mode = r.parts[0]
+      if !mode || %w{browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member?(mode)
+        r.remoteNode
+      elsif mode == 'redirect'
+        [301, {'Location' =>  r.q['q']},[]]
+      elsif mode.match? /204$/
+        [204, {'Content-Length' => 0}, []]
+      else
+        r.drop
+      end}
+
+    HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
 
   end
   module Webize

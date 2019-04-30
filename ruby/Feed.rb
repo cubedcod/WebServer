@@ -320,8 +320,8 @@ class WebResource
 
   module Webize
 
-    def indexFeed
-      ('file:' + localPath).R.indexRDF(:format => :feed, :base_uri => uri)
+    def storeFeed
+      ('file:' + localPath).R.storeRDF(:format => :feed, :base_uri => uri)
     end
 
     def triplrCalendar
