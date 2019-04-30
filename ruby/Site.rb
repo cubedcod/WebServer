@@ -123,7 +123,7 @@ class WebResource
         [202,{},[]]
       end}
 
-    %w{accounts drive groups images news patents}.map{|prod|
+    %w{accounts drive groups images maps news patents}.map{|prod|
       HostGET[prod+'.google.com'] = -> r { r.remoteNode }}
 
     %w{accounts groups}.map{|p|
