@@ -159,8 +159,13 @@ class WebResource
         self.POSTthru
       else
         head = HTTP.unmangle env
-        #HTTP.print_header head
-        HTTP.print_body env['rack.input'].read, head['Content-Type']
+        body = env['rack.input'].read
+        body = if head['Content-Encoding'].to_s.match?(/zip/)
+                 Zlib::Inflate.inflate(body) rescue ''
+               else
+                 body
+               end
+        HTTP.print_body body, head['Content-Type']
         env[:deny] = true
         [202,{},[]]
       end
