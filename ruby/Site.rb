@@ -10,7 +10,7 @@ class WebResource
 
     # Video hosts
     HostOPTIONS['api.vmh.univision.com'] = -> r {r.OPTIONSthru}
-    HostGET['accounts.youtube.com'] = -> r { r.remoteNode }
+    #HostGET['accounts.youtube.com'] = -> r { r.remoteNode }
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
       if !mode || %w{browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member?(mode)
@@ -123,10 +123,10 @@ class WebResource
         [202,{},[]]
       end}
 
-    %w{accounts drive groups images maps news patents}.map{|prod|
+    %w{drive groups images maps news patents}.map{|prod|
       HostGET[prod+'.google.com'] = -> r { r.remoteNode }}
 
-    %w{accounts groups}.map{|p|
+    %w{groups}.map{|p|
       HostOPTIONS[p+'.google.com'] = -> r { r.OPTIONSthru }
       HostPOST[p+'.google.com'] = -> r { r.POSTthru }}
 
