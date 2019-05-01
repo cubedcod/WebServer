@@ -1,40 +1,5 @@
 class WebResource
   module HTTP
-    # JS CDN - allow scripts unless explicitly dropped
-    HostGET['cdnjs.cloudflare.com'] = HostGET['ajax.googleapis.com'] = HostGET['ssl.gstatic.com'] = HostGET['www.gstatic.com'] = HostGET['maps.google.com'] = HostGET['maps.googleapis.com'] = -> r {
-      if r.env.has_key?('HTTP_TYPE') && r.env['HTTP_TYPE'].match?(/drop/)
-        r.deny
-      else
-        r.remoteNode
-      end}
-
-    # BizJournal
-    HostGET['media.bizj.us'] = -> r {
-      if r.path.match? /\*/
-        [301, {'Location' => r.path.split(/\*[^.]+\./).join('.')}, []]
-      else
-        r.remote
-      end}
-
-    # BusinessWire
-    HostGET['cts.businesswire.com'] = -> r {
-      if r.q.has_key? 'url'
-        [301, {'Location' => r.q['url']}, []]
-      else
-        r.remote
-      end}
-
-    # Discourse
-    PathGET['/clicks/track'] = -> r {[301,{'Location' => r.q['url']},[]]}
-
-    # Embedly
-    HostGET['i.embed.ly'] = -> r {
-      if r.path == '/1/display/resize'
-        [301, {'Location' => r.q['url']}, []]
-      else
-        r.deny
-      end
-    }
 
     # Facebook
     HostGET['www.facebook.com'] = -> z {
@@ -48,23 +13,6 @@ class WebResource
     HostGET['l.instagram.com'] = -> r {[301, {'Location' => r.q['u']},  []]}
     PathGET['/safe_image.php'] = -> r {[301, {'Location' => r.q['url']},[]]}
 
-    # Forbes
-    HostGET['thumbor.forbes.com'] = -> r {
-      if r.parts[0] == 'thumbor'
-        [301, {'Location' => 'http' + URI.unescape(r.path.split(/http/)[-1])}, []]
-      else
-        r.remote
-      end}
-
-    # Gatehouse
-    HostGET['www.patriotledger.com'] = HostGET['www.providencejournal.com'] = -> r {
-      if r.parts[0] == 'storyimage' && r.path.match?(/&/)
-        [301, {'Location' => r.path.split('&')[0]},[]]
-      else
-        r.remote
-      end
-    }
-
     # Google
     HostGET['connectivitycheck.gstatic.com'] = -> r {
       if r.path.match? /204$/
@@ -73,94 +21,12 @@ class WebResource
         r.deny
       end}
 
-    HostGET['google.com'] = HostGET['www.google.com'] = -> r {
-      case r.parts[0]
-      when /^(maps|s|search|x?js)$/
-        r.remoteNode
-      when /204$/
-        [204, {'Content-Length' => 0}, []]
-      when 'url'
-        [301, {'Location' => ( r.q['url'] || r.q['q'] )}, []]
-#      when 'recaptcha'
-#        r.remoteNode
-      when 'search'
-        if ENV.has_key? 'https_proxy' # send to DDG to avoid google blackhole
-          [301, {'Location' => 'https://duckduckgo.com/' + r.qs}, []]
-        else
-          r.remoteNode
-        end
-      else
-        r.remoteFiltered
-      end}
-
-    HostGET['www.googleadservices.com'] = -> r {
-      if goto = r.q['adurl']
-        [301, {'Location' => goto}, []]
-      else
-        r.deny
-      end}
-
-    HostPOST['www.google.com'] = -> r {
-      case r.parts[0]
-      when 'recaptcha'
-        r.POSTthru
-      else
-        r.env[:deny] = true
-        [202,{},[]]
-      end}
-
-    %w{drive groups images maps news patents}.map{|prod|
-      HostGET[prod+'.google.com'] = -> r { r.remoteNode }}
-
     %w{groups}.map{|p|
       HostOPTIONS[p+'.google.com'] = -> r { r.OPTIONSthru }
       HostPOST[p+'.google.com'] = -> r { r.POSTthru }}
 
-    # Mail.ru
-    HostGET['img.imgsmail.ru'] = -> r {r.remoteNode}
-
-    # Medium
-    HostGET['medium.com'] = -> r {
-      if %w{_ p}.member? r.parts[0]
-        r.deny
-      elsif r.q.has_key? 'redirecturl'
-        [301, {'Location' => r.q['redirecturl']}, []]
-      else
-        r.remote
-      end}
-
-    # MFC
-    HostPOST['www.myfreecams.com'] = -> r {r.POSTthru}
-
     # Mozilla
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
-
-    # QRZ
-    HostGET['qrz.com'] = HostGET['forums.qrz.com'] = -> r { r.ext == 'gif' ? r.deny : r.remote }
-
-    # Redfin
-    HostGET['www.redfin.com'] = -> r { %w{rift stingray}.member?(r.parts[0]) ? r.deny : r.remoteNode }
-
-    # Reuters
-    HostGET['s1.reutersmedia.net'] = HostGET['s2.reutersmedia.net'] = HostGET['s3.reutersmedia.net'] = HostGET['s4.reutersmedia.net'] = -> r {
-      if r.q.has_key? 'w'
-        q = r.q ; q.delete 'w'
-        [301, {'Location' => r.path + (HTTP.qs q)}, []]
-      else
-        r.remoteFiltered
-      end}
-
-    # SoundCloud
-    HostGET['exit.sc'] = HostGET['w.soundcloud.com'] = -> r {
-      url = r.q['url']
-      url = '//' + url unless url.match? /^(http|\/)/
-      [301, {'Location' => url},[]]}
-
-    # Symantec
-    HostGET['clicktime.symantec.com'] = -> r {[301, {'Location' => r.q['u']},[]]}
-
-    # T-Mobile
-    HostGET['lookup.t-mobile.com'] = -> re {[200, {'Content-Type' => 'text/html'}, [re.htmlDocument({re.uri => {'dest' => re.q['origurl'].R}})]]}
 
     # Twitter
     HostOPTIONS['api.twitter.com'] = -> r {r.OPTIONSthru}
@@ -180,25 +46,8 @@ class WebResource
           graph[Twitter][Link].push (Twitter+'/search?f=tweets&vertical=default&q=' + s.map{|u| 'from:' + u.chomp}.intersperse('+OR+').join).R}
         [200, {'Content-Type' => 'text/html'}, [re.htmlDocument(graph)]]
       else
-        re.ext == 'js' ? re.deny : re.remoteNode
+        re.remoteNode
       end}
-
-    # Univision
-    HostOPTIONS['api.vmh.univision.com'] = -> r {r.OPTIONSthru}
-    
-    # WaPo
-    HostGET['www.washingtonpost.com'] = -> r {
-      if r.parts[0] == 'resizer'
-        [301, {'Location' =>  'https://' + r.path.split(/\/\d+x\d+\//)[-1]},[]]
-      else
-        r.remote
-      end}
-
-    # WGBH
-    HostGET['wgbh.brightspotcdn.com'] = -> r {r.q.has_key?('url') ? [301, {'Location' => r.q['url']}, []] : r.remoteNode}
-
-    # YouTube
-    #HostGET['accounts.youtube.com'] = -> r { r.remoteNode }
 
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
@@ -211,8 +60,6 @@ class WebResource
       else
         r.drop
       end}
-
-    HostGET['youtu.be'] = HostGET['y2u.be'] = -> re {[301,{'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]},[]]}
 
   end
   module Webize
