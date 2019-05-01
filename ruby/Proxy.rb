@@ -97,9 +97,8 @@ class WebResource
 
     def remoteFiltered allowGIF=false
       # filter URIs
-      if %w{bin js pb}.member? ext.downcase # drop name-suffix
+      if %w{bin js pb}.member? ext.downcase
         if cacheFile.exist?
-          puts "#{uri} cache exists, delivering"
           cacheFile.localFile
         else
           deny
@@ -112,12 +111,16 @@ class WebResource
         else
           deny
         end
-      else # filter MIME types
+      else # fetch and inspect
         remoteNode.do{|s,h,b|
-          if s.to_s.match?(/30[1-3]/) || (h['Content-Type'] && h['Content-Type'].match?(/application\/.*mpeg|audio\/|image\/|text\/html|video\/|octet-stream/) && !h['Content-Type'].match?(/^image\/gif/))
+          if s.to_s.match? /30[1-3]/ # redirected
             [s, h, b]
           else
-            deny
+            if h['Content-Type']
+              (h['Content-Type'].match? /image.gif|script/) ? deny : [s, h, b]
+            else
+              deny
+            end
           end}
       end
     end
