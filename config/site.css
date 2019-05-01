@@ -8,7 +8,6 @@
 .bold {font-weight: bold; font-size: 1.1em}
 .container > .name {color: #000; background-color: #fff; font-size: .92em; margin-right: .1em}
 .post {max-width:80ex; border: .08em solid #333; background-color: #080808; color: #fff; border-radius: .3em; margin: .1em}
-:target, :target * {background-color:#0f0 !important; color: #000 !important}
 a {overflow: hidden; text-decoration: none; max-width:32em}
 a.date {float: right; font-weight: normal; font-size:.8em; background-color: #000; color:#888}
 a.id {float: right}
@@ -30,8 +29,9 @@ td {border-width: 0 0 .08em 0; border-style: dotted; border-color: #ccc}
 td.k {text-align: right; white-space: nowrap}
 td.v > a {background-color: #eee; color: #000}
 td.v {padding-left: .1em; max-width: 255ex; overflow: hidden}
-tr[name="content"] > td.v a {background-color: #3f3; color: #000}
-tr[name="content"] > td.v a:visited {background-color: #000; color: #3f3; border: .08em solid #3f3}
+tr[name="content"] > td.v a {padding-left: .1em; background-color: #111; color: #fff; border-color: #3f3; border-width: 0 0 0 .3em; border-style: solid; margin: .1em}
+tr[name="content"] > td.v a:visited {background-color: #000; color: #eee; border-color: #aaa}
+:target, :target * {background-color:#0f0 !important; color: #000 !important}
 .highlight .c { color: #586e75 } /* Comment */
 .highlight .err { color: #93a1a1 } /* Error */
 .highlight .g { color: #93a1a1 } /* Generic */

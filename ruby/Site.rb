@@ -75,12 +75,14 @@ class WebResource
 
     HostGET['google.com'] = HostGET['www.google.com'] = -> r {
       case r.parts[0]
-      when /^(maps|recaptcha|s|search|x?js)$/
+      when /^(maps|s|search|x?js)$/
         r.remoteNode
       when /204$/
         [204, {'Content-Length' => 0}, []]
       when 'url'
         [301, {'Location' => ( r.q['url'] || r.q['q'] )}, []]
+#      when 'recaptcha'
+#        r.remoteNode
       when 'search'
         if ENV.has_key? 'https_proxy' # send to DDG to avoid google blackhole
           [301, {'Location' => 'https://duckduckgo.com/' + r.qs}, []]
