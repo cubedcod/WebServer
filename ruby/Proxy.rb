@@ -96,7 +96,7 @@ class WebResource
     end
 
     def remoteFiltered allowGIF=false
-      # filter URIs
+      # filter on URI
       if %w{bin js pb}.member? ext.downcase
         if cacheFile.exist?
           cacheFile.localFile
@@ -153,6 +153,7 @@ class WebResource
       part = nil
       updates = []
       update = -> url { # updater lambda
+        puts "GET " + url
         begin
           open(url, head) do |response|
             if response.status.to_s.match?(/206/) # partial response

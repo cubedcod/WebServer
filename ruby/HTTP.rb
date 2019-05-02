@@ -43,9 +43,9 @@ class WebResource
                    else
                      ''
                    end
-        location = head['Location'] ? (" -> " + head['Location']) : ""
+        relocation = head['Location'] ? (" ↝ " + head['Location']) : ""
         puts "\e[7m" + (method == 'GET' ? ' ' : '') + method + "\e[" + color + "m "  + status.to_s + "\e[0m " + referrer + ' ' +
-             "\e[" + color + ";7mhttps://" + host + "\e[0m\e[" + color + "m" + path + resource.qs + "\e[0m" + location
+             "\e[" + color + ";7mhttps://" + host + "\e[0m\e[" + color + "m" + path + resource.qs + "\e[0m " + (env['HTTP_TYPE'] || '') + relocation
 
         [status, head, body]} # response
     rescue Exception => e
@@ -124,7 +124,7 @@ class WebResource
     end
 
     def notfound
-      dateMeta # nearby page may exist, look for pointers
+      dateMeta # nearby page may exist, search for pointers
       [404,{'Content-Type' => 'text/html'},[htmlDocument]]
     end
 
@@ -219,7 +219,7 @@ class WebResource
           k
         }.join(underscored ? '_' : '-')
         key = key.downcase if underscored
-        # drop internal headers
+        # strip internal headers
         head[key] = v.to_s unless %w{links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri response script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
       head
     end

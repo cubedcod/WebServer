@@ -1,3 +1,4 @@
+# depended libraries
 %w{
 cgi
 csv
@@ -19,6 +20,7 @@ redcarpet
 shellwords
 }.map{|r|require r}
 
+# this library
 %w{
 URI
 MIME
@@ -30,11 +32,13 @@ Feed
 Image
 Msg
 Proxy
-Site
 Text
 }.map{|i|require_relative i}
 
-# stdlib additions, TODO remove - &. syntax and minor rewrites can facilitate #do replacement
+# site config
+require_relative '../config/site.rb'
+
+# stdlib methods
 class Array
   def head; self[0] end
   def justArray; self end
@@ -42,11 +46,11 @@ class Array
 end
 class Object
   def justArray; [self] end
-  def do; yield self end # non-nil/false args ->run block
+  def do; yield self end # non-(nil|false) arg to block
   def to_time; [Time, DateTime].member?(self.class) ? self : Time.parse(self) end
 end
 class FalseClass
-  def do; self end # no arg exists for block, just yield false/nil
+  def do; self end
 end
 class NilClass
   def justArray; [] end
