@@ -123,7 +123,7 @@ class WebResource
             [s, h, b]
           else
             if h['Content-Type']
-              (h['Content-Type'].match? /image.gif|script/) ? deny : [s, h, b]
+              (h['Content-Type'].match? /image.(bmp|gif)|script/) ? deny : [s, h, b]
             else
               deny
             end
