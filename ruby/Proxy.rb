@@ -160,7 +160,7 @@ class WebResource
       part = nil
       updates = []
       update = -> url { # updater lambda
-        puts "GET " + url
+#        puts "GET " + url
         begin
           open(url, head) do |response|
             if response.status.to_s.match?(/206/) # partial response
