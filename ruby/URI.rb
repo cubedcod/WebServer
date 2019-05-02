@@ -178,14 +178,9 @@ class WebResource < RDF::URI
 
   end
   module HTTP
-
-    # URI to lambda mapping-tables
+    # URI to lambda mapping
     HostGET = {}
     PathGET = {}
-    HostPOST = {}
-    PathPOST = {}
-    HostOPTIONS = {}
-
   end
   module HTML
     include URIs

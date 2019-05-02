@@ -128,9 +128,8 @@ class WebResource
       [404,{'Content-Type' => 'text/html'},[htmlDocument]]
     end
 
-    POSThosts = /(anvato|brightcove).(com|net)$/
+    POSThosts = /(anvato|api.twitter|brightcove).(com|net)$/
     def OPTIONS
-      return HostOPTIONS[host][self] if HostOPTIONS[host]
       if host.match? POSThosts
         self.OPTIONSthru
       else
@@ -153,8 +152,6 @@ class WebResource
     end
 
     def POST
-      return PathPOST[path][self] if PathPOST[path]
-      return HostPOST[host][self] if HostPOST[host]
       if host.match? POSThosts
         self.POSTthru
       else

@@ -81,10 +81,16 @@ class WebResource
     end
 
     def remote
-      if env.has_key? 'HTTP_TYPE'
+      if parts[-1].to_s.match? /^g.*204$/
+        [204, {'Content-Length' => 0}, []]
+      elsif env.has_key? 'HTTP_TYPE'
         case env['HTTP_TYPE']
         when /drop/
-          deny
+          if path.match?('/track') && host.match?(/(bandcamp|soundcloud).com$/)
+            remoteNode
+          else
+            deny
+          end
         when /filter/
           remoteFiltered
         when /thru/
@@ -203,7 +209,7 @@ class WebResource
           update[url.sub /^https/, 'http'] # HTTPS failed, try HTTP
         end
       end
-      # return value to caller
+      # return updates to caller
       if @r # HTTP calling context
         if part
           [206, responseHead, [part]]
@@ -236,6 +242,7 @@ class WebResource
     PathGET['/ui/origin'] = -> r {r.q['u'].do{|u| UI[u.R.host] = true; [302, {'Location' => u}, []]} || r.deny }
     PathGET['/ui/local']  = -> r {r.q['u'].do{|u| UI.delete u.R.host;  [302, {'Location' => u}, []]} || r.deny }
 
+    PathGET['/url'] = -> r { [301, {'Location' => (r.q['url']||r.q['q'])}, []]}
     PathGET['/mu'] = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'},[]]}
 
   end

@@ -8,37 +8,22 @@ class WebResource
       else
         z.remoteNode
       end}
-    HostGET['graph.facebook.com']  = -> r {r.remoteNode}
     HostGET['l.facebook.com']  = -> r {[301, {'Location' => r.q['u']},  []]}
     HostGET['l.instagram.com'] = -> r {[301, {'Location' => r.q['u']},  []]}
-    PathGET['/safe_image.php'] = -> r {[301, {'Location' => r.q['url']},[]]}
 
     # Google
-    HostGET['connectivitycheck.gstatic.com'] = -> r {
-      if r.path.match? /204$/
-        [204, {'Content-Length' => 0}, []]
-      else
-        r.deny
-      end}
-
-    %w{groups}.map{|p|
-      HostOPTIONS[p+'.google.com'] = -> r { r.OPTIONSthru }
-      HostPOST[p+'.google.com'] = -> r { r.POSTthru }}
+    HostGET['www.google.com'] = -> r {%w{async maps search js xjs}.member?(r.parts[0]) ? r.remote : r.deny}
 
     # Mozilla
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # Twitter
-    HostOPTIONS['api.twitter.com'] = -> r {r.OPTIONSthru}
-    HostPOST['api.twitter.com'] = -> r {r.POSTthru}
-
     HostGET['t.co'] = -> r {
       if %w{i}.member? r.parts[0]
         r.deny
       else
         r.remoteNode
       end}
-
     HostGET['twitter.com'] = -> re {
       if re.path == '/'
         graph = {Twitter => {'uri' => Twitter, Link => []}}
@@ -49,6 +34,7 @@ class WebResource
         re.remoteNode
       end}
 
+    # YouTube
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
       if !mode || %w{browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member?(mode)
@@ -87,7 +73,6 @@ class WebResource
           yield s, Image, img.attr('src').to_s.R}}
     end
     TriplrHTML['twitter.com'] = :tweets
-
     IndexHTML['twitter.com'] = -> page { graph = {}; posts = []
       # collect triples
       page.tweets{|s,p,o|
