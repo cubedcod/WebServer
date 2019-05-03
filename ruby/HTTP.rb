@@ -141,7 +141,8 @@ class WebResource
       [404,{'Content-Type' => 'text/html'},[htmlDocument]]
     end
 
-    POSThosts = /(anvato|api.twitter|brightcove|www.google)\.(com|net)$/
+    POSThosts = /(anvato|api.twitter|edge.api.brightcove|www.google)\.(com|net)$/
+
     def OPTIONS
       if host.match? POSThosts
         self.OPTIONSthru
