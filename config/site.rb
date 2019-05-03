@@ -1,6 +1,9 @@
 class WebResource
   module HTTP
 
+    # Cloudflare
+    HostGET['cdnjs.cloudflare.com'] = -> r {r.remoteNode} # bypass JS filtering for this host
+
     # Facebook
     HostGET['www.facebook.com'] = -> z {
       if %w{ajax api connect plugins si tr}.member?(z.parts[0]) || z.path.match?(/reaction/) || z.ext == 'php'
