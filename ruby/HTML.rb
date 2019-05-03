@@ -220,16 +220,20 @@ class WebResource
     include URIs
 
     def storeHTML
-      puts "HTML #{uri}"
       doc = Nokogiri::HTML.parse readFile
       body = doc.css('body')[0]
-      doc.css('header')[0].do{|header|
-        h = header.remove
-        body.add_child h
-      }
-      # link to alternate presentation
+
+      # rearrange doc
+      %w{header nav .masthead}.map{|selection|
+        doc.css(selection).map{|gunk|
+        k = gunk.remove
+        body.add_child k}}
+
+      # link alternate presentation
       body.add_child "<a id='localUI' href='/ui/local#{HTTP.qs({u: 'https://' + @r['SERVER_NAME'] + @r['REQUEST_URI']})}' style='position: fixed; top: 0; right: 0; z-index: 1001; color: #000; background-color: #fff; font-size: 1.8em'>⌘</a>"
-#      body.add_child "<script src='//cdn.jsdelivr.net/npm/eruda'></script><script>eruda.init();</script>"
+
+      # debugger
+      # body.add_child "<script src='//cdn.jsdelivr.net/npm/eruda'></script><script>eruda.init();</script>"
 
       writeFile doc.to_html
       IndexHTML[@r['SERVER_NAME']].do{|indexer| indexer[self] } || []

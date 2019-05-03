@@ -145,7 +145,7 @@ class WebResource
       head.delete 'Host'
       head['User-Agent'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3773.0 Safari/537.36'
       head['Referer'] = 'http://drudgereport.com/' if host.match? /www.(wsj).com$/ # thanks, Matt
-      head.delete 'User-Agent' if %w{t.co}.member? host # don't advertise JS-capability or HTTP header data goes missing
+      head.delete 'User-Agent' if %w{po.st t.co}.member? host # don't advertise JS-capability or HTTP redirect goes missing
       suffix = ext.empty? && host.match?(/reddit.com$/) && !parts.member?('wiki') && !UI[@r['SERVER_NAME']] && '.rss' # format suffix
       url = if @r && !suffix && !(path||'').match?(/[\[\]]/) # preserve locator
               "https://#{host}#{@r['REQUEST_URI']}"
