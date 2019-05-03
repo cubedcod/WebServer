@@ -67,6 +67,19 @@ class WebResource
     end
     alias_method :drop, :deny
 
+    def denyPOST
+      head = HTTP.unmangle env
+      body = env['rack.input'].read
+      body = if head['Content-Encoding'].to_s.match?(/zip/)
+               Zlib::Inflate.inflate(body) rescue ''
+             else
+               body
+             end
+      HTTP.print_body body, head['Content-Type']
+      env[:deny] = true
+      [202,{},[]]
+    end
+
     def environment env = nil
       if env
         @r = env
@@ -128,7 +141,7 @@ class WebResource
       [404,{'Content-Type' => 'text/html'},[htmlDocument]]
     end
 
-    POSThosts = /(anvato|api.twitter|brightcove).(com|net)$/
+    POSThosts = /(anvato|api.twitter|brightcove|www.google)\.(com|net)$/
     def OPTIONS
       if host.match? POSThosts
         self.OPTIONSthru
@@ -153,20 +166,17 @@ class WebResource
 
     def POST
       if host.match? POSThosts
-        self.POSTthru
+        if host=='www.google.com'
+          if path=='/searchbyimage/upload'
+            self.POSTthru
+          else
+            denyPOST
+          end
+        else
+          self.POSTthru
+        end
       else
-        head = HTTP.unmangle env
-#=begin
-        body = env['rack.input'].read
-        body = if head['Content-Encoding'].to_s.match?(/zip/)
-                 Zlib::Inflate.inflate(body) rescue ''
-               else
-                 body
-               end
-        HTTP.print_body body, head['Content-Type']
-#=end
-        env[:deny] = true
-        [202,{},[]]
+        denyPOST
       end
     end
 
