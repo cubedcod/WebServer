@@ -5,6 +5,7 @@ class WebResource
     include URIs
 
     Hosts = {} # track hosts for highlighting
+    HostFirsts = []
 
     def cache?; !(pragma && pragma == 'no-cache') end
 
@@ -22,8 +23,9 @@ class WebResource
         # log request
         color = (if resource.env[:deny]
                  '31'
-                elsif !Hosts.has_key? host # first-time seen host
+                elsif !Hosts.has_key? host # first-seen host
                   Hosts[host] = true
+                  HostFirsts.unshift resource.uri
                   '32'
                 elsif method=='POST'
                   '32'
@@ -135,6 +137,12 @@ class WebResource
     def localNode?
       %w{l [::1] 127.0.0.1 localhost}.member? @r['SERVER_NAME']
     end
+
+    PathGET['/log'] = -> r {
+      graph = {}
+      HostFirsts.map{|uri|
+        graph[uri] = {'uri' => uri, Link => uri.R}}
+      [200, {'Content-Type' => 'text/html'}, [r.htmlDocument(graph)]]}
 
     def notfound
       dateMeta # nearby page may exist, search for pointers
