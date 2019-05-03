@@ -47,15 +47,14 @@ class WebResource
       headers = HTTP.unmangle env
       headers.delete 'Accept-Encoding'
       body = env['rack.input'].read
-#      HTTP.print_header headers
-#      HTTP.print_body body, headers['Content-Type']
+      HTTP.print_header headers
+      HTTP.print_body body, headers['Content-Type']
 
       # response
       r = HTTParty.post url, :headers => headers, :body => body
       s = r.code
       h = r.headers
       b = r.body
-=begin
       body = if h['content-encoding'].to_s.match?(/zip/)
                Zlib::Inflate.inflate(b) rescue ''
              else
@@ -63,7 +62,6 @@ class WebResource
              end
       HTTP.print_header h
       HTTP.print_body body, h['content-type']
-=end
       [s, h, [b]]
     end
 

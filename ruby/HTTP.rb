@@ -141,7 +141,7 @@ class WebResource
       [404,{'Content-Type' => 'text/html'},[htmlDocument]]
     end
 
-    POSThosts = /(anvato|api.twitter|edge.api.brightcove|www.google)\.(com|net)$/
+    POSThosts = /(anvato|api\.(brightcove|twitter)|reddit|www.google)\.(com|net)$/
 
     def OPTIONS
       if host.match? POSThosts
@@ -168,7 +168,7 @@ class WebResource
     def POST
       if host.match? POSThosts
         if host=='www.google.com'
-          if path=='/searchbyimage/upload'
+          if path.match? /recaptcha|searchbyimage/
             self.POSTthru
           else
             denyPOST

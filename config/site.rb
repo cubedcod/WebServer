@@ -12,7 +12,7 @@ class WebResource
     HostGET['l.instagram.com'] = -> r {[301, {'Location' => r.q['u']},  []]}
 
     # Google
-    HostGET['www.google.com'] = -> r {[nil,*%w{aclk async images imghp maps search searchbyimage js webhp xjs}].member?(r.parts[0]) ? r.remote : r.deny}
+    HostGET['www.google.com'] = -> r {[nil,*%w{aclk async images imghp maps recaptcha search searchbyimage js webhp xjs}].member?(r.parts[0]) ? r.remote : r.deny}
 
     # Mozilla
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
