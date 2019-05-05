@@ -129,7 +129,7 @@ class WebResource
       name = container.delete :name
       title = container.delete Title
       color = '#%06x' % (rand 16777216)
-      scale = rand(8) + 1
+      scale = rand(7) + 1
       position = scale * rand(960) / 960.0
 
       # child node(s) represented as Object, array of Object(s) or (URI-indexed) Hash

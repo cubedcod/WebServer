@@ -12,7 +12,7 @@ class WebResource
     def self.call env
       method = env['REQUEST_METHOD']                        # request-method
       return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? method # defined methods
-      query = parseQs env['QUERY_STRING']                   # parse query
+      query = env[:query] = parseQs env['QUERY_STRING']     # parse query
       host = query['host']|| env['HTTP_HOST']|| 'localhost' # lookup hostname
       rawpath = env['REQUEST_PATH'].force_encoding('UTF-8').gsub /[\/]+/, '/' # collapse repeated slashes
       path  = Pathname.new(rawpath).expand_path.to_s        # evaluate path-expression
@@ -80,6 +80,10 @@ class WebResource
       HTTP.print_body body, head['Content-Type']
       env[:deny] = true
       [202,{},[]]
+    end
+
+    def echo
+      [200, {'Content-Type' => 'text/html'}, [htmlDocument]]
     end
 
     def environment env = nil
@@ -205,8 +209,8 @@ class WebResource
     def qs
       if @r && @r['QUERY_STRING'] && !@r['QUERY_STRING'].empty?
         '?' +  @r['QUERY_STRING']
-      elsif        query          && !query.empty?
-        '?' +      query
+      elsif query && !query.empty?
+        '?' + query
       else
         ''
       end
