@@ -225,7 +225,7 @@ class WebResource
       body = doc.css('body')[0]
 
       # rearrange doc
-      %w{.breadcrumb .featured-headlines .header header nav .masthead .top}.map{|selection|
+      %w{.breadcrumb .featured-headlines .header header .masthead .navigation .nav nav .top}.map{|selection|
         doc.css(selection).map{|gunk|
         k = gunk.remove
         body.add_child k}}
