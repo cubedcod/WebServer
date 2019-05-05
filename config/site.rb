@@ -1,5 +1,7 @@
 class WebResource
   module HTTP
+    # BugSnag
+    HostGET['notify.bugsnag.com'] = -> r {r.echo}
 
     # Cloudflare
     HostGET['cdnjs.cloudflare.com'] = -> r {r.remoteNode} # bypass JS filtering for this host

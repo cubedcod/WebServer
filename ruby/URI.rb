@@ -213,10 +213,10 @@ class WebResource < RDF::URI
     def self.urifyHash h
       u = {}
       h.map{|k,v|
-        u[k] = case v.class
-               when Hash
+        u[k] = case v.class.to_s
+               when 'Hash'
                  HTML.urifyHash v
-               when String
+               when 'String'
                  HTML.urifyString v
                else
                  v
