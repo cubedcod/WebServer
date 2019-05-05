@@ -5,8 +5,8 @@ class WebResource
     HostGET['cdnjs.cloudflare.com'] = -> r {r.remoteNode} # bypass JS filtering for this host
 
     # Facebook
-    HostGET['www.facebook.com'] = -> z {
-      if %w{ajax api connect plugins si tr}.member?(z.parts[0]) || z.path.match?(/reaction/) || z.ext == 'php'
+    HostGET['m.facebook.com'] = HostGET['www.facebook.com'] = -> z {
+      if %w{ajax api connect plugins si tr}.member?(z.parts[0]) || z.path.match?(/reaction/)
         z.deny
       else
         z.remoteNode
@@ -15,7 +15,13 @@ class WebResource
     HostGET['l.instagram.com'] = -> r {[301, {'Location' => r.q['u']},  []]}
 
     # Google
-    HostGET['www.google.com'] = -> r {[nil,*%w{aclk async images imghp imgres maps recaptcha search searchbyimage js webhp xjs}].member?(r.parts[0]) ? r.remote : r.deny}
+    HostGET['www.google.com'] = -> r {
+      if r.parts[-1] == 'log204'
+        r.echo
+      else
+        [nil,*%w{aclk async images imghp imgres maps recaptcha search searchbyimage js webhp xjs}].member?(r.parts[0]) ? r.remote : r.deny
+      end
+    }
 
     # Mozilla
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}

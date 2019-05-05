@@ -129,13 +129,14 @@ class WebResource
       name = container.delete :name
       title = container.delete Title
       color = '#%06x' % (rand 16777216)
-      position = rand(38) / 100.0
+      scale = rand(8) + 1
+      position = scale * rand(960) / 960.0
 
       # child node(s) represented as Object, array of Object(s) or (URI-indexed) Hash
       contents = container.delete(Contains).do{|cs| cs.class == Hash ? cs.values : cs}.justArray
 
       multi = contents.size > 1
-      styleC = multi ? "border: .08em solid #{color}; background: repeating-linear-gradient(#{rand 360}deg, #000, #000 #{position}em, #{color} #{position}em, #{color} 1em)" : ''
+      styleC = multi ? "border: .08em solid #{color}; background: repeating-linear-gradient(#{rand 360}deg, #000, #000 #{position}em, #{color} #{position}em, #{color} #{scale}em)" : ''
       styleN = multi ? "background-color: #{color}" : ''
 
       {class: :container, style: styleC,
