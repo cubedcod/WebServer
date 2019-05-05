@@ -65,17 +65,17 @@ class WebResource
       [s, h, [b]]
     end
 
-    def redirectCache
+    def relocation
       hash = (host + (path || '') + qs).sha2
       ('/cache/location/' + hash[0..2] + '/' + hash[3..-1] + '.u').R
     end
 
     def redirect
-      [302, {'Location' => redirectCache.readFile}, []]
+      [302, {'Location' => relocation.readFile}, []]
     end
 
-    def redirection
-      redirectCache.exist?
+    def relocated?
+      relocation.exist?
     end
 
     def remote
@@ -133,8 +133,8 @@ class WebResource
       head = HTTP.unmangle env # request header
       responseHead = {}       # response header
       if @r # HTTP context
-        if redirection
-          location = join(redirectCache.readFile).R
+        if relocated?
+          location = join(relocation.readFile).R
           # redirect caller
           return redirect unless location.host == host && (location.path || '/') == path
         else
@@ -208,40 +208,39 @@ class WebResource
           update[url.sub /^https/, 'http'] # HTTPS failed, try HTTP
         end
       end
-      # return updates to caller
-      if @r # HTTP calling context
+      # return value
+      if @r # HTTP
         if part
           [206, responseHead, [part]]
         elsif cache.exist?
-          if cache.noTransform?
+          if cache.noTransform? # immutable format
             cache.localFile
-          elsif UI[@r['SERVER_NAME']]
+          elsif UI[@r['SERVER_NAME']] # upstream controls format
             cache.localFile
-          else # transformable data
+          else # transform to negotiated format
             graphResponse (updates.empty? ? [cache] : updates)
           end
         else
           notfound
         end
-      else # REPL/shell caller
+      else # REPL/shell
         updates.empty? ? cache : updates
       end
-    rescue OpenURI::HTTPRedirect => re # return redirect-exception as HTTP response
+    rescue OpenURI::HTTPRedirect => re # redirect caller to new location
       updateLocation re.io.meta['location']
     end
 
     def updateLocation location
-      redirectCache.writeFile location
+      relocation.writeFile location
       [302, {'Location' => location}, []]
     end
 
     UI = {'s.ytimg.com' => true}
 
-    # toggle UI provider - local vs origin
+    # toggle UI preference
     PathGET['/ui/origin'] = -> r {r.q['u'].do{|u| UI[u.R.host] = true; [302, {'Location' => u}, []]} || r.deny }
     PathGET['/ui/local']  = -> r {r.q['u'].do{|u| UI.delete u.R.host;  [302, {'Location' => u}, []]} || r.deny }
 
-    PathGET['/url'] = -> r { [301, {'Location' => (r.q['url']||r.q['q'])}, []]}
     PathGET['/mu'] = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'},[]]}
 
   end

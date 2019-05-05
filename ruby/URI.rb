@@ -178,9 +178,13 @@ class WebResource < RDF::URI
 
   end
   module HTTP
-    # URI to lambda mapping
+
+    # URI -> lambda mapping-tables
     HostGET = {}
     PathGET = {}
+
+    PathGET['/url'] = -> r { [301, {'Location' => (r.q['url']||r.q['q'])}, []]}
+
   end
   module HTML
     include URIs
