@@ -29,8 +29,8 @@ td {border-width: 0 0 .08em 0; border-style: dotted; border-color: #ccc}
 td.k {text-align: right; white-space: nowrap}
 td.v > a {background-color: #eee; color: #000}
 td.v {padding-left: .1em; max-width: 255ex; overflow: hidden}
-tr[name="content"] > td.v a {padding-left: .1em; background-color: #111; color: #fff; border-color: #3f3; border-width: 0 0 0 .3em; border-style: solid; border-radius: .2em; margin: .1em}
-tr[name="content"] > td.v a:visited {background-color: #000; color: #eee; border-color: #aaa}
+tr[name="content"] > td.v a         {border-color: #7f3; background-color: #3f3; color: #000; border-width: 0 0 0 .28em; border-style: solid; border-radius: .2em 0 0 .2em}
+tr[name="content"] > td.v a:visited {border-color: #eee; background-color: #f0f0f0; color: #000}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
 .highlight .c { color: #586e75 } /* Comment */
 .highlight .err { color: #93a1a1 } /* Error */

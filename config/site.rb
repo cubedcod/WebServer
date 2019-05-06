@@ -1,7 +1,7 @@
 class WebResource
   module HTTP
 
-    POSThosts = /(anvato|api\.(brightcove|twitter)|(images|www)\.google|reddit|talk.zerohedge)\.(com|net)$/
+    POSThosts = /(anvato|api\.(brightcove|twitter)|(groups|images|www)\.google|reddit|talk.zerohedge)\.(com|net)$/
 
     # BugSnag
     HostGET['notify.bugsnag.com'] = -> r {r.echo}
@@ -24,7 +24,7 @@ class WebResource
       if r.parts[-1] == 'log204'
         r.echo
       else
-        [nil,*%w{aclk async images imghp imgres maps recaptcha search searchbyimage js webhp xjs}].member?(r.parts[0]) ? r.remote : r.deny
+        [nil,*%w{aclk async images imgevent imghp imgres maps recaptcha search searchbyimage js webhp xjs}].member?(r.parts[0]) ? r.remote : r.deny
       end
     }
 
