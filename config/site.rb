@@ -24,7 +24,7 @@ class WebResource
       if r.parts[-1] == 'log204'
         r.echo
       else
-        [nil,*%w{aclk async images imgevent imghp imgres maps recaptcha search searchbyimage js webhp xjs}].member?(r.parts[0]) ? r.remote : r.deny
+        [nil,*%w{aclk async images imgevent imghp imgres logos maps recaptcha search searchbyimage js webhp xjs}].member?(r.parts[0]) ? r.remote : r.deny
       end
     }
 
