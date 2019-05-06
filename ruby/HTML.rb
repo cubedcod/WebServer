@@ -193,19 +193,18 @@ class WebResource
       # strip Javascript URIs
       html.css('a[href]').map{|a| a.remove if a['href'].match? /^javascript/}
 
-      # add CSS background-images to contained image elements
+      # move CSS background-image to img@src
       html.css('[style^="background-image"]').map{|node|
         node['style'].match(/url\('([^']+)'/).do{|url|
           node.add_child "<img src=\"#{url[1]}\">"}}
 
-      # traverse attributes
       html.traverse{|e|
         e.attribute_nodes.map{|a|
-          # move media-source attributes to canonical location
+          # move nonstandard @src to canonical name
           e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-menuimg data-native-src data-original data-src data-src1}.member? a.name
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
 
-          # strip disallowed attributes
+          # strip scripting/styling attrs
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor class height layout ping role style tabindex target width}.member?(a.name)}}
 
       # serialize HTML
@@ -224,16 +223,15 @@ class WebResource
       doc = Nokogiri::HTML.parse readFile
       body = doc.css('body')[0]
 
-      # rearrange doc
+      # move site-chrome to bottom
       %w{.breadcrumb .featured-headlines .header header .masthead .navigation .nav nav .top}.map{|selection|
         doc.css(selection).map{|gunk|
         k = gunk.remove
         body.add_child k}}
 
-      # link alternate presentation
+      # generic-UI link
       body.add_child "<a id='localUI' href='/ui/local#{HTTP.qs({u: 'https://' + @r['SERVER_NAME'] + @r['REQUEST_URI']})}' style='position: fixed; top: 0; right: 0; z-index: 1001; color: #000; background-color: #fff; font-size: 1.8em'>⌘</a>"
-
-      # debugger
+      # debugger link
       # body.add_child "<script src='//cdn.jsdelivr.net/npm/eruda'></script><script>eruda.init();</script>"
 
       writeFile doc.to_html
