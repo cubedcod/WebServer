@@ -223,7 +223,7 @@ class WebResource
       doc = Nokogiri::HTML.parse readFile
       body = doc.css('body')[0]
 
-      # move site-chrome to bottom
+      # move site-chrome to footer
       %w{.breadcrumb .featured-headlines .header header .masthead .navigation .nav nav .top}.map{|selection|
         doc.css(selection).map{|gunk|
         k = gunk.remove
@@ -244,21 +244,22 @@ class WebResource
       # parse HTML
       n = Nokogiri::HTML.parse readFile.to_utf8
 
+      # host-specific triplr
       triplr = TriplrHTML[@r && @r['SERVER_NAME']]
-      if triplr # host-mapped triplr
+      if triplr
         send triplr, &f
       else
         yield uri, Content, HTML.clean(n.css('body').inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
       end
 
+      # <title>
       n.css('title').map{|title| yield uri, Title, title.inner_text }
 
-      # video
+      # <video>
       ['video[src]', 'video > source[src]'].map{|vsel|
         n.css(vsel).map{|v|
           yield uri, Video, v.attr('src').R }}
 
-      # doc-header metadata
       # <link>
       n.css('head link[rel]').map{|m|
         m.attr("rel").do{|k| # predicate
@@ -322,10 +323,8 @@ class WebResource
             yield uri, k, v unless k == :drop
           }}}
 
-      # JSON-LD metadata
-
+      # JSON-LD
       graph = RDF::Graph.new
-      # load doc-fragments to graph
       n.css('script[type="application/ld+json"]').map{|json|
        ast = begin
                ::JSON.parse json.inner_text
@@ -335,7 +334,7 @@ class WebResource
              end
        graph << ::JSON::LD::API.toRdf(ast) rescue puts("JSON-LD toRDF error #{uri}")
       }
-      # emit triples
+      # triples
       graph.each_triple{|s,p,o|
         yield s.to_s, p.to_s, [RDF::Node, RDF::URI].member?(o.class) ? o.R : o.value}
 
