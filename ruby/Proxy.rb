@@ -3,16 +3,14 @@ class WebResource
     OFFLINE = ENV.has_key? 'OFFLINE'
 
     def cacheFile
-      p = path || ''
+      pathname = path || ''
+      pathname = pathname[-1] == '/' ? pathname[0..-2] : pathname # strip trailing slash
       keep_ext = %w{aac atom css html jpeg jpg js m3u8 map mp3 mp4 ogg opus pdf png rdf svg ttf ttl vtt webm webp woff woff2}.member?(ext.downcase) && !host&.match?(/openload|\.wiki/)
-      ((host ? ('/' + host) : '') + (if host&.match?(/google|static|\.redd/) || (qs && !qs.empty?) # mint path
-                     hash = (p + qs).sha2                              # hash upstream path
-                     type = keep_ext ? ext : 'cache'                   # append format-suffix
-                     '/' + hash[0..1] + '/' + hash[1..-1] + '.' + type # distribute to balanced bins
-                    else                                               # preserve upstream path
-                      name = p[-1] == '/' ? p[0..-2] : p               # strip trailing-slash
-                      name + (keep_ext ? '' : '.cache')                # append format-suffix
-                     end)).R env
+      ((host ? ('/' + host) : '') + (if qs && !qs.empty? # hashed query
+                                     [pathname, qs.sha2, keep_ext ? ext : 'cache'].join '.'
+                                    else
+                                      keep_ext ? pathname : (pathname + '.cache')
+                                     end)).R env
     end
 
     def GETthru
