@@ -179,8 +179,8 @@
 .api.gannett-cdn.com
 .api.iheart.com
 .api.pinterest.com
-.apis.google.com
 .apility.net
+.apis.google.com
 .app-measurement.com
 .app-us1.com
 .app.link
@@ -1197,6 +1197,8 @@
 .partnerstack.com
 .patreon.com
 .pay.shopify.com
+.payments-amazon.com
+.payments.amazon.com
 .paypal.com
 .paypalobjects.com
 .pbbl.co
@@ -1378,6 +1380,7 @@
 .rightmessage.com
 .rightnowtech.com
 .ringrevenue.com
+.riskified.com
 .ritogaga.com
 .rkdms.com
 .rlcdn.com
@@ -1857,3 +1860,6 @@
 .zqtk.net
 location.bloomberg.com
 login.bloomberg.com
+ocsrest.ebay.com
+secureir.ebaystatic.com
+signin.ebay.com
