@@ -230,7 +230,7 @@ class WebResource
         body.add_child k}}
 
       # generic-UI link
-      body.add_child "<a id='localUI' href='/ui/local#{HTTP.qs({u: 'https://' + @r['SERVER_NAME'] + @r['REQUEST_URI']})}' style='position: fixed; top: 0; right: 0; z-index: 1001; color: #000; background-color: #fff; font-size: 1.8em'>⌘</a>"
+      body.add_child "<a id='localUI' href='/ui/local#{HTTP.qs({u: 'https://' + @r['SERVER_NAME'] + @r['REQUEST_URI']})}' style='position: fixed; top: 0; right: 0; z-index: 1001; color: #000; font-size: 1.8em'>⌘</a>"
       # debugger link
       # body.add_child "<script src='//cdn.jsdelivr.net/npm/eruda'></script><script>eruda.init();</script>"
 
