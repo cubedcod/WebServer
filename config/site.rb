@@ -1,7 +1,7 @@
 class WebResource
   module HTTP
 
-    POSThosts = /(anvato|api\.(brightcove|twitter)|(android\.clients|groups|images|mail|www)\.google|mirrors.lolinent|reddit|talk.zerohedge)\.(com|net)$/
+    POSThosts = /(anvato|api\.(brightcove|twitter)|(android\.clients|drive|groups|images|mail|www)\.google|mirrors.lolinent|reddit|talk.zerohedge)\.(com|net)$/
 
     # BugSnag
     HostGET['notify.bugsnag.com'] = -> r {r.echo}
