@@ -142,11 +142,6 @@ class WebResource < RDF::URI
     # dirname as string
     def dirname; File.dirname path if path end
 
-    # metadata-file location 
-    def metafile type = 'meta'
-      dir + (dirname[-1] == '/' ? '' : '/') + '.' + basename + '.' + type
-    end
-
     # shell-escaped path
     def shellPath; localPath.force_encoding('UTF-8').sh end
     alias_method :sh, :shellPath

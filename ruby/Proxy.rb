@@ -13,6 +13,10 @@ class WebResource
                                      end)).R env
     end
 
+    def metafile type = 'meta'
+      dir + (dirname[-1] == '/' ? '' : '/') + '.' + basename + '.' + type
+    end
+
     def GETthru
       # request
       url = 'https://' + host + path + qs
