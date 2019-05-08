@@ -65,7 +65,11 @@ class WebResource
 
     def deny
       env[:deny] = true
-      [200, {'Content-Type' => ext=='js' ? 'application/javascript' : 'text/plain'}, []]
+      js = ext == 'js'
+      [200, {'Content-Type' => js ? 'application/javascript' : 'text/html; charset=utf-8'},
+       js ? [] : ["<html><body style='background-color: red; text-align: center'>
+<a href='/allow#{HTTP.qs({u: 'https://' + @r['SERVER_NAME'] + @r['REQUEST_URI']})}' style='color: #fff; font-size: 28em; text-decoration: none; font-weight: normal'>⌘</a>
+</body></html>"]]
     end
     alias_method :drop, :deny
 
