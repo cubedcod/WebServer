@@ -1,7 +1,14 @@
 class WebResource
   module HTTP
 
-    POSThosts = /(anvato|api\.(brightcove|twitter)|(android\.clients|drive|groups|images|mail|www)\.google|mirrors.lolinent|reddit|talk.zerohedge)\.(com|net)$/
+    # Hosts with OPTIONS/POST/PUT capability
+    POSThosts = /(anvato|api\.(brightcove|twitter)|(android\.clients|drive|groups|images|mail|www)\.google|mirrors.lolinent|reddit|soundcloud|talk.zerohedge)\.(com|net)$/
+
+    # upstream user-interface by default
+    UI = {
+      's.ytimg.com' => true,
+      'www.youtube.com' => true,
+    }
 
     # BugSnag
     HostGET['notify.bugsnag.com'] = -> r {r.echo}

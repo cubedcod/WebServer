@@ -237,8 +237,6 @@ class WebResource
       [302, {'Location' => location}, []]
     end
 
-    UI = {'s.ytimg.com' => true}
-
     # toggle UI preference
     PathGET['/ui/origin'] = -> r {r.q['u'].do{|u| UI[u.R.host] = true; [302, {'Location' => u}, []]} || r.deny }
     PathGET['/ui/local']  = -> r {r.q['u'].do{|u| UI.delete u.R.host;  [302, {'Location' => u}, []]} || r.deny }
