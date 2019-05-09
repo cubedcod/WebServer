@@ -19,6 +19,8 @@ class WebResource
       path += '/' if path[-1] != '/' && rawpath[-1] == '/'  # preserve trailing-slash
       env[:Response] = {}; env[:links] = {}                 # init response-headers
       resource = ('//' + host + path).R env                 # bind resource and environment
+
+      #puts "#{method} #{resource}"
       resource.send(method).do{|status,head,body|           # dispatch request
         # log request
         color = (if resource.env[:deny]
