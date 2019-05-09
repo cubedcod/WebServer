@@ -49,6 +49,8 @@ class WebResource
       headers = HTTP.unmangle env
       headers.delete 'Accept-Encoding'
       body = env['rack.input'].read
+
+      puts "->"
       HTTP.print_header headers
       HTTP.print_body body, headers['Content-Type']
 
@@ -62,8 +64,11 @@ class WebResource
              else
                b
              end
+
+      puts "<-"
       HTTP.print_header h
       HTTP.print_body body, h['content-type']
+
       [s, h, [b]]
     end
 
@@ -148,7 +153,7 @@ class WebResource
       head['User-Agent'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3773.0 Safari/537.36'
       head['Referer'] = 'http://drudgereport.com/' if host.match? /www.(wsj).com$/ # thanks, Matt
       head.delete 'User-Agent' if %w{po.st t.co}.member? host # don't advertise JS-capability or HTTP redirect goes missing
-      suffix = ext.empty? && host.match?(/reddit.com$/) && !parts.member?('wiki') && !UI[@r['SERVER_NAME']] && '.rss' # format suffix
+      suffix = ext.empty? && host.match?(/reddit.com$/) && !path.match?(/\/(wiki)/) && !UI[@r['SERVER_NAME']] && '.rss' # format suffix
       url = if @r && !suffix && !(path||'').match?(/[\[\]]/) # preserve locator
               "https://#{host}#{@r['REQUEST_URI']}"
             else # construct locator
@@ -238,8 +243,8 @@ class WebResource
     end
 
     # toggle UI preference
-    PathGET['/ui/origin'] = -> r {r.q['u'].do{|u| UI[u.R.host] = true; [302, {'Location' => u}, []]} || r.deny }
-    PathGET['/ui/local']  = -> r {r.q['u'].do{|u| UI.delete u.R.host;  [302, {'Location' => u}, []]} || r.deny }
+    PathGET['/ui/origin'] = -> r {UI[r.env['SERVER_NAME']] = true; [302, {'Location' => r.q['u'] || '/'}, []]}
+    PathGET['/ui/local']  = -> r {UI.delete r.env['SERVER_NAME'];  [302, {'Location' => r.q['u'] || '/'}, []]}
 
     PathGET['/mu'] = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'},[]]}
 
