@@ -222,6 +222,13 @@ class WebResource
 
   end
   include HTML
+  module HTTP
+
+    # toggle UI choice
+    PathGET['/ui/origin'] = -> r {UI[r.env['SERVER_NAME']] = true; [302, {'Location' => r.q['u'] || '/'}, []]}
+    PathGET['/ui/local']  = -> r {UI.delete r.env['SERVER_NAME'];  [302, {'Location' => r.q['u'] || '/'}, []]}
+
+  end
   module Webize
     include URIs
 

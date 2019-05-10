@@ -207,7 +207,7 @@ class WebResource
         end}
       # update
       immutable = cache? && cache.e && cache.noTransform?
-      #immutable = true
+      immutable = true
       unless immutable || OFFLINE
         begin
           update[url] # HTTPS
@@ -242,10 +242,6 @@ class WebResource
       relocation.writeFile location
       [302, {'Location' => location}, []]
     end
-
-    # toggle UI preference
-    PathGET['/ui/origin'] = -> r {UI[r.env['SERVER_NAME']] = true; [302, {'Location' => r.q['u'] || '/'}, []]}
-    PathGET['/ui/local']  = -> r {UI.delete r.env['SERVER_NAME'];  [302, {'Location' => r.q['u'] || '/'}, []]}
 
     PathGET['/mu'] = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'},[]]}
 
