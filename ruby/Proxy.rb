@@ -165,7 +165,7 @@ class WebResource
       part = nil
       updates = []
       update = -> url { # updater lambda
-#        puts "GET " + url
+        puts "GET " + url
         begin
           open(url, head) do |response|
             if response.status.to_s.match?(/206/) # partial response
@@ -207,6 +207,7 @@ class WebResource
         end}
       # update
       immutable = cache? && cache.e && cache.noTransform?
+      #immutable = true
       unless immutable || OFFLINE
         begin
           update[url] # HTTPS

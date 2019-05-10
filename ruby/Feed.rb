@@ -18,6 +18,17 @@ class WebResource
   module Feed
     include URIs
 
+    def subscribable?
+      case host
+      when /\.reddit.com$/
+        parts[0] == 'r'
+      when /twitter.com$/
+        true
+      else
+        false
+      end
+    end
+
     def feeds
       puts (nokogiri.css '[rel=alternate]').map{|u|join u.attr :href}.uniq
     end

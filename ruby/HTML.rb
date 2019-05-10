@@ -78,7 +78,13 @@ class WebResource
                             ].map{|e|['  ',e,"\n"]}}, "\n\n",
                         {_: :body,
                          c: ["\n", link[:up, '&#9650;'], link[:prev, '&#9664;'], link[:next, '&#9654;'],
-                             ({_: :a, id: :originUI, href: '/ui/origin' + HTTP.qs({u: 'https://' + host + @r['REQUEST_URI']}), c: '⌘'} unless localNode?),
+                             unless localNode?
+                               {id: :toolbox,
+                                c: [if subscribable?
+                                    :subscribe
+                                    end,
+                                    {_: :a, id: :originUI, href: '/ui/origin' + HTTP.qs({u: 'https://' + host + @r['REQUEST_URI']}), c: '⌘'}]}
+                             end,
                              if graph.empty?
                                HTML.kv (HTML.urifyHash @r), @r
                              else
