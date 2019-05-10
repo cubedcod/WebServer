@@ -2,9 +2,11 @@
 class WebResource
   module URIs
 
-    FeedURL={}
+    FeedURL = {}
+
     ConfDir.join('feeds/*.u').R.glob.map{|list|
-      list.lines.map{|u| FeedURL[u] = u.R }}
+      list.lines.map{|u|
+        FeedURL[u] = u.R }}
 
   end
   module HTTP
@@ -19,6 +21,7 @@ class WebResource
     include URIs
 
     def subscribable?
+      return true if host && FeedURL['//' + host + path]
       case host
       when /\.reddit.com$/
         parts[0] == 'r'
