@@ -82,7 +82,7 @@ class WebResource
                                {class: :toolbox,
                                 c: [if subscribable?
                                     s = subscribed?
-                                    {_: :a, id: :subscribe, href: '/' + (s ? 'un' : '') + 'subscribe' + HTTP.qs({u: path}), class: 'subscrib' + (s ? 'ed' : 'able'), c: 'subscribe' + (s ? 'd' : '')}
+                                    {_: :a, id: :subscribe, href: '/' + (s ? 'un' : '') + 'subscribe' + HTTP.qs({u: path}), class: s ? :on : :off, c: 'subscribe' + (s ? 'd' : '')}
                                     end,
                                     {_: :a, id: :originUI, href: '/ui/origin' + HTTP.qs({u: path}), c: '⌘'}]}
                              end,

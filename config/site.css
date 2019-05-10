@@ -3,7 +3,10 @@
 #up, #down {display: block}
 #prev {left:  0}
 #next {right: 0}
-#prev, #next, #up, #down, #originUI {font-size: 2em; padding: .1em; color: #fff}
+#prev, #next, #up, #down, #originUI {font-size: 2em; color: #fff}
+#subscribe {vertical-align: top}
+#subscribe.on  {color: #0f0; background-color: #000; border: .1em solid #0f0}
+#subscribe.off {color: #777; background-color: #000; border: .1em solid #555}
 .toolbox {position: fixed; top: 0; right: 0; z-index: 1}
 .bold {font-weight: bold; font-size: 1.1em}
 .container {border-radius: .2em}
