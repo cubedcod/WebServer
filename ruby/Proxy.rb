@@ -207,7 +207,7 @@ class WebResource
         end}
       # update
       immutable = cache? && cache.e && cache.noTransform?
-      immutable = true
+      #immutable = true
       unless immutable || OFFLINE
         begin
           update[url] # HTTPS

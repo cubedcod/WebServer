@@ -79,7 +79,7 @@ class WebResource
                         {_: :body,
                          c: ["\n", link[:up, '&#9650;'], link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              unless localNode?
-                               {id: :toolbox,
+                               {class: :toolbox,
                                 c: [if subscribable?
                                     :subscribe
                                     end,
