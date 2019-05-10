@@ -46,15 +46,13 @@ class WebResource
         r.remoteNode
       end}
 
-    HostGET['twitter.com'] = -> re {
-      if re.path == '/'
+=begin
         graph = {Twitter => {'uri' => Twitter, Link => []}}
         '/twitter'.R.lines.shuffle.each_slice(16){|s|
           graph[Twitter][Link].push (Twitter+'/search?f=tweets&vertical=default&q=' + s.map{|u| 'from:' + u.chomp}.intersperse('+OR+').join).R}
         [200, {'Content-Type' => 'text/html'}, [re.htmlDocument(graph)]]
-      else
-        re.remoteNode
-      end}
+
+=end
 
     # YouTube
     HostGET['www.youtube.com'] = -> r {
