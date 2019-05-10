@@ -138,7 +138,6 @@ class WebResource
 
     def remoteNode
       head = HTTP.unmangle env # request header
-      responseHead = {}       # response header
 
       if @r # HTTP relocation support
         if relocated?
@@ -150,6 +149,7 @@ class WebResource
         end
       end
 
+      # metadata
       head.delete 'Accept-Encoding'
       head.delete 'Host'
       head['User-Agent'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3773.0 Safari/537.36'
@@ -166,9 +166,10 @@ class WebResource
       cacheMeta = cache.metafile # storage metadata
       part = nil
       updates = []
+      responseHead = {}
 
-
-      update = -> url { # updater lambda
+      # updater
+      update = -> url {
         puts "GET " + url
         begin
           open(url, head) do |response|
@@ -212,8 +213,6 @@ class WebResource
 
       # update resource
       immutable = cache? && cache.e && cache.noTransform?
-      immutable = true
-      env[:feed] = true if cache.feedMIME?
       unless immutable || OFFLINE
         begin
           update[url] # HTTPS
@@ -233,6 +232,7 @@ class WebResource
           elsif UI[@r['SERVER_NAME']] # upstream controls format
             cache.localFile
           else # transform to negotiated format
+            env[:feed] = true if cache.feedMIME?
             graphResponse (updates.empty? ? [cache] : updates)
           end
         else
@@ -241,7 +241,7 @@ class WebResource
       else # REPL/shell
         updates.empty? ? cache : updates
       end
-    rescue OpenURI::HTTPRedirect => re # redirect caller to new location
+    rescue OpenURI::HTTPRedirect => re # redirect caller
       updateLocation re.io.meta['location']
     end
 
