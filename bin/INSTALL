@@ -8,7 +8,7 @@ mkdir -p ~/web/log
 # https://www.alpinelinux.org/
 which apk && su -c 'apk add alpine-sdk graphicsmagick ruby ruby-dev python python3-dev py3-cffi py3-pip openssl-dev rsync libxslt-dev tmux squid'
 # https://www.archlinux.org/
-which pacman && su -c 'pacman -S graphicsmagick git base-devel ruby ruby-rdoc python-pip pkg-config tmux squid make rsync'
+which pacman && su -c 'pacman -S graphicsmagick git base-devel ruby ruby-bundler ruby-rdoc python-pip pkg-config tmux squid make rsync'
 # https://www.debian.org/
 which apt-add-repository && su -c 'apt-get install graphicsmagick git ruby ruby-dev grep file pkg-config libssl-dev libxslt-dev libzip-dev tmux squid make rsync libffi-dev python-pip python-dev'
 # https://termux.com/
