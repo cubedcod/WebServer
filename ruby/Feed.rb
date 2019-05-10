@@ -21,7 +21,11 @@ class WebResource
     include URIs
 
     def subscribable?
+      # feed MIME match
+      return true if env[:feed]
+      # feed URL match
       return true if host && FeedURL['//' + host + path]
+      # host match
       case host
       when /\.reddit.com$/
         parts[0] == 'r'

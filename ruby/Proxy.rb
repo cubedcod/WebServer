@@ -139,7 +139,8 @@ class WebResource
     def remoteNode
       head = HTTP.unmangle env # request header
       responseHead = {}       # response header
-      if @r # HTTP context
+
+      if @r # HTTP relocation support
         if relocated?
           location = join(relocation.readFile).R
           # redirect caller
@@ -148,6 +149,7 @@ class WebResource
           head[:redirect] = false
         end
       end
+
       head.delete 'Accept-Encoding'
       head.delete 'Host'
       head['User-Agent'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3773.0 Safari/537.36'
@@ -164,6 +166,8 @@ class WebResource
       cacheMeta = cache.metafile # storage metadata
       part = nil
       updates = []
+
+
       update = -> url { # updater lambda
         puts "GET " + url
         begin
@@ -205,9 +209,11 @@ class WebResource
             raise # miscellaneous errors
           end
         end}
-      # update
+
+      # update resource
       immutable = cache? && cache.e && cache.noTransform?
-      #immutable = true
+      immutable = true
+      env[:feed] = true if cache.feedMIME?
       unless immutable || OFFLINE
         begin
           update[url] # HTTPS
@@ -216,6 +222,7 @@ class WebResource
           update[url.sub /^https/, 'http'] # HTTPS failed, try HTTP
         end
       end
+
       # return value
       if @r # HTTP
         if part
