@@ -36,6 +36,19 @@ class WebResource
       end
     end
 
+    def subscribed?
+      case host
+      when /reddit.com$/
+        return false if parts.size < 2
+        ('/www.reddit.com/r/' + parts[1] + '/.subscribed').R.exist?
+      when /^twitter.com$/
+        return false if parts.size < 1
+        ('/twitter.com/' + parts[0] + '/.subscribed').R.exist?
+      else
+        false
+      end
+    end
+
     def feeds
       puts (nokogiri.css '[rel=alternate]').map{|u|join u.attr :href}.uniq
     end

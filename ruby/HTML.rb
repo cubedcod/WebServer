@@ -81,9 +81,10 @@ class WebResource
                              unless localNode?
                                {class: :toolbox,
                                 c: [if subscribable?
-                                    :subscribe
+                                    s = subscribed?
+                                    {_: :a, id: :subscribe, href: '/' + (s ? 'un' : '') + 'subscribe' + HTTP.qs({u: path}), class: 'subscrib' + (s ? 'ed' : 'able'), c: 'subscribe' + (s ? 'd' : '')}
                                     end,
-                                    {_: :a, id: :originUI, href: '/ui/origin' + HTTP.qs({u: 'https://' + host + @r['REQUEST_URI']}), c: '⌘'}]}
+                                    {_: :a, id: :originUI, href: '/ui/origin' + HTTP.qs({u: path}), c: '⌘'}]}
                              end,
                              if graph.empty?
                                HTML.kv (HTML.urifyHash @r), @r
