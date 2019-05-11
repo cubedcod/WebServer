@@ -48,7 +48,7 @@ class WebResource
                      ''
                    end
         relocation = head['Location'] ? (" ↝ " + head['Location']) : ""
-        puts "\e[7m" + (method == 'GET' ? ' ' : '') + method + "\e[" + color + "m "  + status.to_s + "\e[0m " + referrer + ' ' +
+        puts "\e[7m" + (method == 'GET' ? '' : method) + "\e[" + color + "m "  + status.to_s + "\e[0m " + referrer + ' ' +
              "\e[" + color + ";7mhttps://" + host + "\e[0m\e[" + color + "m" + path + resource.qs + "\e[0m " + (env['HTTP_TYPE'] || '') + relocation
 
         [status, head, body]} # response

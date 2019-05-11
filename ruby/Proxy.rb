@@ -1,3 +1,4 @@
+# coding: utf-8
 class WebResource
   module HTTP
     OFFLINE = ENV.has_key? 'OFFLINE'
@@ -8,7 +9,7 @@ class WebResource
     PathGET['/allow'] = -> r {
       url = r.q['u']
       if url
-        puts "temporarily allow: https:#{url}"
+        puts "ALLOW https:#{url}"
         Allow[url] = true
         [302, {'Location' => 'https:' + url}, []]
       else
@@ -104,7 +105,7 @@ class WebResource
       elsif env.has_key? 'HTTP_TYPE'
         case env['HTTP_TYPE']
         when /drop/
-          if Allow['//' + env['SERVER_NAME'] + env['REQUEST_URI']] || ((path.match? '/track')&&(host.match? /(bandcamp|soundcloud).com$/))
+          if Allow['//'+env['SERVER_NAME']+env['REQUEST_URI']] || (env['HTTP_REFERER'] && Allow[env['HTTP_REFERER'].sub /^https?:/,'']) || ((path.match? '/track') && (host.match? /(bandcamp|soundcloud).com$/))
             remoteNode
           else
             deny
@@ -183,7 +184,7 @@ class WebResource
 
       # updater
       update = -> url {
-        print " GET "
+        print ' ', '🌎🌏🌍'[rand 3], ' '
         begin
           open(url, head) do |response|
             if response.status.to_s.match?(/206/) # partial response
