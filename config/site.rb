@@ -62,7 +62,11 @@ class WebResource
       elsif mode == 'redirect'
         [301, {'Location' =>  r.q['q']},[]]
       elsif mode.match? /204$/
-        [204, {'Content-Length' => 0}, []]
+        if r.q['a'] == 'autoplay'
+          r.remoteNode
+        else
+          [204, {'Content-Length' => 0}, []]
+        end
       else
         r.drop
       end}
