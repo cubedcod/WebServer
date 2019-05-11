@@ -2,6 +2,19 @@ class WebResource
   module HTTP
     OFFLINE = ENV.has_key? 'OFFLINE'
 
+    # runtime temporarily-allow
+    Allow = {}
+
+    PathGET['/allow'] = -> r {
+      url = r.q['u']
+      if url
+        puts "temporarily allow: https:#{url}"
+        Allow[url] = true
+        [302, {'Location' => 'https:' + url}, []]
+      else
+        r.deny
+      end}
+
     def cacheFile
       pathname = path || ''
       pathname = pathname[-1] == '/' ? pathname[0..-2] : pathname # strip trailing slash
@@ -91,7 +104,7 @@ class WebResource
       elsif env.has_key? 'HTTP_TYPE'
         case env['HTTP_TYPE']
         when /drop/
-          if path.match?('/track') && host.match?(/(bandcamp|soundcloud).com$/)
+          if Allow['//' + env['SERVER_NAME'] + env['REQUEST_URI']] || ((path.match? '/track')&&(host.match? /(bandcamp|soundcloud).com$/))
             remoteNode
           else
             deny

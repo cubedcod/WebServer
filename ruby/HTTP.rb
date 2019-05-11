@@ -70,7 +70,7 @@ class WebResource
       js = ext == 'js'
       [200, {'Content-Type' => js ? 'application/javascript' : 'text/html; charset=utf-8'},
        js ? [] : ["<html><body style='background-color: red; text-align: center'>
-<a href='/allow#{HTTP.qs({u: 'https://' + @r['SERVER_NAME'] + @r['REQUEST_URI']})}' style='color: #fff; font-size: 28em; text-decoration: none; font-weight: normal'>⌘</a>
+<a href='/allow#{HTTP.qs({u: '//' + @r['SERVER_NAME'] + @r['REQUEST_URI']})}' style='color: #fff; font-size: 28em; text-decoration: none; font-weight: normal'>⌘</a>
 </body></html>"]]
     end
     alias_method :drop, :deny
