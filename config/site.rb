@@ -2,7 +2,7 @@ class WebResource
   module HTTP
 
     # Hosts with OPTIONS/POST/PUT capability
-    POSThosts = /(anvato|api\.(brightcove|twitter)|(android.*|clients?[0-9]?|drive|groups|images|mail|www)\.google|mirrors.lolinent|reddit|soundcloud|talk.zerohedge|zillow)\.(com|net)$/
+    POSThosts = /(\.(edu|gov)|(anvato|api\.(brightcove|twitter)|(android.*|clients?[0-9]?|drive|groups|images|mail|www)\.google|mirrors.lolinent|reddit|soundcloud|talk.zerohedge|zillow)\.(com|net))$/
 
     # upstream user-interface by default
     UI = {

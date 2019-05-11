@@ -16,14 +16,29 @@ class WebResource
       nil
     end
 
+    PathGET['/subscribe'] = -> r {
+      url = (r.q['u'] || '/').R
+      url.subscribe
+      [302, {'Location' => url}, []]}
+
+    PathGET['/unsubscribe']  = -> r {
+      url = (r.q['u'] || '/').R
+      url.unsubscribe
+      [302, {'Location' => url}, []]}
+
   end
   module Feed
+
     include URIs
 
+    def feeds
+      puts (nokogiri.css '[rel=alternate]').map{|u|join u.attr :href}.uniq
+    end
+
     def subscribable?
-      # feed MIME match
+      # feed-MIME match
       return true if env[:feed]
-      # feed URL match
+      # feed-URL match
       return true if host && FeedURL['//' + host + path]
       # host match
       case host
@@ -36,21 +51,36 @@ class WebResource
       end
     end
 
+    def subscribe
+      subscriptionFile.e || subscriptionFile.touch
+    end
+
     def subscribed?
       case host
       when /reddit.com$/
         return false if parts.size < 2
-        ('/www.reddit.com/r/' + parts[1] + '/.subscribed').R.exist?
+        subscriptionFile.exist?
       when /^twitter.com$/
         return false if parts.size < 1
-        ('/twitter.com/' + parts[0] + '/.subscribed').R.exist?
+        subscriptionFile.exist?
       else
         false
       end
     end
 
-    def feeds
-      puts (nokogiri.css '[rel=alternate]').map{|u|join u.attr :href}.uniq
+    def subscriptionFile
+      (case host
+       when /reddit.com$/
+         '/www.reddit.com/r/' + parts[1] + '/.subbed'
+       when /^twitter.com$/
+         '/twitter.com/' + parts[0] + '/.following'
+       else
+         '/.global'
+       end).R
+    end
+
+    def unsubscribe
+      subscriptionFile.e && subscriptionFile.node.remove
     end
 
     class Format < RDF::Format

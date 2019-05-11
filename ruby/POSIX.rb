@@ -27,6 +27,7 @@ class WebResource
     end
 
     def touch
+      dir.mkdir
       FileUtils.touch localPath
     end
 
