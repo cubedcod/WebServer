@@ -59,13 +59,10 @@ class WebResource
       case host
       when /reddit.com$/
         return false if parts.size < 2
-        subscriptionFile.exist?
       when /^twitter.com$/
         return false if parts.size < 1
-        subscriptionFile.exist?
-      else
-        false
       end
+      subscriptionFile.exist?
     end
 
     def subscriptionFile
@@ -75,12 +72,12 @@ class WebResource
        when /^twitter.com$/
          '/twitter.com/' + parts[0] + '/.following'
        else
-         '/.global'
+         '/' + [host, *parts, '.subscribed'].join('/')
        end).R
     end
 
     def unsubscribe
-      subscriptionFile.e && subscriptionFile.node.remove
+      subscriptionFile.e && subscriptionFile.node.delete
     end
 
     class Format < RDF::Format
