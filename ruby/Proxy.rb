@@ -259,7 +259,7 @@ class WebResource
     end
 
     def updateLocation location
-      relocation.writeFile location
+      relocation.writeFile location unless host.match? /(google|youtube)\.com$/
       [302, {'Location' => location}, []]
     end
 

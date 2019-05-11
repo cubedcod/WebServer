@@ -2,7 +2,7 @@ class WebResource
   module HTTP
 
     # Hosts with OPTIONS/POST/PUT capability
-    POSThosts = /(\.(edu|gov)|(anvato|api\.(brightcove|twitter)|(android.*|clients?[0-9]?|drive|groups|images|mail|www)\.google|mirrors.lolinent|reddit|soundcloud|talk.zerohedge|zillow)\.(com|net))$/
+    POSThosts = /(\.(edu|gov)|(anvato|api\.(brightcove|twitter)|(android.*|clients?[0-9]?|drive|groups|images|mail|www)\.google|mirrors.lolinent|reddit|soundcloud|youtube|talk.zerohedge|zillow)\.(com|net))$/
 
     # upstream user-interface by default
     UI = {
@@ -31,7 +31,7 @@ class WebResource
       if r.parts[-1] == 'log204'
         r.echo
       else
-        [nil,*%w{aclk async gmail images imgevent imghp imgres logos maps recaptcha s search searchbyimage js webhp xjs}].member?(r.parts[0]) ? r.remote : r.deny
+        [nil,*%w{aclk async gmail images imgevent imghp imgres logos patents maps recaptcha s search searchbyimage js webhp xjs}].member?(r.parts[0]) ? r.remote : r.deny
       end
     }
 
