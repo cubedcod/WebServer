@@ -52,7 +52,9 @@ class WebResource
     end
 
     def subscribe
-      subscriptionFile.e || subscriptionFile.touch
+      return if subscriptionFile.e
+      puts "SUBSCRIBE https:/" + subscriptionFile.dirname
+      subscriptionFile.touch
     end
 
     def subscribed?
