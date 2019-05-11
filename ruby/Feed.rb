@@ -65,10 +65,19 @@ class WebResource
       subscriptionFile.exist?
     end
 
+    def subscriptions
+      case host
+      when /^twitter.com$/
+        '/twitter.com/*/.following'.R.glob.map(&:dir).map(&:basename)
+      else
+        []
+      end
+    end
+
     def subscriptionFile
       (case host
        when /reddit.com$/
-         '/www.reddit.com/r/' + parts[1] + '/.subbed'
+         '/www.reddit.com/r/' + parts[1] + '/.sub'
        when /^twitter.com$/
          '/twitter.com/' + parts[0] + '/.following'
        else

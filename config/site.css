@@ -5,7 +5,7 @@
 #next {right: 0}
 #prev, #next, #up, #down, #originUI {font-size: 2em; color: #fff}
 #subscribe {vertical-align: top}
-#subscribe.on  {color: #000; background-color: #0f0}
+#subscribe.on  {color: #000; background-color: #fff}
 #subscribe.off {color: #777; background-color: #000; border: .1em solid #555}
 .toolbox {position: fixed; top: 0; right: 0; z-index: 1}
 .bold {font-weight: bold; font-size: 1.1em}
@@ -33,8 +33,8 @@ td {border-width: 0 0 .08em 0; border-style: solid; border-color: #555}
 td.k {text-align: right; white-space: nowrap}
 td.v > a {background-color: #eee; color: #000}
 td.v {padding-left: .1em; max-width: 255ex; overflow: hidden}
-tr[name="content"] > td.v a         {border-color: #7f3; background-color: #3f3; color: #000; border-width: 0 0 0 .28em; border-style: solid; border-radius: .2em 0 0 .2em}
-tr[name="content"] > td.v a:visited {border-color: #eee; background-color: #f0f0f0; color: #000}
+tr[name="content"] > td.v a         {background-color: #ddf; color: #000; border-radius: .18em}
+tr[name="content"] > td.v a:visited {background-color: #222; color: #fff}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
 .highlight .c { color: #586e75 } /* Comment */
 .highlight .err { color: #93a1a1 } /* Error */
