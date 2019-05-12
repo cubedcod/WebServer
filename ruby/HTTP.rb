@@ -144,8 +144,10 @@ class WebResource
       end
     end
 
+    LocalAddr = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
+
     def localNode?
-      %w{l [::1] 127.0.0.1 localhost}.member? @r['SERVER_NAME']
+      LocalAddr.member? @r['SERVER_NAME']
     end
 
     PathGET['/log'] = -> r {
