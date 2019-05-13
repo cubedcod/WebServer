@@ -193,7 +193,7 @@ class WebResource
             denyPOST
           end
         when 'www.youtube.com'
-          if env['REQUEST_URI'].match? /ACCOUNT_MENU|comment/
+          if env['REQUEST_URI'].match? /ACCOUNT_MENU|comment|subscribe/
             self.POSTthru
           else
             denyPOST

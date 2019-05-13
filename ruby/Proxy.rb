@@ -162,7 +162,7 @@ class WebResource
           head[:redirect] = false
         end
       end
-
+ 
       # metadata
       head.delete 'Accept-Encoding'
       head.delete 'Host'

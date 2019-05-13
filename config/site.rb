@@ -14,7 +14,7 @@ class WebResource
     HostGET['notify.bugsnag.com'] = -> r {r.echo}
 
     # Cloudflare
-    HostGET['cdnjs.cloudflare.com'] = -> r {r.remoteNode} # bypass JS filtering for this host
+    HostGET['cdnjs.cloudflare.com'] = -> r {r.env['HTTP_TYPE'].match?(/dropURI/) ? r.deny : r.remoteNode}
 
     # Facebook
     HostGET['m.facebook.com'] = HostGET['www.facebook.com'] = -> z {
@@ -46,13 +46,15 @@ class WebResource
         r.remoteNode
       end}
 
-=begin
+    HostGET['twitter.com'] = -> r {
+      if r.path == '/'
+        sources = r.subscriptions.shuffle.each_slice(16){|s|
+          Twitter + '/search?f=tweets&vertical=default&q=' + s.map{|u| 'from:' + u}.intersperse('+OR+').join}
         graph = {Twitter => {'uri' => Twitter, Link => []}}
-        '/twitter'.R.lines.shuffle.each_slice(16){|s|
-          graph[Twitter][Link].push (Twitter+'/search?f=tweets&vertical=default&q=' + s.map{|u| 'from:' + u.chomp}.intersperse('+OR+').join).R}
         [200, {'Content-Type' => 'text/html'}, [re.htmlDocument(graph)]]
-
-=end
+      else
+        r.remote
+      end}
 
     # YouTube
     HostGET['www.youtube.com'] = -> r {
