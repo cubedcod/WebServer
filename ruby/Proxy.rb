@@ -9,6 +9,7 @@ class WebResource
     PathGET['/allow'] = -> r {
       url = r.q['u']
       if url
+        url = url.sub /^https?:/, ''
         puts "ALLOW https:#{url}"
         Allow[url] = true
         [302, {'Location' => 'https:' + url}, []]
