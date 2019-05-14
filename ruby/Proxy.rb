@@ -1,20 +1,6 @@
 # coding: utf-8
 class WebResource
   module HTTP
-    OFFLINE = ENV.has_key? 'OFFLINE'
-
-    Allow = {}
-
-    PathGET['/allow'] = -> r {
-      url = r.q['u']
-      if url
-        url = url.sub /^https?:/, ''
-        puts "allowing #{url}"
-        Allow[url] = true
-        [302, {'Location' => 'https:' + url}, []]
-      else
-        r.deny
-      end}
 
     def cacheFile
       pathname = path || ''
@@ -43,6 +29,8 @@ class WebResource
       b = r.body
       [s, h, [b]]
     end
+
+    OFFLINE = ENV.has_key? 'OFFLINE'
 
    def OPTIONSthru
       # request
