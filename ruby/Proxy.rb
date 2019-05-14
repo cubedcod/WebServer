@@ -148,14 +148,16 @@ class WebResource
         print ' ', '🌎🌏🌍'[rand 3], ' '
         begin
           open(url, head) do |response|
-            if response.status.to_s.match?(/206/) # partial response
+            if response.status.to_s.match?(/206/) # partial content
               response_head = response.meta
               partialContent = response.read
-            else # index and store full response
+            else # handle full-content response
               %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| @r[:Response][k] ||= response.meta[k.downcase] } if @r
               body = response.read
+              body = Zlib::Inflate.inflate body if head['Content-Encoding'].to_s.match? /flate|zip/ # decompress contents
               unless cache.e && cache.readFile == body
-                cache.writeFile body # update cache
+                # update cache
+                cache.writeFile body
                 mime = if response.meta['content-type'] # explicit MIME
                          response.meta['content-type'].split(';')[0]
                        elsif MIMEsuffix[cache.ext]      # file extension
@@ -163,6 +165,7 @@ class WebResource
                        else                             # sniff
                          cache.mimeSniff
                        end
+                # cache metadata TODO survey POSIX extended attributes support
                 cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache'
 
                 # index updates
@@ -179,10 +182,7 @@ class WebResource
           end
         rescue Exception => e
           if e.message.match? /[34]04/
-            # 404
-          elsif e.message.match? /503/
-            puts e.io
-            return [503,{'Content-Type' => 'text/html'}, [503]]
+            # resourced unchanged or missing
           else
             raise # miscellaneous errors
           end
