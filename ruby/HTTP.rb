@@ -92,6 +92,22 @@ class WebResource
       [200, {'Content-Type' => 'text/html'}, [htmlDocument]]
     end
 
+    def entity env, lambda = nil
+      etags = env['HTTP_IF_NONE_MATCH'].do{|m| m.strip.split /\s*,\s*/ }
+      if etags && (etags.include? env[:Response]['ETag'])
+        [304, {}, []] # client has entity
+      else
+        body = lambda ? lambda.call : self # generate
+        if body.class == WebResource # body as resource reference
+          # use Rack file handling
+          (Rack::File.new nil).serving((Rack::Request.new env),body.localPath).do{|s,h,b|
+            [s,h.update(env[:Response]),b]}
+        else
+          [(env[:Status]||200), env[:Response], [body]]
+        end
+      end
+    end
+
     def environment env = nil
       if env
         @r = env

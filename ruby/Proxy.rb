@@ -152,7 +152,7 @@ class WebResource
               response_head = response.meta
               partialContent = response.read
             else # index and store full response
-              %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| @r[:Response][k] ||= response.meta[k.downcase] } if @r # origin-metadata to caller
+              %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| @r[:Response][k] ||= response.meta[k.downcase] } if @r
               body = response.read
               unless cache.e && cache.readFile == body
                 cache.writeFile body # update cache
@@ -163,8 +163,10 @@ class WebResource
                        else                             # sniff
                          cache.mimeSniff
                        end
-                cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # write metadata
-                updates.concat(case mime                                              # update index
+                cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache'
+
+                # index updates
+                updates.concat(case mime
                                when /^(application|text)\/(atom|rss|xml)/
                                  cache.storeFeed
                                when /^text\/html/

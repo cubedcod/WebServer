@@ -148,23 +148,6 @@ class WebResource
   end
   module HTTP
 
-    # conditional file-response
-    def entity env, lambda = nil
-      etags = env['HTTP_IF_NONE_MATCH'].do{|m| m.strip.split /\s*,\s*/ }
-      if etags && (etags.include? env[:Response]['ETag'])
-        [304, {}, []] # client has entity
-      else
-        body = lambda ? lambda.call : self # response body
-        if body.class == WebResource # resource reference
-          # dispatch to Rack file handler
-          (Rack::File.new nil).serving((Rack::Request.new env),body.localPath).do{|s,h,b| # response
-            [s,h.update(env[:Response]),b]} # attach metadata and return
-        else
-          [(env[:Status]||200), env[:Response], [body]]
-        end
-      end
-    end
-
     # file -> HTTP Response
     def localFile
       @r[:Response]['Access-Control-Allow-Origin'] ||= '*'
