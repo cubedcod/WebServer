@@ -154,7 +154,11 @@ class WebResource
             else # handle full-content response
               %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| @r[:Response][k] ||= response.meta[k.downcase] } if @r
               body = response.read
-              body = Zlib::Inflate.inflate body if head['Content-Encoding'].to_s.match? /flate|zip/ # decompress contents
+              puts response.meta['Content-Encoding']
+              if response.meta['Content-Encoding'].to_s.match? /flate|zip/ # decode
+                puts "decoding #{response.meta['Content-Length']} #{response.meta['Content-Encoding']}"
+                body = Zlib::Inflate.inflate body
+              end
               unless cache.e && cache.readFile == body
                 # update cache
                 cache.writeFile body
