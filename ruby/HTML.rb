@@ -221,6 +221,11 @@ class WebResource
 
   end
   include HTML
+  module URIs
+    # hostname to lambda mapping
+    IndexHTML = {}
+    TriplrHTML = {}
+  end
   module HTTP
 
     # toggle UI choice
