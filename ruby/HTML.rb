@@ -143,15 +143,11 @@ class WebResource
 
       # child node(s) represented as Object, array of Object(s) or (URI-indexed) Hash
       contents = container.delete(Contains).do{|cs| cs.class == Hash ? cs.values : cs}.justArray
-
       multi = contents.size > 1
-      styleC = multi ? "border: .08em solid #{color}; background: repeating-linear-gradient(#{rand 360}deg, #000, #000 #{position}em, #{color} #{position}em, #{color} #{scale}em)" : ''
-      styleN = multi ? "background-color: #{color}" : ''
 
-      {class: :container, style: styleC,
-       c: [title ? Markup[Title][title.justArray[0], env, uri.justArray[0]] : ((name && multi) ? ("<span class=name style='#{styleN}'>" + (CGI.escapeHTML name) + "</span>") : ''),
+      {class: :container,
+       c: [title ? Markup[Title][title.justArray[0], env, uri.justArray[0]] : (name ? CGI.escapeHTML(name) : ''),
            contents.map{|c| HTML.value(nil,c,env)}.intersperse(' '),
-           # container metadata
            (HTML.kv(container, env) unless container.empty?)]}}
 
     # table {k => v} -> Markup

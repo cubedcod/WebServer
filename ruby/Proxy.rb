@@ -1,5 +1,5 @@
 # coding: utf-8
-class WebResource
+41;320;0cclass WebResource
   module HTTP
     OFFLINE = ENV.has_key? 'OFFLINE'
 
@@ -106,26 +106,22 @@ class WebResource
       elsif env.has_key? 'HTTP_TYPE'
         case env['HTTP_TYPE']
         when /drop/
-          if Allow['//'+env['SERVER_NAME']+env['REQUEST_URI']] || (env['HTTP_REFERER'] && Allow[env['HTTP_REFERER'].sub /^https?:/,'']) || ((path.match? '/track') && (host.match? /(bandcamp|soundcloud).com$/))
-            remoteNode
-          else
-            deny
-          end
+          drop
         when /filter/
-          remoteFiltered
+          filter
         when /thru/
           self.GETthru
         end
       else
-        remoteNode
+        fetch
       end
     end
 
-    def remoteFiltered
+    def filter
       if %w{bin gif js pb}.member? ext.downcase # blocked suffixes
         deny
       else
-        remoteNode.do{|s,h,b|
+        fetch.do{|s,h,b|
           if s.to_s.match? /30[1-3]/ # redirection
             [s, h, b]
           else
@@ -138,7 +134,7 @@ class WebResource
       end
     end
 
-    def remoteNode
+    def fetch
       head = HTTP.unmangle env # request environment
       head.delete 'Host'
       head.delete 'User-Agent' if %w{po.st t.co}.member? host

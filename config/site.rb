@@ -4,73 +4,24 @@ class WebResource
     # Hosts with OPTIONS/POST/PUT capability
     POSThosts = /(\.(edu|gov)|(anvato|api\.(brightcove|twitter)|(android.*|clients?[0-9]?|drive|groups|images|mail|www)\.google|android.googleapis|mirrors.lolinent|reddit|soundcloud|youtube|talk.zerohedge|zillow)\.(com|net))$/
 
-    # upstream user-interface by default
+    # original-host user-interface preference
     UI = {
       's.ytimg.com' => true,
       'www.youtube.com' => true,
     }
 
-    # BugSnag
-    HostGET['notify.bugsnag.com'] = -> r {r.echo}
-
-    # Cloudflare
-    HostGET['cdnjs.cloudflare.com'] = -> r {r.env['HTTP_TYPE'].match?(/dropURI/) ? r.deny : r.remoteNode}
-
     # Facebook
-    HostGET['m.facebook.com'] = HostGET['www.facebook.com'] = -> z {
-      if %w{ajax api connect plugins si tr}.member?(z.parts[0]) || z.path.match?(/reaction/)
-        z.deny
-      else
-        z.remoteNode
-      end}
     HostGET['l.facebook.com']  = -> r {[301, {'Location' => r.q['u']},  []]}
     HostGET['l.instagram.com'] = -> r {[301, {'Location' => r.q['u']},  []]}
 
-    # Google
-    HostGET['www.google.com'] = -> r {
-      if r.parts[-1] == 'log204'
-        r.echo
-      else
-        [nil,*%w{aclk async gmail images imgevent imghp imgres logos patents maps recaptcha s search searchbyimage js webhp xjs}].member?(r.parts[0]) ? r.remote : r.deny
-      end
-    }
-
-    # Mozilla
-    HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
-
-    # Twitter
-    HostGET['t.co'] = -> r {
-      if %w{i}.member? r.parts[0]
-        r.deny
-      else
-        r.remoteNode
-      end}
-
     HostGET['twitter.com'] = -> r {
       if r.path == '/'
-        sources = r.subscriptions.shuffle.each_slice(16){|s|
-          Twitter + '/search?f=tweets&vertical=default&q=' + s.map{|u| 'from:' + u}.intersperse('+OR+').join}
-        graph = {Twitter => {'uri' => Twitter, Link => []}}
-        [200, {'Content-Type' => 'text/html'}, [re.htmlDocument(graph)]]
+        sources = r.subscriptions.shuffle.each_slice(16){|s| Twitter + '/search?f=tweets&vertical=default&q=' + s.map{|u| 'from:' + u}.intersperse('+OR+').join } # source URI
+        [200, {'Content-Type' => 'text/html'}, [re.htmlDocument({Twitter => {'uri' => Twitter, Link => sources}})]]
+      elsif r.path == '/new'
+        
       else
         r.remote
-      end}
-
-    # YouTube
-    HostGET['www.youtube.com'] = -> r {
-      mode = r.parts[0]
-      if !mode || %w{browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member?(mode)
-        r.remoteNode
-      elsif mode == 'redirect'
-        [301, {'Location' =>  r.q['q']},[]]
-      elsif mode.match? /204$/
-        if r.q['a'] == 'autoplay'
-          r.remoteNode
-        else
-          [204, {'Content-Length' => 0}, []]
-        end
-      else
-        r.drop
       end}
 
   end
@@ -98,7 +49,9 @@ class WebResource
         tweet.css('img').map{|img|
           yield s, Image, img.attr('src').to_s.R}}
     end
+
     TriplrHTML['twitter.com'] = :tweets
+
     IndexHTML['twitter.com'] = -> page { graph = {}; posts = []
       # collect triples
       page.tweets{|s,p,o|
