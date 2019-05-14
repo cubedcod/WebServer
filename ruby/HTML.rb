@@ -145,8 +145,8 @@ class WebResource
       contents = container.delete(Contains).do{|cs| cs.class == Hash ? cs.values : cs}.justArray
       multi = contents.size > 1
 
-      {class: :container,
-       c: [title ? Markup[Title][title.justArray[0], env, uri.justArray[0]] : (name ? CGI.escapeHTML(name) : ''),
+      {class: :container, style: multi ? "border: .08em solid #{color}; background: repeating-linear-gradient(#{rand 360}deg, #000, #000 #{position}em, #{color} #{position}em, #{color} #{scale}em)" : '',
+       c: [title ? Markup[Title][title.justArray[0], env, uri.justArray[0]] : (name ? {_: :span, class: :name, c: CGI.escapeHTML(name), style: multi ? "background-color: #{color}" : ''} : ''),
            contents.map{|c| HTML.value(nil,c,env)}.intersperse(' '),
            (HTML.kv(container, env) unless container.empty?)]}}
 
