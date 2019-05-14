@@ -177,7 +177,8 @@ class WebResource
                                when /^(application|text)\/(atom|rss|xml)/
                                  cache.storeFeed
                                when /^text\/html/
-                                 cache.storeHTML
+                                 # site-specific indexer
+                                 IndexHTML[@r['SERVER_NAME']].do{|indexer| indexer[cache] } || []
                                else
                                  []
                                end || [])

@@ -230,7 +230,7 @@ class WebResource
   end
   module Webize
     include URIs
-
+=begin
     def storeHTML
       doc = Nokogiri::HTML.parse readFile
       body = doc.css('body')[0]
@@ -247,9 +247,8 @@ class WebResource
       # body.add_child "<script src='//cdn.jsdelivr.net/npm/eruda'></script><script>eruda.init();</script>"
 
       writeFile doc.to_html
-      IndexHTML[@r['SERVER_NAME']].do{|indexer| indexer[self] } || []
     end
-
+=end
     # HTML -> RDF
     def triplrHTML &f
 
