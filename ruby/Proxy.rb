@@ -155,13 +155,19 @@ class WebResource
             else # handle full-content response
               %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| @r[:Response][k] ||= response.meta[k.downcase] } if @r
               body = response.read
-              if response.meta['content-encoding'].to_s.match? /flate|zip/ # decode
+
+              puts "decoder #{head['Accept-Encoding']} -> #{response.meta['content-encoding']}" if response.meta['content-encoding']
+              case response.meta['content-encoding'].to_s
+              when /^br(otli)?$/
+                body = Brotli.inflate body
+              when /gzip/
+                body = Zlib::GzipReader.new StringIO.new body
+              when /flate|zip/
                 body = Zlib::Inflate.inflate body
-              elsif response.meta['content-encoding'].to_s.match? /^br$/
-                
               end
+
+              # update cache
               unless cache.e && cache.readFile == body
-                # update cache
                 cache.writeFile body
                 mime = if response.meta['content-type'] # explicit MIME
                          response.meta['content-type'].split(';')[0]
