@@ -236,6 +236,7 @@ class WebResource
   module Webize
     include URIs
 =begin
+# TODO transform HTML at response time 
     def storeHTML
       doc = Nokogiri::HTML.parse readFile
       body = doc.css('body')[0]

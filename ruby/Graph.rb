@@ -206,14 +206,13 @@ class WebResource
          r.parts.map{|p|p.split '%23'}].flatten.map{|name|
           cursor[Type] ||= Container.R
           cursor[Contains] ||= {}
-           # advance cursor to node, creating as needed
+           # advance cursor
           cursor = cursor[Contains][name] ||= {name: name, Type => Container.R}}
 
-        # place data in named-graph
-        if !r.fragment # graph-document itself
+        if !r.fragment # named-graph
           resource.map{|k,v|
             cursor[k] = cursor[k].justArray.concat v.justArray}
-        else # graph-doc contained resource
+        else # contained node
           cursor[Contains] ||= {}
           cursor[Contains][r.fragment] = resource
         end}

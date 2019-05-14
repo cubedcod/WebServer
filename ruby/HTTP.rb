@@ -169,7 +169,9 @@ class WebResource
     PathGET['/log'] = -> r {
       graph = {}
       HostFirsts.map{|uri|
-        graph[uri] = {'uri' => uri, Link => uri.R}}
+        u = uri.R
+        path = '/' + u.host.split('.').reverse.map{|n|n.split '-'}.flatten.join('/')
+        graph[path] = {'uri' => path, Link => u}}
       [200, {'Content-Type' => 'text/html'}, [r.htmlDocument(graph)]]}
 
     def notfound
@@ -208,7 +210,7 @@ class WebResource
           else
             denyPOST
           end
-        when 'www.youtube.com'
+        when /youtube.com$/
           if env['REQUEST_URI'].match? /ACCOUNT_MENU|comment|subscribe/
             self.POSTthru
           else
