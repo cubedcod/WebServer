@@ -14,6 +14,7 @@ class WebResource
     HostGET['l.facebook.com']  = -> r {[301, {'Location' => r.q['u']},  []]}
     HostGET['l.instagram.com'] = -> r {[301, {'Location' => r.q['u']},  []]}
     HostGET['s.yimg.com'] = -> r {r.fetch}
+
     HostGET['twitter.com'] = -> r {
       if r.path == '/'
         sources = r.subscriptions.shuffle.each_slice(16){|s| Twitter + '/search?f=tweets&vertical=default&q=' + s.map{|u| 'from:' + u}.intersperse('+OR+').join } # source URI

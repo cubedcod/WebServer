@@ -12,17 +12,16 @@ class WebResource
     def self.call env
       method = env['REQUEST_METHOD']                        # request-method
       return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? method # defined methods
-      query = env[:query] = parseQs env['QUERY_STRING']     # parse query
-      host = query['host']|| env['HTTP_HOST']|| 'localhost' # lookup hostname
-      rawpath = env['REQUEST_PATH'].force_encoding('UTF-8').gsub /[\/]+/, '/' # collapse repeated slashes
-      path  = Pathname.new(rawpath).expand_path.to_s        # evaluate path-expression
+      query = env[:query] = parseQs env['QUERY_STRING']     # query
+      host = env['HTTP_HOST']|| 'localhost'                 # host name
+      rawpath = env['REQUEST_PATH'].force_encoding('UTF-8').gsub /[\/]+/, '/' # collapse consecutive path-sep chars
+      path  = Pathname.new(rawpath).expand_path.to_s        # evaluate path expression
       path += '/' if path[-1] != '/' && rawpath[-1] == '/'  # preserve trailing-slash
-      env[:Response] = {}; env[:links] = {}                 # init response-headers
-      resource = ('//' + host + path).R env                 # bind resource and environment
-
-      #puts "#{method} #{resource}"
-      resource.send(method).do{|status,head,body|           # dispatch request
-        # log request
+      resource = ('//' + host + path).R env                 # request environment
+      env[:Response] = {}; env[:links] = {}                 # response environment
+      # dispatch request
+      resource.send(method).do{|status,head,body|
+        # log to console
         color = (if resource.env[:deny]
                  '31'
                 elsif !Hosts.has_key? host # first-seen host
