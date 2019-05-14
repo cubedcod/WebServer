@@ -1,6 +1,7 @@
 # coding: utf-8
 class WebResource
   module POSIX
+
     # grepPattern -> file(s)
     def grep q
       env[:grep] = true
@@ -21,8 +22,10 @@ class WebResource
       `#{cmd} | head -n 1024`.lines.map{|path|
         POSIX.fromRelativePath path.chomp}
     end
+
   end
   module HTML
+
     def htmlGrep graph, q
       wordIndex = {}
       # tokenize
@@ -47,8 +50,10 @@ class WebResource
       graph['#abstracts'] = {Abstract => HTML.render({_: :style, c: wordIndex.values.map{|i|
                                                         ".w#{i} {background-color: #{'#%06x' % (rand 16777216)}; color: white}\n"}})}
     end
+
   end
   module Webize
+
     def triplrArchive &f;     yield uri, Type, (Stat+'Archive').R; triplrFile &f end
     def triplrAudio &f;       yield uri, Type, Sound.R; triplrFile &f end
     def triplrDataFile &f;    yield uri, Type, (Stat+'DataFile').R; triplrFile &f end

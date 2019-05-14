@@ -121,29 +121,16 @@ class WebResource
       end
     end
 
-    def remoteFiltered allowGIF=false
-      # filter on URI
-      if %w{bin js pb}.member? ext.downcase
-        if cacheFile.exist?
-          cacheFile.localFile
-        else
-          deny
-        end
-      elsif %w{css dash html ico jpg jpeg json key ogg m3u8 m4a mp3 mp4 mpd pdf png svg ts vtt webm webp}.member? ext.downcase # allow name-suffix
-        remoteNode
-      elsif ext == 'gif'
-        if allowGIF || qs.empty?
-          remoteNode
-        else
-          deny
-        end
-      else # fetch and inspect
+    def remoteFiltered
+      if %w{bin gif js pb}.member? ext.downcase # blocked suffixes
+        deny
+      else
         remoteNode.do{|s,h,b|
-          if s.to_s.match? /30[1-3]/ # redirected
+          if s.to_s.match? /30[1-3]/ # redirection
             [s, h, b]
           else
-            if h['Content-Type']
-              (h['Content-Type'].match? /image.(bmp|gif)|script/) ? deny : [s, h, b]
+            if h['Content-Type'] && !h['Content-Type'].match?(/image.(bmp|gif)|script/)
+              [s, h, b]
             else
               deny
             end
@@ -152,45 +139,35 @@ class WebResource
     end
 
     def remoteNode
-      head = HTTP.unmangle env # request header
+      head = HTTP.unmangle env # request environment
+      head.delete 'Host'
+      head.delete 'User-Agent' if %w{po.st t.co}.member? host
+      response_head = {}       # response environment
 
-      if @r # HTTP relocation support
+      if @r # redirector
         if relocated?
           location = join(relocation.readFile).R
-          # redirect caller
           return redirect unless location.host == host && (location.path || '/') == path
         else
           head[:redirect] = false
         end
       end
- 
-      # metadata
-      head.delete 'Accept-Encoding'
-      head.delete 'Host'
-      head['User-Agent'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3773.0 Safari/537.36'
-      head['Referer'] = 'http://drudgereport.com/' if host.match? /www.(wsj).com$/ # thanks, Matt
-      head.delete 'User-Agent' if %w{po.st t.co}.member? host # don't advertise JS-capability or HTTP redirect goes missing
-      suffix = ext.empty? && host.match?(/reddit.com$/) && !path.match?(/\/(wiki)/) && !UI[@r['SERVER_NAME']] && '.rss' # format suffix
-      url = if @r && !suffix && !(path||'').match?(/[\[\]]/) # preserve locator
-              "https://#{host}#{@r['REQUEST_URI']}"
-            else # construct locator
-              'https://' + host + (path||'').gsub('[','%5B').gsub(']','%5D') + (suffix||'') + qs
-            end
-      cache = cacheFile # storage pointer
+
+      # storage naming
+      cache = cacheFile
+      cacheMeta = cache.metafile
       head["If-Modified-Since"] = cache.mtime.httpdate if cache.e
-      cacheMeta = cache.metafile # storage metadata
-      part = nil
-      updates = []
-      responseHead = {}
 
       # updater
+      partialContent = nil
+      updates = []
       update = -> url {
         print ' ', '🌎🌏🌍'[rand 3], ' '
         begin
           open(url, head) do |response|
             if response.status.to_s.match?(/206/) # partial response
-              responseHead = response.meta
-              part = response.read
+              response_head = response.meta
+              partialContent = response.read
             else # index and store full response
               %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| @r[:Response][k] ||= response.meta[k.downcase] } if @r # origin-metadata to caller
               body = response.read
@@ -217,7 +194,7 @@ class WebResource
           end
         rescue Exception => e
           if e.message.match? /[34]04/
-            # not-modified/found handled in normal control-flow
+            # 404
           elsif e.message.match? /503/
             puts e.io
             return [503,{'Content-Type' => 'text/html'}, [503]]
@@ -226,21 +203,24 @@ class WebResource
           end
         end}
 
-      # update resource
+      # refresh cache
       immutable = cache? && cache.e && cache.noTransform?
       unless immutable || OFFLINE
+        # resource location
+        suffix = ext.empty? && host.match?(/reddit.com$/) && !UI[@r['SERVER_NAME']] && '.rss'
+        url = 'https://' + host + (path||'') + (suffix||'') + qs 
         begin
-          update[url] # HTTPS
+          update[url]
         rescue Exception => e
-          raise if e.class == OpenURI::HTTPRedirect # redirect
-          update[url.sub /^https/, 'http'] # HTTPS failed, try HTTP
+          raise if e.class == OpenURI::HTTPRedirect # follow redirection
+          update[url.sub /^https/, 'http']          # HTTPS -> HTTP downgrade and retry
         end
       end
 
       # return value
       if @r # HTTP
-        if part
-          [206, responseHead, [part]]
+        if partialContent
+          [206, response_head, [partialContent]]
         elsif cache.exist?
           if cache.noTransform? # immutable format
             cache.localFile
