@@ -1,10 +1,13 @@
 #!/bin/sh
-iptables  -A OUTPUT -p udp --dport 443 -j DROP
-iptables  -A OUTPUT -p udp --dport 80 -j DROP
-iptables  -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8082 -m owner ! --uid-owner $1
-iptables  -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1
-ip6tables -A OUTPUT -p udp --dport 443 -j DROP
-ip6tables -A OUTPUT -p udp --dport 80 -j DROP
-ip6tables -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8082 -m owner ! --uid-owner $1
-ip6tables -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1
 
+# drop UDP (until QUIC/HTTP3 support lands in Squid) 
+iptables  -A OUTPUT -p udp --dport 80 -j DROP
+ip6tables -A OUTPUT -p udp --dport 80 -j DROP
+iptables  -A OUTPUT -p udp --dport 443 -j DROP
+ip6tables -A OUTPUT -p udp --dport 443 -j DROP
+
+# route port 80 and 443 to transparent-proxy high-ports
+iptables  -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8082 -m owner ! --uid-owner $1
+ip6tables -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8082 -m owner ! --uid-owner $1
+iptables  -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1
+ip6tables -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1

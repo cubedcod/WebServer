@@ -1,0 +1,3 @@
+#!/usr/bin/env ruby
+require_relative '../ruby/index'
+puts WebResource.send ARGV[0]
