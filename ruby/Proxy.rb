@@ -1,16 +1,15 @@
 # coding: utf-8
-41;320;0cclass WebResource
+class WebResource
   module HTTP
     OFFLINE = ENV.has_key? 'OFFLINE'
 
-    # runtime temporarily-allow
     Allow = {}
 
     PathGET['/allow'] = -> r {
       url = r.q['u']
       if url
         url = url.sub /^https?:/, ''
-        puts "ALLOW https:#{url}"
+        puts "allowing #{url}"
         Allow[url] = true
         [302, {'Location' => 'https:' + url}, []]
       else
