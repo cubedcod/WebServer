@@ -236,7 +236,8 @@ class WebResource
     end
 
     def updateLocation location
-      relocation.writeFile location unless host.match? /(google|youtube)\.com$/
+      # TODO declare non-301/permcache somewhere better than here. 
+      relocation.writeFile location unless host.match? /(google|soundcloud|youtube)\.com$/
       [302, {'Location' => location}, []]
     end
 
