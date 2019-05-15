@@ -155,7 +155,6 @@ class WebResource
               body = response.read
 
               # decompress
-              puts "decoder #{head['Accept-Encoding']} -> #{response.meta['content-encoding']}" if response.meta['content-encoding']
               case response.meta['content-encoding'].to_s
               when /^br(otli)?$/
                 body = Brotli.inflate body

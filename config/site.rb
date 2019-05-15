@@ -35,10 +35,12 @@ class WebResource
       'www.youtube.com' => true,
     }
 
+    # allow all JS on CDN
+    HostGET['ajax.googleapis.com'] = HostGET['cdnjs.cloudflare.com'] = HostGET['s.yimg.com'] = -> r {r.fetch}
+
     # Facebook
     HostGET['l.facebook.com']  = -> r {[301, {'Location' => r.q['u']},  []]}
     HostGET['l.instagram.com'] = -> r {[301, {'Location' => r.q['u']},  []]}
-    HostGET['s.yimg.com'] = -> r {r.fetch}
 
     HostGET['twitter.com'] = -> r {
       if r.path == '/'
