@@ -19,8 +19,11 @@ class WebResource
           denyPOST
         end
       when 'youtubei.googleapis.com'
-        puts :youtube
-        self.POSTthru unless path.match? /\/log/
+        if path.match? /\/log/
+          denyPOST
+        else
+          self.POSTthru
+        end
       else
         self.POSTthru
       end
