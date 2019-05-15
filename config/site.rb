@@ -57,18 +57,10 @@ class WebResource
         r.fetch
       elsif mode == 'redirect'
         [301, {'Location' =>  r.q['q']},[]]
-      elsif mode.match? /204$/
-        if r.q['a'] == 'autoplay'
-          r.fetch
-        else
-          [204, {'Content-Length' => 0}, []]
-        end
       else
         r.drop
       end}
-    HostGET['youtubei.googleapis.com'] = -> r {
-      r.fetch
-    }
+    HostGET['youtubei.googleapis.com'] = -> r {r.fetch}
 
   end
   module Webize

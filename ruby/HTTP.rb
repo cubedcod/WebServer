@@ -118,6 +118,7 @@ class WebResource
     alias_method :env, :environment
 
     def GET
+      return [204,{'Content-Length'=>0},[]] if path.match? /204$/
       return PathGET[path][self] if PathGET[path] # path lambda
       return HostGET[host][self] if HostGET[host] # host lambda
       local || remote

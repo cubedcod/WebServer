@@ -23,7 +23,7 @@ div,td {padding: 0}
 h1,h2,h3,h4,h5,h6, a.title, a.link, div.thumb {background-color: #fff; color: #000}
 img, video {max-width: 100%}
 img.thumb, svg {max-width: 28em}
-p {max-width: 78ex}
+p {max-width: 78ex; border: .08em solid #555; margin: .1em}
 pre {white-space: pre-wrap}
 table {border: 1px solid #eee}
 table, div, a {display: inline-block}

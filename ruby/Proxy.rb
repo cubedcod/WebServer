@@ -88,9 +88,7 @@ class WebResource
     end
 
     def remote
-      if parts[-1].to_s.match? /^g.*204$/
-        [204, {'Content-Length' => 0}, []]
-      elsif env.has_key? 'HTTP_TYPE'
+      if env.has_key? 'HTTP_TYPE'
         case env['HTTP_TYPE']
         when /drop/
           drop
