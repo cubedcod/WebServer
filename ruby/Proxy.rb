@@ -121,10 +121,10 @@ class WebResource
 
     def fetch
       head = HTTP.unmangle env # request environment
-      head.delete 'Accept-Encoding'
+      response_head = {}      # response environment
+      #head.delete 'Accept-Encoding'
       head.delete 'Host'
       head.delete 'User-Agent' if %w{po.st t.co}.member? host
-      response_head = {}       # response environment
 
       if @r # redirector
         if relocated?
@@ -135,7 +135,7 @@ class WebResource
         end
       end
 
-      # storage naming
+      # storage pointer
       cache = cacheFile
       cacheMeta = cache.metafile
       head["If-Modified-Since"] = cache.mtime.httpdate if cache.e
@@ -146,14 +146,15 @@ class WebResource
       update = -> url {
         print ' ', '🌎🌏🌍'[rand 3], ' '
         begin
-          open(url, head) do |response|
-            if response.status.to_s.match?(/206/) # partial content
+          open(url, head) do |response| # request
+            if response.status.to_s.match?(/206/) # partial response
               response_head = response.meta
               partialContent = response.read
-            else # handle full-content response
+            else # full-content response
               %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| @r[:Response][k] ||= response.meta[k.downcase] } if @r
               body = response.read
 
+              # decompress
               puts "decoder #{head['Accept-Encoding']} -> #{response.meta['content-encoding']}" if response.meta['content-encoding']
               case response.meta['content-encoding'].to_s
               when /^br(otli)?$/

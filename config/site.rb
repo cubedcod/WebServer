@@ -29,7 +29,7 @@ class WebResource
       end
     end
 
-    # original-host user-interface preference
+    # upstream user-interface preference
     UI = {
       's.ytimg.com' => true,
       'www.youtube.com' => true,
