@@ -202,22 +202,7 @@ class WebResource
 
     def POST
       if host.match? POSThosts
-        case host
-        when 'www.google.com'
-          if path.match? /recaptcha|searchbyimage/
-            self.POSTthru
-          else
-            denyPOST
-          end
-        when /youtube.com$/
-          if env['REQUEST_URI'].match? /ACCOUNT_MENU|comment|subscribe/
-            self.POSTthru
-          else
-            denyPOST
-          end
-        else
-          self.POSTthru
-        end
+        sitePOST
       else
         denyPOST
       end

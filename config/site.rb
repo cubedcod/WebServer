@@ -2,7 +2,29 @@ class WebResource
   module HTTP
 
     # Hosts with OPTIONS/POST/PUT capability
-    POSThosts = /(\.(edu|gov)|(anvato|api\.(brightcove|twitter)|(android.*|clients?[0-9]?|drive|groups|images|mail|www)\.google|android.googleapis|mirrors.lolinent|reddit|soundcloud|youtube|talk.zerohedge|zillow)\.(com|net))$/
+    POSThosts = /(\.(edu|gov)|(anvato|api\.(brightcove|twitter)|(android.*|clients?[0-9]?|drive|groups|images|mail|www)\.google|(android|youtubei?).googleapis|mirrors.lolinent|reddit|soundcloud|youtube|talk.zerohedge|zillow)\.(com|net))$/
+
+    def sitePOST
+      case host
+      when 'www.google.com'
+        if path.match? /recaptcha|searchbyimage/
+          self.POSTthru
+        else
+          denyPOST
+        end
+      when /youtube.com$/
+        if env['REQUEST_URI'].match? /ACCOUNT_MENU|comment|subscribe/
+          self.POSTthru
+        else
+          denyPOST
+        end
+      when 'youtubei.googleapis.com'
+        puts :youtube
+        self.POSTthru unless path.match? /\/log/
+      else
+        self.POSTthru
+      end
+    end
 
     # original-host user-interface preference
     UI = {
@@ -41,6 +63,9 @@ class WebResource
       else
         r.drop
       end}
+    HostGET['youtubei.googleapis.com'] = -> r {
+      r.fetch
+    }
 
   end
   module Webize
