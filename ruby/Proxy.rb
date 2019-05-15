@@ -160,7 +160,7 @@ class WebResource
               when /^br(otli)?$/
                 body = Brotli.inflate body
               when /gzip/
-                body = Zlib::GzipReader.new StringIO.new body
+                body = (Zlib::GzipReader.new StringIO.new body).read
               when /flate|zip/
                 body = Zlib::Inflate.inflate body
               end

@@ -1,5 +1,6 @@
 # depended libraries
 %w{
+brotli
 cgi
 csv
 date
