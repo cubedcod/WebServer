@@ -50,7 +50,8 @@ class WebResource
         puts "\e[7m" + (method == 'GET' ? '' : method) + "\e[" + color + "m "  + status.to_s + "\e[0m " + referrer + ' ' +
              "\e[" + color + ";7mhttps://" + host + "\e[0m\e[" + color + "m" + path + resource.qs + "\e[0m " + (env['HTTP_TYPE'] || '') + relocation
 
-        [status, head, body]} # response
+        # response
+        [status, head, body]}
     rescue Exception => e
       msg = [resource.uri, e.class, e.message].join " "
       trace = e.backtrace.join "\n"
@@ -60,17 +61,14 @@ class WebResource
                               {_: :h3, c: msg.hrefs, style: 'color: red'},
                               {_: :pre, c: trace.hrefs},
                               (HTML.kv (HTML.urifyHash env), env),
-                              (HTML.kv (HTML.urifyHash e.io.meta), env if e.respond_to? :io)
-                            ]}})]]
+                              (HTML.kv (HTML.urifyHash e.io.meta), env if e.respond_to? :io)]}})]]
     end
 
     def deny
       env[:deny] = true
       js = ext == 'js'
       [200, {'Content-Type' => js ? 'application/javascript' : 'text/html; charset=utf-8'},
-       js ? [] : ["<html><body style='background-color: red; text-align: center'>
-<a href='/allow#{HTTP.qs({u: '//' + @r['SERVER_NAME'] + @r['REQUEST_URI']})}' style='color: #fff; font-size: 28em; text-decoration: none; font-weight: normal'>⌘</a>
-</body></html>"]]
+       js ? [] : ["<html><body style='background-color: red; text-align: center'><span style='color: #fff; font-size: 28em'>⌘</span></body></html>"]]
     end
     alias_method :drop, :deny
 
