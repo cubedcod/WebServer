@@ -82,7 +82,7 @@ class WebResource
              else
                body
              end
-      HTTP.print_body body, head['Content-Type'] unless host.match? /instagram|youtube/
+      HTTP.print_body body, head['Content-Type'] unless host.match? /google|instagram|youtube/
       env[:deny] = true
       [202,{},[]]
     end
