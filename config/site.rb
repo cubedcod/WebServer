@@ -34,7 +34,7 @@ class WebResource
         [301, {'Location' =>  r.q['q']},[]]
       elsif mode.match? /204$/
         if r.q['a'] == 'autoplay'
-          r.detch
+          r.fetch
         else
           [204, {'Content-Length' => 0}, []]
         end

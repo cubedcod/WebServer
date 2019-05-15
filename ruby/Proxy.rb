@@ -194,7 +194,7 @@ class WebResource
           end
         rescue Exception => e
           if e.message.match? /[34]04/
-            # resourced unchanged or missing
+            # resource unchanged or missing
           else
             raise # miscellaneous errors
           end
