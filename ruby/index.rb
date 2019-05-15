@@ -14,6 +14,7 @@ mail
 nokogiri
 open-uri
 pathname
+protobuf
 rack
 rdf
 redcarpet

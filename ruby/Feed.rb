@@ -9,12 +9,13 @@ class WebResource
         FeedURL[u] = u.R }}
 
   end
-  module HTTP
 
-    def self.getFeeds
-      FeedURL.values.map{|feed| feed.fetch rescue nil}
-      nil
-    end
+  def self.getFeeds
+    FeedURL.values.map{|feed| feed.fetch rescue nil}
+    nil
+  end
+
+  module HTTP
 
     PathGET['/subscribe'] = -> r {
       url = (r.q['u'] || '/').R
@@ -27,6 +28,7 @@ class WebResource
       [302, {'Location' => url}, []]}
 
   end
+
   module Feed
 
     include URIs
