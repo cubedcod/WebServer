@@ -100,7 +100,7 @@ class WebResource
 
     def twits
       ts = []
-      subscriptions.shuffle.each_slice(16){|s|
+      subscriptions.shuffle.each_slice(18){|s|
         ts << (Twitter + '/search?f=tweets&vertical=default&q=' + s.map{|u| 'from:' + u}.intersperse('+OR+').join).R }
       ts
     end
