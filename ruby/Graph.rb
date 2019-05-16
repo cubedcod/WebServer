@@ -173,27 +173,9 @@ class WebResource
   end
   module HTML
 
-    # group stuff under /
-    Group['topdir'] = -> graph {
-      containers = {}
-      graph.values.map{|resource|
-        re = resource.R
-        name = re.parts[0] || ''
-        # group into decade and alphanumeric-prefix containers
-        if name.match /^\d{4}$/
-          decade = name[0..2] + '0s'
-        else
-          alpha = (name.sub(/^www\./,'')[0]||'').upcase
-        end
-        key = decade || alpha
-        containers[key] ||= {name: key, Contains => []}
-        containers[key][Contains].push resource }
-      containers}
-
-    # URI-indexed
     Group['flat'] = -> graph { graph }
 
-    # build tree from URI path component
+    # treeize from URIpath
     Group['tree'] = -> graph {
       tree = {}
 

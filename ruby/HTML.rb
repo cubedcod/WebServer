@@ -92,7 +92,7 @@ class WebResource
                                HTML.kv (HTML.urifyHash @r), @r
                              else
                                # Graph -> Tree -> Markup
-                               treeize = Group[q['g']] || Group[path == '/' ? 'topdir' : 'tree']
+                               treeize = Group[q['g']] || Group['tree']
                                Markup[Container][treeize[graph], @r]
                               end,
                              link[:down,'&#9660;']]}]}]
