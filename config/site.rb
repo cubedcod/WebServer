@@ -13,7 +13,9 @@ class WebResource
           denyPOST
         end
       when /youtube.com$/
-        if env['REQUEST_URI'].match? /ACCOUNT_MENU|comment|subscribe/
+        if parts.member? 'stats'
+          denyPOST
+        elsif env['REQUEST_URI'].match? /ACCOUNT_MENU|comment|subscribe/
           self.POSTthru
         else
           denyPOST
@@ -51,7 +53,7 @@ class WebResource
     HostGET['twitter.com'] = -> r {
       if r.path == '/'
         [200, {'Content-Type' => 'text/html'}, [r.htmlDocument({'/' => {'uri' => '/', Link => r.subscriptions.map{|user|(Twitter + '/' + user).R}},
-                                                                '/new' => {'uri' => '/new', Link => r.twits}})]]
+                                                                '/new' => {'uri' => '/new', Link => r.twits, Title => 'new tweets'}})]]
       elsif r.path == '/new'
         r.graphResponse r.twits.map(&:fetch).flatten
       else
