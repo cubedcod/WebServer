@@ -236,12 +236,10 @@ class WebResource
     end
 
     def updateLocation location
-      # TODO declare non-301/permcache somewhere better than here. 
-      relocation.writeFile location unless host.match? /(google|soundcloud|youtube)\.com$/
+      # TODO declare non-301/permcache somewhere better than here
+      relocation.writeFile location unless host.match? /(alibaba|google|soundcloud|youtube)\.com$/
       [302, {'Location' => location}, []]
     end
-
-    PathGET['/mu'] = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'},[]]}
 
   end
 end

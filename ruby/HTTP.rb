@@ -169,7 +169,7 @@ class WebResource
       HostFirsts.map{|uri|
         u = uri.R
         path = '/' + u.host.split('.').reverse.map{|n|n.split '-'}.flatten.join('/')
-        graph[path] = {'uri' => path, Link => u}}
+        graph[path] = {'uri' => path, Link => ('//' + u.host).R}}
       [200, {'Content-Type' => 'text/html'}, [r.htmlDocument(graph)]]}
 
     def notfound

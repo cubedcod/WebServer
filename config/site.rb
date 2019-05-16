@@ -35,6 +35,9 @@ class WebResource
       'www.youtube.com' => true,
     }
 
+    # redirect to music blogs
+    PathGET['/mu'] = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'},[]]}
+
     # allow all JS on CDN
     HostGET['ajax.googleapis.com'] = HostGET['cdnjs.cloudflare.com'] = HostGET['s.yimg.com'] = -> r {r.fetch}
 
