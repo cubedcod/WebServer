@@ -223,7 +223,7 @@ class WebResource
   module Webize
     include MIME
 
-    def storeRDF options = {}
+    def indexRDF options = {}
       newResources = []
       # load resource
       g = RDF::Repository.load self, options

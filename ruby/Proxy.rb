@@ -23,7 +23,7 @@ class WebResource
       head.delete 'Host'
       head.delete 'User-Agent' if %w{po.st t.co}.member? host
 
-      if @r # redirector
+      if @r # redirection
         if relocated?
           location = join(relocation.readFile).R
           return redirect unless location.host == host && (location.path || '/') == path
@@ -32,7 +32,9 @@ class WebResource
         end
       end
 
-      # storage pointer
+      # resource pointers
+      suffix = ext.empty? && host.match?(/reddit.com$/) && !UI[@r['SERVER_NAME']] && '.rss'
+      url = 'https://' + host + (path || '') + (suffix || '') + qs
       cache = cacheFile
       cacheMeta = cache.metafile
       head["If-Modified-Since"] = cache.mtime.httpdate if cache.e
@@ -71,16 +73,15 @@ class WebResource
                        else                             # sniff
                          cache.mimeSniff
                        end
-                # cache metadata TODO survey POSIX extended attributes support
-                cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache'
+                cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # TODO survey POSIX extended attributes (MIME, source URL) support
 
-                # index updates
+                # update index
                 updates.concat(case mime
                                when /^(application|text)\/(atom|rss|xml)/
-                                 cache.storeFeed
+                                 cache.indexFeed
                                when /^text\/html/
                                  # site-specific indexer
-                                 IndexHTML[@r['SERVER_NAME']].do{|indexer| indexer[cache] } || []
+                                 IndexHTML[@r ? @r['SERVER_NAME'] : host].do{|indexer| indexer[cache] } || []
                                else
                                  []
                                end || [])
@@ -98,19 +99,16 @@ class WebResource
       # refresh cache
       immutable = cache? && cache.e && cache.noTransform?
       unless immutable || OFFLINE
-        # resource location
-        suffix = ext.empty? && host.match?(/reddit.com$/) && !UI[@r['SERVER_NAME']] && '.rss'
-        url = 'https://' + host + (path||'') + (suffix||'') + qs 
         begin
           update[url]
         rescue Exception => e
-          raise if e.class == OpenURI::HTTPRedirect # follow redirection
-          update[url.sub /^https/, 'http']          # HTTPS -> HTTP downgrade and retry
+          raise if e.class == OpenURI::HTTPRedirect # redirected
+          update[url.sub /^https/, 'http']          # HTTPS -> HTTP downgrade retry
         end
       end
 
       # return value
-      if @r # HTTP
+      if @r # HTTP caller
         if partialContent
           [206, response_head, [partialContent]]
         elsif cache.exist?
@@ -118,31 +116,31 @@ class WebResource
             cache.localFile
           elsif UI[@r['SERVER_NAME']] # upstream controls format
             cache.localFile
-          else # transform to negotiated format
+          else # transformable format
             env[:feed] = true if cache.feedMIME?
             graphResponse (updates.empty? ? [cache] : updates)
           end
         else
           notfound
         end
-      else # REPL/shell
-        updates.empty? ? cache : updates
+      else # REPL/script/shell caller
+        updates
       end
     rescue OpenURI::HTTPRedirect => re # redirect caller
       updateLocation re.io.meta['location']
     end
 
     def filter
-      if %w{gif js}.member? ext.downcase # blocked suffixes
+      if %w{gif js}.member? ext.downcase # filtered suffix
         deny
       else
         fetch.do{|s,h,b|
-          if s.to_s.match? /30[1-3]/ # redirection
+          if s.to_s.match? /30[1-3]/ # redirected
             [s, h, b]
           else
             if h['Content-Type'] && !h['Content-Type'].match?(/image.(bmp|gif)|script/)
               [s, h, b]
-            else
+            else # filtered content-type
               deny
             end
           end}
@@ -236,7 +234,7 @@ class WebResource
 
     def updateLocation location
       # TODO declare non-301/permcache somewhere better than here
-      relocation.writeFile location unless host.match? /(alibaba|google|soundcloud|youtube)\.com$/
+      relocation.writeFile location unless host.match? /(alibaba|google|soundcloud|twitter|youtube)\.com$/
       [302, {'Location' => location}, []]
     end
 

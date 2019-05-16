@@ -50,10 +50,10 @@ class WebResource
 
     HostGET['twitter.com'] = -> r {
       if r.path == '/'
-        sources = r.subscriptions.shuffle.each_slice(16){|s| Twitter + '/search?f=tweets&vertical=default&q=' + s.map{|u| 'from:' + u}.intersperse('+OR+').join } # source URI
-        [200, {'Content-Type' => 'text/html'}, [re.htmlDocument({Twitter => {'uri' => Twitter, Link => sources}})]]
+        [200, {'Content-Type' => 'text/html'}, [r.htmlDocument({'/' => {'uri' => '/', Link => r.subscriptions.map{|user|(Twitter + '/' + user).R}},
+                                                                '/new' => {'uri' => '/new', Link => r.twits}})]]
       elsif r.path == '/new'
-        
+        r.graphResponse r.twits.map(&:fetch).flatten
       else
         r.remote
       end}
@@ -94,6 +94,13 @@ class WebResource
         end
         tweet.css('img').map{|img|
           yield s, Image, img.attr('src').to_s.R}}
+    end
+
+    def twits
+      ts = []
+      subscriptions.shuffle.each_slice(16){|s|
+        ts << (Twitter + '/search?f=tweets&vertical=default&q=' + s.map{|u| 'from:' + u}.intersperse('+OR+').join).R }
+      ts
     end
 
     TriplrHTML['twitter.com'] = :tweets
