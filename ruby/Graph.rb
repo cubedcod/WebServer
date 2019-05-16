@@ -11,12 +11,6 @@ class WebResource
   module JSON
     include URIs
 
-    def [] p; (@data||{})[p].justArray end
-    def data d={}; @data = (@data||{}).merge(d); self end
-    def types; @types ||= self[Type].select{|t|t.respond_to? :uri}.map(&:uri) end
-    def a type; types.member? type end
-    def to_json *a; {'uri' => uri}.to_json *a end
-
     class Format < RDF::Format
       content_type     'application/json+rdf', :extension => :e
       content_encoding 'utf-8'
@@ -85,7 +79,8 @@ class WebResource
       send(*triplr){|s,p,o|
         graph[s]    ||= {'uri' => s}
         graph[s][p] ||= []
-        graph[s][p].push o}
+        graph[s][p].push o.class == WebResource ? {'uri' => o.uri} : o}
+
       # update cache
       doc.writeFile graph.to_json
     end
@@ -168,7 +163,13 @@ class WebResource
 
   end
   module URIs
+
+    def [] p; (@data||{})[p].justArray end
+    def a type; types.member? type end
+    def data d={}; @data = (@data||{}).merge(d); self end
     def resources; lines.map &:R end
+    def types; @types ||= self[Type].select{|t|t.respond_to? :uri}.map(&:uri) end
+
   end
   module HTML
 

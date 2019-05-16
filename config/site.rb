@@ -105,12 +105,14 @@ class WebResource
 
     TriplrHTML['twitter.com'] = :tweets
 
-    IndexHTML['twitter.com'] = -> page { graph = {}; posts = []
+    IndexHTML['twitter.com'] = -> page {
+      graph = {}
+      posts = []
       # collect triples
       page.tweets{|s,p,o|
         graph[s] ||= {'uri'=>s}
         graph[s][p] ||= []
-        graph[s][p].push o}
+        graph[s][p].push o.class == WebResource ? {'uri' => o.uri} : o}
       # link to timeline
       graph.map{|u,r|
         r[Date].do{|t|
@@ -123,7 +125,7 @@ class WebResource
             doc.writeFile({u => r}.to_json)
             posts << doc
           end}}
-      posts} # indexed tweets
+      posts }
 
   end
 end

@@ -116,6 +116,7 @@ class WebResource < RDF::URI
     def subdomain
       host.split('.')[1..-1].unshift('').join '.'
     end
+
   end
   include URIs
   module POSIX
