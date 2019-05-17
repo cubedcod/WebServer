@@ -32,6 +32,7 @@ class WebResource
 
     # upstream user-interface preference
     UI = {
+      'duckduckgo.com' => true,
       's.ytimg.com' => true,
       'www.youtube.com' => true,
     }

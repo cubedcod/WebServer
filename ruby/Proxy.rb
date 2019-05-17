@@ -52,7 +52,7 @@ class WebResource
               partialContent = response.read
             else # response
               %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| @r[:Response][k] ||= response.meta[k.downcase] } if @r
-              HTTP.print_header response.meta if host.match? /^www.google.com/
+              #HTTP.print_header response.meta
               body = response.read
 
               # decompress
@@ -116,8 +116,8 @@ class WebResource
         elsif cache.exist?
           if cache.noTransform? # immutable format
             cache.localFile
-          elsif UI[@r['SERVER_NAME']] # upstream controls format
-            cache.localFile
+          elsif UI[@r['SERVER_NAME']] || (host == 'www.google.com' && parts[0] == 'maps')
+            cache.localFile # upstream format
           else # transformable format
             env[:feed] = true if cache.feedMIME?
             graphResponse (updates.empty? ? [cache] : updates)
