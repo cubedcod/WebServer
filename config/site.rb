@@ -1,7 +1,7 @@
 class WebResource
   module HTTP
     DesktopMode = /(alibaba|google|soundcloud|twitter|youtube).com$/
-    POSThosts = /(\.(edu|gov)|(anvato|api\.(brightcove|twitter)|(android.*|clients?[0-9]?|drive|groups|images|mail|www)\.google|(android|youtubei?).googleapis|mirrors.lolinent|reddit|soundcloud|youtube|talk.zerohedge|zillow)\.(com|net))$/
+    POSThosts = /(\.(edu|gov)|(anvato|api\.(brightcove|twitter)|(android.*|drive|groups|images|mail|www)\.google|(android|youtubei?).googleapis|reddit|youtube|zillow)\.(com|net))$/
 
     def sitePOST
       case host
@@ -33,7 +33,9 @@ class WebResource
     # upstream user-interface preference
     UI = {
       'duckduckgo.com' => true,
+      'www.ebay.com' => true,
       's.ytimg.com' => true,
+      'soundcloud.com' => true,
       'sourceforge.net' => true,
       'www.youtube.com' => true,
     }
