@@ -34,6 +34,7 @@ class WebResource
     UI = {
       'duckduckgo.com' => true,
       's.ytimg.com' => true,
+      'sourceforge.net' => true,
       'www.youtube.com' => true,
     }
 

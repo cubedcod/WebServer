@@ -228,16 +228,13 @@ class WebResource
   module Webize
     include URIs
 =begin
-# TODO transform HTML at response time 
+      # move site-chrome to footer
       doc = Nokogiri::HTML.parse readFile
       body = doc.css('body')[0]
-      # move site-chrome to footer
       %w{.breadcrumb .featured-headlines .header header .masthead .navigation .nav nav .top}.map{|selection|
         doc.css(selection).map{|gunk|
         k = gunk.remove
         body.add_child k}}
-      # dev tools
-      body.add_child "<script src='//cdn.jsdelivr.net/npm/eruda'></script><script>eruda.init();</script>"
 =end
     # HTML -> RDF
     def triplrHTML &f
