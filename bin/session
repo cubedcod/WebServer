@@ -1,7 +1,6 @@
 #!/usr/bin/sh
-app=$(realpath ~/src/WebServer)
 cd ~/web
-# request-router
-squid -f $app/config/edge.conf
-# daemon
-unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 $app/config/daemon.ru
+conf=../src/WebServer/config
+squid -f $conf/edge.conf
+thin -a 127.0.0.1 -p 8000 -R $conf/rack.ru --threaded start
+#unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 $conf/rack.ru
