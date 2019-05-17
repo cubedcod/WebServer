@@ -36,19 +36,18 @@ class WebResource
       'www.youtube.com' => true,
     }
 
-    # redirect to music blogs
+    # read music blogs
     PathGET['/mu'] = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'},[]]}
 
     # CDNs
     # allow JS
-    HostGET['ajax.googleapis.com'] = HostGET['cdnjs.cloudflare.com'] = HostGET['s.yimg.com'] = -> r {r.fetch}
+    HostGET['ajax.googleapis.com'] = HostGET['cdnjs.cloudflare.com'] = HostGET['s.yimg.com'] = HostGET['youtubei.googleapis.com'] = -> r {r.fetch}
     # filter JS
     HostGET['storage.googleapis.com'] = -> r {r.filter}
 
-    # Facebook
-    HostGET['l.facebook.com']  = -> r {[301, {'Location' => r.q['u']},  []]}
-    HostGET['l.instagram.com'] = -> r {[301, {'Location' => r.q['u']},  []]}
+    # Reddit
 
+    # Twitter
     HostGET['twitter.com'] = -> r {
       if r.path == '/'
         [200, {'Content-Type' => 'text/html'}, [r.htmlDocument({'/' => {'uri' => '/', Link => r.subscriptions.map{|user|(Twitter + '/' + user).R}},
@@ -69,7 +68,6 @@ class WebResource
       else
         r.drop
       end}
-    HostGET['youtubei.googleapis.com'] = -> r {r.fetch}
 
   end
   module Webize
