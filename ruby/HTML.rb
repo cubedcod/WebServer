@@ -85,8 +85,7 @@ class WebResource
                                     {_: :a, id: :subscribe,
                                      href: '/' + (s ? 'un' : '') + 'subscribe' + HTTP.qs({u: 'https://' + host + @r['REQUEST_URI']}),
                                      class: s ? :on : :off, c: 'subscribe' + (s ? 'd' : '')}
-                                    end,
-                                    {_: :a, id: :originUI, href: '/ui/origin' + HTTP.qs({u: 'https://' + host + @r['REQUEST_URI']}), c: '⌘'}]}
+                                    end]}
                              end,
                              if graph.empty?
                                HTML.kv (HTML.urifyHash @r), @r
@@ -226,34 +225,19 @@ class WebResource
     IndexHTML = {}
     TriplrHTML = {}
   end
-  module HTTP
-
-    # toggle UI choice
-    PathGET['/ui/origin'] = -> r {UI[r.env['SERVER_NAME']] = true; [302, {'Location' => r.q['u'] || '/'}, []]}
-    PathGET['/ui/local']  = -> r {UI.delete r.env['SERVER_NAME'];  [302, {'Location' => r.q['u'] || '/'}, []]}
-
-  end
   module Webize
     include URIs
 =begin
 # TODO transform HTML at response time 
-    def storeHTML
       doc = Nokogiri::HTML.parse readFile
       body = doc.css('body')[0]
-
       # move site-chrome to footer
       %w{.breadcrumb .featured-headlines .header header .masthead .navigation .nav nav .top}.map{|selection|
         doc.css(selection).map{|gunk|
         k = gunk.remove
         body.add_child k}}
-
-      # generic-UI link
-      body.add_child "<a id='localUI' href='/ui/local#{HTTP.qs({u: 'https://' + @r['SERVER_NAME'] + @r['REQUEST_URI']})}' style='position: fixed; top: 0; right: 0; z-index: 1001; color: #000; font-size: 1.8em'>⌘</a>"
-      # debugger link
-      # body.add_child "<script src='//cdn.jsdelivr.net/npm/eruda'></script><script>eruda.init();</script>"
-
-      writeFile doc.to_html
-    end
+      # dev tools
+      body.add_child "<script src='//cdn.jsdelivr.net/npm/eruda'></script><script>eruda.init();</script>"
 =end
     # HTML -> RDF
     def triplrHTML &f

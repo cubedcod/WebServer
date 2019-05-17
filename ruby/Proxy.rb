@@ -52,6 +52,7 @@ class WebResource
               partialContent = response.read
             else # response
               %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| @r[:Response][k] ||= response.meta[k.downcase] } if @r
+              HTTP.print_header response.meta if host.match? /^www.google.com/
               body = response.read
 
               # decompress

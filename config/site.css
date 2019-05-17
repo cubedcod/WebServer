@@ -1,9 +1,8 @@
-#localUI {display: none}
 #prev, #next {position: fixed; top: 0; height: 100%; max-width: 1em}
 #up, #down {display: block}
 #prev {left:  0}
 #next {right: 0}
-#prev, #next, #up, #down, #originUI {font-size: 2em; color: #fff}
+#prev, #next, #up, #down {font-size: 2em; color: #fff}
 #subscribe {vertical-align: top}
 #subscribe.on  {color: #000; background-color: #fff}
 #subscribe.off {color: #777; background-color: #000; border: .1em solid #555}
