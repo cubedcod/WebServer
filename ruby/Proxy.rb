@@ -21,7 +21,7 @@ class WebResource
       head = HTTP.unmangle env # request environment
       response_head = {}      # response environment
       head.delete 'Host'
-      head['User-Agent'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3790.0 Safari/537.36' if host.match? /(alibaba|soundcloud|twitter|youtube).com$/
+      head['User-Agent'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3790.0 Safari/537.36' if host.match? DesktopMode
       head.delete 'User-Agent' if %w{po.st t.co}.member? host
 
       if @r # redirection

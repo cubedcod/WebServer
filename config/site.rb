@@ -1,7 +1,6 @@
 class WebResource
   module HTTP
-
-    # Hosts with OPTIONS/POST/PUT capability
+    DesktopMode = /(alibaba|google|soundcloud|twitter|youtube).com$/
     POSThosts = /(\.(edu|gov)|(anvato|api\.(brightcove|twitter)|(android.*|clients?[0-9]?|drive|groups|images|mail|www)\.google|(android|youtubei?).googleapis|mirrors.lolinent|reddit|soundcloud|youtube|talk.zerohedge|zillow)\.(com|net))$/
 
     def sitePOST
