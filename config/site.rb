@@ -80,10 +80,13 @@ class WebResource
     HostGET['www.googleadservices.com'] = -> r {r.q.has_key?('adurl') ? [301, {'Location' =>  r.q['adurl']},[]] : r.remote}
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
-      if !mode || %w{browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member?(mode)
+      if !mode || %w{browse_ajax c channel feed get_video_info guide_ajax heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member?(mode)
         r.fetch
       elsif mode == 'attribution_link'
         [301, {'Location' =>  r.q['u']},[]]
+      elsif mode == 'embed'
+        r.env['HTTP_USER_AGENT'] = DesktopUA
+        r.fetch
       elsif mode == 'redirect'
         [301, {'Location' =>  r.q['q']},[]]
       else
