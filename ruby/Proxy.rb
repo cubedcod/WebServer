@@ -13,15 +13,11 @@ class WebResource
                                      end)).R env
     end
 
-    def metafile type = 'meta'
-      dir + (dirname[-1] == '/' ? '' : '/') + '.' + basename + '.' + type
-    end
-
     def fetch
       head = HTTP.unmangle env # request environment
       response_head = {}      # response environment
       head.delete 'Host'
-      head['User-Agent'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3790.0 Safari/537.36' if host.match? DesktopMode
+      head['User-Agent'] = DesktopUA
       head.delete 'User-Agent' if %w{po.st t.co}.member? host
 
       if @r # redirection
@@ -34,7 +30,7 @@ class WebResource
       end
 
       # resource pointers
-      suffix = ext.empty? && host.match?(/reddit.com$/) && !UI[@r['SERVER_NAME']] && '.rss'
+      suffix = ext.empty? && host.match?(/reddit.com$/) && !originUI && '.rss'
       url = 'https://' + host + (path || '') + (suffix || '') + qs
       cache = cacheFile
       cacheMeta = cache.metafile
@@ -110,15 +106,15 @@ class WebResource
       end
 
       # return value
-      if @r # HTTP caller
+      if @r # HTTP calling context
         if partialContent
           [206, response_head, [partialContent]]
         elsif cache.exist?
-          if cache.noTransform? # immutable format
+          if cache.noTransform? # immutable data
             cache.localFile
-          elsif UI[@r['SERVER_NAME']] || (host == 'www.google.com' && parts[0] == 'maps')
-            cache.localFile # upstream format
-          else # transformable format
+          elsif originUI
+            cache.localFile     # unchanged data
+          else                  # transformable data
             env[:feed] = true if cache.feedMIME?
             graphResponse (updates.empty? ? [cache] : updates)
           end
@@ -162,9 +158,13 @@ class WebResource
       [s, h, [b]]
     end
 
+    def metafile type = 'meta'
+      dir + (dirname[-1] == '/' ? '' : '/') + '.' + basename + '.' + type
+    end
+
     OFFLINE = ENV.has_key? 'OFFLINE'
 
-   def OPTIONSthru
+    def OPTIONSthru
       # request
       url = 'https://' + host + path + qs
       headers = HTTP.unmangle env
@@ -175,6 +175,10 @@ class WebResource
       h = r.headers
       b = r.body
       [s, h, [b]]
+    end
+
+    def originUI
+      env['User-Agent'] == DesktopUA
     end
 
     def POSTthru

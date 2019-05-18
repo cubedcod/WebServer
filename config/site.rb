@@ -1,8 +1,10 @@
 class WebResource
   module HTTP
-    DesktopMode = /(alibaba|google|soundcloud|twitter|youtube).com$/
-    POSThosts = /(\.(edu|gov)|(anvato|api\.(brightcove|twitter)|(android.*|drive|groups|images|mail|www)\.google|(android|youtubei?).googleapis|reddit|youtube|zillow)\.(com|net))$/
+    # advertise this user-agent to request original desktop UI from site
+    DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3790.0 Safari/537.36'
 
+    # hosts which can be POSTed to
+    POSThosts = /(\.(edu|gov)|(anvato|api\.(brightcove|twitter)|(android.*|drive|groups|images|mail|www)\.google|(android|youtubei?).googleapis|reddit|youtube|zillow)\.(com|net))$/
     def sitePOST
       case host
       when 'www.google.com'
@@ -30,25 +32,13 @@ class WebResource
       end
     end
 
-    # upstream user-interface
-    UI = {
-      'duckduckgo.com' => true,
-      'www.ebay.com' => true,
-      's.ytimg.com' => true,
-      'www.instagram.com' => true,
-      'soundcloud.com' => true,
-      'sourceforge.net' => true,
-      'www.zillow.com' => true,
-      'www.youtube.com' => true,
-    }
-
-    # read music blogs
+    # music news
     PathGET['/mu'] = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'},[]]}
 
     # CDNs
-    # allow scripts
+    #  allowed scripts
     HostGET['ajax.googleapis.com'] = HostGET['cdnjs.cloudflare.com'] = HostGET['s.yimg.com'] = -> r {r.fetch}
-    # filter scripts
+    #  filtered scripts
     HostGET['storage.googleapis.com'] = -> r {r.filter}
 
     # Facebook
@@ -94,7 +84,7 @@ class WebResource
   end
   module Webize
 
-    # Twitter
+    # emit tweets from HTML file
     def tweets
       Nokogiri::HTML.parse(readFile).css('div.tweet').map{|tweet|
         s = Twitter + tweet.css('.js-permalink').attr('href')
