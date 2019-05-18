@@ -94,6 +94,7 @@ class WebResource
       end}
 
     # Reddit
+    HostGET['reddit.com'] = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path},[]]}
     HostGET['www.reddit.com'] = -> r {
       if r.path == '/'
         [200, {'Content-Type' => 'text/html'}, [r.htmlDocument({'/' => {'uri' => '/', Link => r.subscriptions.map{|sub|('https://www.reddit.com/r/' + sub).R}},
@@ -103,6 +104,9 @@ class WebResource
       else
         r.remote
       end}
+
+    # Soundcloud
+    HostGET['gate.sc'] = -> r {[301, {'Location' =>  r.q['url']},[]]}
 
     # Twitter
     HostGET['twitter.com'] = -> r {

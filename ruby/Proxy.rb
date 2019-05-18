@@ -178,7 +178,7 @@ class WebResource
     end
 
     def originUI
-      if %w{duckduckgo.com}.member? host
+      if %w{duckduckgo.com soundcloud.com}.member? host
         true
       elsif env['HTTP_USER_AGENT'] == DesktopUA
         true
