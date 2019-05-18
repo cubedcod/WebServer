@@ -30,13 +30,15 @@ class WebResource
       end
     end
 
-    # upstream user-interface preference
+    # upstream user-interface
     UI = {
       'duckduckgo.com' => true,
       'www.ebay.com' => true,
       's.ytimg.com' => true,
+      'www.instagram.com' => true,
       'soundcloud.com' => true,
       'sourceforge.net' => true,
+      'www.zillow.com' => true,
       'www.youtube.com' => true,
     }
 
@@ -44,20 +46,32 @@ class WebResource
     PathGET['/mu'] = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'},[]]}
 
     # CDNs
-    # allow JS
-    HostGET['ajax.googleapis.com'] = HostGET['cdnjs.cloudflare.com'] = HostGET['s.yimg.com'] = HostGET['youtubei.googleapis.com'] = -> r {r.fetch}
-    # filter JS
+    # allow scripts
+    HostGET['ajax.googleapis.com'] = HostGET['cdnjs.cloudflare.com'] = HostGET['s.yimg.com'] = -> r {r.fetch}
+    # filter scripts
     HostGET['storage.googleapis.com'] = -> r {r.filter}
 
     # Reddit
+    HostGET['www.reddit.com'] = -> r {
+      if r.path == '/'
+        [200, {'Content-Type' => 'text/html'}, [r.htmlDocument({'/' => {'uri' => '/', Link => r.subscriptions.map{|sub|('https://www.reddit.com/r/' + sub).R}},
+                                                             '/new' => {'uri' => '/new', Title => 'new posts'}})]]
+      elsif r.path == '/new'
+        r.graphResponse r.twits.map(&:fetch).flatten
+      else
+        r.remote
+      end}
 
     # Twitter
     HostGET['twitter.com'] = -> r {
       if r.path == '/'
         [200, {'Content-Type' => 'text/html'}, [r.htmlDocument({'/' => {'uri' => '/', Link => r.subscriptions.map{|user|(Twitter + '/' + user).R}},
-                                                                '/new' => {'uri' => '/new', Link => r.twits, Title => 'new tweets'}})]]
+                                                             '/new' => {'uri' => '/new', Title => 'new posts'}})]]
       elsif r.path == '/new'
-        r.graphResponse r.twits.map(&:fetch).flatten
+        sources = []
+        r.subscriptions.shuffle.each_slice(18){|s|
+          sources << (Twitter + '/search?f=tweets&vertical=default&q=' + s.map{|u| 'from:' + u}.intersperse('+OR+').join).R }
+        r.graphResponse sources.map(&:fetch).flatten
       else
         r.remote
       end}
@@ -97,13 +111,6 @@ class WebResource
         end
         tweet.css('img').map{|img|
           yield s, Image, img.attr('src').to_s.R}}
-    end
-
-    def twits
-      ts = []
-      subscriptions.shuffle.each_slice(18){|s|
-        ts << (Twitter + '/search?f=tweets&vertical=default&q=' + s.map{|u| 'from:' + u}.intersperse('+OR+').join).R }
-      ts
     end
 
     TriplrHTML['twitter.com'] = :tweets
