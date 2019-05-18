@@ -110,11 +110,11 @@ class WebResource
         if partialContent
           [206, response_head, [partialContent]]
         elsif cache.exist?
-          if cache.noTransform? # immutable data
+          if cache.noTransform? # immutable-data MIME match
             cache.localFile
           elsif originUI
-            cache.localFile     # unchanged data
-          else                  # transformable data
+            cache.localFile     # immutable due to client preference
+          else                  # transformable content
             env[:feed] = true if cache.feedMIME?
             graphResponse (updates.empty? ? [cache] : updates)
           end
