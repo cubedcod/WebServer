@@ -51,6 +51,21 @@ class WebResource
     # filter scripts
     HostGET['storage.googleapis.com'] = -> r {r.filter}
 
+    # Facebook
+    HostGET['l.instagram.com'] = -> r {[301, {'Location' =>  r.q['u']},[]]}
+
+    # Google
+    HostGET['www.googleadservices.com'] = -> r {r.q.has_key?('adurl') ? [301, {'Location' =>  r.q['adurl']},[]] : r.remote}
+    HostGET['www.youtube.com'] = -> r {
+      mode = r.parts[0]
+      if !mode || %w{browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member?(mode)
+        r.fetch
+      elsif mode == 'redirect'
+        [301, {'Location' =>  r.q['q']},[]]
+      else
+        r.drop
+      end}
+
     # Reddit
     HostGET['www.reddit.com'] = -> r {
       if r.path == '/'
@@ -74,17 +89,6 @@ class WebResource
         r.graphResponse sources.map(&:fetch).flatten
       else
         r.remote
-      end}
-
-    # YouTube
-    HostGET['www.youtube.com'] = -> r {
-      mode = r.parts[0]
-      if !mode || %w{browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member?(mode)
-        r.fetch
-      elsif mode == 'redirect'
-        [301, {'Location' =>  r.q['q']},[]]
-      else
-        r.drop
       end}
 
   end
