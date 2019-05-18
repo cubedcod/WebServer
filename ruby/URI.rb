@@ -179,8 +179,6 @@ class WebResource < RDF::URI
     HostGET = {}
     PathGET = {}
 
-    PathGET['/url'] = -> r { [301, {'Location' => (r.q['url']||r.q['q'])}, []]}
-
   end
   module HTML
     include URIs

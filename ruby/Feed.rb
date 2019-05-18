@@ -38,19 +38,12 @@ class WebResource
     end
 
     def subscribable?
-      # feed-MIME match
+      # feed MIME
       return true if env[:feed]
-      # feed-URL match
+      # feed URL
       return true if host && FeedURL['//' + host + path]
-      # host match
-      case host
-      when /\.reddit.com$/
-        parts[0] == 'r'
-      when /twitter.com$/
-        true
-      else
-        false
-      end
+      # site match
+      subscribableSite?
     end
 
     def subscribe
@@ -60,33 +53,11 @@ class WebResource
     end
 
     def subscribed?
-      case host
-      when /reddit.com$/
-        return false if parts.size < 2
-      when /^twitter.com$/
-        return false if parts.size < 1
-      end
       subscriptionFile.exist?
     end
 
     def subscriptions
-      case host
-      when /^twitter.com$/
-        '/twitter.com/*/.following'.R.glob.map(&:dir).map(&:basename)
-      else
-        []
-      end
-    end
-
-    def subscriptionFile
-      (case host
-       when /reddit.com$/
-         '/www.reddit.com/r/' + parts[1] + '/.sub'
-       when /^twitter.com$/
-         '/twitter.com/' + parts[0] + '/.following'
-       else
-         '/' + [host, *parts, '.subscribed'].join('/')
-       end).R
+      subscriptionFile('*').R.glob.map(&:dir).map &:basename
     end
 
     def unsubscribe

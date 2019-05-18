@@ -1,10 +1,39 @@
 class WebResource
+  module Feed
+
+    def subscribableSite?
+      case host
+      when /\.reddit.com$/
+        # TODO user subscriptions
+        parts[0] == 'r'
+      when /twitter.com$/
+        parts.size > 0
+      else
+        false
+      end
+    end
+
+    def subscriptionFile slug=nil
+      (case host
+       when /reddit.com$/
+         '/www.reddit.com/r/' + (slug || parts[1]) + '/.sub'
+       when /^twitter.com$/
+         '/twitter.com/' + (slug || parts[0]) + '/.following'
+       else
+         '/' + [host, *parts, '.subscribed'].join('/')
+       end).R
+    end
+
+  end
   module HTTP
-    # advertise this user-agent to request original desktop UI from site
+
+    # for upstream UI from site, use 'Desktop site' toggle in browser menu. update this to match your User-Agent's "desktop mode" value
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3790.0 Safari/537.36'
 
     # hosts which can be POSTed to
     POSThosts = /(\.(edu|gov)|(anvato|api\.(brightcove|twitter)|(android.*|drive|groups|images|mail|www)\.google|(android|youtubei?).googleapis|reddit|youtube|zillow)\.(com|net))$/
+
+    # POST to site
     def sitePOST
       case host
       when 'www.google.com'
@@ -32,13 +61,16 @@ class WebResource
       end
     end
 
-    # music news
+    # redirects
+    #  location
+    PathGET['/url'] = -> r { [301, {'Location' => (r.q['url']||r.q['q'])}, []]}
+    #  music news
     PathGET['/mu'] = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'},[]]}
 
     # CDNs
-    #  allowed scripts
+    #  allow scripts
     HostGET['ajax.googleapis.com'] = HostGET['cdnjs.cloudflare.com'] = HostGET['s.yimg.com'] = -> r {r.fetch}
-    #  filtered scripts
+    #  filter scripts
     HostGET['storage.googleapis.com'] = -> r {r.filter}
 
     # Facebook
@@ -50,6 +82,8 @@ class WebResource
       mode = r.parts[0]
       if !mode || %w{browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat playlist user results signin watch watch_videos yts}.member?(mode)
         r.fetch
+      elsif mode == 'attribution_link'
+        [301, {'Location' =>  r.q['u']},[]]
       elsif mode == 'redirect'
         [301, {'Location' =>  r.q['q']},[]]
       else
@@ -62,7 +96,7 @@ class WebResource
         [200, {'Content-Type' => 'text/html'}, [r.htmlDocument({'/' => {'uri' => '/', Link => r.subscriptions.map{|sub|('https://www.reddit.com/r/' + sub).R}},
                                                              '/new' => {'uri' => '/new', Title => 'new posts'}})]]
       elsif r.path == '/new'
-        r.graphResponse r.twits.map(&:fetch).flatten
+        ('//www.reddit.com/r/' + r.subscriptions.join('+') + '/new').R(r.env).fetch
       else
         r.remote
       end}
