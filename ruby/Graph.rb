@@ -128,16 +128,14 @@ class WebResource
 
       # check for on-file response body
       if set.size == 1 ; this = set[0]
-        # BEST MATCH format doc is on-file
-        created = this.isRDF && bestFormat?(this) && this
-
-        # WEAK MATCH but mutually acceptable. reduced server-transcoding solution
-        # Recommended only for MIME-agile clients and databrowsers ready for RDF
-        #created = (sendable? this) && (receivable? this) && this
+        # BEST MATCH format is on file
+        extant = this.isRDF && bestFormat?(this) && this
+        # WEAK MATCH mutually acceptable. reduced server transcoding-load for MIME-agile clients
+        #extant = (sendable? this) && (receivable? this) && this
       end
 
       # response metadata
-      format = created && created.mime || outputMIME
+      format = extant && extant.mime || outputMIME
       dateMeta if localNode?
       @r[:Response].update({'Link' => @r[:links].map{|type,uri|
                               "<#{uri}>; rel=#{type}"}.intersperse(', ').join}) unless @r[:links].empty?
@@ -146,17 +144,17 @@ class WebResource
 
       # lazy body-generator
       entity @r, ->{
-        if created # body already exists
-          created  # return reference
-        else # generate
-          if format == 'text/html'
+        if extant # body on file
+          extant  # return ref to body
+        else # generate entity
+          if format == 'text/html' # HTML
             htmlDocument load set
-          elsif format == 'application/atom+xml'
+          elsif format == 'application/atom+xml' # feed
             renderFeed load set
-          else # RDF format
-            g = RDF::Graph.new
-            set.map{|n| g.load n.toRDF.localPath, :base_uri => n.stripDoc }
-            g.dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true
+          else # RDF formats
+            g = RDF::Graph.new # create graph
+            set.map{|n| g.load n.toRDF.localPath, :base_uri => n.stripDoc } # data to graph
+            g.dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true # serialize output
           end
         end}
     end
