@@ -178,7 +178,13 @@ class WebResource
     end
 
     def originUI
-      env['HTTP_USER_AGENT'] == DesktopUA
+      if %w{duckduckgo.com}.member? host
+        true
+      elsif env['HTTP_USER_AGENT'] == DesktopUA
+        true
+      else
+        false
+      end
     end
 
     def POSTthru
