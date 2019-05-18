@@ -178,7 +178,7 @@ class WebResource
     end
 
     def originUI
-      env['User-Agent'] == DesktopUA
+      env['HTTP_USER_AGENT'] == DesktopUA
     end
 
     def POSTthru
@@ -227,6 +227,7 @@ class WebResource
       if env.has_key? 'HTTP_TYPE'
         case env['HTTP_TYPE']
         when /drop/
+          return fetch if parts.member?('track') && host.match?(/\.(bandcamp|soundcloud)\.com$/)
           drop
         when /filter/
           filter
