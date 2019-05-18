@@ -215,16 +215,10 @@ class WebResource
       accept.sort.reverse
     end
 
-    # client accepts format (ANY preference level)
+    # client accepts format at ANY preference level
     def receivable? file
       accepted = accept.values.flatten
       accepted.member?(file.mime) || accepted.member?(file.mimeCategory) || accepted.member?('*/*')
-    end
-
-    # server emits format
-    def sendable? file
-      # not formats which need a webization
-      !%w{message/rfc822 text/uri-list}.member? file.mime
     end
 
     def setMIME m

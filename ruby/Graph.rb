@@ -63,58 +63,55 @@ class WebResource
     end
 
     # file -> file
-    def rdfize # call MIME-mapped triplr function, cache output in JSON and return file-reference
+    def rdfize # call MIME-mapped triplr function, cache its output in JSON file and return reference to it
       return self if ext == 'e'
       hash = node.stat.ino.to_s.sha2
       doc = ('/cache/RDF/' + hash[0..2] + '/' + hash[3..-1] + '.e').R
       return doc if doc.e && doc.m > m # cache up-to-date
       graph = {}
-      # look up triple-producer function
+      # lookup triple-producer code
       triplr = Triplr[mime]
       unless triplr
         puts "#{uri}: triplr for #{mime} missing"
         triplr = :triplrFile
       end
-      # request triples
+      # collect triples
       send(*triplr){|s,p,o|
         graph[s]    ||= {'uri' => s}
         graph[s][p] ||= []
         graph[s][p].push o.class == WebResource ? {'uri' => o.uri} : o}
-
-      # update cache
+      # return cache file-ref
       doc.writeFile graph.to_json
     end
 
   end
   module HTTP
-    # load native-JSON and RDF
-    def load set # file-set
-      g = {}                 # Hash
-      graph = RDF::Graph.new # RDF graph
+    # load JSON and RDF to JSON-compatible Hash
+    def load files
+      g = {}                 # init Hash
+      graph = RDF::Graph.new # init RDF::Graph
 
-      rdf, non_rdf = set.partition &:isRDF
+      rdf, misc = files.partition &:isRDF # input categories
 
       # RDF
-      # load document(s)
-      rdf.map{|n|
+      rdf.map{|n| # each file
         opts = {:base_uri => n}
         opts[:format] = :feed if n.feedMIME?
-        graph.load n.localPath, opts rescue puts("load error on #{n}")}
-      # visit nodes
-      graph.each_triple{|s,p,o|
+        graph.load n.localPath, opts rescue puts("error parsing #{n} as RDF")} # load data
+      graph.each_triple{|s,p,o| # bind subject,predicate,object
         s = s.to_s; p = p.to_s # subject URI, predicate URI
-        o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object
+        o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object URI or literal value
         g[s] ||= {'uri'=>s} # insert subject
         g[s][p] ||= []      # insert predicate
         g[s][p].push o unless g[s][p].member? o} # insert object
 
       # JSON
-      non_rdf.map{|n| # visit non-RDF files
-        n.rdfize.do{|transcode| # transcode to JSON
-          ::JSON.parse(transcode.readFile). # load JSON
-            map{|s,re| # visit resources
-            re.map{|p,o| # predicate URI, object(s)
-              o.justArray.map{|o| # object URI or value
+      misc.map{|n| # each file
+        n.rdfize.do{|transcode| # transcode to RDF
+          ::JSON.parse(transcode.readFile). # load data
+            map{|s,re| # each resource
+            re.map{|p,o| # bind predicate URI  + object(s)
+              o.justArray.map{|o| # normalize array of objects
                 o = o.R if o.class==Hash # object URI
                 g[s] ||= {'uri'=>s} # insert subject
                 g[s][p] ||= []      # insert predicate
@@ -128,10 +125,8 @@ class WebResource
 
       # check for on-file response body
       if set.size == 1 ; this = set[0]
-        # BEST MATCH format is on file
-        extant = this.isRDF && bestFormat?(this) && this
-        # WEAK MATCH mutually acceptable. reduced server transcoding-load for MIME-agile clients
-        #extant = (sendable? this) && (receivable? this) && this
+        extant = this.isRDF && bestFormat?(this) && this # BEST MATCH on file
+       #extant = receivable?(this) && this # WEAK MATCH for MIME-agile clients
       end
 
       # response metadata
