@@ -149,8 +149,10 @@ class WebResource
     end
 
     def youtube
-      s = 'https://www.youtube.com' + env['REQUEST_URI']
-      yield s, Video, s.R
+      if env['REQUEST_PATH'] == '/watch'
+        s = 'https://www.youtube.com' + env['REQUEST_URI']
+        yield s, Video, s.R
+      end
     end
 
     TriplrHTML['twitter.com'] = :tweets
