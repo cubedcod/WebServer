@@ -148,7 +148,13 @@ class WebResource
           yield s, Image, img.attr('src').to_s.R}}
     end
 
+    def youtube
+      s = 'https://www.youtube.com' + env['REQUEST_URI']
+      yield s, Video, s.R
+    end
+
     TriplrHTML['twitter.com'] = :tweets
+    TriplrHTML['www.youtube.com'] = :youtube
 
     IndexHTML['twitter.com'] = -> page {
       graph = {}
