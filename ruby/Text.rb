@@ -9,13 +9,13 @@ class WebResource
       case args.size
       when 0
         return []
-      when 2 # two terms
+      when 2 # two unordered terms
         cmd = "grep -rilZ #{args[0].sh} #{sh} | xargs -0 grep -il #{args[1].sh}"
-      when 3 # three terms
+      when 3 # three unordered terms
         cmd = "grep -rilZ #{args[0].sh} #{sh} | xargs -0 grep -ilZ #{args[1].sh} | xargs -0 grep -il #{args[2].sh}"
-      when 4 # four terms
+      when 4 # four unordered terms
         cmd = "grep -rilZ #{args[0].sh} #{sh} | xargs -0 grep -ilZ #{args[1].sh} | xargs -0 grep -ilZ #{args[2].sh} | xargs -0 grep -il #{args[3].sh}"
-      else # N terms in sequential order of appearance in match in one process invocation (if anyone reaches this, maybe theyre pasting in a sentence in which case the args are ordered)
+      else # N ordered terms
         pattern = args.join '.*'
         cmd = "grep -ril #{pattern.sh} #{sh}"
       end
@@ -28,22 +28,20 @@ class WebResource
 
     def htmlGrep graph, q
       wordIndex = {}
-      # tokenize
       args = POSIX.splitArgs q
       args.each_with_index{|arg,i| wordIndex[arg] = i }
-      # highlight any matches via OR pattern
       pattern = /(#{args.join '|'})/i
 
       # find matches
       graph.map{|k,v|
         graph.delete k unless (k.match pattern) || (v.to_s.match pattern)}
 
-      # highlighted matches in Abstract field
+      # highlight matches in exerpt
       graph.values.map{|r|
         (r[Content]||r[Abstract]).justArray.map(&:lines).flatten.grep(pattern).do{|lines|
           r[Abstract] = lines[0..5].map{|l|
-            l.gsub(/<[^>]+>/,'')[0..512].gsub(pattern){|g| # capture
-              HTML.render({_: :span, class: "w#{wordIndex[g.downcase]}", c: g}) # wrap
+            l.gsub(/<[^>]+>/,'')[0..512].gsub(pattern){|g| # matches
+              HTML.render({_: :span, class: "w#{wordIndex[g.downcase]}", c: g}) # wrap in styled node
             }} if lines.size > 0 }}
 
       # CSS
