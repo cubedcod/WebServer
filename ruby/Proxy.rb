@@ -131,7 +131,12 @@ class WebResource
 
     def filter
       if %w{gif js}.member? ext.downcase # filtered suffix
-        deny
+        if ext=='gif' && qs.empty?
+          puts "GIF #{uri}"
+          fetch
+        else
+          deny
+        end
       else
         fetch.do{|s,h,b|
           if s.to_s.match? /30[1-3]/ # redirected
