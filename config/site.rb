@@ -74,6 +74,7 @@ class WebResource
     HostGET['storage.googleapis.com'] = -> r {r.filter}
 
     # Facebook
+    HostGET['facebook.com'] = HostGET['www.facebook.com'] = -> r {%w{connect security tr}.member?(r.parts[0]) ? r.drop : r.remote}
     HostGET['l.instagram.com'] = -> r {[301, {'Location' =>  r.q['u']},[]]}
 
     # Google
