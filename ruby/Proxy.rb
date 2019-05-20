@@ -42,6 +42,7 @@ class WebResource
       update = -> url {
         print '🌎🌏🌍'[rand 3], ' '
         begin
+          #puts "FETCH #{url}"
           open(url, head) do |response| # request
             if response.status.to_s.match?(/206/) # partial response
               response_head = response.meta
@@ -233,8 +234,15 @@ class WebResource
       if env.has_key? 'HTTP_TYPE'
         case env['HTTP_TYPE']
         when /drop/
-          return fetch if parts.member?('track') && host.match?(/\.(bandcamp|soundcloud)\.com$/)
-          drop
+          if parts.member?('track') && host.match?(/\.(bandcamp|soundcloud)\.com$/)
+            fetch
+          elsif qs == '?allow'
+            puts "ALLOW #{uri}"
+            env.delete 'QUERY_STRING'
+            fetch
+          else
+            drop
+          end
         when /filter/
           filter
         when /thru/

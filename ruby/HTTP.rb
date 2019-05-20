@@ -68,7 +68,7 @@ class WebResource
       env[:deny] = true
       js = ext == 'js'
       [200, {'Content-Type' => js ? 'application/javascript' : 'text/html; charset=utf-8'},
-       js ? [] : ["<html><body style='background-color: red; text-align: center'><a href='#{path}' style='color: #fff; font-size: 28em; text-decoration: none'>⌘</span></body></html>"]]
+       js ? ["console.log('loaded #{host}#{path.gsub "'",''}');"] : ["<html><body style='background-color: red; text-align: center'><a href='#{qs.empty? ? '?allow' : path}' style='color: #fff; font-size: 28em; text-decoration: none'>⌘</a></body></html>"]]
     end
     alias_method :drop, :deny
 
