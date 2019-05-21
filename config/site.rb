@@ -7,7 +7,7 @@ class WebResource
         # TODO user subscriptions
         parts[0] == 'r'
       when /twitter.com$/
-        parts.size > 0
+        parts.size > 0 && !%w{search}.member?(parts[0])
       else
         false
       end
