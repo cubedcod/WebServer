@@ -42,7 +42,6 @@ class WebResource
       update = -> url {
         print '🌎🌏🌍'[rand 3], ' '
         begin
-          #puts "FETCH #{url}"
           open(url, head) do |response| # request
             if response.status.to_s.match?(/206/) # partial response
               response_head = response.meta
@@ -88,8 +87,8 @@ class WebResource
             end
           end
         rescue Exception => e
-          if e.message.match? /[34]04/
-            # resource unchanged or missing
+          if e.message.match? /[34]04/ # no updates
+          #HTTP.print_header  e.io.meta
           else
             raise # miscellaneous errors
           end
