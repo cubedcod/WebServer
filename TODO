@@ -1,0 +1,27 @@
+.txt for turtle
+announce full updates or existence thereof to curious peers - irvc3, crdt, solid-websocket, matrix etc
+pull gmail, inbox via to: match
+eliminate cache dir
+host/path-mapped json triplrs
+expand cached-shortURLs at storage and presentation/loading time
+ad <a id> when missing in extracted-content
+index-browsing for cached remote containers
+reference cached stories on timeline and in RDF indexes - index backlinks, HEAD Metadata
+troff triplr - .1, .2, (sslsplit/proxy docs)
+Searchbox host-specific URL templates
+mp3 images
+xhr link inliner - nowrapped-body, only-new updates (twitter frontpage)
+Tweet-video triplr
+reddit-video triplr
+random fileset
+universal breadcrumb links
+graph viz
+dokieli / write ui
+webized server log
+pseudofeed from frontpage when can't be found  http://www.mysouthend.com/
+preserve rewrite/non status across server runs
+record POSTs for modification/replay/templating
+paranoid networking script
+handle overload of / (recursive?-)subdir triplization
+bubble up HTML-extracted next/prev to HTTP headers https://www.google.com/search?q=corbett+crew+boston&gbv=1&prmd=ivns&ei=OdTEXPS5OLCKggeExqXoDA&start=10&sa=N
+/crt.sectigo.com/SectigoRSADomainValidationSecureServerCA.crt.cache: triplr for application/x-x509-ca-cert missing                                                                                                                                                                                                              GET 200  https://crt.sectigo.com/SectigoRSADomainValidationSecureServerCA.crt

@@ -78,6 +78,7 @@ class WebResource
     HostGET['l.instagram.com'] = -> r {[301, {'Location' =>  r.q['u']},[]]}
 
     # Google
+    HostGET['google.com'] = HostGET['www.google.com'] = -> r {%w{complete}.member?(r.parts[0]) ? r.drop : r.remote}
     HostGET['www.googleadservices.com'] = -> r {r.q.has_key?('adurl') ? [301, {'Location' =>  r.q['adurl']},[]] : r.remote}
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
