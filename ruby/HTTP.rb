@@ -10,18 +10,16 @@ class WebResource
     def cache?; !(pragma && pragma == 'no-cache') end
 
     def self.call env
-      method = env['REQUEST_METHOD']                        # request-method
-      return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? method # defined methods
-      query = env[:query] = parseQs env['QUERY_STRING']     # query
-      host = env['HTTP_HOST']|| 'localhost'                 # host name
-      rawpath = env['REQUEST_PATH'].force_encoding('UTF-8').gsub /[\/]+/, '/' # collapse consecutive path-sep chars
+      method = env['REQUEST_METHOD']                        # lookup request-method
+      return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? method # allow defined methods
+      query = env[:query] = parseQs env['QUERY_STRING']     # parse query
+      host = query['host'] || env['HTTP_HOST']|| 'localhost' # hostname
+      rawpath = env['REQUEST_PATH'].force_encoding('UTF-8').gsub /[\/]+/, '/' # collapse consecutive path-separator chars
       path  = Pathname.new(rawpath).expand_path.to_s        # evaluate path expression
       path += '/' if path[-1] != '/' && rawpath[-1] == '/'  # preserve trailing-slash
-      resource = ('//' + host + path).R env                 # request environment
-      env[:Response] = {}; env[:links] = {}                 # response environment
-      # dispatch request
-      resource.send(method).do{|status,head,body|
-        # log to console
+      resource = ('//' + host + path).R env                 # bind request environment and resource identifier
+      env[:Response] = {}; env[:links] = {}                 # response-header storage
+      resource.send(method).do{|status,head,body|           # dispatch request
         color = (if resource.env[:deny]
                  '31'
                 elsif !Hosts.has_key? host # first-seen host
@@ -47,9 +45,9 @@ class WebResource
                      ''
                    end
         relocation = head['Location'] ? (" ↝ " + head['Location']) : ""
+        # log request to console
         puts "\e[7m" + (method == 'GET' ? '' : method) + "\e[" + color + "m "  + status.to_s + "\e[0m " + referrer + ' ' +
              "\e[" + color + ";7mhttps://" + host + "\e[0m\e[" + color + "m" + path + resource.qs + "\e[0m " + (env['HTTP_TYPE'] || '') + relocation
-
         # response
         [status, head, body]}
     rescue Exception => e
