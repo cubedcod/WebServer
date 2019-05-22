@@ -238,7 +238,7 @@ class WebResource
       if env.has_key? 'HTTP_TYPE'
         case env['HTTP_TYPE']
         when /drop/
-          if parts.member?('track') && host.match?(/\.(bandcamp|soundcloud)\.com$/)
+          if env['REQUEST_URI'].match?(/track/) && host.match?(/\.(bandcamp|soundcloud|theplatform)\.com$/)
             fetch
           elsif qs == '?allow'
             puts "ALLOW #{uri}"
