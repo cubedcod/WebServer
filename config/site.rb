@@ -31,11 +31,17 @@ class WebResource
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3790.0 Safari/537.36'
 
     # hosts which can be POSTed to
-    POSThosts = /(\.(edu|gov)|(anvato|api\.(brightcove|twitter)|(accounts|android.*|drive|groups|images|mail|photos|www)\.google|(android|youtubei?).googleapis|reddit|youtube|zillow)\.(com|net))$/
+    POSThosts = /(^www.facebook.com|\.(edu|gov)|(anvato|api\.(brightcove|twitter)|(accounts|android.*|drive|groups|images|mail|photos|www)\.google|(android|youtubei?).googleapis|reddit|youtube|zillow)\.(com|net))$/
 
     # POST to site
     def sitePOST
       case host
+      when 'www.facebook.com'
+        if %w{/api/graphql/}.member? path
+          self.POSTthru
+        else
+          denyPOST
+        end
       when 'www.google.com'
         if path.match? /recaptcha|searchbyimage/
           self.POSTthru
