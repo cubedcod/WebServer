@@ -79,7 +79,7 @@ class WebResource
       send(*triplr){|s,p,o|
         graph[s]    ||= {'uri' => s}
         graph[s][p] ||= []
-        graph[s][p].push o.class == WebResource ? {'uri' => o.uri} : o}
+        graph[s][p].push o.class == WebResource ? {'uri' => o.uri} : o unless p == 'uri'}
       # return cache file-ref
       doc.writeFile graph.to_json
     end
