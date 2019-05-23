@@ -27,13 +27,10 @@ class WebResource
   end
   module HTTP
 
-    # put your UA string here to use "desktop mode" toggle for upstream UI
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3802.0 Safari/537.36'
 
-    # hosts which can be POSTed to
-    POSThosts = /(^www.facebook.com|\.(edu|gov)|(anvato|api\.(brightcove|twitter)|(accounts|android.*|drive|groups|images|mail|photos|www)\.google|(android|youtubei?).googleapis|reddit|youtube|zillow)\.(com|net))$/
-
     # POST to site
+    POSThosts = /(^www.facebook.com|\.(edu|gov)|(^|\.)(anvato|brightcove|(accounts|android.*|clients?[0-9]*|drive|groups|images|mail|maps|photos|www|youtubei?)\.google(apis)?|reddit|youtube|zillow)\.(com|net))$/
     def sitePOST
       case host
       when 'www.facebook.com'
@@ -42,13 +39,13 @@ class WebResource
         else
           denyPOST
         end
-      when 'www.google.com'
-        if path.match? /recaptcha|searchbyimage/
+      when /\.google\.com$/
+        if path.match? /chrome-sync|recaptcha|searchbyimage/
           self.POSTthru
         else
           denyPOST
         end
-      when /youtube.com$/
+      when /\.youtube.com$/
         if parts.member? 'stats'
           denyPOST
         elsif env['REQUEST_URI'].match? /ACCOUNT_MENU|comment|subscribe/
@@ -75,7 +72,7 @@ class WebResource
 
     # CDNs
     #  allow scripts
-    HostGET['ajax.googleapis.com'] = HostGET['cdnjs.cloudflare.com'] = HostGET['s.yimg.com'] = -> r {r.fetch}
+    HostGET['ajax.googleapis.com'] = HostGET['cdnjs.cloudflare.com'] = HostGET['maps.googleapis.com'] = HostGET['s.yimg.com'] = -> r {r.fetch}
     #  filter scripts
     HostGET['storage.googleapis.com'] = -> r {r.filter}
 
