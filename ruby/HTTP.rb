@@ -7,6 +7,11 @@ class WebResource
     Hosts = {} # track hosts for highlighting
     HostFirsts = []
 
+    def allowPOST?
+      (host.match? POSThost) ||
+      (path.match? POSTpath)
+    end
+
     def cache?; !(pragma && pragma == 'no-cache') end
 
     def self.call env
@@ -176,7 +181,7 @@ class WebResource
     end
 
     def OPTIONS
-      if host.match? POSThosts
+      if allowPOST?
         self.OPTIONSthru
       else
         env[:deny] = true
@@ -197,13 +202,7 @@ class WebResource
       end
     end
 
-    def POST
-      if host.match? POSThosts
-        sitePOST
-      else
-        denyPOST
-      end
-    end
+    def POST; allowPOST? ? sitePOST : denyPOST end
 
     def pragma; env['HTTP_PRAGMA'] end
 
