@@ -49,7 +49,7 @@ class WebResource
       when /\.youtube.com$/
         if parts.member? 'stats'
           denyPOST
-        elsif env['REQUEST_URI'].match? /ACCOUNT_MENU|comment|subscribe/
+        elsif env['REQUEST_URI'].match? /ACCOUNT_MENU|comment|\/results|subscribe/
           self.POSTthru
         else
           denyPOST
