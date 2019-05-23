@@ -10,6 +10,7 @@ reference cached stories on timeline and in RDF indexes - index backlinks, HEAD 
 troff triplr - .1, .2, (sslsplit/proxy docs)
 Searchbox host-specific URL templates
 mp3 images
+move toplevel cache file into host-dir
 images/video in twitter search https://twitter.com/search?f=images&vertical=default&q=%22Red%20line%22%20derailment
 reddit-video triplr
 random fileset
