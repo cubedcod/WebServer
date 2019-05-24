@@ -42,7 +42,7 @@ class WebResource
           denyPOST
         end
       when /\.google\.com$/
-        if path.match? /chrome-sync|recaptcha|searchbyimage/
+        if path.match? /chrome-sync|recaptcha|searchbyimage|signin/
           self.POSTthru
         else
           denyPOST

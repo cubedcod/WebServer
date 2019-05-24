@@ -13,6 +13,19 @@ class WebResource
                                      end)).R env
     end
 
+    def decompress head, body
+      case head['content-encoding'].to_s
+      when /^br(otli)?$/i
+        Brotli.inflate body
+      when /gzip/i
+        (Zlib::GzipReader.new StringIO.new body).read
+      when /flate|zip/i
+        Zlib::Inflate.inflate body
+      else
+        body
+      end
+    end
+
     def fetch
       head = HTTP.unmangle env # request environment
       response_head = {}      # response environment
@@ -37,7 +50,7 @@ class WebResource
       head["If-Modified-Since"] = cache.mtime.httpdate if cache.e
 
       # updater
-      partialContent = nil
+      partial_response = nil
       updates = []
       update = -> url {
         print '🌎🌏🌍'[rand 3], ' '
@@ -45,24 +58,12 @@ class WebResource
           open(url, head) do |response| # request
             if response.status.to_s.match?(/206/) # partial response
               response_head = response.meta
-              partialContent = response.read
+              partial_response = response.read
             else # response
               %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| @r[:Response][k] ||= response.meta[k.downcase] } if @r
-              #HTTP.print_header response.meta
-              body = response.read
-
-              # decompress
-              case response.meta['content-encoding'].to_s
-              when /^br(otli)?$/
-                body = Brotli.inflate body
-              when /gzip/
-                body = (Zlib::GzipReader.new StringIO.new body).read
-              when /flate|zip/
-                body = Zlib::Inflate.inflate body
-              end
-
-              # update cache
-              unless cache.e && cache.readFile == body
+              body = decompress response.meta, response.read
+              unless cache.e && cache.readFile == body # unchanged
+                # update cache
                 cache.writeFile body
                 mime = if response.meta['content-type'] # explicit MIME
                          response.meta['content-type'].split(';')[0]
@@ -71,14 +72,13 @@ class WebResource
                        else                             # sniff
                          cache.mimeSniff
                        end
-                cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # TODO survey POSIX extended attributes (MIME, source URL) support
-
-                # update index
+                # updata metadata on cache file  TODO survey POSIX eattr support
+                cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache'
+                # index updates
                 updates.concat(case mime
                                when /^(application|text)\/(atom|rss|xml)/
                                  cache.indexFeed
                                when /^text\/html/
-                                 # site-specific indexer
                                  IndexHTML[@r ? @r['SERVER_NAME'] : host].do{|indexer| indexer[cache] } || []
                                else
                                  []
@@ -87,34 +87,30 @@ class WebResource
             end
           end
         rescue Exception => e
-          if e.message.match? /[34]04/ # no updates
-          #HTTP.print_header  e.io.meta
-          else
-            raise # miscellaneous errors
-          end
+          raise unless e.message.match? /[34]04/ # 304/404 handled in normal control-flow
         end}
 
-      # refresh cache
+      # update cache
       immutable = cache? && cache.e && cache.noTransform?
       unless immutable || OFFLINE
         begin
-          update[url]
+          update[url]                               # HTTPS
         rescue Exception => e
-          raise if e.class == OpenURI::HTTPRedirect # redirected
-          update[url.sub /^https/, 'http']          # HTTPS -> HTTP downgrade retry
+          raise if e.class == OpenURI::HTTPRedirect # redirection
+          update[url.sub /^https/, 'http']          # HTTP downgrade
         end
       end
 
-      # return value
-      if @r # HTTP calling context
-        if partialContent
-          [206, response_head, [partialContent]]
+      # response
+      if @r # HTTP caller
+        if partial_response
+          [206, response_head, [partial_response]]
         elsif cache.exist?
-          if cache.noTransform? # immutable MIME
+          if cache.noTransform? # immutable format
             cache.localFile
           elsif originUI
             cache.localFile     # immutable per client preference
-          else                  # malleable
+          else                  # malleable graph format
             env[:feed] = true if cache.feedMIME?
             graphResponse (updates.empty? ? [cache] : updates)
           end
@@ -124,7 +120,7 @@ class WebResource
       else # REPL/script/shell caller
         updates
       end
-    rescue OpenURI::HTTPRedirect => re # redirect caller
+    rescue OpenURI::HTTPRedirect => re # redirection
       updateLocation re.io.meta['location']
     end
 
@@ -208,15 +204,10 @@ class WebResource
       s = r.code
       h = r.headers
       b = r.body
-      body = if h['content-encoding'].to_s.match?(/zip/)
-               Zlib::Inflate.inflate(b) rescue ''
-             else
-               b
-             end
 
       puts "<-"
       HTTP.print_header h
-      HTTP.print_body body, h['content-type']
+      HTTP.print_body decompress(h, b), h['content-type']
 
       [s, h, [b]]
     end
