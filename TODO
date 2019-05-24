@@ -22,6 +22,7 @@ webized server log
 pseudofeed from frontpage when can't be found  http://www.mysouthend.com/
 record POSTs for modification/replay/templating
 paranoid networking script
+image hashing and hash-based linking
 handle overload of / (recursive?-)subdir triplization
 bubble up HTML-extracted next/prev to HTTP headers https://www.google.com/search?q=corbett+crew+boston&gbv=1&prmd=ivns&ei=OdTEXPS5OLCKggeExqXoDA&start=10&sa=N
 /crt.sectigo.com/SectigoRSADomainValidationSecureServerCA.crt.cache: triplr for application/x-x509-ca-cert missing https://crt.sectigo.com/SectigoRSADomainValidationSecureServerCA.crt

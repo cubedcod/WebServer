@@ -41,7 +41,7 @@ class WebResource
           denyPOST
         end
       when /\.google\.com$/
-        if path.match? /chrome-sync|recaptcha|searchbyimage|signin/
+        if path.match? /searchbyimage|signin/
           self.POSTthru
         else
           denyPOST
@@ -83,7 +83,7 @@ class WebResource
 
     # Google
     PathGET['/url'] = -> r { [301, {'Location' => (r.q['url']||r.q['q'])}, []]}
-    HostGET['google.com'] = HostGET['www.google.com'] = -> r {%w{complete jsapi}.member?(r.parts[0]) ? r.drop : r.remote}
+    HostGET['google.com'] = HostGET['www.google.com'] = -> r {%w{complete jsapi recaptcha}.member?(r.parts[0]) ? r.drop : r.remote}
     HostGET['www.googleadservices.com'] = -> r {r.q.has_key?('adurl') ? [301, {'Location' =>  r.q['adurl']},[]] : r.remote}
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
