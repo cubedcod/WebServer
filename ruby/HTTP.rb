@@ -52,7 +52,7 @@ class WebResource
         relocation = head['Location'] ? (" ↝ " + head['Location']) : ""
         # log request to console
         puts "\e[7m" + (method == 'GET' ? '' : method) + "\e[" + color + "m "  + status.to_s + "\e[0m " + referrer + ' ' +
-             "\e[" + color + ";7mhttps://" + host + "\e[0m\e[" + color + "m" + path + resource.qs + "\e[0m " + (env['HTTP_TYPE'] || '') + relocation # + (env[:Response]['ETag'] || '')
+             "\e[" + color + ";7mhttps://" + host + "\e[0m\e[" + color + "m" + path + resource.qs + "\e[0m " + relocation
         # response
         [status, head, body]}
     rescue Exception => e

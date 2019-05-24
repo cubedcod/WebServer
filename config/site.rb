@@ -78,12 +78,12 @@ class WebResource
     HostGET['duckduckgo.com'] = -> r {%w{ac}.member?(r.parts[0]) ? r.drop : r.remote}
 
     # Facebook
-    HostGET['facebook.com'] = HostGET['www.facebook.com'] = -> r {%w{connect security tr}.member?(r.parts[0]) ? r.drop : r.remote}
+    HostGET['facebook.com'] = HostGET['www.facebook.com'] = -> r {%w{connect pages_reaction_units plugins security tr}.member?(r.parts[0]) ? r.drop : r.remote}
     HostGET['l.instagram.com'] = -> r {[301, {'Location' =>  r.q['u']},[]]}
 
     # Google
     PathGET['/url'] = -> r { [301, {'Location' => (r.q['url']||r.q['q'])}, []]}
-    HostGET['google.com'] = HostGET['www.google.com'] = -> r {%w{complete}.member?(r.parts[0]) ? r.drop : r.remote}
+    HostGET['google.com'] = HostGET['www.google.com'] = -> r {%w{complete jsapi}.member?(r.parts[0]) ? r.drop : r.remote}
     HostGET['www.googleadservices.com'] = -> r {r.q.has_key?('adurl') ? [301, {'Location' =>  r.q['adurl']},[]] : r.remote}
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
