@@ -1,4 +1,5 @@
 #!/usr/bin/sh
 uid=$(id -u)
-script=$(realpath ~/src/WebServer/bin/network.rules)
-su -c "sh $script $uid"
+rules=$(realpath ~/src/WebServer/bin/network.rules)
+# configure network
+su -c "sh $rules $uid"

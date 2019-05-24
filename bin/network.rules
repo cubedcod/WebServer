@@ -59,7 +59,7 @@ open_port 60001 Mosh
 open_port 60002 Mosh
 open_port 60003 Mosh
 
-# route HTTP
+# route HTTP. for transparent proxy run browser or client as different user
 iptables  -A OUTPUT -p udp --dport 80 -j DROP
 ip6tables -A OUTPUT -p udp --dport 80 -j DROP
 iptables  -A OUTPUT -p udp --dport 443 -j DROP
