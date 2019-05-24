@@ -238,7 +238,7 @@ class WebResource
       if env.has_key? 'HTTP_TYPE'
         case env['HTTP_TYPE']
         when /drop/
-          if env['REQUEST_URI'].match?(/track/) && host.match?(TrackHost)
+          if ((host.match? /track/) || (env['REQUEST_URI'].match? /track/)) && (host.match? TrackHost)
             fetch
           elsif qs == '?allow'
             puts "ALLOW #{uri}"

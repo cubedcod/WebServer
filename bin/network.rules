@@ -20,30 +20,32 @@ open_port () {
     open_TCP $1 $2
 }
 
-# default drop
+# policy defaults
 iptables  -P INPUT DROP
 ip6tables -P INPUT DROP
 iptables  -P OUTPUT DROP
 ip6tables -P OUTPUT DROP
 
-# allow ICMP
+# ICMP
 iptables  -A INPUT -p icmp -j ACCEPT
 ip6tables -A INPUT -p icmp -j ACCEPT
 iptables  -A OUTPUT -p icmp -j ACCEPT
 ip6tables -A OUTPUT -p icmp -j ACCEPT
 
-# allow localnet
+# localnet
 iptables  -A INPUT -i lo -j ACCEPT
 ip6tables -A INPUT -i lo -j ACCEPT
 iptables  -A OUTPUT -o lo -j ACCEPT
 ip6tables -A OUTPUT -o lo -j ACCEPT
 
-# open miscellaneous ports
+# open ports
 open_port    22 SSH
 open_port    43 whois
 open_port    53 DNS
 open_port    67 DHCP
 open_port    68 DHCP
+open_TCP    80 HTTP
+open_TCP   443 HTTPS
 open_port  6789 IRC
 open_port  8000 HTTP
 open_port  8022 SSH
@@ -57,15 +59,11 @@ open_port 60001 Mosh
 open_port 60002 Mosh
 open_port 60003 Mosh
 
-# open HTTP ports
+# route HTTP
 iptables  -A OUTPUT -p udp --dport 80 -j DROP
 ip6tables -A OUTPUT -p udp --dport 80 -j DROP
 iptables  -A OUTPUT -p udp --dport 443 -j DROP
 ip6tables -A OUTPUT -p udp --dport 443 -j DROP
-open_TCP    80 HTTP
-open_TCP   443 HTTPS
-
-# route HTTP
 iptables  -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8082 -m owner ! --uid-owner $uid
 ip6tables -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8082 -m owner ! --uid-owner $uid
 iptables  -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $uid

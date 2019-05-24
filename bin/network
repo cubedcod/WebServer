@@ -1,4 +1,4 @@
 #!/usr/bin/sh
 uid=$(id -u)
-script=$(realpath ~/src/WebServer/bin/network.paranoid)
+script=$(realpath ~/src/WebServer/bin/network.rules)
 su -c "sh $script $uid"
