@@ -6,6 +6,7 @@ host/path-mapped json triplrs
 expand cached-shortURLs at storage and presentation/loading time
 ad <a id> when missing in extracted-content
 index-browsing for cached remote containers
+link to cache URL in metadata (and body? server-log?)
 reference cached stories on timeline and in RDF indexes - index backlinks, HEAD Metadata
 troff triplr - .1, .2, (sslsplit/proxy docs)
 Searchbox host-specific URL templates
