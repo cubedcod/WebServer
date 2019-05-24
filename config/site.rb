@@ -70,7 +70,7 @@ class WebResource
 
     # CDNs
     #  allow scripts
-    HostGET['ajax.googleapis.com'] = HostGET['cdnjs.cloudflare.com'] = HostGET['maps.googleapis.com'] = HostGET['s.yimg.com'] = -> r {r.fetch}
+    HostGET['ajax.googleapis.com'] = HostGET['cdnjs.cloudflare.com'] = HostGET['maps.googleapis.com'] = -> r {r.fetch}
     #  filter scripts
     HostGET['storage.googleapis.com'] = -> r {r.filter}
 
