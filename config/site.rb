@@ -4,7 +4,6 @@ class WebResource
     def subscribableSite?
       case host
       when /\.reddit.com$/
-        # TODO user subscriptions
         parts[0] == 'r'
       when /twitter.com$/
         parts.size > 0 && !%w{new search}.member?(parts[0])
@@ -29,10 +28,10 @@ class WebResource
 
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3802.0 Safari/537.36'
     TrackHost = /\.(bandcamp|soundcloud|theplatform|track-blaster)\.com$/
-
     POSThost = /(^www.facebook.com|\.(edu|gov)|(^|\.)(anvato|brightcove|(accounts|android.*|clients?[0-9]*|drive|groups|images|mail|maps|photos|www|youtubei?)\.google(apis)?|reddit|youtube|zillow)\.(com|net))$/
     POSTpath = /^\/_Incapsula_Resource$/
-    # POST handling. enable with regexes above and define custom handling if needed
+
+    # POST handling. allow via regex above and define custom handler if needed
     def sitePOST
       case host
       when 'www.facebook.com'
@@ -66,9 +65,6 @@ class WebResource
       end
     end
 
-    # redirects
-    #  location
-    PathGET['/url'] = -> r { [301, {'Location' => (r.q['url']||r.q['q'])}, []]}
     #  music news
     PathGET['/mu'] = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'},[]]}
 
@@ -86,6 +82,7 @@ class WebResource
     HostGET['l.instagram.com'] = -> r {[301, {'Location' =>  r.q['u']},[]]}
 
     # Google
+    PathGET['/url'] = -> r { [301, {'Location' => (r.q['url']||r.q['q'])}, []]}
     HostGET['google.com'] = HostGET['www.google.com'] = -> r {%w{complete}.member?(r.parts[0]) ? r.drop : r.remote}
     HostGET['www.googleadservices.com'] = -> r {r.q.has_key?('adurl') ? [301, {'Location' =>  r.q['adurl']},[]] : r.remote}
     HostGET['www.youtube.com'] = -> r {

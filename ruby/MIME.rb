@@ -144,7 +144,7 @@ class WebResource
       'text/x-tex'           => [:triplrTeX],
     }
 
-    NoTransform = /^(application\/(dash|font|(x-)?java|json|octet-stream|pdf|smil|vnd|x-mpegURL|(x-)?protobuf(fer)?)|audio|binary|font|image|text\/(css|javascript|vtt)|video)/
+    NoTransform = /^(application\/(dash|font|gzip|(x-)?java|json|octet-stream|pdf|smil|vnd|x-mpegURL|(x-)?protobuf(fer)?)|audio|binary|font|image|text\/(css|javascript|vtt)|video)/
 
     # environment -> acceptable formats
     def accept k = 'HTTP_ACCEPT'

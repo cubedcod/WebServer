@@ -192,7 +192,7 @@ class WebResource
       # request
       url = 'https://' + host + path + qs
       headers = HTTP.unmangle env
-      headers.delete 'Accept-Encoding'
+      %w{Host Query}.map{|k| headers.delete k }
       body = env['rack.input'].read
 
       puts "->"
