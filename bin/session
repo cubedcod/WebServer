@@ -1,6 +1,10 @@
 #!/usr/bin/sh
 cd ~/web
 conf=../src/WebServer/config
-squid -f $conf/edge.conf
+
+# HTTP router
+squid -f $conf/squid.conf
+
+# local daemon
 #thin -a 127.0.0.1 -p 8000 -R $conf/rack.ru --threaded start
 unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c $conf/unicorn.rb $conf/rack.ru
