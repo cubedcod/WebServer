@@ -34,7 +34,7 @@ class WebResource
     include URIs
 
     def feeds
-      puts (nokogiri.css '[rel=alternate]').map{|u|join u.attr :href}.uniq
+      puts (Nokogiri::HTML.parse (open uri).read).css('[rel=alternate]').map{|u|join u.attr :href}.uniq
     end
 
     def subscribable?

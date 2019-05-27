@@ -32,8 +32,6 @@ class WebResource
       return '' if !k || k.empty? || k.match(/^[0-9]+$/)
       "#{bg ? 'color' : 'background-color'}: black; #{bg ? 'background-' : ''}color: #{'#%06x' % (rand 16777216)}"
     end
-    def self.colorizeBG k; colorize k end
-    def self.colorizeFG k; colorize k, false end
 
     SiteCSS = ConfDir.join('site.css').read
     SiteJS  = ConfDir.join('site.js').read
@@ -125,7 +123,7 @@ class WebResource
                u.host.do{|h|h.sub(/\.com$/,'')} ||
                'user'
 
-        color = env[:colors][name] ||= (HTML.colorizeBG name)
+        color = env[:colors][name] ||= (HTML.colorize name)
         {_: :a, class: :creator, style: color, href: uris.justArray[0] || c.uri, c: name}
       else
         CGI.escapeHTML (c||'')
@@ -214,9 +212,6 @@ class WebResource
       # serialize HTML
       html.to_xhtml(:indent => 0)
     end
-
-    # parse HTML
-    def nokogiri; Nokogiri::HTML.parse (open uri).read end
 
   end
   include HTML
