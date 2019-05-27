@@ -158,10 +158,7 @@ class WebResource
       index
     end
 
-    # file matches ordered client preferences head of list
-    def bestFormat? file
-      preferences.head[1].member? file.mime
-    end
+    def preferredFormat? file; preferences.head[1].member? file.mime end
 
     # file format
     def mime
@@ -198,27 +195,20 @@ class WebResource
       [mime.split('/')[0], '*'].join '/'
     end
 
-    def noTransform?; mime&.match? NoTransform end
+    def noTransform?; e && mime&.match?(NoTransform) end
 
-    # work down preference list, terminate when first writer found
     def outputMIME default = 'text/html'
       return 'application/atom+xml' if q.has_key?('feed')
-      preferences.map{|q,formats| # formats indexed on q-value
+      preferences.map{|q,formats| # highest q-value first
         formats.map{|mime|
-          return default if mime == '*/*' # wildcard acceptance of default
-          return mime if RDF::Writer.for(:content_type => mime) ||          # RDF writer defined
-                         %w{application/atom+xml text/html}.member?(mime)}} # non-RDF writer defined
+          return default if mime == '*/*'
+          return mime if RDF::Writer.for(:content_type => mime) ||          # RDF Writer definition found
+                         %w{application/atom+xml text/html}.member?(mime)}} # non-RDF
       default
     end
 
     def preferences
       accept.sort.reverse
-    end
-
-    # client accepts format at ANY preference level
-    def receivable? file
-      accepted = accept.values.flatten
-      accepted.member?(file.mime) || accepted.member?(file.mimeCategory) || accepted.member?('*/*')
     end
 
     def setMIME m

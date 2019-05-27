@@ -91,8 +91,7 @@ class WebResource
         end}
 
       # update cache
-      immutable = cache? && cache.e && cache.noTransform?
-      unless immutable || OFFLINE
+      unless cache.noTransform? || OFFLINE
         begin
           update[url]                               # HTTPS
         rescue Exception => e

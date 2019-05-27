@@ -123,10 +123,10 @@ class WebResource
     def graphResponse set
       return notfound if !set || set.empty?
 
-      # check for on-file response body
-      if set.size == 1 ; this = set[0]
-        extant = this.isRDF && bestFormat?(this) && this # BEST MATCH on file
-       #extant = receivable?(this) && this # WEAK MATCH for MIME-agile clients
+      # output format may be on file
+      if set.size == 1
+        this = set[0]
+        extant = this.isRDF && preferredFormat?(this) && this
       end
 
       # response metadata

@@ -12,8 +12,6 @@ class WebResource
       (path.match? POSTpath)
     end
 
-    def cache?; !(pragma && pragma == 'no-cache') end
-
     def self.call env
       method = env['REQUEST_METHOD']                        # lookup request-method
       return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? method # allow defined methods
