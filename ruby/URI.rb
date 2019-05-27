@@ -184,21 +184,20 @@ class WebResource < RDF::URI
     include URIs
 
     Icons = {
-      Abstract => '✍️',
+      Abstract => '✍',
       Contains => '📁',
-      Content => '✏️',
-      Date => '📅',
-      DC+'note' => 'ℹ️',
-      DC+'hasFormat' => '📑',
-      Identifier => '🆔',
-      Image => '🖼️',
-      Link => '🔗',
-      SIOC + 'attachment' => '📎',
-      SIOC + 'reply_of' => '↩️',
+      Content => '✏',
+      Date => '⌚',
+      DC+'hasFormat' => '≈',
+      Identifier => '☸',
+      Image => '🖼',
+      Link => '☚',
+      SIOC + 'attachment' => '✉',
+      SIOC + 'reply_of' => '↩',
       Schema + 'width' => '↔',
       Schema + 'height' => '↕',
       Twitter => '🐦',
-      Video => '📼',
+      Video => '🎞',
     }
 
     Group = {}
