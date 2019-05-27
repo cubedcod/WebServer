@@ -95,7 +95,7 @@ class WebResource
         begin
           update[url]                               # HTTPS
         rescue Exception => e
-          raise if e.class == OpenURI::HTTPRedirect # redirection
+          raise if e.class == OpenURI::HTTPRedirect # redirected
           update[url.sub /^https/, 'http']          # HTTP downgrade
         end
       end
@@ -119,12 +119,12 @@ class WebResource
       else # REPL/script caller
         updates
       end
-    rescue OpenURI::HTTPRedirect => re # redirection
+    rescue OpenURI::HTTPRedirect => re # redirected
       updateLocation re.io.meta['location']
     end
 
     def filter
-      if %w{gif js}.member? ext.downcase # filtered suffix
+      if %w{gif js}.member? ext.downcase # filtered name-suffix
         if ext=='gif' && qs.empty?
           fetch
         else
@@ -137,7 +137,7 @@ class WebResource
           else
             if h['Content-Type'] && !h['Content-Type'].match?(/image.(bmp|gif)|script/)
               [s, h, b]
-            else # filtered content-type
+            else # filtered MIME
               deny
             end
           end}
