@@ -1,8 +1,5 @@
 class WebResource
-
-  # TODO Dedupe video embeds within response representation
   module Webize
-
     def triplrImage &f
       yield uri, Type, Image.R
       yield uri, Image, self
@@ -11,20 +8,8 @@ class WebResource
       yield uri, Schema+'height', h
       triplrFile &f
     end
-
   end
-
-  module HTTP
-
-    UnwrapImage = -> re {
-      img = ('https://'+re.host+re.path).R.nokogiri.css('[property="og:image"]').attr('content').to_s.R
-      loc = img.host ? ('https://' + img.host + img.path) : img.path
-      [302,{'Location' => loc},[]]}
-
-  end
-
   module HTML
-
     Markup[Image] = -> image,env {
       if image.respond_to? :uri
         img = image.R
@@ -36,8 +21,7 @@ class WebResource
         end
       else
         CGI.escapeHTML image.to_s
-      end
-    }
+      end}
 
     Markup[Video] = -> video,env {
       video = video.R
@@ -52,8 +36,6 @@ class WebResource
            c: [{_: :video, src: video.uri, controls: :true}, '<br>',
                {_: :span, class: :notes, c: video.basename}]}
         end
-      end
-    }
-
+      end}
   end
 end
