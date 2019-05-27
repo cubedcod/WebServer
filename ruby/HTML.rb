@@ -222,27 +222,25 @@ class WebResource
   end
   module Webize
     include URIs
-=begin
-      # move site-chrome to footer
-      doc = Nokogiri::HTML.parse readFile
-      body = doc.css('body')[0]
-      %w{.breadcrumb .featured-headlines .header header .masthead .navigation .nav nav .top}.map{|selection|
-        doc.css(selection).map{|gunk|
-        k = gunk.remove
-        body.add_child k}}
-=end
+
     # HTML -> RDF
     def triplrHTML &f
 
       # parse HTML
       n = Nokogiri::HTML.parse readFile.to_utf8
+      body = n.css('body')[0]
 
-      # host-specific triplr
+      # move site-chrome to bottom
+      %w{.breadcrumb .featured-headlines .header header .masthead .navigation .nav .navbar nav .top}.map{|selector|
+        body.css(selector).map{|sel|
+          body.add_child sel.remove}}
+
+      # call host-specific triplr
       triplr = TriplrHTML[@r && @r['SERVER_NAME']]
       if triplr
         send triplr, &f
       else
-        yield uri, Content, HTML.clean(n.css('body').inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
+        yield uri, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
       end
 
       # <title>
