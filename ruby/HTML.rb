@@ -202,11 +202,11 @@ class WebResource
 
       html.traverse{|e|
         e.attribute_nodes.map{|a|
-          # move nonstandard @src to canonical name
+          # src attribute placeholder to nonstandard attr-name
           e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-menuimg data-native-src data-original data-src data-src1}.member? a.name
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
 
-          # strip scripting/styling attrs
+          # strip attrs
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor class height layout ping role style tabindex target width}.member?(a.name)}}
 
       # serialize HTML
@@ -231,7 +231,7 @@ class WebResource
       body = n.css('body')[0]
 
       # move site-chrome to bottom
-      %w{.breadcrumb .featured-headlines .header header .masthead .navigation .nav .navbar nav .top}.map{|selector|
+      %w{.breadcrumb .featured-headlines .header header .masthead .navigation .nav .navbar nav .sidebar .top}.map{|selector|
         body.css(selector).map{|sel|
           body.add_child sel.remove}}
 
