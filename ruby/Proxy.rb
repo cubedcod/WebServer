@@ -108,15 +108,15 @@ class WebResource
           if cache.noTransform? # immutable format
             cache.localFile
           elsif originUI
-            cache.localFile     # immutable per client preference
-          else                  # malleable graph format
+            cache.localFile     # upstream format preference
+          else                  # output transform
             env[:feed] = true if cache.feedMIME?
             graphResponse (updates.empty? ? [cache] : updates)
           end
         else
           notfound
         end
-      else # REPL/script/shell caller
+      else # REPL/script caller
         updates
       end
     rescue OpenURI::HTTPRedirect => re # redirection
@@ -126,7 +126,6 @@ class WebResource
     def filter
       if %w{gif js}.member? ext.downcase # filtered suffix
         if ext=='gif' && qs.empty?
-          puts "GIF #{uri}"
           fetch
         else
           deny
