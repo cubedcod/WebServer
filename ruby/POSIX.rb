@@ -122,6 +122,16 @@ class WebResource
         yield s, Mtime, mt.to_i; yield s, Date, mt.iso8601}
     end
 
+    # file -> RDF
+    def triplrImage &f
+      yield uri, Type, Image.R
+      yield uri, Image, self
+      w,h = Dimensions.dimensions localPath
+      yield uri, Schema + 'width', w
+      yield uri, Schema + 'height', h
+      triplrFile &f
+    end
+
     # directory -> RDF
     def triplrContainer
       s = path

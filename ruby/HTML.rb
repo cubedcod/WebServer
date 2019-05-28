@@ -18,7 +18,8 @@ class WebResource
       when Array
         x.map{|n|render n}.join
       when WebResource
-        render({_: :a, href: x.uri, id: x[:id][0] || ('link'+rand.to_s.sha2), class: x[:class][0], c: x[:label][0] || (CGI.escapeHTML x.uri)})
+        render({_: :a, href: x.uri, id: x[:id][0] || ('link'+rand.to_s.sha2), class: x[:class][0],
+                c: x[:label][0] || (%w{gif ico jpg png webp}.member?(x.ext.downcase) ? {_: :img, src: x.uri} : CGI.escapeHTML(x.uri))})
       when NilClass
         ''
       when FalseClass
@@ -162,6 +163,35 @@ class WebResource
         {_: :a, class: :creator, style: color, href: uris.justArray[0] || c.uri, c: name}
       else
         CGI.escapeHTML (c||'')
+      end}
+
+    Markup[Image] = -> image,env {
+      if image.respond_to? :uri
+        img = image.R
+        if env[:images] && env[:images][img.uri]
+        # deduplicate
+        else
+          env[:images] ||= {}
+          env[:images][img.uri] = true
+          {class: :thumb, c: {_: :a, href: img.uri, c: {_: :img, src: img.uri}}}
+        end
+      else
+        CGI.escapeHTML image.to_s
+      end}
+
+    Markup[Video] = -> video,env {
+      video = video.R
+      if env[:images][video.uri]
+      else
+        env[:images][video.uri] = true
+        if video.match /youtu/
+          id = (HTTP.parseQs video.query)['v'] || video.parts[-1]
+          {_: :iframe, width: 560, height: 315, src: "https://www.youtube.com/embed/#{id}", frameborder: 0, gesture: "media", allow: "encrypted-media", allowfullscreen: :true}
+        else
+          {class: :video,
+           c: [{_: :video, src: video.uri, controls: :true}, '<br>',
+               {_: :span, class: :notes, c: video.basename}]}
+        end
       end}
 
     Markup[Container] = -> container , env {

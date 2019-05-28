@@ -31,7 +31,6 @@ HTTP
 POSIX
 Graph
 Feed
-Image
 Msg
 Proxy
 Text
