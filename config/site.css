@@ -13,7 +13,7 @@
 .post {max-width:80ex; border: .08em solid #333; background-color: #080808; color: #fff; border-radius: .3em; margin: .1em}
 a {overflow: hidden; text-decoration: none; max-width:32em}
 a.date {float: right; font-weight: normal; font-size:.8em; background-color: #000; color:#888}
-a.id {float: right}
+a.id {float: right; color: #333}
 a.link {border: 1px solid #777}
 a.title, div.post, table {vertical-align: top}
 body {font-family: sans-serif; margin: 0 2em 0 2em}

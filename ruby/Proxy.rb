@@ -42,18 +42,17 @@ class WebResource
         end
       end
 
-      # resource pointers
+      # resource pointers and metadata
       suffix = ext.empty? && host.match?(/reddit.com$/) && !originUI && '.rss'
       url = 'https://' + host + (path || '') + (suffix || '') + qs
       cache = cacheFile
+      partial_response = nil
       cacheMeta = cache.metafile
       head["If-Modified-Since"] = cache.mtime.httpdate if cache.e
-
-      # updater
-      partial_response = nil
       updates = []
-      update = -> url {
-        print '🌎🌏🌍'[rand 3], ' '
+
+      fetchURL = -> url {
+        print '🌍🌎🌏'[rand 3], ' '#, url, ' '
         begin
           open(url, head) do |response| # request
             if response.status.to_s.match?(/206/) # partial response
@@ -93,10 +92,10 @@ class WebResource
       # update cache
       unless cache.noTransform? || OFFLINE
         begin
-          update[url]                               # HTTPS
+          fetchURL[url]                             # HTTPS
         rescue Exception => e
           raise if e.class == OpenURI::HTTPRedirect # redirected
-          update[url.sub /^https/, 'http']          # HTTP downgrade
+          fetchURL[url.sub /^https/, 'http']        # HTTP downgrade
         end
       end
 
