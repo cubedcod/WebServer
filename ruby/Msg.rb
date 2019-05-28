@@ -178,7 +178,7 @@ class WebResource
             if !rel.e # link missing
               if destFile.e # link
                 destFile.link rel
-              else # symlink. it may appear
+              else # referenced file may appear later on
                 destFile.ln_s rel unless rel.symlink?
               end
             end

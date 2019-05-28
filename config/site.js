@@ -32,6 +32,11 @@ document.addEventListener("DOMContentLoaded", function(){
     };
 
     // keyboard control
+    document.querySelectorAll('input').map(function(i){
+	this.addEventListener("keydown",function(e){
+	    e.stopPropagation();
+	},false);
+    });
     document.addEventListener("keydown",function(e){
 	var key = e.keyCode;
 	var selectNextLink = function(){
