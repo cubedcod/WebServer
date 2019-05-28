@@ -301,11 +301,12 @@ class WebResource
       # <body>
       unless hostTriples && @r['SERVER_NAME'].match?(/twitter/)
         # move site-chrome to bottom
-        body = n.css('body')[0]
-        Gunk.map{|selector|
-          body.css(selector).map{|sel|
-            body.add_child sel.remove}}
-        yield uri, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
+        if body = n.css('body')[0]
+          Gunk.map{|selector|
+            body.css(selector).map{|sel|
+              body.add_child sel.remove}}
+          yield uri, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
+        end
       end
 
       # <title>
