@@ -132,7 +132,15 @@ class WebResource
   end
   module Webize
 
-    # emit tweets from HTML file
+    def IG
+      Nokogiri::HTML.parse(readFile).css('script').map{|script|
+        dataHeader = /^window._sharedData = /
+        if script.inner_text.match? dataHeader
+          data = ::JSON.parse script.inner_text.sub(dataHeader,'')[0..-2]
+          puts ::JSON.pretty_generate data
+        end}
+    end
+
     def tweets
       Nokogiri::HTML.parse(readFile).css('div.tweet').map{|tweet|
         s = Twitter + tweet.css('.js-permalink').attr('href')
@@ -163,6 +171,7 @@ class WebResource
     end
 
     TriplrHTML['twitter.com'] = :tweets
+    TriplrHTML['www.instagram.com'] = :IG
     TriplrHTML['www.youtube.com'] = :youtube
 
     IndexHTML['twitter.com'] = -> page {
