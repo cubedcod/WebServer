@@ -27,13 +27,14 @@ class WebResource
     end
 
     def fetch
-      head = HTTP.unmangle env # request environment
-      response_head = {}      # response environment
+      # environment
+      head = HTTP.unmangle env
       head.delete 'Host'
       head['User-Agent'] = DesktopUA
       head.delete 'User-Agent' if %w{po.st t.co}.member? host
 
-      if @r # redirection
+      # relocation handling
+      if @r
         if relocated?
           location = join(relocation.readFile).R
           return redirect unless location.host == host && (location.path || '/') == path
@@ -49,14 +50,16 @@ class WebResource
       partial_response = nil
       cacheMeta = cache.metafile
       head["If-Modified-Since"] = cache.mtime.httpdate if cache.e
+      response_meta = {}
       updates = []
 
+      # fetcher lambda
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3], ' '#, url, ' '
         begin
           open(url, head) do |response| # request
             if response.status.to_s.match?(/206/) # partial response
-              response_head = response.meta
+              response_meta = response.meta
               partial_response = response.read
             else # response
               %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| @r[:Response][k] ||= response.meta[k.downcase] } if @r
@@ -102,7 +105,7 @@ class WebResource
       # response
       if @r # HTTP caller
         if partial_response
-          [206, response_head, [partial_response]]
+          [206, response_meta, [partial_response]]
         elsif cache.exist?
           if cache.noTransform?
             cache.localFile # immutable format
