@@ -137,11 +137,12 @@ class WebResource
 
     # CSS selectors for content-wrapping/adorning elements
     Gunk = %w{
+ .author-contact
  .breadcrumb .featured-headlines
  .header header .Header .masthead .top
- .navigation .nav .navbar nav
- .sidebar .RelatedTopics .SocialShare
-.global-audio-components
+ .navigation .nav .navbar nav .nav--plain-header
+ .desktop-share .mobile-share .sidebar .RelatedTopics .SocialShare
+ .global-audio-components
 }
 
     def AP
