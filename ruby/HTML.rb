@@ -256,9 +256,9 @@ class WebResource
       # strip nodes
       %w{iframe link[rel='stylesheet'] style link[type='text/javascript'] link[as='script'] script}.map{|s| html.css(s).remove}
 
-      # strip Javascript URIs
+      # strip Javascript and trackers
       html.css('a[href^="javascript"]').map{|a| a.remove }
-     #html.css('a[href]').map{|a| a.remove if a['href'].match? /^javascript/} # workaround for missing attribute-selector support
+      html.css('img[src*="scorecardresearch"]').map{|img| img.remove }
 
       # move CSS background-image to src attribute
       html.css('[style^="background-image"]').map{|node|
@@ -267,12 +267,12 @@ class WebResource
 
       html.traverse{|e|
         e.attribute_nodes.map{|a|
-          # find nonstandard src attribute. assume canonical is only placeholder if both exist
+          # find nonstandard src attribute. assume canonical is placeholder if both exist
           e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-menuimg data-native-src data-original data-src data-src1}.member? a.name
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
 
           # strip attributes
-          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor class height layout ping role style tabindex target width}.member?(a.name)}}
+          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor height layout ping role style tabindex target width}.member?(a.name)}}
 
       # serialize
       html.to_xhtml(:indent => 0)
@@ -300,7 +300,7 @@ class WebResource
       else
         # move site-chrome to bottom
         body = n.css('body')[0]
-        %w{.breadcrumb .featured-headlines .header header .masthead .navigation .nav .navbar nav .sidebar .top}.map{|selector|
+        Gunk.map{|selector|
           body.css(selector).map{|sel|
             body.add_child sel.remove}}
         # <body>

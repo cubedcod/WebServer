@@ -26,11 +26,14 @@ class WebResource
   end
   module HTTP
 
+    # User Agent which prefers upstream desktop interface
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3805.0 Safari/537.36'
+
+    # hosts which can have a dir named 'track'
     TrackHost = /\.(bandcamp|soundcloud|theplatform|track-blaster)\.com$/
+
     POSThost = /(^www.facebook.com|\.(edu|gov)|(^|\.)(anvato|brightcove|(accounts|android.*|clients?[0-9]*|drive|groups|images|mail|maps|photos|www|youtubei?)\.google(apis)?|reddit|youtube|zillow)\.(com|net))$/
     POSTpath = /^\/_Incapsula_Resource$/
-
     # POST handling. allow via regex above and define custom handler if needed
     def sitePOST
       case host
@@ -131,6 +134,14 @@ class WebResource
 
   end
   module Webize
+
+    # CSS selectors for content-wrapping/adorning elements
+    Gunk = %w{
+ .breadcrumb .featured-headlines
+ .header header .Header .masthead .top
+ .navigation .nav .navbar nav
+ .sidebar .RelatedTopics .SocialShare
+}
 
     def IG
       dataHeader = /^window._sharedData = /

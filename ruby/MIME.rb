@@ -3,7 +3,7 @@ class WebResource
   module MIME
   include URIs
 
-  # name prefix -> MIME map
+  # prefix -> MIME map
     MIMEprefix = {
       'authors' => 'text/plain',
       'changelog' => 'text/plain',
@@ -24,7 +24,7 @@ class WebResource
       'msg' => 'message/rfc822',
     }
 
-    # name suffix -> MIME map
+    # suffix -> MIME map
     MIMEsuffix = {
       'aac' => 'audio/aac',
       'asc' => 'text/plain',
