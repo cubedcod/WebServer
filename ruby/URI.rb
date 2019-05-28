@@ -203,17 +203,23 @@ class WebResource < RDF::URI
     Group = {}
     Markup = {}
 
+    def self.urifyValue v
+      case v.class.to_s
+      when 'Hash'
+        HTML.urifyHash v
+      when 'String'
+        HTML.urifyString v
+      when 'Array'
+        v.map{|_v| HTML.urifyValue _v }
+      else
+        v
+      end
+    end
+
     def self.urifyHash h
       u = {}
       h.map{|k,v|
-        u[k] = case v.class.to_s
-               when 'Hash'
-                 HTML.urifyHash v
-               when 'String'
-                 HTML.urifyString v
-               else
-                 v
-               end}
+        u[k] = HTML.urifyValue v}
       u
     end
 

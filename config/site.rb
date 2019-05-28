@@ -133,11 +133,12 @@ class WebResource
   module Webize
 
     def IG
+      dataHeader = /^window._sharedData = /
       Nokogiri::HTML.parse(readFile).css('script').map{|script|
-        dataHeader = /^window._sharedData = /
         if script.inner_text.match? dataHeader
           data = ::JSON.parse script.inner_text.sub(dataHeader,'')[0..-2]
-          puts ::JSON.pretty_generate data
+          #puts ::JSON.pretty_generate data
+          yield env['REQUEST_URI'], Content, HTML.render(HTML.kv (HTML.urifyHash data), env)
         end}
     end
 
