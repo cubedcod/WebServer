@@ -294,16 +294,16 @@ class WebResource
       # parse HTML
       n = Nokogiri::HTML.parse readFile.to_utf8
 
-      triplr = TriplrHTML[@r && @r['SERVER_NAME']]
-      if triplr # triplr host-binding found
-        send triplr, &f
-      else
+      # triplr host-binding
+      hostTriples = TriplrHTML[@r && @r['SERVER_NAME']]
+
+      # <body>
+      unless hostTriples && @r['SERVER_NAME'].match?(/twitter/)
         # move site-chrome to bottom
         body = n.css('body')[0]
         Gunk.map{|selector|
           body.css(selector).map{|sel|
             body.add_child sel.remove}}
-        # <body>
         yield uri, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
       end
 
@@ -387,12 +387,11 @@ class WebResource
                puts "JSON parse failed: #{json.inner_text}"
                {}
              end
-       graph << ::JSON::LD::API.toRdf(ast) rescue puts("JSON-LD toRDF error #{uri}")
-      }
-      # triples
+       graph << ::JSON::LD::API.toRdf(ast) rescue puts("JSON-LD toRDF error #{uri}")}
       graph.each_triple{|s,p,o|
         yield s.to_s, p.to_s, [RDF::Node, RDF::URI].member?(o.class) ? o.R : o.value}
 
+      send hostTriples, &f if hostTriples
       triplrFile &f
     end
 

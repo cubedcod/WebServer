@@ -141,14 +141,24 @@ class WebResource
  .header header .Header .masthead .top
  .navigation .nav .navbar nav
  .sidebar .RelatedTopics .SocialShare
+.global-audio-components
 }
+
+    def AP
+      Nokogiri::HTML.parse(readFile).css('script').map{|script|
+        script.inner_text.scan(/window\['[-a-z]+'\] = ([^\n]+)/){|data|
+          data = data[0]
+          data = data[0..-2] if data[-1] == ';'
+          json = ::JSON.parse data
+          yield env['REQUEST_URI'], Content, HTML.render(HTML.kv (HTML.webizeHash json), env)
+        }}
+    end
 
     def IG
       dataHeader = /^window._sharedData = /
       Nokogiri::HTML.parse(readFile).css('script').map{|script|
         if script.inner_text.match? dataHeader
           data = ::JSON.parse script.inner_text.sub(dataHeader,'')[0..-2]
-          #puts ::JSON.pretty_generate data
           yield env['REQUEST_URI'], Content, HTML.render(HTML.kv (HTML.webizeHash data), env)
         end}
     end
@@ -182,8 +192,9 @@ class WebResource
       end
     end
 
-    TriplrHTML['twitter.com'] = :tweets
+    TriplrHTML['www.apnews.com'] = :AP
     TriplrHTML['www.instagram.com'] = :IG
+    TriplrHTML['twitter.com'] = :tweets
     TriplrHTML['www.youtube.com'] = :youtube
 
     IndexHTML['twitter.com'] = -> page {
