@@ -191,7 +191,7 @@ class WebResource < RDF::URI
       DC+'hasFormat' => '≈',
       Identifier => '☸',
       Image => '🖼',
-      Link => '☚',
+      Link => '☛',
       SIOC + 'attachment' => '✉',
       SIOC + 'reply_of' => '↩',
       Schema + 'width' => '↔',

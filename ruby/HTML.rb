@@ -196,14 +196,14 @@ class WebResource
       html.css('a[href^="javascript"]').map{|a| a.remove }
      #html.css('a[href]').map{|a| a.remove if a['href'].match? /^javascript/} # workaround for missing attribute-selector support
 
-      # move CSS background-image to to src attribute
+      # move CSS background-image to src attribute
       html.css('[style^="background-image"]').map{|node|
         node['style'].match(/url\('([^']+)'/).do{|url|
           node.add_child "<img src=\"#{url[1]}\">"}}
 
       html.traverse{|e|
         e.attribute_nodes.map{|a|
-          # find nonstandard src attribute. assume canonical is placeholder if these exist
+          # find nonstandard src attribute. assume canonical is only placeholder if both exist
           e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-menuimg data-native-src data-original data-src data-src1}.member? a.name
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
 

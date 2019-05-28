@@ -236,7 +236,7 @@ class WebResource
                     {_: :td, c: '&rarr;'},
                     {_: :td, c: to.map{|f|Markup[Creator][f,env]}, class: :to}]}},
            content,
-           {_: :a, id: 't'+rand.to_s.sha2, class: :id, c: '🔗', href: location},
+           {_: :a, id: 't'+rand.to_s.sha2, class: :id, c: '☚', href: location},
            ((HTML.kv post, env) unless post.empty?),
            (Markup[Date][date] if date),
           ]}}
