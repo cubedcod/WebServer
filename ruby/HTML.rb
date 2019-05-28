@@ -56,9 +56,10 @@ class WebResource
 
     def self.webizeString str
       if str.match? /^(http|\/)\S+$/
-        if str.match? /\.(jpg|png|webp)|insta.*fbcdn/i
-          {'uri' => str,
-           Type => Image.R}
+        if str.match? /\.(jpg|png|webp)/i
+          {'uri' => str, Type => Image.R}
+        elsif str.match? /afs-prod\/media/
+          {'uri' => str + '3000.jpeg', Type => Image.R}
         else
           str.R
         end

@@ -10,7 +10,7 @@
 .bold {font-weight: bold; font-size: 1.1em}
 .container, p, table {border-radius: .2em}
 .container > .name {color: #fff; background-color: #000; margin-right: .1em}
-.post {max-width:80ex; border: .08em solid #333; background-color: #080808; color: #fff; border-radius: .3em; margin: .1em}
+.post {border: .08em solid #333; background-color: #080808; color: #fff; border-radius: .3em; margin: .1em}
 a {overflow: hidden; text-decoration: none; max-width:32em}
 a.date {float: right; font-weight: normal; font-size:.8em; background-color: #000; color:#888}
 a.id {float: right; color: #333}
@@ -22,13 +22,12 @@ div,td {padding: 0}
 h1,h2,h3,h4,h5,h6, a.title, a.link, div.thumb {background-color: #fff; color: #000}
 img, video {max-width: 100%}
 img.thumb, svg {max-width: 28em}
-p {max-width: 78ex}
+p {max-width: 78ex; margin: .08em}
 pre {white-space: pre-wrap}
-table {border-spacing: 0}
-table, p {border: .08em solid #444; margin: 0 .1em .1em 0}
+table {border-spacing: 0; border: .08em solid #666}
 table, div, a {display: inline-block}
 table:first-child, p:first-child {border-width: 0}
-td {border-width: 0 0 .08em 0; border-style: solid; border-color: #555}
+td {border-width: 0 0 .08em 0; border-style: solid; border-color: #333}
 td.k {text-align: right; white-space: nowrap}
 td.v > a {background-color: #eee; color: #000}
 tr[name="content"] > td.v a         {background-color: #ddf; color: #000; border-radius: .18em}
