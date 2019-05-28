@@ -13,9 +13,10 @@ class WebResource
     Markup[Image] = -> image,env {
       if image.respond_to? :uri
         img = image.R
-        if env[:images][img.uri]
-        # deduplicated
+        if env[:images] && env[:images][img.uri]
+        # deduplicate
         else
+          env[:images] ||= {}
           env[:images][img.uri] = true
           {class: :thumb, c: {_: :a, href: img.uri, c: {_: :img, src: img.uri}}}
         end

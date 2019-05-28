@@ -138,7 +138,7 @@ class WebResource
         if script.inner_text.match? dataHeader
           data = ::JSON.parse script.inner_text.sub(dataHeader,'')[0..-2]
           #puts ::JSON.pretty_generate data
-          yield env['REQUEST_URI'], Content, HTML.render(HTML.kv (HTML.urifyHash data), env)
+          yield env['REQUEST_URI'], Content, HTML.render(HTML.kv (HTML.webizeHash data), env)
         end}
     end
 

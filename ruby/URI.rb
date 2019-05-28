@@ -203,30 +203,6 @@ class WebResource < RDF::URI
     Group = {}
     Markup = {}
 
-    def self.urifyValue v
-      case v.class.to_s
-      when 'Hash'
-        HTML.urifyHash v
-      when 'String'
-        HTML.urifyString v
-      when 'Array'
-        v.map{|_v| HTML.urifyValue _v }
-      else
-        v
-      end
-    end
-
-    def self.urifyHash h
-      u = {}
-      h.map{|k,v|
-        u[k] = HTML.urifyValue v}
-      u
-    end
-
-    def self.urifyString str
-      str.match(/^(http|\/)\S+$/) ? str.R : str
-    end
-
     Markup[Link] = -> ref, env=nil {
       u = ref.to_s
       [{_: :a, class: :link, title: u, id: 'l'+rand.to_s.sha2,

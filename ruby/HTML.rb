@@ -33,6 +33,39 @@ class WebResource
       "#{bg ? 'color' : 'background-color'}: black; #{bg ? 'background-' : ''}color: #{'#%06x' % (rand 16777216)}"
     end
 
+    def self.webizeValue v
+      case v.class.to_s
+      when 'Hash'
+        HTML.webizeHash v
+      when 'String'
+        HTML.webizeString v
+      when 'Array'
+        v.map{|_v| HTML.webizeValue _v }
+      else
+        v
+      end
+    end
+
+    def self.webizeHash h
+      u = {}
+      h.map{|k,v|
+        u[k] = HTML.webizeValue v}
+      u
+    end
+
+    def self.webizeString str
+      if str.match? /^(http|\/)\S+$/
+        if str.match? /\.(jpg|png|webp)|insta.*fbcdn/i
+          {'uri' => str,
+           Type => Image.R}
+        else
+          str.R
+        end
+      else
+        str
+      end
+    end
+
     SiteCSS = ConfDir.join('site.css').read
     SiteJS  = ConfDir.join('site.js').read
 
@@ -86,7 +119,7 @@ class WebResource
                                     end]}
                              end,
                              if graph.empty?
-                               HTML.kv (HTML.urifyHash @r), @r
+                               HTML.kv (HTML.webizeHash @r), @r
                              else
                                # Graph -> Tree -> Markup
                                treeize = Group[q['g']] || Group['tree']
@@ -95,10 +128,12 @@ class WebResource
                              link[:down,'&#9660;']]}]}]
     end
 
+    Markup['uri'] = -> uri, env=nil {uri.R}
+
     Markup[Date] = -> date, env=nil {
       {_: :a, class: :date, href: (env && %w{l localhost}.member?(env['SERVER_NAME']) && '/' || 'http://localhost:8000/') + date[0..13].gsub(/[-T:]/,'/'), c: date}}
 
-    Markup[Type] = -> t,env=nil {
+    Markup[Type] = -> t, env=nil {
       if t.respond_to? :uri
         t = t.R
         {_: :a, href: t.uri,
@@ -147,40 +182,36 @@ class WebResource
            contents.map{|c| HTML.value(nil,c,env)}.intersperse(' '),
            (HTML.kv(container, env) unless container.empty?)]}}
 
-    # table {k => v} -> Markup
+    # Hash -> Markup
     def self.kv hash, env
       {_: :table,
        c: hash.map{|k,vs|
          type = k && k.R || '#untyped'.R
          [:name,'uri',Type].member?(k) ? '' : [{_: :tr, name: type.fragment || type.basename,
-                                                c: ["\n ",
-                                                    {_: :td, class: 'k', c: Markup[Type][type]},"\n ",
-                                                    {_: :td, class: 'v', c: vs.justArray.map{|v| HTML.value k,v,env }.intersperse(' ')}]}, "\n"]}}
+                                                c: [{_: :td, class: 'k', c: Markup[Type][type]}, "\n ",
+                                                    {_: :td, class: 'v', c: vs.justArray.map{|v|
+                                                       HTML.value k, v, env}.intersperse(' ')}]}, "\n"]}}
     end
 
-    # tuple (k,v) -> Markup
+    # typed value -> Markup
     def self.value k, v, env
-      if Abstract == k
-        v # HTML content
-      elsif Content == k
-        v # HTML content
-      elsif Markup[k] # predicate-type keyed
+      if Abstract == k || Content == k || v.class == WebResource
+        v
+      elsif Markup[k] # predicate-URI key
         Markup[k][v,env]
-      elsif v.class == Hash # object-type keyed
+      elsif v.class == Hash # typed object
         resource = v.R
         types = resource.types
         if (types.member? Post) || (types.member? BlogPost) || (types.member? Email)
           Markup[Post][v,env]
+        elsif types.member? Image
+          Markup[Image][v,env]
         elsif types.member? Container
           Markup[Container][v,env]
-        else
+        else # untyped Hash
           kv v, env
         end
-      elsif k == 'uri'
-        v.R # reference
-      elsif v.class == WebResource
-        v   # reference
-      else # renderer undefined
+      else # Markup-lambda undefined
         CGI.escapeHTML v.to_s
       end
     end
@@ -306,9 +337,9 @@ class WebResource
               k = Twitter
               v = (Twitter + '/' + v.sub(/^@/,'')).R
             when Abstract
-              v = v.hrefs # substring URIs to <a href>
+              v = v.hrefs
             else
-              v = HTML.urifyString v # bare URI to resource-reference
+              v = HTML.webizeString v
             end
 
             yield uri, k, v unless k == :drop
