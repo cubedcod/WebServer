@@ -31,7 +31,6 @@ table:first-child, p:first-child {border-width: 0}
 td {border-width: 0 0 .08em 0; border-style: solid; border-color: #555}
 td.k {text-align: right; white-space: nowrap}
 td.v > a {background-color: #eee; color: #000}
-td.v {padding-left: .1em; max-width: 255ex; overflow: hidden}
 tr[name="content"] > td.v a         {background-color: #ddf; color: #000; border-radius: .18em}
 tr[name="content"] > td.v a:visited {background-color: #222; color: #fff}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
