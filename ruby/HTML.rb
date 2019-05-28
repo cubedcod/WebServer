@@ -209,7 +209,8 @@ class WebResource
 
       {class: :container, style: multi ? "border: .08em solid #{color}; background: repeating-linear-gradient(#{rand 360}deg, #000, #000 #{position}em, #{color} #{position}em, #{color} #{scale}em)" : '',
        c: [title ? Markup[Title][title.justArray[0], env, uri.justArray[0]] : (name ? {_: :span, class: :name, c: CGI.escapeHTML(name), style: multi ? "background-color: #{color}" : ''} : ''),
-           contents.map{|c| HTML.value(nil,c,env)}.intersperse(' '),
+           contents.map{|c|
+             HTML.value(nil,c,env)}.intersperse(' '),
            (HTML.kv(container, env) unless container.empty?)]}}
 
     # Hash -> Markup
@@ -225,7 +226,7 @@ class WebResource
 
     # typed value -> Markup
     def self.value k, v, env
-      if Abstract == k || Content == k || v.class == WebResource
+      if Abstract == k || Content == k
         v
       elsif Markup[k] # predicate-URI key
         Markup[k][v,env]
@@ -241,7 +242,9 @@ class WebResource
         else # untyped Hash
           kv v, env
         end
-      else # Markup-lambda undefined
+      elsif v.class == WebResource
+        v # untyped resource reference
+      else # undefined
         CGI.escapeHTML v.to_s
       end
     end
