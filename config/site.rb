@@ -136,15 +136,8 @@ class WebResource
   module Webize
 
     Gunk = %w{
- .RelatedTopics
- .SocialShare
- .author-contact
- .breadcrumb
- .desktop-share
  .featured-headlines
  .global-audio-components
- .mobile-share
- .nav--plain-header
 }
 
     def AP

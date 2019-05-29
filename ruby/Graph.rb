@@ -167,7 +167,6 @@ class WebResource
 
     Group['flat'] = -> graph { graph }
 
-    # treeize from URIpath
     Group['tree'] = -> graph {
       tree = {}
 

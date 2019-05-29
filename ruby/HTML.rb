@@ -290,10 +290,15 @@ class WebResource
     include URIs
 
     BasicGunk = %w{
- header  [class*='head'] [id*='head']
- nav     [class*='nav']  [id*='nav']  [class*='top'] [id*='top']
- sidebar [class^='side'] [id^='side'] [class*='aside'] [id*='aside'] [class*='social'] [id*='social']
- footer  [class*='footer'] [id*='footer']
+header  [class*='head']    [id*='head']
+nav     [class*='nav']     [id*='nav']
+        [class*='top']     [id*='top']
+        [class*='related'] [id*='related']
+sidebar [class^='side']    [id^='side']
+aside   [class*='aside']   [id*='aside']
+        [class*='share']   [id*='share']
+        [class*='social']  [id*='social']
+footer  [class*='footer']  [id*='footer']
 }
 
     # HTML -> RDF
