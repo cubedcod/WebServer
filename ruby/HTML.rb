@@ -120,12 +120,13 @@ class WebResource
                                      class: s ? :on : :off, c: 'subscribe' + (s ? 'd' : '')}
                                     end]}
                              end,
-                             HTML.kv(if graph.empty?
-                                     HTML.webizeHash @r
-                                     else
-                                      (Group[q['g']] ||      # custom layout
-                                       Group['tree'])[graph] # graph -> tree
-                                     end, @r),
+                             if graph.empty?
+                               HTML.table (HTML.webizeHash @r), @r
+                             else
+                               HTML.tree (Group[q['g']] || # custom layout
+                                          Group['tree']    # graph -> tree
+                                                       )[graph], @r
+                             end,
                              link[:down,'&#9660;']]}]}]
     end
 
@@ -194,34 +195,25 @@ class WebResource
         end
       end}
 
-    Markup[Container] = -> container , env {
-      container.delete Type
-      uri = container.delete 'uri'
-      name = container.delete :name
-      title = container.delete Title
-      color = '#%06x' % (rand 16777216)
-      scale = rand(7) + 1
-      position = scale * rand(960) / 960.0
-
-      # child node(s) represented as Object, array of Object(s) or (URI-indexed) Hash
-      contents = container.delete(Contains).do{|cs| cs.class == Hash ? cs.values : cs}.justArray
-      multi = contents.size > 1
-
-      {class: :container, style: multi ? "border: .08em solid #{color}; background: repeating-linear-gradient(#{rand 360}deg, #000, #000 #{position}em, #{color} #{position}em, #{color} #{scale}em)" : '',
-       c: [title ? Markup[Title][title.justArray[0], env, uri.justArray[0]] : (name ? {_: :span, class: :name, c: CGI.escapeHTML(name), style: multi ? "background-color: #{color}" : ''} : ''),
-           contents.map{|c|
-             HTML.value(nil,c,env)}.intersperse(' '),
-           (HTML.kv(container, env) unless container.empty?)]}}
-
-    # Hash -> Markup
-    def self.kv hash, env
+    def self.table t, env
       {_: :table,
-       c: hash.map{|k,vs|
+       c: t.map{|k,vs|
          type = k && k.R || '#untyped'.R
          [:name,'uri',Type].member?(k) ? '' : [{_: :tr, name: type.fragment || type.basename,
-                                                c: [{_: :td, class: 'k', c: Markup[Type][type]}, "\n ",
+                                                c: [{_: :td, class: 'k', c: Markup[Type][type]},
                                                     {_: :td, class: 'v', c: vs.justArray.map{|v|
                                                        HTML.value k, v, env}.intersperse(' ')}]}, "\n"]}}
+    end
+
+    def self.tree t, env
+      t.map{|name, children|
+        color = '#%06x' % rand(16777216)
+        scale = rand(7) + 1
+        position = scale * rand(960) / 960.0
+        {class: :container, style: "border: .08em solid #{color}; background: repeating-linear-gradient(#{rand 360}deg, #000, #000 #{position}em, #{color} #{position}em, #{color} #{scale}em)",
+         c: [{_: :span, class: :name, c: CGI.escapeHTML(name.to_s), style: "background-color: #{color}"},
+             children.justArray.map{|c|
+               HTML.value(nil,c,env)}.intersperse(' ')]}}
     end
 
     # typed value -> Markup
@@ -238,9 +230,9 @@ class WebResource
         elsif types.member? Image
           Markup[Image][v,env]
         elsif types.member? Container
-          Markup[Container][v,env]
+          tree v, env
         else
-          kv v, env
+          table v, env
         end
       elsif v.class == WebResource
         v

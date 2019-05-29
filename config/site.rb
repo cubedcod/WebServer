@@ -146,7 +146,7 @@ class WebResource
           data = data[0]
           data = data[0..-2] if data[-1] == ';'
           json = ::JSON.parse data
-          yield env['REQUEST_URI'], Content, HTML.render(HTML.kv (HTML.webizeHash json), env)
+          yield env['REQUEST_URI'], Content, HTML.render(HTML.tree (HTML.webizeHash json), env)
         }}
     end
 
@@ -155,7 +155,7 @@ class WebResource
       Nokogiri::HTML.parse(readFile).css('script').map{|script|
         if script.inner_text.match? dataHeader
           data = ::JSON.parse script.inner_text.sub(dataHeader,'')[0..-2]
-          yield env['REQUEST_URI'], Content, HTML.render(HTML.kv (HTML.webizeHash data), env)
+          yield env['REQUEST_URI'], Content, HTML.render(HTML.tree (HTML.webizeHash data), env)
         end}
     end
 

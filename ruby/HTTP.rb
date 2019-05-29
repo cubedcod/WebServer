@@ -61,8 +61,8 @@ class WebResource
           {resource.uri => {Content => [
                               {_: :h3, c: msg.hrefs, style: 'color: red'},
                               {_: :pre, c: trace.hrefs},
-                              (HTML.kv (HTML.webizeHash env), env),
-                              (HTML.kv (HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
+                              (HTML.table (HTML.webizeHash env), env),
+                              (HTML.table (HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
     end
 
     def deny
