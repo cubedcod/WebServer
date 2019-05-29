@@ -44,7 +44,8 @@ class WebResource
       id = m.message_id || m.resent_message_id || rand.to_s.sha2 # Message-ID
       puts " MID #{id}" if @verbose
       msgURI = -> id { h=id.sha2; ['', 'msg', h[0], h[1], h[2], id.gsub(/[^a-zA-Z0-9]+/,'.')[0..96], '#this'].join('/').R}
-      resource = msgURI[id]; e = resource.uri                # Message URI
+      resource = msgURI[id]
+      e = resource.uri # Message URI
       puts " URI #{resource}" if @verbose
       srcDir = resource.path.R; srcDir.mkdir # container
       srcFile = srcDir + 'this.msg'          # pathname
@@ -55,7 +56,7 @@ class WebResource
       yield e, Identifier, id # Message-ID
       yield e, Type, Email.R
 
-      # HTML body
+      # HTML
       htmlFiles, parts = m.all_parts.push(m).partition{|p|p.mime_type=='text/html'}
       htmlCount = 0
       htmlFiles.map{|p| # HTML file
@@ -67,7 +68,7 @@ class WebResource
         end
         htmlCount += 1 } # increment count
 
-      # text/plain body
+      # plaintext
       parts.select{|p|
         (!p.mime_type || p.mime_type == 'text/plain') && # text parts
           Mail::Encodings.defined?(p.body.encoding)      # decodable?
@@ -90,9 +91,9 @@ class WebResource
                                [l.gsub(/(\w+)@(\w+)/,'\2\1').hrefs{|p,o|yield e, p, o}]
                              end}.compact.intersperse("\n")})} # join lines
 
-      # recursive messages, digests, forwards, archives..
+      # recursive contained messages: digests, forwards, archives
       parts.select{|p|p.mime_type=='message/rfc822'}.map{|m|
-        content = m.body.decoded                   # decode message-part
+        content = m.body.decoded                   # decode message
         f = srcDir + content.sha2 + '.inlined.msg' # message location
         f.writeFile content if !f.e                # store message
         f.triplrMail &b} # triplr on contained message

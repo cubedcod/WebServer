@@ -26,15 +26,15 @@ class WebResource
   end
   module HTTP
 
-    # User Agent which prefers upstream desktop interface
+    # User Agent for vendor-supplied "desktop" interface
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3805.0 Safari/537.36'
 
     # hosts which can have a dir named 'track'
     TrackHost = /\.(bandcamp|soundcloud|theplatform|track-blaster)\.com$/
 
+    # POST handler. add to regex and define custom handler if needed
     POSThost = /(^www.facebook.com|\.(edu|gov)|(^|\.)(anvato|brightcove|(accounts|android.*|clients?[0-9]*|drive|groups|images|mail|maps|photos|www|youtubei?)\.google(apis)?|reddit|youtube|zillow)\.(com|net))$/
     POSTpath = /^\/_Incapsula_Resource$/
-    # POST handling. allow via regex above and define custom handler if needed
     def sitePOST
       case host
       when 'www.facebook.com'
