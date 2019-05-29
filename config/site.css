@@ -7,8 +7,6 @@
 #subscribe.on  {color: #000; background-color: #fff}
 #up, #down {display: block}
 .bold {font-weight: bold; font-size: 1.1em}
-.container > .name {color: #fff; background-color: #000; margin-right: .1em}
-.container, p, table {border-radius: .2em}
 .post {border: .08em solid #333; background-color: #080808; color: #fff; border-radius: .3em}
 .toolbox {position: fixed; top: 0; right: 0; z-index: 1}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
@@ -19,7 +17,8 @@ a.link {border: 1px solid #777}
 a.title, div.post, table {vertical-align: top}
 body {font-family: sans-serif; margin: 0 2em 0 2em}
 body, pre, p, span, li, time, td.k > a, tr[name="abstract"] > td.v {background-color: #000; color: #fff}
-div,td {padding: 0}
+div, p, table {border-radius: .2em}
+div, td {padding: 0}
 h1,h2,h3,h4,h5,h6, a.title, a.link, div.thumb {background-color: #fff; color: #000}
 img, video {max-width: 100%}
 img.thumb, svg {max-width: 28em}

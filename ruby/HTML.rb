@@ -202,18 +202,16 @@ class WebResource
          [:name,'uri',Type].member?(k) ? '' : [{_: :tr, name: type.fragment || type.basename,
                                                 c: [{_: :td, class: 'k', c: Markup[Type][type]},
                                                     {_: :td, class: 'v', c: vs.justArray.map{|v|
-                                                       HTML.value k, v, env}.intersperse(' ')}]}, "\n"]}}
+                                                       value k, v, env}.intersperse(' ')}]}, "\n"]}}
     end
 
-    def self.tree t, env
-      t.map{|name, children|
-        color = '#%06x' % rand(16777216)
-        scale = rand(7) + 1
-        position = scale * rand(960) / 960.0
-        {class: :container, style: "border: .08em solid #{color}; background: repeating-linear-gradient(#{rand 360}deg, #000, #000 #{position}em, #{color} #{position}em, #{color} #{scale}em)",
-         c: [{_: :span, class: :name, c: CGI.escapeHTML(name.to_s), style: "background-color: #{color}"},
-             children.justArray.map{|c|
-               HTML.value(nil,c,env)}.intersperse(' ')]}}
+    def self.tree tree, env
+      tree.map{|name, node| color = '#%06x' % rand(16777216) ; scale = rand(7) + 1 ; position = scale * rand(960) / 960.0
+        show = name != :node && node.class == Hash && node.keys.size > 1
+        {style: show ? "border: .08em solid #{color}; background: repeating-linear-gradient(#{rand 360}deg, #000, #000 #{position}em, #{color} #{position}em, #{color} #{scale}em)" : "",
+         c: [({_: :span, class: :name, c: (CGI.escapeHTML name.to_s), style: "background-color: #{color}"} if show),
+             node.justArray.map{|c|
+               value nil, c, env}.intersperse(' ')]}}
     end
 
     # typed value -> Markup
@@ -230,9 +228,9 @@ class WebResource
         elsif types.member? Image
           Markup[Image][v,env]
         elsif types.member? Container
-          tree v, env
-        else
           table v, env
+        else
+          tree v, env
         end
       elsif v.class == WebResource
         v
