@@ -135,14 +135,16 @@ class WebResource
   end
   module Webize
 
-    # CSS selectors for content-wrapping/adorning elements
     Gunk = %w{
+ .RelatedTopics
+ .SocialShare
  .author-contact
- .breadcrumb .featured-headlines
- .header header .Header .masthead .top
- .navigation .nav .navbar nav .nav--plain-header
- .desktop-share .mobile-share .sidebar .RelatedTopics .SocialShare
+ .breadcrumb
+ .desktop-share
+ .featured-headlines
  .global-audio-components
+ .mobile-share
+ .nav--plain-header
 }
 
     def AP

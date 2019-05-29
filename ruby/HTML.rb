@@ -289,6 +289,13 @@ class WebResource
   module Webize
     include URIs
 
+    BasicGunk = %w{
+ header  [class*='head'] [id*='head']
+ nav     [class*='nav']  [id*='nav']  [class*='top'] [id*='top']
+ sidebar [class^='side'] [id^='side'] [class*='aside'] [id*='aside'] [class*='social'] [id*='social']
+ footer  [class*='footer'] [id*='footer']
+}
+
     # HTML -> RDF
     def triplrHTML &f
 
@@ -302,7 +309,7 @@ class WebResource
       unless hostTriples && @r['SERVER_NAME'].match?(/twitter/)
         # move site-chrome to bottom
         if body = n.css('body')[0]
-          Gunk.map{|selector|
+          [*BasicGunk,*Gunk].map{|selector|
             body.css(selector).map{|sel|
               body.add_child sel.remove}}
           yield uri, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
