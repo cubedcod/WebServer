@@ -120,13 +120,12 @@ class WebResource
                                      class: s ? :on : :off, c: 'subscribe' + (s ? 'd' : '')}
                                     end]}
                              end,
-                             if graph.empty?
-                               HTML.kv (HTML.webizeHash @r), @r
-                             else
-                               # Graph -> Tree -> Markup
-                               treeize = Group[q['g']] || Group['tree']
-                               Markup[Container][treeize[graph], @r]
-                              end,
+                             HTML.kv(if graph.empty?
+                                     HTML.webizeHash @r
+                                     else
+                                      (Group[q['g']] ||      # custom layout
+                                       Group['tree'])[graph] # graph -> tree
+                                     end, @r),
                              link[:down,'&#9660;']]}]}]
     end
 
@@ -226,12 +225,12 @@ class WebResource
     end
 
     # typed value -> Markup
-    def self.value k, v, env
-      if Abstract == k || Content == k
+    def self.value type, v, env
+      if Abstract == type || Content == type
         v
-      elsif Markup[k] # predicate-URI key
-        Markup[k][v,env]
-      elsif v.class == Hash # typed object
+      elsif Markup[type]
+        Markup[type][v,env]
+      elsif v.class == Hash # graph data
         resource = v.R
         types = resource.types
         if (types.member? Post) || (types.member? BlogPost) || (types.member? Email)
@@ -240,11 +239,11 @@ class WebResource
           Markup[Image][v,env]
         elsif types.member? Container
           Markup[Container][v,env]
-        else # untyped Hash
+        else
           kv v, env
         end
       elsif v.class == WebResource
-        v # untyped resource reference
+        v
       else # undefined
         CGI.escapeHTML v.to_s
       end

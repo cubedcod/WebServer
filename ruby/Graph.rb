@@ -165,33 +165,19 @@ class WebResource
   end
   module HTML
 
-    Group['flat'] = -> graph { graph }
-
     Group['tree'] = -> graph {
-      tree = {}
-
-      # for each graph-node
-      (graph.class==Array ? graph : graph.values).map{|resource|
-        cursor = tree
-        r = resource.R
-
-        # locate document-graph
-        [r.host || '',
-         r.parts.map{|p|p.split '%23'}].flatten.map{|name|
-          cursor[Type] ||= Container.R
-          cursor[Contains] ||= {}
-           # advance cursor
-          cursor = cursor[Contains][name] ||= {name: name, Type => Container.R}}
-
-        if !r.fragment # named-graph
-          resource.map{|k,v|
-            cursor[k] = cursor[k].justArray.concat v.justArray}
-        else # contained node
-          cursor[Contains] ||= {}
-          cursor[Contains][r.fragment] = resource
-        end}
-
-      tree }
+      t = {}
+      # visit nodes
+      (graph.class==Array ? graph : graph.values).map{|node|
+        cursor = t  # cursor starting-point
+        re = node.R # node reference
+        # traverse
+        [re.host ? re.host.split('.').reverse : nil, re.parts, re.fragment].flatten.compact.map{|name|
+          cursor = cursor[name] ||= {}}
+        # insert
+        puts "duplicate node! #{node.uri}" if cursor[:node]
+        cursor[:node] = node }
+      t } # tree
 
   end
   module Webize
