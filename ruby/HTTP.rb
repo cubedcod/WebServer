@@ -189,10 +189,11 @@ class WebResource
                        end
                 # updata metadata on cache file  TODO survey POSIX eattr support
                 cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache'
+
                 # index updates
                 updates.concat(case mime
                                when /^(application|text)\/(atom|rss|xml)/
-                                 cache.indexFeed
+                                 ('file:' + cache.localPath).R.indexRDF(:format => :feed, :base_uri => uri)
                                when /^text\/html/
                                  IndexHTML[@r ? @r['SERVER_NAME'] : host].do{|indexer| indexer[cache] } || []
                                else

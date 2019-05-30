@@ -89,8 +89,8 @@ class WebResource
 
       def each_triple &block; each_statement{|s| block.call *s.to_triple} end
 
-      def each_statement &fn # triples flow (left ← right)
-        scanContent(:normalizeDates, :normalizePredicates,:rawTriples){|s,p,o|
+      def each_statement &fn
+        scanContent(:normalizeDates, :normalizePredicates,:rawTriples){|s,p,o| # triples flow (left ← right) in filter stack
           fn.call RDF::Statement.new(s.R, p.R,
                                      (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal (if p == Content
                                                                                                     WebResource::HTML.clean o
@@ -361,10 +361,6 @@ class WebResource
   end
 
   module Webize
-
-    def indexFeed
-      ('file:' + localPath).R.indexRDF(:format => :feed, :base_uri => uri)
-    end
 
     def triplrCalendar
       cal_file = File.open localPath

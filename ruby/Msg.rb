@@ -2,16 +2,6 @@
 class WebResource
   module Webize
 
-    def indexMail
-      triples = 0
-      triplrMail{|s,p,o|triples += 1}
-      puts "    #{triples} triples"
-    rescue Exception => e
-      puts uri, e.class, e.message
-    end
-
-    def indexMails; glob.map &:indexMail end
-
     def triplrChatLog &f
       linenum = -1
       base = stripDoc
