@@ -47,13 +47,14 @@ open_port    68 DHCP
 open_TCP     80 HTTP
 open_TCP    443 HTTPS
 open_port   587 SMTP
+open_port  6362 Energy http://162.244.81.33:6362/
 open_port  6789 IRC
 open_port  8000 HTTP
 open_port  8022 SSH
-open_port  8073 SDR
 open_port  8080 "HTTP forward"
 open_port  8081 "HTTP transparent"
 open_port  8082 "HTTPS transparent"
+open_port  8901 SDR
 open_port  9418 Git
 open_port 22000 Syncthing
 open_port 60001 Mosh
