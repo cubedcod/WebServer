@@ -92,6 +92,8 @@ class WebResource
       graph = RDF::Graph.new # init RDF::Graph
 
       rdf, misc = files.partition &:isRDF # input categories
+#      puts "load RDF: ",   rdf.join(' ') unless  rdf.empty?
+#      puts "load JSON: ", misc.join(' ') unless misc.empty?
 
       # RDF
       rdf.map{|n| # each file
@@ -175,8 +177,8 @@ class WebResource
         [re.host ? re.host.split('.').reverse : nil, re.parts, re.fragment].flatten.compact.map{|name|
           cursor = cursor[name] ||= {}}
         # insert
-        puts "duplicate node! #{node.uri}" if cursor[:node]
-        cursor[:node] = node }
+        puts "duplicated data at #{node.uri}" if cursor[:data]
+        cursor[:data] = node }
       t } # tree
 
   end

@@ -205,13 +205,22 @@ class WebResource
                                                        value k, v, env}.intersperse(' ')}]}, "\n"]}}
     end
 
-    def self.tree tree, env
-      tree.map{|name, node| color = '#%06x' % rand(16777216) ; scale = rand(7) + 1 ; position = scale * rand(960) / 960.0
-        show = name != :node && node.class == Hash && node.keys.size > 1
-        {style: show ? "border: .08em solid #{color}; background: repeating-linear-gradient(#{rand 360}deg, #000, #000 #{position}em, #{color} #{position}em, #{color} #{scale}em)" : "",
-         c: [({_: :span, class: :name, c: (CGI.escapeHTML name.to_s), style: "background-color: #{color}"} if show),
-             node.justArray.map{|c|
-               value nil, c, env}.intersperse(' ')]}}
+    def self.tree t, env, name=nil
+      if name
+        color = '#%06x' % rand(16777216)
+        scale = rand(7) + 1
+        position = scale * rand(960) / 960.0
+        css = {style: "border: .08em solid #{color}; background: repeating-linear-gradient(#{rand 360}deg, #000, #000 #{position}em, #{color} #{position}em, #{color} #{scale}em)"}
+      end
+      {class: :tree,
+       c: [({_: :span, class: :name, c: (CGI.escapeHTML name.to_s), style: "background-color: #{color}"} if name),
+           t.map{|_name, _t|
+             if :data == _name
+               value nil, _t, env
+             else
+               tree _t, env, _name
+             end
+           }]}.update(name ? css : {})
     end
 
     # typed value -> Markup
@@ -220,17 +229,15 @@ class WebResource
         v
       elsif Markup[type]
         Markup[type][v,env]
-      elsif v.class == Hash # graph data
+      elsif v.class == Hash
         resource = v.R
         types = resource.types
         if (types.member? Post) || (types.member? BlogPost) || (types.member? Email)
           Markup[Post][v,env]
         elsif types.member? Image
           Markup[Image][v,env]
-        elsif types.member? Container
-          table v, env
         else
-          tree v, env
+          table v, env
         end
       elsif v.class == WebResource
         v
