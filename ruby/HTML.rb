@@ -298,7 +298,7 @@ class WebResource
         [class*='topbar']  [id*='topbar']
 aside   [class*='aside']   [id*='aside']
 footer  [class*='footer']  [id*='footer']
-header  [class*='header']  [id*='header']
+header  [class*='header']  [id*='header'] [class*='Header'] [id*='Header']
 nav     [class*='nav']     [id*='nav']
 sidebar [class^='side']    [id^='side']
 }#.map{|sel| sel.sub /\]$/, ' i]'}
@@ -306,7 +306,7 @@ sidebar [class^='side']    [id^='side']
     # HTML -> RDF
     def triplrHTML &f
 
-      # parse HTML
+      # parse HTML TODO see if Oga or something can do case-insensitive attribute-selectors https://gitlab.com/yorickpeterse/oga
       n = Nokogiri::HTML.parse readFile.to_utf8
 
       # host-specific conversion
