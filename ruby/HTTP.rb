@@ -4,8 +4,7 @@ class WebResource
     include MIME
     include URIs
 
-    Hosts = {} # track hosts for highlighting
-    HostFirsts = []
+    Hosts = {}
     OFFLINE = ENV.has_key? 'OFFLINE'
 
     def allowPOST?
@@ -37,9 +36,8 @@ class WebResource
       resource.send(method).do{|status,head,body|           # dispatch request
         color = (if resource.env[:deny]
                  '31'
-                elsif !Hosts.has_key? host # first-seen host
-                  Hosts[host] = true
-                  HostFirsts.unshift resource.uri
+                elsif !Hosts.has_key? host # record first visit
+                  Hosts[host] = resource
                   '32'
                 elsif method=='POST'
                   '32'
@@ -324,12 +322,7 @@ class WebResource
     end
 
     PathGET['/log'] = -> r {
-      graph = {}
-      HostFirsts.map{|uri|
-        u = uri.R
-        path = '/' + u.host.split('.').reverse.map{|n|n.split '-'}.flatten.join('/')
-        graph[path] = {'uri' => path, Link => ('//' + u.host).R}}
-      [200, {'Content-Type' => 'text/html'}, [r.htmlDocument(graph)]]}
+      [200, {'Content-Type' => 'text/html'}, [r.htmlDocument(Hosts)]]}
 
     def metafile type = 'meta'
       dir + (dirname[-1] == '/' ? '' : '/') + '.' + basename + '.' + type

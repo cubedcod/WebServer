@@ -395,13 +395,13 @@ sidebar [class^='side']    [id^='side']
       # JSON-LD
       graph = RDF::Graph.new
       n.css('script[type="application/ld+json"]').map{|json|
-       ast = begin
+       tree = begin
                ::JSON.parse json.inner_text
              rescue
                puts "JSON parse failed: #{json.inner_text}"
                {}
              end
-       graph << ::JSON::LD::API.toRdf(ast) rescue puts("JSON-LD toRDF error #{uri}")}
+       graph << ::JSON::LD::API.toRdf(tree) rescue puts("JSON-LD toRDF error #{uri}")}
       graph.each_triple{|s,p,o|
         yield s.to_s, p.to_s, [RDF::Node, RDF::URI].member?(o.class) ? o.R : o.value}
 
