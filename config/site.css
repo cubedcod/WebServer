@@ -16,7 +16,7 @@ a.id {float: right; color: #333}
 a.link {border: 1px solid #777}
 a.title, div.post, table {vertical-align: top}
 body {font-family: sans-serif; margin: 0 2em 0 2em}
-body, pre, p, span, li, time, td.k > a, tr[name="abstract"] > td.v {background-color: #000; color: #fff}
+body, pre, p, li, time, td.k > a, tr[name="abstract"] > td.v, td.v span {background-color: #000; color: #fff}
 div, p, table {border-radius: .2em}
 div, td {padding: 0}
 h1,h2,h3,h4,h5,h6, a.title, a.link, div.thumb {background-color: #fff; color: #000}
