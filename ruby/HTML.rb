@@ -206,20 +206,21 @@ class WebResource
     end
 
     def self.tree t, env, name=nil
-      if name
+      if name && t.keys.size > 1
         color = '#%06x' % rand(16777216)
         scale = rand(7) + 1
         position = scale * rand(960) / 960.0
-        css = {class: :tree, style: "border: .08em solid #{color}; background: repeating-linear-gradient(#{rand 360}deg, #000, #000 #{position}em, #{color} #{position}em, #{color} #{scale}em)"}
+        css = {style: "border: .08em solid #{color}; background: repeating-linear-gradient(#{rand 360}deg, #000, #000 #{position}em, #{color} #{position}em, #{color} #{scale}em)"}
       end
-      {c: [({_: :span, c: (CGI.escapeHTML name.to_s)} if name),
+      {class: :tree,
+       c: [({_: :span, class: :label, c: (CGI.escapeHTML name.to_s)} if name),
            t.map{|_name, _t|
              if :data == _name
                value nil, _t, env
              else
                tree _t, env, _name
              end
-           }]}.update(name ? css : {})
+           }]}.update(css ? css : {})
     end
 
     # typed value -> Markup
