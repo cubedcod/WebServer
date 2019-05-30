@@ -32,7 +32,6 @@ POSIX
 Graph
 Feed
 Msg
-Proxy
 Text
 }.map{|i|require_relative i}
 
