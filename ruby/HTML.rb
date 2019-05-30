@@ -228,16 +228,16 @@ class WebResource
     def self.value type, v, env
       if Abstract == type || Content == type
         v
-      elsif Markup[type]
+      elsif Markup[type] # explicit type overrides RDF-type
         Markup[type][v,env]
-      elsif v.class == Hash
+      elsif v.class == Hash # RDF
         resource = v.R
         types = resource.types
         if (types.member? Post) || (types.member? BlogPost) || (types.member? Email)
           Markup[Post][v,env]
         elsif types.member? Image
           Markup[Image][v,env]
-        else
+        else # untyped
           table v, env
         end
       elsif v.class == WebResource
