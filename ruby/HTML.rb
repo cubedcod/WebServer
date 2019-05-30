@@ -207,12 +207,14 @@ class WebResource
 
     def self.tree t, env, name=nil
       url = t[:RDF].uri if t[:RDF]
+
       if name && t.keys.size > 1
         color = '#%06x' % rand(16777216)
         scale = rand(7) + 1
         position = scale * rand(960) / 960.0
         css = {style: "border: .08em solid #{color}; background: repeating-linear-gradient(#{rand 360}deg, #000, #000 #{position}em, #{color} #{position}em, #{color} #{scale}em)"}
       end
+
       {class: :tree,
        c: [({_: (url ? :a : :span), class: :label, c: (CGI.escapeHTML name.to_s)}.update(url ? {href: url} : {}) if name),
            t.map{|_name, _t|
@@ -287,16 +289,19 @@ class WebResource
     include URIs
 
     BasicGunk = %w{
-header  [class*='head']    [id*='head']
-nav     [class*='nav']     [id*='nav']
-        [class*='top']     [id*='top']
+        [class*='cookie']  [id*='cookie']
+        [class*='feature'] [id*='feature']
+        [class*='message'] [id*='message']
         [class*='related'] [id*='related']
-sidebar [class^='side']    [id^='side']
-aside   [class*='aside']   [id*='aside']
         [class*='share']   [id*='share']
         [class*='social']  [id*='social']
+        [class*='topbar']  [id*='topbar']
+aside   [class*='aside']   [id*='aside']
 footer  [class*='footer']  [id*='footer']
-}
+header  [class*='header']  [id*='header']
+nav     [class*='nav']     [id*='nav']
+sidebar [class^='side']    [id^='side']
+}#.map{|sel| sel.sub /\]$/, ' i]'}
 
     # HTML -> RDF
     def triplrHTML &f
@@ -304,18 +309,16 @@ footer  [class*='footer']  [id*='footer']
       # parse HTML
       n = Nokogiri::HTML.parse readFile.to_utf8
 
-      # triplr host-binding
+      # host-specific conversion
       hostTriples = TriplrHTML[@r && @r['SERVER_NAME']]
+      send hostTriples, n, &f if hostTriples
 
       # <body>
-      unless hostTriples && @r['SERVER_NAME'].match?(/twitter/)
-        # move site-chrome to bottom
-        if body = n.css('body')[0]
-          [*BasicGunk,*Gunk].map{|selector|
-            body.css(selector).map{|sel|
-              body.add_child sel.remove}}
-          yield uri, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
-        end
+      if body = n.css('body')[0]
+        [*BasicGunk,*Gunk].map{|selector|
+          body.css(selector).map{|sel|
+            body.add_child sel.remove}}
+        yield uri, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
       end
 
       # <title>
@@ -402,7 +405,6 @@ footer  [class*='footer']  [id*='footer']
       graph.each_triple{|s,p,o|
         yield s.to_s, p.to_s, [RDF::Node, RDF::URI].member?(o.class) ? o.R : o.value}
 
-      send hostTriples, &f if hostTriples
       triplrFile &f
     end
 

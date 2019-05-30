@@ -12,7 +12,7 @@
 .tree > .label {font-size: .8em; display:block; color: #eee; text-align: right}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
 a {overflow: hidden; text-decoration: none; max-width:32em}
-a.date {float: right; font-weight: normal; font-size:.8em; background-color: #000; color:#888}
+a.date, .tree > a.label {font-weight: normal; font-size:.8em; color:#888}
 a.id {float: right; color: #333}
 a.link {border: 1px solid #777}
 a.title, div.post, table {vertical-align: top}

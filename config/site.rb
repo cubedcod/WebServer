@@ -134,27 +134,26 @@ class WebResource
  .global-audio-components
 }
 
-    def AP
-      Nokogiri::HTML.parse(readFile).css('script').map{|script|
+    def AP doc
+      doc.css('script').map{|script|
         script.inner_text.scan(/window\['[-a-z]+'\] = ([^\n]+)/){|data|
           data = data[0]
           data = data[0..-2] if data[-1] == ';'
           json = ::JSON.parse data
-          yield env['REQUEST_URI'], Content, HTML.render(HTML.table (HTML.webizeHash json), env)
-        }}
+          yield env['REQUEST_URI'], Content, HTML.render(HTML.table (HTML.webizeHash json), env)}}
     end
 
-    def IG
+    def IG doc
       dataHeader = /^window._sharedData = /
-      Nokogiri::HTML.parse(readFile).css('script').map{|script|
+      doc.css('script').map{|script|
         if script.inner_text.match? dataHeader
           data = ::JSON.parse script.inner_text.sub(dataHeader,'')[0..-2]
           yield env['REQUEST_URI'], Content, HTML.render(HTML.table (HTML.webizeHash data), env)
         end}
     end
 
-    def tweets
-      Nokogiri::HTML.parse(readFile).css('div.tweet').map{|tweet|
+    def tweets doc
+      doc.css('div.tweet').map{|tweet|
         s = Twitter + tweet.css('.js-permalink').attr('href')
         authorName = tweet.css('.username b')[0].inner_text
         author = (Twitter + '/' + authorName).R
@@ -173,16 +172,17 @@ class WebResource
         end
         tweet.css('img').map{|img|
           yield s, Image, img.attr('src').to_s.R}}
+      doc.css('body').remove
     end
 
-    def youtube
+    def youtube doc
       if env['REQUEST_PATH'] == '/watch'
         s = 'https://www.youtube.com' + env['REQUEST_URI']
         yield s, Video, s.R
       end
     end
 
-    TriplrHTML['www.apnews.com'] = :AP
+    TriplrHTML['apnews.com'] = TriplrHTML['www.apnews.com'] = :AP
     TriplrHTML['www.instagram.com'] = :IG
     TriplrHTML['twitter.com'] = :tweets
     TriplrHTML['www.youtube.com'] = :youtube
