@@ -161,7 +161,7 @@ class WebResource
                'user'
 
         color = env[:colors][name] ||= (HTML.colorize name)
-        {_: :a, class: :creator, style: color, href: uris.justArray[0] || c.uri, c: name}
+        {_: :a, id: 'a'+rand.to_s.sha2, class: :creator, style: color, href: uris.justArray[0] || c.uri, c: name}
       else
         CGI.escapeHTML (c||'')
       end}

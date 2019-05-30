@@ -227,7 +227,8 @@ class WebResource
                    uri
                  end
       {class: :post,
-       c: [titles.map{|title|
+       c: [{_: :a, id: 't'+rand.to_s.sha2, class: :id, c: '☚', href: location},
+           titles.map{|title|
              Markup[Title][title,env,uri]},
            images.map{|i|
              Markup[Image][i,env]},
@@ -237,7 +238,6 @@ class WebResource
                     {_: :td, c: '&rarr;'},
                     {_: :td, c: to.map{|f|Markup[Creator][f,env]}, class: :to}]}},
            content,
-           {_: :a, id: 't'+rand.to_s.sha2, class: :id, c: '☚', href: location},
            ((HTML.table post, env) unless post.empty?),
            (Markup[Date][date] if date),
           ]}}

@@ -121,9 +121,6 @@ class WebResource
     # Twitter
     HostGET['twitter.com'] = -> r {
       if r.path == '/'
-        [200, {'Content-Type' => 'text/html'}, [r.htmlDocument({'/' => {'uri' => '/', Link => r.subscriptions.map{|user|(Twitter + '/' + user).R}},
-                                                             '/new' => {'uri' => '/new', Title => 'new posts'}})]]
-      elsif r.path == '/new'
         sources = []
         r.subscriptions.shuffle.each_slice(18){|s|
           sources << (Twitter + '/search?f=tweets&vertical=default&q=' + s.map{|u| 'from:' + u}.intersperse('+OR+').join).R }
