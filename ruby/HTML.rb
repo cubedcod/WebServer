@@ -206,6 +206,7 @@ class WebResource
     end
 
     def self.tree t, env, name=nil
+      url = t[:RDF].uri if t[:RDF]
       if name && t.keys.size > 1
         color = '#%06x' % rand(16777216)
         scale = rand(7) + 1
@@ -213,9 +214,9 @@ class WebResource
         css = {style: "border: .08em solid #{color}; background: repeating-linear-gradient(#{rand 360}deg, #000, #000 #{position}em, #{color} #{position}em, #{color} #{scale}em)"}
       end
       {class: :tree,
-       c: [({_: :span, class: :label, c: (CGI.escapeHTML name.to_s)} if name),
+       c: [({_: (url ? :a : :span), class: :label, c: (CGI.escapeHTML name.to_s)}.update(url ? {href: url} : {}) if name),
            t.map{|_name, _t|
-             if :data == _name
+             if :RDF == _name
                value nil, _t, env
              else
                tree _t, env, _name

@@ -177,8 +177,8 @@ class WebResource
         [re.host ? re.host.split('.').reverse : nil, re.parts, re.fragment].flatten.compact.map{|name|
           cursor = cursor[name] ||= {}}
         # insert
-        puts "duplicated data at #{node.uri}" if cursor[:data]
-        cursor[:data] = node }
+        puts "duplicate data at #{node.uri}" if cursor[:RDF]
+        cursor[:RDF] = node }
       t } # tree
 
   end
