@@ -38,24 +38,22 @@ class WebResource
     end
 
     def self.call env
-      method = env['REQUEST_METHOD']                        # lookup request-method
-      return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? method # allow defined methods
-      query = env[:query] = parseQs env['QUERY_STRING']     # parse query
-      host = query['host'] || env['HTTP_HOST']|| 'localhost' # hostname
+      return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? env['REQUEST_METHOD'] # allow defined methods
+      query = env[:query] = parseQs env['QUERY_STRING']          # parse query
       rawpath = env['REQUEST_PATH'].force_encoding('UTF-8').gsub /[\/]+/, '/' # collapse consecutive path-separator chars
-      path  = Pathname.new(rawpath).expand_path.to_s        # evaluate path expression
-      path += '/' if path[-1] != '/' && rawpath[-1] == '/'  # preserve trailing-slash
-      resource = ('//' + host + path).R env                 # instantiate request
-      env[:Response] = {}; env[:links] = {}                 # response-meta storage
-      resource.send(method).do{|status,head,body|           # dispatch request
+      path  = Pathname.new(rawpath).expand_path.to_s             # evaluate path expression
+      path += '/' if path[-1] != '/' && rawpath[-1] == '/'       # preserve trailing-slash
+      resource = ('//' + env['SERVER_NAME'] + path).R env        # instantiate request
+      env[:Response] = {}; env[:links] = {}                      # response-meta storage
+      resource.send(env['REQUEST_METHOD']).do{|status,head,body| # dispatch request
         color = (if resource.env[:deny]
                  '31'
-                elsif !Hosts.has_key? host # record first visit
-                  Hosts[host] = resource
+                elsif !Hosts.has_key? env['SERVER_NAME']
+                  Hosts[env['SERVER_NAME']] = resource
                   '32'
-                elsif method=='POST'
+                elsif env['REQUEST_METHOD'] == 'POST'
                   '32'
-                elsif status==200
+                elsif status == 200
                   if resource.ext == 'js' || (head['Content-Type'] && head['Content-Type'].match?(/script/))
                     '36'
                   else
@@ -73,8 +71,8 @@ class WebResource
                    end
         relocation = head['Location'] ? (" ↝ " + head['Location']) : ""
         # log request to console
-        puts "\e[7m" + (method == 'GET' ? '' : method) + "\e[" + color + "m "  + status.to_s + "\e[0m " + referrer + ' ' +
-             "\e[" + color + ";7mhttps://" + host + "\e[0m\e[" + color + "m" + path + resource.qs + "\e[0m " + relocation
+        puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + "\e[" + color + "m "  + status.to_s + "\e[0m " + referrer + ' ' +
+             "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + path + resource.qs + "\e[0m " + relocation
         # response
         [status, head, body]}
     rescue Exception => e
