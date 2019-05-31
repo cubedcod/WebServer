@@ -23,9 +23,13 @@ class WebResource
     end
 
     def cacheFile
-      pathname = path || ''
-      pathname = pathname[-1] == '/' ? pathname[0..-2] : pathname # strip trailing slash
       keep_ext = %w{aac atom css html jpeg jpg js m3u8 map mp3 mp4 ogg opus pdf png rdf svg ttf ttl vtt webm webp woff woff2}.member?(ext.downcase) && !host&.match?(/openload|\.wiki/)
+      pathname = path || ''
+      pathname = pathname[-1] == '/' ? pathname[0..-2] : pathname # strip slash
+      if pathname.size > 255
+        h = pathname.sha2
+        pathname = '/' + h[0..1] + '/' + h[2..-1] + (keep_ext ? ('.' + ext) : '')
+      end
       ((host ? ('/' + host) : '') + (if qs && !qs.empty? # hashed query
                                      [pathname, qs.sha2, keep_ext ? ext : 'cache'].join '.'
                                     else
