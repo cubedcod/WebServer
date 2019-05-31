@@ -45,8 +45,8 @@ class WebResource
       rawpath = env['REQUEST_PATH'].force_encoding('UTF-8').gsub /[\/]+/, '/' # collapse consecutive path-separator chars
       path  = Pathname.new(rawpath).expand_path.to_s        # evaluate path expression
       path += '/' if path[-1] != '/' && rawpath[-1] == '/'  # preserve trailing-slash
-      resource = ('//' + host + path).R env                 # bind request environment and resource identifier
-      env[:Response] = {}; env[:links] = {}                 # response-header storage
+      resource = ('//' + host + path).R env                 # instantiate request
+      env[:Response] = {}; env[:links] = {}                 # response-meta storage
       resource.send(method).do{|status,head,body|           # dispatch request
         color = (if resource.env[:deny]
                  '31'
@@ -284,8 +284,8 @@ class WebResource
             if h['Content-Type'] && !h['Content-Type'].match?(/image.(bmp|gif)|script/)
               [s, h, b] # allowed MIME
             else # filtered MIME
-              env[:GIF] = true if h['Content-Type'].match? /image\/gif/
-              env[:script] = true if h['Content-Type'].match? /script/
+              env[:GIF] = true if h['Content-Type']&.match? /image\/gif/
+              env[:script] = true if h['Content-Type']&.match? /script/
               deny
             end
           end}
