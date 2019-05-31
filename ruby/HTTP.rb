@@ -6,6 +6,16 @@ class WebResource
 
     Hosts = {}
     OFFLINE = ENV.has_key? 'OFFLINE'
+    SiteGIF = ConfDir.join('site.gif').read
+
+    # TODO RTFM on CORS/CORB stuff
+    def allowedOrigin
+      if referer = env['HTTP_REFERER']
+        'https://' + referer.R.host
+      else
+        '*'
+      end
+    end
 
     def allowPOST?
       (host.match? POSThost) ||
@@ -66,6 +76,7 @@ class WebResource
     rescue Exception => e
       msg = [resource.uri, e.class, e.message].join " "
       trace = e.backtrace.join "\n"
+      puts "\e[7;31m500\e[0m " + msg , trace
       [500, {'Content-Type' => 'text/html'},
        [resource.htmlDocument(
           {resource.uri => {Content => [
@@ -90,10 +101,23 @@ class WebResource
 
     def deny
       env[:deny] = true
-      js = ext == 'js'
-      [200, {'Access-Control-Allow-Origin' => '*',
-             'Content-Type' => js ? 'application/javascript' : 'text/html; charset=utf-8'},
-       js ? ["// TODO deliver modified scripts"] : ["<html><body style='background-color: red; text-align: center'><a href='#{qs.empty? ? '?allow' : path}' style='color: #fff; font-size: 28em; text-decoration: none'>⌘</a></body></html>"]]
+      type, content = if ext == 'js' || env[:script]
+                        ['application/javascript',
+                         '// TODO deliver modified scripts']
+                      elsif path[-3..-1] == 'css'
+                        ['text/css',
+                         'body {background-color: #000; color: #fff}']
+                      elsif env[:GIF]
+                        ['image/gif', SiteGIF]
+                      else
+                        ['text/html; charset=utf-8',
+                         "<html><body style='background-color: red; text-align: center'><a href='#{qs.empty? ? '?allow' : path}' style='color: #fff; font-size: 28em; text-decoration: none'>⌘</a></body></html>"]
+                      end
+      [200,
+       {'Access-Control-Allow-Credentials' => 'true',
+        'Access-Control-Allow-Origin' => allowedOrigin,
+        'Content-Type' => type},
+       [content]]
     end
     alias_method :drop, :deny
 
@@ -240,21 +264,24 @@ class WebResource
       updateLocation re.io.meta['location']
     end
 
+    # filter scripts and tracking GIFs
     def filter
-      if %w{gif js}.member? ext.downcase # filtered name-suffix
-        if ext=='gif' && qs.empty?
+      if %w{gif js}.member? ext.downcase # filtered suffix, skip origin-roundtrip
+        if ext=='gif' && qs.empty? # no querystring, allow GIF
           fetch
         else
           deny
         end
-      else
+      else # fetch and inspect
         fetch.do{|s,h,b|
-          if s.to_s.match? /30[1-3]/ # redirected
+          if s.to_s.match? /30[1-3]/ # redirection
             [s, h, b]
           else
             if h['Content-Type'] && !h['Content-Type'].match?(/image.(bmp|gif)|script/)
-              [s, h, b]
+              [s, h, b] # allowed MIME
             else # filtered MIME
+              env[:GIF] = true if h['Content-Type'].match? /image\/gif/
+              env[:script] = true if h['Content-Type'].match? /script/
               deny
             end
           end}
@@ -493,7 +520,7 @@ class WebResource
     end
 
     def updateLocation location
-      # TODO mobile/desktop site redirect loops after UA switch prevents 301 (perm) cache
+      # TODO redirect loops after mobile vs desktop UA-switch prevents permanent cacheability (any other common scenarios?)
       relocation.writeFile location unless host.match? /(alibaba|google|soundcloud|twitter|youtube)\.com$/
       [302, {'Location' => location}, []]
     end
