@@ -91,8 +91,9 @@ class WebResource
     def deny
       env[:deny] = true
       js = ext == 'js'
-      [200, {'Content-Type' => js ? 'application/javascript' : 'text/html; charset=utf-8'},
-       js ? ["// TODO deliver modified origin-scripts"] : ["<html><body style='background-color: red; text-align: center'><a href='#{qs.empty? ? '?allow' : path}' style='color: #fff; font-size: 28em; text-decoration: none'>⌘</a></body></html>"]]
+      [200, {'Access-Control-Allow-Origin' => '*',
+             'Content-Type' => js ? 'application/javascript' : 'text/html; charset=utf-8'},
+       js ? ["// TODO deliver modified scripts"] : ["<html><body style='background-color: red; text-align: center'><a href='#{qs.empty? ? '?allow' : path}' style='color: #fff; font-size: 28em; text-decoration: none'>⌘</a></body></html>"]]
     end
     alias_method :drop, :deny
 
