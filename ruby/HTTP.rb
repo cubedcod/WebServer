@@ -41,7 +41,7 @@ class WebResource
       return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? env['REQUEST_METHOD'] # allow defined methods
       query = env[:query] = parseQs env['QUERY_STRING']          # parse query
       rawpath = env['REQUEST_PATH'].force_encoding('UTF-8').gsub /[\/]+/, '/' # collapse consecutive path-separator chars
-      path  = Pathname.new(rawpath).expand_path.to_s             # evaluate path expression
+      path = Pathname.new(rawpath).expand_path.to_s              # evaluate path expression
       path += '/' if path[-1] != '/' && rawpath[-1] == '/'       # preserve trailing-slash
       resource = ('//' + env['SERVER_NAME'] + path).R env        # instantiate request
       env[:Response] = {}; env[:links] = {}                      # response-meta storage
@@ -76,16 +76,17 @@ class WebResource
         # response
         [status, head, body]}
     rescue Exception => e
-      msg = [resource.uri, e.class, e.message].join " "
+      uri = 'https://' + env['SERVER_NAME'] + env['REQUEST_URI']
+      msg = [uri, e.class, e.message].join " "
       trace = e.backtrace.join "\n"
       puts "\e[7;31m500\e[0m " + msg , trace
       [500, {'Content-Type' => 'text/html'},
-       [resource.htmlDocument(
-          {resource.uri => {Content => [
-                              {_: :h3, c: msg.hrefs, style: 'color: red'},
-                              {_: :pre, c: trace.hrefs},
-                              (HTML.table (HTML.webizeHash env), env),
-                              (HTML.table (HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
+       [uri.R.htmlDocument(
+          {uri => {Content => [
+                     {_: :h3, c: msg.hrefs, style: 'color: red'},
+                     {_: :pre, c: trace.hrefs},
+                     (HTML.table (HTML.webizeHash env), env),
+                     (HTML.table (HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
     end
 
     def decompress head, body
@@ -230,7 +231,8 @@ class WebResource
             end
           end
         rescue Exception => e
-          raise unless e.message.match? /[34]04/ # 304/404 handled in normal control-flow
+          # TODO show some indication that origin is down/missing
+          raise unless e.message.match? /304|403|404/ # statuscode handled in normal control-flow
         end}
 
       # update cache
