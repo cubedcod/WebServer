@@ -166,7 +166,7 @@ class WebResource
       response_meta = {}
       updates = []
 
-      # fetcher lambda
+      # fetcher
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3], ' '#, url, ' '
         begin
