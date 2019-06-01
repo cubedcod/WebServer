@@ -63,30 +63,27 @@ class WebResource
     end
 
     # file -> file
-    def rdfize # call MIME-mapped triplr function, cache its output in JSON file and return reference to it
+    def rdfize # call MIME-mapped triplr, cache output in JSON file, return swapped file-reference
       return self if ext == 'e'
       hash = node.stat.ino.to_s.sha2
       doc = ('/cache/RDF/' + hash[0..2] + '/' + hash[3..-1] + '.e').R
       return doc if doc.e && doc.m > m # cache up-to-date
       graph = {}
-      # lookup triple-producer code
       triplr = Triplr[mime]
       unless triplr
         puts "#{uri}: triplr for #{mime} missing"
         triplr = :triplrFile
       end
-      # collect triples
       send(*triplr){|s,p,o|
         graph[s]    ||= {'uri' => s}
         graph[s][p] ||= []
         graph[s][p].push o.class == WebResource ? {'uri' => o.uri} : o unless p == 'uri'}
-      # return cache file-ref
       doc.writeFile graph.to_json
     end
 
   end
   module HTTP
-    # load JSON and RDF to JSON-compatible Hash
+    # load JSON and RDF to JSON-compat Hash
     def load files
       g = {}                 # init Hash
       graph = RDF::Graph.new # init RDF::Graph

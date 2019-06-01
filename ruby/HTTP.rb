@@ -231,11 +231,11 @@ class WebResource
       # update cache
       unless cache.noTransform? || OFFLINE
         begin
-          fetchURL[url]                             # HTTPS
+          fetchURL[url]                       # HTTPS
         rescue Exception => e
           raise if e.class == OpenURI::HTTPRedirect # redirected
           puts e.class, e.message
-          #fetchURL[url.sub /^https/, 'http']        # HTTP downgrade
+          #fetchURL[url.sub /^https/, 'http'] # HTTP downgrade
         end
       end
 
