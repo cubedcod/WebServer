@@ -52,9 +52,9 @@ class WebResource
   end
   module Webize
 
-    def triplrArchive &f;     yield uri, Type, (Stat+'Archive').R; triplrFile &f end
-    def triplrAudio &f;       yield uri, Type, Sound.R; triplrFile &f end
-    def triplrDataFile &f;    yield uri, Type, (Stat+'DataFile').R; triplrFile &f end
+    def triplrArchive &f; yield uri, Type, (Stat+'Archive').R end
+    def triplrAudio &f;   yield uri, Type, Sound.R end
+    def triplrDataFile &f;yield uri, Type, (Stat+'DataFile').R end
 
     def triplrBat &f
       yield uri, Content, `pygmentize -l batch -f html #{sh}` end
@@ -76,7 +76,6 @@ class WebResource
 
     def triplrWord conv, argB='', &f
       yield uri, Content, '<pre>' + `#{conv} #{sh} #{argB}` + '</pre>'
-      triplrFile &f
     end
 
     def triplrRTF          &f; triplrWord :catdoc,        &f end

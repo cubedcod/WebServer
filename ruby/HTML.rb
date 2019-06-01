@@ -401,9 +401,6 @@ sidebar [class^='side']    [id^='side']
       if hostTriples = @r && Triplr[:HTML][@r['SERVER_NAME']]
         send hostTriples, n, &f
       end
-
-      # POSIX file metadata
-      triplrFile &f
     end
 
   end

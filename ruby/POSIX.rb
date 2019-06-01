@@ -129,7 +129,6 @@ class WebResource
       w,h = Dimensions.dimensions localPath
       yield uri, Schema + 'width', w
       yield uri, Schema + 'height', h
-      triplrFile &f
     end
 
     # directory -> RDF

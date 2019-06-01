@@ -67,17 +67,14 @@ class WebResource
       return self if ext == 'e'
       hash = node.stat.ino.to_s.sha2
       doc = ('/cache/RDF/' + hash[0..2] + '/' + hash[3..-1] + '.e').R
-      return doc if doc.e && doc.m > m # cache up-to-date
+      return doc if doc.e && doc.m > m # rdfization up to date
       graph = {}
-      triplr = Triplr[mime]
-      unless triplr
-        puts "#{uri}: triplr for #{mime} missing"
-        triplr = :triplrFile
+      triplrFile{|s,p,o|     graph[s] ||= {'uri' => s}; graph[s][p] ||= []; graph[s][p].push o.class == WebResource ? {'uri' => o.uri} : o unless p == 'uri'}
+      if triplr = Triplr[mime]
+       send(*triplr){|s,p,o| graph[s] ||= {'uri' => s}; graph[s][p] ||= []; graph[s][p].push o.class == WebResource ? {'uri' => o.uri} : o unless p == 'uri'}
+      else
+       puts "#{uri}: triplr for #{mime} missing" unless triplr
       end
-      send(*triplr){|s,p,o|
-        graph[s]    ||= {'uri' => s}
-        graph[s][p] ||= []
-        graph[s][p].push o.class == WebResource ? {'uri' => o.uri} : o unless p == 'uri'}
       doc.writeFile graph.to_json
     end
 
@@ -184,8 +181,8 @@ class WebResource
     Triplr = {}
 
     def indexRDF options = {} ; updates = []
-      g = RDF::Repository.load self, options # load graph
-      g.each_graph.map{|graph|               # visit named graph
+      g = RDF::Repository.load self, options # load resource
+      g.each_graph.map{|graph|               # bind named graph
         graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value.do{|t| # timestamp
           doc = ['/' + t.gsub(/[-T]/,'/').sub(':','/').sub(/(.00.00|Z)$/, ''),
                  *graph.name.to_s.sub(/^https?:/,'').split(/[\/\-_]/).-(%w{a blog co com edu gov html net org the www}),
