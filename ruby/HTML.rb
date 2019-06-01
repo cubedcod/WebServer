@@ -299,15 +299,11 @@ footer  [class*='footer']  [id*='footer']
 header  [class*='header']  [id*='header'] [class*='Header'] [id*='Header']
 nav     [class*='nav']     [id*='nav']
 sidebar [class^='side']    [id^='side']
-}#.map{|sel| sel.sub /\]$/, ' i]'}
+}#.map{|sel| sel.sub /\]$/, ' i]'} #TODO see if Oga et al support case-insensitive attribute-selectors https://gitlab.com/yorickpeterse/oga
 
     # HTML -> RDF
     def triplrHTML &f
-      # parse HTML, TODO see if Oga or something else supports case-insensitive attribute-selectors https://gitlab.com/yorickpeterse/oga
-      n = Nokogiri::HTML.parse readFile.to_utf8
-      # host-specific triplr
-      hostTriples = Triplr[:HTML][@r && @r['SERVER_NAME']]
-      send hostTriples, n, &f if hostTriples
+      n = Nokogiri::HTML.parse readFile.to_utf8 # parse
 
       # <body>
       if body = n.css('body')[0]
@@ -401,6 +397,12 @@ sidebar [class^='side']    [id^='side']
       graph.each_triple{|s,p,o|
         yield s.to_s, p.to_s, [RDF::Node, RDF::URI].member?(o.class) ? o.R : o.value}
 
+      # host-specific triplr
+      if hostTriples = @r && Triplr[:HTML][@r['SERVER_NAME']]
+        send hostTriples, n, &f
+      end
+
+      # POSIX file metadata
       triplrFile &f
     end
 

@@ -188,7 +188,7 @@ class WebResource
       g.each_graph.map{|graph|               # visit named graph
         graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value.do{|t| # timestamp
           doc = ['/' + t.gsub(/[-T]/,'/').sub(':','/').sub(/(.00.00|Z)$/, ''),
-                 *graph.name.to_s.sub(/^https?:\/\/(www)?/,'').split(/\//),
+                 *graph.name.to_s.sub(/^https?:/,'').split(/[\/\-_]/).-(%w{a blog co com edu gov html net org the www}),
                  'ttl'].join('.').R # link in hour-dir w/ preserved name slugs
           unless doc.e
             doc.dir.mkdir
