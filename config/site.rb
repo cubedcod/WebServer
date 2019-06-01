@@ -82,7 +82,7 @@ class WebResource
 
     # Facebook
     HostGET['facebook.com'] = HostGET['www.facebook.com'] = -> r {%w{connect pages_reaction_units plugins security tr}.member?(r.parts[0]) ? r.drop : r.remote}
-    HostGET['l.instagram.com'] = -> r {[301, {'Location' =>  r.q['u']},[]]}
+    HostGET['l.instagram.com'] = HostGET['l.facebook.com'] = -> r {[301, {'Location' =>  r.q['u']},[]]}
 
     # Google
     PathGET['/url'] = -> r { [301, {'Location' => (r.q['url']||r.q['q'])}, []]}

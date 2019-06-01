@@ -233,9 +233,9 @@ class WebResource
         begin
           fetchURL[url]                       # HTTPS
         rescue Exception => e
-          raise if e.class == OpenURI::HTTPRedirect # redirected
-          puts e.class, e.message
-          #fetchURL[url.sub /^https/, 'http'] # HTTP downgrade
+          raise if e.class == OpenURI::HTTPRedirect
+          fetchURL[url.sub /^https/, 'http'] if e.class == OpenSSL::SSL::SSLError
+          puts e.class, e.message unless e.class == OpenSSL::SSL::SSLError
         end
       end
 
