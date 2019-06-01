@@ -181,6 +181,7 @@ class WebResource
   end
   module Webize
     include MIME
+    Triplr = {}
 
     def indexRDF options = {}
       newResources = []

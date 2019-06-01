@@ -7,12 +7,12 @@
 #subscribe.on  {color: #000; background-color: #fff}
 #up, #down {display: block}
 .bold {font-weight: bold; font-size: 1.1em}
-.post {border: .08em solid #333; background-color: #080808; color: #fff; border-radius: .3em}
+.post {border: .08em solid #111; background-color: #000; color: #fff; border-radius: .38em}
 .toolbox {position: fixed; top: 0; right: 0; z-index: 1}
 .tree > .label {font-size: .8em; display:block; color: #eee; text-align: right}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
 a {overflow: hidden; text-decoration: none; max-width:32em}
-a.date, .tree > a.label {font-weight: normal; font-size:.8em; color:#aaa}
+a.date {float: right; color: #888; font-size: .8em}
 a.id {float: right; color: #333}
 a.link {border: 1px solid #777}
 a.title, div.post, table {vertical-align: top}

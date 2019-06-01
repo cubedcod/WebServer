@@ -164,7 +164,7 @@ class WebResource
         content = tweet.css('.tweet-text')[0]
         if content
           content.css('a').map{|a|
-            a.set_attribute('id', 'tweetedlink'+rand.to_s.sha2)
+            a.set_attribute('id', 'link'+rand.to_s.sha2)
             a.set_attribute('href', Twitter + (a.attr 'href')) if (a.attr 'href').match /^\//
             yield s, DC+'link', (a.attr 'href').R}
           yield s, Content, HTML.clean(content.inner_html).gsub(/<\/?span[^>]*>/,'').gsub(/\n/,'').gsub(/\s+/,' ')
@@ -181,10 +181,13 @@ class WebResource
       end
     end
 
-    TriplrHTML['apnews.com'] = TriplrHTML['www.apnews.com'] = :AP
-    TriplrHTML['www.instagram.com'] = :IG
-    TriplrHTML['twitter.com'] = :tweets
-    TriplrHTML['www.youtube.com'] = :youtube
+    Triplr[:HTML] = {
+      'apnews.com' => :AP,
+      'www.apnews.com' => :AP,
+      'www.instagram.com' => :IG,
+      'twitter.com' => :tweets,
+      'www.youtube.com' => :youtube,
+    }
 
     IndexHTML['twitter.com'] = -> page {
       graph = {}

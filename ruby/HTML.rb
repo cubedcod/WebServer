@@ -281,9 +281,7 @@ class WebResource
   end
   include HTML
   module URIs
-    # hostname -> lambda tables
     IndexHTML = {}
-    TriplrHTML = {}
   end
   module Webize
     include URIs
@@ -310,7 +308,7 @@ sidebar [class^='side']    [id^='side']
       n = Nokogiri::HTML.parse readFile.to_utf8
 
       # host-specific conversion
-      hostTriples = TriplrHTML[@r && @r['SERVER_NAME']]
+      hostTriples = Triplr[:HTML][@r && @r['SERVER_NAME']]
       send hostTriples, n, &f if hostTriples
 
       # <body>
