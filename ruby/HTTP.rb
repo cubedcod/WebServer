@@ -210,8 +210,7 @@ class WebResource
                        else                             # sniff
                          cache.mimeSniff
                        end
-                # updata metadata on cache file  TODO survey POSIX eattr support
-                cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache'
+                cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # updata metadata
                 # index updates
                 updates.concat(case mime
                                when /^(application|text)\/(atom|rss|xml)/
