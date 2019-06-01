@@ -39,13 +39,11 @@ class WebResource
 
     def self.call env
       return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? env['REQUEST_METHOD'] # allow defined methods
-      query = env[:query] = parseQs env['QUERY_STRING']          # parse query
-      rawpath = env['REQUEST_PATH'].force_encoding('UTF-8').gsub /[\/]+/, '/' # collapse consecutive path-separator chars
-      path = Pathname.new(rawpath).expand_path.to_s              # evaluate path expression
-      path += '/' if path[-1] != '/' && rawpath[-1] == '/'       # preserve trailing-slash
-      resource = ('//' + env['SERVER_NAME'] + path).R env        # instantiate request
-      env[:Response] = {}; env[:links] = {}                      # response-meta storage
-      resource.send(env['REQUEST_METHOD']).do{|status,head,body| # dispatch request
+      env[:Response] = {}; env[:links] = {}                                             # response-meta storage
+      path = Pathname.new(env['REQUEST_PATH'].force_encoding('UTF-8')).expand_path.to_s # evaluate path expression
+      query = env[:query] = parseQs env['QUERY_STRING']                                 # parse query
+      resource = ('//' + env['SERVER_NAME'] + path).R env                               # instantiate request
+      resource.send(env['REQUEST_METHOD']).do{|status,head,body|                        # dispatch request
         color = (if resource.env[:deny]
                  '31'
                 elsif !Hosts.has_key? env['SERVER_NAME']
@@ -72,7 +70,7 @@ class WebResource
         relocation = head['Location'] ? (" ↝ " + head['Location']) : ""
         # log request to console
         puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + "\e[" + color + "m "  + status.to_s + "\e[0m " + referrer + ' ' +
-             "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + path + resource.qs + "\e[0m " + relocation
+             "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs + "\e[0m " + relocation
         # response
         [status, head, body]}
     rescue Exception => e
@@ -168,25 +166,19 @@ class WebResource
     alias_method :env, :environment
 
     def fetch
-      # environment
+      # request environment
       head = HTTP.unmangle env
       head.delete 'Host'
       head['User-Agent'] = DesktopUA
       head.delete 'User-Agent' if %w{po.st t.co}.member? host
-
-      # relocation handling
-      if @r
-        if relocated?
-          location = join(relocation.readFile).R
-          return redirect unless location.host == host && (location.path || '/') == path
-        else
-          head[:redirect] = false
-        end
-      end
+      head[:redirect] = false if @r # don't internally redirect, let clients know location
 
       # resource pointers and metadata
-      suffix = ext.empty? && host.match?(/reddit.com$/) && !originUI && '.rss'
-      url = 'https://' + host + (path || '') + (suffix || '') + qs
+      url = if suffix = ext.empty? && host.match?(/reddit.com$/) && !originUI && '.rss'
+              'https://' + host + path + suffix + qs
+            else
+              'https://' + env['HTTP_HOST'] + env['REQUEST_URI']
+            end
       cache = cacheFile
       partial_response = nil
       cacheMeta = cache.metafile
@@ -203,6 +195,9 @@ class WebResource
               response_meta = response.meta
               partial_response = response.read
             else # response
+              #HTTP.print_header head; puts "<============>"
+              #print response.status.justArray.join(' ') + ' '
+              #HTTP.print_header response.meta
               %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| @r[:Response][k] ||= response.meta[k.downcase] } if @r
               body = decompress response.meta, response.read
               unless cache.e && cache.readFile == body # unchanged
@@ -217,7 +212,6 @@ class WebResource
                        end
                 # updata metadata on cache file  TODO survey POSIX eattr support
                 cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache'
-
                 # index updates
                 updates.concat(case mime
                                when /^(application|text)\/(atom|rss|xml)/
@@ -241,7 +235,9 @@ class WebResource
           fetchURL[url]                             # HTTPS
         rescue Exception => e
           raise if e.class == OpenURI::HTTPRedirect # redirected
-          fetchURL[url.sub /^https/, 'http']        # HTTP downgrade
+          puts e.class, e.message
+          puts "skipping HTTP downgrade. do you need it?"
+          #fetchURL[url.sub /^https/, 'http']        # HTTP downgrade
         end
       end
 
@@ -485,9 +481,10 @@ class WebResource
         when /drop/
           if ((host.match? /track/) || (env['REQUEST_URI'].match? /track/)) && (host.match? TrackHost)
             fetch
-          elsif qs == '?allow'
-            puts "ALLOW #{uri}"
+          elsif qs == '?allow' # allow without query-string
             env.delete 'QUERY_STRING'
+            env['REQUEST_URI'] = env['REQUEST_PATH']
+            puts "ALLOW #{uri}"
             fetch
           else
             drop
