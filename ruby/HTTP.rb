@@ -195,9 +195,9 @@ class WebResource
               response_meta = response.meta
               partial = response.read
             else # response
-              #HTTP.print_header head; puts "<============>"; print response.status.justArray.join(' ') + ' '; HTTP.print_header response.meta
               %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| @r[:Response][k] ||= response.meta[k.downcase] } if @r
               body = decompress response.meta, response.read
+              #HTTP.print_header head; puts "<============>"; print response.status.justArray.join(' ') + ' '; HTTP.print_header response.meta ; # puts body
               unless cache.e && cache.readFile == body # unchanged
                 cache.writeFile body                   # update
                 mime = if response.meta['content-type'] # explicit MIME

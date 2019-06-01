@@ -183,33 +183,20 @@ class WebResource
     include MIME
     Triplr = {}
 
-    def indexRDF options = {}
-      newResources = []
-      # load resource
-      g = RDF::Repository.load self, options
-
-      # visit named-graph containers
-      g.each_graph.map{|graph|
-
-        # timestamp for timeline-linkage
-        graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value.do{|t|
-
-          # document-URI
-          time = t.gsub(/[-T]/,'/').sub(':','/').sub /(.00.00|Z)$/, ''
-          slug = (graph.name.to_s.sub(/https?:\/\//,'.').gsub(/[\W_]/,'..').sub(/\d{12,}/,'')+'.').gsub(/\.+/,'.')[0..127].sub(/\.$/,'')
-          doc = "/#{time}#{slug}.ttl".R
-
-          # cache graph locally
+    def indexRDF options = {} ; updates = []
+      g = RDF::Repository.load self, options # load graph
+      g.each_graph.map{|graph|               # visit named graph
+        graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value.do{|t| # timestamp
+          doc = ('/' + t.gsub(/[-T]/,'/').sub(':','/').sub(/(.00.00|Z)$/, '') +
+                 (graph.name.to_s.sub(/https?:\/\/(www)?/,'.').gsub(/[\W_]/,'..') + '.').gsub(/\.+/,'.')[0..127].sub(/\.$/,'') +
+                 ".ttl").R # located in hour-dir w/ preserved name slugs
           unless doc.e
             doc.dir.mkdir
-            RDF::Writer.open(doc.localPath){|f|
-              f << graph}
-            newResources << doc
-            puts  "http://localhost:8000" + doc.stripDoc
+            RDF::Writer.open(doc.localPath){|f|f << graph}
+            updates << doc; puts  "http://localhost:8000" + doc.stripDoc
           end
           true}}
-
-      newResources
+      updates
     end
   end
 end
