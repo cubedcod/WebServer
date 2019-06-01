@@ -10,10 +10,7 @@ class WebResource
 
   end
 
-  def self.getFeeds
-    FeedURL.values.map{|feed| feed.fetch rescue nil}
-    nil
-  end
+  def self.getFeeds; FeedURL.values.map &:fetch; nil end
 
   module HTTP
 

@@ -303,11 +303,9 @@ sidebar [class^='side']    [id^='side']
 
     # HTML -> RDF
     def triplrHTML &f
-
-      # parse HTML TODO see if Oga or something can do case-insensitive attribute-selectors https://gitlab.com/yorickpeterse/oga
+      # parse HTML, TODO see if Oga or something else supports case-insensitive attribute-selectors https://gitlab.com/yorickpeterse/oga
       n = Nokogiri::HTML.parse readFile.to_utf8
-
-      # host-specific conversion
+      # host-specific triplr
       hostTriples = Triplr[:HTML][@r && @r['SERVER_NAME']]
       send hostTriples, n, &f if hostTriples
 

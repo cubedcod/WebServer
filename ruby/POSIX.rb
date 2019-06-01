@@ -82,10 +82,10 @@ class WebResource
          grep q['q']
        else # LS
          index = (self+'index.html').glob
-         if !index.empty? && qs.empty? # static HTML index-compile exists and no custom-query?
-           index # return static index
+         if !index.empty? && qs.empty? # static index-file exists and no query
+           index
          else
-           [self, path[-1] == '/' ? children : []]
+           [self, env['REQUEST_PATH'][-1] == '/' ? children : []]
          end
        end
       else # files
