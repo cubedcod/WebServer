@@ -225,8 +225,8 @@ class WebResource
             end
           end
         rescue Exception => e
-          # TODO show some indication that origin is down/missing
-          raise unless e.message.match? /304|403|404/ # statuscode handled in normal control-flow
+          # TODO show some indication of remote status in UI
+          raise unless e.message.match? /304|40[134]/
         end}
 
       # update cache
@@ -236,7 +236,6 @@ class WebResource
         rescue Exception => e
           raise if e.class == OpenURI::HTTPRedirect # redirected
           puts e.class, e.message
-          puts "skipping HTTP downgrade. do you need it?"
           #fetchURL[url.sub /^https/, 'http']        # HTTP downgrade
         end
       end
