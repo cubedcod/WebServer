@@ -39,11 +39,11 @@ class WebResource
 
     def self.call env
       return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? env['REQUEST_METHOD'] # allow defined methods
-      env[:Response] = {}; env[:links] = {}                                             # response-meta storage
+      env[:Response] = {}; env[:links] = {}                      # response-header storage
       path = Pathname.new(env['REQUEST_PATH'].force_encoding('UTF-8')).expand_path.to_s # evaluate path expression
-      query = env[:query] = parseQs env['QUERY_STRING']                                 # parse query
-      resource = ('//' + env['SERVER_NAME'] + path).R env                               # instantiate request
-      resource.send(env['REQUEST_METHOD']).do{|status,head,body|                        # dispatch request
+      query = env[:query] = parseQs env['QUERY_STRING']          # parse query
+      resource = ('//' + env['SERVER_NAME'] + path).R env        # instantiate request
+      resource.send(env['REQUEST_METHOD']).do{|status,head,body| # dispatch request
         color = (if resource.env[:deny]
                  '31'
                 elsif !Hosts.has_key? env['SERVER_NAME']
@@ -171,19 +171,19 @@ class WebResource
       head.delete 'Host'
       head['User-Agent'] = DesktopUA
       head.delete 'User-Agent' if %w{po.st t.co}.member? host
-      head[:redirect] = false if @r # don't internally redirect, let clients know location
-
-      # resource pointers and metadata
+      head[:redirect] = false if @r # don't internally redirect HTTP callers
       url = if suffix = ext.empty? && host.match?(/reddit.com$/) && !originUI && '.rss'
               'https://' + host + path + suffix + qs
-            else
+            elsif @r
               'https://' + env['HTTP_HOST'] + env['REQUEST_URI']
+            else
+              'https://' + host + path + qs
             end
       cache = cacheFile
-      partial_response = nil
       cacheMeta = cache.metafile
       head["If-Modified-Since"] = cache.mtime.httpdate if cache.e
       response_meta = {}
+      partial = nil
       updates = []
 
       # fetcher
@@ -193,16 +193,13 @@ class WebResource
           open(url, head) do |response| # request
             if response.status.to_s.match?(/206/) # partial response
               response_meta = response.meta
-              partial_response = response.read
+              partial = response.read
             else # response
-              #HTTP.print_header head; puts "<============>"
-              #print response.status.justArray.join(' ') + ' '
-              #HTTP.print_header response.meta
+              #HTTP.print_header head; puts "<============>"; print response.status.justArray.join(' ') + ' '; HTTP.print_header response.meta
               %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| @r[:Response][k] ||= response.meta[k.downcase] } if @r
               body = decompress response.meta, response.read
               unless cache.e && cache.readFile == body # unchanged
-                # update cache
-                cache.writeFile body
+                cache.writeFile body                   # update
                 mime = if response.meta['content-type'] # explicit MIME
                          response.meta['content-type'].split(';')[0]
                        elsif MIMEsuffix[cache.ext]      # file extension
@@ -241,8 +238,8 @@ class WebResource
 
       # response
       if @r # HTTP caller
-        if partial_response
-          [206, response_meta, [partial_response]]
+        if partial
+          [206, response_meta, [partial]]
         elsif cache.exist?
           if cache.noTransform?
             cache.localFile # immutable format
