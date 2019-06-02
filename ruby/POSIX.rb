@@ -146,7 +146,7 @@ class WebResource
       load(files.select &:exist?).map{|s,r|
         r.map{|p,objs|
           objs.justArray.map{|o|
-            yield s, p, o unless [Content,'uri'].member? p
+            yield s, p, o unless [Content,'uri'].member?(p) && s.R.basename != 'README'
           }}}
     end
 

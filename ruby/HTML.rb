@@ -121,8 +121,8 @@ class WebResource
                                     end]}
                              end,
                              if graph.empty?
-                               HTML.keyval (HTML.webizeHash @r), @r
-                             elsif localNode? && directory? && env['REQUEST_PATH'][-1] != '/' # directory overview
+                               HTML.keyval (HTML.webizeHash @r), @r # 404
+                             elsif localNode? && directory? && env['REQUEST_PATH'][-1] != '/' # overview of content
                                HTML.tabular graph, @r
                              else
                                HTML.tree (Group[q['g']] || # custom layout
@@ -198,7 +198,7 @@ class WebResource
       end}
 
     def self.keyval t, env
-      {_: :table,
+      {_: :table, class: :kv,
        c: t.map{|k,vs|
          type = k && k.R || '#untyped'.R
          [:name,'uri',Type].member?(k) ? '' : [{_: :tr, name: type.fragment || type.basename,
@@ -208,7 +208,14 @@ class WebResource
     end
 
     def self.tabular graph, env
-      'XYZ'
+      keys = graph.map{|uri,resource| resource.keys}.flatten.uniq - [Content]
+      {_: :table, class: :tabular,
+       c: [{_: :tr, c: keys.map{|p| {_: :td, c: Markup[Type][p.R]}}},
+           graph.map{|uri,resource|
+             [{_: :tr, c: keys.map{|k|
+                {_: :td, c: resource[k].justArray.map{|v|
+                   value k, v, env }}}},
+              ({_: :tr, c: {_: :td, colspan: keys.size, c: resource[Content]}} if resource[Content])]}]}
     end
 
     def self.tree t, env, name=nil
