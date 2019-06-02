@@ -121,7 +121,8 @@ class WebResource
                                     end]}
                              end,
                              if graph.empty?
-                               HTML.table (HTML.webizeHash @r), @r
+                               HTML.keyval (HTML.webizeHash @r), @r
+                             elsif # directory overview
                              else
                                HTML.tree (Group[q['g']] || # custom layout
                                           Group['tree']    # graph -> tree
@@ -195,7 +196,7 @@ class WebResource
         end
       end}
 
-    def self.table t, env
+    def self.keyval t, env
       {_: :table,
        c: t.map{|k,vs|
          type = k && k.R || '#untyped'.R
@@ -239,8 +240,8 @@ class WebResource
           Markup[Post][v,env]
         elsif types.member? Image
           Markup[Image][v,env]
-        else # untyped
-          table v, env
+        else
+          keyval v, env
         end
       elsif v.class == WebResource
         v

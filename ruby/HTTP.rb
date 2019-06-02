@@ -83,8 +83,8 @@ class WebResource
           {uri => {Content => [
                      {_: :h3, c: msg.hrefs, style: 'color: red'},
                      {_: :pre, c: trace.hrefs},
-                     (HTML.table (HTML.webizeHash env), env),
-                     (HTML.table (HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
+                     (HTML.keyval (HTML.webizeHash env), env),
+                     (HTML.keyval (HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
     end
 
     def decompress head, body

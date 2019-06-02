@@ -80,12 +80,12 @@ class WebResource
 
   end
   module HTTP
-    # load JSON and RDF to JSON-compat Hash
+    # merge-load JSON and RDF to JSON-pickleable Hash
     def load files
       g = {}                 # init Hash
       graph = RDF::Graph.new # init RDF::Graph
 
-      rdf, misc = files.partition &:isRDF # input categories
+      rdf, misc = files.partition &:isRDF # input-file categories
 #      puts "load RDF: ",   rdf.join(' ') unless  rdf.empty?
 #      puts "load JSON: ", misc.join(' ') unless misc.empty?
 
@@ -113,7 +113,7 @@ class WebResource
                 g[s][p] ||= []      # insert predicate
                 g[s][p].push o unless g[s][p].member? o} unless p == 'uri' }}}} # insert object
 
-      g # graph reference for caller
+      g # graph reference
     end
 
     def graphResponse set

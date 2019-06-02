@@ -228,7 +228,7 @@ class WebResource
                     {_: :td, c: '&rarr;'},
                     {_: :td, c: to.map{|f|Markup[Creator][f,env]}, class: :to}]}},
            content,
-           ((HTML.table post, env) unless post.empty?),
+           ((HTML.keyval post, env) unless post.empty?),
            (Markup[Date][date] if date),
           ]}}
 
