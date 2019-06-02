@@ -188,7 +188,7 @@ class WebResource
 
       # fetcher
       fetchURL = -> url {
-        print '🌍🌎🌏'[rand 3], ' '#, url, ' '
+        print '🌍🌎🌏'[rand 3], ' ', url, ' '
         begin
           open(url, head) do |response| # request
             if response.status.to_s.match?(/206/) # partial response
@@ -241,10 +241,11 @@ class WebResource
           when 'OpenURI::HTTPError'
             fetchURL[fallback]
           when 'OpenURI::HTTPRedirect'
-            if e.io.meta['location'] == fallback
+            location = e.io.meta['location']
+            if location == fallback
               fetchURL[fallback]
             else
-              raise
+              return updateLocation location
             end
           else
             puts [url, e.class, e.message].join ' '
@@ -271,13 +272,13 @@ class WebResource
       else # REPL/script caller
         updates
       end
-    rescue OpenURI::HTTPRedirect => re # redirected
-      updateLocation re.io.meta['location']
+    rescue Exception => e
+      puts [url, e.class, e.message].join ' '
     end
 
     # filter scripts and tracking GIFs
     def filter
-      if %w{gif js}.member? ext.downcase # filtered suffix, skip origin-roundtrip
+      if %w{gif js}.member? ext.downcase # filtered suffix, skip origin roundtrip
         if ext=='gif' && qs.empty? # no querystring, allow GIF
           fetch
         else
@@ -285,7 +286,7 @@ class WebResource
         end
       else # fetch and inspect
         fetch.do{|s,h,b|
-          if s.to_s.match? /30[1-3]/ # redirection
+          if s.to_s.match? /30[1-3]/ # redirected
             [s, h, b]
           else
             if h['Content-Type'] && !h['Content-Type'].match?(/image.(bmp|gif)|script/)
