@@ -152,7 +152,8 @@ class WebResource
     end
 
     def tweets doc
-      doc.css('div.tweet').map{|tweet|
+      %w{grid-tweet tweet}.map{|tweetclass|
+      doc.css('.' + tweetclass).map{|tweet|
         s = Twitter + (tweet.css('.js-permalink').attr('href') || tweet.attr('data-permalink-path'))
         authorName = tweet.css('.username b')[0].do{|b|b.inner_text} || s.R.parts[0]
         author = (Twitter + '/' + authorName).R
@@ -169,9 +170,11 @@ class WebResource
             yield s, DC+'link', (a.attr 'href').R}
           yield s, Content, HTML.clean(content.inner_html).gsub(/<\/?span[^>]*>/,'').gsub(/\n/,'').gsub(/\s+/,' ')
         end
+        if img = tweet.attr('data-resolved-url-large')
+          yield s, Image, img.to_s.R
+        end
         tweet.css('img').map{|img|
-          yield s, Image, img.attr('src').to_s.R}}
-      doc.css('body').remove
+          yield s, Image, img.attr('src').to_s.R}}}
     end
 
     def youtube doc
