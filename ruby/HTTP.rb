@@ -234,6 +234,8 @@ class WebResource
           case e.class.to_s
           when 'Errno::ECONNREFUSED'
             fetchURL[fallback]
+          when 'Errno::ENETUNREACH'
+            fetchURL[fallback]
           when 'Net::OpenTimeout'
             fetchURL[fallback]
           when 'OpenSSL::SSL::SSLError'
@@ -248,7 +250,7 @@ class WebResource
               return updateLocation location
             end
           else
-            puts [url, e.class, e.message].join ' '
+            puts ["\e[7;31m", url, e.class, e.message, "\e[0m"].join ' '
           end
         end
       end
