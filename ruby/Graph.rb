@@ -164,9 +164,8 @@ class WebResource
     Group['tree'] = -> graph {
       t = {}
       # visit nodes
-      (graph.class==Array ? graph : graph.values).map{|node|
-        cursor = t  # cursor starting-point
-        re = node.R # node reference
+      (graph.class==Array ? graph : graph.values).map{|node| re = node.R
+        cursor = t  # cursor start
         # traverse
         [re.host ? re.host.split('.').reverse : nil, re.parts, re.fragment].flatten.compact.map{|name|
           cursor = cursor[name] ||= {}}

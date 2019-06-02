@@ -220,7 +220,6 @@ class WebResource
 
     def self.tree t, env, name=nil
       url = t[:RDF].uri if t[:RDF]
-
       if name && t.keys.size > 1
         color = '#%06x' % rand(16777216)
         scale = rand(7) + 1
@@ -239,13 +238,13 @@ class WebResource
            }]}.update(css ? css : {})
     end
 
-    # typed value -> Markup
+    # Markup dispatcher
     def self.value type, v, env
       if Abstract == type || Content == type
         v
-      elsif Markup[type] # explicit type overrides RDF-type
+      elsif Markup[type] # type-arg precedence over RDF type
         Markup[type][v,env]
-      elsif v.class == Hash # RDF
+      elsif v.class == Hash # RDF type
         resource = v.R
         types = resource.types
         if (types.member? Post) || (types.member? BlogPost) || (types.member? Email)
