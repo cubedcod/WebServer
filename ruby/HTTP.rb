@@ -183,7 +183,7 @@ class WebResource
       cacheMeta = cache.metafile
       head["If-Modified-Since"] = cache.mtime.httpdate if cache.e
       response_meta = {}
-      partial = nil
+      part = nil
       updates = []
 
       # fetcher
@@ -193,7 +193,7 @@ class WebResource
           open(url, head) do |response| # request
             if response.status.to_s.match?(/206/) # partial response
               response_meta = response.meta
-              partial = response.read
+              part = response.read
             else # response
               %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| @r[:Response][k] ||= response.meta[k.downcase] } if @r
               body = decompress response.meta, response.read
@@ -230,16 +230,32 @@ class WebResource
         begin
           fetchURL[url]                       # HTTPS
         rescue Exception => e
-          raise if e.class == OpenURI::HTTPRedirect
-          fetchURL[url.sub /^https/, 'http'] if e.class == OpenSSL::SSL::SSLError
-          puts e.class, e.message unless e.class == OpenSSL::SSL::SSLError
+          fallback = url.sub /^https/, 'http'
+          case e.class.to_s
+          when 'Errno::ECONNREFUSED'
+            fetchURL[fallback]
+          when 'Net::OpenTimeout'
+            fetchURL[fallback]
+          when 'OpenSSL::SSL::SSLError'
+            fetchURL[fallback]
+          when 'OpenURI::HTTPError'
+            fetchURL[fallback]
+          when 'OpenURI::HTTPRedirect'
+            if e.io.meta['location'] == fallback
+              fetchURL[fallback]
+            else
+              raise
+            end
+          else
+            puts [url, e.class, e.message].join ' '
+          end
         end
       end
 
       # response
       if @r # HTTP caller
-        if partial
-          [206, response_meta, [partial]]
+        if part
+          [206, response_meta, [part]]
         elsif cache.exist?
           if cache.noTransform?
             cache.localFile # immutable format
