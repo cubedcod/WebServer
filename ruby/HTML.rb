@@ -319,10 +319,11 @@ sidebar [class^='side']    [id^='side']
 
       # <body>
       if body = n.css('body')[0]
+        # move site links to footer
         [*BasicGunk,*Gunk].map{|selector|
           body.css(selector).map{|sel|
             body.add_child sel.remove}}
-        yield uri, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
+        yield uri, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '') unless (@r ? @r['SERVER_NAME'] : host).match? /twitter.com/
       end
 
       # <title>

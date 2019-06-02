@@ -171,7 +171,7 @@ class WebResource
           cursor = cursor[name] ||= {}}
         if cursor[:RDF] # merge to node
           node.map{|k,v|
-            cursor[:RDF][k] = cursor[:RDF][k].justArray.concat v.justArray}
+            cursor[:RDF][k] = cursor[:RDF][k].justArray.concat v.justArray unless k == 'uri'}
         else
           cursor[:RDF] = node # insert node
         end}
