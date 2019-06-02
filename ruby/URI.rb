@@ -103,7 +103,7 @@ class WebResource < RDF::URI
       @r[:links][:next] = n + remainder + qs + '#next' if n && n.R.e
       unless !path || path=='/'
         up = if @r['REQUEST_PATH'][-1] == '/'
-               path[0..-2]
+               @r['REQUEST_PATH'][0..-2]
              else
                dirname
              end

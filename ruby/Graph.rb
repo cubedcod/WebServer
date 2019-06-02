@@ -170,9 +170,12 @@ class WebResource
         # traverse
         [re.host ? re.host.split('.').reverse : nil, re.parts, re.fragment].flatten.compact.map{|name|
           cursor = cursor[name] ||= {}}
-        # insert
-        puts "duplicate data at #{node.uri}" if cursor[:RDF]
-        cursor[:RDF] = node }
+        if cursor[:RDF] # merge to node
+          node.map{|k,v|
+            cursor[:RDF][k] = cursor[:RDF][k].justArray.concat v.justArray}
+        else
+          cursor[:RDF] = node # insert node
+        end}
       t } # tree
 
   end
