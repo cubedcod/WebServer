@@ -122,7 +122,8 @@ class WebResource
                              end,
                              if graph.empty?
                                HTML.keyval (HTML.webizeHash @r), @r
-                             elsif # directory overview
+                             elsif localNode? && directory? && env['REQUEST_PATH'][-1] != '/' # directory overview
+                               HTML.tabular graph, @r
                              else
                                HTML.tree (Group[q['g']] || # custom layout
                                           Group['tree']    # graph -> tree
@@ -204,6 +205,10 @@ class WebResource
                                                 c: [{_: :td, class: 'k', c: Markup[Type][type]},
                                                     {_: :td, class: 'v', c: vs.justArray.map{|v|
                                                        value k, v, env}.intersperse(' ')}]}, "\n"]}}
+    end
+
+    def self.tabular graph, env
+      'XYZ'
     end
 
     def self.tree t, env, name=nil
