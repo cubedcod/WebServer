@@ -97,7 +97,7 @@ class WebResource < RDF::URI
       end
 
       remainder = parts.empty? ? '' : ['', *parts].join('/')
-      remainder += '/' if path[-1] == '/'
+      remainder += '/' if @r['REQUEST_PATH'][-1] == '/'
 
       @r[:links][:prev] = p + remainder + qs + '#prev' if p && p.R.e
       @r[:links][:next] = n + remainder + qs + '#next' if n && n.R.e

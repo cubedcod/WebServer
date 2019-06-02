@@ -188,7 +188,7 @@ class WebResource
 
       # fetcher
       fetchURL = -> url {
-        print '🌍🌎🌏'[rand 3], ' ', url, ' '
+        print '🌍🌎🌏'[rand 3], ' '#, url, ' '
         begin
           open(url, head) do |response| # request
             if response.status.to_s.match?(/206/) # partial response
