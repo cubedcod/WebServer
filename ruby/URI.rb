@@ -175,13 +175,6 @@ class WebResource < RDF::URI
     def sha2; to_s.sha2 end
 
   end
-  module HTTP
-
-    # URI -> lambda mapping-tables
-    HostGET = {}
-    PathGET = {}
-
-  end
   module HTML
     include URIs
 

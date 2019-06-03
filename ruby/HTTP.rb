@@ -4,7 +4,9 @@ class WebResource
     include MIME
     include URIs
 
-    Hosts = {}
+    Hosts = {}   # seen hosts
+    HostGET = {} # lambda tables
+    PathGET = {}
     OFFLINE = ENV.has_key? 'OFFLINE'
     SiteGIF = ConfDir.join('site.gif').read
 
@@ -228,7 +230,7 @@ class WebResource
       # update cache
       unless cache.noTransform? || OFFLINE
         begin
-          fetchURL[url]                       # HTTPS
+          fetchURL[url]
         rescue Exception => e
           fallback = url.sub /^https/, 'http'
           case e.class.to_s
@@ -448,6 +450,32 @@ class WebResource
     end
 
     def pragma; env['HTTP_PRAGMA'] end
+
+    def HTTP.print_body body, mime
+      puts mime
+      case mime
+      when /application\/json/
+        json = ::JSON.parse body rescue nil
+        if json
+          puts ::JSON.pretty_generate json
+        else
+          puts body
+        end
+      when /application\/x-www-form-urlencoded/
+        q = HTTP.parseQs body
+        message = q.delete "message"
+        puts q
+        puts ::JSON.pretty_generate ::JSON.parse message if message
+      when /text\/plain/
+      else
+        puts body
+      end
+    end
+
+    def HTTP.print_header header
+      header.map{|k,v|
+            puts [k,v].join "\t"}
+    end
 
     def PUT
       env[:deny] = true

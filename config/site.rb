@@ -33,7 +33,7 @@ class WebResource
     TrackHost = /\.(bandcamp|soundcloud|theplatform|track-blaster)\.com$/
 
     # POSTs, allow in regex and define handler if needed
-    POSThost = /(^www.facebook.com|\.(edu|gov)|(^|\.)(anvato|brightcove|(accounts|android.*|clients?[0-9]*|drive|groups|images|mail|maps|photos|www|youtubei?)\.google(apis)?|reddit|youtube|zillow)\.(com|net))$/
+    POSThost = /(^www.facebook.com|\.(edu|gov)|(^|\.)(anvato|brightcove|(accounts|android.*|clients?[0-9]*|drive|groups|images|mail|maps|photos|www|youtubei?)\.google(apis)?|reddit|soundcloud|youtube|zillow)\.(com|net))$/
     POSTpath = /^\/_Incapsula_Resource$/
     def sitePOST
       case host
@@ -45,6 +45,12 @@ class WebResource
         end
       when /\.google\.com$/
         if path.match? /searchbyimage|signin/
+          self.POSTthru
+        else
+          denyPOST
+        end
+      when /\.soundcloud\.com$/
+        if host.match? /^api/
           self.POSTthru
         else
           denyPOST
