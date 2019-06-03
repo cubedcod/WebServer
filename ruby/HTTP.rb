@@ -102,7 +102,7 @@ class WebResource
       end
     end
 
-    def deny
+    def deny status = 200
       env[:deny] = true
       type, content = if ext == 'js' || env[:script]
                         ['application/javascript',
@@ -116,7 +116,7 @@ class WebResource
                         ['text/html; charset=utf-8',
                          "<html><body style='background-color: red; text-align: center'><a href='#{qs.empty? ? '?allow' : path}' style='color: #fff; font-size: 28em; text-decoration: none'>⌘</a></body></html>"]
                       end
-      [200,
+      [status,
        {'Access-Control-Allow-Credentials' => 'true',
         'Access-Control-Allow-Origin' => allowedOrigin,
         'Content-Type' => type},
@@ -184,8 +184,9 @@ class WebResource
       cache = cacheFile
       cacheMeta = cache.metafile
       head["If-Modified-Since"] = cache.mtime.httpdate if cache.e
-      response_meta = {}
       part = nil
+      response_meta = {}
+      status = nil
       updates = []
 
       # fetcher
@@ -223,8 +224,16 @@ class WebResource
             end
           end
         rescue Exception => e
-          # TODO show some indication of remote status in UI
-          raise unless e.message.match? /304|40[134]/
+          case e.message
+          when /[34]04/
+          # no updates
+          when /401/
+            status = 401 # unauthorized
+          when /403/
+            status = 403 # forbidden
+          else
+            raise
+          end
         end}
 
       # update cache
@@ -263,6 +272,8 @@ class WebResource
       if @r # HTTP caller
         if part
           [206, response_meta, [part]]
+        elsif [401,403].member? status
+          [status, response_meta, []]
         elsif cache.exist?
           if cache.noTransform?
             cache.localFile # immutable format
@@ -278,8 +289,6 @@ class WebResource
       else # REPL/script caller
         updates
       end
-    rescue Exception => e
-      puts [url, e.class, e.message].join ' '
     end
 
     # filter scripts and tracking GIFs
@@ -291,16 +300,16 @@ class WebResource
           deny
         end
       else # fetch and inspect
-        fetch.do{|s,h,b|
-          if s.to_s.match? /30[1-3]/ # redirected
-            [s, h, b]
+        fetch.do{|status, h, b|
+          if status.to_s.match? /30[1-3]/ # redirected
+            [status, h, b]
           else
             if h['Content-Type'] && !h['Content-Type'].match?(/image.(bmp|gif)|script/)
-              [s, h, b] # allowed MIME
+              [status, h, b] # allowed MIME
             else # filtered MIME
               env[:GIF] = true if h['Content-Type']&.match? /image\/gif/
               env[:script] = true if h['Content-Type']&.match? /script/
-              deny
+              deny status
             end
           end}
       end

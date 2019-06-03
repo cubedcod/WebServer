@@ -93,7 +93,19 @@ class WebResource
     # Google
     PathGET['/url'] = -> r { [301, {'Location' => (r.q['url']||r.q['q'])}, []]}
     HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.drop : r.filter}
-    HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['www.google.com'] = -> r {%w{complete searchdomaincheck}.member?(r.parts[0]) ? r.drop : r.filter}
+    HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['www.google.com'] = -> req {
+      if %w{complete searchdomaincheck}.member? req.parts[0]
+        req.drop
+      else
+        req.filter.do{|status, head, body|
+          case status
+          when 403
+            [302, {'Location' => 'https://duckduckgo.com/' + req.qs}, []]
+          else
+            [status, head, body]
+          end
+        }
+      end}
     HostGET['www.googleadservices.com'] = -> r {r.q['adurl'] ? [301, {'Location' => r.q['adurl']},[]] : r.drop}
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
