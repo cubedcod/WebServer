@@ -467,6 +467,12 @@ class WebResource
         puts q
         puts ::JSON.pretty_generate ::JSON.parse message if message
       when /text\/plain/
+        json = ::JSON.parse body rescue nil
+        if json
+          puts ::JSON.pretty_generate json
+        else
+          puts body
+        end
       else
         puts body
       end
