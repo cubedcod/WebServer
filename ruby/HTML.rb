@@ -228,7 +228,7 @@ class WebResource
       end
 
       {class: :tree,
-       c: [({_: (url ? :a : :span), class: :label, c: (CGI.escapeHTML name.to_s)}.update(url ? {href: url} : {}) if name),
+       c: [({_: (url ? :a : :span), class: :label, c: (CGI.escapeHTML name.to_s)}.update(url ? {href: url} : {}) if name), ('<br>' if name && url),
            t.map{|_name, _t|
              if :RDF == _name
                value nil, _t, env
