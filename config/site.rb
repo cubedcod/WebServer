@@ -93,6 +93,7 @@ class WebResource
     # Google
     PathGET['/url'] = -> r { [301, {'Location' => (r.q['url']||r.q['q'])}, []]}
     HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['www.google.com'] = -> r {%w{complete searchdomaincheck}.member?(r.parts[0]) ? r.drop : r.filter}
+    HostGET['www.googleadservices.com'] = -> r {r.q['adurl'] ? [301, {'Location' => r.q['adurl']},[]] : r.drop}
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
       if !mode || %w{browse_ajax c channel guide_ajax heartbeat iframe_api live_chat playlist signin watch_videos}.member?(mode)
