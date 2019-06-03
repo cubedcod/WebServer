@@ -150,7 +150,7 @@ class WebResource
       title = raw.to_s.sub(/\/u\/\S+ on /,'')
       unless env[:title] == title
         env[:title] = title
-        {_: :a, id: 't'+rand.to_s.sha2, class: :title, href: uri, c: CGI.escapeHTML(title)}
+        [{_: :a, id: 't'+rand.to_s.sha2, class: :title, href: uri, c: CGI.escapeHTML(title)}, ' ']
       end}
 
     Markup[Creator] = -> c, env, uris=nil {
@@ -228,7 +228,7 @@ class WebResource
       end
 
       {class: :tree,
-       c: [({_: (url ? :a : :span), class: :label, c: (CGI.escapeHTML name.to_s)}.update(url ? {href: url} : {}) if name), ('<br>' if name && url),
+       c: [({_: (url ? :a : :span), class: :label, c: (CGI.escapeHTML name.to_s)}.update(url ? {href: url} : {}) if name), '<br>',
            t.map{|_name, _t|
              if :RDF == _name
                value nil, _t, env

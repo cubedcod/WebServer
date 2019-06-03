@@ -222,7 +222,7 @@ class WebResource
              Markup[Title][title,env,uri]},
            images.map{|i|
              Markup[Image][i,env]},
-           {_: :table,
+           {_: :table, class: :fromTo,
             c: {_: :tr,
                 c: [{_: :td, c: from.map{|f|Markup[Creator][f,env]}, class: :from},
                     {_: :td, c: '&rarr;'},

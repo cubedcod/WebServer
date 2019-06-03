@@ -9,27 +9,26 @@
 .bold {font-weight: bold; font-size: 1.1em}
 .post {border: .08em solid #111; background-color: #000; color: #fff; border-radius: .38em}
 .toolbox {position: fixed; top: 0; right: 0; z-index: 1}
-.tree > .label {font-size: .8em; float: right; color: #eee}
+.tree > .label {font-size: .8em; float: right}
+.tree > a.label {color: #ccc}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
-a {overflow: hidden; text-decoration: none; max-width:32em}
+a {overflow: hidden; text-decoration: none; max-width:32em; background-color: #eee; color: #000; border-radius: .16em}
 a.date {float: right; color: #888; font-size: .8em}
 a.id {float: right; color: #333}
 a.link {border: 1px solid #777}
+a.title, a.link, .thumb {background-color: #fff; color: #000}
 a.title, div.post, table {vertical-align: top}
+a:visited {background-color: #222; color: #fff}
 body {font-family: sans-serif; margin: 0 2em 0 2em}
 body, pre, p, li, time, td.k > a, tr[name="abstract"] > td.v, td.v span {background-color: #000; color: #fff}
 div, p, table {border-radius: .2em}
 div, td {padding: 0}
-h1,h2,h3,h4,h5,h6, a.title, a.link, div.thumb {background-color: #fff; color: #000}
+h1, h2, h3, h4, h5, h6 {}
 img, video {max-width: 100%}
 img.thumb, svg {max-width: 28em}
 p, .post {width: 80ex; margin: .08em}
 pre {white-space: pre-wrap}
 table {border-spacing: 0}
 table, div, a {display: inline-block}
-table:first-child, p:first-child {border-width: 0}
-td {border-width: 0 0 .08em 0; border-style: solid; border-color: #333}
-td.k {text-align: right; white-space: nowrap}
-td.v > a {background-color: #eee; color: #000}
-tr[name="content"] > td.v a         {background-color: #ddf; color: #000; border-radius: .18em}
-tr[name="content"] > td.v a:visited {background-color: #222; color: #fff}
+td {border-width: 0 0 .08em 0; border-style: dotted; border-color: #333}
+td.k {text-align: right}
