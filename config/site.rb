@@ -94,7 +94,7 @@ class WebResource
     PathGET['/url'] = -> r { [301, {'Location' => (r.q['url']||r.q['q'])}, []]}
     HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.drop : r.filter}
     HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['www.google.com'] = -> req {
-      if %w{complete searchdomaincheck}.member? req.parts[0]
+      if %w{async complete searchdomaincheck}.member? req.parts[0]
         req.drop
       else
         req.filter.do{|status, head, body|
