@@ -188,6 +188,7 @@ class WebResource
       response_meta = {}
       status = nil
       updates = []
+      cached = cache.e && cache.no_transform # TODO more HTTP headers. currently URI-versioned static assets are immutable
 
       # fetcher
       fetchURL = -> url {
@@ -236,8 +237,7 @@ class WebResource
           end
         end}
 
-      # update cache
-      unless cache.noTransform? || OFFLINE
+      unless OFFLINE || (!no_cache && cached)
         begin
           fetchURL[url]
         rescue Exception => e
@@ -275,11 +275,11 @@ class WebResource
         elsif [401,403].member? status
           [status, response_meta, []]
         elsif cache.exist?
-          if cache.noTransform?
-            cache.localFile # immutable format
+          if cache.no_transform
+            cache.localFile
           elsif originUI
-            cache.localFile # upstream format
-          else              # output transform
+            cache.localFile # upstream determined format
+          else # transformable
             env[:feed] = true if cache.feedMIME?
             graphResponse (updates.empty? ? [cache] : updates)
           end
@@ -383,6 +383,8 @@ class WebResource
     def metafile type = 'meta'
       dir + (dirname[-1] == '/' ? '' : '/') + '.' + basename + '.' + type
     end
+
+    def no_cache; pragma && pragma == 'no-cache' end
 
     def notfound
       dateMeta # nearby page may exist, search for pointers

@@ -158,8 +158,6 @@ class WebResource
       index
     end
 
-    def preferredFormat? file; preferences.head[1].member? file.mime end
-
     # file format
     def mime
       @mime ||= # memoize
@@ -167,7 +165,7 @@ class WebResource
         (name = path || ''
          prefix = ((File.basename name).split('.')[0]||'').downcase
          suffix = ((File.extname name)[1..-1]||'').downcase
-         # prefer specification in prefix, suffix or metadata, sniff as last resort
+         # prefer specification in name prefix/suffix or metadata file, sniff as last resort
          if node.directory?
            'inode/directory'
          elsif MIMEsuffix[suffix]
@@ -195,7 +193,7 @@ class WebResource
       [mime.split('/')[0], '*'].join '/'
     end
 
-    def noTransform?; e && mime&.match?(NoTransform) end
+    def no_transform; mime.match? NoTransform end
 
     def outputMIME default = 'text/html'
       return 'application/atom+xml' if q.has_key?('feed')
@@ -210,6 +208,8 @@ class WebResource
     def preferences
       accept.sort.reverse
     end
+
+    def preferredFormat? file; preferences.head[1].member? file.mime end
 
     def setMIME m
       @mime = m
