@@ -251,6 +251,8 @@ class WebResource
             else
               return updateLocation location
             end
+          when 'RuntimeError'
+            fetchURL[fallback]
           else
             puts ["\e[7;31m", url, e.class, e.message, "\e[0m"].join ' '
           end
