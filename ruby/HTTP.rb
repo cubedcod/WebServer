@@ -233,14 +233,13 @@ class WebResource
         rescue Exception => e
           case e.message
           when /304/
-            status = 304 # no update
+            #status = 304 # no update
           when /401/
             status = 401 # unauthorized
           when /403/
             status = 403 # forbidden
           when /404/
-            env[:status] = 404
-            status = 404 # not found
+            env[:status] = 404 # not found
           else
             raise
           end
