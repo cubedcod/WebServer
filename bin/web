@@ -1,3 +1,3 @@
 #!/usr/bin/env ruby
 require_relative '../ruby/index'
-WebResource.send ARGV[0]
+WebResource.send *ARGV
