@@ -168,7 +168,7 @@ class WebResource
       (graph.class==Array ? graph : graph.values).map{|node| re = node.R
         cursor = t  # cursor start
         # traverse
-        [re.host ? re.host.split('.').reverse : nil, re.parts, re.fragment].flatten.compact.map{|name|
+        [re.host ? re.host.split('.').reverse : nil, re.parts, re.qs, re.fragment].flatten.compact.map{|name|
           cursor = cursor[name] ||= {}}
         if cursor[:RDF] # merge to node
           node.map{|k,v|
