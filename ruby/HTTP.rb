@@ -285,11 +285,9 @@ class WebResource
       elsif [401,403].member? status
         [status, response_meta, []]
       elsif cache.exist?
-        if cache.no_transform
-          cache.localFile
-        elsif originUI
-          cache.localFile # upstream determined format
-        else # transformable
+        if cache.no_transform || originUI
+          cache.localFile # immutable format
+        else              # transformable
           env[:feed] = true if cache.feedMIME?
           graphResponse (updates.empty? ? [cache] : updates)
         end
