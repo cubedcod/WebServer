@@ -382,9 +382,6 @@ class WebResource
       LocalAddr.member?(@r['SERVER_NAME']||host)
     end
 
-    PathGET['/log'] = -> r {
-      [200, {'Content-Type' => 'text/html'}, [r.htmlDocument(Hosts)]]}
-
     def metafile type = 'meta'
       dir + (dirname[-1] == '/' ? '' : '/') + '.' + basename + '.' + type
     end
