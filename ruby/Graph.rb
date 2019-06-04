@@ -119,20 +119,21 @@ class WebResource
     def graphResponse set
       return notfound if !set || set.empty?
 
-      # output format may be on file
+      # output format
       if set.size == 1
         this = set[0]
         extant = this.isRDF && preferredFormat?(this) && this
       end
+      format = extant && extant.mime || selectFormat
 
       # response metadata
-      format = extant && extant.mime || outputMIME
       dateMeta if localNode?
-      @r[:Response].update({'Link' => @r[:links].map{|type,uri| "<#{uri}>; rel=#{type}"}.intersperse(', ').join}) unless @r[:links].empty?
+      @r[:Response] ||= {}
+      @r[:Response].update({'Link' => @r[:links].map{|type,uri| "<#{uri}>; rel=#{type}"}.intersperse(', ').join}) unless !@r[:links] || @r[:links].empty?
       @r[:Response].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format,
                             'ETag' => [set.sort.map{|r|[r,r.m]}, format].join.sha2})
 
-      # lazy body-generator
+      # entity generation
       entity @r, ->{
         if extant # body on file
           extant  # return ref to body
@@ -142,7 +143,7 @@ class WebResource
           elsif format == 'application/atom+xml' # feed
             renderFeed load set
           else # RDF formats
-            g = RDF::Graph.new # create graph
+            g = RDF::Graph.new # initialize graph
             set.map{|n| g.load n.toRDF.localPath, :base_uri => n.stripDoc } # data to graph
             g.dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true # serialize output
           end
@@ -182,13 +183,16 @@ class WebResource
     include MIME
     Triplr = {}
 
-    def indexRDF options = {} ; updates = []
+    def indexRDF options = {}
       g = RDF::Repository.load self, options # load resource
+      updates = []
       g.each_graph.map{|graph|               # bind named graph
-        graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value.do{|t| # timestamp
-          doc = ['/' + t.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/(.00.00|Z)$/, ''),
-                 graph.name.to_s.sub(/^https?:/,'').split(/[\/\-_\.]/).-(%w{a blog co com edu gov html net org the www}),
-                 'ttl'].flatten.compact.-(['']).join('.').R # link in hour-dir w/ preserved name slugs
+        n = graph.name.R
+        # link to timeline
+        graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value.do{|t| # timestamp query
+          doc = ['/' + t.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/(00.00|Z)$/,''),     # hour-dir
+                 %w{host path query fragment}.map{|a|n.send(a).do{|p|p.split(/[\W_]/)}},'ttl']. # slugs
+                 flatten.-([nil,'',*%w{blog blogspot com comment edu feeds feedproxy forums google gov html index medium net news org p php post r rss source threads utm www}]).join('.').R # skiplist
           unless doc.e
             doc.dir.mkdir
             RDF::Writer.open(doc.localPath){|f|f << graph}

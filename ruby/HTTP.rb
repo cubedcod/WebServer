@@ -147,12 +147,11 @@ class WebResource
         [304, {}, []] # client has entity
       else
         body = lambda ? lambda.call : self # generate
-        if body.class == WebResource # body as resource reference
-          # use Rack file handling
-          (Rack::File.new nil).serving((Rack::Request.new env),body.localPath).do{|s,h,b|
+        if body.class == WebResource # local static resource
+          (Rack::File.new nil).serving((Rack::Request.new env), body.localPath).do{|s,h,b|
             [s,h.update(env[:Response]),b]}
         else
-          [(env[:Status]||200), env[:Response], [body]]
+          [200, env[:Response], [body]]
         end
       end
     end
@@ -162,28 +161,33 @@ class WebResource
         @r = env
         self
       else
-        @r || {}
+        @r
       end
     end
     alias_method :env, :environment
 
     def fetch
-      # request environment
+      # request metadata
+      @r ||= {}
       head = HTTP.unmangle env
       head.delete 'Host'
       head['User-Agent'] = DesktopUA
       head.delete 'User-Agent' if %w{po.st t.co}.member? host
-      head[:redirect] = false if @r # don't internally redirect HTTP callers
+      head[:redirect] = false # don't internally redirect
+
+      # locator
       url = if suffix = ext.empty? && host.match?(/reddit.com$/) && !originUI && '.rss'
-              'https://' + host + path + suffix + qs
-            elsif @r
-              'https://' + env['HTTP_HOST'] + env['REQUEST_URI']
+              'https://' + (env['HTTP_HOST'] || host) + path + suffix + qs # added explicit-format suffix
             else
-              'https://' + host + path + qs
+              'https://' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + qs))
             end
+
+      # cache storage
       cache = cacheFile
       cacheMeta = cache.metafile
       head["If-Modified-Since"] = cache.mtime.httpdate if cache.e
+
+      # response metadata
       part = nil
       response_meta = {}
       status = nil
@@ -199,7 +203,9 @@ class WebResource
               response_meta = response.meta
               part = response.read
             else # response
-              %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| @r[:Response][k] ||= response.meta[k.downcase] } if @r
+              %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k|
+                @r[:Response]    ||= {}
+                @r[:Response][k] ||= response.meta[k.downcase]}
               body = decompress response.meta, response.read
               #HTTP.print_header head; puts "<============>"; print response.status.justArray.join(' ') + ' '; HTTP.print_header response.meta ; # puts body
               unless cache.e && cache.readFile == body # unchanged
@@ -264,30 +270,27 @@ class WebResource
             fetchURL[fallback]
           else
             puts ["\e[7;31m", url, e.class, e.message, "\e[0m"].join ' '
+            puts e.backtrace
           end
         end
       end
 
-      # response
-      if @r # HTTP caller
-        if part
-          [206, response_meta, [part]]
-        elsif [401,403].member? status
-          [status, response_meta, []]
-        elsif cache.exist?
-          if cache.no_transform
-            cache.localFile
-          elsif originUI
-            cache.localFile # upstream determined format
-          else # transformable
-            env[:feed] = true if cache.feedMIME?
-            graphResponse (updates.empty? ? [cache] : updates)
-          end
-        else
-          notfound
+      # return response
+      if part
+        [206, response_meta, [part]]
+      elsif [401,403].member? status
+        [status, response_meta, []]
+      elsif cache.exist?
+        if cache.no_transform
+          cache.localFile
+        elsif originUI
+          cache.localFile # upstream determined format
+        else # transformable
+          env[:feed] = true if cache.feedMIME?
+          graphResponse (updates.empty? ? [cache] : updates)
         end
-      else # REPL/script caller
-        updates
+      else
+        notfound
       end
     end
 
@@ -374,7 +377,7 @@ class WebResource
     LocalAddr = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
 
     def localNode?
-      LocalAddr.member? @r['SERVER_NAME']
+      LocalAddr.member?(@r['SERVER_NAME']||host)
     end
 
     PathGET['/log'] = -> r {

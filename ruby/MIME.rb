@@ -195,9 +195,9 @@ class WebResource
 
     def no_transform; mime.match? NoTransform end
 
-    def outputMIME default = 'text/html'
+    def selectFormat default = 'text/html'
       return 'application/atom+xml' if q.has_key?('feed')
-      preferences.map{|q,formats| # highest q-value first
+      preferences.map{|q, formats| # q values in descending order
         formats.map{|mime|
           return default if mime == '*/*'
           return mime if RDF::Writer.for(:content_type => mime) ||          # RDF Writer definition found
@@ -209,11 +209,9 @@ class WebResource
       accept.sort.reverse
     end
 
-    def preferredFormat? file; preferences.head[1].member? file.mime end
-
-    def setMIME m
-      @mime = m
-      self
+    def preferredFormat? this
+      preferences.head.do{|q, formats|
+        formats.member? this.mime}
     end
 
   end

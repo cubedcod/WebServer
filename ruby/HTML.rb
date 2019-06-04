@@ -116,7 +116,7 @@ class WebResource
                                 c: [if subscribable?
                                     s = subscribed?
                                     {_: :a, id: :subscribe,
-                                     href: '/' + (s ? 'un' : '') + 'subscribe' + HTTP.qs({u: 'https://' + host + @r['REQUEST_URI']}),
+                                     href: '/' + (s ? 'un' : '') + 'subscribe' + HTTP.qs({u: 'https://' + host + (@r['REQUEST_URI'] || path)}),
                                      class: s ? :on : :off, c: 'subscribe' + (s ? 'd' : '')}
                                     end]}
                              end,
@@ -210,10 +210,11 @@ class WebResource
     def self.tabular graph, env
       keys = graph.map{|uri,resource| resource.keys}.flatten.uniq - [Content]
       {_: :table, class: :tabular,
-       c: [{_: :tr, c: keys.map{|p| {_: :td, c: Markup[Type][p.R]}}},
+       c: [{_: :tr, c: keys.map{|p|
+              {_: :td, class: 'k', c: Markup[Type][p.R]}}},
            graph.map{|uri,resource|
              [{_: :tr, c: keys.map{|k|
-                {_: :td, c: resource[k].justArray.map{|v|
+                {_: :td, class: 'v', c: resource[k].justArray.map{|v|
                    value k, v, env }}}},
               ({_: :tr, c: {_: :td, colspan: keys.size, c: resource[Content]}} if resource[Content])]}]}
     end
@@ -264,28 +265,22 @@ class WebResource
     def self.clean body
       # parse
       html = Nokogiri::HTML.fragment body
-
       # strip nodes
       %w{iframe link[rel='stylesheet'] style link[type='text/javascript'] link[as='script'] script}.map{|s| html.css(s).remove}
-
-      # strip Javascript and trackers
+      # strip Javascript and tracker images
       html.css('a[href^="javascript"]').map{|a| a.remove }
       html.css('img[src*="scorecardresearch"]').map{|img| img.remove }
-
       # move CSS background-image to src attribute
       html.css('[style^="background-image"]').map{|node|
         node['style'].match(/url\('([^']+)'/).do{|url|
           node.add_child "<img src=\"#{url[1]}\">"}}
-
+      # find nonstandard src attributes: assume canonical is placeholder if both exist
       html.traverse{|e|
         e.attribute_nodes.map{|a|
-          # find nonstandard src attribute. assume canonical is placeholder if both exist
           e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-menuimg data-native-src data-original data-src data-src1}.member? a.name
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
-
           # strip attributes
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor height layout ping role style tabindex target width}.member?(a.name)}}
-
       # serialize
       html.to_xhtml(:indent => 0)
     end

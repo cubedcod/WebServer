@@ -3,14 +3,22 @@ class WebResource
   module URIs
 
     FeedURL = {}
-
     ConfDir.join('feeds/*.u').R.glob.map{|list|
-      list.lines.map{|u|
-        FeedURL[u] = u.R }}
+      list.lines.map{|u| FeedURL[u] = u.R }}
 
   end
 
-  def self.getFeeds; FeedURL.values.map &:fetch; nil end
+  def self.getFeeds
+    FeedURL.values.map{|feed|
+      begin
+        feed.fetch.do{|s,h,b|
+          [s, feed.uri]}
+      rescue Exception => e
+        puts e.backtrace
+        [500, feed.uri, e.class, e.message]
+      end}.map{|report|
+      report.join "\t"}.sort
+  end
 
   module HTTP
 

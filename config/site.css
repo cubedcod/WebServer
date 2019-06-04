@@ -1,7 +1,7 @@
 #next {right: 0}
 #prev {left:  0}
 #prev, #next {position: fixed; top: 0; height: 100%; max-width: 1em}
-#prev, #next, #up, #down {font-size: 2em; color: #fff}
+#prev, #next, #up, #down {font-size: 2em; color: #fff; background-color: #000}
 #subscribe {vertical-align: top}
 #subscribe.off {color: #777; background-color: #000; border: .1em solid #555}
 #subscribe.on  {color: #000; background-color: #fff}
@@ -12,9 +12,9 @@
 .tree > .label {font-size: .8em; float: right}
 .tree > a.label {color: #ccc}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
-a {overflow: hidden; text-decoration: none; max-width:32em; background-color: #eee; color: #000; border-radius: .16em}
-a.date {float: right; color: #888; font-size: .8em}
-a.id {float: right; color: #333}
+a {overflow: hidden; text-decoration: none; max-width:32em; background-color: #eee; color: #000}
+a.date {float: right; background-color: #000; color: #888; font-size: .8em}
+a.id {float: right; background-color: #000; color: #333}
 a.link {border: 1px solid #777}
 a.title, a.link, .thumb {background-color: #fff; color: #000}
 a.title, div.post, table {vertical-align: top}
