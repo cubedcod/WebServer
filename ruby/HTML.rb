@@ -122,7 +122,7 @@ class WebResource
                              end,
                              if graph.empty?
                                HTML.keyval (HTML.webizeHash @r), @r # 404
-                             elsif localNode? && directory? && env['REQUEST_PATH'][-1] != '/' # overview of content
+                             elsif localNode? && directory? && env['REQUEST_PATH'][-1] != '/' && env['REQUEST_PATH'] != '/log'
                                HTML.tabular graph, @r
                              else
                                HTML.tree (Group[q['g']] || # custom layout
