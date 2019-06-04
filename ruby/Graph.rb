@@ -183,16 +183,30 @@ class WebResource
     include MIME
     Triplr = {}
 
+    BasicSlugs = %w{
+ article archives articles
+ blog blogs blogspot
+ columns co com comment comments
+ edu entry
+ feed feeds feedproxy forum forums
+ go google gov
+ html index local medium
+ net news org p php post
+ r reddit rss rssfeed
+ sports source story
+ t the threads topic tumblr
+ uk utm www}
+
     def indexRDF options = {}
       g = RDF::Repository.load self, options # load resource
       updates = []
       g.each_graph.map{|graph|               # bind named graph
         n = graph.name.R
         # link to timeline
-        graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value.do{|t| # timestamp query
+        graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value.do{|t| # timestamp
           doc = ['/' + t.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/(00.00|Z)$/,''),     # hour-dir
                  %w{host path query fragment}.map{|a|n.send(a).do{|p|p.split(/[\W_]/)}},'ttl']. # slugs
-                 flatten.-([nil,'',*%w{article archives articles blog blogs blogspot columns co com comment comments edu entry feed feeds feedproxy forum forums go google gov html index local medium net news org p php post r reddit rss rssfeed sports source story t the threads topic tumblr uk utm www}]).join('.').R # skiplist
+                 flatten.-([nil,'',*BasicSlugs]).grep_v(/^\d+$/).join('.').R # apply skiplist,
           unless doc.e
             doc.dir.mkdir
             RDF::Writer.open(doc.localPath){|f|f << graph}
