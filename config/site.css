@@ -27,7 +27,7 @@ img, video {max-width: 100%}
 img.thumb, svg {max-width: 28em}
 p, .post {width: 80ex; margin: .08em}
 pre {white-space: pre-wrap}
-table {fborder-spacing: 0}
+table {border-spacing: 0}
 table, div, a {display: inline-block}
 table.tree {border-radius: .2em}
 td.k {border-width: 0 0 .08em 0; border-style: dotted; border-color: #3f4; text-align: right}
