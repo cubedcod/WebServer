@@ -9,8 +9,8 @@
 .bold {font-weight: bold; font-size: 1.1em}
 .post {border: .08em solid #111; background-color: #000; color: #fff; border-radius: .38em}
 .toolbox {position: fixed; top: 0; right: 0; z-index: 1}
-.tree > .label {font-size: .8em; float: right}
-.tree > a.label {color: #ccc}
+.tree > a.label {font-size: .8em; color: #ccc}
+.tree > span.label {position: absolute; top: 0; right: 0}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
 a {overflow: hidden; text-decoration: none; max-width:32em; background-color: #eee; color: #000}
 a.date {float: right; background-color: #000; color: #888; font-size: .8em}
@@ -21,14 +21,15 @@ a.title, div.post, table {vertical-align: top}
 a:visited {background-color: #222; color: #fff}
 body {font-family: sans-serif; margin: 0 2em 0 2em}
 body, pre, p, li, time, td.k > a, tr[name="abstract"] > td.v, td.v span {background-color: #000; color: #fff}
-div, p, table {border-radius: .2em}
 div, td {padding: 0}
 h1, h2, h3, h4, h5, h6 {}
 img, video {max-width: 100%}
 img.thumb, svg {max-width: 28em}
 p, .post {width: 80ex; margin: .08em}
 pre {white-space: pre-wrap}
-table {border-spacing: 0}
+table {fborder-spacing: 0}
 table, div, a {display: inline-block}
-td {border-width: 0 0 .08em 0; border-style: dotted; border-color: #333}
-td.k {text-align: right}
+table.tree {border-radius: .2em}
+td.k {border-width: 0 0 .08em 0; border-style: dotted; border-color: #3f4; text-align: right}
+td.v {border-width: 0 0 .08em 0; border-style: dotted; border-color: #34f}
+td.v div {border: .1em dotted #555}
