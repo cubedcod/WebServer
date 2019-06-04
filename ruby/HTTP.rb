@@ -151,7 +151,7 @@ class WebResource
           (Rack::File.new nil).serving((Rack::Request.new env), body.localPath).do{|s,h,b|
             [s,h.update(env[:Response]),b]}
         else
-          [200, env[:Response], [body]]
+          [env[:status] || 200, env[:Response], [body]]
         end
       end
     end
@@ -232,12 +232,15 @@ class WebResource
           end
         rescue Exception => e
           case e.message
-          when /[34]04/
-          # no updates
+          when /304/
+            status = 304 # no update
           when /401/
             status = 401 # unauthorized
           when /403/
             status = 403 # forbidden
+          when /404/
+            env[:status] = 404
+            status = 404 # not found
           else
             raise
           end
