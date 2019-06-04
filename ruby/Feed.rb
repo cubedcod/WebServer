@@ -14,10 +14,10 @@ class WebResource
         feed.fetch.do{|s,h,b|
           [s, 'https:'+feed.uri]}
       rescue Exception => e
-        puts e.backtrace
         [500, 'https:'+feed.uri, e.class, e.message]
-      end}.map{|report|
-      report.join "\t"}.sort
+      end}.
+      select{|s|s[0] != 200}.
+      map{|report|report.join "\t"}.sort
   end
 
   module HTTP
