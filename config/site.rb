@@ -74,14 +74,9 @@ class WebResource
       end
     end
 
-    #  music news
-    PathGET['/mu'] = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'},[]]}
-
-    # CDNs
-    #  allow scripts
-    HostGET['ajax.googleapis.com'] = HostGET['cdnjs.cloudflare.com'] = HostGET['maps.googleapis.com'] = -> r {r.fetch}
-    #  filter scripts
-    HostGET['storage.googleapis.com'] = -> r {r.filter}
+    # redirects
+    PathGET['/mu']  = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'}, []]} # new posts in bostonmusic blog
+    PathGET['/url'] = -> r {[301,{'Location' => (r.q['url'] || r.q['q'])}, []]}
 
     # DuckDuckGo
     HostGET['duckduckgo.com'] = -> r {%w{ac}.member?(r.parts[0]) ? r.drop : r.remote}
@@ -91,9 +86,9 @@ class WebResource
     HostGET['l.instagram.com'] = HostGET['l.facebook.com'] = -> r {[301, {'Location' =>  r.q['u']},[]]}
 
     # Google
-    PathGET['/url'] = -> r { [301, {'Location' => (r.q['url']||r.q['q'])}, []]}
+    HostGET['ajax.googleapis.com'] = HostGET['cdnjs.cloudflare.com'] = HostGET['maps.googleapis.com'] = -> r {r.fetch} # CDN with JS stdlibs, allow
+    HostGET['feedproxy.google.com'] = HostGET['storage.googleapis.com'] = -> r {r.filter}                              # CDN with mystery JS, filter
     HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.drop : r.filter}
-    HostGET['feedproxy.google.com'] = -> r {r.filter}
     HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['www.google.com'] = -> req {
       if %w{async complete searchdomaincheck}.member? req.parts[0]
         req.drop
@@ -101,6 +96,7 @@ class WebResource
         req.filter.do{|status, head, body|
           case status
           when 403
+            # goog blocked by a middlebox, try DDG
             [302, {'Location' => 'https://duckduckgo.com/' + req.qs}, []]
           else
             [status, head, body]
@@ -108,20 +104,9 @@ class WebResource
         }
       end}
     HostGET['www.googleadservices.com'] = -> r {r.q['adurl'] ? [301, {'Location' => r.q['adurl']},[]] : r.drop}
-    HostGET['www.youtube.com'] = -> r {
-      mode = r.parts[0]
-      if !mode || %w{browse_ajax c channel guide_ajax heartbeat iframe_api live_chat playlist signin watch_videos}.member?(mode)
-        r.fetch
-      elsif mode == 'attribution_link'
-        [301, {'Location' =>  r.q['u']}, []]
-      elsif %w{embed feed get_video_info results user watch yts}.member? mode
-        r.env['HTTP_USER_AGENT'] = DesktopUA
-        r.fetch
-      elsif mode == 'redirect'
-        [301, {'Location' =>  r.q['q']},[]]
-      else
-        r.drop
-      end}
+
+    # Mozilla
+    HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # Reddit
     HostGET['reddit.com'] = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path},[]]}
@@ -144,6 +129,22 @@ class WebResource
         r.graphResponse sources.map(&:fetch).flatten
       else
         r.remote
+      end}
+
+    # YouTube
+    HostGET['www.youtube.com'] = -> r {
+      mode = r.parts[0]
+      if !mode || %w{browse_ajax c channel guide_ajax heartbeat iframe_api live_chat playlist signin watch_videos}.member?(mode)
+        r.fetch
+      elsif mode == 'attribution_link'
+        [301, {'Location' =>  r.q['u']}, []]
+      elsif %w{embed feed get_video_info results user watch yts}.member? mode
+        r.env['HTTP_USER_AGENT'] = DesktopUA
+        r.fetch
+      elsif mode == 'redirect'
+        [301, {'Location' =>  r.q['q']},[]]
+      else
+        r.drop
       end}
 
   end
