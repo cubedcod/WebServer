@@ -268,6 +268,8 @@ class WebResource
             end
           when 'RuntimeError'
             fetchURL[fallback]
+          when 'SocketError'
+            puts ["\e[7;31m", url, e.class, e.message, "\e[0m"].join ' '
           else
             puts ["\e[7;31m", url, e.class, e.message, "\e[0m"].join ' '
             puts e.backtrace
@@ -561,6 +563,8 @@ class WebResource
       else
         fetch
       end
+    rescue OpenURI::HTTPRedirect => e
+      updateLocation e.io.meta['location']
     end
 
     # ALL_CAPS (CGI/env-var) key-names to standard HTTP capitalization

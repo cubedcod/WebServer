@@ -192,7 +192,7 @@ class WebResource
         graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value.do{|t| # timestamp query
           doc = ['/' + t.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/(00.00|Z)$/,''),     # hour-dir
                  %w{host path query fragment}.map{|a|n.send(a).do{|p|p.split(/[\W_]/)}},'ttl']. # slugs
-                 flatten.-([nil,'',*%w{blog blogspot com comment edu feeds feedproxy forums google gov html index medium net news org p php post r rss source threads utm www}]).join('.').R # skiplist
+                 flatten.-([nil,'',*%w{article archives articles blog blogs blogspot columns co com comment comments edu entry feed feeds feedproxy forum forums go google gov html index local medium net news org p php post r reddit rss rssfeed sports source story t the threads topic tumblr uk utm www}]).join('.').R # skiplist
           unless doc.e
             doc.dir.mkdir
             RDF::Writer.open(doc.localPath){|f|f << graph}

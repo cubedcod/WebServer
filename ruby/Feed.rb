@@ -12,10 +12,10 @@ class WebResource
     FeedURL.values.map{|feed|
       begin
         feed.fetch.do{|s,h,b|
-          [s, feed.uri]}
+          [s, 'https:'+feed.uri]}
       rescue Exception => e
         puts e.backtrace
-        [500, feed.uri, e.class, e.message]
+        [500, 'https:'+feed.uri, e.class, e.message]
       end}.map{|report|
       report.join "\t"}.sort
   end
