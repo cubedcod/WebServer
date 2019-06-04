@@ -209,12 +209,12 @@ class WebResource
               body = decompress response.meta, response.read
               #HTTP.print_header head; puts "<============>"; print response.status.justArray.join(' ') + ' '; HTTP.print_header response.meta ; # puts body
               unless cache.e && cache.readFile == body # unchanged
-                cache.writeFile body                   # update
-                mime = if response.meta['content-type'] # explicit MIME
+                cache.writeFile body                   # updated
+                mime = if response.meta['content-type'] # explicit MIME in metadata
                          response.meta['content-type'].split(';')[0]
-                       elsif MIMEsuffix[cache.ext]      # file extension
+                       elsif MIMEsuffix[cache.ext]      # filename suffix
                          MIMEsuffix[cache.ext]
-                       else                             # sniff
+                       else                             # examine contents
                          cache.mimeSniff
                        end
                 cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # updata metadata
