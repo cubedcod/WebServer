@@ -30,6 +30,6 @@ pre {white-space: pre-wrap}
 table {border-spacing: 0}
 table, div, a {display: inline-block}
 table.tree {border-radius: .2em}
-td.k {border-width: 0 0 .08em 0; border-style: dotted; border-color: #3f4; text-align: right}
+td.k {border-width: 0 0 .08em 0; border-style: solid; border-color: #060; background-color: #010; text-align: right}
 td.v {border-width: 0 0 .08em 0; border-style: dotted; border-color: #34f}
-td.v div {border: .1em dotted #555}
+td.v div {border: .05em solid #333}
