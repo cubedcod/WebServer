@@ -12,11 +12,14 @@ class WebResource
     FeedURL.values.map{|feed|
       begin
         feed.fetch.do{|status, h, b|
-        ([status, 'https:'+feed.uri] unless status==200)}
+          [status, 'https:' + feed.uri]}
       rescue Exception => e
-        [500, 'https:'+feed.uri, e.class, e.message]
+        [500, 'https:' + feed.uri, e.class, e.message]
       end}.
-      map{|row|row.join "\t"}.sort
+      compact.sort.do{|report|
+      puts "#{report.size} feeds\n"
+      report.map{|line|
+        puts line.join "\t" unless 200 == line[0]}}
   end
 
   module HTTP
