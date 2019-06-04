@@ -11,13 +11,12 @@ class WebResource
   def self.getFeeds
     FeedURL.values.map{|feed|
       begin
-        feed.fetch.do{|s,h,b|
-          [s, 'https:'+feed.uri]}
+        feed.fetch.do{|status, h, b|
+        ([status, 'https:'+feed.uri] unless status==200)}
       rescue Exception => e
         [500, 'https:'+feed.uri, e.class, e.message]
       end}.
-      select{|s|s[0] != 200}.
-      map{|report|report.join "\t"}.sort
+      map{|row|row.join "\t"}.sort
   end
 
   module HTTP
