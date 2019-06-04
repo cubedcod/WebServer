@@ -196,7 +196,6 @@ class WebResource
     def no_transform; mime.match? NoTransform end
 
     def selectFormat default = 'text/html'
-      return 'application/atom+xml' if q.has_key?('feed')
       preferences.map{|q, formats| # q values in descending order
         formats.map{|mime|
           return default if mime == '*/*'
