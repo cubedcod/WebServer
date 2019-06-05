@@ -122,7 +122,7 @@ class WebResource
                              end,
                              if graph.empty?
                                HTML.keyval (HTML.webizeHash @r), @r # 404
-                             elsif localNode? && directory? && env['REQUEST_PATH'][-1] != '/' && env['REQUEST_PATH'] != '/log'
+                             elsif qs == '?head' || (localNode? && directory?)
                                HTML.tabular graph, @r
                              else
                                HTML.tree (Group[q['g']] || # custom layout
@@ -208,7 +208,7 @@ class WebResource
     end
 
     def self.tabular graph, env
-      keys = graph.map{|uri,resource| resource.keys}.flatten.uniq - ['uri',Content]
+      keys = graph.map{|uri,resource| resource.keys}.flatten.uniq - ['uri', Content, DC+'hasFormat', Identifier, Mtime, Type]
       {_: :table, class: :tabular,
        c: [{_: :tr, c: keys.map{|p|
               {_: :td, class: 'k', c: Markup[Type][p.R]}}},
@@ -216,7 +216,7 @@ class WebResource
              [{_: :tr, c: keys.map{|k|
                 {_: :td, class: 'v', c: resource[k].justArray.map{|v|
                    value k, v, env }}}},
-              ({_: :tr, c: {_: :td, colspan: keys.size, c: resource[Content]}} if resource[Content])]}]}
+              ({_: :tr, c: {_: :td, colspan: keys.size, c: resource[Content]}} if resource[Content] && env['QUERY_STRING'] != 'head')]}]}
     end
 
     def self.tree t, env, name=nil
