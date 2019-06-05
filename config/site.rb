@@ -150,6 +150,12 @@ class WebResource
       end}
 
   end
+
+  def self.twits
+    `cd ~/src/WebServer && git log -n 1 --pretty=format:%B e015012b8c53e15e460a297b636b03ae853df239`.split.map{|twit|
+      (Twitter + '/' + twit).R.subscribe}
+  end
+
   module Webize
 
     Gunk = %w{

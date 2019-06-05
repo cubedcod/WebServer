@@ -208,7 +208,7 @@ class WebResource
     end
 
     def self.tabular graph, env
-      keys = graph.map{|uri,resource| resource.keys}.flatten.uniq - [Content]
+      keys = graph.map{|uri,resource| resource.keys}.flatten.uniq - ['uri',Content]
       {_: :table, class: :tabular,
        c: [{_: :tr, c: keys.map{|p|
               {_: :td, class: 'k', c: Markup[Type][p.R]}}},
