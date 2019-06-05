@@ -218,19 +218,15 @@ class WebResource
                  end
       {class: :post,
        c: [{_: :a, id: 't'+rand.to_s.sha2, class: :id, c: '☚', href: location},
-           titles.map{|title|
-             Markup[Title][title,env,uri]},
-           images.map{|i|
-             Markup[Image][i,env]},
+           titles.map{|title| Markup[Title][title,env,uri]},
+           (Markup[Date][date] if date),
+           images.map{|i| Markup[Image][i,env]},
            {_: :table, class: :fromTo,
             c: {_: :tr,
                 c: [{_: :td, c: from.map{|f|Markup[Creator][f,env]}, class: :from},
                     {_: :td, c: '&rarr;'},
                     {_: :td, c: to.map{|f|Markup[Creator][f,env]}, class: :to}]}},
-           content,
-           ((HTML.keyval post, env) unless post.empty?),
-           (Markup[Date][date] if date),
-          ]}}
+           content, ((HTML.keyval post, env) unless post.keys.-(['uri',Type]).size < 1)]}}
 
     # group by sender
     Group['from'] = -> graph { Group['from-to'][graph,Creator] }
