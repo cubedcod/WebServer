@@ -296,30 +296,6 @@ class WebResource
       end
     end
 
-    # filter scripts and tracking GIFs
-    def filter
-      if %w{gif js}.member? ext.downcase # filtered suffix, skip origin roundtrip
-        if ext=='gif' && qs.empty? # no querystring, allow GIF
-          fetch
-        else
-          deny
-        end
-      else # fetch and inspect
-        fetch.do{|status, h, b|
-          if status.to_s.match? /30[1-3]/ # redirected
-            [status, h, b]
-          else
-            if h['Content-Type'] && !h['Content-Type'].match?(/image.(bmp|gif)|script/)
-              [status, h, b] # allowed MIME
-            else # filtered MIME
-              env[:GIF] = true if h['Content-Type']&.match? /image\/gif/
-              env[:script] = true if h['Content-Type']&.match? /script/
-              deny status
-            end
-          end}
-      end
-    end
-
     def GET
       return [204,{'Content-Length'=>[0]},[]] if path.match? /204$/
       return PathGET[path][self] if PathGET[path] # path lambda
@@ -387,6 +363,30 @@ class WebResource
     end
 
     def no_cache; pragma && pragma == 'no-cache' end
+
+    # filter scripts
+    def noexec
+      if %w{gif js}.member? ext.downcase # filtered suffix
+        if ext=='gif' && qs.empty? # no querystring, allow GIF
+          fetch
+        else
+          deny
+        end
+      else # fetch and inspect
+        fetch.do{|status, h, b|
+          if status.to_s.match? /30[1-3]/ # redirected
+            [status, h, b]
+          else
+            if h['Content-Type'] && !h['Content-Type'].match?(/image.(bmp|gif)|script/)
+              [status, h, b] # allowed MIME
+            else # filtered MIME
+              env[:GIF] = true if h['Content-Type']&.match? /image\/gif/
+              env[:script] = true if h['Content-Type']&.match? /script/
+              deny status
+            end
+          end}
+      end
+    end
 
     def notfound
       dateMeta # nearby page may exist, search for pointers
@@ -553,9 +553,9 @@ class WebResource
           else
             drop
           end
-        when /filter/
-          filter
-        when /thru/
+        when /noexec/
+          noexec
+        when /direct/
           self.GETthru
         end
       else

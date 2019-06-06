@@ -87,15 +87,16 @@ class WebResource
     HostGET['l.instagram.com'] = HostGET['l.facebook.com'] = -> r {[301, {'Location' => r.q['u']},[]]}
 
     # Google
-    (0..3).map{|i|HostGET["encrypted-tbn#{i}.gstatic.com"] = -> r {r.filter}}
-    HostGET['ajax.googleapis.com'] = HostGET['cdnjs.cloudflare.com'] = HostGET['maps.googleapis.com'] = -> r {r.fetch} # CDN with JS stdlibs, allow
-    HostGET['feedproxy.google.com'] = HostGET['storage.googleapis.com'] = -> r {r.filter}                              # CDN with mystery JS, filter
-    HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.drop : r.filter}
+    (0..3).map{|i|HostGET["encrypted-tbn#{i}.gstatic.com"] = -> r {r.noexec}}
+    HostGET['ajax.googleapis.com'] = HostGET['cdnjs.cloudflare.com'] = -> r {r.fetch}     # CDN with mainstream JS libraries, allow
+    HostGET['feedproxy.google.com'] = HostGET['storage.googleapis.com'] = -> r {r.noexec} # CDN with mystery JS, filter
+    HostGET['maps.googleapis.com'] = -> r {}
+    HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.drop : r.noexec}
     HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['www.google.com'] = -> req {
-      if %w{async complete searchdomaincheck}.member? req.parts[0]
+      if %w{complete searchdomaincheck}.member? req.parts[0]
         req.drop
       else
-        req.filter.do{|status, head, body|
+        req.fetch.do{|status, head, body|
           case status
           when 403
             # goog blocked by a middlebox, try DDG
@@ -123,10 +124,10 @@ class WebResource
     HostGET['s2.reutersmedia.net'] = -> r {
       if r.q.has_key? 'w'
         q = r.q
-        q.delete 'w'
+        q['w'] = 1920
         [301, {'Location' =>  r.path + (HTTP.qs q)}, []]
       else
-        r.filter
+        r.noexec
       end}
 
     # Soundcloud
