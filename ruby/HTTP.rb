@@ -539,24 +539,25 @@ class WebResource
       relocation.exist?
     end
 
+    # dispatch request for remote resource
     def remote
       if env.has_key? 'HTTP_TYPE'
         case env['HTTP_TYPE']
         when /drop/
           if ((host.match? /track/) || (env['REQUEST_URI'].match? /track/)) && (host.match? TrackHost)
-            fetch
-          elsif qs == '?allow' # allow without query-string
+            fetch # allow music tracks
+          elsif qs == '?allow' # allow with stripped querystring
             env.delete 'QUERY_STRING'
             env['REQUEST_URI'] = env['REQUEST_PATH']
-            puts "ALLOW #{uri}"
+            puts "ALLOW #{uri}" # notify on console
             fetch
           else
             drop
           end
         when /noexec/
-          noexec
+          noexec # strip JS
         when /direct/
-          self.GETthru
+          self.GETthru # direct to origin
         end
       else
         fetch
