@@ -11,13 +11,13 @@
 .toolbox {position: fixed; top: 0; right: 0; z-index: 1}
 .tree > .label {font-size: .8em}
 .tree > a.label {color: #ccc}
-.tree > span.label {display: block; text-align: right}
+.tree > span.label {display: none}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
 a {overflow: hidden; text-decoration: none; max-width:32em; background-color: #eee; color: #000}
 a.date {float: right; background-color: #000; color: #666; font-size: .8em; margin-right: .1em}
 a.id {float: right; background-color: #000; color: #333}
-a.title {float: left; vertical-align: top}
-a.title, a.link, .thumb {background-color: #fff; color: #000}
+a.title {float: left; vertical-align: top; background-color: #000; color: #fff; font-size: 1.2em; font-weight: bold}
+a.link, .thumb {background-color: #fff; color: #000}
 a:visited {background-color: cyan; color: #000}
 body {font-family: sans-serif; margin: 0 2em 0 2em}
 body, pre, p, li, time, tr[name="abstract"] > td.v, td.v span {background-color: #000; color: #fff}

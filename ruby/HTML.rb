@@ -122,7 +122,7 @@ class WebResource
                              end,
                              if graph.empty?
                                HTML.keyval (HTML.webizeHash @r), @r # 404
-                             elsif qs == '?head' || (localNode? && directory?)
+                             elsif qs == '?head' || (localNode? && directory?) # tabular view for local directories
                                HTML.tabular graph, @r
                              else
                                HTML.tree (Group[q['g']] || # custom layout
