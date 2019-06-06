@@ -166,7 +166,7 @@ class WebResource
     end
     alias_method :env, :environment
 
-    def fetch
+    def fetch rackResponse=true
       # request metadata
       @r ||= {}
       head = HTTP.unmangle env
@@ -245,7 +245,7 @@ class WebResource
           end
         end}
 
-      unless OFFLINE || (!no_cache && cached)
+      unless OFFLINE || (cached && !no_cache)
         begin
           fetchURL[url]
         rescue Exception => e
@@ -279,7 +279,7 @@ class WebResource
         end
       end
 
-      # return response
+      return updates unless rackResponse
       if part
         [206, response_meta, [part]]
       elsif [401,403].member? status

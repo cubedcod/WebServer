@@ -118,7 +118,6 @@ class WebResource
 
     def graphResponse set
       return notfound if !set || set.empty?
-
       # output format
       if set.size == 1
         this = set[0]
