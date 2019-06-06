@@ -525,6 +525,7 @@ class WebResource
         k.to_s + '=' + (v ? (CGI.escape [*v][0].to_s) : '')
       }.intersperse("&").join('')
     end
+
     def relocation
       hash = (host + (path || '') + qs).sha2
       ('/cache/location/' + hash[0..2] + '/' + hash[3..-1] + '.u').R

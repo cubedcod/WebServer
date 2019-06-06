@@ -119,6 +119,16 @@ class WebResource
         r.remote
       end}
 
+    # Reuters
+    HostGET['s2.reutersmedia.net'] = -> r {
+      if r.q.has_key? 'w'
+        q = r.q
+        q.delete 'w'
+        [301, {'Location' =>  r.path + (HTTP.qs q)}, []]
+      else
+        r.filter
+      end}
+
     # Soundcloud
     HostGET['gate.sc'] = -> r {[301, {'Location' =>  r.q['url']},[]]}
 
