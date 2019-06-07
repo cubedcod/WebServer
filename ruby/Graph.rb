@@ -63,11 +63,11 @@ class WebResource
     end
 
     # file -> file
-    def rdfize # call MIME-mapped triplr, cache output in JSON file, return swapped file-reference
+    def rdfize # call MIME-mapped triplr, cache output in JSON, return swapped file-reference
       return self if ext == 'e'
       hash = node.stat.ino.to_s.sha2
       doc = ('/cache/RDF/' + hash[0..2] + '/' + hash[3..-1] + '.e').R
-      return doc if doc.e && doc.m > m # rdfization up to date
+      return doc if doc.e && doc.m > m # RDF transform up to date
       graph = {}
       triplrFile{|s,p,o|     graph[s] ||= {'uri' => s}; graph[s][p] ||= []; graph[s][p].push o.class == WebResource ? {'uri' => o.uri} : o unless p == 'uri'}
       if triplr = Triplr[mime]
