@@ -287,9 +287,6 @@ class WebResource
 
   end
   include HTML
-  module URIs
-    IndexHTML = {}
-  end
   module Webize
     include URIs
 

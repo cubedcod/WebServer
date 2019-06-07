@@ -240,29 +240,5 @@ class WebResource
       'www.youtube.com' => :youtube,
     }
 
-    IndexHTML['twitter.com'] = -> page {
-      puts :indexTwitter
-      graph = {}
-      posts = []
-      # collect triples
-      page.tweets{|s,p,o|
-        graph[s] ||= {'uri'=>s}
-        graph[s][p] ||= []
-        graph[s][p].push o.class == WebResource ? {'uri' => o.uri} : o}
-      # link to timeline
-      graph.map{|u,r|
-        r[Date].do{|t|
-          # mint timeline-entry identifier
-          slug = (u.sub(/https?/,'.').gsub(/\W/,'.')).gsub /\.+/,'.'
-          time = t[0].to_s.gsub(/[-T]/,'/').sub(':','/').sub /(.00.00|Z)$/, ''
-          doc = "/#{time}#{slug}.e".R
-          # store tweet
-          if !doc.e
-            doc.writeFile({u => r}.to_json)
-            posts << doc
-          end}}
-      puts posts
-      posts }
-
   end
 end

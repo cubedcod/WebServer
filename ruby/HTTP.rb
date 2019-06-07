@@ -223,7 +223,7 @@ class WebResource
                                when /^(application|text)\/(atom|rss|xml)/
                                  ('file:' + cache.localPath).R.indexRDF(:format => :feed, :base_uri => uri)
                                when /^text\/html/
-                                 IndexHTML[@r && @r['SERVER_NAME'] || host].do{|indexer|indexer[cache] } || []
+                                 
                                else
                                  []
                                end || [])
@@ -234,7 +234,7 @@ class WebResource
           puts "fetch status #{e.message} #{url}"
           case e.message
           when /304/
-            #status = 304 # no update
+            status = 304 # no update
           when /401/
             status = 401 # unauthorized
           when /403/
