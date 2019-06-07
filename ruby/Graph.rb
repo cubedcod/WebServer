@@ -82,15 +82,12 @@ class WebResource
   module HTTP
     # merge-load JSON and RDF to JSON-pickleable Hash
     def load files
-      g = {}                 # init Hash
-      graph = RDF::Graph.new # init RDF::Graph
+      g = {}                 # blank Hash
+      graph = RDF::Graph.new # blank Graph
 
-      rdf, misc = files.partition &:isRDF # input-file categories
-#      puts "load RDF: ",   rdf.join(' ') unless  rdf.empty?
-#      puts "load JSON: ", misc.join(' ') unless misc.empty?
+      rdf, notRDF = files.partition &:isRDF # input categories
 
-      # RDF
-      rdf.map{|n| # each file
+      rdf.map{|n|
         opts = {:base_uri => n}
         opts[:format] = :feed if n.feedMIME?
         graph.load n.localPath, opts rescue puts("error parsing #{n} as RDF")} # load data
@@ -101,8 +98,7 @@ class WebResource
         g[s][p] ||= []      # insert predicate
         g[s][p].push o unless g[s][p].member? o} # insert object
 
-      # JSON
-      misc.map{|n| # each file
+      notRDF.map{|n|
         n.rdfize.do{|transcode| # transcode to RDF
           ::JSON.parse(transcode.readFile). # load data
             map{|s,re| # each resource

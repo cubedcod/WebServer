@@ -146,7 +146,7 @@ class WebResource
         sources = []
         r.subscriptions.shuffle.each_slice(18){|s|
           sources << (Twitter + '/search?f=tweets&vertical=default&q=' + s.map{|u| 'from:' + u}.intersperse('+OR+').join).R }
-        r.graphResponse sources[0..1].map{|source|source.fetch false}.flatten
+        r.graphResponse sources[0..0].map{|source|source.fetch false}.flatten
       else
         r.remote
       end}
@@ -241,6 +241,7 @@ class WebResource
     }
 
     IndexHTML['twitter.com'] = -> page {
+      puts :indexTwitter
       graph = {}
       posts = []
       # collect triples
@@ -260,6 +261,7 @@ class WebResource
             doc.writeFile({u => r}.to_json)
             posts << doc
           end}}
+      puts posts
       posts }
 
   end

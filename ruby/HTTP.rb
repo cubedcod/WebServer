@@ -196,7 +196,7 @@ class WebResource
 
       # fetcher
       fetchURL = -> url {
-        print '🌍🌎🌏'[rand 3], ' '#, url, ' '
+        print '🌍🌎🌏'[rand 3] , ' '
         begin
           open(url, head) do |response| # request
             if response.status.to_s.match?(/206/) # partial response
@@ -207,7 +207,7 @@ class WebResource
                 @r[:Response]    ||= {}
                 @r[:Response][k] ||= response.meta[k.downcase]}
               body = decompress response.meta, response.read
-              #HTTP.print_header head; puts "<============>"; print response.status.justArray.join(' ') + ' '; HTTP.print_header response.meta ; # puts body
+              #puts url; HTTP.print_header head; puts "<============>"; print response.status.justArray.join(' ') + ' '; HTTP.print_header response.meta
               unless cache.e && cache.readFile == body # unchanged
                 cache.writeFile body                   # updated
                 mime = if response.meta['content-type'] # explicit MIME in metadata
@@ -223,7 +223,7 @@ class WebResource
                                when /^(application|text)\/(atom|rss|xml)/
                                  ('file:' + cache.localPath).R.indexRDF(:format => :feed, :base_uri => uri)
                                when /^text\/html/
-                                 IndexHTML[@r ? @r['SERVER_NAME'] : host].do{|indexer| indexer[cache] } || []
+                                 IndexHTML[@r && @r['SERVER_NAME'] || host].do{|indexer|indexer[cache] } || []
                                else
                                  []
                                end || [])
@@ -231,6 +231,7 @@ class WebResource
             end
           end
         rescue Exception => e
+          puts "fetch status #{e.message} #{url}"
           case e.message
           when /304/
             #status = 304 # no update
