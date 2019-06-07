@@ -12,12 +12,11 @@ class WebResource
     include URIs
 
     class Format < RDF::Format
-      content_type     'application/json+rdf', :extension => :e
+      content_type     'application/json+rdf', :extension => :e # native "RDF-subset in JSON" format
       content_encoding 'utf-8'
       reader { WebResource::JSON::Reader }
     end
 
-    # JSON -> RDF
     class Reader < RDF::Reader
       format Format
       def initialize(input = $stdin, options = {}, &block)
@@ -33,12 +32,15 @@ class WebResource
       end
       def each_statement &fn
         @graph.map{|s,r|
+          subject = @base.join s
+          graph = @base.join subject.R.path
+          puts "#{subject} in graph #{graph}"
           r.map{|p,o|
             o.justArray.map{|o|
-              fn.call RDF::Statement.new(@base.join(s), RDF::URI(p),
+              fn.call RDF::Statement.new(subject, RDF::URI(p),
                                          o.class==Hash ? @base.join(o['uri']) : (l = RDF::Literal o
                                                                                  l.datatype=RDF.XMLLiteral if p == 'http://rdfs.org/sioc/ns#content'
-                                                                                 l))} unless p=='uri'}}
+                                                                                 l), :graph_name => graph)} unless p=='uri'}}
       end
       def each_triple &block; each_statement{|s| block.call *s.to_triple} end
     end
@@ -69,9 +71,15 @@ class WebResource
       doc = ('/cache/RDF/' + hash[0..2] + '/' + hash[3..-1] + '.e').R
       return doc if doc.e && doc.m > m # RDF transform up to date
       graph = {}
-      triplrFile{|s,p,o|     graph[s] ||= {'uri' => s}; graph[s][p] ||= []; graph[s][p].push o.class == WebResource ? {'uri' => o.uri} : o unless p == 'uri'}
+      triplrFile{|s,p,o|
+        graph[s] ||= {'uri' => s}
+        graph[s][p] ||= []
+        graph[s][p].push o.class == WebResource ? {'uri' => o.uri} : o unless p == 'uri'}
       if triplr = Triplr[mime]
-       send(*triplr){|s,p,o| graph[s] ||= {'uri' => s}; graph[s][p] ||= []; graph[s][p].push o.class == WebResource ? {'uri' => o.uri} : o unless p == 'uri'}
+        send(*triplr){|s,p,o|
+          graph[s] ||= {'uri' => s}
+          graph[s][p] ||= []
+          graph[s][p].push o.class == WebResource ? {'uri' => o.uri} : o unless p == 'uri'}
       else
        puts "#{uri}: triplr for #{mime} missing" unless triplr
       end

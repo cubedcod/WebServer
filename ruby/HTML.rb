@@ -243,7 +243,7 @@ class WebResource
     def self.value type, v, env
       if Abstract == type || Content == type
         v
-      elsif Markup[type] # explicit type argument supplied
+      elsif Markup[type] # supplied type argument
         Markup[type][v,env]
       elsif v.class == Hash # RDF type
         resource = v.R

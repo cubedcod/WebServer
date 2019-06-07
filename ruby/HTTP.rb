@@ -199,15 +199,17 @@ class WebResource
         print '🌍🌎🌏'[rand 3] , ' '
         begin
           open(url, head) do |response| # request
+              #HTTP.print_header head; puts "<============>"; print response.status.justArray.join(' ') + ' '; HTTP.print_header response.meta
+
             if response.status.to_s.match?(/206/) # partial response
               response_meta = response.meta
               part = response.read
-            else # response
+            else
               %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k|
                 @r[:Response]    ||= {}
                 @r[:Response][k] ||= response.meta[k.downcase]}
               body = decompress response.meta, response.read
-              #puts url; HTTP.print_header head; puts "<============>"; print response.status.justArray.join(' ') + ' '; HTTP.print_header response.meta
+              puts "#{url} -> #{cache}"
               unless cache.e && cache.readFile == body # unchanged
                 cache.writeFile body                   # updated
                 mime = if response.meta['content-type'] # explicit MIME in metadata
@@ -218,12 +220,11 @@ class WebResource
                          cache.mimeSniff
                        end
                 cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # updata metadata
-                # index updates
-                updates.concat(case mime
+                updates.concat(case mime                                              # update index
                                when /^(application|text)\/(atom|rss|xml)/
-                                 ('file:' + cache.localPath).R.indexRDF(:format => :feed, :base_uri => uri)
+                                 ('file:' + cache.localPath).R.indexRDF(:format => :feed, :base_uri => self)
                                when /^text\/html/
-                                 
+                                 ('file:' + cache.rdfize.localPath).R.indexRDF(:base_uri => self)
                                else
                                  []
                                end || [])
