@@ -205,7 +205,7 @@ class WebResource
               response_meta = response.meta
               part = response.read
             else
-              puts "CACHE #{url} -> #{cache}"
+              #puts "CACHE #{url} -> #{cache}"
 
               %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k|
                 @r[:Response]    ||= {}
