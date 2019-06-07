@@ -200,7 +200,7 @@ class WebResource
  t the threads topic tumblr
  uk utm www}
 
-    def indexRDF options = {}
+    def index options = {}
       g = RDF::Repository.load self, options # load resource
       updates = []
       g.each_graph.map{|graph|               # bind named graph

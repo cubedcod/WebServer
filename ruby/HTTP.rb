@@ -222,9 +222,9 @@ class WebResource
                 cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # updata metadata
                 updates.concat(case mime                                              # update index
                                when /^(application|text)\/(atom|rss|xml)/
-                                 ('file:' + cache.localPath).R.indexRDF(:format => :feed, :base_uri => self)
+                                 ('file:' + cache.localPath).R.index(:format => :feed, :base_uri => self)
                                when /^text\/html/
-                                 ('file:' + cache.rdfize.localPath).R.indexRDF(:base_uri => self)
+                                 ('file:' + cache.rdfize.localPath).R.index(:base_uri => self)
                                else
                                  []
                                end || [])
