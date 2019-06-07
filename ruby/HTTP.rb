@@ -205,13 +205,18 @@ class WebResource
               response_meta = response.meta
               part = response.read
             else
+              puts "CACHE #{url} -> #{cache}"
+
               %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k|
                 @r[:Response]    ||= {}
                 @r[:Response][k] ||= response.meta[k.downcase]}
+
               body = decompress response.meta, response.read
-              puts "#{url} -> #{cache}"
-              unless cache.e && cache.readFile == body # unchanged
-                cache.writeFile body                   # updated
+
+              unless cache.e && cache.readFile == body  # unchanged? 
+
+                cache.writeFile body                    # update
+
                 mime = if response.meta['content-type'] # explicit MIME in metadata
                          response.meta['content-type'].split(';')[0]
                        elsif MIMEsuffix[cache.ext]      # filename suffix
@@ -219,7 +224,9 @@ class WebResource
                        else                             # examine contents
                          cache.mimeSniff
                        end
+
                 cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # updata metadata
+
                 updates.concat(case mime                                              # update index
                                when /^(application|text)\/(atom|rss|xml)/
                                  ('file:' + cache.localPath).R.index(:format => :feed, :base_uri => self)
