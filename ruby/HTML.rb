@@ -398,7 +398,7 @@ sidebar [class^='side']    [id^='side']
                puts "JSON parse failed: #{json.inner_text}"
                {}
              end
-       graph << ::JSON::LD::API.toRdf(tree) rescue puts("JSON-LD toRDF error #{uri}")}
+       graph << ::JSON::LD::API.toRdf(tree) rescue puts("JSON-LD read-error #{uri}")}
       graph.each_triple{|s,p,o|
         yield s.to_s, p.to_s, [RDF::Node, RDF::URI].member?(o.class) ? o.R : o.value}
 

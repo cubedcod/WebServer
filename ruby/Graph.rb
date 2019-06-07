@@ -58,7 +58,7 @@ class WebResource
     end
 
     # file -> file
-    def toRDF
+    def justRDF
       isRDF ? self : rdfize
     end
 
@@ -139,7 +139,7 @@ class WebResource
             renderFeed load set
           else # RDF formats
             g = RDF::Graph.new # initialize graph
-            set.map{|n| g.load n.toRDF.localPath, :base_uri => n.stripDoc } # data to graph
+            set.map{|n| g.load n.justRDF.localPath, :base_uri => n.stripDoc } # load
             g.dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true # serialize output
           end
         end}
