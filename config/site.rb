@@ -217,11 +217,7 @@ class WebResource
         s = Twitter + (tweet.css('.js-permalink').attr('href') || tweet.attr('data-permalink-path'))
         authorName = tweet.css('.username b')[0].do{|b|b.inner_text} || s.R.parts[0]
         author = (Twitter + '/' + authorName).R
-        puts tweet
-        puts tweet.css('.time > a')
-        puts tweet.css('[data-time]')
         ts = (tweet.css('[data-time]')[0].do{|unixtime|
-puts unixtime
                 Time.at(unixtime.attr('data-time').to_i)} || Time.now).iso8601
         yield s, Type, Post.R
         yield s, Date, ts

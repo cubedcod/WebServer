@@ -34,7 +34,6 @@ class WebResource
         @graph.map{|s,r|
           subject = @base.join s
           graph = @base.join subject.R.path
-          puts "#{subject} in graph #{graph}"
           r.map{|p,o|
             o.justArray.map{|o|
               fn.call RDF::Statement.new(subject, RDF::URI(p),
