@@ -307,24 +307,25 @@ sidebar [class^='side']    [id^='side']
 
     # HTML -> RDF
     def triplrHTML &f
-      n = Nokogiri::HTML.parse readFile.to_utf8 # parse
+      n = Nokogiri::HTML.parse readFile.to_utf8 # parse HTML
 
-      # <body>
-      if body = n.css('body')[0]
-        # move site links to footer
-        [*BasicGunk,*Gunk].map{|selector|
-          body.css(selector).map{|sel|
-            body.add_child sel.remove}}
-        yield uri, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '') unless (@r && @r['SERVER_NAME'] || host || '').match? /twitter.com/
+      # triplr host-binding
+      if hostTriples = @r && Triplr[:HTML][@r['SERVER_NAME']]
+        send hostTriples, n, &f
       end
 
-      # <title>
-      n.css('title').map{|title| yield uri, Title, title.inner_text }
-
-      # <video>
-      ['video[src]', 'video > source[src]'].map{|vsel|
-        n.css(vsel).map{|v|
-          yield uri, Video, v.attr('src').R }}
+      # JSON-LD
+      graph = RDF::Graph.new
+      n.css('script[type="application/ld+json"]').map{|json|
+       tree = begin
+               ::JSON.parse json.inner_text
+             rescue
+               puts "JSON parse failed: #{json.inner_text}"
+               {}
+             end
+       graph << ::JSON::LD::API.toRdf(tree) rescue puts("JSON-LD read-error #{uri}")}
+      graph.each_triple{|s,p,o|
+        yield s.to_s, p.to_s, [RDF::Node, RDF::URI].member?(o.class) ? o.R : o.value}
 
       # <link>
       n.css('head link[rel]').map{|m|
@@ -389,25 +390,26 @@ sidebar [class^='side']    [id^='side']
             yield uri, k, v unless k == :drop
           }}}
 
-      # JSON-LD
-      graph = RDF::Graph.new
-      n.css('script[type="application/ld+json"]').map{|json|
-       tree = begin
-               ::JSON.parse json.inner_text
-             rescue
-               puts "JSON parse failed: #{json.inner_text}"
-               {}
-             end
-       graph << ::JSON::LD::API.toRdf(tree) rescue puts("JSON-LD read-error #{uri}")}
-      graph.each_triple{|s,p,o|
-        yield s.to_s, p.to_s, [RDF::Node, RDF::URI].member?(o.class) ? o.R : o.value}
+      # <title>
+      n.css('title').map{|title| yield uri, Title, title.inner_text }
 
-      # host-specific triplr
-      if hostTriples = @r && Triplr[:HTML][@r['SERVER_NAME']]
-        send hostTriples, n, &f
+      # <video>
+      ['video[src]', 'video > source[src]'].map{|vsel|
+        n.css(vsel).map{|v|
+          yield uri, Video, v.attr('src').R }}
+
+      # <body>
+      if body = n.css('body')[0]
+        # move site links to footer
+        [*BasicGunk,*Gunk].map{|selector|
+          body.css(selector).map{|sel|
+            sel.remove
+#            body.add_child sel.remove
+          }}
+        yield uri, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '') unless (@r && @r['SERVER_NAME'] || host || '').match? /twitter.com/
       end
-    end
 
+    end
   end
   include Webize
 end
