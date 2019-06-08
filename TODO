@@ -4,12 +4,12 @@ eliminate cache dir
 expand cached-shortURLs at storage and presentation/loading time
 ad <a id> when missing in extracted-content
 index-browsing for cached remote containers
-reference cached stories on timeline and in RDF indexes - index backlinks, HEAD Metadata
 troff triplr - .1, .2, (sslsplit/proxy docs)
 Searchbox host-specific URL templates
 touch caches to match date in HTTP header
 mp3 images
 move toplevel cache file into host-dir
+throttle cache updates (for HTML pages.. use HTTP meta or override?)
 images/video in twitter search https://twitter.com/search?f=images&vertical=default&q=%22Red%20line%22%20derailment
 random fileset
 graph viz

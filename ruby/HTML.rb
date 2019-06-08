@@ -378,6 +378,8 @@ sidebar [class^='side']    [id^='side']
             }[k] || ('#' + k.gsub(' ','_'))
 
             case k
+            when /lytics/
+              k = :drop
             when 'twitter:site'
               k = Twitter
               v = (Twitter + '/' + v.sub(/^@/,'')).R
