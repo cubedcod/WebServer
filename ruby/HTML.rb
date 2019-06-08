@@ -339,7 +339,7 @@ sidebar [class^='side']    [id^='side']
               'apple-touch-icon-precomposed' => Image,
               'shortcut icon' => Image,
               'stylesheet' => :drop,
-            }[k] || k
+            }[k] || ('#' + k.gsub(' ','_'))
             yield uri, k, v.R unless k == :drop
           }}}
 
@@ -375,7 +375,7 @@ sidebar [class^='side']    [id^='side']
               'twitter:image:src' => Image,
               'twitter:title' => Title,
               'viewport' => :drop,
-            }[k] || k
+            }[k] || ('#' + k.gsub(' ','_'))
 
             case k
             when 'twitter:site'
