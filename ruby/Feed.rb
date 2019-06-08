@@ -9,7 +9,7 @@ class WebResource
   end
 
   def self.getFeeds
-    FeedURL.values.map{|feed|
+    FeedURL.values.shuffle.map{|feed|
       begin
         feed.fetch.do{|status, h, b|
           [status, 'https:' + feed.uri]}
