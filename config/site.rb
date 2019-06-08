@@ -82,6 +82,14 @@ class WebResource
     HostGET['duckduckgo.com'] = -> r {%w{ac}.member?(r.parts[0]) ? r.drop : r.remote}
     HostGET['proxy.duckduckgo.com'] = -> r {%w{iu}.member?(r.parts[0]) ? [301, {'Location' => r.q['u']}, []] : r.remote}
 
+    # eBay
+    HostGET['i.ebayimg.com'] = -> r {
+      if r.basename.match? /s-l(64|96|200|225).jpg/
+        [301, {'Location' => r.dirname + '/s-l1600.jpg'}, []]
+      else
+        r.fetch
+      end}
+
     # Facebook
     HostGET['facebook.com'] = HostGET['www.facebook.com'] = -> r {%w{connect pages_reaction_units plugins security tr}.member?(r.parts[0]) ? r.drop : r.remote}
     HostGET['l.instagram.com'] = HostGET['l.facebook.com'] = -> r {[301, {'Location' => r.q['u']},[]]}
@@ -99,8 +107,12 @@ class WebResource
       end}
     HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.drop : r.noexec}
     HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['www.google.com'] = -> req {
-      if %w{complete searchdomaincheck}.member? req.parts[0]
+      mode = req.parts[0]
+      if %w{complete searchdomaincheck}.member? mode
         req.drop
+      elsif mode == 'maps'
+        req.env['HTTP_USER_AGENT'] = DesktopUA
+        req.fetch
       else
         req.fetch.do{|status, head, body|
           case status
@@ -205,7 +217,12 @@ class WebResource
         s = Twitter + (tweet.css('.js-permalink').attr('href') || tweet.attr('data-permalink-path'))
         authorName = tweet.css('.username b')[0].do{|b|b.inner_text} || s.R.parts[0]
         author = (Twitter + '/' + authorName).R
-        ts = (tweet.css('[data-time]')[0].do{|unixtime| Time.at(unixtime.attr('data-time').to_i)} || Time.now).iso8601
+        puts tweet
+        puts tweet.css('.time > a')
+        puts tweet.css('[data-time]')
+        ts = (tweet.css('[data-time]')[0].do{|unixtime|
+puts unixtime
+                Time.at(unixtime.attr('data-time').to_i)} || Time.now).iso8601
         yield s, Type, Post.R
         yield s, Date, ts
         yield s, Creator, author

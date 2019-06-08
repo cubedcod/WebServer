@@ -239,7 +239,6 @@ class WebResource
             end
           end
         rescue Exception => e
-          puts "fetch status #{e.message} #{url}"
           case e.message
           when /304/
             status = 304 # no update
