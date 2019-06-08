@@ -401,14 +401,16 @@ sidebar [class^='side']    [id^='side']
           yield uri, Video, v.attr('src').R }}
 
       # <body>
-      if body = n.css('body')[0]
-        # move site links to footer
+      if (body = n.css('body')[0]) && !(@r && @r['SERVER_NAME'] || host || '').match?(/twitter.com/)
+        if content = body.css('.entry-content')[0]
+          yield uri, Content, HTML.clean(content.inner_html)
+        end
         [*BasicGunk,*Gunk].map{|selector|
           body.css(selector).map{|sel|
-            sel.remove
-#            body.add_child sel.remove
+            sel.remove # strip site-chrome
+#            body.add_child sel.remove # move site-chrome to footer
           }}
-        yield uri, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '') unless (@r && @r['SERVER_NAME'] || host || '').match? /twitter.com/
+        yield uri, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
       end
 
     end
