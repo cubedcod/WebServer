@@ -7,7 +7,6 @@
 //airmedia.org/feed/
 //andrewsquare.org/feed/
 //arckboston.org/feed/
-//rss.wbur.org/artery/rss
 //artsboston.org/feed/
 //as220.org/feed/
 //bartlettevents.org/blog?format=rss
@@ -53,11 +52,11 @@
 //cpaboston.org/en/news-events/news/news.xml
 //crewtrust.org/feed/
 //datatherapy.org/feed/
+//dbedc.org/feed/
 //districthallboston.org/feed/
 //dorchester.comunicas.org/feed/
 //esplanade.org/feed/
 //everydayboston.org/feed/
-//www.necir.org/feed/
 //fairmountcollaborative.org/feed/
 //fairmounthill.org/cgi-bin/dada/mail.cgi/archive_atom/fhnaannounce/
 //feneas.org/rss/
@@ -72,12 +71,14 @@
 //graduationmusic.org/comments/feed/
 //graduationmusic.org/feed/
 //greaterashmont.org/feed/
+//greaterashmont.org/feed/
 //hipstory.org/feed/
 //historicboston.org/feed/
 //hnrss.org/frontpage
 //hria.org/feed/
 //jamaicaplainforum.org/feed/
 //leaffund.org/blog-1?format=RSS
+//leahneukirchen.org/trivium/index.atom
 //lynnpolice.org/feed/
 //mapublichealth.org/feed/
 //masshort.org/feed/
@@ -87,8 +88,8 @@
 //masspirg.org/rss.xml
 //massportcac.org/feed/
 //matrix.org/blog/feed
-//www.metrohousingboston.org/feed/
 //mountauburn.org/feed/
+//mspnews.org/feed/
 //mydorchester.org/node/feed
 //mymattapan.org/rss.xml
 //naiopmablog.org/feed/
@@ -97,6 +98,7 @@
 //oldwayspt.org/blog/feed
 //rimediacoop.org/feed/
 //rimediacoop.org/feed/podcast
+//rss.wbur.org/artery/rss
 //ruben.verborgh.org/blog/latest.xml
 //sampan.org/feed/atom/
 //segreenhouse.org/feed/
@@ -125,7 +127,6 @@
 //www.cctvcambridge.org/rss.xml
 //www.chsne.org/feed/
 //www.clvu.org/news.rss
-//dbedc.org/feed/
 //www.doorsopenri.org/feed/
 //www.dotpark.org/feed/
 //www.ds4si.org/blog?format=RSS
@@ -148,8 +149,9 @@
 //www.masshist.org/blog/rss/feed2.0.rss
 //www.masslibsystem.org/feed/
 //www.medfordma.org/feed/
-//mspnews.org/feed/
+//www.metrohousingboston.org/feed/
 //www.mydorchester.org/blog/feed
+//www.necir.org/feed/
 //www.neighbormedia.org/rss.xml
 //www.neldha.org/index.php?format=feed&type=atom
 //www.neponset.org/feed/
@@ -162,8 +164,6 @@
 //www.realhartford.org/feed/
 //www.rifuture.org/feed/
 //www.scidorchester.org/blog/feed
-//greaterashmont.org/feed/
-//www.sjp2ca.org/apps/news/rss
 //www.somervillemedia.org/feed/
 //www.tcproject.org/feed/
 //www.thecharles.org/feed/
@@ -175,4 +175,3 @@
 //www.writersroomofboston.org/feed/
 //www.zanj.org/feed/
 //wx1box.org/feed/
-//leahneukirchen.org/trivium/index.atom
