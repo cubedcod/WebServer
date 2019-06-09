@@ -194,7 +194,6 @@ class WebResource
       response_meta = {}
       status = nil
       updates = []
-      cached = cache.e && cache.no_transform # TODO more HTTP headers. currently URI-versioned static assets are immutable
 
       # fetcher
       fetchURL = -> url {
@@ -254,6 +253,19 @@ class WebResource
             raise
           end
         end}
+
+      cached = if cache.e              # entry exists?
+                 if cache.no_transform # immutable always up to date
+                   true
+                 elsif (Time.now - cache.mtime) < 60 # reasonably fresh
+                   puts :cache_throttle
+                   true
+                 else
+                   false
+                 end
+               else
+                 false
+               end
 
       unless OFFLINE || (cached && !no_cache)
         begin

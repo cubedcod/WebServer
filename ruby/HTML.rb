@@ -97,10 +97,10 @@ class WebResource
       {_: :table, class: :kv,
        c: t.map{|k,vs|
          type = k && k.R || '#untyped'.R
-         [:name,'uri',Type].member?(k) ? '' : [{_: :tr, name: type.fragment || type.basename,
-                                                c: [{_: :td, class: 'k', c: Markup[Type][type]},
-                                                    {_: :td, class: 'v', c: vs.justArray.map{|v|
-                                                       value k, v, env}.intersperse(' ')}]}, "\n"]}}
+         [{_: :tr, name: type.fragment || type.basename,
+           c: [{_: :td, class: 'k', c: Markup[Type][type]},
+               {_: :td, class: 'v', c: vs.justArray.map{|v|
+                  value k, v, env}.intersperse(' ')}]}, "\n"]}}
     end
 
     Markup['uri'] = -> uri, env=nil {uri.R}
@@ -308,6 +308,7 @@ sidebar [class^='side']    [id^='side']
       n = Nokogiri::HTML.parse readFile.to_utf8 # parse HTML
       # triplr host-binding
       if hostTriples = @r && Triplr[:HTML][@r['SERVER_NAME']]
+        send(hostTriples, n){|s,p,o| puts s,p,o}
         send hostTriples, n, &f
       end
 

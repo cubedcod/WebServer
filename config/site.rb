@@ -194,14 +194,25 @@ class WebResource
 
     IGgraph = /^window._sharedData = /
     def IG doc
-      
       doc.css('script').map{|script|
         if script.inner_text.match? IGgraph
           graph = ::JSON.parse script.inner_text.sub(IGgraph,'')[0..-2]
           HTML.webizeHash(graph){|h|
-            puts :_________________,::JSON.pretty_generate h
+            if h['shortcode']
+              s = 'https://www.instagram.com/p/' + h['shortcode']
+              
+              yield s, Image, h['display_url'].R if h['display_url']
+              h['owner'].do{|o|
+                yield s, Creator, ('https://www.instagram.com/' + o['username']).R
+                yield s, To, 'https://www.instagram.com/'.R
+              }
+              h['edge_media_to_caption']['edges'][0]['node']['text'].do{|t|
+                yield s, Abstract, CGI.escapeHTML(t)
+              } rescue nil
+
+            end
+#            puts :_________________, ::JSON.pretty_generate(h)
           }
-#          puts ::JSON.pretty_generate graph
         end}
     end
 
