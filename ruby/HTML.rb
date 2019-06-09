@@ -244,7 +244,7 @@ class WebResource
           keyval v, env
         end
       elsif v.class == WebResource
-        v.data({label: v.query || v.basename || v.path || v.host || v})
+        v.data({label: CGI.escapeHTML((v.query || v.basename || v.path || v.host || v)[0..99])})
       else # undefined
         CGI.escapeHTML v.to_s
       end

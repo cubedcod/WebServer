@@ -2,21 +2,17 @@
 announce full updates or existence thereof to curious peers - irvc3, crdt, solid-websocket, matrix etc
 eliminate cache dir
 expand cached-shortURLs at storage and presentation/loading time
-ad <a id> when missing in extracted-content
 index-browsing for cached remote containers
 troff triplr - .1, .2, (sslsplit/proxy docs)
 Searchbox host-specific URL templates
 touch caches to match date in HTTP header
 mp3 images
 move toplevel cache file into host-dir
-throttle cache updates (for HTML pages.. use HTTP meta or override?)
-images/video in twitter search https://twitter.com/search?f=images&vertical=default&q=%22Red%20line%22%20derailment
 random fileset
 graph viz
 dokieli / write ui
 webized server log
 pseudofeed from frontpage when can't be found  http://www.mysouthend.com/
-record POSTs for modification/replay/templating
 image hashing and hash-based linking
 bubble up HTML-extracted next/prev to HTTP headers https://www.google.com/search?q=corbett+crew+boston&gbv=1&prmd=ivns&ei=OdTEXPS5OLCKggeExqXoDA&start=10&sa=N
 /crt.sectigo.com/SectigoRSADomainValidationSecureServerCA.crt.cache: triplr for application/x-x509-ca-cert missing https://crt.sectigo.com/SectigoRSADomainValidationSecureServerCA.crt

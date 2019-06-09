@@ -6,7 +6,7 @@ class WebResource
        when /reddit.com$/
          '/www.reddit.com/r/' + (slug || parts[1]) + '/.sub'
        when /^twitter.com$/
-         '/twitter.com/' + (slug || parts[0]) + '/.following'
+         '/twitter.com/' + (slug || parts[0] || '') + '/.following'
        else
          '/feed/' + [host, *parts].join('.')
        end).R
