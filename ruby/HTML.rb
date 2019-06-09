@@ -308,7 +308,6 @@ sidebar [class^='side']    [id^='side']
     # HTML -> RDF
     def triplrHTML &f
       n = Nokogiri::HTML.parse readFile.to_utf8 # parse HTML
-
       # triplr host-binding
       if hostTriples = @r && Triplr[:HTML][@r['SERVER_NAME']]
         send hostTriples, n, &f

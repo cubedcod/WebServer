@@ -166,7 +166,7 @@ class WebResource
     end
     alias_method :env, :environment
 
-    def fetch rackResponse=true
+    def fetch rack_API=true
       # request metadata
       @r ||= {}
       head = HTTP.unmangle env
@@ -176,8 +176,10 @@ class WebResource
       head[:redirect] = false # don't internally redirect
 
       # locator
-      url = if suffix = ext.empty? && host.match?(/reddit.com$/) && !originUI && '.rss'
-              'https://' + (env['HTTP_HOST'] || host) + path + suffix + qs # added explicit-format suffix
+      url = if !rack_API
+              'https://' + host + path + qs
+            elsif suffix = ext.empty? && host.match?(/reddit.com$/) && !originUI && '.rss'
+              'https://' + (env['HTTP_HOST'] || host) + path + suffix + qs # new locator with format suffix
             else
               'https://' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + qs))
             end
@@ -287,7 +289,7 @@ class WebResource
         end
       end
 
-      return updates unless rackResponse
+      return updates unless rack_API
       if part
         [206, response_meta, [part]]
       elsif [401,403].member? status

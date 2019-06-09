@@ -154,11 +154,12 @@ class WebResource
 
     # Twitter
     HostGET['twitter.com'] = -> r {
-      if r.path == '/'
+      if !r.path || r.path == '/'
         sources = []
         r.subscriptions.shuffle.each_slice(18){|s|
-          sources << (Twitter + '/search?f=tweets&vertical=default&q=' + s.map{|u| 'from:' + u}.intersperse('+OR+').join).R }
-        r.graphResponse sources[0..0].map{|source|source.fetch false}.flatten
+          sources << (Twitter + '/search?f=tweets&vertical=default&q=' + s.map{|u| 'from:' + u}.intersperse('+OR+').join).R(r.env) }
+        r.graphResponse sources.map{|source|
+          source.fetch false}.flatten
       else
         r.remote
       end}
