@@ -1,17 +1,6 @@
 class WebResource
   module Feed
 
-    def subscribableSite?
-      case host
-      when /\.reddit.com$/
-        parts[0] == 'r'
-      when /twitter.com$/
-        parts.size > 0 && !%w{new search}.member?(parts[0])
-      else
-        false
-      end
-    end
-
     def subscriptionFile slug=nil
       (case host
        when /reddit.com$/
@@ -19,7 +8,7 @@ class WebResource
        when /^twitter.com$/
          '/twitter.com/' + (slug || parts[0]) + '/.following'
        else
-         '/' + [host, *parts, '.subscribed'].join('/')
+         '/feed/' + [host, *parts].join('.')
        end).R
     end
 
@@ -208,9 +197,11 @@ class WebResource
       
       doc.css('script').map{|script|
         if script.inner_text.match? IGgraph
-          graph = ::JSON.parse script.inner_text.sub(dataHeader,'')[0..-2]
-          puts ::JSON.pretty_generate graph
-
+          graph = ::JSON.parse script.inner_text.sub(IGgraph,'')[0..-2]
+          HTML.webizeHash(graph){|h|
+            puts ::JSON.pretty_generate h
+          }
+#          puts ::JSON.pretty_generate graph
         end}
     end
 

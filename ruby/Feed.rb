@@ -44,15 +44,6 @@ class WebResource
       puts (Nokogiri::HTML.parse (open uri).read).css('[rel=alternate]').map{|u|join u.attr :href}.uniq
     end
 
-    def subscribable?
-      # feed MIME
-      return true if env[:feed]
-      # feed URL
-      return true if host && FeedURL['//' + host + path]
-      # site match
-      subscribableSite?
-    end
-
     def subscribe
       return if subscriptionFile.e
       puts "SUBSCRIBE https:/" + subscriptionFile.dirname

@@ -57,7 +57,7 @@ class WebResource
 
       # filtered graph -> HTML
       htmlGrep graph, q['q'] if @r[:grep]
-
+      subbed = subscribed?
       # Markup -> HTML
       HTML.render ["<!DOCTYPE html>\n\n",
                    {_: :html,
@@ -75,12 +75,8 @@ class WebResource
                          c: ["\n", link[:up, '&#9650;'], link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              unless localNode?
                                {class: :toolbox,
-                                c: [if subscribable?
-                                    s = subscribed?
-                                    {_: :a, id: :subscribe,
-                                     href: '/' + (s ? 'un' : '') + 'subscribe' + HTTP.qs({u: 'https://' + host + (@r['REQUEST_URI'] || path)}),
-                                     class: s ? :on : :off, c: 'subscribe' + (s ? 'd' : '')}
-                                    end]}
+                                c: {_: :a, id: :subscribe,
+                                     href: '/' + (subbed ? 'un' : '') + 'subscribe' + HTTP.qs({u: 'https://' + host + (@r['REQUEST_URI'] || path)}), class: subbed ? :on : :off, c: 'subscribe' + (subbed ? 'd' : '')}}
                              end,
                              if graph.empty?
                                HTML.keyval (HTML.webizeHash @r), @r # 404
@@ -186,7 +182,7 @@ class WebResource
         x.map{|n|render n}.join
       when WebResource
         render({_: :a, href: x.uri, id: x[:id][0] || ('link'+rand.to_s.sha2), class: x[:class][0],
-                c: x[:label][0] || (%w{gif ico jpg png webp}.member?(x.ext.downcase) ? {_: :img, src: x.uri} : CGI.escapeHTML(x.uri))})
+                c: x[:label][0] || (%w{gif ico jpg png webp}.member?(x.ext.downcase) ? {_: :img, src: x.uri} : CGI.escapeHTML(x.uri[0..99]))})
       when NilClass
         ''
       when FalseClass
@@ -245,38 +241,37 @@ class WebResource
           keyval v, env
         end
       elsif v.class == WebResource
-        v
+        v.data({label: v.query || v.basename || v.path || v.host || v})
       else # undefined
         CGI.escapeHTML v.to_s
       end
     end
 
-    def self.webizeValue v
+    def self.webizeValue v, &y
       case v.class.to_s
       when 'Hash'
-        HTML.webizeHash v
+        webizeHash v, &y
       when 'String'
-        HTML.webizeString v
+        webizeString v, &y
       when 'Array'
-        v.map{|_v| HTML.webizeValue _v }
+        v.map{|_v| webizeValue _v, &y }
       else
         v
       end
     end
 
-    def self.webizeHash h
+    def self.webizeHash h, &y
       u = {}
+      yield h if h['__typename']
       h.map{|k,v|
-        u[k] = HTML.webizeValue v}
+        u[k] = webizeValue v, &y}
       u
     end
 
-    def self.webizeString str
+    def self.webizeString str, &y
       if str.match? /^(http|\/)\S+$/
         if str.match? /\.(jpg|png|webp)/i
           {'uri' => str, Type => Image.R}
-        elsif str.match? /afs-prod\/media/
-          {'uri' => str + '3000.jpeg', Type => Image.R}
         else
           str.R
         end
