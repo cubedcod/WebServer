@@ -301,7 +301,7 @@ class WebResource
 aside   [class*='aside']   [id*='aside']
 footer  [class*='footer']  [id*='footer']
 header  [class*='header']  [id*='header'] [class*='Header'] [id*='Header']
-nav     [class*='nav']     [id*='nav']
+nav     [class^='nav']     [id^='nav']
 sidebar [class^='side']    [id^='side']
 }#.map{|sel| sel.sub /\]$/, ' i]'} #TODO see if Oga et al support case-insensitive attribute-selectors https://gitlab.com/yorickpeterse/oga
 
@@ -407,8 +407,9 @@ sidebar [class^='side']    [id^='side']
         end
         [*BasicGunk,*Gunk].map{|selector|
           body.css(selector).map{|sel|
-            sel.remove # strip site-chrome
-#            body.add_child sel.remove # move site-chrome to footer
+#            puts :______________________________, selector, sel
+            sel.remove # strip elements
+#            body.add_child sel.remove # move to footer
           }}
         yield uri, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
       end
