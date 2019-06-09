@@ -371,6 +371,7 @@ sidebar [class^='side']    [id^='side']
               'twitter:description' => Abstract,
               'twitter:image' => Image,
               'twitter:image:src' => Image,
+              'twitter:site' => Twitter,
               'twitter:title' => Title,
               'viewport' => :drop,
             }[k] || ('#' + k.gsub(' ','_'))
@@ -378,8 +379,7 @@ sidebar [class^='side']    [id^='side']
             case k
             when /lytics/
               k = :drop
-            when 'twitter:site'
-              k = Twitter
+            when Twitter
               v = (Twitter + '/' + v.sub(/^@/,'')).R
             when Abstract
               v = v.hrefs
