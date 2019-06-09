@@ -193,12 +193,14 @@ class WebResource
     end
 
     def Google doc
+      doc.css('a[aria-label^="Next"]').map{|a|
+        env[:links][:next] ||= a['href']
+      }
       doc.css('a[href^="/url"]').map{|a|
         if s = (HTTP.parseQs a['href'].R.query)['q']
-          puts "url #{s}"
           yield s, Type, Resource.R
           yield s, Abstract, a.inner_text.gsub(/<[^>]+>/,' ')
-          a.remove
+          #a.remove
         else
           puts "no URL found:" + a.to_s
         end
