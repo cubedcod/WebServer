@@ -203,12 +203,14 @@ class WebResource
           yield env['REQUEST_URI'], Content, HTML.render(HTML.keyval (HTML.webizeHash json), env)}}
     end
 
+    IGgraph = /^window._sharedData = /
     def IG doc
-      dataHeader = /^window._sharedData = /
+      
       doc.css('script').map{|script|
-        if script.inner_text.match? dataHeader
-          data = ::JSON.parse script.inner_text.sub(dataHeader,'')[0..-2]
-          yield env['REQUEST_URI'], Content, HTML.render(HTML.keyval (HTML.webizeHash data), env)
+        if script.inner_text.match? IGgraph
+          graph = ::JSON.parse script.inner_text.sub(dataHeader,'')[0..-2]
+          puts ::JSON.pretty_generate graph
+
         end}
     end
 
