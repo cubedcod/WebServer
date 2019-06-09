@@ -199,7 +199,7 @@ class WebResource
         if script.inner_text.match? IGgraph
           graph = ::JSON.parse script.inner_text.sub(IGgraph,'')[0..-2]
           HTML.webizeHash(graph){|h|
-            puts ::JSON.pretty_generate h
+            puts :_________________,::JSON.pretty_generate h
           }
 #          puts ::JSON.pretty_generate graph
         end}
