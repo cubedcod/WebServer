@@ -308,7 +308,7 @@ sidebar [class^='side']    [id^='side']
       n = Nokogiri::HTML.parse readFile.to_utf8 # parse HTML
       # triplr host-binding
       if hostTriples = @r && Triplr[:HTML][@r['SERVER_NAME']]
-        send(hostTriples, n){|s,p,o| puts s,p,o}
+        #send(hostTriples, n){|s,p,o| puts s,p,o}
         send hostTriples, n, &f
       end
 
@@ -405,9 +405,8 @@ sidebar [class^='side']    [id^='side']
         end
         [*BasicGunk,*Gunk].map{|selector|
           body.css(selector).map{|sel|
-#            puts :______________________________, selector, sel
             sel.remove # strip elements
-#            body.add_child sel.remove # move to footer
+#            body.add_child sel.remove # move element to footer
           }}
         yield uri, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
       end

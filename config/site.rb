@@ -192,8 +192,21 @@ class WebResource
           yield env['REQUEST_URI'], Content, HTML.render(HTML.keyval (HTML.webizeHash json), env)}}
     end
 
+    def Google doc
+      doc.css('a[href^="/url"]').map{|a|
+        if s = (HTTP.parseQs a['href'].R.query)['q']
+          puts "url #{s}"
+          yield s, Type, Resource.R
+          yield s, Abstract, a.inner_text.gsub(/<[^>]+>/,' ')
+          a.remove
+        else
+          puts "no URL found:" + a.to_s
+        end
+      }
+    end
+
     IGgraph = /^window._sharedData = /
-    def IG doc
+    def Instagram doc
       doc.css('script').map{|script|
         if script.inner_text.match? IGgraph
           graph = ::JSON.parse script.inner_text.sub(IGgraph,'')[0..-2]
@@ -216,7 +229,7 @@ class WebResource
         end}
     end
 
-    def tweets doc
+    def Twitter doc
       %w{grid-tweet tweet}.map{|tweetclass|
       doc.css('.' + tweetclass).map{|tweet|
         s = Twitter + (tweet.css('.js-permalink').attr('href') || tweet.attr('data-permalink-path'))
@@ -243,7 +256,7 @@ class WebResource
           yield s, Image, img.attr('src').to_s.R}}}
     end
 
-    def youtube doc
+    def YouTube doc
       if env['REQUEST_PATH'] == '/watch'
         s = 'https://www.youtube.com' + env['REQUEST_URI']
         yield s, Video, s.R
@@ -253,9 +266,10 @@ class WebResource
     Triplr[:HTML] = {
       'apnews.com' => :AP,
       'www.apnews.com' => :AP,
-      'www.instagram.com' => :IG,
-      'twitter.com' => :tweets,
-      'www.youtube.com' => :youtube,
+      'www.google.com' => :Google,
+      'www.instagram.com' => :Instagram,
+      'twitter.com' => :Twitter,
+      'www.youtube.com' => :YouTube,
     }
 
   end
