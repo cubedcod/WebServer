@@ -7,7 +7,7 @@
 #subscribe.on  {color: #000; background-color: #fff}
 #up, #down {display: block}
 .bold {font-weight: bold; font-size: 1.1em}
-.post {border: .08em solid #444; background-color: #000; color: #fff; border-radius: .38em}
+.post {background-color: #000; color: #fff; border-radius: .38em}
 .toolbox {position: fixed; top: 0; right: 0; z-index: 1}
 .tree > .label {font-size: .8em}
 .tree > a.label {color: #ccc}
@@ -27,7 +27,6 @@ div.md {float: left}
 h1, h2, h3, h4, h5, h6 {}
 img, video {max-width: 100%}
 img.thumb, svg {max-width: 28em}
-p, .post {max-width: 120ex; margin: .08em}
 pre {white-space: pre-wrap}
 table {margin: 0}
 table, div, a {display: inline-block}

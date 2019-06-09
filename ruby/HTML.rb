@@ -2,31 +2,30 @@
 class WebResource
   module HTML
 
-    # Markup -> HTML
-    def self.render x
-      case x
-      when String
-        x
-      when Hash # element
-        void = [:img, :input, :link, :meta].member? x[:_]
-        '<' + (x[:_] || 'div').to_s +                        # open
-          (x.keys - [:_,:c]).map{|a|                         # attr name
-          ' ' + a.to_s + '=' + "'" + x[a].to_s.chars.map{|c| # attr value
-            {"'"=>'%27', '>'=>'%3E', '<'=>'%3C'}[c]||c}.join + "'"}.join +
-          (void ? '/' : '') + '>' + (render x[:c]) +         # children
-          (void ? '' : ('</'+(x[:_]||'div').to_s+'>'))       # close
-      when Array
-        x.map{|n|render n}.join
-      when WebResource
-        render({_: :a, href: x.uri, id: x[:id][0] || ('link'+rand.to_s.sha2), class: x[:class][0],
-                c: x[:label][0] || (%w{gif ico jpg png webp}.member?(x.ext.downcase) ? {_: :img, src: x.uri} : CGI.escapeHTML(x.uri))})
-      when NilClass
-        ''
-      when FalseClass
-        ''
-      else
-        CGI.escapeHTML x.to_s
-      end
+    SiteCSS = ConfDir.join('site.css').read
+    SiteJS  = ConfDir.join('site.js').read
+
+    def self.clean body
+      # parse
+      html = Nokogiri::HTML.fragment body
+      # strip nodes
+      %w{iframe link[rel='stylesheet'] style link[type='text/javascript'] link[as='script'] script}.map{|s| html.css(s).remove}
+      # strip Javascript and tracker images
+      html.css('a[href^="javascript"]').map{|a| a.remove }
+      html.css('img[src*="scorecardresearch"]').map{|img| img.remove }
+      # move CSS background-image to src attribute
+      html.css('[style^="background-image"]').map{|node|
+        node['style'].match(/url\('([^']+)'/).do{|url|
+          node.add_child "<img src=\"#{url[1]}\">"}}
+      # find nonstandard src attributes: assume canonical is placeholder if both exist
+      html.traverse{|e|
+        e.attribute_nodes.map{|a|
+          e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-menuimg data-native-src data-original data-src data-src1}.member? a.name
+          e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
+          # strip attributes
+          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor height layout ping role style tabindex target width}.member?(a.name)}}
+      # serialize
+      html.to_xhtml(:indent => 0)
     end
 
     def self.colorize k, bg = true
@@ -34,44 +33,7 @@ class WebResource
       "#{bg ? 'color' : 'background-color'}: black; #{bg ? 'background-' : ''}color: #{'#%06x' % (rand 16777216)}"
     end
 
-    def self.webizeValue v
-      case v.class.to_s
-      when 'Hash'
-        HTML.webizeHash v
-      when 'String'
-        HTML.webizeString v
-      when 'Array'
-        v.map{|_v| HTML.webizeValue _v }
-      else
-        v
-      end
-    end
-
-    def self.webizeHash h
-      u = {}
-      h.map{|k,v|
-        u[k] = HTML.webizeValue v}
-      u
-    end
-
-    def self.webizeString str
-      if str.match? /^(http|\/)\S+$/
-        if str.match? /\.(jpg|png|webp)/i
-          {'uri' => str, Type => Image.R}
-        elsif str.match? /afs-prod\/media/
-          {'uri' => str + '3000.jpeg', Type => Image.R}
-        else
-          str.R
-        end
-      else
-        str
-      end
-    end
-
-    SiteCSS = ConfDir.join('site.css').read
-    SiteJS  = ConfDir.join('site.js').read
-
-    # Graph -> HTML
+    # JSON -> HTML
     def htmlDocument graph = {}
 
       # HEAD links
@@ -130,6 +92,16 @@ class WebResource
                                                        )[graph], @r
                              end,
                              link[:down,'&#9660;']]}]}]
+    end
+
+    def self.keyval t, env
+      {_: :table, class: :kv,
+       c: t.map{|k,vs|
+         type = k && k.R || '#untyped'.R
+         [:name,'uri',Type].member?(k) ? '' : [{_: :tr, name: type.fragment || type.basename,
+                                                c: [{_: :td, class: 'k', c: Markup[Type][type]},
+                                                    {_: :td, class: 'v', c: vs.justArray.map{|v|
+                                                       value k, v, env}.intersperse(' ')}]}, "\n"]}}
     end
 
     Markup['uri'] = -> uri, env=nil {uri.R}
@@ -197,14 +169,31 @@ class WebResource
         end
       end}
 
-    def self.keyval t, env
-      {_: :table, class: :kv,
-       c: t.map{|k,vs|
-         type = k && k.R || '#untyped'.R
-         [:name,'uri',Type].member?(k) ? '' : [{_: :tr, name: type.fragment || type.basename,
-                                                c: [{_: :td, class: 'k', c: Markup[Type][type]},
-                                                    {_: :td, class: 'v', c: vs.justArray.map{|v|
-                                                       value k, v, env}.intersperse(' ')}]}, "\n"]}}
+    # Markup -> HTML
+    def self.render x
+      case x
+      when String
+        x
+      when Hash # element
+        void = [:img, :input, :link, :meta].member? x[:_]
+        '<' + (x[:_] || 'div').to_s +                        # open
+          (x.keys - [:_,:c]).map{|a|                         # attr name
+          ' ' + a.to_s + '=' + "'" + x[a].to_s.chars.map{|c| # attr value
+            {"'"=>'%27', '>'=>'%3E', '<'=>'%3C'}[c]||c}.join + "'"}.join +
+          (void ? '/' : '') + '>' + (render x[:c]) +         # children
+          (void ? '' : ('</'+(x[:_]||'div').to_s+'>'))       # close
+      when Array
+        x.map{|n|render n}.join
+      when WebResource
+        render({_: :a, href: x.uri, id: x[:id][0] || ('link'+rand.to_s.sha2), class: x[:class][0],
+                c: x[:label][0] || (%w{gif ico jpg png webp}.member?(x.ext.downcase) ? {_: :img, src: x.uri} : CGI.escapeHTML(x.uri))})
+      when NilClass
+        ''
+      when FalseClass
+        ''
+      else
+        CGI.escapeHTML x.to_s
+      end
     end
 
     def self.tabular graph, env
@@ -262,27 +251,38 @@ class WebResource
       end
     end
 
-    def self.clean body
-      # parse
-      html = Nokogiri::HTML.fragment body
-      # strip nodes
-      %w{iframe link[rel='stylesheet'] style link[type='text/javascript'] link[as='script'] script}.map{|s| html.css(s).remove}
-      # strip Javascript and tracker images
-      html.css('a[href^="javascript"]').map{|a| a.remove }
-      html.css('img[src*="scorecardresearch"]').map{|img| img.remove }
-      # move CSS background-image to src attribute
-      html.css('[style^="background-image"]').map{|node|
-        node['style'].match(/url\('([^']+)'/).do{|url|
-          node.add_child "<img src=\"#{url[1]}\">"}}
-      # find nonstandard src attributes: assume canonical is placeholder if both exist
-      html.traverse{|e|
-        e.attribute_nodes.map{|a|
-          e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-menuimg data-native-src data-original data-src data-src1}.member? a.name
-          e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
-          # strip attributes
-          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor height layout ping role style tabindex target width}.member?(a.name)}}
-      # serialize
-      html.to_xhtml(:indent => 0)
+    def self.webizeValue v
+      case v.class.to_s
+      when 'Hash'
+        HTML.webizeHash v
+      when 'String'
+        HTML.webizeString v
+      when 'Array'
+        v.map{|_v| HTML.webizeValue _v }
+      else
+        v
+      end
+    end
+
+    def self.webizeHash h
+      u = {}
+      h.map{|k,v|
+        u[k] = HTML.webizeValue v}
+      u
+    end
+
+    def self.webizeString str
+      if str.match? /^(http|\/)\S+$/
+        if str.match? /\.(jpg|png|webp)/i
+          {'uri' => str, Type => Image.R}
+        elsif str.match? /afs-prod\/media/
+          {'uri' => str + '3000.jpeg', Type => Image.R}
+        else
+          str.R
+        end
+      else
+        str
+      end
     end
 
   end
