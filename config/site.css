@@ -7,19 +7,18 @@
 #subscribe.on  {color: #000; background-color: #fff}
 #up, #down {display: block}
 .bold {font-weight: bold; font-size: 1.1em}
-.post {background-color: #000; color: #fff; border-radius: .38em}
+.post {background-color: #000; color: #fff; max-width: 80em; margin: .08em; border: .08em solid #444; border-radius: .38em}
 .toolbox {position: fixed; top: 0; right: 0; z-index: 1}
 .tree > .label {font-size: .8em}
 .tree > a.label {color: #ccc}
 .tree > span.label {display: none}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
-a {overflow: hidden; text-decoration: none; max-width:32em; background-color: #eee; color: #000}
-a.date {float: right; background-color: #000; color: #666; font-size: .8em; margin-right: .1em}
+a {text-decoration: none; color: #ddd; border: .08em solid #333}
+a.date {float: right; background-color: #000; color: #888; font-size: .8em; margin-right: .1em}
 a.id {float: right; background-color: #000; color: #333}
-a.title {float: left; vertical-align: top; background-color: #aaa; color: #000; font-size: 1.1em; font-weight: bold; border-radius: .3em 0 .3em 0}
+a.title {float: left; vertical-align: top; background-color: #aaa; color: #000; font-size: 1.1em; font-weight: bold }
 a.title:visited {background-color: #000; color: #aaa}
 a.link, .thumb {background-color: #fff; color: #000}
-a:visited {background-color: cyan; color: #000}
 body {font-family: sans-serif; margin: 0 2em 0 2em}
 body, pre, p, li, time, tr[name="abstract"] > td.v, td.v span {background-color: #000; color: #fff}
 div, td {padding: 0}
@@ -27,6 +26,7 @@ div.md {float: left}
 h1, h2, h3, h4, h5, h6 {}
 img, video {max-width: 100%}
 img.thumb, svg {max-width: 28em}
+p {margin: 0}
 pre {white-space: pre-wrap}
 table {margin: 0}
 table, div, a {display: inline-block}
@@ -35,4 +35,5 @@ table.kv, .tree {border-radius: .2em}
 td.k > a {background-color: #111; color: #fff}
 td.k {border-radius: .2em 0 0 .2em; background-color: #222; color: #fff; text-align: right}
 td.v div {border: .05em solid #333}
+td.v a {border-width: 0 0 0 .1em; border-style: solid; border-color: #0f0; padding-left: .08em}
 td.v {border-width: 0 0 .08em 0; border-style: solid; border-color: #222}
