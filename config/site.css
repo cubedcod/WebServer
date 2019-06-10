@@ -39,6 +39,6 @@ table.kv, .tree {border-radius: .2em}
 table.tabular td {vertical-align: top}
 td.k > a {background-color: #111; color: #fff}
 td.k {border-radius: .2em 0 0 .2em; background-color: #222; color: #fff; max-width: 32ex; overflow: hidden}
-td.v a {border-width: 0 0 .05em .1em; border-style: solid; border-color: #0f0; padding-left: .08em}
+td.v a {border-width: 0 0 0 .1em; border-style: solid; border-color: #0f0; background-color: #5b5; color: #000; padding-left: .08em}
 td.v div {border: .05em solid #333}
 td.v {border-width: 0 0 .08em 0; border-style: solid; border-color: #222}

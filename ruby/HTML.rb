@@ -33,7 +33,7 @@ class WebResource
           end
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
           # strip attributes
-          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor height layout ping role style tabindex target width}.member?(a.name)}}
+          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor class height layout ping role style tabindex target width}.member?(a.name)}}
 
       html.to_xhtml(:indent => 0)
     end
@@ -52,11 +52,16 @@ class WebResource
       @r[:colors] ||= {}
 
       # title
-      title = graph[(path||'')+'#this'].do{|r|
-        r[Title].justArray[0]} || # title in RDF
-              [*(path||'').split('/'), q['q'], q['f']].
-                map{|e|
-        e && URI.unescape(e)}.join(' ') # path-derived title
+      titleRes = [
+        '#this', '',
+        path && (path + '#this'), path,
+        host && !path && ('//' + host + '#this'),
+        host && !path && ('//' + host),
+        host && path && ('https://' + host + path + '#this'),
+        host && path && ('https://' + host + path),
+        host && path && ('//' + host + path + '#this'),
+        host && path && ('//' + host + path)
+      ].compact.find{|u| graph[u] && !graph[u][Title].justArray.empty?}
 
       # header (k,v) -> HTML
       link = -> key, displayname {
@@ -73,7 +78,7 @@ class WebResource
                     c: ["\n\n",
                         {_: :head,
                          c: [{_: :meta, charset: 'utf-8'},
-                             {_: :title, c: title},
+                            ({_: :title, c: CGI.escapeHTML(graph[titleRes][Title].justArray.map(&:to_s).join ' ')} if titleRes),
                              {_: :style, c: ["\n", SiteCSS]}, "\n",
                              {_: :script, c: ["\n", SiteJS]}, "\n",
                              *@r[:links].do{|links|
@@ -326,13 +331,12 @@ sidebar [class^='side']    [id^='side']
 
     # HTML -> RDF
     def triplrHTML &f
+      subject = ''
+
       n = Nokogiri::HTML.parse readFile.to_utf8 # parse HTML
       # triplr host-binding
       if hostTriples = @r && Triplr[:HTML][@r['SERVER_NAME']]
         send hostTriples, n, &f
-        #send(hostTriples, n){|s,p,o|
-        # puts [s,p,o].join "\t"
-        # yield s,p,o}
       end
 
       # JSON-LD
@@ -361,7 +365,7 @@ sidebar [class^='side']    [id^='side']
               'shortcut icon' => Image,
               'stylesheet' => :drop,
             }[k] || ('#' + k.gsub(' ','_'))
-            yield uri, k, v.R unless k == :drop
+            yield subject, k, v.R unless k == :drop
           }}}
 
       # <meta>
@@ -390,7 +394,7 @@ sidebar [class^='side']    [id^='side']
               'sailthru.secondary_image' => Image,
               'sailthru.title' => Title,
               'thumbnail' => Image,
-              'twitter:creator' => Creator,
+              'twitter:creator' => Twitter,
               'twitter:description' => Abstract,
               'twitter:image' => Image,
               'twitter:image:src' => Image,
@@ -410,31 +414,36 @@ sidebar [class^='side']    [id^='side']
               v = HTML.webizeString v
             end
 
-            yield uri, k, v unless k == :drop
+            yield subject, k, v unless k == :drop
           }}}
 
       # <title>
-      n.css('title').map{|title| yield uri, Title, title.inner_text }
+      n.css('title').map{|title| yield subject, Title, title.inner_text }
 
       # <video>
       ['video[src]', 'video > source[src]'].map{|vsel|
         n.css(vsel).map{|v|
-          yield uri, Video, v.attr('src').R }}
+          yield subject, Video, v.attr('src').R }}
 
       # <body>
-      if (body = n.css('body')[0]) && !(@r && @r['SERVER_NAME'] || host || '').match?(/twitter.com/)
-        %w{content-body entry-content}.map{|bsel|
-          if content = body.css('.' + bsel)[0]
-            yield uri, Content, HTML.clean(content.inner_html)
-          end}
-        [*BasicGunk,*Gunk].map{|selector|
-          body.css(selector).map{|sel|
-            sel.remove # strip elements
-#            body.add_child sel.remove # move element to footer
-          }}
-        yield uri, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
+      unless (@r && @r['SERVER_NAME'] || host || '').match?(/twitter.com/)
+        if body = n.css('body')[0]
+          %w{content-body entry-content}.map{|bsel|
+            if content = body.css('.' + bsel)[0]
+              yield subject, Content, HTML.clean(content.inner_html)
+            end}
+          [*BasicGunk,*Gunk].map{|selector|
+            body.css(selector).map{|sel|
+              sel.remove # strip elements
+              #            body.add_child sel.remove # move element to footer
+            }}
+          yield subject, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
+        else
+          puts "no <body> found in HTML #{uri}"
+          n.css('head').remove
+          yield subject, Content, HTML.clean(n.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
+        end
       end
-
     end
   end
   include Webize

@@ -260,7 +260,7 @@ class WebResource
                  elsif (Time.now - cache.mtime) < 60 # reasonably fresh
                    puts :cache_throttle
                    true
-                 else
+                 else # TODO more HTTP header checks
                    false
                  end
                else
