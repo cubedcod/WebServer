@@ -87,15 +87,8 @@ class WebResource
     (0..3).map{|i|HostGET["encrypted-tbn#{i}.gstatic.com"] = -> r {r.noexec}}
     HostGET['ajax.googleapis.com'] = HostGET['cdnjs.cloudflare.com'] = -> r {r.fetch}     # CDN with mainstream JS libraries, allow
     HostGET['feedproxy.google.com'] = HostGET['storage.googleapis.com'] = -> r {r.noexec} # CDN with mystery JS, filter
-    HostGET['maps.googleapis.com'] = -> r {
-      case r.env['HTTP_TYPE']
-      when /dropURI/
-        r.drop
-      else
-        r.fetch
-      end}
     HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.drop : r.noexec}
-    HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['www.google.com'] = -> req {
+    HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['maps.googleapis.com'] = HostGET['www.google.com'] = -> req {
       mode = req.parts[0]
       if %w{complete searchdomaincheck}.member? mode
         req.drop
@@ -103,15 +96,18 @@ class WebResource
         req.env['HTTP_USER_AGENT'] = DesktopUA
         req.fetch
       else
-        req.fetch.do{|status, head, body|
-          case status
-          when 403
-            # goog blocked by a middlebox, try DDG
-            [302, {'Location' => 'https://duckduckgo.com/' + req.qs}, []]
-          else
-            [status, head, body]
-          end
-        }
+        case req.env['HTTP_TYPE']
+        when /dropURI/
+          req.drop
+        else
+          req.fetch.do{|status, head, body|
+            case status
+            when 403 # goog blocked by a middlebox, try DDG
+              [302, {'Location' => 'https://duckduckgo.com/' + req.qs}, []]
+            else
+              [status, head, body]
+            end}
+        end
       end}
     HostGET['www.googleadservices.com'] = -> r {r.q['adurl'] ? [301, {'Location' => r.q['adurl']},[]] : r.drop}
 
@@ -156,15 +152,13 @@ class WebResource
     # YouTube
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
-      if !mode || %w{browse_ajax c channel guide_ajax heartbeat iframe_api live_chat playlist signin watch_videos}.member?(mode)
+      if %w{browse_ajax c channel guide_ajax heartbeat iframe_api live_chat playlist signin watch_videos}.member? mode
         r.fetch
-      elsif mode == 'attribution_link'
-        [301, {'Location' =>  r.q['u']}, []]
-      elsif %w{embed feed get_video_info results user watch yts}.member? mode
+      elsif !mode || %w{embed feed get_video_info results user watch yts}.member?(mode)
         r.env['HTTP_USER_AGENT'] = DesktopUA
         r.fetch
-      elsif mode == 'redirect'
-        [301, {'Location' =>  r.q['q']},[]]
+      elsif %w{attribution_link redirect}.member? mode
+        [301, {'Location' =>  r.q['q'] || r.q['u']},[]]
       else
         r.drop
       end}
@@ -226,7 +220,7 @@ class WebResource
               } rescue nil
 
             end
-#            puts :_________________, ::JSON.pretty_generate(h)
+            puts :_________________, ::JSON.pretty_generate(h)
           }
         end}
     end
