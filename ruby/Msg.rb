@@ -218,7 +218,12 @@ class WebResource
                  end
       {class: :post,
        c: [{_: :a, id: 't'+rand.to_s.sha2, class: :id, c: '☚', href: location},
-           titles.map{|title| Markup[Title][title,env,uri]},
+           titles.map{|title|
+             title = title.to_s.sub(/\/u\/\S+ on /,'')
+             unless env[:title] == title
+               env[:title] = title
+               [{_: :a, id: 't'+rand.to_s.sha2, class: :title, href: uri, c: CGI.escapeHTML(title)}, ' ']
+             end},
            (Markup[Date][date] if date),
            images.map{|i| Markup[Image][i,env]},
            {_: :table, class: :fromTo,

@@ -117,13 +117,6 @@ class WebResource
         CGI.escapeHTML t.to_s
       end}
 
-    Markup[Title] = -> raw, env, uri='' {
-      title = raw.to_s.sub(/\/u\/\S+ on /,'')
-      unless env[:title] == title
-        env[:title] = title
-        [{_: :a, id: 't'+rand.to_s.sha2, class: :title, href: uri, c: CGI.escapeHTML(title)}, ' ']
-      end}
-
     Markup[Creator] = -> c, env, uris=nil {
       if c.respond_to? :uri
         u = c.R
