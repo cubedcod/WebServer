@@ -189,14 +189,21 @@ class WebResource
     end
 
     def self.tabular graph, env
-      keys = graph.map{|uri,resource| resource.keys}.flatten.uniq - [Content, DC+'hasFormat', Identifier, Mtime, Type]
+      keys = graph.map{|uri,resource| resource.keys}.flatten.uniq - [Content, DC+'hasFormat', Identifier, Mtime, SIOC+'reply_of', Title, Type]
       {_: :table, class: :tabular,
        c: [{_: :tr, c: keys.map{|p|
               {_: :td, class: 'k', c: Markup[Type][p.R]}}},
            graph.map{|uri,resource|
              [{_: :tr, c: keys.map{|k|
-                {_: :td, class: 'v', c: resource[k].justArray.map{|v|
-                   value k, v, env }}}},
+                 {_: :td, class: 'v',
+                  c: if k=='uri'
+                   {_: :a, href: uri, id: 'r' + rand.to_s.sha2, class: :title,
+                    c: [resource[Title].justArray.map{|t| CGI.escapeHTML t.to_s },
+                        {_: :span, class: :uri, c: CGI.escapeHTML(uri)}]}
+                 else
+                   resource[k].justArray.map{|v|
+                     value k, v, env }
+                  end}}},
               ({_: :tr, c: {_: :td, colspan: keys.size, c: resource[Content]}} if resource[Content] && env['QUERY_STRING'] != 'head')]}]}
     end
 

@@ -18,6 +18,7 @@ a.date {float: right; background-color: #000; color: #888; font-size: .8em; marg
 a.id {float: right; background-color: #000; color: #333}
 a.title {float: left; vertical-align: top; background-color: #aaa; color: #000; font-size: 1.1em; font-weight: bold }
 a.title:visited {background-color: #000; color: #aaa}
+a.title > span.uri {font-size: .8em ; font-weight: normal}
 a.link, .thumb {background-color: #fff; color: #000}
 body {font-family: sans-serif; margin: 0 2em 0 2em}
 body, pre, p, li, time, tr[name="abstract"] > td.v, td.v span {background-color: #000; color: #fff}
