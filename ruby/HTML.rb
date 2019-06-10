@@ -83,8 +83,8 @@ class WebResource
                              end,
                              if graph.empty?
                                HTML.keyval (HTML.webizeHash @r), @r # 404
-                             elsif qs == '?head' || (localNode? && directory? && env['REQUEST_PATH'][-1] != '/') # tabular overview
-                               HTML.tabular graph, @r
+                             elsif q['view']=='table' || (localNode? && directory? && env['REQUEST_PATH'][-1] != '/')
+                               HTML.tabular graph, @r      # table layout
                              else
                                HTML.tree (Group[q['g']] || # custom layout
                                           Group['tree']    # graph -> tree
@@ -196,7 +196,7 @@ class WebResource
            graph.map{|uri,resource|
              [{_: :tr, c: keys.map{|k|
                  {_: :td, class: 'v',
-                  c: if k=='uri'
+                  c: if k=='uri' # title(s) with URI subscript
                    {_: :a, href: uri, id: 'r' + rand.to_s.sha2, class: :title,
                     c: [resource[Title].justArray.map{|t| CGI.escapeHTML t.to_s }, '<br>',
                         {_: :span, class: :uri, c: CGI.escapeHTML(uri)}]}
@@ -204,7 +204,7 @@ class WebResource
                    resource[k].justArray.map{|v|
                      value k, v, env }
                   end}}},
-              ({_: :tr, c: {_: :td, colspan: keys.size, c: resource[Content]}} if resource[Content] && env['QUERY_STRING'] != 'head')]}]}
+              ({_: :tr, c: {_: :td, colspan: keys.size, c: resource[Content]}} if resource[Content] && !env[:query].has_key?('head'))]}]}
     end
 
     def self.tree t, env, name=nil
