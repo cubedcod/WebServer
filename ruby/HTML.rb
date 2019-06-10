@@ -189,7 +189,7 @@ class WebResource
     end
 
     def self.tabular graph, env
-      keys = graph.map{|uri,resource| resource.keys}.flatten.uniq - [Content, DC+'hasFormat', Identifier, Mtime, SIOC+'reply_of', Title, Type]
+      keys = graph.map{|uri,resource| resource.keys}.flatten.uniq - [Content, DC+'hasFormat', Identifier, Mtime, SIOC+'reply_of', SIOC+'user_agent', Title, Type]
       {_: :table, class: :tabular,
        c: [{_: :tr, c: keys.map{|p|
               {_: :td, class: 'k', c: Markup[Type][p.R]}}},
@@ -198,7 +198,7 @@ class WebResource
                  {_: :td, class: 'v',
                   c: if k=='uri'
                    {_: :a, href: uri, id: 'r' + rand.to_s.sha2, class: :title,
-                    c: [resource[Title].justArray.map{|t| CGI.escapeHTML t.to_s },
+                    c: [resource[Title].justArray.map{|t| CGI.escapeHTML t.to_s }, '<br>',
                         {_: :span, class: :uri, c: CGI.escapeHTML(uri)}]}
                  else
                    resource[k].justArray.map{|v|
