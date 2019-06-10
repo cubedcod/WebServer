@@ -393,9 +393,10 @@ sidebar [class^='side']    [id^='side']
 
       # <body>
       if (body = n.css('body')[0]) && !(@r && @r['SERVER_NAME'] || host || '').match?(/twitter.com/)
-        if content = body.css('.entry-content')[0]
-          yield uri, Content, HTML.clean(content.inner_html)
-        end
+        %w{content-body entry-content}.map{|bsel|
+          if content = body.css('.' + bsel)[0]
+            yield uri, Content, HTML.clean(content.inner_html)
+          end}
         [*BasicGunk,*Gunk].map{|selector|
           body.css(selector).map{|sel|
             sel.remove # strip elements
