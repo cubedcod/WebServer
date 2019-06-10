@@ -82,7 +82,7 @@ class WebResource
       else
        puts "#{uri}: triplr for #{mime} missing" unless triplr
       end
-      doc.writeFile graph.to_json
+      doc.writeFile graph.to_json rescue puts("RDFize error for #{uri}")
     end
 
   end

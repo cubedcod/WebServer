@@ -7,8 +7,8 @@
 #subscribe.on  {color: #000; background-color: #fff}
 #up, #down {display: block}
 .bold {font-weight: bold; font-size: 1.1em}
-.group {margin-bottom: .5em; margin-right: .5em; border-radius: .2em .8em .8em .8em}
 .group > .label {font-size: 1.2em; font-weight: bold; color: #000}
+.group {margin-bottom: .5em; margin-right: .5em; border-radius: .2em .8em .8em .8em}
 .post {background-color: #000; color: #fff; max-width: 80em; margin: .08em; border: .08em solid #444; border-radius: .38em}
 .toolbox {position: fixed; top: 0; right: 0; z-index: 1}
 .tree > .label {font-size: .8em}
@@ -18,11 +18,10 @@
 a {text-decoration: none; color: #fff; background-color: #000; border: .08em solid #333}
 a.date {float: right; background-color: #000; color: #888; font-size: .8em; margin-right: .1em}
 a.id {float: right; background-color: #000; color: #333}
+a.link, .thumb {background-color: #fff; color: #000}
+a.title > span.uri {font-size: .8em ; font-weight: normal}
 a.title {float: left; vertical-align: top; background-color: #aaa; color: #000; font-size: 1.1em; font-weight: bold }
 a.title:visited {background-color: #000; color: #aaa}
-a.title > span.uri {font-size: .8em ; font-weight: normal}
-a.link, .thumb {background-color: #fff; color: #000}
-a.link {font-size: .92em}
 body {font-family: sans-serif; margin: 0 2em 0 2em}
 body, pre, p, li, time, tr[name="abstract"] > td.v, td.v span {background-color: #000; color: #fff}
 div, td {padding: 0}
@@ -35,10 +34,11 @@ pre {white-space: pre-wrap}
 table {margin: 0}
 table, div {display: inline-block}
 table.fromTo {float: left; border-spacing: 0}
+table.kv td.k {text-align: right}
 table.kv, .tree {border-radius: .2em}
 table.tabular td {vertical-align: top}
 td.k > a {background-color: #111; color: #fff}
-td.k {border-radius: .2em 0 0 .2em; background-color: #222; color: #fff; text-align: right}
-td.v div {border: .05em solid #333}
+td.k {border-radius: .2em 0 0 .2em; background-color: #222; color: #fff}
 td.v a {border-width: 0 0 0 .08em; border-style: solid; border-color: #0f0; padding-left: .08em}
+td.v div {border: .05em solid #333}
 td.v {border-width: 0 0 .08em 0; border-style: solid; border-color: #222}
