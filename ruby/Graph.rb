@@ -142,7 +142,11 @@ class WebResource
           extant  # return ref to body
         else # generate entity
           if format == 'text/html' # HTML
-            htmlDocument load set
+            if qs == '?data'
+              '/mashlib/browse.html'.R
+            else
+              htmlDocument load set
+            end
           elsif format == 'application/atom+xml' # feed
             renderFeed load set
           else # RDF formats
