@@ -204,6 +204,8 @@ class WebResource
 
     Markup[Post] = -> post , env {
       uri = post.uri.justArray[0]
+      post.delete 'uri'
+      post.delete Type
       titles = post.delete(Title).justArray.map(&:to_s).map(&:strip).uniq
       date = post.delete(Date).justArray[0]
       from = post.delete(From).justArray
@@ -231,7 +233,7 @@ class WebResource
                 c: [{_: :td, c: from.map{|f|Markup[Creator][f,env]}, class: :from},
                     {_: :td, c: '&rarr;'},
                     {_: :td, c: to.map{|f|Markup[Creator][f,env]}, class: :to}]}},
-           content, ((HTML.keyval post, env) unless post.keys.-(['uri',Type]).size < 1)]}}
+           content, ((HTML.keyval post, env) unless post.keys.size < 1)]}}
 
   end
 end
