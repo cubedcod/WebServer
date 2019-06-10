@@ -195,7 +195,6 @@ class WebResource < RDF::URI
       Video => '🎞',
     }
 
-    Group = {}
     Markup = {}
 
     Markup[Link] = -> ref, env=nil {

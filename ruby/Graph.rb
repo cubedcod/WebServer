@@ -165,7 +165,7 @@ class WebResource
   end
   module HTML
 
-    Group['tree'] = -> graph {
+    Treeize = -> graph {
       t = {}
       # visit nodes
       (graph.class==Array ? graph : graph.values).map{|node| re = node.R

@@ -233,21 +233,5 @@ class WebResource
                     {_: :td, c: to.map{|f|Markup[Creator][f,env]}, class: :to}]}},
            content, ((HTML.keyval post, env) unless post.keys.-(['uri',Type]).size < 1)]}}
 
-    # group by sender
-    Group['from'] = -> graph { Group['from-to'][graph,Creator] }
-
-    # group by recipient
-    Group['to'] = -> graph { Group['from-to'][graph,To] }
-
-    # group by sender or recipient
-    Group['from-to'] = -> graph,predicate {
-      users = {}
-      graph.values.map{|msg|
-        msg[predicate].justArray.map{|creator|
-          c = creator.to_s
-          users[c] ||= {name: c, Type => Container.R, Contains => {}}
-          users[c][Contains][msg.uri] = msg }}
-      users}
-
   end
 end

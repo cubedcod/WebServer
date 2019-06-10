@@ -31,8 +31,7 @@ class WebResource
       html.to_xhtml(:indent => 0)
     end
 
-    def self.colorize k, bg = true
-      return '' if !k || k.empty? || k.match(/^[0-9]+$/)
+    def self.colorize bg = true
       "#{bg ? 'color' : 'background-color'}: black; #{bg ? 'background-' : ''}color: #{'#%06x' % (rand 16777216)}"
     end
 
@@ -83,12 +82,26 @@ class WebResource
                              end,
                              if graph.empty?
                                HTML.keyval (HTML.webizeHash @r), @r # 404
-                             elsif q['view']=='table' || (localNode? && directory? && env['REQUEST_PATH'][-1] != '/')
+                             elsif q['view'] == 'table' || (localNode? && directory? && env['REQUEST_PATH'][-1] != '/')
                                HTML.tabular graph, @r      # table layout
+                             elsif q['group']
+                               p = q['group']
+                               case p
+                               when 'to'
+                                 p = To
+                               when 'from'
+                                 p = Creator
+                               end
+                               bins = {}
+                               graph.map{|uri, resource|
+                                 resource[p].justArray.map{|o|
+                                   o = o.to_s
+                                   bins[o] ||= []
+                                   bins[o].push resource}}
+                               bins.map{|bin, resources|
+                                 {class: :group, style: HTML.colorize, c: [{_: :span, class: :label, c: CGI.escapeHTML(bin)}, HTML.tabular(resources, @r)]}}
                              else
-                               HTML.tree (Group[q['g']] || # custom layout
-                                          Group['tree']    # graph -> tree
-                                                       )[graph], @r
+                               HTML.tree Treeize[graph], @r # tree layout
                              end,
                              link[:down,'&#9660;']]}]}]
     end
@@ -126,7 +139,7 @@ class WebResource
                u.host.do{|h|h.sub(/\.com$/,'')} ||
                'user'
 
-        color = env[:colors][name] ||= (HTML.colorize name)
+        color = env[:colors][name] ||= HTML.colorize
         {_: :a, id: 'a'+rand.to_s.sha2, class: :creator, style: color, href: uris.justArray[0] || c.uri, c: name}
       else
         CGI.escapeHTML (c||'')
@@ -178,7 +191,7 @@ class WebResource
         x.map{|n|render n}.join
       when WebResource
         render({_: :a, href: x.uri, id: x[:id][0] || ('link'+rand.to_s.sha2), class: x[:class][0],
-                c: x[:label][0] || (%w{gif ico jpg png webp}.member?(x.ext.downcase) ? {_: :img, src: x.uri} : CGI.escapeHTML(x.uri[0..99]))})
+                c: x[:label][0] || (%w{gif ico jpg png webp}.member?(x.ext.downcase) ? {_: :img, src: x.uri} : CGI.escapeHTML(x.uri[0..64]))})
       when NilClass
         ''
       when FalseClass
@@ -189,17 +202,18 @@ class WebResource
     end
 
     def self.tabular graph, env
-      keys = graph.map{|uri,resource| resource.keys}.flatten.uniq - [Content, DC+'hasFormat', Identifier, Mtime, SIOC+'reply_of', SIOC+'user_agent', Title, Type]
+      graph = graph.values if graph.class == Hash
+      keys = graph.map{|resource|resource.keys}.flatten.uniq - [Content, DC+'hasFormat', Identifier, Mtime, SIOC+'reply_of', SIOC+'user_agent', Title, Type]
       {_: :table, class: :tabular,
        c: [{_: :tr, c: keys.map{|p|
               {_: :td, class: 'k', c: Markup[Type][p.R]}}},
-           graph.map{|uri,resource|
+           graph.map{|resource|
              [{_: :tr, c: keys.map{|k|
                  {_: :td, class: 'v',
                   c: if k=='uri' # title(s) with URI subscript
-                   {_: :a, href: uri, id: 'r' + rand.to_s.sha2, class: :title,
+                   {_: :a, href: resource.uri, id: 'r' + rand.to_s.sha2, class: :title,
                     c: [resource[Title].justArray.map{|t| CGI.escapeHTML t.to_s }, '<br>',
-                        {_: :span, class: :uri, c: CGI.escapeHTML(uri)}]}
+                        {_: :span, class: :uri, c: CGI.escapeHTML(resource.uri)}]}
                  else
                    resource[k].justArray.map{|v|
                      value k, v, env }
@@ -244,7 +258,7 @@ class WebResource
           keyval v, env
         end
       elsif v.class == WebResource
-        v.data({label: CGI.escapeHTML((v.query || v.basename || v.path || v.host || v)[0..99])})
+        v.data({label: CGI.escapeHTML((v.query || v.basename || v.path || v.host || v)[0..48])})
       else # undefined
         CGI.escapeHTML v.to_s
       end
