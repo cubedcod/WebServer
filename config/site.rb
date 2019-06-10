@@ -208,8 +208,9 @@ class WebResource
           graph = ::JSON.parse script.inner_text.sub(IGgraph,'')[0..-2]
           HTML.webizeHash(graph){|h|
             if h['shortcode']
+              #puts ::JSON.pretty_generate h
               s = 'https://www.instagram.com/p/' + h['shortcode']
-              
+              yield s, Type, Post.R
               yield s, Image, h['display_url'].R if h['display_url']
               h['owner'].do{|o|
                 yield s, Creator, ('https://www.instagram.com/' + o['username']).R
@@ -218,10 +219,7 @@ class WebResource
               h['edge_media_to_caption']['edges'][0]['node']['text'].do{|t|
                 yield s, Abstract, CGI.escapeHTML(t)
               } rescue nil
-
-            end
-            puts :_________________, ::JSON.pretty_generate(h)
-          }
+            end}
         end}
     end
 

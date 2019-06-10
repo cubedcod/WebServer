@@ -322,8 +322,10 @@ sidebar [class^='side']    [id^='side']
       n = Nokogiri::HTML.parse readFile.to_utf8 # parse HTML
       # triplr host-binding
       if hostTriples = @r && Triplr[:HTML][@r['SERVER_NAME']]
-        #send(hostTriples, n){|s,p,o| puts s,p,o}
         send hostTriples, n, &f
+        #send(hostTriples, n){|s,p,o|
+        # puts [s,p,o].join "\t"
+        # yield s,p,o}
       end
 
       # JSON-LD
