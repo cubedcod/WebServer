@@ -94,7 +94,7 @@ class WebResource
         req.drop
       elsif mode == 'maps'
         req.env['HTTP_USER_AGENT'] = DesktopUA
-        req.fetch
+        req.GETthru
       else
         case req.env['HTTP_TYPE']
         when /dropURI/
