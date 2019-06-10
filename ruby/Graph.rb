@@ -212,7 +212,7 @@ class WebResource
         n = graph.name.R
         # link to timeline
         graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value.do{|t| # timestamp
-          doc = ['/' + t.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/(00.00|Z)$/,''),     # hour-dir
+          doc = ['/' + t.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/\+?(00.00|Z)$/,''),     # hour-dir
                  %w{host path query fragment}.map{|a|n.send(a).do{|p|p.split(/[\W_]/)}},'ttl']. #  slugs
                  flatten.-([nil,'',*BasicSlugs]).join('.').R  # apply skiplist, mint URI
           unless doc.e

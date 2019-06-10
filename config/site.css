@@ -1,7 +1,7 @@
 #next {right: 0}
 #prev {left:  0}
 #prev, #next {position: fixed; top: 0; height: 100%; max-width: 1em}
-#prev, #next, #up, #down {font-size: 2em; color: #fff; background-color: #000}
+#prev, #next, #up, #down {font-size: 2em; color: #fff; background-color: #000; border-width: 0}
 #subscribe {vertical-align: top}
 #subscribe.off {color: #777; background-color: #000; border: .1em solid #555}
 #subscribe.on  {color: #000; background-color: #fff}
@@ -38,7 +38,7 @@ table.kv td.k {text-align: right}
 table.kv, .tree {border-radius: .2em}
 table.tabular td {vertical-align: top}
 td.k > a {background-color: #111; color: #fff}
-td.k {border-radius: .2em 0 0 .2em; background-color: #222; color: #fff}
+td.k {border-radius: .2em 0 0 .2em; background-color: #222; color: #fff; max-width: 32ex; overflow: hidden}
 td.v a {border-width: 0 0 0 .08em; border-style: solid; border-color: #0f0; padding-left: .08em}
 td.v div {border: .05em solid #333}
 td.v {border-width: 0 0 .08em 0; border-style: solid; border-color: #222}

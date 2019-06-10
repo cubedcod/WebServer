@@ -133,21 +133,14 @@ class WebResource
 
     # directory -> RDF
     def triplrContainer
-      s = path
-      s = s + '/' unless s[-1] == '/'
-      yield s, Type, Container.R
-      yield s, Title, basename
+      yield path, Type, Container.R
+      yield path, Title, basename
       nodes = children
-      yield s, Size, nodes.size
+      nodes.map{|node|
+        yield path, Contains, node.stripDoc}
+      yield path, Size, nodes.size
       mtime.do{|mt|
-        yield s, Mtime, mt.to_i; yield s, Date, mt.iso8601}
-      dirs, files = nodes.partition &:directory?
-      # preview contents
-      load(files.select &:exist?).map{|s,r|
-        r.map{|p,objs|
-          objs.justArray.map{|o|
-            yield s, p, o unless [Content,'uri'].member?(p) && s.R.basename != 'README'
-          }}}
+        yield path, Date, mt.iso8601}
     end
 
   end
