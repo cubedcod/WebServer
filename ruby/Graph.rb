@@ -143,7 +143,7 @@ class WebResource
         else # generate entity
           if format == 'text/html' # HTML
             if qs == '?data'
-              '/mashlib/browse.html'.R
+              '/mashlib/databrowser.html'.R
             else
               htmlDocument load set
             end

@@ -20,10 +20,17 @@ class WebResource
         node['style'].match(/url\('([^']+)'/).do{|url|
           node.add_child "<img src=\"#{url[1]}\">"}}
 
-      # move nonstandard @src attr: assume canonical is placeholder if both exist
+      # traverse nodes
       html.traverse{|e|
+        # assign link identifier
+        e.set_attribute 'id', 'id'+rand.to_s.sha2 if e['href'] && !e['id']
+        # traverse attribute nodes
         e.attribute_nodes.map{|a|
-          e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-menuimg data-native-src data-original data-src data-src1}.member? a.name
+          # load nonstandard @src attrs
+          if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-menuimg data-native-src data-original data-src data-src1}.member? a.name
+            puts "updating @src #{e['src']} to #{a.value}" if e['src']
+            e.set_attribute 'src', a.value
+          end
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
           # strip attributes
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor height layout ping role style tabindex target width}.member?(a.name)}}

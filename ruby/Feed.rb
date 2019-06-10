@@ -40,10 +40,6 @@ class WebResource
 
     include URIs
 
-    def feeds
-      puts (Nokogiri::HTML.parse (open uri).read).css('[rel=alternate]').map{|u|join u.attr :href}.uniq
-    end
-
     def subscribe
       return if subscriptionFile.e
       puts "SUBSCRIBE https:/" + subscriptionFile.dirname
