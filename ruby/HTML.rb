@@ -337,7 +337,7 @@ class WebResource
 
     BasicGunk = %w{
         [class*='cookie']  [id*='cookie']
-        [class*='feature'] [id*='feature']
+        [class*='featured'] [id*='featured']
         [class*='message'] [id*='message']
         [class*='related'] [id*='related']
         [class*='share']   [id*='share']
@@ -458,9 +458,7 @@ sidebar [class^='side']    [id^='side']
             end}
           [*BasicGunk,*Gunk].map{|selector|
             body.css(selector).map{|sel|
-              sel.remove # strip elements
-              #            body.add_child sel.remove # move element to footer
-            }}
+              sel.remove }} # strip elements
           yield subject, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
         else
           puts "no <body> found in HTML #{uri}"
