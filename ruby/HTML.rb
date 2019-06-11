@@ -113,6 +113,7 @@ class WebResource
                                bins.map{|bin, resources|
                                  {class: :group, style: HTML.colorize, c: [{_: :span, class: :label, c: CGI.escapeHTML(bin)}, HTML.tabular(resources, @r)]}}
                              else
+                               env[:graph] = graph
                                HTML.tree Treeize[graph], @r # tree layout
                              end,
                              link[:down,'&#9660;']]}]}]
@@ -270,7 +271,14 @@ class WebResource
           keyval v, env
         end
       elsif v.class == WebResource
-        v.data({label: CGI.escapeHTML((v.query || v.basename || v.path || v.host || v)[0..48])})
+        # inline blank-node references
+        if v.uri.match? /^_:/
+          value nil, env[:graph][v.uri], env
+        elsif %w{jpg JPG png PNG webp}.member? v.ext
+          Markup[Image][v, env]
+        else
+          v.data({label: CGI.escapeHTML((v.query || v.basename || v.path || v.host || v)[0..48])})
+        end
       else # undefined
         CGI.escapeHTML v.to_s
       end

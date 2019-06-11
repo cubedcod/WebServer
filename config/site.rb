@@ -90,6 +90,7 @@ class WebResource
     HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.drop : r.noexec}
     HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['maps.googleapis.com'] = HostGET['www.google.com'] = -> req {
       mode = req.parts[0]
+      search = mode == 'search'
       if %w{complete searchdomaincheck}.member? mode
         req.drop
       elsif mode == 'maps'
@@ -100,14 +101,18 @@ class WebResource
         when /dropURI/
           req.drop
         else
-          req.q['view'] = 'table' if mode == 'search'
-          req.fetch.do{|status, head, body|
-            case status
-            when 403 # goog blocked by a middlebox, try DDG
-              [302, {'Location' => 'https://duckduckgo.com/' + req.qs}, []]
-            else
-              [status, head, body]
-            end}
+          if OFFLINE && search
+            [302, {'Location' => 'http://localhost:8000/m' + req.qs}, []]
+          else
+            req.q['view'] = 'table' if search
+            req.fetch.do{|status, head, body|
+              case status
+              when 403 # goog blocked by a middlebox, try DDG
+                [302, {'Location' => 'https://duckduckgo.com/' + req.qs}, []]
+              else
+                [status, head, body]
+              end}
+          end
         end
       end}
     HostGET['www.googleadservices.com'] = -> r {r.q['adurl'] ? [301, {'Location' => r.q['adurl']},[]] : r.drop}
