@@ -220,7 +220,7 @@ class WebResource
       if env[:query].has_key? 'sort'
         graph = graph.sort_by{|r| r[env[:query]['sort']].justArray[0].to_s}.reverse
       end
-
+      titles = {}
       {_: :table, class: :tabular,
        c: [{_: :tr, c: keys.map{|p|
               p = p.R
@@ -232,8 +232,13 @@ class WebResource
                  {_: :td, class: 'v',
                   c: if k=='uri' # title(s) with URI subscript
                    {_: :a, href: resource.uri, id: 'r' + rand.to_s.sha2, class: :title,
-                    c: [resource[Title].justArray.map{|t| CGI.escapeHTML t.to_s }, '<br>',
-                        {_: :span, class: :uri, c: CGI.escapeHTML(resource.uri)}]}
+                    c: [resource[Title].justArray.map{|t|
+                          title = t.to_s.sub(/\/u\/\S+ on /,'')
+                          unless titles[title]
+                            titles[title] = true
+                            [(CGI.escapeHTML title), '<br>']
+                          end
+                        }, {_: :span, class: :uri, c: CGI.escapeHTML(resource.uri)}]}
                  else
                    resource[k].justArray.map{|v|value k, v, env }
                   end}}},

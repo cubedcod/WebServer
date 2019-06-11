@@ -260,9 +260,8 @@ class WebResource
                  if cache.no_transform # immutable always up to date
                    true
                  elsif (Time.now - cache.mtime) < 60 # reasonably fresh
-                   puts :cache_throttle
                    true
-                 else # TODO more HTTP header checks
+                 else # TODO find HTTP header checks where upstream hit isn't required to determine freshness
                    false
                  end
                else

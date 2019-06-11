@@ -213,8 +213,6 @@ class WebResource
           if (s = qs['q'] || qs['url']) && !s.match?(/webcache/)
             yield s, Type, Resource.R
             yield s, Title, a.inner_text.gsub(/<[^>]+>/,' ')
-          else
-            puts "no URL found:" + a.to_s
           end}}
     end
 
