@@ -163,7 +163,7 @@ class WebResource < RDF::URI
     end
 
     # basename of path
-    def basename; File.basename ( path || '' ) end
+    def basename; File.basename ( path || '/' ) end
 
     # strip native format suffixes
     def stripDoc; (uri.sub /\.(bu|e|html|json|log|md|msg|opml|ttl|txt|u)$/,'').R end

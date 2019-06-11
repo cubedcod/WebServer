@@ -290,7 +290,7 @@ class WebResource
         elsif %w{jpg JPG png PNG webp}.member? v.ext
           Markup[Image][v, env]
         else
-          v.data({label: CGI.escapeHTML((v.query || v.basename || v.path || v.host || v)[0..48])})
+          v.data({label: CGI.escapeHTML((v.query || (v.basename && v.basename != '/' && v.basename) || (v.path && v.path != '/' && v.path) || v.host || v.to_s)[0..48])})
         end
       else # undefined
         CGI.escapeHTML v.to_s
