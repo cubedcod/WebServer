@@ -66,6 +66,8 @@ class WebResource
       yield uri, Content, `pygmentize -l make -f html #{sh}` end
     def triplrLisp &f
       yield uri, Content, `pygmentize -l lisp -f html #{sh}` end
+    def triplrPerl &f
+      yield uri, Content, `pygmentize -l perl -f html #{sh}` end
     def triplrShellScript &f
       yield uri, Content, `pygmentize -l sh -f html #{sh}` end
     def triplrRuby &f

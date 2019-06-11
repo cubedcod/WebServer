@@ -127,6 +127,7 @@ class WebResource
       'text/x-makefile'      => [:triplrMakefile],
       'text/x-java-source'   => [:triplrCode],
       'text/x-ruby'          => [:triplrRuby],
+      'text/x-perl'          => [:triplrPerl],
       'text/x-php'           => [:triplrCode],
       'text/x-python'        => [:triplrCode],
       'text/x-script.ruby'   => [:triplrCode],
