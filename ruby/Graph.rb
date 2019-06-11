@@ -230,8 +230,9 @@ class WebResource
     end
 
     def triplrJSON &f
+      tree = ::JSON.parse readFile.to_utf8
       if hostTriples = @r && Triplr[:JSON][@r['SERVER_NAME']]
-        send hostTriples, &f
+        send hostTriples, tree, &f
       end
     end
 

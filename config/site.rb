@@ -240,8 +240,13 @@ class WebResource
         end}
     end
 
-    def Outline
-      puts :OUTLINE
+    def Outline tree
+      subject = tree['data']['article_url']
+      yield subject, Type, Post.R
+      yield subject, Title, tree['data']['title']
+      yield subject, To, ('//' + tree['data']['domain']).R
+      yield subject, Content, (HTML.clean tree['data']['html'])
+      yield subject, Image, tree['data']['meta']['og']['og:image'].R
     end
 
     def Twitter doc
