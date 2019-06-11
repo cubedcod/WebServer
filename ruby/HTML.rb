@@ -216,7 +216,7 @@ class WebResource
 
     def self.tabular graph, env
       graph = graph.values if graph.class == Hash
-      keys = graph.map{|resource|resource.keys}.flatten.uniq - [Content, DC+'hasFormat', Identifier, Mtime, SIOC+'reply_of', SIOC+'user_agent', Title, Type]
+      keys = graph.map{|resource|resource.keys}.flatten.uniq - [Content, DC+'hasFormat', Identifier, Image, Mtime, SIOC+'reply_of', SIOC+'user_agent', Title, Type]
       if env[:query].has_key? 'sort'
         graph = graph.sort_by{|r| r[env[:query]['sort']].justArray[0].to_s}.reverse
       end
@@ -235,10 +235,11 @@ class WebResource
                     c: [resource[Title].justArray.map{|t| CGI.escapeHTML t.to_s }, '<br>',
                         {_: :span, class: :uri, c: CGI.escapeHTML(resource.uri)}]}
                  else
-                   resource[k].justArray.map{|v|
-                     value k, v, env }
+                   resource[k].justArray.map{|v|value k, v, env }
                   end}}},
-              ({_: :tr, c: {_: :td, colspan: keys.size, c: resource[Content]}} if resource[Content] && !env[:query].has_key?('head'))]}]}
+              ({_: :tr, c: {_: :td, colspan: keys.size,
+                            c: [resource[Image].justArray.map{|i|{style: 'max-width: 20em', c: Markup[Image][i,env]}},
+                                resource[Content]]}} if (resource[Content] || resource[Image]) && !env[:query].has_key?('head'))]}]}
     end
 
     def self.tree t, env, name=nil
