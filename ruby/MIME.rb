@@ -149,14 +149,14 @@ class WebResource
 
     # environment -> acceptable formats
     def accept k = 'HTTP_ACCEPT'
-      @r[:ACCEPT] ||= (index = {}
+      index = {}
       @r && @r[k].do{|v| # header data
         (v.split /,/).map{|e|  # split to (MIME,q) pairs
           format, q = e.split /;/ # split (MIME,q) pair
           i = q && q.split(/=/)[1].to_f || 1.0 # find q-value
           index[i] ||= []              # initialize index-entry
           index[i].push format.strip}} # index on q-value
-      index)
+      index
     end
 
     # file format
