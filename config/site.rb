@@ -94,7 +94,7 @@ class WebResource
     HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['maps.googleapis.com'] = HostGET['www.google.com'] = -> req {
       mode = req.parts[0]
       search = mode == 'search'
-      if %w{complete searchdomaincheck}.member? mode
+      if %w{async complete searchdomaincheck}.member? mode
         req.drop
       elsif mode == 'maps'
         req.env['HTTP_USER_AGENT'] = DesktopUA
