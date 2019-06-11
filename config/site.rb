@@ -100,6 +100,7 @@ class WebResource
         when /dropURI/
           req.drop
         else
+          req.q['view'] = 'table' if mode == 'search'
           req.fetch.do{|status, head, body|
             case status
             when 403 # goog blocked by a middlebox, try DDG
@@ -113,6 +114,9 @@ class WebResource
 
     # Mozilla
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
+
+    # Outline
+    HostGET['outline.com']
 
     # Reddit
     HostGET['reddit.com'] = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path},[]]}
@@ -190,15 +194,15 @@ class WebResource
       doc.css('a[aria-label^="Next"]').map{|a|
         env[:links][:next] ||= a['href']
       }
-      doc.css('a[href^="/url"]').map{|a|
-        if s = (HTTP.parseQs a['href'].R.query)['q']
-          yield s, Type, Resource.R
-          yield s, Abstract, a.inner_text.gsub(/<[^>]+>/,' ')
-          #a.remove
-        else
-          puts "no URL found:" + a.to_s
-        end
-      }
+      %w{href ping}.map{|attr|
+        doc.css('a[' + attr + '^="/url"]').map{|a|
+          qs = HTTP.parseQs a[attr].R.query
+          if (s = qs['q'] || qs['url']) && !s.match?(/webcache/)
+            yield s, Type, Resource.R
+            yield s, Title, a.inner_text.gsub(/<[^>]+>/,' ')
+          else
+            puts "no URL found:" + a.to_s
+          end}}
     end
 
     IGgraph = /^window._sharedData = /

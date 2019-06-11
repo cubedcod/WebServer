@@ -311,7 +311,7 @@ class WebResource
           cache.localFile # immutable format
         else              # transformable
           env[:feed] = true if cache.feedMIME?
-          graphResponse (updates.empty? ? [cache] : updates)
+          graphResponse [cache]
         end
       else
         notfound

@@ -70,19 +70,24 @@ class WebResource
       doc = ('/cache/RDF/' + hash[0..2] + '/' + hash[3..-1] + '.e').R
       return doc if doc.e && doc.m > m # RDF transform up to date
       graph = {}
+      # file metadata
       triplrFile{|s,p,o|
         graph[s] ||= {'uri' => s}
         graph[s][p] ||= []
         graph[s][p].push o.class == WebResource ? {'uri' => o.uri} : o unless p == 'uri'}
+
+      # MIME-specific metadata
       if triplr = Triplr[mime]
         send(*triplr){|s,p,o|
+          #puts [s,p,o].join "\t"
           graph[s] ||= {'uri' => s}
           graph[s][p] ||= []
           graph[s][p].push o.class == WebResource ? {'uri' => o.uri} : o unless p == 'uri'}
       else
        puts "#{uri}: triplr for #{mime} missing" unless triplr
       end
-      doc.writeFile graph.to_json rescue puts("RDFize error for #{uri}")
+
+      doc.writeFile graph.to_json
     end
 
   end
@@ -212,7 +217,7 @@ class WebResource
         n = graph.name.R
         # link to timeline
         graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value.do{|t| # timestamp
-          doc = ['/' + t.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/\+?(00.00|Z)$/,''),     # hour-dir
+          doc = ['/' + t.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/\+?(00.00|Z)$/,''),  # hour-dir
                  %w{host path query fragment}.map{|a|n.send(a).do{|p|p.split(/[\W_]/)}},'ttl']. #  slugs
                  flatten.-([nil,'',*BasicSlugs]).join('.').R  # apply skiplist, mint URI
           unless doc.e

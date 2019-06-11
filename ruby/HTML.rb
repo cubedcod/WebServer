@@ -332,8 +332,8 @@ sidebar [class^='side']    [id^='side']
     # HTML -> RDF
     def triplrHTML &f
       subject = ''
-
       n = Nokogiri::HTML.parse readFile.to_utf8 # parse HTML
+
       # triplr host-binding
       if hostTriples = @r && Triplr[:HTML][@r['SERVER_NAME']]
         send hostTriples, n, &f
@@ -426,7 +426,7 @@ sidebar [class^='side']    [id^='side']
           yield subject, Video, v.attr('src').R }}
 
       # <body>
-      unless (@r && @r['SERVER_NAME'] || host || '').match?(/twitter.com/)
+      unless (@r && @r['SERVER_NAME'] || host || '').match?(/(google|twitter).com/)
         if body = n.css('body')[0]
           %w{content-body entry-content}.map{|bsel|
             if content = body.css('.' + bsel)[0]
