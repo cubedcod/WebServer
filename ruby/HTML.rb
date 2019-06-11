@@ -122,7 +122,7 @@ class WebResource
     def self.keyval t, env
       {_: :table, class: :kv,
        c: t.map{|k,vs|
-         type = k && k.R || '#untyped'.R
+         type = (k ? k.to_s : '#notype').R
          ([{_: :tr, name: type.fragment || type.basename,
             c: [{_: :td, class: 'k', c: Markup[Type][type]},
                 {_: :td, class: 'v', c: vs.justArray.map{|v|
