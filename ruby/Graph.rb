@@ -127,8 +127,8 @@ class WebResource
     def graphResponse set
       return notfound if !set || set.empty?
 
-      # output format
-      extant = set[0].bestFormat? && set[0] if set.size == 1
+      # output may be on file, for single-member sets
+      extant = set.size == 1 && set[0].bestFormat? && set[0].mime != 'text/html' && set[0] # if HTML is IN and OUT fmt, assume a rewrite is requested
       format = extant ? extant.mime : selectFormat
 
       # response metadata

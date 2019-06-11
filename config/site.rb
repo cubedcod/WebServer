@@ -293,7 +293,8 @@ class WebResource
     }
 
     Triplr[:JSON] = {
-      'outline.com' => :Outline
+      'outline.com' => :Outline,
+      'outlineapi.com' => :Outline
     }
 
   end
