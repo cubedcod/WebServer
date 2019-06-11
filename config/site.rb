@@ -283,6 +283,10 @@ class WebResource
       end
     end
 
+    def YouTubeJSON doc
+
+    end
+
     Triplr[:HTML] = {
       'apnews.com' => :AP,
       'www.apnews.com' => :AP,
@@ -294,7 +298,8 @@ class WebResource
 
     Triplr[:JSON] = {
       'outline.com' => :Outline,
-      'outlineapi.com' => :Outline
+      'outlineapi.com' => :Outline,
+      'www.youtube.com' => :YouTubeJSON,
     }
 
   end
