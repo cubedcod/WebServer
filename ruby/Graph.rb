@@ -128,11 +128,8 @@ class WebResource
       return notfound if !set || set.empty?
 
       # output format
-      if set.size == 1
-        this = set[0]
-        extant = this.isRDF && preferredFormat?(this) && this
-      end
-      format = extant && extant.mime || selectFormat
+      extant = set[0].bestFormat? && set[0] if set.size == 1
+      format = extant ? extant.mime : selectFormat
 
       # response metadata
       dateMeta if localNode?
@@ -231,5 +228,12 @@ class WebResource
           true}}
       updates
     end
+
+    def triplrJSON &f
+      if hostTriples = @r && Triplr[:JSON][@r['SERVER_NAME']]
+        send hostTriples, &f
+      end
+    end
+
   end
 end

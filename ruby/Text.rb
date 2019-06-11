@@ -52,9 +52,9 @@ class WebResource
   end
   module Webize
 
-    def triplrArchive &f; yield uri, Type, (Stat+'Archive').R end
-    def triplrAudio &f;   yield uri, Type, Sound.R end
-    def triplrDataFile &f;yield uri, Type, (Stat+'DataFile').R end
+    def triplrArchive &f;  yield uri, Type, (Stat+'Archive').R end
+    def triplrAudio &f;    yield uri, Type, Sound.R end
+    def triplrDataFile &f; yield uri, Type, (Stat+'DataFile').R end
 
     def triplrBat &f
       yield uri, Content, `pygmentize -l batch -f html #{sh}` end

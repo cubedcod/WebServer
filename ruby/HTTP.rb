@@ -154,11 +154,11 @@ class WebResource
     def fetch rack_API=true
       # request metadata
       @r ||= {}
-      head = HTTP.unmangle env                         # strip local headers
+      head = HTTP.unmangle env                           # strip local headers
       head.delete 'Host'
       head['User-Agent'] = DesktopUA
       head.delete 'User-Agent' if %w{po.st t.co}.member? host
-      head[:redirect] = false                          # don't internally redirect
+      head[:redirect] = false                            # no internal redirects
       query = if @r[:query]
                 q = @r[:query].dup
                 %w{group view sort}.map{|a| q.delete a } # strip local query-arguments
@@ -191,6 +191,7 @@ class WebResource
                                              end)).R env
       cacheMeta = cache.metafile
       head["If-Modified-Since"] = cache.mtime.httpdate if cache.e
+      #puts "CACHE #{url} -> #{cache}"
 
       # response metadata
       part = nil
@@ -209,13 +210,11 @@ class WebResource
               response_meta = response.meta
               part = response.read
             else
-              #puts "CACHE #{url} -> #{cache}"
-
-              %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k|
+              %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| # read metadata
                 @r[:Response]    ||= {}
                 @r[:Response][k] ||= response.meta[k.downcase]}
 
-              body = decompress response.meta, response.read
+              body = decompress response.meta, response.read # read body
 
               unless cache.e && cache.readFile == body  # unchanged? 
 
@@ -311,7 +310,7 @@ class WebResource
         [status, response_meta, []]
       elsif cache.exist?
         if cache.no_transform || originUI
-          cache.localFile # immutable format
+          cache.localFile # immutable content
         else              # transformable
           env[:feed] = true if cache.feedMIME?
           graphResponse [cache]

@@ -82,7 +82,7 @@ class WebResource
       'application/haskell'   => [:triplrCode],
       'application/javascript' => [:triplrCode],
       'application/ino'      => [:triplrCode],
-      'application/json'      => [:triplrDataFile],
+      'application/json'      => [:triplrJSON],
       'application/mbox'      => [:triplrMbox],
       'application/octet-stream' => [:triplrFile],
       'application/org'      => [:triplrOrg],
@@ -144,18 +144,18 @@ class WebResource
       'text/x-tex'           => [:triplrTeX],
     }
 
-    NoTransform = /^(application\/(dash|font|gzip|(x-)?java|json|octet-stream|pdf|smil|vnd|x-mpegURL|(x-)?protobuf(fer)?)|audio|binary|font|image|text\/(css|javascript|vtt)|video)/
+    NoTransform = /^(application\/(dash|font|gzip|(x-)?java|octet-stream|pdf|smil|vnd|x-mpegURL|(x-)?protobuf(fer)?)|audio|binary|font|image|text\/(css|javascript|vtt)|video)/
 
     # environment -> acceptable formats
     def accept k = 'HTTP_ACCEPT'
-      index = {}
+      @r[:ACCEPT] ||= (index = {}
       @r && @r[k].do{|v| # header data
         (v.split /,/).map{|e|  # split to (MIME,q) pairs
           format, q = e.split /;/ # split (MIME,q) pair
           i = q && q.split(/=/)[1].to_f || 1.0 # find q-value
           index[i] ||= []              # initialize index-entry
           index[i].push format.strip}} # index on q-value
-      index
+      index)
     end
 
     # file format
@@ -208,9 +208,10 @@ class WebResource
       accept.sort.reverse
     end
 
-    def preferredFormat? this
+    def bestFormat?
       preferences.head.do{|q, formats|
-        formats.member? this.mime}
+        (formats.member? '*/*') ||
+        (formats.member? mime)}
     end
 
   end

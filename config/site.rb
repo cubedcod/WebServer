@@ -121,7 +121,14 @@ class WebResource
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # Outline
-    HostGET['outline.com']
+    HostGET['outline.com'] = -> r {
+      if r.parts.size == 1 && r.parts[0] != 'favicon.ico'
+        r.env['HTTP_HOST'] = 'outlineapi.com'
+        r.env['REQUEST_URI'] = '/v4/get_article?id=' + r.parts[0]
+        r.fetch
+      else
+        r.drop
+      end}
 
     # Reddit
     HostGET['reddit.com'] = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path},[]]}
@@ -233,6 +240,10 @@ class WebResource
         end}
     end
 
+    def Outline
+      puts :OUTLINE
+    end
+
     def Twitter doc
       %w{grid-tweet tweet}.map{|tweetclass|
       doc.css('.' + tweetclass).map{|tweet|
@@ -274,6 +285,10 @@ class WebResource
       'www.instagram.com' => :Instagram,
       'twitter.com' => :Twitter,
       'www.youtube.com' => :YouTube,
+    }
+
+    Triplr[:JSON] = {
+      'outline.com' => :Outline
     }
 
   end
