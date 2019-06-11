@@ -357,12 +357,15 @@ class WebResource
   module Webize
 
     def triplrCalendar
-      cal_file = File.open localPath
-      cals = Icalendar::Calendar.parse(cal_file)
-      cal = cals.first
-      puts cal
-      event = cal.events.first
-      puts event
+      Icalendar::Calendar.parse(File.open localPath).map{|cal|
+        cal.events.map{|event|
+          subject = event.url || ('#event'+rand.to_s.sha2)
+          yield subject, Date, event.dtstart
+          yield subject, Title, event.summary
+          yield subject, Abstract, CGI.escapeHTML(event.description)
+          yield subject, '#geo', event.geo if event.geo
+          yield subject, '#location', event.location if event.location
+        }}
     end
 
     def triplrOPML
