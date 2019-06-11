@@ -177,7 +177,7 @@ class WebResource
             end
 
       # storage
-      keep_ext = %w{aac atom css html jpeg jpg js m3u8 map mp3 mp4 ogg opus pdf png rdf svg ttf ttl vtt webm webp woff woff2}.member?(ext.downcase) && !host&.match?(/openload|\.wiki/)
+      keep_ext = %w{aac atom css html jpeg jpg js m3u8 map mp3 mp4 ogg opus pdf png svg ttf ttl vtt webm webp woff woff2}.member?(ext.downcase) && !host&.match?(/openload|\.wiki/)
       pathname = path || ''
       pathname = pathname[-1] == '/' ? pathname[0..-2] : pathname # strip slash
       if pathname.size > 255

@@ -234,6 +234,8 @@ class WebResource
       if hostTriples = @r && Triplr[:JSON][@r['SERVER_NAME']]
         send hostTriples, tree, &f
       end
+    rescue
+      puts "triplrJSON error on #{uri}"
     end
 
   end
