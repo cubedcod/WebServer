@@ -391,6 +391,8 @@ sidebar [class^='side']    [id^='side']
 
             # normalize predicates
             k = {
+              'al:ios:url' => :drop,
+              'apple-itunes-app' => :drop,
               'article:modified_time' => Date,
               'article:published_time' => Date,
               'description' => Abstract,
