@@ -24,21 +24,6 @@ class WebResource
       (path.match? POSTpath)
     end
 
-    def cacheFile
-      keep_ext = %w{aac atom css html jpeg jpg js m3u8 map mp3 mp4 ogg opus pdf png rdf svg ttf ttl vtt webm webp woff woff2}.member?(ext.downcase) && !host&.match?(/openload|\.wiki/)
-      pathname = path || ''
-      pathname = pathname[-1] == '/' ? pathname[0..-2] : pathname # strip slash
-      if pathname.size > 255
-        h = pathname.sha2
-        pathname = '/' + h[0..1] + '/' + h[2..-1] + (keep_ext ? ('.' + ext) : '')
-      end
-      ((host ? ('/' + host) : '') + (if qs && !qs.empty? # hashed query
-                                     [pathname, qs.sha2, keep_ext ? ext : 'cache'].join '.'
-                                    else
-                                      keep_ext ? pathname : (pathname + '.cache')
-                                     end)).R env
-    end
-
     def self.call env
       return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? env['REQUEST_METHOD'] # allow defined methods
       env[:Response] = {}; env[:links] = {}                      # response-header storage
@@ -169,23 +154,41 @@ class WebResource
     def fetch rack_API=true
       # request metadata
       @r ||= {}
-      head = HTTP.unmangle env
+      head = HTTP.unmangle env                         # strip local headers
       head.delete 'Host'
       head['User-Agent'] = DesktopUA
       head.delete 'User-Agent' if %w{po.st t.co}.member? host
-      head[:redirect] = false # don't internally redirect
+      head[:redirect] = false                          # don't internally redirect
+      query = if @r[:query]
+                q = @r[:query].dup
+                %w{group view sort}.map{|a| q.delete a } # strip local query-arguments
+                q.empty? ? '' : HTTP.qs(q)
+              else
+                qs
+              end
 
       # locator
       url = if !rack_API
               'https://' + host + path + qs
-            elsif suffix = ext.empty? && host.match?(/reddit.com$/) && !originUI && '.rss'
-              'https://' + (env['HTTP_HOST'] || host) + path + suffix + qs # new locator with format suffix
+            elsif suffix = ext.empty? && host.match?(/reddit.com$/) && !originUI && '.rss' # insert format-suffix
+              'https://' + (env['HTTP_HOST'] || host) + path + suffix + query
             else
-              'https://' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + qs))
+              'https://' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + query))
             end
 
-      # cache storage
-      cache = cacheFile
+      # storage
+      keep_ext = %w{aac atom css html jpeg jpg js m3u8 map mp3 mp4 ogg opus pdf png rdf svg ttf ttl vtt webm webp woff woff2}.member?(ext.downcase) && !host&.match?(/openload|\.wiki/)
+      pathname = path || ''
+      pathname = pathname[-1] == '/' ? pathname[0..-2] : pathname # strip slash
+      if pathname.size > 255
+        h = pathname.sha2
+        pathname = '/' + h[0..1] + '/' + h[2..-1] + (keep_ext ? ('.' + ext) : '')
+      end
+      cache = ((host ? ('/' + host) : '') + (if !query.empty? # hashed query-component
+                                             [pathname, query.sha2, keep_ext ? ext : 'cache'].join '.'
+                                            else
+                                              keep_ext ? pathname : (pathname + '.cache')
+                                             end)).R env
       cacheMeta = cache.metafile
       head["If-Modified-Since"] = cache.mtime.httpdate if cache.e
 
@@ -525,12 +528,19 @@ class WebResource
       [202,{},[]]
     end
 
-    # parsed query-string as Hash
+    # query-string -> Hash
     def q
       @q ||= HTTP.parseQs qs[1..-1]
     end
 
-    # query-string
+    # Hash -> query-string
+    def HTTP.qs h
+      '?' + h.map{|k,v|
+        k.to_s + '=' + (v ? (CGI.escape [*v][0].to_s) : '')
+      }.intersperse("&").join('')
+    end
+
+    # env or URI -> query-string
     def qs
       if @r && @r['QUERY_STRING'] && !@r['QUERY_STRING'].empty?
         '?' +  @r['QUERY_STRING']
@@ -539,13 +549,6 @@ class WebResource
       else
         ''
       end
-    end
-
-    # Hash -> String
-    def HTTP.qs h
-      '?' + h.map{|k,v|
-        k.to_s + '=' + (v ? (CGI.escape [*v][0].to_s) : '')
-      }.intersperse("&").join('')
     end
 
     def relocation

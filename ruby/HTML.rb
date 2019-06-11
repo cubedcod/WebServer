@@ -94,8 +94,6 @@ class WebResource
                              end,
                              if graph.empty?
                                HTML.keyval (HTML.webizeHash @r), @r # 404
-                             elsif q['view'] == 'table' || (localNode? && directory? && env['REQUEST_PATH'][-1] != '/')
-                               HTML.tabular graph, @r      # table layout
                              elsif q['group']
                                p = q['group']
                                case p
@@ -112,6 +110,8 @@ class WebResource
                                    bins[o].push resource}}
                                bins.map{|bin, resources|
                                  {class: :group, style: HTML.colorize, c: [{_: :span, class: :label, c: CGI.escapeHTML(bin)}, HTML.tabular(resources, @r)]}}
+                             elsif q['view'] == 'table' || (localNode? && directory? && env['REQUEST_PATH'][-1] != '/')
+                               HTML.tabular graph, @r       # table layout
                              else
                                env[:graph] = graph
                                HTML.tree Treeize[graph], @r # tree layout
@@ -217,9 +217,16 @@ class WebResource
     def self.tabular graph, env
       graph = graph.values if graph.class == Hash
       keys = graph.map{|resource|resource.keys}.flatten.uniq - [Content, DC+'hasFormat', Identifier, Mtime, SIOC+'reply_of', SIOC+'user_agent', Title, Type]
+      if env[:query].has_key? 'sort'
+        graph = graph.sort_by{|r| r[env[:query]['sort']].justArray[0].to_s}.reverse
+      end
+
       {_: :table, class: :tabular,
        c: [{_: :tr, c: keys.map{|p|
-              {_: :td, class: 'k', c: Markup[Type][p.R]}}},
+              p = p.R
+              slug = p.fragment || p.basename
+              icon = Icons[p.uri] || slug
+              {_: :td, class: 'k', c: env[:query]['sort'] == p.uri ? icon : {_: :a, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}}},
            graph.map{|resource|
              [{_: :tr, c: keys.map{|k|
                  {_: :td, class: 'v',

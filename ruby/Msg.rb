@@ -212,14 +212,8 @@ class WebResource
       to = post.delete(To).justArray
       images = post.delete(Image).justArray
       content = post.delete(Content).justArray
-      cache = post.R.cacheFile
-      location = if %w{l localhost}.member?(env['SERVER_NAME']) && cache.exist?
-                   cache.uri
-                 else
-                   uri
-                 end
       {class: :post,
-       c: [{_: :a, id: 't'+rand.to_s.sha2, class: :id, c: '☚', href: location},
+       c: [{_: :a, id: 't'+rand.to_s.sha2, class: :id, c: '☚', href: uri},
            titles.map{|title|
              title = title.to_s.sub(/\/u\/\S+ on /,'')
              unless env[:title] == title
