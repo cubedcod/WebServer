@@ -159,7 +159,7 @@ class WebResource
       head['User-Agent'] = DesktopUA
       head.delete 'User-Agent' if %w{po.st t.co}.member? host
       head[:redirect] = false                            # no internal redirects
-      query = if @r[:query]
+      query = if rack_API && @r[:query]
                 q = @r[:query].dup
                 %w{group view sort}.map{|a| q.delete a } # strip local query-arguments
                 q.empty? ? '' : HTTP.qs(q)
@@ -260,6 +260,7 @@ class WebResource
                  if cache.no_transform # immutable always up to date
                    true
                  elsif (Time.now - cache.mtime) < 60 # reasonably fresh
+                   #puts :cache_throttle
                    true
                  else # TODO find HTTP header checks where upstream hit isn't required to determine freshness
                    false
@@ -611,7 +612,6 @@ class WebResource
     end
 
     def updateLocation location
-      # TODO redirect loops after mobile vs desktop UA-switch prevents permanent cacheability (any other common scenarios?)
       relocation.writeFile location unless host.match? /(alibaba|google|soundcloud|twitter|youtube)\.com$/
       [302, {'Location' => location}, []]
     end

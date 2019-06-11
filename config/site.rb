@@ -162,8 +162,7 @@ class WebResource
         sources = []
         r.subscriptions.shuffle.each_slice(18){|s|
           sources << (Twitter + '/search?f=tweets&vertical=default&q=' + s.map{|u| 'from:' + u}.intersperse('+OR+').join).R(r.env) }
-        r.graphResponse sources.map{|source|
-          source.fetch false}.flatten
+        r.graphResponse sources.map{|source|source.fetch false}.flatten
       else
         r.remote
       end}
