@@ -334,6 +334,7 @@ class WebResource
         [class*='cookie']  [id*='cookie']
         [class*='feature'] [id*='feature']
         [class*='message'] [id*='message']
+        [class*='promo']   [id*='promo']  [class*='Promo']  [id*='Promo']
         [class*='related'] [id*='related']
         [class*='share']   [id*='share']
         [class*='social']  [id*='social']

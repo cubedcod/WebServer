@@ -182,6 +182,7 @@ class WebResource
   module Webize
 
     Gunk = %w{
+ .ActionBar .ActionBar-items .SocialBar
  .featured-headlines
  .global-audio-components
 }
