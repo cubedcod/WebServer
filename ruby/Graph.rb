@@ -68,25 +68,16 @@ class WebResource
       return self if ext == 'e'
       hash = node.stat.ino.to_s.sha2
       doc = ('/cache/RDF/' + hash[0..2] + '/' + hash[3..-1] + '.e').R
-      return doc if doc.e && doc.m > m # RDF transform up to date
+      return doc if doc.e && doc.m > m
       graph = {}
-      # file metadata
-      triplrFile{|s,p,o|
-        graph[s] ||= {'uri' => s}
-        graph[s][p] ||= []
-        graph[s][p].push o.class == WebResource ? {'uri' => o.uri} : o unless p == 'uri'}
-
-      # MIME-specific metadata
       if triplr = Triplr[mime]
         send(*triplr){|s,p,o|
-          #puts [s,p,o].join "\t"
           graph[s] ||= {'uri' => s}
           graph[s][p] ||= []
           graph[s][p].push o.class == WebResource ? {'uri' => o.uri} : o unless p == 'uri'}
       else
-       puts "#{uri}: triplr for #{mime} missing" unless triplr
+        puts "#{uri}: triplr for #{mime} missing" unless triplr
       end
-
       doc.writeFile graph.to_json
     end
 
