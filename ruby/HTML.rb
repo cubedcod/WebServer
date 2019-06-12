@@ -42,12 +42,21 @@ class WebResource
       "#{bg ? 'color' : 'background-color'}: black; #{bg ? 'background-' : ''}color: #{'#%06x' % (rand 16777216)}"
     end
 
-    # JSON -> HTML
+    # JSON-graph -> HTML
     def htmlDocument graph = {}
 
       # HEAD links
       @r ||= {}
       @r[:links] ||= {}
+      unless !path || path=='/'
+        up = if @r['REQUEST_PATH'][-1] == '/'
+               @r['REQUEST_PATH'][0..-2]
+             else
+               dirname
+             end
+        @r[:links][:up] = up + qs + '#r' + (path||'/').sha2
+        @r[:links][:down] = @r['REQUEST_PATH'] + '/' if directory? && @r['REQUEST_PATH'][-1] != '/'
+      end
       @r[:images] ||= {}
       @r[:colors] ||= {}
 
@@ -63,7 +72,7 @@ class WebResource
         host && path && ('//' + host + path)
       ].compact.find{|u| graph[u] && !graph[u][Title].justArray.empty?}
 
-      # header (k,v) -> HTML
+      # render HEAD link as HTML
       link = -> key, displayname {
         @r[:links][key].do{|uri|
           [uri.R.data({id: key, label: displayname}),

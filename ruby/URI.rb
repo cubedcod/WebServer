@@ -67,7 +67,6 @@ class WebResource < RDF::URI
       @r[:links] ||= {}
       n = nil # next page
       p = nil # prev page
-
       # date parts
       dp = []
       dp.push parts.shift.to_i while parts[0] && parts[0].match(/^[0-9]+$/)
@@ -95,22 +94,10 @@ class WebResource < RDF::URI
           n = hour >= 23 ? (day + 1).strftime('/%Y/%m/%d/00') : (day.strftime('/%Y/%m/%d/')+('%02d' % (hour+1)))
         end
       end
-
       remainder = parts.empty? ? '' : ['', *parts].join('/')
       remainder += '/' if @r['REQUEST_PATH'][-1] == '/'
-
       @r[:links][:prev] = p + remainder + qs + '#prev' if p && p.R.e
       @r[:links][:next] = n + remainder + qs + '#next' if n && n.R.e
-      unless !path || path=='/'
-        up = if @r['REQUEST_PATH'][-1] == '/'
-               @r['REQUEST_PATH'][0..-2]
-             else
-               dirname
-             end
-
-        @r[:links][:up] = up + qs + '#r' + (path||'/').sha2
-        @r[:links][:down] = @r['REQUEST_PATH'] + '/' if directory? && @r['REQUEST_PATH'][-1] != '/'
-      end
     end
 
     def match p; to_s.match p end
