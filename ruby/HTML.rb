@@ -77,7 +77,7 @@ class WebResource
       @r[:links][:up] = dirname + '/' + qs + '#r' + (path||'/').sha2 unless !path || path=='/'
       @r[:links][:down] = if qs == tabularOverview
                             tabularOverview[0..-6]
-                          elsif directory? && env['REQUEST_PATH'][-1] != '/'
+                          elsif directory? && env['REQUEST_PATH'] && env['REQUEST_PATH'][-1] != '/'
                             path + '/'
                           end
 

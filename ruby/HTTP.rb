@@ -159,7 +159,7 @@ class WebResource
       head.delete 'User-Agent' if %w{po.st t.co}.member? host
       head[:redirect] = false                            # no internal redirects
       query = if rack_API
-                q = @r[:query].dup
+                q = @r[:query].dup || {}
                 %w{group view sort}.map{|a| q.delete a } # strip local query-arguments
                 q.empty? ? '' : HTTP.qs(q)
               else

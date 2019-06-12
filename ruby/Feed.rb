@@ -17,7 +17,6 @@ class WebResource
         [500, 'https:' + feed.uri, e.class, e.message]
       end}.
       compact.sort.do{|report|
-      puts "#{report.size} feeds\n"
       report.map{|line|
         puts line.join "\t" unless 200 == line[0]}}
   end
