@@ -24,7 +24,7 @@ a.date {float: right; background-color: #000; color: #888; font-size: .8em; marg
 a.id {float: right; background-color: #000; color: #333}
 a.link, .thumb {background-color: #fff; color: #000}
 a.title > span.uri {font-size: .7em; font-weight: normal; background-color: #aaa}
-a.title {float: left; vertical-align: top; background-color: #aaa; color: #000; font-size: 1.1em; font-weight: bold }
+a.title {float: left; vertical-align: top; background-color: #ddd; color: #000; font-size: 1.1em; font-weight: bold }
 a.title:visited {background-color: #111; color: #ccc}
 a.title:visited > span.uri {background-color: #111; color: #aaa}
 body {font-family: sans-serif; margin: 0 2em 0 2em}
