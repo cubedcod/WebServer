@@ -48,15 +48,7 @@ class WebResource
       # HEAD links
       @r ||= {}
       @r[:links] ||= {}
-      unless !path || path=='/'
-        up = if @r['REQUEST_PATH'][-1] == '/'
-               @r['REQUEST_PATH'][0..-2]
-             else
-               dirname
-             end
-        @r[:links][:up] = up + qs + '#r' + (path||'/').sha2
-        @r[:links][:down] = @r['REQUEST_PATH'] + '/' if directory? && @r['REQUEST_PATH'][-1] != '/'
-      end
+      @r[:links][:up] ||= dirname + qs + '#r' + (path||'/').sha2 unless !path || path=='/'
       @r[:images] ||= {}
       @r[:colors] ||= {}
 
@@ -239,15 +231,22 @@ class WebResource
            graph.map{|resource|
              [{_: :tr, c: keys.map{|k|
                  {_: :td, class: 'v',
-                  c: if k=='uri' # title(s) with URI subscript
-                   {_: :a, href: resource.uri, id: 'r' + rand.to_s.sha2, class: :title,
-                    c: [resource[Title].justArray.map{|t|
-                          title = t.to_s.sub(/\/u\/\S+ on /,'')
-                          unless titles[title]
-                            titles[title] = true
-                            [(CGI.escapeHTML title), '<br>']
-                          end
-                        }, {_: :span, class: :uri, c: CGI.escapeHTML(resource.uri)}]}
+                  c: if k=='uri' # title with URI subscript
+                   ts = resource[Title].justArray
+                   if ts.size > 0
+                     ts.map{|t|
+                       title = t.to_s.sub(/\/u\/\S+ on /,'')
+                       if titles[title]
+                         {_: :a, href: resource.uri, id: 'r' + rand.to_s.sha2, class: :id, c: ' '}
+                       else
+                         titles[title] = true
+                         {_: :a, href: resource.uri, id: 'r' + rand.to_s.sha2, class: :title,
+                          c: [(CGI.escapeHTML title), ' ',
+                              {_: :span, class: :uri, c: CGI.escapeHTML(resource.uri)}, ' ']}
+                       end}
+                   else
+                     {_: :a, href: resource.uri, id: 'r' + rand.to_s.sha2, class: :id, c: '&#x1f517;'}
+                   end
                  else
                    resource[k].justArray.map{|v|value k, v, env }
                   end}}},
