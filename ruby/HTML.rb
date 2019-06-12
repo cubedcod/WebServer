@@ -331,7 +331,7 @@ class WebResource
 
     def self.webizeHash h, &y
       u = {}
-      yield h if h['__typename']
+      yield h if h['__typename'] || h['type']
       h.map{|k,v|
         u[k] = webizeValue v, &y}
       u

@@ -209,7 +209,12 @@ class WebResource
       doc.css('script').map{|script|
         if data = script.inner_text.match(GHgraph)
           graph = ::JSON.parse data[1][0..-2]
-          puts ::JSON.pretty_generate graph
+          HTML.webizeHash(graph){|h|
+            if h['type'] == 'gallery'
+              h['items'].map{|i|
+                puts ::JSON.pretty_generate i
+              }
+            end}
         end}
     end
 
