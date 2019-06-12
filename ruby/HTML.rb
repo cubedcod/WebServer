@@ -48,7 +48,6 @@ class WebResource
       # HEAD links
       @r ||= {}
       @r[:links] ||= {}
-      @r[:links][:up] ||= dirname + '/' + qs + '#r' + (path||'/').sha2 unless !path || path=='/'
       @r[:images] ||= {}
       @r[:colors] ||= {}
 
@@ -70,10 +69,14 @@ class WebResource
           [uri.R.data({id: key, label: displayname}),
            "\n"]}}
 
-      # filtered graph -> HTML
+
       htmlGrep graph, q['q'] if @r[:grep]
       subbed = subscribed?
       tabular = q['view'] == 'table'
+      tabularOverview = '?view=table&sort=date&head'
+      @r[:links][:up] ||= dirname + '/' + qs + '#r' + (path||'/').sha2 unless !path || path=='/'
+      @r[:links][:down] ||= tabularOverview[0..-6] if qs == tabularOverview
+
       # Markup -> HTML
       HTML.render ["<!DOCTYPE html>\n\n",
                    {_: :html,
@@ -88,7 +91,7 @@ class WebResource
                                  {_: :link, rel: type, href: CGI.escapeHTML(uri.to_s)}}}
                             ].map{|e|['  ',e,"\n"]}}, "\n\n",
                         {_: :body,
-                         c: ["\n", link[:up, '&#9650;'], {_: :a, id: :tabular, style: tabular ? 'color: #fff' : 'color: #555', href: tabular ? '?' : '?view=table&sort=date&head', c: '↨'},
+                         c: ["\n", link[:up, '&#9650;'], {_: :a, id: :tabular, style: tabular ? 'color: #fff' : 'color: #555', href: tabular ? '?' : tabularOverview, c: '↨'},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              unless localNode?
                                {class: :toolbox,

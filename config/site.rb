@@ -4,7 +4,7 @@ class WebResource
     def subscriptionFile slug=nil
       (case host
        when /reddit.com$/
-         '/www.reddit.com/r/' + (slug || parts[1]) + '/.sub'
+         '/www.reddit.com/r/' + (slug || parts[1] || '') + '/.sub'
        when /^twitter.com$/
          '/twitter.com/' + (slug || parts[0] || '') + '/.following'
        else

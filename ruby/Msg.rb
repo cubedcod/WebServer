@@ -214,14 +214,14 @@ class WebResource
       content = post.delete(Content).justArray
       uri_hash = 'r' + uri.sha2
       {class: :post, id: uri_hash,
-       c: [{_: :a, id: 'sel' + uri_hash, class: :id, c: '☚', href: uri},
+       c: [{_: :a, id: 'pt' + uri_hash, class: :id, c: '☚', href: uri},
            titles.map{|title|
              title = title.to_s.sub(/\/u\/\S+ on /,'')
              unless env[:title] == title
                env[:title] = title
                [{_: :a, id: 't'+rand.to_s.sha2, class: :title, href: uri, c: CGI.escapeHTML(title)}, ' ']
              end},
-           ({_: :a, class: :date, href: (env && %w{l localhost}.member?(env['SERVER_NAME']) && '/' || 'http://localhost:8000/') + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date} if date),
+           ({_: :a, class: :date, id: 'date' + uri_hash, href: (env && %w{l localhost}.member?(env['SERVER_NAME']) && '/' || 'http://localhost:8000/') + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date} if date),
            images.map{|i| Markup[Image][i,env]},
            {_: :table, class: :fromTo,
             c: {_: :tr,
