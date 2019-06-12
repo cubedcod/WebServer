@@ -204,6 +204,15 @@ class WebResource
           yield env['REQUEST_URI'], Content, HTML.render(HTML.keyval (HTML.webizeHash json), env)}}
     end
 
+    GHgraph = /__gh__coreData.content=(.*?)\s*__gh__coreData.content.bylineFormat/m
+    def GateHouse doc
+      doc.css('script').map{|script|
+        if data = script.inner_text.match(GHgraph)
+          graph = ::JSON.parse data[1][0..-2]
+          puts ::JSON.pretty_generate graph
+        end}
+    end
+
     def Google doc
       doc.css('a[aria-label^="Next"]').map{|a|
         env[:links][:next] ||= a['href']
@@ -291,6 +300,7 @@ class WebResource
       'www.apnews.com' => :AP,
       'www.google.com' => :Google,
       'www.instagram.com' => :Instagram,
+      'www.patriotledger.com' => :GateHouse,
       'twitter.com' => :Twitter,
       'www.youtube.com' => :YouTube,
     }
