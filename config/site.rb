@@ -212,7 +212,10 @@ class WebResource
           HTML.webizeHash(graph){|h|
             if h['type'] == 'gallery'
               h['items'].map{|i|
-                puts ::JSON.pretty_generate i
+                subject = i['link']
+                yield subject, Type, Post.R
+                yield subject, Image, subject.R
+                yield subject, Abstract, CGI.escapeHTML(i['caption'])
               }
             end}
         end}
