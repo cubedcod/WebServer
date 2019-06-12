@@ -356,7 +356,6 @@ class WebResource
 
     BasicGunk = %w{
         [class*='cookie']  [id*='cookie']
-        [class*='featured'] [id*='featured']
         [class*='message'] [id*='message']
         [class*='related'] [id*='related']
         [class*='share']   [id*='share']

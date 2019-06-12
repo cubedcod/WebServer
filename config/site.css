@@ -25,7 +25,8 @@ a.id {float: right; background-color: #000; color: #333}
 a.link, .thumb {background-color: #fff; color: #000}
 a.title > span.uri {font-size: .7em; font-weight: normal; background-color: #aaa}
 a.title {float: left; vertical-align: top; background-color: #aaa; color: #000; font-size: 1.1em; font-weight: bold }
-a.title:visited {background-color: #000; color: #aaa}
+a.title:visited {background-color: #111; color: #ccc}
+a.title:visited > span.uri {background-color: #111; color: #aaa}
 body {font-family: sans-serif; margin: 0 2em 0 2em}
 body, pre, p, span, li, time, td.v {background-color: #000; color: #fff}
 div, td {padding: 0}
