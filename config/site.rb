@@ -23,7 +23,6 @@ class WebResource
 
     # POSTs, allow in regex and define handler if needed
     POSThost = /(^www.facebook.com|\.(edu|gov)|(^|\.)(anvato|brightcove|(accounts|android.*|clients?[0-9]*|drive|groups|images|mail|maps|photos|www|youtubei?)\.google(apis)?|soundcloud|youtube|zillow)\.(com|net))$/
-    POSTpath = /^\/_Incapsula_Resource$/
     def sitePOST
       case host
       when 'www.facebook.com'

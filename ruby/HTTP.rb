@@ -20,8 +20,7 @@ class WebResource
     end
 
     def allowPOST?
-      (host.match? POSThost) ||
-      (path.match? POSTpath)
+      host.match? POSThost
     end
 
     def self.call env
