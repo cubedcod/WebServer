@@ -48,7 +48,7 @@ class WebResource
       # HEAD links
       @r ||= {}
       @r[:links] ||= {}
-      @r[:links][:up] ||= dirname + qs + '#r' + (path||'/').sha2 unless !path || path=='/'
+      @r[:links][:up] ||= dirname + '/' + qs + '#r' + (path||'/').sha2 unless !path || path=='/'
       @r[:images] ||= {}
       @r[:colors] ||= {}
 
@@ -73,6 +73,7 @@ class WebResource
       # filtered graph -> HTML
       htmlGrep graph, q['q'] if @r[:grep]
       subbed = subscribed?
+      tabular = q['view'] == 'table'
       # Markup -> HTML
       HTML.render ["<!DOCTYPE html>\n\n",
                    {_: :html,
@@ -87,7 +88,8 @@ class WebResource
                                  {_: :link, rel: type, href: CGI.escapeHTML(uri.to_s)}}}
                             ].map{|e|['  ',e,"\n"]}}, "\n\n",
                         {_: :body,
-                         c: ["\n", link[:up, '&#9650;'], link[:prev, '&#9664;'], link[:next, '&#9654;'],
+                         c: ["\n", link[:up, '&#9650;'], {_: :a, id: :tabular, style: tabular ? 'color: #fff' : 'color: #555', href: tabular ? '?' : '?view=table&sort=date&head', c: '↨'},
+                             link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              unless localNode?
                                {class: :toolbox,
                                 c: {_: :a, id: :subscribe,
@@ -111,7 +113,7 @@ class WebResource
                                    bins[o].push resource}}
                                bins.map{|bin, resources|
                                  {class: :group, style: HTML.colorize, c: [{_: :span, class: :label, c: CGI.escapeHTML(bin)}, HTML.tabular(resources, @r)]}}
-                             elsif q['view'] == 'table' || (localNode? && directory? && env['REQUEST_PATH'][-1] != '/')
+                             elsif tabular || (localNode? && directory? && env['REQUEST_PATH'][-1] != '/')
                                HTML.tabular graph, @r       # table layout
                              else
                                env[:graph] = graph
@@ -219,7 +221,9 @@ class WebResource
       graph = graph.values if graph.class == Hash
       keys = graph.map{|resource|resource.keys}.flatten.uniq - [Content, DC+'hasFormat', Identifier, Image, Mtime, SIOC+'reply_of', SIOC+'user_agent', Title, Type]
       if env[:query].has_key? 'sort'
-        graph = graph.sort_by{|r| r[env[:query]['sort']].justArray[0].to_s}.reverse
+        attr = env[:query]['sort']
+        attr = Date if attr == 'date'
+        graph = graph.sort_by{|r| r[attr].justArray[0].to_s}.reverse
       end
       titles = {}
       {_: :table, class: :tabular,
@@ -237,7 +241,7 @@ class WebResource
                      ts.map{|t|
                        title = t.to_s.sub(/\/u\/\S+ on /,'')
                        if titles[title]
-                         {_: :a, href: resource.uri, id: 'r' + rand.to_s.sha2, class: :id, c: ' '}
+                         {_: :a, href: resource.uri, id: 'r' + rand.to_s.sha2, class: :id, c: '☚'}
                        else
                          titles[title] = true
                          {_: :a, href: resource.uri, id: 'r' + rand.to_s.sha2, class: :title,
@@ -293,7 +297,7 @@ class WebResource
         end
       elsif v.class == WebResource
         # inline blank-node references
-        if v.uri.match? /^_:/
+        if v.uri.match?(/^_:/) && env[:graph] && env[:graph][v.uri]
           value nil, env[:graph][v.uri], env
         elsif %w{jpg JPG png PNG webp}.member? v.ext
           Markup[Image][v, env]
