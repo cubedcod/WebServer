@@ -133,14 +133,13 @@ class WebResource
 
     # directory -> RDF
     def triplrContainer
-      yield path, Type, Container.R
-      yield path, Title, basename
+      subject = path[-1] == '/' ? path : (path + '/')
+      yield subject, Type, Container.R
+      yield subject, Title, basename
+      mtime.do{|mt|yield subject, Date, mt.iso8601}
       nodes = children
-      nodes.map{|node|
-        yield path, Contains, node.stripDoc}
-      yield path, Size, nodes.size
-      mtime.do{|mt|
-        yield path, Date, mt.iso8601}
+      nodes.map{|node| yield subject, Contains, node.stripDoc}
+      yield subject, Size, nodes.size
     end
 
   end

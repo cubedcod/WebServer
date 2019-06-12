@@ -3,6 +3,7 @@
 #prev, #next {position: fixed; top: 0; height: 100%; max-width: 1em}
 #prev, #next, #up, #down, #tabular {color: #fff; background-color: #000; border-width: 0}
 #prev, #next, #up, #down {font-size: 2em;}
+#down {display: block}
 #tabular, #up {vertical-align: top}
 #tabular {font-size: 1.8em}
 #subscribe {vertical-align: top}

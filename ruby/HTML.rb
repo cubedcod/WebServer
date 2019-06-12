@@ -74,8 +74,12 @@ class WebResource
       subbed = subscribed?
       tabular = q['view'] == 'table'
       tabularOverview = '?view=table&sort=date&head'
-      @r[:links][:up] ||= dirname + '/' + qs + '#r' + (path||'/').sha2 unless !path || path=='/'
-      @r[:links][:down] ||= tabularOverview[0..-6] if qs == tabularOverview
+      @r[:links][:up] = dirname + '/' + qs + '#r' + (path||'/').sha2 unless !path || path=='/'
+      @r[:links][:down] = if qs == tabularOverview
+                            tabularOverview[0..-6]
+                          elsif directory? && env['REQUEST_PATH'][-1] != '/'
+                            path + '/'
+                          end
 
       # Markup -> HTML
       HTML.render ["<!DOCTYPE html>\n\n",
@@ -116,7 +120,7 @@ class WebResource
                                    bins[o].push resource}}
                                bins.map{|bin, resources|
                                  {class: :group, style: HTML.colorize, c: [{_: :span, class: :label, c: CGI.escapeHTML(bin)}, HTML.tabular(resources, @r)]}}
-                             elsif tabular || (localNode? && directory? && env['REQUEST_PATH'][-1] != '/')
+                             elsif tabular || (localNode? && directory?)
                                HTML.tabular graph, @r       # table layout
                              else
                                env[:graph] = graph
