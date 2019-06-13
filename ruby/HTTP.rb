@@ -165,6 +165,13 @@ class WebResource
               else
                 qs
               end
+      # response metadata
+      partial = false
+      response_meta = {}
+      body = nil
+      graph = nil
+      status = nil
+      updates = nil
 
       # locator
       url = if !rack_API
@@ -176,28 +183,7 @@ class WebResource
             end
 
       # storage
-      keep_ext = %w{aac atom css html jpeg jpg js m3u8 map mp3 mp4 ogg opus pdf png svg ttf ttl vtt webm webp woff woff2}.member?(ext.downcase) && !host&.match?(/openload|\.wiki/)
-      pathname = path || ''
-      pathname = pathname[-1] == '/' ? pathname[0..-2] : pathname # strip slash
-      if pathname.size > 255
-        h = pathname.sha2
-        pathname = '/' + h[0..1] + '/' + h[2..-1] + (keep_ext ? ('.' + ext) : '')
-      end
-      cache = ((host ? ('/' + host) : '') + (if !query.empty? # hashed query-component
-                                             [pathname, query.sha2, keep_ext ? ext : 'cache'].join '.'
-                                            else
-                                              keep_ext ? pathname : (pathname + '.cache')
-                                             end)).R env
-      cacheMeta = cache.metafile
-      head["If-Modified-Since"] = cache.mtime.httpdate if cache.e
-      #puts "CACHE #{url} -> #{cache}"
-
-      # response metadata
-      part = nil
-      response_meta = {}
-      status = nil
-      updates = []
-
+      #keep_ext = %w{aac atom css html jpeg jpg js m3u8 map mp3 mp4 ogg opus pdf png svg ttf ttl vtt webm webp woff woff2}.member?(ext.downcase) && !host&.match?(/openload|\.wiki/)
       # fetcher
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
@@ -207,37 +193,32 @@ class WebResource
 
             if response.status.to_s.match?(/206/) # partial response
               response_meta = response.meta
-              part = response.read
+              partial = true
+              body = response.read
             else
               %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| # read metadata
                 @r[:Response]    ||= {}
                 @r[:Response][k] ||= response.meta[k.downcase]}
 
               body = decompress response.meta, response.read # read body
-
-              unless cache.e && cache.readFile == body  # unchanged? 
-
-                cache.writeFile body                    # update
-
-                mime = if response.meta['content-type'] # explicit MIME in metadata
-                         response.meta['content-type'].split(';')[0]
-                       elsif MIMEsuffix[cache.ext]      # filename suffix
-                         MIMEsuffix[cache.ext]
-                       else                             # examine contents
-                         cache.mimeSniff
+              mime = if response.meta['content-type'] # MIME in HTTP metadata
+                       response.meta['content-type'].split(';')[0]
+                     elsif MIMEsuffix[ext]            # path suffix
+                       MIMEsuffix[ext]
+                     else
+                       'application/octet-stream'
+                     end
+              format = case mime
+                       when /^(application|text)\/(atom|rss|xml)/
+                         :feed
+                       when /^text\/turtle/
+                         :turtle
+                       when /^text\/html/
+                         :webpage
+                       else
+                         :nonRDF
                        end
-
-                cacheMeta.writeFile [mime, url, ''].join "\n" if cache.ext == 'cache' # updata metadata
-
-                updates.concat(case mime                                              # update index
-                               when /^(application|text)\/(atom|rss|xml)/
-                                 ('file:' + cache.localPath).R.index(:format => :feed, :base_uri => self)
-                               when /^text\/html/
-                                 ('file:' + cache.rdfize.localPath).R.index(:base_uri => self)
-                               else
-                                 []
-                               end || [])
-              end
+              graph, updates = url.R.index(format, body)
             end
           end
         rescue Exception => e
@@ -254,7 +235,7 @@ class WebResource
             raise
           end
         end}
-
+=begin
       cached = if cache.e              # entry exists?
                  if cache.no_transform # immutable always up to date
                    true
@@ -267,7 +248,8 @@ class WebResource
                else
                  false
                end
-
+=end
+      cached = false
       unless OFFLINE || (cached && !no_cache)
         begin
           fetchURL[url]
@@ -303,19 +285,18 @@ class WebResource
       end
 
       return updates unless rack_API
-      if part
-        [206, response_meta, [part]]
+      if partial
+        [206, response_meta, [body]]
       elsif [401,403].member? status
         [status, response_meta, []]
-      elsif cache.exist?
-        if cache.no_transform || originUI
-          cache.localFile # immutable content
-        else              # transformable
-          env[:feed] = true if cache.feedMIME?
-          graphResponse [cache]
-        end
-      else
+      elsif !graph || graph.empty?
         notfound
+      else
+        if originUI #|| cache.no_transform
+          #cache.localFile # immutable content
+        else              # transformable
+          graphResponse graph
+        end
       end
     end
 

@@ -344,15 +344,7 @@ class WebResource
                                     c: d[Content]}}]}}]}]
     end
   end
-
   include Feed
-
-  module MIME
-
-    def feedMIME?; %w{atom rdf rss}.member?(ext) || mime.match?(/\/(atom|rss|xml)/) end
-
-  end
-
   module Webize
 
     def triplrCalendar

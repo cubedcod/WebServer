@@ -44,108 +44,44 @@ class WebResource
       def each_triple &block; each_statement{|s| block.call *s.to_triple} end
     end
   end
-
+  
   include JSON
-
-  module MIME
-    # file -> bool
-    def isRDF
-      if %w{atom n3 owl rdf ttl}.member? ext
-        return true
-      elsif feedMIME?
-        return true
-      end
-      false
-    end
-
-    # file -> file
-    def justRDF
-      isRDF ? self : rdfize
-    end
-
-    # file -> file
-    def rdfize # call MIME-mapped triplr, cache output in JSON, return swapped file-reference
-      return self if ext == 'e'
-      hash = node.stat.ino.to_s.sha2
-      doc = ('/cache/RDF/' + hash[0..2] + '/' + hash[3..-1] + '.e').R
-      return doc if doc.e && doc.m > m
-      graph = {}
-      if triplr = Triplr[mime]
-        send(*triplr){|s,p,o|
-          graph[s] ||= {'uri' => s}
-          graph[s][p] ||= []
-          graph[s][p].push o.class == WebResource ? {'uri' => o.uri} : o unless p == 'uri'}
-      else
-        puts "#{uri}: triplr for #{mime} missing" unless triplr
-      end
-      doc.writeFile graph.to_json
-    end
-
-  end
   module HTTP
-    # merge-load JSON and RDF to JSON-pickleable Hash
-    def load files
-      g = {}                 # blank Hash
-      graph = RDF::Graph.new # blank Graph
-
-      rdf, notRDF = files.partition &:isRDF # input categories
-
-      rdf.map{|n|
-        opts = {:base_uri => n}
-        opts[:format] = :feed if n.feedMIME?
-        graph.load n.localPath, opts rescue puts("error parsing #{n} as RDF")} # load data
+    def graphToJSON graph
+      g = {}                    # blank Hash
       graph.each_triple{|s,p,o| # bind subject,predicate,object
         s = s.to_s; p = p.to_s # subject URI, predicate URI
         o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object URI or literal value
         g[s] ||= {'uri'=>s} # insert subject
         g[s][p] ||= []      # insert predicate
         g[s][p].push o unless g[s][p].member? o} # insert object
-
-      notRDF.map{|n|
-        n.rdfize.do{|transcode| # transcode to RDF
-          ::JSON.parse(transcode.readFile). # load data
-            map{|s,re| # each resource
-            re.map{|p,o| # bind predicate URI  + object(s)
-              o.justArray.map{|o| # normalize array of objects
-                o = o.R if o.class==Hash # object URI
-                g[s] ||= {'uri'=>s} # insert subject
-                g[s][p] ||= []      # insert predicate
-                g[s][p].push o unless g[s][p].member? o} unless p == 'uri' }}}} # insert object
-
-      g # graph reference
+      g # graph in JSON
     end
 
-    def graphResponse set
-      return notfound if !set || set.empty?
-
-      # output may be on file, for single-member sets
-      extant = set.size == 1 && set[0].bestFormat? && set[0].mime != 'text/html' && set[0] # if HTML is IN and OUT fmt, assume a rewrite is requested
-      format = extant ? extant.mime : selectFormat
-
-      # response metadata
+    def graphResponse graph
+      format = selectFormat
       dateMeta if localNode?
       @r[:Response] ||= {}
       @r[:Response].update({'Link' => @r[:links].map{|type,uri| "<#{uri}>; rel=#{type}"}.intersperse(', ').join}) unless !@r[:links] || @r[:links].empty?
       @r[:Response].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format,
-                            'ETag' => [set.sort.map{|r|[r,r.m]}, format].join.sha2})
+                         #   'ETag' => [set.sort.map{|r|[r,r.m]}, format].join.sha2
+                           })
 
-      # entity generation
+      # conditional generator
       entity @r, ->{
-        if extant # body on file
-          extant  # return ref to body
-        else # generate entity
-          if format == 'text/html' # HTML
+        if false #extant # body on file
+          extant
+        else
+          if format == 'text/html'
             if qs == '?data'
-              '/mashlib/databrowser.html'.R
+              '/mashlib/databrowser.html'.R      # static HTML
             else
-              htmlDocument load set
+              htmlDocument graphToJSON graph     # HTML
             end
-          elsif format == 'application/atom+xml' # feed
-            renderFeed load set
-          else # RDF formats
-            g = RDF::Graph.new # initialize graph
-            set.map{|n| g.load n.justRDF.localPath, :base_uri => n.stripDoc } # load
-            g.dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true # serialize output
+          elsif format == 'application/atom+xml' # Atom/RSS
+            renderFeed graphToJSON graph
+          else                                   # RDF
+            graph.dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true
           end
         end}
     end
@@ -197,9 +133,12 @@ class WebResource
  t the threads topic tumblr
  uk utm www}
 
-    def index options = {}
-      #puts "INDEX #{uri}"
-      g = RDF::Repository.load self, options # load resource
+    def index format, data
+      g = RDF::Repository.new
+      puts "#{uri} #{format}"
+      RDF::Reader.for(format).new(data, :base_uri => self) do |reader|
+        g << reader
+      end
       updates = []
       g.each_graph.map{|graph|               # bind named graph
         n = graph.name.R
@@ -214,10 +153,10 @@ class WebResource
             updates << doc
             puts  "\e[32m+\e[0m http://localhost:8000" + doc.stripDoc
           else
-            #puts  "= http://localhost:8000" + doc.stripDoc
+            puts  "= http://localhost:8000" + doc.stripDoc
           end
           true}}
-      updates
+      [g, updates]
     end
 
     def triplrJSON &f
