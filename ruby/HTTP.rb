@@ -208,17 +208,7 @@ class WebResource
                      else
                        'application/octet-stream'
                      end
-              format = case mime
-                       when /^(application|text)\/(atom|rss|xml)/
-                         :feed
-                       when /^text\/turtle/
-                         :turtle
-                       when /^text\/html/
-                         :webpage
-                       else
-                         :nonRDF
-                       end
-              graph, updates = url.R.index(format, body)
+              graph, updates = url.R.index(mime, body)
             end
           end
         rescue Exception => e

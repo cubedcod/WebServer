@@ -8,43 +8,6 @@ end
 
 class WebResource
 
-  module JSON
-    include URIs
-
-    class Format < RDF::Format
-      content_type     'application/json+rdf', :extension => :e # native "RDF-subset in JSON" format
-      content_encoding 'utf-8'
-      reader { WebResource::JSON::Reader }
-    end
-
-    class Reader < RDF::Reader
-      format Format
-      def initialize(input = $stdin, options = {}, &block)
-        @graph = ::JSON.parse (input.respond_to?(:read) ? input : StringIO.new(input.to_s)).read
-        @base = options[:base_uri]
-        if block_given?
-          case block.arity
-          when 0 then instance_eval(&block)
-          else block.call(self)
-          end
-        end
-        nil
-      end
-      def each_statement &fn
-        @graph.map{|s,r|
-          subject = @base.join s
-          graph = @base.join subject.R.path
-          r.map{|p,o|
-            o.justArray.map{|o|
-              fn.call RDF::Statement.new(subject, RDF::URI(p),
-                                         o.class==Hash ? @base.join(o['uri']) : (l = RDF::Literal o
-                                                                                 l.datatype=RDF.XMLLiteral if p == 'http://rdfs.org/sioc/ns#content'
-                                                                                 l), :graph_name => graph)} unless p=='uri'}}
-      end
-      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
-    end
-  end
-  
   include JSON
   module HTTP
     def graphToJSON graph
@@ -136,7 +99,7 @@ class WebResource
     def index format, data
       g = RDF::Repository.new
       puts "#{uri} #{format}"
-      RDF::Reader.for(format).new(data, :base_uri => self) do |reader|
+      RDF::Reader.for(content_type: format).new(data, :base_uri => self) do |reader|
         g << reader
       end
       updates = []

@@ -1,7 +1,43 @@
 # coding: utf-8
 class WebResource
   module HTML
+    class Format < RDF::Format
+      content_type     'text/html', :extension => :html
+      content_encoding 'utf-8'
+      reader { WebResource::HTML::Reader }
+    end
 
+    class Reader < RDF::Reader
+      include URIs
+      format Format
+
+      def initialize(input = $stdin, options = {}, &block)
+        @doc = (input.respond_to?(:read) ? input : StringIO.new(input.to_s)).read.to_utf8
+        @base = options[:base_uri].R
+        @host = @base.host
+        if block_given?
+          case block.arity
+          when 0 then instance_eval(&block)
+          else block.call(self)
+          end
+        end
+        nil
+      end
+
+      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
+
+      def each_statement &fn
+        scanContent(:normalizeDates, :normalizePredicates,:rawTriples){|s,p,o| # triples flow (left ← right) in filter stack
+          fn.call RDF::Statement.new(s.R, p.R,
+                                     (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal (if p == Content
+                                                                                                    WebResource::HTML.clean o
+                                                                                                   else
+                                                                                                     o.gsub(/<[^>]*>/,' ')
+                                                                                                    end)
+                                                                                  l.datatype=RDF.XMLLiteral if p == Content
+                                                                                  l), :graph_name => s.R)}
+      end
+    end
     SiteCSS = ConfDir.join('site.css').read
     SiteJS  = ConfDir.join('site.js').read
 
