@@ -159,6 +159,7 @@ class WebResource
 
     def fetch(options = {})
       return cache.fileResponse if cacheHit?
+      return self.GETthru if upstreamUI?
 
       # request data
       @r ||= {}
@@ -174,7 +175,7 @@ class WebResource
               else
                 qs
               end
-      url = if suffix = ext.empty? && host.match?(/reddit.com$/) && !upstreamUI && '.rss'
+      url = if suffix = ext.empty? && host.match?(/reddit.com$/) && !upstreamUI? && '.rss'
               'https://' + (env['HTTP_HOST'] || host) + path + suffix + query                  # insert format-suffix
             else
               'https://' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + query)) # original URL
@@ -280,7 +281,7 @@ class WebResource
       return if options[:no_response]
       if file
         file.fileResponse
-      elsif upstreamUI
+      elsif upstreamUI?
         [200, meta, [body]]
       elsif 206 == status
         [206, meta, [body]]
@@ -567,7 +568,7 @@ class WebResource
       [302, {'Location' => location}, []]
     end
 
-    def upstreamUI
+    def upstreamUI?
       if %w{duckduckgo.com soundcloud.com}.member? host
         true
       elsif env['HTTP_USER_AGENT'] == DesktopUA
