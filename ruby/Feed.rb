@@ -11,14 +11,10 @@ class WebResource
   def self.getFeeds
     FeedURL.values.shuffle.map{|feed|
       begin
-        feed.fetch.do{|status, h, b|
-          [status, 'https:' + feed.uri]}
+        feed.fetch format: 'application/atom+xml', no_response: true
       rescue Exception => e
-        [500, 'https:' + feed.uri, e.class, e.message]
-      end}.
-      compact.sort.do{|report|
-      report.map{|line|
-        puts line.join "\t" unless 200 == line[0]}}
+        puts 'https:' + feed.uri, e.class, e.message
+      end}
   end
 
   module HTTP
@@ -58,7 +54,7 @@ class WebResource
     end
 
     class Format < RDF::Format
-      content_type     'application/atom+xml', :extension => :atom
+      content_type 'application/atom+xml', :extension => :atom
       content_encoding 'utf-8'
       reader { WebResource::Feed::Reader }
     end

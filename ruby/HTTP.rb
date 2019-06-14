@@ -152,7 +152,7 @@ class WebResource
     end
     alias_method :env, :environment
 
-    def fetch rack_API=true
+    def fetch(options = {})
       return cache.fileResponse if cacheHit?
 
       # request data
@@ -162,28 +162,25 @@ class WebResource
       head['User-Agent'] = DesktopUA
       head.delete 'User-Agent' if %w{po.st t.co}.member? host
       head[:redirect] = false                            # halt internal redirects
-      query = if rack_API
+      query = if @r[:query]
                 q = @r[:query].dup || {}
-                %w{group view sort}.map{|a| q.delete a } # strip internal qs-args
-                q.empty? ? '' : HTTP.qs(q)
+                %w{group view sort}.map{|a| q.delete a } # strip internal query arguments
+                q.empty? ? '' : HTTP.qs(q)               # original query string
               else
                 qs
               end
-      url = if !rack_API
-              'https://' + host + path + qs
-            elsif suffix = ext.empty? && host.match?(/reddit.com$/) && !originUI && '.rss'
+      url = if suffix = ext.empty? && host.match?(/reddit.com$/) && !originUI && '.rss'
               'https://' + (env['HTTP_HOST'] || host) + path + suffix + query                  # added format-suffix
             else
-              'https://' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + query)) # extant URL
+              'https://' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + query)) # original URL
             end
 
       # response data
       body = nil
       file = nil
-      graph = RDF::Repository.new
+      graph = options[:graph] || RDF::Repository.new
       meta = {}
       status = nil
-      updates = nil
 
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
@@ -199,7 +196,9 @@ class WebResource
                 @r[:Response]    ||= {}
                 @r[:Response][k] ||= meta[k.downcase]}
 
-              mime = if meta['content-type']
+              mime = if options[:format]
+                       options[:format]
+                     elsif meta['content-type']
                        meta['content-type'].split(';')[0]
                      elsif MIMEsuffix[ext]
                        puts "WARNING missing MIME in HTTP metadata"
@@ -215,7 +214,7 @@ class WebResource
                 file = cache.writeFile body
               else
                 RDF::Reader.for(content_type: mime).new(body, :base_uri => self){|reader| graph << reader } # read graph
-                updates.concat index graph                                                                  # index updates
+                index graph                                                                                 # index graph
               end
             end
           end
@@ -254,7 +253,11 @@ class WebResource
           if location == fallback
             fetchURL[fallback]
           else
-            return updateLocation location
+            if options[:no_response]
+              puts "REDIRECT \e[32;7m" + location + "\e[0m"
+            else
+              return updateLocation location
+            end
           end
         when 'RuntimeError'
           fetchURL[fallback]
@@ -266,8 +269,7 @@ class WebResource
         end
       end
 
-      return updates unless rack_API
-
+      return if options[:no_response]
       if file
         file.fileResponse
       elsif 206 == status

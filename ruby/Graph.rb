@@ -116,7 +116,7 @@ class WebResource
             updates << doc
             puts  "\e[32m+\e[0m http://localhost:8000" + doc.stripDoc
           else
-            puts  "= http://localhost:8000" + doc.stripDoc
+            #puts  "= http://localhost:8000" + doc.stripDoc
           end
           true}}
       updates

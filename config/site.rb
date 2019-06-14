@@ -167,10 +167,10 @@ class WebResource
     # Twitter
     HostGET['twitter.com'] = -> r {
       if !r.path || r.path == '/'
-        sources = []
+        graph = RDF::Repository.new
         r.subscriptions.shuffle.each_slice(18){|s|
-          sources << (Twitter + '/search?f=tweets&vertical=default&q=' + s.map{|u| 'from:' + u}.intersperse('+OR+').join).R(r.env) }
-        r.graphResponse sources.map{|source|source.fetch false}.flatten
+          (Twitter+'/search?f=tweets&vertical=default&q='+s.map{|u|'from:' + u}.intersperse('+OR+').join).R.fetch graph: graph, no_response: true}
+        r.graphResponse graph
       else
         r.remote
       end}
