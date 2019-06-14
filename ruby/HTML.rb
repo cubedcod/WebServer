@@ -510,11 +510,7 @@ sidebar [class^='side']    [id^='side']
 
     def self.webizeString str, &y
       if str.match? /^(http|\/)\S+$/
-        if str.match? /\.(jpg|png|webp)/i
-          {'uri' => str, Type => Image.R}
-        else
-          str.R
-        end
+        str.R
       else
         str
       end

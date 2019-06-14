@@ -23,7 +23,7 @@ class WebResource
 
     def cache; ('/' + host + path).R end
 
-    def cacheHit?; cache.exist? end
+    def cacheHit?; cache.file? end
 
     def self.call env
       return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? env['REQUEST_METHOD'] # allow defined methods
