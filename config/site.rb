@@ -192,7 +192,7 @@ class WebResource
   end
 
   def self.twits
-    `cd ~/src/WebServer && git show -s --format=%B e015012b8c53e15e460a297b636b03ae853df239`.split.map{|twit|
+    `cd ~/src/WebServer && git show -s --format=%B f8f21ef33eaa3fba034d9868d3bc4cd2f68bede4`.split.map{|twit|
       (Twitter + '/' + twit).R.subscribe}
   end
 
