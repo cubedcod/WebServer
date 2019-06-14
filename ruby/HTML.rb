@@ -29,7 +29,7 @@ sidebar [class^='side']    [id^='side']
 
     def initialize(input = $stdin, options = {}, &block)
         @doc = (input.respond_to?(:read) ? input : StringIO.new(input.to_s)).read.to_utf8
-        @base = options[:base_uri].R
+        @base = options[:base_uri]
         @host = @base.host
         if block_given?
           case block.arity

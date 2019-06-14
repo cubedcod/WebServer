@@ -204,7 +204,7 @@ class WebResource
           data = data[0]
           data = data[0..-2] if data[-1] == ';'
           json = ::JSON.parse data
-          yield env['REQUEST_URI'], Content, HTML.render(HTML.keyval (HTML.webizeHash json), env)}}
+          yield self, Content, HTML.render(HTML.keyval (HTML.webizeHash json), env)}}
     end
 
     GHgraph = /__gh__coreData.content=(.*?)\s*__gh__coreData.content.bylineFormat/m
@@ -296,10 +296,7 @@ class WebResource
     end
 
     def YouTube doc
-      if env['REQUEST_PATH'] == '/watch'
-        s = 'https://www.youtube.com' + env['REQUEST_URI']
-        yield s, Video, s.R
-      end
+      yield self, Video, self if path == '/watch'
     end
 
     def YouTubeJSON doc

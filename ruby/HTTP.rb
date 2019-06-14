@@ -151,7 +151,9 @@ class WebResource
     alias_method :env, :environment
 
     def fetch rack_API=true
-      # request metadata
+      return cachedFile if cacheHit?
+
+      # request data
       @r ||= {}
       head = HTTP.unmangle env                           # strip local headers
       head.delete 'Host'
@@ -165,50 +167,48 @@ class WebResource
               else
                 qs
               end
-      # response metadata
-      response_meta = {}
-      body = nil
-      graph = nil
-      status = nil
-      updates = nil
-      partial = false
-
-      # locator
       url = if !rack_API
               'https://' + host + path + qs
-            elsif suffix = ext.empty? && host.match?(/reddit.com$/) && !originUI && '.rss' # insert format-suffix
+            elsif suffix = ext.empty? && host.match?(/reddit.com$/) && !originUI && '.rss' # add format-suffix
               'https://' + (env['HTTP_HOST'] || host) + path + suffix + query
             else
               'https://' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + query))
             end
 
-      # storage
-      #keep_ext = %w{aac atom css html jpeg jpg js m3u8 map mp3 mp4 ogg opus pdf png svg ttf ttl vtt webm webp woff woff2}.member?(ext.downcase) && !host&.match?(/openload|\.wiki/)
-      # fetcher
+      # response data
+      status = nil
+      meta = {}
+      body = nil
+      graph = RDF::Repository.new
+      partial = false
+      updates = nil
+
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
         begin
           open(url, head) do |response| # request
-              #HTTP.print_header head; puts "<============>"; print response.status.justArray.join(' ') + ' '; HTTP.print_header response.meta
-
-            if response.status.to_s.match?(/206/) # partial response
-              response_meta = response.meta
+            meta = response.meta
+            #HTTP.print_header head; puts "<============>"; print response.status.justArray.join(' ') + ' '; HTTP.print_header meta
+            if response.status.to_s.match? /206/
               partial = true
               body = response.read
             else
-              %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Set-Cookie}.map{|k| # read metadata
+              %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag Set-Cookie}.map{|k| # read metadata
                 @r[:Response]    ||= {}
-                @r[:Response][k] ||= response.meta[k.downcase]}
+                @r[:Response][k] ||= meta[k.downcase]}
 
               body = decompress response.meta, response.read # read body
-              mime = if response.meta['content-type'] # MIME in HTTP metadata
-                       response.meta['content-type'].split(';')[0]
-                     elsif MIMEsuffix[ext]            # path suffix
+              mime = if meta['content-type'] # response metadata
+                       meta['content-type'].split(';')[0]
+                     elsif MIMEsuffix[ext]   # pathname suffix
+                       puts "WARNING missing MIME in HTTP header"
                        MIMEsuffix[ext]
                      else
+                       puts "ERROR missing MIME in HTTP header and path-extension"
                        'application/octet-stream'
                      end
-              graph, updates = url.R.index(mime, body)
+              RDF::Reader.for(content_type: mime).new(body, :base_uri => self){|reader| graph << reader } # read graph
+              updates.concat index graph
             end
           end
         rescue Exception => e
@@ -225,68 +225,49 @@ class WebResource
             raise
           end
         end}
-=begin
-      cached = if cache.e              # entry exists?
-                 if cache.no_transform # immutable always up to date
-                   true
-                 elsif (Time.now - cache.mtime) < 60 # reasonably fresh
-                   #puts :cache_throttle
-                   true
-                 else # TODO find HTTP header checks where upstream hit isn't required to determine freshness
-                   false
-                 end
-               else
-                 false
-               end
-=end
-      cached = false
-      unless OFFLINE || (cached && !no_cache)
-        begin
-          fetchURL[url]
-        rescue Exception => e
-          fallback = url.sub /^https/, 'http'
-          case e.class.to_s
-          when 'Errno::ECONNREFUSED'
+
+      begin
+        fetchURL[url]
+      rescue Exception => e
+        fallback = url.sub /^https/, 'http'
+        case e.class.to_s
+        when 'Errno::ECONNREFUSED'
+          fetchURL[fallback]
+        when 'Errno::ENETUNREACH'
+          fetchURL[fallback]
+        when 'Net::OpenTimeout'
+          fetchURL[fallback]
+        when 'OpenSSL::SSL::SSLError'
+          fetchURL[fallback]
+        when 'OpenURI::HTTPError'
+          fetchURL[fallback]
+        when 'OpenURI::HTTPRedirect'
+          location = e.io.meta['location']
+          if location == fallback
             fetchURL[fallback]
-          when 'Errno::ENETUNREACH'
-            fetchURL[fallback]
-          when 'Net::OpenTimeout'
-            fetchURL[fallback]
-          when 'OpenSSL::SSL::SSLError'
-            fetchURL[fallback]
-          when 'OpenURI::HTTPError'
-            fetchURL[fallback]
-          when 'OpenURI::HTTPRedirect'
-            location = e.io.meta['location']
-            if location == fallback
-              fetchURL[fallback]
-            else
-              return updateLocation location
-            end
-          when 'RuntimeError'
-            fetchURL[fallback]
-          when 'SocketError'
-            puts ["\e[7;31m", url, e.class, e.message, "\e[0m"].join ' '
           else
-            puts ["\e[7;31m", url, e.class, e.message, "\e[0m"].join ' '
-            puts e.backtrace
+            return updateLocation location
           end
+        when 'RuntimeError'
+          fetchURL[fallback]
+        when 'SocketError'
+          puts ["\e[7;31m", url, e.class, e.message, "\e[0m"].join ' '
+        else
+          puts ["\e[7;31m", url, e.class, e.message, "\e[0m"].join ' '
+          puts e.backtrace
         end
       end
 
       return updates unless rack_API
+
       if partial
-        [206, response_meta, [body]]
-      elsif [401,403].member? status
-        [status, response_meta, []]
-      elsif !graph || graph.empty?
+        [206, meta, [body]]
+      elsif [401, 403].member? status
+        [status, meta, []]
+      elsif graph.empty?
         notfound
       else
-        if originUI #|| cache.no_transform
-          #cache.localFile # immutable content
-        else              # transformable
-          graphResponse graph
-        end
+        graphResponse graph
       end
     end
 

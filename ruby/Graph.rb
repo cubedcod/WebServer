@@ -93,20 +93,16 @@ class WebResource
  t the threads topic tumblr
  uk utm www}
 
-    def index format, data
-      g = RDF::Repository.new
-      puts "#{uri} #{format}"
-      RDF::Reader.for(content_type: format).new(data, :base_uri => self) do |reader|
-        g << reader
-      end
+    def index g
       updates = []
-      g.each_graph.map{|graph|               # bind named graph
+      g.each_graph.map{|graph|
         n = graph.name.R
-        # link to timeline
         graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value.do{|t| # timestamp
+          # doc URI in timeline
           doc = ['/' + t.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/\+?(00.00|Z)$/,''),  # hour-dir
                  %w{host path query fragment}.map{|a|n.send(a).do{|p|p.split(/[\W_]/)}},'ttl']. #  slugs
                  flatten.-([nil,'',*BasicSlugs]).join('.').R  # apply skiplist, mint URI
+          # store version
           unless doc.e
             doc.dir.mkdir
             RDF::Writer.open(doc.localPath){|f|f << graph}
@@ -116,7 +112,7 @@ class WebResource
             puts  "= http://localhost:8000" + doc.stripDoc
           end
           true}}
-      [g, updates]
+      updates
     end
 
     def triplrJSON &f
