@@ -158,7 +158,6 @@ class WebResource
 
     def fetch(options = {})
       return cache.fileResponse if cacheHit?
-      return self.GETthru if upstreamUI?
 
       # request data
       @r ||= {}
