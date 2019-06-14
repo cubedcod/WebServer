@@ -19,9 +19,11 @@ class WebResource
       end
     end
 
-    def allowPOST?
-      host.match? POSThost
-    end
+    def allowPOST?; host.match? POSThost end
+
+    def cacheLocation; '/' + host + path end
+
+    def cacheHit?; cacheLocation.exist? end
 
     def self.call env
       return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? env['REQUEST_METHOD'] # allow defined methods
@@ -126,11 +128,11 @@ class WebResource
     end
 
     def entity env, lambda = nil
-      etags = env['HTTP_IF_NONE_MATCH'].do{|m| m.strip.split /\s*,\s*/ }
-      if etags && (etags.include? env[:Response]['ETag'])
-        [304, {}, []] # client has entity
-      else
-        body = lambda ? lambda.call : self # generate
+      entities = env['HTTP_IF_NONE_MATCH'].do{|m| m.strip.split /\s*,\s*/ }
+      if entities && entities.include?(env[:Response]['ETag'])
+        [304, {}, []] # not modified
+      else            # generate
+        body = lambda ? lambda.call : self # call generator lambda
         if body.class == WebResource # static-resource reference
           (Rack::File.new nil).serving((Rack::Request.new env), body.localPath).do{|s,h,b|
             [s,h.update(env[:Response]),b]}
@@ -155,24 +157,24 @@ class WebResource
 
       # request data
       @r ||= {}
-      head = HTTP.unmangle env                           # strip local headers
+      head = HTTP.unmangle env                           # strip internal headers
       head.delete 'Host'
       head['User-Agent'] = DesktopUA
       head.delete 'User-Agent' if %w{po.st t.co}.member? host
-      head[:redirect] = false                            # no internal redirects
+      head[:redirect] = false                            # halt internal redirects
       query = if rack_API
                 q = @r[:query].dup || {}
-                %w{group view sort}.map{|a| q.delete a } # strip local query-arguments
+                %w{group view sort}.map{|a| q.delete a } # strip internal qs-args
                 q.empty? ? '' : HTTP.qs(q)
               else
                 qs
               end
       url = if !rack_API
               'https://' + host + path + qs
-            elsif suffix = ext.empty? && host.match?(/reddit.com$/) && !originUI && '.rss' # add format-suffix
-              'https://' + (env['HTTP_HOST'] || host) + path + suffix + query
+            elsif suffix = ext.empty? && host.match?(/reddit.com$/) && !originUI && '.rss'
+              'https://' + (env['HTTP_HOST'] || host) + path + suffix + query                  # added format-suffix
             else
-              'https://' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + query))
+              'https://' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + query)) # extant URL
             end
 
       # response data
@@ -196,17 +198,16 @@ class WebResource
               %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag Set-Cookie}.map{|k| # read metadata
                 @r[:Response]    ||= {}
                 @r[:Response][k] ||= meta[k.downcase]}
-
-              body = decompress response.meta, response.read # read body
-              mime = if meta['content-type'] # response metadata
+              mime = if meta['content-type']
                        meta['content-type'].split(';')[0]
-                     elsif MIMEsuffix[ext]   # pathname suffix
-                       puts "WARNING missing MIME in HTTP header"
+                     elsif MIMEsuffix[ext]
+                       puts "WARNING missing MIME in HTTP metadata"
                        MIMEsuffix[ext]
                      else
-                       puts "ERROR missing MIME in HTTP header and path-extension"
+                       puts "ERROR missing MIME in HTTP meta and URI path-extension"
                        'application/octet-stream'
                      end
+              body = decompress meta, response.read                                                       # read body
               RDF::Reader.for(content_type: mime).new(body, :base_uri => self){|reader| graph << reader } # read graph
               updates.concat index graph
             end
@@ -262,10 +263,8 @@ class WebResource
 
       if partial
         [206, meta, [body]]
-      elsif [401, 403].member? status
+      elsif [304, 401, 403].member? status
         [status, meta, []]
-      elsif graph.empty?
-        notfound
       else
         graphResponse graph
       end
@@ -297,41 +296,32 @@ class WebResource
     end
 
     def local
-      localNode if localNode?
-    end
-
-    # file(s) -> HTTP Response
-    def localGraph
-      graphResponse localNodes
-    end
-
-    def localNode
-      if %w{y year m month d day h hour}.member? parts[0] # local timeline
-        time = Time.now
-        loc = time.strftime(case parts[0][0].downcase
-                            when 'y'
-                              '/%Y/'
-                            when 'm'
-                              '/%Y/%m/'
-                            when 'd'
-                              '/%Y/%m/%d/'
-                            when 'h'
-                              '/%Y/%m/%d/%H/'
-                            else
-                            end)
-        [303, @r[:Response].update({'Location' => loc + parts[1..-1].join('/') + qs}), []]
-      elsif file?
-        localFile
-      else
-        localGraph
+      if localNode?
+        if %w{y year m month d day h hour}.member? parts[0] # timeslice redirect
+          time = Time.now
+          loc = time.strftime(case parts[0][0].downcase
+                              when 'y'
+                                '/%Y/'
+                              when 'm'
+                                '/%Y/%m/'
+                              when 'd'
+                                '/%Y/%m/%d/'
+                              when 'h'
+                                '/%Y/%m/%d/%H/'
+                              else
+                              end)
+          [303, @r[:Response].update({'Location' => loc + parts[1..-1].join('/') + qs}), []]
+        elsif file?
+          fileResponse
+        else
+          graphResponse graph
+        end
       end
     end
 
     LocalAddr = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
 
-    def localNode?
-      LocalAddr.member?(@r['SERVER_NAME']||host)
-    end
+    def localNode?; LocalAddr.member?(@r['SERVER_NAME']||host) end
 
     def metafile type = 'meta'
       dir + (dirname[-1] == '/' ? '' : '/') + '.' + basename + '.' + type

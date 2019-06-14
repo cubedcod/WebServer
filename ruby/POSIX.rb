@@ -145,17 +145,12 @@ class WebResource
   end
   module HTTP
 
-    # file -> HTTP Response
-    def localFile
+    def fileResponse
       @r[:Response]['Access-Control-Allow-Origin'] ||= allowedOrigin
       @r[:Response]['Cache-Control'] ||= 'no-transform' if @r[:Response]['Content-Type'] && @r[:Response]['Content-Type'].match(NoTransform)
       @r[:Response]['Content-Type'] ||= (%w{text/html text/turtle}.member?(mime) ? (mime + '; charset=utf-8') : mime)
-      @r[:Response]['ETag'] ||= [m,size].join.sha2
-      if q.has_key?('preview') && ext && ext.match(/(mp4|mkv|png|jpg)/i)
-        filePreview
-      else
-        entity @r
-      end
+      @r[:Response]['ETag'] ||= [uri, mtime, size].join.sha2
+      entity @r
     end
 
   end

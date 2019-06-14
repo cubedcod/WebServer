@@ -8,40 +8,47 @@ end
 
 class WebResource
   module HTTP
+
+    # tree with nested S -> P -> O indexing
     def treeFromGraph graph
-      g = {}                    # blank Hash
-      graph.each_triple{|s,p,o| # bind subject,predicate,object
-        s = s.to_s; p = p.to_s # subject URI, predicate URI
-        o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object URI or literal value
-        g[s] ||= {'uri'=>s} # insert subject
-        g[s][p] ||= []      # insert predicate
+      g = {}                    # empty tree
+
+      # traverse
+      graph.each_triple{|s,p,o| # (subject,predicate,object) triple
+        s = s.to_s; p = p.to_s  # subject, predicate
+        o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object
+        g[s] ||= {'uri'=>s}                      # insert subject
+        g[s][p] ||= []                           # insert predicate
         g[s][p].push o unless g[s][p].member? o} # insert object
-      g # graph in JSON
+
+      g # tree
     end
 
     def graphResponse graph
-      @r[:Response] ||= {}
+      return notfound if graph.empty?
 
       # response metadata
+      @r[:Response] ||= {}
       dateMeta if localNode?
-      @r[:Response].update({'Link' => @r[:links].map{|type,uri|
-                              "<#{uri}>; rel=#{type}"}.intersperse(', ').join}) unless !@r[:links] || @r[:links].empty?
-      # format
       format = selectFormat
       @r[:Response].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
+      unless !@r[:links] || @r[:links].empty?
+        @r[:Response].update({'Link' => @r[:links].map{|type,uri|
+                                "<#{uri}>; rel=#{type}"}.intersperse(', ').join})
+      end
 
-      # conditional generator
+      # generator called by need
       entity @r, ->{
         case format
         when /^text\/html/
           if qs == '?data'
-            '/mashlib/databrowser.html'.R    # static HTML file databrowser source
+            '/mashlib/databrowser.html'.R    # static HTML w/ databrowser source
           else
-            htmlDocument treeFromGraph graph # generate HTML doc
+            htmlDocument treeFromGraph graph # generated HTML
           end
         when /^(application|text)\/(atom|rss|xml)/
-          renderFeed treeFromGraph graph
-        else
+          renderFeed treeFromGraph graph     # generated feed
+        else                                 # RDF
           graph.dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true
         end}
     end
