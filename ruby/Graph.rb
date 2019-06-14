@@ -32,15 +32,16 @@ class WebResource
 
       # conditional generator
       entity @r, ->{
-        if format == 'text/html'
+        case format
+        when /^text\/html/
           if qs == '?data'
-            '/mashlib/databrowser.html'.R      # static HTML
+            '/mashlib/databrowser.html'.R    # static HTML file databrowser source
           else
-            htmlDocument treeFromGraph graph     # HTML
+            htmlDocument treeFromGraph graph # generate HTML doc
           end
-        elsif format == 'application/atom+xml' # Atom/RSS
+        when /^(application|text)\/(atom|rss|xml)/
           renderFeed treeFromGraph graph
-        else                                   # RDF
+        else
           graph.dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true
         end}
     end

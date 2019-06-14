@@ -13,6 +13,15 @@ class WebResource
     end
 
   end
+  module HTML
+    class Reader
+      Gunk = %w{
+ .ActionBar .ActionBar-items .SocialBar
+ .featured-headlines
+ .global-audio-components
+}
+    end
+  end
   module HTTP
 
     # Agent preferring upstream "desktop" interface
@@ -188,12 +197,6 @@ class WebResource
   end
 
   module Webize
-
-    Gunk = %w{
- .ActionBar .ActionBar-items .SocialBar
- .featured-headlines
- .global-audio-components
-}
 
     def AP doc
       doc.css('script').map{|script|
