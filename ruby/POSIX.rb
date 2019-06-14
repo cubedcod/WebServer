@@ -87,7 +87,7 @@ class WebResource
          if !index.empty? && qs.empty? # static index-file exists and no query
            index
          else
-           [self, env['REQUEST_PATH'][-1] == '/' ? children : []]
+           children
          end
        end
       else # files

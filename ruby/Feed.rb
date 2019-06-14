@@ -46,6 +46,7 @@ class WebResource
     def subscribed?
       subscriptionFile.exist?
     end
+    def subs; puts subscriptions.sort.join ' ' end
 
     def subscriptions
       subscriptionFile('*').R.glob.map(&:dir).map &:basename

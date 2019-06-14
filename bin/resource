@@ -1,3 +1,3 @@
 #!/usr/bin/env ruby
 require_relative '../ruby/index'
-puts ARGV[0].R.send ARGV[1]
+ARGV[0].R.send ARGV[1]

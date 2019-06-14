@@ -291,7 +291,7 @@ sidebar [class^='side']    [id^='side']
                                    bins[o].push resource}}
                                bins.map{|bin, resources|
                                  {class: :group, style: HTML.colorize, c: [{_: :span, class: :label, c: CGI.escapeHTML(bin)}, HTML.tabular(resources, @r)]}}
-                             elsif tabular || (localNode? && directory?)
+                             elsif tabular
                                HTML.tabular graph, @r       # table layout
                              else
                                env[:graph] = graph
