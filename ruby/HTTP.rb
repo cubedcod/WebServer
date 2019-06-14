@@ -131,7 +131,7 @@ class WebResource
         [304, {}, []] # client has entity
       else
         body = lambda ? lambda.call : self # generate
-        if body.class == WebResource # local static resource
+        if body.class == WebResource # static-resource reference
           (Rack::File.new nil).serving((Rack::Request.new env), body.localPath).do{|s,h,b|
             [s,h.update(env[:Response]),b]}
         else
@@ -166,12 +166,12 @@ class WebResource
                 qs
               end
       # response metadata
-      partial = false
       response_meta = {}
       body = nil
       graph = nil
       status = nil
       updates = nil
+      partial = false
 
       # locator
       url = if !rack_API

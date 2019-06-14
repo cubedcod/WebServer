@@ -7,10 +7,8 @@ class Hash
 end
 
 class WebResource
-
-  include JSON
   module HTTP
-    def graphToJSON graph
+    def treeFromGraph graph
       g = {}                    # blank Hash
       graph.each_triple{|s,p,o| # bind subject,predicate,object
         s = s.to_s; p = p.to_s # subject URI, predicate URI
@@ -22,30 +20,28 @@ class WebResource
     end
 
     def graphResponse graph
-      format = selectFormat
-      dateMeta if localNode?
       @r[:Response] ||= {}
-      @r[:Response].update({'Link' => @r[:links].map{|type,uri| "<#{uri}>; rel=#{type}"}.intersperse(', ').join}) unless !@r[:links] || @r[:links].empty?
-      @r[:Response].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format,
-                         #   'ETag' => [set.sort.map{|r|[r,r.m]}, format].join.sha2
-                           })
+
+      # response metadata
+      dateMeta if localNode?
+      @r[:Response].update({'Link' => @r[:links].map{|type,uri|
+                              "<#{uri}>; rel=#{type}"}.intersperse(', ').join}) unless !@r[:links] || @r[:links].empty?
+      # format
+      format = selectFormat
+      @r[:Response].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
 
       # conditional generator
       entity @r, ->{
-        if false #extant # body on file
-          extant
-        else
-          if format == 'text/html'
-            if qs == '?data'
-              '/mashlib/databrowser.html'.R      # static HTML
-            else
-              htmlDocument graphToJSON graph     # HTML
-            end
-          elsif format == 'application/atom+xml' # Atom/RSS
-            renderFeed graphToJSON graph
-          else                                   # RDF
-            graph.dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true
+        if format == 'text/html'
+          if qs == '?data'
+            '/mashlib/databrowser.html'.R      # static HTML
+          else
+            htmlDocument treeFromGraph graph     # HTML
           end
+        elsif format == 'application/atom+xml' # Atom/RSS
+          renderFeed treeFromGraph graph
+        else                                   # RDF
+          graph.dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true
         end}
     end
 
