@@ -162,7 +162,7 @@ class WebResource
     def fetch(options = {})
       return cache.fileResponse if cacheHit?
 
-      # request data
+      # request metadata
       @r ||= {}
       head = HTTP.unmangle env                           # strip local headers
       head.delete 'Host'
@@ -181,8 +181,8 @@ class WebResource
             else
               'https://' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + query)) # original URL
             end
-
-      # response data
+      # response metadata
+      @r[:Response] ||= {}
       response = nil
       status = nil
       meta = {}
@@ -198,8 +198,7 @@ class WebResource
             meta = resp.meta; #HTTP.print_header meta
             unless status == 206
               %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag Set-Cookie}.map{|k| # read meta
-                @r[:Response]    ||= {}
-                @r[:Response][k] ||= meta[k.downcase]}
+                @r[:Response][k] ||= meta[k.downcase] if meta[k.downcase]}
               format = if options[:format]
                          options[:format]
                        elsif meta['content-type']
