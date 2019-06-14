@@ -157,6 +157,8 @@ class WebResource
     end
     alias_method :env, :environment
 
+    PathGET['/favicon.ico']  = -> r {r.upstreamUI? ? r.fetch : [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
+
     def fetch(options = {})
       return cache.fileResponse if cacheHit?
 
