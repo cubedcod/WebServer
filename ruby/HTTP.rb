@@ -181,26 +181,23 @@ class WebResource
             end
 
       # response data
-      body = nil
+      response = nil
+      status = nil
+      meta = {}
       file = nil
       graph = options[:graph] || RDF::Repository.new
-      meta = {}
-      status = nil
 
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
         begin
-          open(url, head) do |response| # request
-            meta = response.meta
-            body = response.read
-            #HTTP.print_header head; puts "<============>"; print response.status.justArray.join(' ') + ' '; HTTP.print_header meta
-            if response.status.to_s.match? /206/
-              status = 206
-            else
-              %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag Set-Cookie}.map{|k| # read metadata
+          open(url, head) do |resp|
+            response = resp
+            status = resp.status.to_s.match(/\d{3}/)[0]
+            meta = resp.meta; #HTTP.print_header meta
+            unless status == 206
+              %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag Set-Cookie}.map{|k| # read meta
                 @r[:Response]    ||= {}
                 @r[:Response][k] ||= meta[k.downcase]}
-
               format = if options[:format]
                          options[:format]
                        elsif meta['content-type']
@@ -216,10 +213,11 @@ class WebResource
                          puts "ERROR missing MIME in HTTP meta and URI path-extension"
                          'application/octet-stream'
                        end
-              data = decompress meta, body                                                          # read body
+              data = decompress meta, resp.read                                                     # read body
               if format.match? NonRDF
                 file = cache.writeFile data
               else
+                puts "rdfize #{format} #{uri}"
                 RDF::Reader.for(content_type: format).new(data, :base_uri => self){|_| graph << _ } # read graph
                 index graph                                                                         # index graph
               end
@@ -281,9 +279,9 @@ class WebResource
       if file
         file.fileResponse
       elsif upstreamUI?
-        [200, meta, [body]]
+        [200, meta, [response.read]]
       elsif 206 == status
-        [206, meta, [body]]
+        [status, meta, [response.read]]
       elsif [304, 401, 403].member? status
         [status, meta, []]
       else
@@ -334,7 +332,12 @@ class WebResource
         else
           graph = RDF::Graph.new
           nodes.map{|node|
-            graph.load node.localPath, :base_uri => self}
+            if node.ext == 'ttl'
+              graph.load node.localPath, :base_uri => self
+            else
+              graph.load node.localPath, :format => :notrdf, :base_uri => self
+            end
+          }
           graphResponse graph
         end
       end

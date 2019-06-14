@@ -7,6 +7,48 @@ class Hash
 end
 
 class WebResource
+  module NotRDF
+    class Format < RDF::Format
+      content_encoding 'utf-8'
+      reader { WebResource::NotRDF::Reader }
+    end
+
+    class Reader < RDF::Reader
+      include URIs
+      format Format
+
+    def initialize(input = $stdin, options = {}, &block)
+        @doc = (input.respond_to?(:read) ? input : StringIO.new(input.to_s)).read.to_utf8
+        @base = options[:base_uri]
+        @host = @base.host
+        if block_given?
+          case block.arity
+          when 0 then instance_eval(&block)
+          else block.call(self)
+          end
+        end
+        nil
+      end
+
+      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
+
+      def each_statement &fn
+        scanContent{|s,p,o|
+          fn.call RDF::Statement.new(s.class == String ? s.R : s,
+                                     p.class == String ? p.R : p,
+                                     (o.class == WebResource || o.class == RDF::Node ||
+                                      o.class == RDF::URI) ? o : (l = RDF::Literal (if [Abstract,Content].member? p
+                                                                                    WebResource::HTML.clean o
+                                                                                   else
+                                                                                     o
+                                                                                    end)
+                                                                  l.datatype=RDF.XMLLiteral if p == Content
+                                                                  l),
+                                     :graph_name => s.R)}
+      end
+
+    end
+  end
   module HTTP
 
     # tree with nested S -> P -> O indexing
