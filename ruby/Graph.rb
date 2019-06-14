@@ -46,7 +46,7 @@ class WebResource
           else
             htmlDocument treeFromGraph graph # generated HTML
           end
-        when /^(application|text)\/(atom|rss|xml)/
+        when FeedMIME
           renderFeed treeFromGraph graph     # generated feed
         else                                 # RDF
           graph.dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true

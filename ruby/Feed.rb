@@ -2,6 +2,8 @@
 class WebResource
   module URIs
 
+    FeedMIME = /^(application|text)\/(atom|rss|xml)/
+
     FeedURL = {}
     ConfDir.join('feeds/*.u').R.glob.map{|list|
       list.lines.map{|u| FeedURL[u] = u.R }}

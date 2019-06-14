@@ -398,7 +398,7 @@ sidebar [class^='side']    [id^='side']
     def self.tabular graph, env
       graph = graph.values if graph.class == Hash
       keys = graph.map{|resource|resource.keys}.flatten.uniq - [Content, DC+'hasFormat', Identifier, Image, Mtime, SIOC+'reply_of', SIOC+'user_agent', Title, Type]
-      if env[:query].has_key? 'sort'
+      if env[:query] && env[:query].has_key?('sort')
         attr = env[:query]['sort']
         attr = Date if attr == 'date'
         graph = graph.sort_by{|r| r[attr].justArray[0].to_s}.reverse

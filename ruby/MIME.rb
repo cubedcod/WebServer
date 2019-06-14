@@ -47,6 +47,7 @@ class WebResource
       'in' => 'text/x-makefile',
       'ini' => 'text/ini',
       'ino' => 'application/ino',
+      'jpg:large' => 'image/jpeg',
       'js' => 'application/javascript',
       'lisp' => 'text/x-lisp',
       'list' => 'text/plain',

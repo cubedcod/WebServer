@@ -199,7 +199,11 @@ class WebResource
               mime = if options[:format]
                        options[:format]
                      elsif meta['content-type']
-                       meta['content-type'].split(';')[0]
+                       if meta['content-type'].match? FeedMIME
+                         'application/atom+xml'
+                       else
+                         meta['content-type'].split(';')[0]
+                       end
                      elsif MIMEsuffix[ext]
                        puts "WARNING missing MIME in HTTP metadata"
                        MIMEsuffix[ext]
