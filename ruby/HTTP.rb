@@ -26,12 +26,14 @@ class WebResource
     def cacheHit?; cache.file? end
 
     def self.call env
-      return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? env['REQUEST_METHOD'] # allow defined methods
-      env[:Response] = {}; env[:links] = {}                      # response-header storage
-      path = Pathname.new(env['REQUEST_PATH'].force_encoding('UTF-8')).expand_path.to_s # evaluate path expression
-      query = env[:query] = parseQs env['QUERY_STRING']          # parse query
-      resource = ('//' + env['SERVER_NAME'] + path).R env        # instantiate request
-      resource.send(env['REQUEST_METHOD']).do{|status,head,body| # dispatch request
+      return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? env['REQUEST_METHOD'] # allow methods
+      env[:Response] = {}; env[:links] = {}               # response-metadata storage
+      path = Pathname.new(env['REQUEST_PATH'].force_encoding('UTF-8')).expand_path.to_s # evaluate pathexp
+      query = env[:query] = parseQs env['QUERY_STRING']   # parse query
+      resource = ('//' + env['SERVER_NAME'] + path).R env # instantiate requested resource
+
+      # dispatch request
+      resource.send(env['REQUEST_METHOD']).do{|status,head,body|
         color = (if resource.env[:deny]
                  '31'
                 elsif !Hosts.has_key? env['SERVER_NAME']
@@ -56,9 +58,12 @@ class WebResource
                      ''
                    end
         relocation = head['Location'] ? (" ↝ " + head['Location']) : ""
-        # log request to console
+
+        # log request
         puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + "\e[" + color + "m "  + status.to_s + "\e[0m " + referrer + ' ' +
              "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs + "\e[0m " + relocation
+        #puts [status, head, body]
+
         # response
         [status, head, body]}
     rescue Exception => e
