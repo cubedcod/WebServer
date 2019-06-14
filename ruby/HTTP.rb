@@ -185,6 +185,7 @@ class WebResource
       @r[:Response] ||= {}
       status = nil
       meta = {}
+      format = nil
       body = nil
       file = nil
       graph = options[:graph] || RDF::Repository.new
@@ -277,13 +278,11 @@ class WebResource
 
       return if options[:no_response]
       if file
-        puts :file, uri
         file.fileResponse
       elsif upstreamUI?
-        puts :upstream, uri, meta
-        [200, meta, [body]]
+puts body.class
+        [200, {'Content-Type' => format, 'Content-Length' => body.bytesize.to_s}, [body]]
       elsif 206 == status
-        puts '206', uri, meta
         [status, meta, [body]]
       elsif [304, 401, 403].member? status
         [status, meta, []]
@@ -293,7 +292,10 @@ class WebResource
     end
 
     def GET
-      return [204,{'Content-Length'=>[0]},[]] if path.match? /204$/
+      return [204,
+              #{'Content-Length' => '0'},
+              {},
+              []] if path.match? /204$/
       return PathGET[path][self] if PathGET[path] # path lambda
       return HostGET[host][self] if HostGET[host] # host lambda
       local || remote
