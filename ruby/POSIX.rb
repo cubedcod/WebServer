@@ -67,13 +67,15 @@ class WebResource
     # GLOB(7)
     def glob; (Pathname.glob localPath).map &:R end
 
-    # Pathname
+    # mapped file
     def node; @node ||= (Pathname.new localPath) end
+
     def directory?; node.directory? end
+
     def file?; node.file? end
 
-    # WebResource -> file(s)
-    def localNodes
+    # URI -> mapped file(s)
+    def nodes
       (if directory? # directory
        if q.has_key?('f') && path!='/' # FIND
          found = find q['f']
@@ -146,6 +148,8 @@ class WebResource
   module HTTP
 
     def fileResponse
+      @r ||= {}
+      @r[:Response] ||= {}
       @r[:Response]['Access-Control-Allow-Origin'] ||= allowedOrigin
       @r[:Response]['Cache-Control'] ||= 'no-transform' if @r[:Response]['Content-Type'] && @r[:Response]['Content-Type'].match(NoTransform)
       @r[:Response]['Content-Type'] ||= (%w{text/html text/turtle}.member?(mime) ? (mime + '; charset=utf-8') : mime)

@@ -21,9 +21,9 @@ class WebResource
 
     def allowPOST?; host.match? POSThost end
 
-    def cacheLocation; '/' + host + path end
+    def cache; ('/' + host + path).R end
 
-    def cacheHit?; cacheLocation.exist? end
+    def cacheHit?; cache.exist? end
 
     def self.call env
       return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? env['REQUEST_METHOD'] # allow defined methods
@@ -153,7 +153,7 @@ class WebResource
     alias_method :env, :environment
 
     def fetch rack_API=true
-      return cachedFile if cacheHit?
+      return cache.fileResponse if cacheHit?
 
       # request data
       @r ||= {}
@@ -178,11 +178,11 @@ class WebResource
             end
 
       # response data
-      status = nil
-      meta = {}
       body = nil
+      file = nil
       graph = RDF::Repository.new
-      partial = false
+      meta = {}
+      status = nil
       updates = nil
 
       fetchURL = -> url {
@@ -192,12 +192,13 @@ class WebResource
             meta = response.meta
             #HTTP.print_header head; puts "<============>"; print response.status.justArray.join(' ') + ' '; HTTP.print_header meta
             if response.status.to_s.match? /206/
-              partial = true
+              status = 206
               body = response.read
             else
               %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag Set-Cookie}.map{|k| # read metadata
                 @r[:Response]    ||= {}
                 @r[:Response][k] ||= meta[k.downcase]}
+
               mime = if meta['content-type']
                        meta['content-type'].split(';')[0]
                      elsif MIMEsuffix[ext]
@@ -207,9 +208,15 @@ class WebResource
                        puts "ERROR missing MIME in HTTP meta and URI path-extension"
                        'application/octet-stream'
                      end
+
               body = decompress meta, response.read                                                       # read body
-              RDF::Reader.for(content_type: mime).new(body, :base_uri => self){|reader| graph << reader } # read graph
-              updates.concat index graph
+
+              if mime.match? NonRDF
+                file = cache.writeFile body
+              else
+                RDF::Reader.for(content_type: mime).new(body, :base_uri => self){|reader| graph << reader } # read graph
+                updates.concat index graph                                                                  # index updates
+              end
             end
           end
         rescue Exception => e
@@ -261,7 +268,9 @@ class WebResource
 
       return updates unless rack_API
 
-      if partial
+      if file
+        file.fileResponse
+      elsif 206 == status
         [206, meta, [body]]
       elsif [304, 401, 403].member? status
         [status, meta, []]
@@ -314,6 +323,9 @@ class WebResource
         elsif file?
           fileResponse
         else
+          graph = RDF::Graph.new
+          nodes.map{|node|
+            graph.load node.localPath, :base_uri => self}
           graphResponse graph
         end
       end
