@@ -183,45 +183,44 @@ class WebResource
             end
       # response metadata
       @r[:Response] ||= {}
-      response = nil
       status = nil
       meta = {}
+      body = nil
       file = nil
       graph = options[:graph] || RDF::Repository.new
 
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
         begin
-          open(url, head) do |resp|
-            response = resp
-            status = resp.status.to_s.match(/\d{3}/)[0]
-            meta = resp.meta; #HTTP.print_header meta
-            unless status == 206
-              %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag Set-Cookie}.map{|k| # read meta
-                @r[:Response][k] ||= meta[k.downcase] if meta[k.downcase]}
-              format = if options[:format]
-                         options[:format]
-                       elsif meta['content-type']
-                         if meta['content-type'].match? FeedMIME
-                           'application/atom+xml'
-                         else
-                           meta['content-type'].split(';')[0]
-                         end
-                       elsif MIMEsuffix[ext]
-                         puts "WARNING missing MIME in HTTP metadata"
-                         MIMEsuffix[ext]
+          open(url, head) do |response|
+            status = response.status.to_s.match(/\d{3}/)[0]
+            meta = response.meta
+            %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag Set-Cookie}.map{|k| # read headers
+              @r[:Response][k] ||= meta[k.downcase] if meta[k.downcase]}
+
+            format = if options[:format]
+                       options[:format]
+                     elsif meta['content-type']
+                       if meta['content-type'].match? FeedMIME
+                         'application/atom+xml'
                        else
-                         puts "ERROR missing MIME in HTTP meta and URI path-extension"
-                         'application/octet-stream'
+                         meta['content-type'].split(';')[0]
                        end
-              data = decompress meta, resp.read                                                     # read body
-              if format.match? NonRDF
-                file = cache.writeFile data
-              else
-                puts "rdfize #{format} #{uri}"
-                RDF::Reader.for(content_type: format).new(data, :base_uri => self){|_| graph << _ } # read graph
-                index graph                                                                         # index graph
-              end
+                     elsif MIMEsuffix[ext]
+                       puts "WARNING missing MIME in HTTP metadata"
+                       MIMEsuffix[ext]
+                     else
+                       puts "ERROR missing MIME in HTTP meta and URI path-extension"
+                       'application/octet-stream'
+                     end
+            if status == 206
+              body = response.read                                                                # incomplete body
+            else
+              body = decompress meta, response.read; meta.delete 'content-encoding'               # read body
+              file = cache.writeFile body if format.match? NonRDF                                 # store body
+              puts "rdfize #{format} #{uri}"
+              RDF::Reader.for(content_type: format).new(body, :base_uri => self){|_| graph << _ } # read graph
+              index graph                                                                         # index graph
             end
           end
         rescue Exception => e
@@ -278,11 +277,14 @@ class WebResource
 
       return if options[:no_response]
       if file
+        puts :file, uri
         file.fileResponse
       elsif upstreamUI?
-        [200, meta, [response.read]]
+        puts :upstream, uri, meta
+        [200, meta, [body]]
       elsif 206 == status
-        [status, meta, [response.read]]
+        puts '206', uri, meta
+        [status, meta, [body]]
       elsif [304, 401, 403].member? status
         [status, meta, []]
       else
