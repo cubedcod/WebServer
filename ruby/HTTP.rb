@@ -157,19 +157,19 @@ class WebResource
 
       # request data
       @r ||= {}
-      head = HTTP.unmangle env                           # strip internal headers
+      head = HTTP.unmangle env                           # strip local headers
       head.delete 'Host'
       head['User-Agent'] = DesktopUA
       head.delete 'User-Agent' if %w{po.st t.co}.member? host
       head[:redirect] = false                            # halt internal redirects
       query = if @r[:query]
                 q = @r[:query].dup || {}
-                %w{group view sort}.map{|a| q.delete a } # strip internal query arguments
+                %w{group view sort}.map{|a| q.delete a } # strip local query arguments
                 q.empty? ? '' : HTTP.qs(q)               # original query string
               else
                 qs
               end
-      url = if suffix = ext.empty? && host.match?(/reddit.com$/) && !originUI && '.rss'
+      url = if suffix = ext.empty? && host.match?(/reddit.com$/) && !upstreamUI && '.rss'
               'https://' + (env['HTTP_HOST'] || host) + path + suffix + query                  # added format-suffix
             else
               'https://' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + query)) # original URL
@@ -196,29 +196,29 @@ class WebResource
                 @r[:Response]    ||= {}
                 @r[:Response][k] ||= meta[k.downcase]}
 
-              mime = if options[:format]
-                       options[:format]
-                     elsif meta['content-type']
-                       if meta['content-type'].match? FeedMIME
-                         'application/atom+xml'
+              format = if options[:format]
+                         options[:format]
+                       elsif meta['content-type']
+                         if meta['content-type'].match? FeedMIME
+                           'application/atom+xml'
+                         else
+                           meta['content-type'].split(';')[0]
+                         end
+                       elsif MIMEsuffix[ext]
+                         puts "WARNING missing MIME in HTTP metadata"
+                         MIMEsuffix[ext]
                        else
-                         meta['content-type'].split(';')[0]
+                         puts "ERROR missing MIME in HTTP meta and URI path-extension"
+                         'application/octet-stream'
                        end
-                     elsif MIMEsuffix[ext]
-                       puts "WARNING missing MIME in HTTP metadata"
-                       MIMEsuffix[ext]
-                     else
-                       puts "ERROR missing MIME in HTTP meta and URI path-extension"
-                       'application/octet-stream'
-                     end
 
-              body = decompress meta, response.read                                                       # read body
+              body = decompress meta, response.read                                                           # read body
 
-              if mime.match? NonRDF
+              if format.match? NonRDF
                 file = cache.writeFile body
               else
-                RDF::Reader.for(content_type: mime).new(body, :base_uri => self){|reader| graph << reader } # read graph
-                index graph                                                                                 # index graph
+                RDF::Reader.for(content_type: format).new(body, :base_uri => self){|reader| graph << reader } # read graph
+                index graph                                                                                   # index graph
               end
             end
           end
@@ -398,7 +398,7 @@ class WebResource
       [s, h, [b]]
     end
 
-    def originUI
+    def upstreamUI
       if %w{duckduckgo.com soundcloud.com}.member? host
         true
       elsif env['HTTP_USER_AGENT'] == DesktopUA
@@ -450,7 +450,6 @@ class WebResource
     def pragma; env['HTTP_PRAGMA'] end
 
     def HTTP.print_body body, mime
-      puts mime
       case mime
       when /application\/json/
         json = ::JSON.parse body rescue nil
@@ -476,10 +475,7 @@ class WebResource
       end
     end
 
-    def HTTP.print_header header
-      header.map{|k,v|
-            puts [k,v].join "\t"}
-    end
+    def HTTP.print_header header; header.map{|k,v| puts [k,v].join "\t"} end
 
     def PUT
       env[:deny] = true

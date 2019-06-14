@@ -24,7 +24,7 @@ class WebResource
   end
   module HTTP
 
-    # Agent preferring upstream "desktop" interface
+    # UA must match this to request upstream UI. on mobile choose "Desktop Site" in browser menu
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3805.0 Safari/537.36'
 
     # hosts with dirs named 'track'
