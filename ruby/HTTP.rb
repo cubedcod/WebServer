@@ -170,7 +170,7 @@ class WebResource
                 qs
               end
       url = if suffix = ext.empty? && host.match?(/reddit.com$/) && !upstreamUI && '.rss'
-              'https://' + (env['HTTP_HOST'] || host) + path + suffix + query                  # added format-suffix
+              'https://' + (env['HTTP_HOST'] || host) + path + suffix + query                  # insert format-suffix
             else
               'https://' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + query)) # original URL
             end
@@ -187,10 +187,10 @@ class WebResource
         begin
           open(url, head) do |response| # request
             meta = response.meta
+            body = response.read
             #HTTP.print_header head; puts "<============>"; print response.status.justArray.join(' ') + ' '; HTTP.print_header meta
             if response.status.to_s.match? /206/
               status = 206
-              body = response.read
             else
               %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag Set-Cookie}.map{|k| # read metadata
                 @r[:Response]    ||= {}
@@ -211,18 +211,17 @@ class WebResource
                          puts "ERROR missing MIME in HTTP meta and URI path-extension"
                          'application/octet-stream'
                        end
-
-              body = decompress meta, response.read                                                           # read body
-
+              data = decompress meta, body                                                          # read body
               if format.match? NonRDF
-                file = cache.writeFile body
+                file = cache.writeFile data
               else
-                RDF::Reader.for(content_type: format).new(body, :base_uri => self){|reader| graph << reader } # read graph
-                index graph                                                                                   # index graph
+                RDF::Reader.for(content_type: format).new(data, :base_uri => self){|_| graph << _ } # read graph
+                index graph                                                                         # index graph
               end
             end
           end
         rescue Exception => e
+          puts [:FETCH, uri, e.class, e.message].join " "
           case e.message
           when /304/
             status = 304 # no update
@@ -276,6 +275,8 @@ class WebResource
       return if options[:no_response]
       if file
         file.fileResponse
+      elsif upstreamUI
+        [200, meta, [body]]
       elsif 206 == status
         [206, meta, [body]]
       elsif [304, 401, 403].member? status
@@ -396,16 +397,6 @@ class WebResource
       h = r.headers
       b = r.body
       [s, h, [b]]
-    end
-
-    def upstreamUI
-      if %w{duckduckgo.com soundcloud.com}.member? host
-        true
-      elsif env['HTTP_USER_AGENT'] == DesktopUA
-        true
-      else
-        false
-      end
     end
 
     # String -> Hash
@@ -569,6 +560,16 @@ class WebResource
     def updateLocation location
       relocation.writeFile location unless host.match? /(alibaba|google|soundcloud|twitter|youtube)\.com$/
       [302, {'Location' => location}, []]
+    end
+
+    def upstreamUI
+      if %w{duckduckgo.com soundcloud.com}.member? host
+        true
+      elsif env['HTTP_USER_AGENT'] == DesktopUA
+        true
+      else
+        false
+      end
     end
 
   end
