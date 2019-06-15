@@ -223,11 +223,10 @@ class WebResource
                        'application/octet-stream'
                      end
             if status == 206
-              body = response.read                                                                # incomplete body
-            else
+              body = response.read                                                                # partial body
+            else                                                                                  # complete body
               body = decompress meta, response.read; meta.delete 'content-encoding'               # read body
               file = (cache format).writeFile body if format.match? NonRDF                        # store body
-              puts "rdfize #{format} #{uri}"
               RDF::Reader.for(content_type: format).new(body, :base_uri => self){|_| graph << _ } # read graph
               index graph                                                                         # index graph
             end
@@ -236,13 +235,15 @@ class WebResource
           puts [:FETCH, uri, e.class, e.message].join " "
           case e.message
           when /304/
-            status = 304 # no update
-          when /401/
-            status = 401 # unauthorized
-          when /403/
-            status = 403 # forbidden
-          when /404/
-            env[:status] = 404 # not found
+          # no updates
+          when /401/     # unauthorized
+            status = 401
+          when /403/     # forbidden
+            status = 403
+          when /404/     # not found
+            # set status hint for responses with content via cache
+            env[:status] = 404
+            status = 404
           else
             raise
           end
@@ -288,11 +289,10 @@ class WebResource
       if file
         file.fileResponse
       elsif upstreamUI?
-puts body.class
         [200, {'Content-Type' => format, 'Content-Length' => body.bytesize.to_s}, [body]]
       elsif 206 == status
         [status, meta, [body]]
-      elsif [304, 401, 403].member? status
+      elsif [401, 403].member? status
         [status, meta, []]
       else
         graphResponse graph
