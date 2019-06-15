@@ -22,13 +22,13 @@ class WebResource
     def allowPOST?; host.match? POSThost end
 
     def cache format=nil
-      # add format-suffix if missing but known. TODO investigate POSIX extended-attribute portability for further metadata caching
+      # add format-suffix if missing but known
       ('/' + host + path + (format && ext.empty? && Extension[format] && ('.' + Extension[format]) || '')).R
     end
 
     def cacheHit?
-      return cache if cache.exist?      # direct hit
-      (cache + '.*').glob.find &:exist? # suffix hit
+      return cache if cache.file?      # direct hit
+      (cache + '.*').glob.find &:file? # suffix hit
     end
 
     def self.call env
