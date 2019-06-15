@@ -23,7 +23,7 @@ class WebResource
 
     def cache format=nil
       # add format-suffix if missing but known
-      ('/' + host + path + (format && ext.empty? && Extension[format] && ('.' + Extension[format]) || '')).R
+      ('/' + host + path + (format && ext.empty? && Extension[format] && ('.' + Extension[format]) || '')).R env
     end
 
     def cacheHit?
