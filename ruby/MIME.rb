@@ -3,7 +3,7 @@ class WebResource
   module MIME
   include URIs
 
-  # prefix -> MIME map
+  # prefix -> MIME
     MIMEprefix = {
       'authors' => 'text/plain',
       'changelog' => 'text/plain',
@@ -24,7 +24,7 @@ class WebResource
       'msg' => 'message/rfc822',
     }
 
-    # suffix -> MIME map
+    # suffix -> MIME
     MIMEsuffix = {
       'aac' => 'audio/aac',
       'asc' => 'text/plain',
@@ -47,7 +47,8 @@ class WebResource
       'in' => 'text/x-makefile',
       'ini' => 'text/ini',
       'ino' => 'application/ino',
-      'jpg:large' => 'image/jpeg',
+      'jpg' => 'image/jpeg',
+#      'jpg:large' => 'image/jpeg',
       'js' => 'application/javascript',
       'lisp' => 'text/x-lisp',
       'list' => 'text/plain',
@@ -72,10 +73,12 @@ class WebResource
       'vtt' => 'text/vtt',
       'webp' => 'image/webp',
       'woff' => 'application/font',
-      'yaml' => 'text/plain',
-    }
+      'yaml' => 'text/plain'}
 
-    # MIME -> RDF-emitter map
+    # MIME -> suffix
+    Extension = MIMEsuffix.invert
+
+      # MIME -> RDF-emitter
     Triplr = {
       'application/config'   => [:triplrDataFile],
       'application/font'      => [:triplrFile],

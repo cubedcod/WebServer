@@ -156,7 +156,10 @@ class WebResource < RDF::URI
     def stripDoc; (uri.sub /\.(bu|e|html|json|log|md|msg|opml|ttl|txt|u)$/,'').R end
 
     # suffix
-    def ext; File.extname( path || '' )[1..-1] || '' end
+    def ext
+      #path && File.extname(path)[1..-1] # TODO return nil instead of empty-string
+      File.extname( path || '' )[1..-1] || ''
+    end
 
     # SHA2 hashed URI
     def sha2; to_s.sha2 end

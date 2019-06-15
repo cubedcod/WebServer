@@ -21,9 +21,15 @@ class WebResource
 
     def allowPOST?; host.match? POSThost end
 
-    def cache; ('/' + host + path).R end
+    def cache format=nil
+      # add format-suffix if missing but known. TODO investigate POSIX extended-attribute portability for further metadata caching
+      ('/' + host + path + (format && ext.empty? && Extension[format] && ('.' + Extension[format]) || '')).R
+    end
 
-    def cacheHit?; cache.file? end
+    def cacheHit?
+      return cache if cache.exist?      # direct hit
+      (cache + '.*').glob.find &:exist? # suffix hit
+    end
 
     def self.call env
       return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? env['REQUEST_METHOD'] # allow methods
@@ -160,7 +166,9 @@ class WebResource
     PathGET['/favicon.ico']  = -> r {r.upstreamUI? ? r.fetch : [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
 
     def fetch(options = {})
-      return cache.fileResponse if cacheHit?
+      if hit = cacheHit?
+        return hit.fileResponse
+      end
 
       # request metadata
       @r ||= {}
@@ -182,13 +190,13 @@ class WebResource
               'https://' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + query)) # original URL
             end
       # response metadata
-      @r[:Response] ||= {}
       status = nil
       meta = {}
-      format = nil
       body = nil
+      format = nil
       file = nil
       graph = options[:graph] || RDF::Repository.new
+      @r[:Response] ||= {}
 
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
@@ -218,7 +226,7 @@ class WebResource
               body = response.read                                                                # incomplete body
             else
               body = decompress meta, response.read; meta.delete 'content-encoding'               # read body
-              file = cache.writeFile body if format.match? NonRDF                                 # store body
+              file = (cache format).writeFile body if format.match? NonRDF                        # store body
               puts "rdfize #{format} #{uri}"
               RDF::Reader.for(content_type: format).new(body, :base_uri => self){|_| graph << _ } # read graph
               index graph                                                                         # index graph
