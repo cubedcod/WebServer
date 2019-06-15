@@ -285,17 +285,19 @@ class WebResource
         end
       end
 
-      return if options[:no_response]
-      if file
+      return if options[:no_response] # no HTTP return-value
+      if file                  # local static-content
         file.fileResponse
-      elsif upstreamUI?
+      elsif upstreamUI?        # remote static-content
         [200, {'Content-Type' => format, 'Content-Length' => body.bytesize.to_s}, [body]]
-      elsif 206 == status
+      elsif 206 == status      # partial static-content
         [status, meta, [body]]
+      elsif 304 == status      # not modified
+        [304, {}, []]
       elsif [401, 403].member? status
-        [status, meta, []]
+        [status, meta, []]     # authn failure
       else
-        graphResponse graph
+        graphResponse graph    # content-negotiated graph
       end
     end
 
