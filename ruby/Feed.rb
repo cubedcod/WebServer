@@ -24,12 +24,12 @@ class WebResource
     PathGET['/subscribe'] = -> r {
       url = (r.q['u'] || '/').R
       url.subscribe
-      [302, {'Location' => url}, []]}
+      [302, {'Location' => url.to_s}, []]}
 
     PathGET['/unsubscribe']  = -> r {
       url = (r.q['u'] || '/').R
       url.unsubscribe
-      [302, {'Location' => url}, []]}
+      [302, {'Location' => url.to_s}, []]}
 
   end
 
