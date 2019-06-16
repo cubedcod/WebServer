@@ -244,13 +244,9 @@ sidebar [class^='side']    [id^='side']
       htmlGrep graph, q['q'] if @r[:grep]
       subbed = subscribed?
       tabular = q['view'] == 'table'
-      tabularOverview = '?view=table&sort=date&head'
+      tabularOverview = '?view=table&sort=date'
       @r[:links][:up] = dirname + '/' + qs + '#r' + (path||'/').sha2 unless !path || path=='/'
-      @r[:links][:down] = if qs == tabularOverview
-                            tabularOverview[0..-6]
-                          elsif directory? && env['REQUEST_PATH'] && env['REQUEST_PATH'][-1] != '/'
-                            path + '/'
-                          end
+      @r[:links][:down] = path + '/' if env['REQUEST_PATH'] && directory? && env['REQUEST_PATH'][-1] != '/'
 
       # Markup -> HTML
       HTML.render ["<!DOCTYPE html>\n\n",
