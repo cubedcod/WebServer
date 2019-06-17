@@ -80,7 +80,7 @@ class WebResource
       end
 
       # generator called by need
-      entity @r, ->{
+      entity ->{
         case format
         when /^text\/html/
           if qs == '?data'

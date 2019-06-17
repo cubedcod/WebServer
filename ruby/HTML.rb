@@ -107,6 +107,8 @@ sidebar [class^='side']    [id^='side']
               'article:modified_time' => Date,
               'article:published_time' => Date,
               'description' => Abstract,
+              'fb:admins' => :drop,
+              'fb:pages' => :drop,
               'image' => Image,
               'msapplication-TileImage' => Image,
               'og:description' => Abstract,

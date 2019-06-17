@@ -154,7 +154,7 @@ class WebResource
       @r[:Response]['Cache-Control'] ||= 'no-transform' if @r[:Response]['Content-Type'] && @r[:Response]['Content-Type'].match(NoTransform)
       @r[:Response]['Content-Type'] ||= (%w{text/html text/turtle}.member?(mime) ? (mime + '; charset=utf-8') : mime)
       @r[:Response]['ETag'] ||= [uri, mtime, size].join.sha2
-      entity @r
+      entity
     end
 
   end

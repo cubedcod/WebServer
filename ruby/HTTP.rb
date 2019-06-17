@@ -21,12 +21,13 @@ class WebResource
 
     def allowPOST?; host.match? POSThost end
 
-    def cache format=nil
-      # add format-suffix if missing but known
+    # cache location
+    def cache format=nil # add format-suffix if missing but known
       ('/' + host + path + (format && ext.empty? && Extension[format] && ('.' + Extension[format]) || '')).R env
     end
 
-    def cacheHit?
+    # return cache resource on hit
+    def cached?
       return cache if cache.file?      # direct hit
       (cache + '.*').glob.find &:file? # suffix hit
     end
@@ -68,7 +69,7 @@ class WebResource
         # log request
         puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + "\e[" + color + "m "  + status.to_s + "\e[0m " + referrer + ' ' +
              "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs + "\e[0m " + relocation
-        #puts [status, head, body]
+        puts [status, head]
 
         # response
         [status, head, body]}
@@ -138,14 +139,15 @@ class WebResource
       [200, {'Content-Type' => 'text/html'}, [htmlDocument]]
     end
 
-    def entity env, lambda = nil
+    def entity lambda = nil
       entities = env['HTTP_IF_NONE_MATCH'].do{|m| m.strip.split /\s*,\s*/ }
       if entities && entities.include?(env[:Response]['ETag'])
         [304, {}, []] # not modified
       else            # generate
-        body = lambda ? lambda.call : self # call generator lambda
+        body = lambda ? lambda.call : self # call generator
         if body.class == WebResource # static-resource reference
           (Rack::File.new nil).serving((Rack::Request.new env), body.localPath).do{|s,h,b|
+            puts :RackFile
             [s,h.update(env[:Response]),b]}
         else
           [env[:status] || 200, env[:Response], [body]]
@@ -166,8 +168,8 @@ class WebResource
     PathGET['/favicon.ico']  = -> r {r.upstreamUI? ? r.fetch : [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
 
     def fetch(options = {})
-      if hit = cacheHit?
-        return hit.fileResponse
+      if this = cached?
+        return this.fileResponse
       end
 
       # request metadata
@@ -232,7 +234,6 @@ class WebResource
             end
           end
         rescue Exception => e
-          puts [:FETCH, uri, e.class, e.message].join " "
           case e.message
           when /304/
           # no updates
@@ -298,7 +299,7 @@ class WebResource
         [status, meta, []]     # authn failure
       else
         graphResponse graph    # content-negotiated graph
-      end
+       end
     end
 
     def GET
@@ -382,8 +383,8 @@ class WebResource
             [status, h, b]
           else
             if h['Content-Type'] && !h['Content-Type'].match?(/image.(bmp|gif)|script/)
-              [status, h, b] # allowed MIME
-            else # filtered MIME
+              [status, h, b] # allow MIME
+            else             # filter MIME
               env[:GIF] = true if h['Content-Type']&.match? /image\/gif/
               env[:script] = true if h['Content-Type']&.match? /script/
               deny status

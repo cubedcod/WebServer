@@ -235,7 +235,7 @@ class WebResource
           `gm convert #{sh} -thumbnail "256x256" #{p.sh}`
         end
       end
-      p.e && p.entity(@r) || notfound
+      p.e && p.entity || notfound
     end
 
   end
