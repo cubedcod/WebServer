@@ -66,39 +66,6 @@ class WebResource
  t the threads topic tumblr
  uk utm www}
 
-    def triplrArchive &f;  yield uri, Type, (Stat+'Archive').R end
-    def triplrAudio &f;    yield uri, Type, Sound.R end
-    def triplrDataFile &f; yield uri, Type, (Stat+'DataFile').R end
-
-    def triplrBat &f
-      yield uri, Content, `pygmentize -l batch -f html #{sh}` end
-    def triplrDocker &f
-      yield uri, Content, `pygmentize -l docker -f html #{sh}` end
-    def triplrIni &f
-      yield uri, Content, `pygmentize -l ini -f html #{sh}` end
-    def triplrMakefile &f
-      yield uri, Content, `pygmentize -l make -f html #{sh}` end
-    def triplrLisp &f
-      yield uri, Content, `pygmentize -l lisp -f html #{sh}` end
-    def triplrPerl &f
-      yield uri, Content, `pygmentize -l perl -f html #{sh}` end
-    def triplrShellScript &f
-      yield uri, Content, `pygmentize -l sh -f html #{sh}` end
-    def triplrRuby &f
-      yield uri, Content, `pygmentize -l ruby -f html #{sh}` end
-    def triplrCode &f # pygments determines type
-      yield uri, Content, `pygmentize -f html #{sh}`
-    end
-
-    def triplrWord conv, argB='', &f
-      yield uri, Content, '<pre>' + `#{conv} #{sh} #{argB}` + '</pre>'
-    end
-
-    def triplrRTF          &f; triplrWord :catdoc,        &f end
-    def triplrWordDoc      &f; triplrWord :antiword,      &f end
-    def triplrWordXML      &f; triplrWord :docx2txt, '-', &f end
-    def triplrOpenDocument &f; triplrWord :odt2txt,       &f end
-
     def triplrText enc=nil, &f
       doc = stripDoc.uri
       mtime.do{|mt|
@@ -114,9 +81,6 @@ class WebResource
                            yield o.uri, Type, Resource.R
                          }})
     end
-    
-    def triplrTeX
-      yield stripDoc.uri, Content, `cat #{sh} | tth -r` end
 
     def triplrMarkdown
       doc = stripDoc.uri

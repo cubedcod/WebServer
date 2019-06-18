@@ -192,9 +192,6 @@ class WebResource
         end }
     end
 
-    def triplrMbox &b      
-    end
-
   end
 end
 

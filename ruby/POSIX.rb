@@ -142,36 +142,6 @@ class WebResource
       updates
     end
 
-    # file -> RDF
-    def triplrFile
-      s = path
-      yield s, Title, basename
-      size.do{|sz|
-        yield s, Size, sz}
-      mtime.do{|mt|
-        yield s, Mtime, mt.to_i; yield s, Date, mt.iso8601}
-    end
-
-    # file -> RDF
-    def triplrImage &f
-      yield uri, Type, Image.R
-      yield uri, Image, self
-      w,h = Dimensions.dimensions localPath
-      yield uri, Schema + 'width', w
-      yield uri, Schema + 'height', h
-    end
-
-    # directory -> RDF
-    def triplrContainer
-      subject = path[-1] == '/' ? path : (path + '/')
-      yield subject, Type, Container.R
-      yield subject, Title, basename
-      mtime.do{|mt|yield subject, Date, mt.iso8601}
-      nodes = children
-      nodes.map{|node| yield subject, Contains, node.stripDoc}
-      yield subject, Size, nodes.size
-    end
-
   end
   module HTTP
 
