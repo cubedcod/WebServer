@@ -391,11 +391,7 @@ class WebResource
         else
           graph = RDF::Graph.new
           nodes.map{|node|
-            if node.ext == 'ttl'
-              graph.load node.localPath, :base_uri => self
-            else
-              graph.load node.localPath, :format => :nonrdf, :base_uri => self
-            end
+            graph.load node.localPath, :content_type => node.mime, :base_uri => self
           }
           graphResponse graph
         end

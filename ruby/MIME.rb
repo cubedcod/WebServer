@@ -194,14 +194,21 @@ class WebResource
 
       def each_statement &fn
         image_tuples{|p, o|
-          fn.call RDF::Statement.new(@subject, p, (o.class == WebResource || o.class == RDF::URI) ? o : RDF::Literal(o),
+          fn.call RDF::Statement.new(@subject,
+                                     p.R,
+                                     (o.class == WebResource || o.class == RDF::URI) ? o : RDF::Literal(o),
                                      :graph_name => @subject)}
       end
 
       def image_tuples
         [:ifd0, :ifd1, :exif, :gps].map{|fields|
           @img[fields].map{|k,v|
-            yield ('http://www.w3.org/2003/12/exif/ns#' + k.to_s).R, v }} if @img
+            if k == :date_time
+              yield Date, v.sub(':','-').sub(':','-').to_time.iso8601
+            else
+              yield ('http://www.w3.org/2003/12/exif/ns#' + k.to_s), v.to_s.to_utf8
+            end
+          }} if @img
       end
       
     end
