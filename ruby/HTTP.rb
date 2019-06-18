@@ -240,6 +240,7 @@ class WebResource
               file = (cache format).writeFile body unless format.match? RDFmimes                  # store non-RDF in file (RDF stays in RAM until indexing)
               puts "RDFize #{format} #{url}" unless format.match? RDFmimes
               RDF::Reader.for(content_type: format).new(body, :base_uri => self){|_| graph << _ } # read graph
+              RDF::Reader.for(:rdfa).new(body, :base_uri => self){|_| graph << _ } if format=='text/html' # read RDFa in HTML
               index graph                                                                         # index graph
             end
           end
@@ -572,7 +573,7 @@ class WebResource
         when /drop/
           if ((host.match? /track/) || (env['REQUEST_URI'].match? /track/)) && (host.match? TrackHost)
             fetch # allow music tracks
-          elsif qs == '?allow' # allow with stripped querystring
+          elsif q.has_key? 'allow' # allow with stripped querystring
             env.delete 'QUERY_STRING'
             env['REQUEST_URI'] = env['REQUEST_PATH']
             puts "ALLOW #{uri}" # notify on console
