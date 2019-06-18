@@ -80,7 +80,7 @@
 .highlight .vi { color: #268bd2 } /* Name.Variable.Instance */
 .highlight .w { color: #93a1a1 } /* Text.Whitespace */
 .highlight .x { color: #cb4b16 } /* Other */
-.post {background-color: #000; color: #fff; max-width: 255ex; margin: .08em; border: .08em solid #444; border-radius: .38em}
+.post {background-color: #000; color: #fff; max-width: 255ex; margin: .08em; border: .08em solid #333; border-radius: .38em}
 .toolbox {position: fixed; top: 0; right: 0; z-index: 1}
 .tree > .label {font-size: .8em}
 .tree > a.label {color: #ccc}

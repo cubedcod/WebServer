@@ -136,8 +136,8 @@ class WebResource
             end
             true}
         else
-          puts "anonymous graph:" if graph.size > 0
-          puts graph.dump (RDF::Writer.for :turtle).to_sym
+          #puts "anonymous graph:"
+          #puts graph.dump (RDF::Writer.for :turtle).to_sym
         end}
       updates
     end
