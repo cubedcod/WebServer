@@ -240,6 +240,7 @@ class WebResource
             else                                                                                  # complete body
               body = decompress meta, response.read; meta.delete 'content-encoding'               # read body
               file = (cache format).writeFile body unless format.match? RDFmimes                  # store non-RDF in file (RDF stays in RAM until indexing)
+              puts "RDFize #{format} #{url}" unless format.match? RDFmimes
               RDF::Reader.for(content_type: format).new(body, :base_uri => self){|_| graph << _ } # read graph
               index graph                                                                         # index graph
             end

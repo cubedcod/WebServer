@@ -248,8 +248,9 @@ class WebResource
       include URIs
       format Format
 
-    def initialize(input = $stdin, options = {}, &block)
-        @data = (input.respond_to?(:read) ? input : StringIO.new(input.to_s)).read.to_utf8
+      def initialize(input = $stdin, options = {}, &block)
+        @img = Exif::Data.new(input.respond_to?(:read) ? input.read : input)
+        @subject = (options[:base_uri] || '#image').R 
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -262,22 +263,91 @@ class WebResource
       def each_triple &block; each_statement{|s| block.call *s.to_triple} end
 
       def each_statement &fn
-        image_triples{|s,p,o|
-          fn.call RDF::Statement.new(s.class == String ? s.R : s,
-                                     p.class == String ? p.R : p,
-                                     (o.class == WebResource || o.class == RDF::Node ||
-                                      o.class == RDF::URI) ? o : (l = RDF::Literal (if [Abstract,Content].member? p
-                                                                                    WebResource::HTML.clean o
-                                                                                   else
-                                                                                     o
-                                                                                    end)
-                                                                  l.datatype=RDF.XMLLiteral if p == Content
-                                                                  l),
-                                     :graph_name => s.R)}
+        image_tuples{|p, o|
+          fn.call RDF::Statement.new(@subject, p, (o.class == WebResource || o.class == RDF::URI) ? o : RDF::Literal(o),
+                                     :graph_name => @subject)}
       end
 
-      def image_triples
-        
+      def image_tuples
+        [:ifd0, :ifd1, :exif, :gps].map{|fields|
+          @img[fields].map{|k,v|
+            yield ('http://www.w3.org/2003/12/exif/ns#' + k.to_s).R, v }}
+      end
+      
+    end
+  end
+  module PNG
+    class Format < RDF::Format
+      content_type 'image/png', :extension => :png
+      content_encoding 'utf-8'
+      reader { WebResource::PNG::Reader }
+    end
+
+    class Reader < RDF::Reader
+      include URIs
+      format Format
+
+      def initialize(input = $stdin, options = {}, &block)
+        @img = Exif::Data.new(input.respond_to?(:read) ? input.read : input)
+        @subject = (options[:base_uri] || '#image').R 
+        if block_given?
+          case block.arity
+          when 0 then instance_eval(&block)
+          else block.call(self)
+          end
+        end
+        nil
+      end
+
+      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
+
+      def each_statement &fn
+        image_tuples{|p, o|
+          fn.call RDF::Statement.new(@subject, p, (o.class == WebResource || o.class == RDF::URI) ? o : RDF::Literal(o),
+                                     :graph_name => @subject)}
+      end
+
+      def image_tuples
+        [:ifd0, :ifd1, :exif, :gps].map{|fields|
+          @img[fields].map{|k,v|
+            yield ('http://www.w3.org/2003/12/exif/ns#' + k.to_s).R, v }}
+      end
+
+    end
+  end
+  module WebP
+    class Format < RDF::Format
+      content_type 'image/webp', :extension => :webp
+      content_encoding 'utf-8'
+      reader { WebResource::WebP::Reader }
+    end
+
+    class Reader < RDF::Reader
+      include URIs
+      format Format
+
+      def initialize(input = $stdin, options = {}, &block)
+        #@img = Exif::Data.new(input.respond_to?(:read) ? input.read : input)
+        @subject = (options[:base_uri] || '#image').R 
+        if block_given?
+          case block.arity
+          when 0 then instance_eval(&block)
+          else block.call(self)
+          end
+        end
+        nil
+      end
+
+      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
+
+      def each_statement &fn
+        image_tuples{|p, o|
+          fn.call RDF::Statement.new(@subject, p, (o.class == WebResource || o.class == RDF::URI) ? o : RDF::Literal(o),
+                                     :graph_name => @subject)}
+      end
+
+      def image_tuples
+
       end
 
     end
