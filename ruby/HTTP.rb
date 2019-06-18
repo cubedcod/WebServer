@@ -391,7 +391,7 @@ class WebResource
           fileResponse
         else
           graph = RDF::Repository.new
-          nodes.map{|node|
+          nodes.select(&:file?).map{|node|
             graph.load node.localPath, :content_type => node.mime, :base_uri => node}
           index graph
           graphResponse graph

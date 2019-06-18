@@ -136,22 +136,6 @@ class WebResource
 
   include MIME
 
-  module HTTP
-
-    # file -> HTTP Response
-    def filePreview
-      p = join('.' + basename + '.jpg').R
-      if !p.e
-        if mime.match(/^video/)
-          `ffmpegthumbnailer -s 256 -i #{sh} -o #{p.sh}`
-        else
-          `gm convert #{sh} -thumbnail "256x256" #{p.sh}`
-        end
-      end
-      p.e && p.entity || notfound
-    end
-
-  end
   module JPEG
     class Format < RDF::Format
       content_type 'image/jpeg', :extension => :jpg
