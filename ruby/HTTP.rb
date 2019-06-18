@@ -139,18 +139,22 @@ class WebResource
       [200, {'Content-Type' => 'text/html'}, [htmlDocument]]
     end
 
-    def entity lambda = nil
+    def entity generator = nil
       entities = env['HTTP_IF_NONE_MATCH'].do{|m| m.strip.split /\s*,\s*/ }
       if entities && entities.include?(env[:Response]['ETag'])
-        [304, {}, []] # not modified
-      else            # generate
-        body = lambda ? lambda.call : self # call generator
-        if body.class == WebResource # static-resource reference
+        [304, {}, []]                            # not modified
+      else                                       # generate
+        body = generator ? generator.call : self # call generator
+        if body.class == WebResource             # static response
           (Rack::File.new nil).serving((Rack::Request.new env), body.localPath).do{|s,h,b|
-            puts :RackFile
-            [s,h.update(env[:Response]),b]}
+            if s == 304
+              puts "NOTICE matched Rack ETag on #{uri}, duplicate computation may have ensued. please set env[:Response]['ETag']"
+              [s,{},[]]
+            else
+              [s,h.update(env[:Response]),b]     # Rack-handled file
+            end}
         else
-          [env[:status] || 200, env[:Response], [body]]
+          [env[:status] || 200, env[:Response], [body]] # generated response
         end
       end
     end
@@ -299,7 +303,7 @@ class WebResource
         [status, meta, []]     # authn failure
       else
         graphResponse graph    # content-negotiated graph
-       end
+      end
     end
 
     def GET

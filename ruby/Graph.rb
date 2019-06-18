@@ -79,12 +79,12 @@ class WebResource
                                 "<#{uri}>; rel=#{type}"}.intersperse(', ').join})
       end
 
-      # generator called by need
+      # lazy generator
       entity ->{
         case format
         when /^text\/html/
           if qs == '?data'
-            '/mashlib/databrowser.html'.R    # static HTML w/ databrowser source
+            '/mashlib/databrowser.html'.R    # static HTML w/ databrowser sourcecode
           else
             htmlDocument treeFromGraph graph # generated HTML
           end
