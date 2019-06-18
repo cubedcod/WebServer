@@ -239,7 +239,7 @@ class WebResource
               body = response.read                                                                # partial body
             else                                                                                  # complete body
               body = decompress meta, response.read; meta.delete 'content-encoding'               # read body
-              file = (cache format).writeFile body if format.match? NonRDF                        # store body
+              file = (cache format).writeFile body unless format.match? RDFmimes                  # store non-RDF in file (RDF stays in RAM until indexing)
               RDF::Reader.for(content_type: format).new(body, :base_uri => self){|_| graph << _ } # read graph
               index graph                                                                         # index graph
             end
@@ -253,7 +253,7 @@ class WebResource
           when /403/     # forbidden
             status = 403
           when /404/     # not found
-            # set status hint for responses with content via cache
+            # set status hint for 404 responses with data from local cache (should we just hide origin 404 and return 200?)
             env[:status] = 404
             status = 404
           else
@@ -366,7 +366,7 @@ class WebResource
             if node.ext == 'ttl'
               graph.load node.localPath, :base_uri => self
             else
-              graph.load node.localPath, :format => :notrdf, :base_uri => self
+              graph.load node.localPath, :format => :nonrdf, :base_uri => self
             end
           }
           graphResponse graph

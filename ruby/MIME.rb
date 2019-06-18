@@ -149,7 +149,7 @@ class WebResource
       'text/x-tex'           => [:triplrTeX],
     }
 
-    NonRDF = NoTransform = /^(application\/(dash|font|gzip|(x-)?java|octet-stream|pdf|smil|vnd|x-mpegURL|(x-)?protobuf(fer)?)|audio|binary|font|image|text\/(css|javascript|vtt)|video)/
+    RDFmimes = /^(application|text)\/(atom|html|rss|turtle|xml)/
 
     # environment -> acceptable formats
     def accept k = 'HTTP_ACCEPT'
@@ -197,8 +197,6 @@ class WebResource
     def mimeCategory
       [mime.split('/')[0], '*'].join '/'
     end
-
-    def no_transform; mime.match? NoTransform end
 
     def selectFormat default = 'text/html'
       preferences.map{|q, formats| # q values in descending order
