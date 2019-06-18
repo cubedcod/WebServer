@@ -391,8 +391,8 @@ class WebResource
         else
           graph = RDF::Graph.new
           nodes.map{|node|
-            graph.load node.localPath, :content_type => node.mime, :base_uri => self
-          }
+            graph.load node.localPath, :content_type => node.mime, :base_uri => node}
+          index graph
           graphResponse graph
         end
       end

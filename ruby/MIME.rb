@@ -201,6 +201,7 @@ class WebResource
       end
 
       def image_tuples
+        yield Image, @subject
         [:ifd0, :ifd1, :exif, :gps].map{|fields|
           @img[fields].map{|k,v|
             if k == :date_time
