@@ -179,8 +179,8 @@ class WebResource
       format Format
 
       def initialize(input = $stdin, options = {}, &block)
-        @img = Exif::Data.new(input.respond_to?(:read) ? input.read : input)
         @subject = (options[:base_uri] || '#image').R 
+        @img = Exif::Data.new(input.respond_to?(:read) ? input.read : input) rescue puts("EXIF read failed on #{@subject}")
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -201,7 +201,7 @@ class WebResource
       def image_tuples
         [:ifd0, :ifd1, :exif, :gps].map{|fields|
           @img[fields].map{|k,v|
-            yield ('http://www.w3.org/2003/12/exif/ns#' + k.to_s).R, v }}
+            yield ('http://www.w3.org/2003/12/exif/ns#' + k.to_s).R, v }} if @img
       end
       
     end
@@ -218,7 +218,7 @@ class WebResource
       format Format
 
       def initialize(input = $stdin, options = {}, &block)
-        @img = Exif::Data.new(input.respond_to?(:read) ? input.read : input)
+        #@img = Exif::Data.new(input.respond_to?(:read) ? input.read : input)
         @subject = (options[:base_uri] || '#image').R 
         if block_given?
           case block.arity
@@ -238,9 +238,7 @@ class WebResource
       end
 
       def image_tuples
-        [:ifd0, :ifd1, :exif, :gps].map{|fields|
-          @img[fields].map{|k,v|
-            yield ('http://www.w3.org/2003/12/exif/ns#' + k.to_s).R, v }}
+
       end
 
     end
