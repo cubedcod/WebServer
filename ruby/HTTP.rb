@@ -170,6 +170,13 @@ class WebResource
     alias_method :env, :environment
 
     PathGET['/favicon.ico']  = -> r {r.upstreamUI? ? r.fetch : [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
+    PathGET['/resizer'] = -> r {
+      parts = r.path.split /\/\d+x\d+\//
+      if parts.size > 1
+        [301, {'Location' => 'https://' + parts[-1]}, []]
+      else
+        r.remote
+      end}
 
     def fetch(options = {})
       if this = cached?
@@ -205,7 +212,7 @@ class WebResource
       @r[:Response] ||= {}
 
       fetchURL = -> url {
-        print '🌍🌎🌏'[rand 3] , ' '
+        print '🌍🌎🌏'[rand 3] , ' ' #, url , ' '
         begin
           open(url, head) do |response|
             status = response.status.to_s.match(/\d{3}/)[0]
@@ -255,9 +262,10 @@ class WebResource
         end}
 
       begin
-        fetchURL[url]
-      rescue Exception => e
+        fetchURL[url]       # try HTTPS
+      rescue Exception => e # retry HTTPS network/SSL-related failures on HTTP
         fallback = url.sub /^https/, 'http'
+        #puts "HTTPS-fetch failure: #{e.class} #{e.message} for #{url}"
         case e.class.to_s
         when 'Errno::ECONNREFUSED'
           fetchURL[fallback]
@@ -283,10 +291,9 @@ class WebResource
         when 'RuntimeError'
           fetchURL[fallback]
         when 'SocketError'
-          puts ["\e[7;31m", url, e.class, e.message, "\e[0m"].join ' '
+          fetchURL[fallback]
         else
-          puts ["\e[7;31m", url, e.class, e.message, "\e[0m"].join ' '
-          puts e.backtrace
+          raise
         end
       end
 
@@ -307,13 +314,17 @@ class WebResource
     end
 
     def GET
-      return [204,
-              #{'Content-Length' => '0'},
-              {},
-              []] if path.match? /204$/
-      return PathGET[path][self] if PathGET[path] # path lambda
-      return HostGET[host][self] if HostGET[host] # host lambda
-      local || remote
+      if path.match? /204$/
+        [204, {}, []]
+      elsif handler = PathGET['/' + parts[0].to_s] # toplevel-dir binding
+        handler[self]
+      elsif handler = PathGET[path] # path binding
+        handler[self]
+      elsif handler = HostGET[host] # host binding
+        handler[self]
+      else
+        local || remote
+      end
     end
 
     def GETthru
