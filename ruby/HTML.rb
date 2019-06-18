@@ -184,7 +184,7 @@ sidebar [class^='side']    [id^='side']
               sel.remove }} # strip elements
           yield subject, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
         else
-          puts "no <body> found in HTML #{uri}"
+          puts "no <body> found in HTML #{@base}"
           n.css('head').remove
           yield subject, Content, HTML.clean(n.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
         end

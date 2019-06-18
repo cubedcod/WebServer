@@ -95,12 +95,10 @@ class WebResource
 
     # file format
     def mime
-      @mime ||= # memoize
-        # parse name components
+      @mime ||=
         (name = path || ''
          prefix = ((File.basename name).split('.')[0]||'').downcase
          suffix = ((File.extname name)[1..-1]||'').downcase
-         # prefer specification in name prefix/suffix or metadata file, sniff as last resort
          if node.directory?
            'inode/directory'
          elsif MIMEsuffix[suffix]
@@ -110,22 +108,9 @@ class WebResource
          elsif Rack::Mime::MIME_TYPES['.'+suffix]
            Rack::Mime::MIME_TYPES['.'+suffix]
          else
-           meta = metafile
-           if meta.exist?
-             meta.lines[0]
-           else
-             mimeSniff
-           end
+           puts "MIME undefined for #{localPath}, sniffing content"
+           `file --mime-type -b #{Shellwords.escape localPath.to_s}`.chomp
          end)
-    end
-
-    def mimeSniff
-      puts "MIME undefined for #{localPath}, sniffing content"
-      `file --mime-type -b #{Shellwords.escape localPath.to_s}`.chomp
-    end
-
-    def mimeCategory
-      [mime.split('/')[0], '*'].join '/'
     end
 
     def selectFormat default = 'text/html'
@@ -180,7 +165,7 @@ class WebResource
 
       def initialize(input = $stdin, options = {}, &block)
         @subject = (options[:base_uri] || '#image').R 
-        @img = Exif::Data.new(input.respond_to?(:read) ? input.read : input) rescue puts("EXIF read failed on #{@subject}")
+        @img = Exif::Data.new(input.respond_to?(:read) ? input.read : input) rescue nil #puts("EXIF read failed on #{@subject}")
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)

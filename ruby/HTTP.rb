@@ -402,10 +402,6 @@ class WebResource
 
     def localNode?; LocalAddr.member?(@r['SERVER_NAME']||host) end
 
-    def metafile type = 'meta'
-      dir + (dirname[-1] == '/' ? '' : '/') + '.' + basename + '.' + type
-    end
-
     def no_cache; pragma && pragma == 'no-cache' end
 
     # filter scripts
