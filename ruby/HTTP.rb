@@ -139,18 +139,17 @@ class WebResource
     end
 
     def entity generator = nil
-      entities = env['HTTP_IF_NONE_MATCH'].do{|m| m.strip.split /\s*,\s*/ }
-      if entities && entities.include?(env[:Response]['ETag'])
+      entities = env['HTTP_IF_NONE_MATCH'].do{|m| m.strip.split /\s*,\s*/ } # entities
+      if entities && entities.include?(env[:Response]['ETag']) # client has entity
         [304, {}, []]                            # not modified
       else                                       # generate
         body = generator ? generator.call : self # call generator
         if body.class == WebResource             # static response
-          (Rack::File.new nil).serving((Rack::Request.new env), body.localPath).do{|s,h,b|
+          (Rack::File.new nil).serving((Rack::Request.new env), body.localPath).do{|s,h,b| # Rack handler
             if s == 304
-              puts "NOTICE matched Rack ETag on #{uri}, duplicate computation may have ensued. please set env[:Response]['ETag']"
-              [s,{},[]]
+              [s, {}, []]                        # not modified
             else
-              [s,h.update(env[:Response]),b]     # Rack-handled file
+              [s, h.update(env[:Response]), b]   # file
             end}
         else
           [env[:status] || 200, env[:Response], [body]] # generated response
