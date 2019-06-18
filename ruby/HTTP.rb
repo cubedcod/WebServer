@@ -337,6 +337,35 @@ class WebResource
       [r.code, r.headers, [r.body]]
     end
 
+    def graphResponse graph
+      return notfound if graph.empty?
+
+      # response metadata
+      @r[:Response] ||= {}
+      dateMeta if localNode?
+      format = selectFormat
+      @r[:Response].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
+      unless !@r[:links] || @r[:links].empty?
+        @r[:Response].update({'Link' => @r[:links].map{|type,uri|
+                                "<#{uri}>; rel=#{type}"}.intersperse(', ').join})
+      end
+
+      # lazy generator
+      entity ->{
+        case format
+        when /^text\/html/
+          if qs == '?data'
+            '/mashlib/databrowser.html'.R    # static HTML w/ databrowser sourcecode
+          else
+            htmlDocument treeFromGraph graph # generated HTML
+          end
+        when FeedMIME
+          renderFeed treeFromGraph graph     # generated feed
+        else                                 # RDF
+          graph.dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true
+        end}
+    end
+
     def HEAD
      self.GET.do{| s, h, b|
        [ s, h, []]}

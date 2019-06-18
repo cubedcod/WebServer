@@ -1,13 +1,24 @@
 # coding: utf-8
+class Hash
+  def R
+    WebResource.new(uri).data self
+  end
+  def uri; self["uri"] end
+end
+
+
 class RDF::Node
   def R; WebResource.new to_s end
 end
+
 class RDF::URI
   def R; WebResource.new to_s end
 end
+
 class Symbol
   def R; WebResource.new to_s end
 end
+
 class String
   def R env=nil
     if env
@@ -17,6 +28,7 @@ class String
     end
   end
 end
+
 class WebResource < RDF::URI
   def R; self end
 
@@ -61,6 +73,11 @@ class WebResource < RDF::URI
     YouTube  = 'http://www.youtube.com/xml/schemas/2015#'
 
     def + u; (to_s + u.to_s).R end
+    def [] p; (@data||{})[p].justArray end
+    def a type; types.member? type end
+    def data d={}; @data = (@data||{}).merge(d); self end
+    def resources; lines.map &:R end
+    def types; @types ||= self[Type].select{|t|t.respond_to? :uri}.map(&:uri) end
 
     def dateMeta
       @r ||= {}

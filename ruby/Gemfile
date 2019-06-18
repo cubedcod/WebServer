@@ -1,6 +1,7 @@
 source "https://rubygems.org/"
 gem 'brotli'
 gem 'dimensions'
+gem 'exif'
 gem 'foreman'
 gem 'httparty'
 gem 'icalendar'

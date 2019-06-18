@@ -114,6 +114,29 @@ class WebResource
 
   module Webize
 
+    # stored named-graph(s) in local turtle files
+    def index g
+      updates = []
+      g.each_graph.map{|graph|
+        n = graph.name.R
+        graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value.do{|t| # timestamp
+          # doc URI in timeline
+          doc = ['/' + t.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/\+?(00.00|Z)$/,''),  # hour-dir
+                 %w{host path query fragment}.map{|a|n.send(a).do{|p|p.split(/[\W_]/)}},'ttl']. #  slugs
+                 flatten.-([nil,'',*BasicSlugs]).join('.').R  # apply skiplist, mint URI
+          # store version
+          unless doc.e
+            doc.dir.mkdir
+            RDF::Writer.open(doc.localPath){|f|f << graph}
+            updates << doc
+            puts  "\e[32m+\e[0m http://localhost:8000" + doc.stripDoc
+          else
+            #puts  "= http://localhost:8000" + doc.stripDoc
+          end
+          true}}
+      updates
+    end
+
     # file -> RDF
     def triplrFile
       s = path

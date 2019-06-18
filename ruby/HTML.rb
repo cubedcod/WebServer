@@ -1,6 +1,23 @@
 # coding: utf-8
 class WebResource
   module HTML
+
+    Treeize = -> graph {
+      t = {}
+      # visit nodes
+      (graph.class==Array ? graph : graph.values).map{|node| re = node.R
+        cursor = t  # cursor start
+        # traverse
+        [re.host ? re.host.split('.').reverse : nil, re.parts, re.qs, re.fragment].flatten.compact.map{|name|
+          cursor = cursor[name] ||= {}}
+        if cursor[:RDF] # merge to node
+          node.map{|k,v|
+            cursor[:RDF][k] = cursor[:RDF][k].justArray.concat v.justArray unless k == 'uri'}
+        else
+          cursor[:RDF] = node # insert node
+        end}
+      t } # tree
+
     class Format < RDF::Format
       content_type     'text/html', :extension => :html
       content_encoding 'utf-8'
@@ -30,7 +47,6 @@ sidebar [class^='side']    [id^='side']
     def initialize(input = $stdin, options = {}, &block)
         @doc = (input.respond_to?(:read) ? input : StringIO.new(input.to_s)).read.to_utf8
         @base = options[:base_uri]
-        @host = @base.host
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -453,6 +469,21 @@ sidebar [class^='side']    [id^='side']
                tree _t, env, _name
              end
            }]}.update(css ? css : {})
+    end
+
+    # tree with nested S -> P -> O indexing (renderer input)
+    def treeFromGraph graph
+      g = {}                    # empty tree
+
+      # traverse
+      graph.each_triple{|s,p,o| # (subject,predicate,object) triple
+        s = s.to_s; p = p.to_s  # subject, predicate
+        o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object
+        g[s] ||= {'uri'=>s}                      # insert subject
+        g[s][p] ||= []                           # insert predicate
+        g[s][p].push o unless g[s][p].member? o} # insert object
+
+      g # tree
     end
 
     # Markup dispatcher

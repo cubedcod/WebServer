@@ -237,5 +237,63 @@ class WebResource
     end
 
   end
+  module JPEG
+    class Format < RDF::Format
+      content_type 'image/jpeg', :extension => :jpg
+      content_encoding 'utf-8'
+      reader { WebResource::JPEG::Reader }
+    end
 
+    class Reader < RDF::Reader
+      include URIs
+      format Format
+
+    def initialize(input = $stdin, options = {}, &block)
+        @data = (input.respond_to?(:read) ? input : StringIO.new(input.to_s)).read.to_utf8
+        if block_given?
+          case block.arity
+          when 0 then instance_eval(&block)
+          else block.call(self)
+          end
+        end
+        nil
+      end
+
+      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
+
+      def each_statement &fn
+        image_triples{|s,p,o|
+          fn.call RDF::Statement.new(s.class == String ? s.R : s,
+                                     p.class == String ? p.R : p,
+                                     (o.class == WebResource || o.class == RDF::Node ||
+                                      o.class == RDF::URI) ? o : (l = RDF::Literal (if [Abstract,Content].member? p
+                                                                                    WebResource::HTML.clean o
+                                                                                   else
+                                                                                     o
+                                                                                    end)
+                                                                  l.datatype=RDF.XMLLiteral if p == Content
+                                                                  l),
+                                     :graph_name => s.R)}
+      end
+
+      def image_triples
+        
+      end
+
+    end
+  end
+  module Webize
+    include MIME
+    Triplr = {}
+
+    def triplrJSON &f
+      tree = ::JSON.parse readFile.to_utf8
+      if hostTriples = @r && Triplr[:JSON][@r['SERVER_NAME']]
+        send hostTriples, tree, &f
+      end
+    rescue
+      puts "triplrJSON error on #{uri}"
+    end
+
+  end
 end
