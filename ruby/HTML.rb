@@ -372,7 +372,7 @@ sidebar [class^='side']    [id^='side']
       if env[:images][video.uri]
       else
         env[:images][video.uri] = true
-        if video.match /youtu/
+        if video.uri.match /youtu/
           id = (HTTP.parseQs video.query)['v'] || video.parts[-1]
           {_: :iframe, width: 560, height: 315, src: "https://www.youtube.com/embed/#{id}", frameborder: 0, gesture: "media", allow: "encrypted-media", allowfullscreen: :true}
         else

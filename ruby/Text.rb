@@ -34,7 +34,7 @@ class WebResource
 
       # find matches
       graph.map{|k,v|
-        graph.delete k unless (k.match pattern) || (v.to_s.match pattern)}
+        graph.delete k unless (k.to_s.match pattern) || (v.to_s.match pattern)}
 
       # highlight matches in exerpt
       graph.values.map{|r|
