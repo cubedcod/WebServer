@@ -396,7 +396,9 @@ class WebResource
           fileResponse
         else
           graph = RDF::Repository.new
-          nodes.select(&:file?).map{|node|
+          files, dirs = nodes.partition &:file?
+          puts dirs
+          files.map{|node|
             begin
               graph.load node.localPath, :base_uri => node
             rescue RDF::FormatError => e
