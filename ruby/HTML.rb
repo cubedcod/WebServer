@@ -503,7 +503,7 @@ sidebar [class^='side']    [id^='side']
           keyval v, env
         end
       elsif v.class == WebResource
-        # inline blank-node references
+        # blank-node reference
         if v.uri.match?(/^_:/) && env[:graph] && env[:graph][v.uri]
           value nil, env[:graph][v.uri], env
         elsif %w{jpg JPG png PNG webp}.member? v.ext
@@ -572,9 +572,8 @@ module Redcarpet
 end
 
 class String
-  # text -> HTML. yield (rel,href) tuples to block
-  def hrefs &blk
-    # leading & trailing [<>()] stripped, trailing [,.] dropped
+  # text -> HTML, also yielding found (rel,href) tuples to block
+  def hrefs &blk               # leading/trailing <>()[] and trailing ,. not captured in URL
     pre, link, post = self.partition(/(https?:\/\/(\([^)>\s]*\)|[,.]\S|[^\s),.”\'\"<>\]])+)/)
     pre.gsub('&','&amp;').gsub('<','&lt;').gsub('>','&gt;') + # pre-match
       (link.empty? && '' ||
@@ -593,7 +592,7 @@ class String
         end
         CGI.escapeHTML(resource.uri.sub /^http:../,'')) +
        '</a>') +
-      (post.empty? && '' || post.hrefs(&blk)) # recursion on tail
+      (post.empty? && '' || post.hrefs(&blk)) # prob not properly tail-recursive, getting overflow on logfiles, may need to rework
   rescue
     puts "failed to scan #{self}"
     ''
