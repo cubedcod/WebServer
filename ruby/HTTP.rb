@@ -168,13 +168,6 @@ class WebResource
     alias_method :env, :environment
 
     PathGET['/favicon.ico']  = -> r {r.upstreamUI? ? r.fetch : [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
-    PathGET['/resizer'] = -> r {
-      parts = r.path.split /\/\d+x\d+\//
-      if parts.size > 1
-        [301, {'Location' => 'https://' + parts[-1]}, []]
-      else
-        r.remote
-      end}
 
     def fetch(options = {})
       if this = cached?
@@ -237,8 +230,8 @@ class WebResource
               body = response.read                                                                # partial body
             else                                                                                  # complete body
               body = decompress meta, response.read; meta.delete 'content-encoding'               # read body
-              file = (cache format).writeFile body unless format.match? RDFmimes                  # store non-RDF in file (RDF stays in RAM until indexing)
-              puts "RDFize #{format} #{url}" unless format.match? RDFmimes
+              file = (cache format).writeFile body unless format.match? RDFmimes                  # store non-RDF (RDF is stored in named-graph locations when indexing)
+              puts "RDFize #{format} #{url}" unless format.match?(RDFmimes) || format.match?(/^image/)
               RDF::Reader.for(content_type: format).new(body, :base_uri => self){|_| graph << _ } # read graph
               RDF::Reader.for(:rdfa).new(body, :base_uri => self){|_| graph << _ } if format=='text/html' # read RDFa in HTML
               index graph                                                                         # index graph
@@ -262,10 +255,10 @@ class WebResource
         end}
 
       begin
-        fetchURL[url]       # try HTTPS
-      rescue Exception => e # retry HTTPS network/SSL-related failures on HTTP
+        fetchURL[url]       #   try HTTPS
+      rescue Exception => e # retry network/SSL-related failures on HTTP
+        #puts "HTTPS failed: #{e.class} #{e.message} for #{url}"
         fallback = url.sub /^https/, 'http'
-        #puts "HTTPS-fetch failure: #{e.class} #{e.message} for #{url}"
         case e.class.to_s
         when 'Errno::ECONNREFUSED'
           fetchURL[fallback]
@@ -316,7 +309,7 @@ class WebResource
     def GET
       if path.match? /204$/
         [204, {}, []]
-      elsif handler = PathGET['/' + parts[0].to_s] # toplevel-dir binding
+      elsif handler = PathGET['/' + parts[0].to_s] # toplevel-path binding
         handler[self]
       elsif handler = PathGET[path] # path binding
         handler[self]
@@ -593,8 +586,16 @@ class WebResource
       updateLocation e.io.meta['location']
     end
 
-    # ALL_CAPS (CGI/env-var) key-names to standard HTTP capitalization
-    # ..is there any way to have Rack give us the names straight out of the HTTP parser?
+    PathGET['/resizer'] = -> r {
+      parts = r.path.split /\/\d+x\d+\//
+      if parts.size > 1
+        [301, {'Location' => 'https://' + parts[-1]}, []]
+      else
+        r.remote
+      end}
+
+    # ALL_CAPS (CGI/env-var) keys to HTTP-capitalization
+    # is there a way to have Rack give us this straight out of the HTTP parser?
     def self.unmangle env
       head = {}
       env.map{|k,v|
@@ -602,9 +603,9 @@ class WebResource
         underscored = k.match? /(_AP_|PASS_SFP)/i
         key = k.downcase.sub(/^http_/,'').split('_').map{|k| # eat prefix and process tokens
           if %w{cl id spf utc xsrf}.member? k # acronyms
-            k = k.upcase
+            k = k.upcase       # all caps
           else
-            k[0] = k[0].upcase # capitalize word
+            k[0] = k[0].upcase # capitalize
           end
           k
         }.join(underscored ? '_' : '-')
