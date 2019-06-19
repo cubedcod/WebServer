@@ -5,20 +5,18 @@ class Hash
   end
   def uri; self["uri"] end
 end
-
-
+class Pathname
+  def R; WebResource.new to_s end
+end
 class RDF::Node
   def R; WebResource.new to_s end
 end
-
 class RDF::URI
   def R; WebResource.new to_s end
 end
-
 class Symbol
   def R; WebResource.new to_s end
 end
-
 class String
   def R env=nil
     if env
@@ -28,7 +26,6 @@ class String
     end
   end
 end
-
 class WebResource < RDF::URI
   def R; self end
 

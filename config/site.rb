@@ -1,18 +1,4 @@
 class WebResource
-  module Feed
-
-    def subscriptionFile slug=nil
-      (case host
-       when /reddit.com$/
-         '/www.reddit.com/r/' + (slug || parts[1] || '') + '/.sub'
-       when /^twitter.com$/
-         '/twitter.com/' + (slug || parts[0] || '') + '/.following'
-       else
-         '/feed/' + [host, *parts].join('.')
-       end).R
-    end
-
-  end
   module HTML
     class Reader
       Gunk = %w{
@@ -69,6 +55,17 @@ class WebResource
       else
         self.POSTthru
       end
+    end
+
+    def subscriptionFile slug=nil
+      (case host
+       when /reddit.com$/
+         '/www.reddit.com/r/' + (slug || parts[1] || '') + '/.sub'
+       when /^twitter.com$/
+         '/twitter.com/' + (slug || parts[0] || '') + '/.following'
+       else
+         '/feed/' + [host, *parts].join('.')
+       end).R
     end
 
     # redirects
