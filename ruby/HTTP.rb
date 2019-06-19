@@ -10,6 +10,18 @@ class WebResource
     OFFLINE = ENV.has_key? 'OFFLINE'
     SiteGIF = ConfDir.join('site.gif').read
 
+    # env -> accepted formats
+    def accept k = 'HTTP_ACCEPT'
+      index = {}
+      @r && @r[k].do{|v| # header data
+        (v.split /,/).map{|e|  # split to (MIME,q) pairs
+          format, q = e.split /;/ # split (MIME,q) pair
+          i = q && q.split(/=/)[1].to_f || 1.0 # find q-value
+          index[i] ||= []              # initialize index-entry
+          index[i].push format.strip}} # index on q-value
+      index
+    end
+
     # TODO RTFM on CORS/CORB stuff
     def allowedOrigin
       if referer = env['HTTP_REFERER']
@@ -219,9 +231,9 @@ class WebResource
                        else
                          meta['content-type'].split(';')[0]
                        end
-                     elsif MIMEsuffix[ext]
-                       puts "WARNING missing MIME in HTTP metadata"
-                       MIMEsuffix[ext]
+                     elsif fmt = RDF::Format.file_extensions[ext.to_sym]
+                       puts "NOTICE format #{fmt} derived from path extension"
+                       fmt
                      else
                        puts "ERROR missing MIME in HTTP meta and URI path-extension"
                        'application/octet-stream'
@@ -385,7 +397,12 @@ class WebResource
         else
           graph = RDF::Repository.new
           nodes.select(&:file?).map{|node|
-            graph.load node.localPath, :content_type => node.mime, :base_uri => node}
+            begin
+              graph.load node.localPath, :base_uri => node
+            rescue RDF::FormatError => e
+              puts [node.localPath, e.class, e.message].join " "
+            end
+          }
           index graph
           graphResponse graph
         end
@@ -593,6 +610,15 @@ class WebResource
       else
         r.remote
       end}
+
+    def selectFormat default = 'text/html'
+      accept.sort.reverse.map{|q, formats| # q values in descending order
+        formats.map{|mime|
+          return default if mime == '*/*'
+          return mime if RDF::Writer.for(:content_type => mime) ||          # RDF Writer definition found
+                         %w{application/atom+xml text/html}.member?(mime)}} # non-RDF
+      default
+    end
 
     # ALL_CAPS (CGI/env-var) keys to HTTP-capitalization
     # is there a way to have Rack give us this straight out of the HTTP parser?

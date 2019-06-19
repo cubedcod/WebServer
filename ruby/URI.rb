@@ -205,6 +205,7 @@ class WebResource < RDF::URI
 
   end
   module Webize
+    Triplr = {}
     def triplrUriList addHost = false
       base = stripDoc
       name = base.basename
