@@ -620,6 +620,26 @@ class WebResource
       default
     end
 
+    def subscribe
+      return if subscriptionFile.e
+      puts "SUBSCRIBE https:/" + subscriptionFile.dirname
+      subscriptionFile.touch
+    end
+
+    def subscribed?
+      subscriptionFile.exist?
+    end
+    def subs; puts subscriptions.sort.join ' ' end
+
+    def subscriptions
+      subscriptionFile('*').R.glob.map(&:dir).map &:basename
+    end
+
+    PathGET['/subscribe'] = -> r {
+      url = (r.q['u'] || '/').R
+      url.subscribe
+      [302, {'Location' => url.to_s}, []]}
+
     # ALL_CAPS (CGI/env-var) keys to HTTP-capitalization
     # is there a way to have Rack give us this straight out of the HTTP parser?
     def self.unmangle env
@@ -641,6 +661,15 @@ class WebResource
       head
     end
 
+    def unsubscribe
+      subscriptionFile.e && subscriptionFile.node.delete
+    end
+
+    PathGET['/unsubscribe']  = -> r {
+      url = (r.q['u'] || '/').R
+      url.unsubscribe
+      [302, {'Location' => url.to_s}, []]}
+
     def updateLocation location
       relocation.writeFile location unless host.match? /(alibaba|google|soundcloud|twitter|youtube)\.com$/
       [302, {'Location' => location}, []]
@@ -658,4 +687,21 @@ class WebResource
 
   end
   include HTTP
+  def self.getFeeds
+    FeedURL.values.shuffle.map{|feed|
+      begin
+        feed.fetch format: 'application/atom+xml', no_response: true
+      rescue Exception => e
+        puts 'https:' + feed.uri, e.class, e.message
+      end}
+  end
+  module URIs
+
+    FeedMIME = /^(application|text)\/(atom|rss|xml)/
+
+    FeedURL = {}
+    ConfDir.join('feeds/*.u').R.glob.map{|list|
+      list.lines.map{|u| FeedURL[u] = u.R }}
+
+  end
 end

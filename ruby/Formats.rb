@@ -1,6 +1,53 @@
 # coding: utf-8
 class WebResource
   RDFmimes = /^(application|text)\/(atom|html|rss|turtle|xml)/
+  module Calendar
+    class Format < RDF::Format
+      content_type 'text/calendar', :extension => :ics
+      content_encoding 'utf-8'
+      reader { WebResource::Calendar::Reader }
+    end
+
+    class Reader < RDF::Reader
+      include URIs
+      format Format
+
+      def initialize(input = $stdin, options = {}, &block)
+        @doc = input.respond_to?(:read) ? input.read : input
+        @subject = (options[:base_uri] || '#textfile').R
+        if block_given?
+          case block.arity
+          when 0 then instance_eval(&block)
+          else block.call(self)
+          end
+        end
+        nil
+      end
+
+      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
+
+      def each_statement &fn
+        calendar_triples{|s,p,o|
+          fn.call RDF::Statement.new(@subject, p.R,
+                                     (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal o
+                                                                                            l.datatype=RDF.XMLLiteral if p == Content
+                                                                                            l),
+                                     :graph_name => @subject)}
+      end
+
+      def calendar_triples
+      Icalendar::Calendar.parse(@doc).map{|cal|
+        cal.events.map{|event|
+          subject = event.url || ('#event'+rand.to_s.sha2)
+          yield subject, Date, event.dtstart
+          yield subject, Title, event.summary
+          yield subject, Abstract, CGI.escapeHTML(event.description)
+          yield subject, '#geo', event.geo if event.geo
+          yield subject, '#location', event.location if event.location
+        }}
+      end
+    end
+  end
   module Feed
     class Format < RDF::Format
       content_type 'application/atom+xml',
@@ -43,12 +90,12 @@ class WebResource
         scanContent(:normalizeDates, :normalizePredicates,:rawTriples){|s,p,o| # triples flow (left ← right) in filter stack
           fn.call RDF::Statement.new(s.R, p.R,
                                      (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal (if p == Content
-                                                                                                    WebResource::HTML.clean o
-                                                                                                   else
-                                                                                                     o.gsub(/<[^>]*>/,' ')
-                                                                                                    end)
-                                                                                  l.datatype=RDF.XMLLiteral if p == Content
-                                                                                  l), :graph_name => s.R)}
+                                                                                                              WebResource::HTML.clean o
+                                                                                                             else
+                                                                                                               o.gsub(/<[^>]*>/,' ')
+                                                                                                              end)
+                                                                                            l.datatype=RDF.XMLLiteral if p == Content
+                                                                                            l), :graph_name => s.R)}
       end
 
       def scanContent *f
@@ -243,7 +290,7 @@ class WebResource
             inner.gsub(reGroup,'').scan(reElement){|e|
               p = (x[e[0] && e[0].chop]||WebResource::RSS) + e[1] # attribute URI
               if [Atom+'id', RSS+'link', RSS+'guid', Atom+'link'].member? p
-               # subject URI candidates
+              # subject URI candidates
               elsif [Atom+'author', RSS+'author', RSS+'creator', DCe+'creator'].member? p
                 # creators
                 crs = []
@@ -542,6 +589,204 @@ sidebar [class^='side']    [id^='side']
 
     end
   end
+  module Mail
+    class Format < RDF::Format
+      content_type 'message/rfc822', :extension => :eml
+      content_encoding 'utf-8'
+      reader { WebResource::Mail::Reader }
+    end
+
+    class Reader < RDF::Reader
+      include URIs
+      format Format
+
+      def initialize(input = $stdin, options = {}, &block)
+        @doc = input.respond_to?(:read) ? input.read : input
+        @subject = (options[:base_uri] || '#textfile').R
+        if block_given?
+          case block.arity
+          when 0 then instance_eval(&block)
+          else block.call(self)
+          end
+        end
+        nil
+      end
+
+      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
+
+      def each_statement &fn
+        mail_triples{|s,p,o|
+          fn.call RDF::Statement.new(@subject, p.R,
+                                     (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal o
+                                                                                            l.datatype=RDF.XMLLiteral if p == Content
+                                                                                            l),
+                                     :graph_name => @subject)}
+      end
+      def mail_triples &b
+        m = Mail.read @doc; return unless m
+        id = m.message_id || m.resent_message_id || rand.to_s.sha2 # Message-ID
+        puts " MID #{id}" if @verbose
+        msgURI = -> id { h=id.sha2; ['', 'msg', h[0], h[1], h[2], id.gsub(/[^a-zA-Z0-9]+/,'.')[0..96], '#this'].join('/').R}
+        resource = msgURI[id]
+        e = resource.uri # Message URI
+        puts " URI #{resource}" if @verbose
+        srcDir = resource.path.R; srcDir.mkdir # container
+        srcFile = srcDir + 'this.msg'          # pathname
+        unless srcFile.e
+          link srcFile # link canonical-location
+          puts "LINK #{srcFile}" if @verbose
+        end
+        yield e, Identifier, id # Message-ID
+        yield e, Type, Email.R
+
+        # HTML
+        htmlFiles, parts = m.all_parts.push(m).partition{|p|p.mime_type=='text/html'}
+        htmlCount = 0
+        htmlFiles.map{|p| # HTML file
+          html = srcDir + "#{htmlCount}.html"  # file location
+          yield e, DC+'hasFormat', html        # file pointer
+          unless html.e
+            html.writeFile p.decoded  # store HTML email
+            puts "HTML #{html}" if @verbose
+          end
+          htmlCount += 1 } # increment count
+
+        # plaintext
+        parts.select{|p|
+          (!p.mime_type || p.mime_type == 'text/plain') && # text parts
+            Mail::Encodings.defined?(p.body.encoding)      # decodable?
+        }.map{|p|
+          yield e, Content,
+                HTML.render({_: :pre,
+                             c: p.decoded.to_utf8.lines.to_a.map{|l| # split lines
+                               l = l.chomp # strip any remaining [\n\r]
+                               if qp = l.match(/^((\s*[>|]\s*)+)(.*)/) # quoted line
+                                 depth = (qp[1].scan /[>|]/).size # > count
+                                 if qp[3].empty? # drop blank quotes
+                                   nil
+                                 else # wrap quotes in <span>
+                                   indent = "<span name='quote#{depth}'>&gt;</span>"
+                                   {_: :span, class: :quote,
+                                    c: [indent * depth,' ',
+                                        {_: :span, class: :quoted, c: qp[3].gsub('@','').hrefs{|p,o|yield e, p, o}}]}
+                                 end
+                               else # fresh line
+                                 [l.gsub(/(\w+)@(\w+)/,'\2\1').hrefs{|p,o|yield e, p, o}]
+                               end}.compact.intersperse("\n")})} # join lines
+
+        # recursive contained messages: digests, forwards, archives
+        parts.select{|p|p.mime_type=='message/rfc822'}.map{|m|
+          content = m.body.decoded                   # decode message
+          f = srcDir + content.sha2 + '.inlined.msg' # message location
+          f.writeFile content if !f.e                # store message
+          f.triplrMail &b} # triplr on contained message
+
+        # From
+        from = []
+        m.from.do{|f|
+          f.justArray.compact.map{|f|
+            noms = f.split ' '
+            if noms.size > 2 && noms[1] == 'at'
+              f = "#{noms[0]}@#{noms[2]}"
+            end
+            puts "FROM #{f}" if @verbose 
+            from.push f.to_utf8.downcase}} # queue address for indexing + triple-emitting
+        m[:from].do{|fr|
+          fr.addrs.map{|a|
+            name = a.display_name || a.name # human-readable name
+            yield e, Creator, name
+            puts "NAME #{name}" if @verbose
+          } if fr.respond_to? :addrs}
+        m['X-Mailer'].do{|m|
+          yield e, SIOC+'user_agent', m.to_s
+          puts " MLR #{m}" if @verbose
+        }
+
+        # To
+        to = []
+        %w{to cc bcc resent_to}.map{|p|      # recipient fields
+          m.send(p).justArray.map{|r|        # recipient
+            puts "  TO #{r}" if @verbose
+            to.push r.to_utf8.downcase }}    # queue for indexing
+        m['X-BeenThere'].justArray.map{|r|to.push r.to_s} # anti-loop recipient
+        m['List-Id'].do{|name|yield e, To, name.decoded.sub(/<[^>]+>/,'').gsub(/[<>&]/,'')} # mailinglist name
+
+        # Subject
+        subject = nil
+        m.subject.do{|s|
+          subject = s.to_utf8#.gsub(/\[[^\]]+\]/){|l| yield e, Label, l[1..-2] ; nil }
+          yield e, Title, subject}
+
+        # Date
+        date = m.date || Time.now rescue Time.now
+        date = date.to_time.utc
+        dstr = date.iso8601
+        yield e, Date, dstr
+        dpath = '/' + dstr[0..6].gsub('-','/') + '/msg/' # month
+        puts "DATE #{date}\nSUBJ #{subject}" if @verbose && subject
+
+        # index addresses
+        [*from,*to].map{|addr|
+          user, domain = addr.split '@'
+          if user && domain
+            apath = dpath + domain + '/' + user # address
+            yield e, (from.member? addr) ? Creator : To, apath.R # To/From triple
+            if subject
+              slug = subject.scan(/[\w]+/).map(&:downcase).uniq.join('.')[0..63]
+              mpath = apath + '.' + dstr[8..-1].gsub(/[^0-9]+/,'.') + slug # time & subject
+              mpath = mpath + (mpath[-1] == '.' ? '' : '.')  + 'msg' # file-type extension
+              mdir = '../.mail/' + domain + '/' # maildir
+              %w{cur new tmp}.map{|c| (mdir + c).R.mkdir} # maildir container
+              mloc = (mdir + 'cur/' + id.sha2 + '.msg').R # maildir entry
+              iloc = mpath.R # index entry
+              [iloc,mloc].map{|loc| loc.dir.mkdir # container
+                unless loc.e
+                  link loc
+                  puts "LINK #{loc}" if @verbose
+                end
+              }
+            end
+          end
+        }
+
+        # index bidirectional refs
+        %w{in_reply_to references}.map{|ref|
+          m.send(ref).do{|rs|
+            rs.justArray.map{|r|
+              dest = msgURI[r]
+              yield e, SIOC+'reply_of', dest
+              destDir = dest.path.R; destDir.mkdir; destFile = destDir+'this.msg'
+              # bidirectional reference link
+              rev = destDir + id.sha2 + '.msg'
+              rel = srcDir + r.sha2 + '.msg'
+              if !rel.e # link missing
+                if destFile.e # link
+                  destFile.link rel
+                else # referenced file may appear later on
+                  destFile.ln_s rel unless rel.symlink?
+                end
+              end
+              srcFile.link rev if !rev.e}}}
+
+        # attachments
+        m.attachments.select{|p|Mail::Encodings.defined?(p.body.encoding)}.map{|p| # decodability check
+          name = p.filename.do{|f|f.to_utf8.do{|f|!f.empty? && f}} ||                           # explicit name
+                 (rand.to_s.sha2 + (Rack::Mime::MIME_TYPES.invert[p.mime_type] || '.bin').to_s) # generated name
+          file = srcDir + name                     # file location
+          unless file.e
+            file.writeFile p.body.decoded # store
+            puts "FILE #{file}" if @verbose
+          end
+          yield e, SIOC+'attachment', file         # file pointer
+          if p.main_type=='image'                  # image attachments
+            yield e, Image, file                   # image link represented in RDF
+            yield e, Content,                      # image link represented in HTML
+                  HTML.render({_: :a, href: file.uri, c: [{_: :img, src: file.uri}, p.filename]}) # render HTML
+          end }
+      end
+
+    end
+  end
   module Markdown
     class Format < RDF::Format
       content_type 'text/markdown', :extension => :md
@@ -568,7 +813,7 @@ sidebar [class^='side']    [id^='side']
       def each_triple &block; each_statement{|s| block.call *s.to_triple} end
 
       def each_statement &fn
-        text_triples{|s,p,o|
+        markdown_triples{|s,p,o|
           fn.call RDF::Statement.new(@subject, p.R,
                                      (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal o
                                                                                             l.datatype=RDF.XMLLiteral if p == Content
@@ -576,7 +821,7 @@ sidebar [class^='side']    [id^='side']
                                      :graph_name => @subject)}
       end
 
-      def text_triples
+      def markdown_triples
         yield @subject, Content, ::Redcarpet::Markdown.new(::Redcarpet::Render::Pygment, fenced_code_blocks: true).render(@doc)
       end
     end
