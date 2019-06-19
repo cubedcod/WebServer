@@ -114,7 +114,7 @@ class WebResource
     end
 
     def selectFormat default = 'text/html'
-      preferences.map{|q, formats| # q values in descending order
+      accept.sort.reverse.map{|q, formats| # q values in descending order
         formats.map{|mime|
           return default if mime == '*/*'
           return mime if RDF::Writer.for(:content_type => mime) ||          # RDF Writer definition found
@@ -122,12 +122,8 @@ class WebResource
       default
     end
 
-    def preferences
-      accept.sort.reverse
-    end
-
     def bestFormat?
-      preferences.head.do{|q, formats|
+      accept.sort.reverse.head.do{|q, formats|
         (formats.member? '*/*') ||
         (formats.member? mime)}
     end
