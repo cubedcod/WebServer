@@ -67,6 +67,27 @@ class WebResource
     # GLOB(7)
     def glob; (Pathname.glob localPath).map &:R end
 
+    # GREP(1)
+    def grep q
+      env[:grep] = true
+      args = POSIX.splitArgs q
+      case args.size
+      when 0
+        return []
+      when 2 # two unordered terms
+        cmd = "grep -rilZ #{args[0].sh} #{sh} | xargs -0 grep -il #{args[1].sh}"
+      when 3 # three unordered terms
+        cmd = "grep -rilZ #{args[0].sh} #{sh} | xargs -0 grep -ilZ #{args[1].sh} | xargs -0 grep -il #{args[2].sh}"
+      when 4 # four unordered terms
+        cmd = "grep -rilZ #{args[0].sh} #{sh} | xargs -0 grep -ilZ #{args[1].sh} | xargs -0 grep -ilZ #{args[2].sh} | xargs -0 grep -il #{args[3].sh}"
+      else # N ordered terms
+        pattern = args.join '.*'
+        cmd = "grep -ril #{pattern.sh} #{sh}"
+      end
+      `#{cmd} | head -n 1024`.lines.map{|path|
+        POSIX.fromRelativePath path.chomp}
+    end
+
     # mapped file
     def node; @node ||= (Pathname.new localPath) end
 
@@ -114,7 +135,7 @@ class WebResource
 
   module Webize
 
-    # stored named-graph(s) in local turtle files
+    # stored named-graph(s) in turtle files
     def index g
       updates = []
       g.each_graph.map{|graph|
@@ -142,6 +163,30 @@ class WebResource
       updates
     end
 
+  end
+  module HTML
+    def htmlGrep graph, q
+      wordIndex = {}
+      args = POSIX.splitArgs q
+      args.each_with_index{|arg,i| wordIndex[arg] = i }
+      pattern = /(#{args.join '|'})/i
+
+      # find matches
+      graph.map{|k,v|
+        graph.delete k unless (k.to_s.match pattern) || (v.to_s.match pattern)}
+
+      # highlight matches in exerpt
+      graph.values.map{|r|
+        (r[Content]||r[Abstract]).justArray.map{|v|v.respond_to?(:lines) ? v.lines : nil}.flatten.compact.grep(pattern).do{|lines|
+          r[Abstract] = lines[0..5].map{|l|
+            l.gsub(/<[^>]+>/,'')[0..512].gsub(pattern){|g| # matches
+              HTML.render({_: :span, class: "w#{wordIndex[g.downcase]}", c: g}) # wrap in styled node
+            }} if lines.size > 0 }}
+
+      # CSS
+      graph['#abstracts'] = {Abstract => HTML.render({_: :style, c: wordIndex.values.map{|i|
+                                                        ".w#{i} {background-color: #{'#%06x' % (rand 16777216)}; color: white}\n"}})}
+    end
   end
   module HTTP
 

@@ -216,6 +216,33 @@ class WebResource
 
     end
   end
+=begin Text
+      yield doc, Content,
+            HTML.render({_: :pre,
+                         style: 'white-space: pre-wrap',
+                         c: readFile.do{|r|
+                           enc ? r.force_encoding(enc).to_utf8 : r}.
+                           hrefs{|p,o| # hypertextize
+                           # yield detected links to consumer
+                           yield doc, p, o
+                           yield o.uri, Type, Resource.R
+                         }})
+    Markdown
+      yield doc, Content, ::Redcarpet::Markdown.new(::Redcarpet::Render::Pygment, fenced_code_blocks: true).render(readFile)
+    CSV, investigate RDF-library advanced support
+    def triplrCSV d
+      ns    = W3 + 'ns/csv#'
+      lines = CSV.read localPath
+      lines[0].do{|fields| # header-row
+        yield uri, Type, (ns+'Table').R
+        yield uri, ns+'rowCount', lines.size
+        lines[1..-1].each_with_index{|row,line|
+          row.each_with_index{|field,i|
+            id = uri + '#row:' + line.to_s
+            yield id, fields[i], field
+            yield id, Type, (ns+'Row').R}}}
+    end
+=end
   module WebP
     class Format < RDF::Format
       content_type 'image/webp', :extension => :webp

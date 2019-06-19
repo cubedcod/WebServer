@@ -577,6 +577,19 @@ sidebar [class^='side']    [id^='side']
   include HTML
   module Webize
     include URIs
+    BasicSlugs = %w{
+ article archives articles
+ blog blogs blogspot
+ columns co com comment comments
+ edu entry
+ feed feeds feedproxy forum forums
+ go google gov
+ html index local medium
+ net news org p php post
+ r reddit rss rssfeed
+ sports source story
+ t the threads topic tumblr
+ uk utm www}
   end
   include Webize
 end
@@ -625,4 +638,6 @@ class String
     puts "failed to scan #{self}"
     ''
   end
+  def sha2; Digest::SHA2.hexdigest self end
+  def to_utf8; encode('UTF-8', undef: :replace, invalid: :replace, replace: '?') end
 end
