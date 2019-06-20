@@ -239,7 +239,7 @@ class WebResource
                 if reader
                   reader.new(body, :base_uri => self){|_| graph << _ }                                    # read RDF
                 else
-                  puts "RDF: no reader for MIME #{format} #{url}"
+                  puts "RDF: no reader for MIME #{format} #{url}" unless format.match? /script/
                 end
               end
               RDF::Reader.for(:rdfa).new(body, :base_uri => self){|_| graph << _ } if format=='text/html' # read RDFa
