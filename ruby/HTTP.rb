@@ -34,8 +34,14 @@ class WebResource
     def allowPOST?; host.match? POSThost end
 
     # cache location
-    def cache format=nil # add format-suffix if missing but known
-      ('/' + host + path + (format && ext.empty? && Extension[format] && ('.' + Extension[format]) || '')).R env
+    def cache format=nil
+      extension = if format && ext.empty? # format suffix missing but known
+                    puts "appending suffix #{Extensions[RDF::Format.content_types[format]]} to #{uri}"
+                    '.' + Extensions[RDF::Format.content_types[format]].to_s
+                  else
+                    ''
+                  end
+      ('/' + host + path + extension).R env
     end
 
     # return cache resource on hit
@@ -222,31 +228,22 @@ class WebResource
             meta = response.meta
             %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag Set-Cookie}.map{|k| # read headers
               @r[:Response][k] ||= meta[k.downcase] if meta[k.downcase]}
-
-            format = if options[:format]
-                       options[:format]
-                     elsif meta['content-type']
-                       if meta['content-type'].match? FeedMIME
-                         'application/atom+xml'
-                       else
-                         meta['content-type'].split(';')[0]
-                       end
-                     elsif fmt = RDF::Format.file_extensions[ext.to_sym]
-                       puts "NOTICE format #{fmt} derived from path extension"
-                       fmt
-                     else
-                       puts "ERROR missing MIME in HTTP meta and URI path-extension"
-                       'application/octet-stream'
-                     end
+            format = meta['content-type'] || 'application/octet-stream'
             if status == 206
               body = response.read                                                                # partial body
             else                                                                                  # complete body
               body = decompress meta, response.read; meta.delete 'content-encoding'               # read body
-              file = (cache format).writeFile body unless format.match? RDFformats                # store non-RDF (RDF is stored in named-graph locations when indexing)
-              puts "RDFize #{format} #{url}" unless format.match?(RDFformats) || format.match?(/^image/)
-              RDF::Reader.for(content_type: format).new(body, :base_uri => self){|_| graph << _ } # read graph
-              RDF::Reader.for(:rdfa).new(body, :base_uri => self){|_| graph << _ } if format=='text/html' # read RDFa in HTML
-              index graph                                                                         # index graph
+              file = (cache format).writeFile body unless format.match? RDFformats                # store non-RDF (RDF stored at named-graph locations when indexing)
+              unless %w{application/javascript text/css}.member? format
+                reader = RDF::Reader.for(content_type: format)
+                if reader
+                  reader.new(body, :base_uri => self){|_| graph << _ }                                    # read RDF
+                else
+                  puts "RDF: no reader for MIME #{format} #{url}"
+                end
+              end
+              RDF::Reader.for(:rdfa).new(body, :base_uri => self){|_| graph << _ } if format=='text/html' # read RDFa
+              index graph                                                                                 # index graph
             end
           end
         rescue Exception => e
@@ -305,7 +302,7 @@ class WebResource
       return if options[:no_response] # no HTTP return-value
       if file                  # local static-content
         file.fileResponse
-      elsif upstreamUI?        # remote static-content
+      elsif upstreamUI? && body# remote static-content
         [200, {'Content-Type' => format, 'Content-Length' => body.bytesize.to_s}, [body]]
       elsif 206 == status      # partial static-content
         [status, meta, [body]]

@@ -11,7 +11,7 @@ class WebResource
   module HTTP
 
     # UA must match this to request upstream UI. on mobile choose "Desktop Site" in browser menu
-    DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3805.0 Safari/537.36'
+    DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64; rv:67.0) Gecko/20100101 Firefox/67.0'
 
     # hosts with dirs named 'track'
     TrackHost = /\.(bandcamp|soundcloud|theplatform|track-blaster)\.com$/
@@ -315,6 +315,7 @@ class WebResource
       'www.youtube.com' => :YouTubeJSON,
     }
 
+    include URIs
   end
   include Webize
 end
