@@ -112,12 +112,11 @@ class WebResource
          end
        end
       else # files
-        if match GlobChars # glob
-          files = glob || [] # server-wide path
-          files.concat ('/' + host + path).R.glob # path on host
-        else # default file-set
+        if uri.match GlobChars # glob
+          files = glob
+        else # default glob
           files = (self + '.*').glob                # base + extension
-          files = (self + '*').glob if files.empty? # prefix-match
+          files = (self + '*').glob if files.empty? # prefix match
         end
         [self, files]
        end).justArray.flatten.compact.uniq.select &:exist?

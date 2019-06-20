@@ -242,8 +242,8 @@ class WebResource
               body = response.read                                                                # partial body
             else                                                                                  # complete body
               body = decompress meta, response.read; meta.delete 'content-encoding'               # read body
-              file = (cache format).writeFile body unless format.match? RDFmimes                  # store non-RDF (RDF is stored in named-graph locations when indexing)
-              puts "RDFize #{format} #{url}" unless format.match?(RDFmimes) || format.match?(/^image/)
+              file = (cache format).writeFile body unless format.match? RDFformats                # store non-RDF (RDF is stored in named-graph locations when indexing)
+              puts "RDFize #{format} #{url}" unless format.match?(RDFformats) || format.match?(/^image/)
               RDF::Reader.for(content_type: format).new(body, :base_uri => self){|_| graph << _ } # read graph
               RDF::Reader.for(:rdfa).new(body, :base_uri => self){|_| graph << _ } if format=='text/html' # read RDFa in HTML
               index graph                                                                         # index graph

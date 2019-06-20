@@ -1,6 +1,6 @@
 # coding: utf-8
 class WebResource
-  RDFmimes = /^(application|text)\/(atom|html|rss|turtle|xml)/
+  RDFformats = /^(application|text)\/(atom|html|rss|turtle|xml)/
   module Calendar
     class Format < RDF::Format
       content_type 'text/calendar', :extension => :ics
