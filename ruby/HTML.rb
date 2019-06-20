@@ -443,10 +443,6 @@ class WebResource
 
   end
   include HTML
-  module Webize
-    include URIs
-  end
-  include Webize
 end
 
 module Redcarpet

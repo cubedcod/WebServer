@@ -215,32 +215,5 @@ class WebResource < RDF::URI
         href: u, c: u.sub(/^https?.../,'')[0..127]}," \n"]}
 
   end
-  module Webize
-    Triplr = {}
-    def triplrUriList addHost = false
-      base = stripDoc
-      name = base.basename
-
-      # containing file
-      yield base.uri, Type, Container.R
-      yield base.uri, Title, name
-      prefix = addHost ? "https://#{name}/" : ''
-
-      # resources
-      lines.map{|line|
-        t = line.chomp.split ' '
-        unless t.empty?
-          uri = prefix + t[0]
-          resource = uri.R
-          title = t[1..-1].join ' ' if t.size > 1
-          yield uri, Title, title if title
-          alpha = resource.host && resource.host.sub(/^www\./,'')[0] || ''
-          container = base.uri + '#' + alpha
-          yield container, Type, Container.R
-          yield container, Title, alpha
-          yield container, Contains, resource
-        end}
-    end
-  end
   alias_method :uri, :to_s
 end
