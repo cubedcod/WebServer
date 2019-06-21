@@ -435,7 +435,9 @@ class WebResource
           puts dirs
           files.map{|node|
             begin
-              graph.load node.localPath, :base_uri => node
+              options = {base_uri: node}
+              options[:format] = :mail if node.basename.split('.')[0] == 'msg'
+              graph.load node.localPath, options
             rescue RDF::FormatError => e
               puts [node.localPath, e.class, e.message].join " "
             end

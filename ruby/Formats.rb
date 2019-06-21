@@ -655,6 +655,9 @@ sidebar [class^='side']    [id^='side']
       content_type 'message/rfc822', :extension => :eml
       content_encoding 'utf-8'
       reader { WebResource::Mail::Reader }
+      def self.symbols
+        [:mail]
+      end
     end
 
     class Reader < RDF::Reader
@@ -683,18 +686,28 @@ sidebar [class^='side']    [id^='side']
                                                                                             l),
                                      :graph_name => @subject)}
       end
-      def mail_triples &b
-        m = Mail.read @doc; return unless m
-        id = m.message_id || m.resent_message_id || rand.to_s.sha2 # Message-ID
+      def mail_triples &b; @verbose = true
+        m = ::Mail.new @doc
+        unless m
+          puts "mail parse failed:", @doc
+          return
+        end
+        # Message-ID
+        id = m.message_id || m.resent_message_id || rand.to_s.sha2
         puts " MID #{id}" if @verbose
-        msgURI = -> id { h=id.sha2; ['', 'msg', h[0], h[1], h[2], id.gsub(/[^a-zA-Z0-9]+/,'.')[0..96], '#this'].join('/').R}
+
+        # Message URI
+        msgURI = -> id {
+          h = id.sha2
+          ['', 'msg', h[0], h[1], h[2], id.gsub(/[^a-zA-Z0-9]+/,'.')[0..96], '#this'].join('/').R}
         resource = msgURI[id]
-        e = resource.uri # Message URI
+        e = resource.uri
         puts " URI #{resource}" if @verbose
-        srcDir = resource.path.R; srcDir.mkdir # container
-        srcFile = srcDir + 'this.msg'          # pathname
-        unless srcFile.e
-          link srcFile # link canonical-location
+
+        srcDir = resource.path.R      # message dir
+        srcFile = srcDir + 'this.msg' # message path
+        unless srcFile.exist?
+          srcFile.writeFile @doc # store in canonical-location
           puts "LINK #{srcFile}" if @verbose
         end
         yield e, Identifier, id # Message-ID
@@ -715,7 +728,7 @@ sidebar [class^='side']    [id^='side']
         # plaintext
         parts.select{|p|
           (!p.mime_type || p.mime_type == 'text/plain') && # text parts
-            Mail::Encodings.defined?(p.body.encoding)      # decodable?
+            ::Mail::Encodings.defined?(p.body.encoding)      # decodable?
         }.map{|p|
           yield e, Content,
                 HTML.render({_: :pre,
@@ -802,7 +815,7 @@ sidebar [class^='side']    [id^='side']
               iloc = mpath.R # index entry
               [iloc,mloc].map{|loc| loc.dir.mkdir # container
                 unless loc.e
-                  link loc
+                  srcFile.link loc
                   puts "LINK #{loc}" if @verbose
                 end
               }
@@ -830,7 +843,8 @@ sidebar [class^='side']    [id^='side']
               srcFile.link rev if !rev.e}}}
 
         # attachments
-        m.attachments.select{|p|Mail::Encodings.defined?(p.body.encoding)}.map{|p| # decodability check
+        m.attachments.select{|p|
+          ::Mail::Encodings.defined?(p.body.encoding)}.map{|p| # decodability check
           name = p.filename.do{|f|f.to_utf8.do{|f|!f.empty? && f}} ||                           # explicit name
                  (rand.to_s.sha2 + (Rack::Mime::MIME_TYPES.invert[p.mime_type] || '.bin').to_s) # generated name
           file = srcDir + name                     # file location
