@@ -352,26 +352,19 @@ class WebResource
 
     def graphResponse graph
       return notfound if graph.empty?
-
-      # response metadata
-      @r[:Response] ||= {}
-      dateMeta if localNode?
       format = selectFormat
-      @r[:Response].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
-      unless !@r[:links] || @r[:links].empty?
-        @r[:Response].update({'Link' => @r[:links].map{|type,uri|
-                                "<#{uri}>; rel=#{type}"}.intersperse(', ').join})
-      end
-
-      # lazy generator
+      dateMeta if localNode?
+      @r[:Response] ||= {}
+      @r[:Response]['Access-Control-Allow-Origin'] ||= allowedOrigin
+      @r[:Response].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})      
+      @r[:Response].update({'Link' => @r[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.intersperse(', ').join}) unless !@r[:links] || @r[:links].empty?
       entity ->{
         case format
         when /^text\/html/
-          '/mashlib/databrowser.html'.R    # static HTML w/ databrowser sourcecode
-          #htmlDocument treeFromGraph graph # generate HTML
+          htmlDocument treeFromGraph graph # HTML
         when /^application\/atom+xml/
-          renderFeed treeFromGraph graph     # generate feed
-        else                                 # RDF
+          renderFeed treeFromGraph graph   # feed
+        else                               # RDF
           graph.dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true
         end}
     end
