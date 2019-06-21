@@ -36,7 +36,7 @@ class WebResource
     # cache location
     def cache format=nil
       extension = if format && ext.empty? # format suffix missing but known
-                    puts "appending suffix #{Extensions[RDF::Format.content_types[format]]} to #{uri}"
+                    puts format, RDF::Format.content_types[format]
                     '.' + Extensions[RDF::Format.content_types[format]].to_s
                   else
                     ''
@@ -228,11 +228,12 @@ class WebResource
             meta = response.meta
             %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag Set-Cookie}.map{|k| # read headers
               @r[:Response][k] ||= meta[k.downcase] if meta[k.downcase]}
-            format = meta['content-type'] || 'application/octet-stream'
+            format = (meta['content-type'] || 'application/octet-stream').split(/;/)[0]
             if status == 206
               body = response.read                                                                # partial body
             else                                                                                  # complete body
               body = decompress meta, response.read; meta.delete 'content-encoding'               # read body
+              puts "caching #{format} from #{url} at #{cache}" unless format.match? RDFformats
               file = (cache format).writeFile body unless format.match? RDFformats                # store non-RDF (RDF stored at named-graph locations when indexing)
               unless %w{application/javascript text/css}.member? format
                 reader = RDF::Reader.for(content_type: format)
