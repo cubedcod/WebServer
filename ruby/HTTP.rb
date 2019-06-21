@@ -89,7 +89,8 @@ class WebResource
              "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs + "\e[0m " + relocation
 
         # response
-        [status, head, body]}
+        status == 304 ? [304, {}, []] : [status, head, body]
+      }
     rescue Exception => e
       uri = 'https://' + env['SERVER_NAME'] + env['REQUEST_URI']
       msg = [uri, e.class, e.message].join " "
@@ -201,8 +202,8 @@ class WebResource
       head[:redirect] = false                            # halt internal redirects
       query = if @r[:query]
                 q = @r[:query].dup || {}
-                %w{group view sort}.map{|a| q.delete a } # strip local query arguments
-                q.empty? ? '' : HTTP.qs(q)               # original query string
+                %w{group view sort}.map{|a| q.delete a } # strip local qs-args
+                q.empty? ? '' : HTTP.qs(q)                    # remote query-string
               else
                 qs
               end
@@ -366,13 +367,10 @@ class WebResource
       entity ->{
         case format
         when /^text\/html/
-          if qs == '?data'
-            '/mashlib/databrowser.html'.R    # static HTML w/ databrowser sourcecode
-          else
-            htmlDocument treeFromGraph graph # generated HTML
-          end
-        when FeedMIME
-          renderFeed treeFromGraph graph     # generated feed
+          '/mashlib/databrowser.html'.R    # static HTML w/ databrowser sourcecode
+          #htmlDocument treeFromGraph graph # generate HTML
+        when /^application\/atom+xml/
+          renderFeed treeFromGraph graph     # generate feed
         else                                 # RDF
           graph.dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true
         end}
@@ -735,8 +733,6 @@ class WebResource
       end}
   end
   module URIs
-
-    FeedMIME = /^(application|text)\/(atom|rss|xml)/
 
     FeedURL = {}
     ConfDir.join('feeds/*.u').R.glob.map{|list|

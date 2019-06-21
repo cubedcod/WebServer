@@ -17,7 +17,7 @@ class WebResource
     TrackHost = /\.(bandcamp|soundcloud|theplatform|track-blaster)\.com$/
 
     # POSTs, allow in regex and define handler if needed
-    POSThost = /(^www.facebook.com|\.(edu|gov)|(^|\.)(anvato|brightcove|(accounts|android.*|clients?[0-9]*|drive|groups|images|mail|maps|photos|www|youtubei?)\.google(apis)?|soundcloud|youtube|zillow)\.(com|net))$/
+    POSThost = /(^www.facebook.com|\.(edu|gov)|(^|\.)(anvato|brightcove|(accounts|android.*|clients?[0-9]*|drive|groups|images|mail|maps|photos|www|youtubei?)\.google(apis)?|reddit|soundcloud|youtube|zillow)\.(com|net))$/
     def sitePOST
       case host
       when 'www.facebook.com'
