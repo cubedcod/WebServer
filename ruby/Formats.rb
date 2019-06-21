@@ -811,14 +811,10 @@ sidebar [class^='side']    [id^='side']
             yield e, (from.member? addr) ? Creator : To, apath.R # To/From triple
             if subject
               slug = subject.scan(/[\w]+/).map(&:downcase).uniq.join('.')[0..63]
-              mpath = apath + '.' + dstr[8..-1].gsub(/[^0-9]+/,'.') + slug # time & subject
-              mpath = mpath + (mpath[-1] == '.' ? '' : '.')  + 'eml' # file-type extension
-              iloc = mpath.R # index entry
-              iloc.dir.mkdir # container
-              unless iloc.e
-                srcFile.link iloc
-                puts "LINK #{iloc}" if @verbose
-              end
+              mpath = apath + '.' + dstr[8..-1].gsub(/[^0-9]+/,'.') + slug # (month,addr,title) path
+              [(mpath + (mpath[-1] == '.' ? '' : '.')  + 'eml').R, # monthdir entry
+               ('mail/cur/' + id.sha2 + '.eml').R].map{|entry|     # maildir entry
+                srcFile.link entry unless entry.e} # link if missing
             end
           end
         }

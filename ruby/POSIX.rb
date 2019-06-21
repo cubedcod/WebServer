@@ -49,7 +49,7 @@ class WebResource
     # LN(1)
     def ln   n; FileUtils.ln   node.expand_path, n.node.expand_path end
     def ln_s n; FileUtils.ln_s node.expand_path, n.node.expand_path end
-    def link n; send LinkMethod, n unless n.exist? end
+    def link n; n.dir.mkdir; send LinkMethod, n unless n.exist? end
 
     def lines; e ? (open localPath).readlines.map(&:chomp) : [] end
 

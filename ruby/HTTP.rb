@@ -22,10 +22,10 @@ class WebResource
       index
     end
 
-    # TODO RTFM on CORS/CORB stuff
     def allowedOrigin
       if referer = env['HTTP_REFERER']
-        'https://' + referer.R.host
+#        'https://' + referer.R.host
+        'http://' + referer.R.host
       else
         '*'
       end
