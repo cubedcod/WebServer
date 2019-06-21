@@ -113,3 +113,4 @@ td.k > a {background-color: #111; color: #fff}
 td.k {max-width: 32ex; overflow: hidden; text-align: right}
 td.v div {border: .05em solid #333}
 tr[name="title"] > td.v {max-width: 40ex; overflow: hidden}
+tr[name="articleBody"] > td.v {max-width: 100ex; overflow: hidden}

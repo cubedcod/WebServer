@@ -237,7 +237,7 @@ class WebResource
               unless %w{application/javascript text/css}.member? format             # parse RDF
                 reader = RDF::Reader.for(content_type: format)
                 if reader
-                  reader.new(body, :base_uri => self){|_| graph << _ }
+                  reader.new(body, :base_uri => self){|_| graph << _ } rescue puts("RDF reader failure for #{format} #{url}")
                 else
                   puts "RDF: no reader for MIME #{format} #{url}" unless format.match? /script/
                 end
