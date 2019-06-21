@@ -680,11 +680,11 @@ sidebar [class^='side']    [id^='side']
 
       def each_statement &fn
         mail_triples{|s,p,o|
-          fn.call RDF::Statement.new(@subject, p.R,
+          fn.call RDF::Statement.new(s.R, p.R,
                                      (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal o
                                                                                             l.datatype=RDF.XMLLiteral if p == Content
                                                                                             l),
-                                     :graph_name => @subject)}
+                                     :graph_name => s.R)}
       end
       def mail_triples &b; @verbose = true
         m = ::Mail.new @doc
@@ -694,7 +694,7 @@ sidebar [class^='side']    [id^='side']
         end
         # Message-ID
         id = m.message_id || m.resent_message_id || rand.to_s.sha2
-        puts " MID #{id}" if @verbose
+        puts "\n MID #{id}" if @verbose
 
         # Message URI
         msgURI = -> id {
@@ -705,7 +705,7 @@ sidebar [class^='side']    [id^='side']
         puts " URI #{resource}" if @verbose
 
         srcDir = resource.path.R      # message dir
-        srcFile = srcDir + 'this.msg' # message path
+        srcFile = srcDir + 'this.eml' # message path
         unless srcFile.exist?
           srcFile.writeFile @doc # store in canonical-location
           puts "LINK #{srcFile}" if @verbose
@@ -742,16 +742,19 @@ sidebar [class^='side']    [id^='side']
                                    indent = "<span name='quote#{depth}'>&gt;</span>"
                                    {_: :span, class: :quote,
                                     c: [indent * depth,' ',
-                                        {_: :span, class: :quoted, c: qp[3].gsub('@','').hrefs{|p,o|yield e, p, o}}]}
+                                        {_: :span, class: :quoted,
+                                         c: qp[3].hrefs{|p,o|
+                                           yield e, p, o }}]}
                                  end
                                else # fresh line
-                                 [l.gsub(/(\w+)@(\w+)/,'\2\1').hrefs{|p,o|yield e, p, o}]
+                                 [l.hrefs{|p, o|
+                                    yield e, p, o}]
                                end}.compact.intersperse("\n")})} # join lines
 
         # recursive contained messages: digests, forwards, archives
         parts.select{|p|p.mime_type=='message/rfc822'}.map{|m|
           content = m.body.decoded                   # decode message
-          f = srcDir + content.sha2 + '.inlined.msg' # message location
+          f = srcDir + content.sha2 + '.inlined.eml' # message location
           f.writeFile content if !f.e                # store message
           f.triplrMail &b} # triplr on contained message
 
@@ -788,7 +791,8 @@ sidebar [class^='side']    [id^='side']
         # Subject
         subject = nil
         m.subject.do{|s|
-          subject = s.to_utf8#.gsub(/\[[^\]]+\]/){|l| yield e, Label, l[1..-2] ; nil }
+          subject = s.to_utf8
+          subject.scan(/\[[^\]]+\]/){|l| yield e, Label, l[1..-2]}
           yield e, Title, subject}
 
         # Date
@@ -808,17 +812,13 @@ sidebar [class^='side']    [id^='side']
             if subject
               slug = subject.scan(/[\w]+/).map(&:downcase).uniq.join('.')[0..63]
               mpath = apath + '.' + dstr[8..-1].gsub(/[^0-9]+/,'.') + slug # time & subject
-              mpath = mpath + (mpath[-1] == '.' ? '' : '.')  + 'msg' # file-type extension
-              mdir = '../.mail/' + domain + '/' # maildir
-              %w{cur new tmp}.map{|c| (mdir + c).R.mkdir} # maildir container
-              mloc = (mdir + 'cur/' + id.sha2 + '.msg').R # maildir entry
+              mpath = mpath + (mpath[-1] == '.' ? '' : '.')  + 'eml' # file-type extension
               iloc = mpath.R # index entry
-              [iloc,mloc].map{|loc| loc.dir.mkdir # container
-                unless loc.e
-                  srcFile.link loc
-                  puts "LINK #{loc}" if @verbose
-                end
-              }
+              iloc.dir.mkdir # container
+              unless iloc.e
+                srcFile.link iloc
+                puts "LINK #{iloc}" if @verbose
+              end
             end
           end
         }
@@ -829,10 +829,12 @@ sidebar [class^='side']    [id^='side']
             rs.justArray.map{|r|
               dest = msgURI[r]
               yield e, SIOC+'reply_of', dest
-              destDir = dest.path.R; destDir.mkdir; destFile = destDir+'this.msg'
+              destDir = dest.path.R
+              destDir.mkdir
+              destFile = destDir + 'this.eml'
               # bidirectional reference link
-              rev = destDir + id.sha2 + '.msg'
-              rel = srcDir + r.sha2 + '.msg'
+              rev = destDir + id.sha2 + '.eml'
+              rel = srcDir + r.sha2 + '.eml'
               if !rel.e # link missing
                 if destFile.e # link
                   destFile.link rel
