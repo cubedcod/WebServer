@@ -287,7 +287,7 @@ class WebResource
             fetchURL[fallback]
           else
             if options[:no_response]
-              puts "REDIRECT \e[32;7m" + location + "\e[0m"
+              puts "REDIRECT #{url} -> \e[32;7m" + location + "\e[0m"
             else
               return updateLocation location
             end
@@ -727,7 +727,7 @@ class WebResource
   def self.getFeeds
     FeedURL.values.shuffle.map{|feed|
       begin
-        feed.fetch format: 'application/atom+xml', no_response: true
+        feed.fetch no_response: true
       rescue Exception => e
         puts 'https:' + feed.uri, e.class, e.message
       end}

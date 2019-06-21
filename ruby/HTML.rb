@@ -427,7 +427,9 @@ class WebResource
 
     def self.webizeHash h, &y
       u = {}
-      yield h if h['__typename'] || h['type']
+      if block_given?
+        yield h if h['__typename'] || h['type']
+      end
       h.map{|k,v|
         u[k] = webizeValue v, &y}
       u
