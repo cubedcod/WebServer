@@ -32,6 +32,8 @@ class WebResource
         else
           denyPOST
         end
+      when 'metrics.brightcove.com'
+        denyPOST
       when /\.soundcloud\.com$/
         if host.match? /^api/
           self.POSTthru
