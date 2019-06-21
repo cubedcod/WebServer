@@ -1,6 +1,6 @@
 # coding: utf-8
 class WebResource
-  RDFformats = /^(application|text)\/(atom|html|json|rss|turtle|xml)/
+  RDFformats = /^(application|text)\/(atom|html|json|rss|turtle|.*urlencoded|xml)/
 
   module Calendar
     class Format < RDF::Format
