@@ -964,4 +964,7 @@ URI-list
 
     end
   end
+  module URIs
+    Extensions = RDF::Format.file_extensions.invert
+  end
 end
