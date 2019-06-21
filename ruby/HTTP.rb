@@ -230,20 +230,22 @@ class WebResource
               @r[:Response][k] ||= meta[k.downcase] if meta[k.downcase]}
             format = (meta['content-type'] || 'application/octet-stream').split(/;/)[0]
             if status == 206
-              body = response.read                                                                # partial body
-            else                                                                                  # complete body
-              body = decompress meta, response.read; meta.delete 'content-encoding'               # read body
-              file = (cache format).writeFile body unless format.match? RDFformats                # store non-RDF (RDF stored at named-graph locations when indexing)
-              unless %w{application/javascript text/css}.member? format
+              body = response.read                                                  # partial body
+            else                                                                    # complete body
+              body = decompress meta, response.read; meta.delete 'content-encoding' # decompress body
+              file = (cache format).writeFile body unless format.match? RDFformats  # store non-RDF (RDF stored in named-graph locations by indexer)
+              unless %w{application/javascript text/css}.member? format             # parse RDF
                 reader = RDF::Reader.for(content_type: format)
                 if reader
-                  reader.new(body, :base_uri => self){|_| graph << _ }                                    # read RDF
+                  reader.new(body, :base_uri => self){|_| graph << _ }
                 else
                   puts "RDF: no reader for MIME #{format} #{url}" unless format.match? /script/
                 end
               end
-              RDF::Reader.for(:rdfa).new(body, :base_uri => self){|_| graph << _ } if format=='text/html' # read RDFa
-              index graph                                                                                 # index graph
+              if format=='text/html'                                                # parse RDFa
+                RDF::Reader.for(:rdfa).new(body, :base_uri => self){|_| graph << _ } rescue puts('RDFa error in ' + url)
+              end
+              index graph                                                           # index RDF
             end
           end
         rescue Exception => e
