@@ -72,8 +72,7 @@ class WebResource
       format Format
 
       def initialize(input = $stdin, options = {}, &block)
-        #@doc = (input.respond_to?(:read) ? input : StringIO.new(input.to_s)).read.to_utf8
-        @doc = input.respond_to?(:read) ? input.read : input
+        @doc = (input.respond_to?(:read) ? input.read : input).to_utf8
         @base = options[:base_uri].R
         @host = @base.host
         if block_given?

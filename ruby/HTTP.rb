@@ -193,7 +193,7 @@ class WebResource
         return this.fileResponse
       end
 
-      # request metadata
+      # request meta
       @r ||= {}
       head = HTTP.unmangle env                           # strip local headers
       head.delete 'Host'
@@ -208,16 +208,16 @@ class WebResource
                 qs
               end
       url = if suffix = ext.empty? && host.match?(/reddit.com$/) && !upstreamUI? && '.rss'
-              'https://' + (env['HTTP_HOST'] || host) + path + suffix + query                  # insert format-suffix
+              '//' + (env['HTTP_HOST'] || host) + path + suffix + query                  # insert format-suffix
             else
-              'https://' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + query)) # original URL
+              '//' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + query)) # original URL
             end
-      # response metadata
-      status = nil
-      meta = {}
-      body = nil
-      format = nil
-      file = nil
+      options[:content_type] = 'application/atom+xml' if FeedURL[url] # fix borked Feed MIMEs often text/html
+      fallback =  'http:' + url
+           url = 'https:' + url
+      # response meta
+      status = nil; meta = {}; body = nil
+      format = nil; file = nil
       graph = options[:graph] || RDF::Repository.new
       @r[:Response] ||= {}
 
@@ -235,16 +235,18 @@ class WebResource
             else                                                                    # complete body
               body = decompress meta, response.read; meta.delete 'content-encoding' # decompress body
               file = (cache format).writeFile body unless format.match? RDFformats  # store non-RDF (RDF stored in named-graph locations by indexer)
-              unless %w{application/javascript text/css}.member? format             # parse RDF
-                reader = RDF::Reader.for(content_type: format)
+              unless %w{application/javascript text/css}.member? format             # read RDF
+                reader = RDF::Reader.for(content_type: options[:content_type] || format)
                 if reader
-                  reader.new(body, :base_uri => self){|_| graph << _ } rescue puts("RDF reader failure for #{format} #{url}")
+                  string = [url, " reader ", accept, format, reader].join ' '
+                  File.open('junk', 'w') { |file| file.write string }
+                  reader.new(body, :base_uri => self){|_| graph << _ }
                 else
                   puts "RDF: no reader for MIME #{format} #{url}" unless format.match? /script/
                 end
               end
-              if format=='text/html'                                                # parse RDFa
-                RDF::Reader.for(:rdfa).new(body, :base_uri => self){|_| graph << _ } rescue puts('RDFa error in ' + url)
+              if format=='text/html'                                                # read RDFa
+                RDF::Reader.for(:rdfa).new(body, :base_uri => self){|_| graph << _ }
               end
               index graph                                                           # index RDF
             end
@@ -270,7 +272,6 @@ class WebResource
         fetchURL[url]       #   try HTTPS
       rescue Exception => e # retry network/SSL-related failures on HTTP
         #puts "HTTPS failed: #{e.class} #{e.message} for #{url}"
-        fallback = url.sub /^https/, 'http'
         case e.class.to_s
         when 'Errno::ECONNREFUSED'
           fetchURL[fallback]
