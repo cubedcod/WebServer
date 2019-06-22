@@ -187,7 +187,7 @@ class WebResource
 
     PathGET['/favicon.ico']  = -> r {r.upstreamUI? ? r.fetch : [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
 
-    def fetch(options = {})
+    def fetch options = {}; #@verbose = true
       if this = cached?; return this.fileResponse end
 
       # request meta
@@ -220,11 +220,17 @@ class WebResource
       @r[:Response] ||= {}
 
       fetchURL = -> url {
-        print '🌍🌎🌏'[rand 3] , ' ' #, url , ' '
+        print '🌍🌎🌏'[rand 3] , ' '
+        if @verbose
+          print url , ' '
+          HTTP.print_header head
+          puts ""
+        end
         begin
           open(url, head) do |response|
             status = response.status.to_s.match(/\d{3}/)[0]
             meta = response.meta
+            HTTP.print_header meta if @verbose
             allowed_meta = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag}
             allowed_meta.push 'Set-Cookie' if host.match? /\.reddit.com$/
             allowed_meta.map{|k| @r[:Response][k] ||= meta[k.downcase] if meta[k.downcase]}
