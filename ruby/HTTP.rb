@@ -226,11 +226,11 @@ class WebResource
           open(url, head) do |response|
             status = response.status.to_s.match(/\d{3}/)[0]
             meta = response.meta
-            %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag Set-Cookie}.map{|k| # read headers
-              @r[:Response][k] ||= meta[k.downcase] if meta[k.downcase]}
-            format = meta['content-type'] && meta['content-type'].split(/;/)[0]
-            unless format
-              format = case ext
+            allowed_meta = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag}
+            allowed_meta.push 'Set-Cookie' if host.match? /\.reddit.com$/
+            allowed_meta.map{|k| @r[:Response][k] ||= meta[k.downcase] if meta[k.downcase]}
+            format = options[:content_type] || meta['content-type'] && meta['content-type'].split(/;/)[0]
+            format ||= case ext
                        when 'jpg'
                          'image/jpeg'
                        when 'png'
@@ -240,26 +240,21 @@ class WebResource
                        else
                          'application/octet-stream'
                        end
-            end
             if status == 206
               body = response.read                                                  # partial body
             else                                                                    # complete body
               body = decompress meta, response.read; meta.delete 'content-encoding' # decompress body
               file = (cache format).writeFile body unless format.match? RDFformats  # store non-RDF (RDF stored in named-graph locations by indexer)
               unless %w{application/javascript text/css}.member? format             # read RDF
-                reader = RDF::Reader.for(content_type: options[:content_type] || format)
+                reader = RDF::Reader.for(content_type: format)
                 if reader
-                  string = [url, " reader ", accept, format, reader].join ' '
-                  File.open('junk', 'w') { |file| file.write string }
                   reader.new(body, :base_uri => self){|_| graph << _ }
                 else
-                  puts "RDF: no reader for MIME #{format} #{url}" unless format.match? /script/
+                  puts "no RDF reader for MIME #{format} #{url}"
                 end
               end
-              if format=='text/html'                                                # read RDFa
-                RDF::Reader.for(:rdfa).new(body, :base_uri => self){|_| graph << _ }
-              end
-              index graph                                                           # index RDF
+              RDF::Reader.for(:rdfa).new(body, :base_uri => self){|_| graph << _ } if format=='text/html' # read RDFa
+              index graph                                                                                 # index RDF
             end
           end
         rescue Exception => e
