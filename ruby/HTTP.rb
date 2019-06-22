@@ -188,9 +188,7 @@ class WebResource
     PathGET['/favicon.ico']  = -> r {r.upstreamUI? ? r.fetch : [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
 
     def fetch(options = {})
-      if this = cached?
-        return this.fileResponse
-      end
+      if this = cached?; return this.fileResponse end
 
       # request meta
       @r ||= {}
@@ -213,7 +211,8 @@ class WebResource
             end
       options[:content_type] = 'application/atom+xml' if FeedURL[url] # fix borked Feed MIMEs often text/html
       fallback =  'http:' + url
-           url = 'https:' + url
+      url = 'https:' + url
+
       # response meta
       status = nil; meta = {}; body = nil
       format = nil; file = nil
@@ -277,7 +276,6 @@ class WebResource
       begin
         fetchURL[url]       #   try HTTPS
       rescue Exception => e # retry network/SSL-related failures on HTTP
-        #puts "HTTPS failed: #{e.class} #{e.message} for #{url}"
         case e.class.to_s
         when 'Errno::ECONNREFUSED'
           fetchURL[fallback]
