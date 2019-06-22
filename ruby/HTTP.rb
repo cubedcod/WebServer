@@ -24,8 +24,7 @@ class WebResource
 
     def allowedOrigin
       if referer = env['HTTP_REFERER']
-#        'https://' + referer.R.host
-        'http://' + referer.R.host
+        'https://' + referer.R.host
       else
         '*'
       end
@@ -44,7 +43,7 @@ class WebResource
       ('/' + host + path + extension).R env
     end
 
-    # return cache resource on hit
+    # return resource on hit
     def cached?
       return cache if cache.file?      # direct hit
       (cache + '.*').glob.find &:file? # suffix hit
@@ -52,8 +51,8 @@ class WebResource
 
     def self.call env
       return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? env['REQUEST_METHOD'] # allow methods
-      env[:Response] = {}; env[:links] = {}               # response-metadata storage
-      path = Pathname.new(env['REQUEST_PATH'].force_encoding('UTF-8')).expand_path.to_s # evaluate pathexp
+      env[:Response] = {}; env[:links] = {}               # response-meta storage
+      path = Pathname.new(env['REQUEST_PATH'].force_encoding('UTF-8')).expand_path.to_s # evaluate path
       query = env[:query] = parseQs env['QUERY_STRING']   # parse query
       resource = ('//' + env['SERVER_NAME'] + path).R env # instantiate requested resource
 
@@ -229,7 +228,19 @@ class WebResource
             meta = response.meta
             %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag Set-Cookie}.map{|k| # read headers
               @r[:Response][k] ||= meta[k.downcase] if meta[k.downcase]}
-            format = (meta['content-type'] || 'application/octet-stream').split(/;/)[0]
+            format = meta['content-type'] && meta['content-type'].split(/;/)[0]
+            unless format
+              format = case ext
+                       when 'jpg'
+                         'image/jpeg'
+                       when 'png'
+                         'image/png'
+                       when 'gif'
+                         'image/gif'
+                       else
+                         'application/octet-stream'
+                       end
+            end
             if status == 206
               body = response.read                                                  # partial body
             else                                                                    # complete body
