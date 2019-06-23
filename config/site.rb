@@ -321,7 +321,7 @@ yts
     Triplr[:HTML] = {
       'apnews.com' => :AP,
       'www.apnews.com' => :AP,
-      'www.google.com' => :Google,
+#      'www.google.com' => :Google,
       'www.instagram.com' => :Instagram,
       'www.patriotledger.com' => :GateHouse,
       'twitter.com' => :Twitter,

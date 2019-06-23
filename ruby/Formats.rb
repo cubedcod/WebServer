@@ -515,7 +515,7 @@ sidebar [class^='side']    [id^='side']
             yield subject, Video, v.attr('src').R }}
 
         # <body>
-        unless (@base.host || '').match?(/(google|twitter).com/)
+        unless (@base.host || '').match?(/(twitter).com/)
           if body = n.css('body')[0]
             %w{content-body entry-content}.map{|bsel|
               if content = body.css('.' + bsel)[0]
