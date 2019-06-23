@@ -82,12 +82,12 @@ class WebResource
       trace = e.backtrace.join "\n"
       puts "\e[7;31m500\e[0m " + msg , trace
       [500, {'Content-Type' => 'text/html'},
-       [uri.R.htmlDocument(
-          {uri => {Content => [
-                     {_: :h3, c: msg.hrefs, style: 'color: red'},
-                     {_: :pre, c: trace.hrefs},
-                     (HTML.keyval (HTML.webizeHash env), env),
-                     (HTML.keyval (HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
+       env['REQUEST_METHOD'] == 'HEAD' ? [] : [uri.R.htmlDocument(
+                                                 {uri => {Content => [
+                                                            {_: :h3, c: msg.hrefs, style: 'color: red'},
+                                                            {_: :pre, c: trace.hrefs},
+                                                            (HTML.keyval (HTML.webizeHash env), env),
+                                                            (HTML.keyval (HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
     end
 
     def decompress head, body
