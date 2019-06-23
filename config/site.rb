@@ -181,7 +181,7 @@ class WebResource
         r.fetch
       elsif !mode || %w{channel embed feed get_video_info results user watch yts}.member?(mode)
         r.env['HTTP_USER_AGENT'] = DesktopUA
-        r.fetch
+        r.fetch cookies: true
       elsif %w{attribution_link redirect}.member? mode
         [301, {'Location' =>  r.q['q'] || r.q['u']},[]]
       else
