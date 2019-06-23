@@ -239,12 +239,12 @@ class WebResource
               unless %w{application/javascript text/css}.member? format             # read RDF
                 reader = RDF::Reader.for(content_type: format)
                 if reader
-                  reader.new(body, :base_uri => self){|_| graph << _ }
+                  reader.new(body, :base_uri => url.R){|_| graph << _ }
                 else
                   puts "no RDF reader for MIME #{format} #{url}"
                 end
               end
-              RDF::Reader.for(:rdfa).new(body, :base_uri => self){|_| graph << _ } if format=='text/html' # read RDFa
+              RDF::Reader.for(:rdfa).new(body, :base_uri => url.R){|_| graph << _ } if format=='text/html' # read RDFa
               index graph                                                                                 # index RDF
             end
           end

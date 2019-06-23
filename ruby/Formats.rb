@@ -417,7 +417,7 @@ sidebar [class^='side']    [id^='side']
 
       # HTML -> RDF
       def scanContent &f
-        subject = ''
+        subject = @base
         n = Nokogiri::HTML.parse @doc # parse HTML
 
         # triplr host-binding
