@@ -179,7 +179,7 @@ class WebResource
       # request meta
       @r ||= {}
       head = HTTP.unmangle env                           # strip local headers
-      head.delete 'Host'
+      head.delete 'Cookie' unless options[:cookies]
       head['User-Agent'] = DesktopUA
       head.delete 'User-Agent' if %w{po.st t.co}.member? host
       head[:redirect] = false                            # halt internal redirects
@@ -197,7 +197,7 @@ class WebResource
           end
       url      = (options[:scheme] || 'https').to_s    + ':' + u # primary URL
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u # fallback URL
-      options[:content_type] = FeedMIME if FeedURL[u] # ignore server-provided feed MIME, often text/html
+      options[:content_type] = FeedMIME if FeedURL[u] # ignore remote feed MIME, often text/html
 
       # response meta
       status = nil; meta = {}; body = nil
@@ -208,7 +208,7 @@ class WebResource
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
         if @verbose
-          print url , ' '
+          print url , "\n"
           HTTP.print_header head
           puts ""
         end
@@ -218,7 +218,7 @@ class WebResource
             meta = response.meta
             HTTP.print_header meta if @verbose
             allowed_meta = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag}
-            #allowed_meta.push 'Set-Cookie' if host.match? /\.$/
+            allowed_meta.push 'Set-Cookie' if options[:cookies]
             allowed_meta.map{|k| @r[:Response][k] ||= meta[k.downcase] if meta[k.downcase]}
             format = options[:content_type] || meta['content-type'] && meta['content-type'].split(/;/)[0]
             format ||= case ext
@@ -684,8 +684,8 @@ class WebResource
           k
         }.join(underscored ? '_' : '-')
         key = key.downcase if underscored
-        # strip internal headers
-        head[key] = v.to_s unless %w{links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri response script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
+        # strip local headers
+        head[key] = v.to_s unless %w{host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri response script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
       head
     end
 
