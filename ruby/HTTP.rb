@@ -185,8 +185,8 @@ class WebResource
       head[:redirect] = false                            # halt internal redirects
       query = if @r[:query]
                 q = @r[:query].dup || {}
-                %w{group view sort}.map{|a| q.delete a } # strip local qs-args
-                q.empty? ? '' : HTTP.qs(q)                    # remote query-string
+                %w{group view sort}.map{|a| q.delete a } # strip local args
+                q.empty? ? '' : HTTP.qs(q)               # remote qs
               else
                 qs
               end
@@ -195,8 +195,8 @@ class WebResource
           else
             '//' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + query)) # original URL
           end
-      url = (options[:scheme]||'https') + ':' + u     # primary URL
-      fallback               = 'http:'        + u     # fallback URL
+      url = (options[:scheme]||:https).to_s + ':' + u # primary URL
+      fallback               = 'http:'            + u # fallback URL
       options[:content_type] = FeedMIME if FeedURL[u] # ignore server-provided Feed MIMEs, often text/html
 
       # response meta
@@ -718,7 +718,12 @@ class WebResource
   def self.getFeeds
     FeedURL.values.shuffle.map{|feed|
       begin
-        feed.fetch no_response: true
+        options = {
+          content_type: FeedMIME,
+          no_response: true,
+        }
+        options[:scheme] = :http if feed.scheme == 'http'
+        feed.fetch options
       rescue Exception => e
         puts 'https:' + feed.uri, e.class, e.message
       end}
