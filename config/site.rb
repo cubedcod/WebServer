@@ -177,9 +177,25 @@ class WebResource
     # YouTube
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
-      if %w{browse_ajax c guide_ajax heartbeat iframe_api live_chat playlist signin watch_videos}.member? mode
-        r.fetch
-      elsif !mode || %w{channel embed feed get_video_info results user watch yts}.member?(mode)
+      if !mode || %w{
+browse_ajax
+c
+channel
+embed
+feed
+get_video_info
+guide_ajax
+heartbeat
+iframe_api
+live_chat
+playlist
+results
+signin
+user
+watch
+watch_videos
+yts
+}.member?(mode)
         r.env['HTTP_USER_AGENT'] = DesktopUA
         r.fetch cookies: true
       elsif %w{attribution_link redirect}.member? mode
