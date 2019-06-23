@@ -51,7 +51,7 @@ class WebResource
   end
   module Feed
     class Format < RDF::Format
-      content_type 'application/atom+xml',
+      content_type FeedMIME,
                    extension: :atom,
                    aliases: %w(
                    application/rss+xml;q=0.9

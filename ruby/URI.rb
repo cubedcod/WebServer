@@ -45,7 +45,9 @@ class WebResource < RDF::URI
  uk utm www}
 
     ConfDir = Pathname.new(__dir__).join('../config').relative_path_from Pathname.new Dir.pwd
+    FeedMIME = 'application/atom+xml'
 
+    # URI constants
     W3       = 'http://www.w3.org/'
     Purl     = 'http://purl.org/'
     DC       = Purl + 'dc/terms/'

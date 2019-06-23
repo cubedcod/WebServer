@@ -54,42 +54,28 @@ class WebResource
       env[:Response] = {}; env[:links] = {}               # response-meta storage
       path = Pathname.new(env['REQUEST_PATH'].force_encoding('UTF-8')).expand_path.to_s # evaluate path
       query = env[:query] = parseQs env['QUERY_STRING']   # parse query
-      resource = ('//' + env['SERVER_NAME'] + path).R env # instantiate requested resource
-
-      # dispatch request
-      resource.send(env['REQUEST_METHOD']).do{|status,head,body|
-        color = (if resource.env[:deny]
-                 '31'
+      resource = ('//' + env['SERVER_NAME'] + path).R env # instantiate request-resource
+      resource.send(env['REQUEST_METHOD']).do{|status,head,body| # dispatch
+        color = (if resource.env[:deny]                          # log
+                 '31' # red - denied
                 elsif !Hosts.has_key? env['SERVER_NAME']
                   Hosts[env['SERVER_NAME']] = resource
-                  '32'
+                  '32' # green - new host
                 elsif env['REQUEST_METHOD'] == 'POST'
-                  '32'
+                  '32' # green - new POST data
                 elsif status == 200
                   if resource.ext == 'js' || (head['Content-Type'] && head['Content-Type'].match?(/script/))
-                    '36'
+                    '36' # lightblue - code
                   else
-                    '37'
+                    '37' # white - basic
                   end
                 else
-                  '30'
+                  '30' # gray - misc
                  end) + ';1'
-        referer = env['HTTP_REFERER']
-        referrer = if referer
-                     r = referer.R
-                     "\e[" + color + ";7m" + (r.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m -> "
-                   else
-                     ''
-                   end
-        relocation = head['Location'] ? (" ↝ " + head['Location']) : ""
-
-        # log request
-        puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + "\e[" + color + "m "  + status.to_s + "\e[0m " + referrer + ' ' +
-             "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs + "\e[0m " + relocation
-
-        # response
-        status == 304 ? [304, {}, []] : [status, head, body]
-      }
+        location = head['Location'] ? (" ↝ " + head['Location']) : ""
+        referer  = env['HTTP_REFERER'] ? ("\e[" + color + ";7m" + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m -> ") : ''
+        puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + "\e[" + color + "m "  + status.to_s + "\e[0m " + referer + ' ' + "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs + "\e[0m " + location
+        status == 304 ? [304, {}, []] : [status, head, body]} # response
     rescue Exception => e
       uri = 'https://' + env['SERVER_NAME'] + env['REQUEST_URI']
       msg = [uri, e.class, e.message].join " "
@@ -204,14 +190,14 @@ class WebResource
               else
                 qs
               end
-      url = if suffix = ext.empty? && host.match?(/reddit.com$/) && !upstreamUI? && '.rss'
-              '//' + (env['HTTP_HOST'] || host) + path + suffix + query                  # insert format-suffix
-            else
-              '//' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + query)) # original URL
-            end
-      options[:content_type] = 'application/atom+xml' if FeedURL[url] # fix borked Feed MIMEs often text/html
-      fallback =  'http:' + url
-      url = 'https:' + url
+      u = if suffix = ext.empty? && host.match?(/reddit.com$/) && !upstreamUI? && '.rss'
+            '//' + (env['HTTP_HOST'] || host) + path + suffix + query                  # insert format-suffix
+          else
+            '//' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + query)) # original URL
+          end
+      fallback               = 'http:'        + u
+      url = (options[:scheme]||'https') + ':' + u
+      options[:content_type] = FeedMIME if FeedURL[u] # ignore server-provided Feed MIMEs, often text/html
 
       # response meta
       status = nil; meta = {}; body = nil
@@ -653,13 +639,13 @@ class WebResource
         r.remote
       end}
 
-    def selectFormat default = 'text/html'
-      accept.sort.reverse.map{|q, formats| # q values in descending order
-        formats.map{|mime|
-          return default if mime == '*/*'
-          return mime if RDF::Writer.for(:content_type => mime) ||          # RDF Writer definition found
-                         %w{application/atom+xml text/html}.member?(mime)}} # non-RDF
-      default
+    def selectFormat
+      accept.sort.reverse.map{|q, formats| # formats in descending qval order
+        formats.map{|f|
+          return f if RDF::Writer.for(:content_type => f) || # RDF writer defined
+                      [FeedMIME, 'text/html'].member?(f)     # non-RDF writer defined
+          return 'text/html' if f == '*/*' }}                # wildcard writer
+      'text/html'                                            # default writer
     end
 
     def subscribe
