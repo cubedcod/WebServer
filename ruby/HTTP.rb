@@ -195,9 +195,9 @@ class WebResource
           else
             '//' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + query)) # original URL
           end
-      url = (options[:scheme]||:https).to_s + ':' + u # primary URL
-      fallback               = 'http:'            + u # fallback URL
-      options[:content_type] = FeedMIME if FeedURL[u] # ignore server-provided Feed MIMEs, often text/html
+      url      = (options[:scheme] || 'https').to_s    + ':' + u # primary URL
+      fallback = (options[:scheme] ? 'https' : 'http') + ':' + u # fallback URL
+      options[:content_type] = FeedMIME if FeedURL[u] # ignore server-provided feed MIME, often text/html
 
       # response meta
       status = nil; meta = {}; body = nil
