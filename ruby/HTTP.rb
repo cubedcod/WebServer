@@ -232,7 +232,7 @@ class WebResource
             meta = response.meta
             HTTP.print_header meta if @verbose
             allowed_meta = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag}
-            allowed_meta.push 'Set-Cookie' if host.match? /\.reddit.com$/
+            #allowed_meta.push 'Set-Cookie' if host.match? /\.$/
             allowed_meta.map{|k| @r[:Response][k] ||= meta[k.downcase] if meta[k.downcase]}
             format = options[:content_type] || meta['content-type'] && meta['content-type'].split(/;/)[0]
             format ||= case ext

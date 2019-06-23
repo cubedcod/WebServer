@@ -298,7 +298,7 @@ class WebResource
                 uri = e[3].match /<uri>([^<]+)</
                 name = e[3].match /<name>([^<]+)</
                 crs.push uri[1].R if uri
-                crs.push name[1] if name && !(uri && uri[1].R.path.sub('/user/','/u/') == name[1])
+                crs.push name[1] if name && !(uri && (uri[1].R.path||'/').sub('/user/','/u/') == name[1])
                 unless name || uri
                   crs.push e[3].do{|o|
                     case o
