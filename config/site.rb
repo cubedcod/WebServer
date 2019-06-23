@@ -101,7 +101,7 @@ class WebResource
     HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['maps.googleapis.com'] = HostGET['www.google.com'] = -> req {
       mode = req.parts[0]
       search = mode == 'search'
-      if %w{async complete searchdomaincheck}.member? mode
+      if %w{async complete js searchdomaincheck}.member? mode
         req.drop
       elsif mode == 'maps'
         req.env['HTTP_USER_AGENT'] = DesktopUA
@@ -111,13 +111,13 @@ class WebResource
         when /dropURI/
           req.drop
         else
-          if OFFLINE && search
+          if OFFLINE && search # search local index
             [302, {'Location' => 'http://localhost:8000/m' + req.qs}, []]
           else
             req.q['view'] = 'table' if search
             req.fetch.do{|status, head, body|
               case status
-              when 403 # goog blocked by a middlebox, try DDG
+              when 403 # blocked by a middlebox, try DDG
                 [302, {'Location' => 'https://duckduckgo.com/' + req.qs}, []]
               else
                 [status, head, body]
