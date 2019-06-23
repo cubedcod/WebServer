@@ -51,13 +51,13 @@ class WebResource
 
     def self.call env
       return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? env['REQUEST_METHOD'] # allow methods
-      env[:Response] = {}; env[:links] = {}               # response-meta storage
+      env[:Response] = {}; env[:links] = {}                                             # allocate response-meta
       path = Pathname.new(env['REQUEST_PATH'].force_encoding('UTF-8')).expand_path.to_s # evaluate path
-      query = env[:query] = parseQs env['QUERY_STRING']   # parse query
-      resource = ('//' + env['SERVER_NAME'] + path).R env # instantiate request-resource
+      query = env[:query] = parseQs env['QUERY_STRING']                                 # parse query
+      resource = ('//' + env['SERVER_NAME'] + path).R env                               # instantiate resource
       resource.send(env['REQUEST_METHOD']).do{|status,head,body| # dispatch
-        color = (if resource.env[:deny]                          # log
-                 '31' # red - denied
+        color = (if resource.env[:deny]                          # logging
+                  '31' # red - denied
                 elsif !Hosts.has_key? env['SERVER_NAME']
                   Hosts[env['SERVER_NAME']] = resource
                   '32' # green - new host
@@ -71,10 +71,10 @@ class WebResource
                   end
                 else
                   '30' # gray - misc
-                 end) + ';1'
+                end) + ';1'
         location = head['Location'] ? (" ↝ " + head['Location']) : ""
         referer  = env['HTTP_REFERER'] ? ("\e[" + color + ";7m" + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m -> ") : ''
-        puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + "\e[" + color + "m "  + status.to_s + "\e[0m " + referer + ' ' + "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs + "\e[0m " + location
+        puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + "\e[" + color + "m "  + status.to_s + "\e[0m " + referer + ' ' + "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs + "\e[0m " + location                                            # log
         status == 304 ? [304, {}, []] : [status, head, body]} # response
     rescue Exception => e
       uri = 'https://' + env['SERVER_NAME'] + env['REQUEST_URI']
