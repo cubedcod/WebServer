@@ -195,8 +195,8 @@ class WebResource
           else
             '//' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + query)) # original URL
           end
-      fallback               = 'http:'        + u
-      url = (options[:scheme]||'https') + ':' + u
+      url = (options[:scheme]||'https') + ':' + u     # primary URL
+      fallback               = 'http:'        + u     # fallback URL
       options[:content_type] = FeedMIME if FeedURL[u] # ignore server-provided Feed MIMEs, often text/html
 
       # response meta
@@ -266,7 +266,7 @@ class WebResource
         end}
 
       begin
-        fetchURL[url]       #   try HTTPS
+        fetchURL[url]       #   try (HTTPS default)
       rescue Exception => e # retry network/SSL-related failures on HTTP
         case e.class.to_s
         when 'Errno::ECONNREFUSED'
