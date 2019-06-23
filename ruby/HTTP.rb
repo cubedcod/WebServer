@@ -126,7 +126,7 @@ class WebResource
     alias_method :drop, :deny
 
     def denyPOST
-      head = HTTP.unmangle env
+      head = headers
       body = env['rack.input'].read
       body = if head['Content-Encoding'].to_s.match?(/zip/)
                Zlib::Inflate.inflate(body) rescue ''
@@ -178,7 +178,7 @@ class WebResource
 
       # request meta
       @r ||= {}
-      head = HTTP.unmangle env                           # strip local headers
+      head = headers
       head.delete 'Cookie' unless options[:cookies]
       head['User-Agent'] = DesktopUA
       head.delete 'User-Agent' if %w{po.st t.co}.member? host
@@ -341,7 +341,6 @@ class WebResource
     def GETthru
       # request
       url = 'https://' + host + path + qs
-      headers = HTTP.unmangle env
       body = env['rack.input'].read
       # response
       r = HTTParty.get url, :headers => headers, :body => body
@@ -484,7 +483,6 @@ class WebResource
     def OPTIONSthru
       # request
       url = 'https://' + host + path + qs
-      headers = HTTP.unmangle env
       body = env['rack.input'].read
       # response
       r = HTTParty.options url, :headers => headers, :body => body
@@ -512,16 +510,16 @@ class WebResource
     def POSTthru
       # request
       url = 'https://' + host + path + qs
-      headers = HTTP.unmangle env
-      %w{Host Query}.map{|k| headers.delete k }
+      head = headers
+      %w{Host Query}.map{|k| head.delete k }
       body = env['rack.input'].read
 
       puts "->"
-      HTTP.print_header headers
-      HTTP.print_body body, headers['Content-Type']
+      HTTP.print_header head
+      HTTP.print_body body, head['Content-Type']
 
       # response
-      r = HTTParty.post url, :headers => headers, :body => body
+      r = HTTParty.post url, :headers => head, :body => body
       s = r.code
       h = r.headers
       b = r.body
@@ -668,9 +666,8 @@ class WebResource
       url.subscribe
       [302, {'Location' => url.to_s}, []]}
 
-    # ALL_CAPS (CGI/env-var) keys to HTTP-capitalization
-    # is there a way to have Rack give us this straight out of the HTTP parser?
-    def self.unmangle env
+    # request headers
+    def headers
       head = {}
       env.map{|k,v|
         k = k.to_s
