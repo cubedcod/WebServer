@@ -245,19 +245,6 @@ yts
         end}
     end
 
-    def Google doc
-      doc.css('a[aria-label^="Next"]').map{|a|
-        env[:links][:next] ||= a['href']
-      }
-      %w{href ping}.map{|attr|
-        doc.css('a[' + attr + '^="/url"]').map{|a|
-          qs = HTTP.parseQs a[attr].R.query
-          if (s = qs['q'] || qs['url']) && !s.match?(/webcache/)
-            yield s, Type, Resource.R
-            yield s, Title, a.inner_text.gsub(/<[^>]+>/,' ')
-          end}}
-    end
-
     IGgraph = /^window._sharedData = /
     def Instagram doc
       doc.css('script').map{|script|
@@ -327,7 +314,6 @@ yts
     Triplr[:HTML] = {
       'apnews.com' => :AP,
       'www.apnews.com' => :AP,
-#      'www.google.com' => :Google,
       'www.instagram.com' => :Instagram,
       'www.patriotledger.com' => :GateHouse,
       'twitter.com' => :Twitter,
