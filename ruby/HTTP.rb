@@ -411,10 +411,13 @@ class WebResource
           dirs, files = nodes.partition &:directory?
           dirs.map{|dir|
             subject = dir.path[-1] == '/' ? dir : (dir + '/')
-            graph << RDF::Statement.new(subject, Type.R, Container.R)
-            graph << RDF::Statement.new(subject, Title.R, dir.basename)
-            graph << RDF::Statement.new(subject, Date.R, dir.mtime.iso8601)}
+            graph << (RDF::Statement.new subject, Type.R, Container.R)
+            graph << (RDF::Statement.new subject, Title.R, dir.basename)
+            graph << (RDF::Statement.new subject, Date.R, dir.mtime.iso8601)}
           files.map{|node|
+            graph << (RDF::Statement.new node, Type.R, Stat.R + 'File')
+            graph << (RDF::Statement.new node, Title.R, node.basename)
+            graph << (RDF::Statement.new node, Size.R, node.size)
             options = {base_uri: node}
             options[:format] = :mail if node.basename.split('.')[0] == 'msg'
             graph.load node.localPath, options rescue puts("error reading RDF in #{node}")}
