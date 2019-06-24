@@ -234,19 +234,11 @@ class WebResource
               body = response.read                                                  # partial body
             else                                                                    # complete body
               body = decompress meta, response.read; meta.delete 'content-encoding' # decompress body
-              file = (cache format).writeFile body unless format.match? RDFformats  # store non-RDF (RDF stored in named-graph locations by indexer)
-              unless %w{application/javascript text/css}.member? format             # read RDF
-                reader = RDF::Reader.for(content_type: format)
-                if reader
-                  reader.new(body, :base_uri => url.R){|_| graph << _ }
-                else
-                  puts "no RDF reader for MIME #{format} #{url}"
-                end
-              end
-              if format=='text/html' # read RDFa
-                RDF::Reader.for(:rdfa).new(body, :base_uri => url.R){|_|graph << _ } rescue nil
-              end
-              index graph            # index RDF
+              file = (cache format).writeFile body unless format.match? RDFformats  # cache non-RDF
+              reader = RDF::Reader.for(content_type: format)                  # RDF reader
+              reader.new(body, :base_uri => url.R){|_| graph << _ } if reader # read RDF
+              RDF::Reader.for(:rdfa).new(body, :base_uri => url.R){|_|graph << _ } if format=='text/html' # read RDFa
+              index graph                                                     # index RDF
             end
           end
         rescue Exception => e
