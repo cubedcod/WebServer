@@ -40,7 +40,6 @@ class WebResource
        ((format && ext.empty? && Extensions[RDF::Format.content_types[format]]) ? ('.' + Extensions[RDF::Format.content_types[format]].to_s) : '')).R env
     end
 
-    # return resource on hit
     def cached?
       location = cache
       return location if location.file? # direct match
@@ -134,10 +133,6 @@ class WebResource
       HTTP.print_body body, head['Content-Type'] unless host.match? /google|instagram|youtube/
       env[:deny] = true
       [202,{},[]]
-    end
-
-    def echo
-      [200, {'Content-Type' => 'text/html'}, [htmlDocument]]
     end
 
     def entity generator = nil
@@ -316,7 +311,7 @@ class WebResource
     def GET
       if path.match? /204$/
         [204, {}, []]
-      elsif handler = PathGET['/' + parts[0].to_s] # toplevel-path binding
+      elsif handler = PathGET['/' + parts[0].to_s] # toplevel-path
         handler[self]
       elsif handler = PathGET[path] # path binding
         handler[self]
@@ -691,15 +686,7 @@ class WebResource
       url.unsubscribe
       [302, {'Location' => url.to_s}, []]}
 
-    def upstreamUI?
-      if %w{duckduckgo.com soundcloud.com}.member? host
-        true
-      elsif env['HTTP_USER_AGENT'] == DesktopUA
-        true
-      else
-        false
-      end
-    end
+    def upstreamUI?; env['HTTP_USER_AGENT'] == DesktopUA end
 
   end
   include HTTP
@@ -717,10 +704,7 @@ class WebResource
       end}
   end
   module URIs
-
     FeedURL = {}
-    ConfDir.join('feeds/*.u').R.glob.map{|list|
-      list.lines.map{|u| FeedURL[u] = u.R }}
-
+    ConfDir.join('feeds/*.u').R.glob.map{|list| list.lines.map{|u| FeedURL[u] = u.R }}
   end
 end
