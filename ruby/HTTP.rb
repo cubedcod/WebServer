@@ -130,7 +130,6 @@ class WebResource
              else
                body
              end
-      HTTP.print_body body, head['Content-Type'] unless host.match? /google|instagram|youtube/
       env[:deny] = true
       [202,{},[]]
     end
@@ -440,7 +439,7 @@ class WebResource
          end
        end
       else # files
-        if uri.match GlobChars # glob
+        if uri.match /[\*\{\[]/ # glob chars
           files = glob
         else # default glob
           files = (self + '.*').glob                # base + extension
@@ -534,51 +533,15 @@ class WebResource
       head = headers
       %w{Host Query}.map{|k| head.delete k }
       body = env['rack.input'].read
-
-      puts "->"
-      HTTP.print_header head
-      HTTP.print_body body, head['Content-Type']
-
       # response
       r = HTTParty.post url, :headers => head, :body => body
       s = r.code
       h = r.headers
       b = r.body
-
-      puts "<-"
-      HTTP.print_header h
-      HTTP.print_body decompress(h, b), h['content-type']
-
       [s, h, [b]]
     end
 
     def pragma; env['HTTP_PRAGMA'] end
-
-    def HTTP.print_body body, mime
-      case mime
-      when /application\/json/
-        json = ::JSON.parse body rescue nil
-        if json
-          puts ::JSON.pretty_generate json
-        else
-          puts body
-        end
-      when /application\/x-www-form-urlencoded/
-        q = HTTP.parseQs body
-        message = q.delete "message"
-        puts q
-        puts ::JSON.pretty_generate ::JSON.parse message if message
-      when /text\/plain/
-        json = ::JSON.parse body rescue nil
-        if json
-          puts ::JSON.pretty_generate json
-        else
-          puts body
-        end
-      else
-        puts body
-      end
-    end
 
     def HTTP.print_header header; header.map{|k,v| puts [k,v].join "\t"} end
 

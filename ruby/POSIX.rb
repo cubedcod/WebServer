@@ -1,6 +1,5 @@
 class WebResource
   module POSIX
-    GlobChars = /[\*\{\[]/
     LinkMethod = :ln#_s
 
     def children
