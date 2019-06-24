@@ -180,8 +180,6 @@ class WebResource
       @r ||= {}
       head = headers
       head.delete 'Cookie' unless options[:cookies]
-      head['User-Agent'] = DesktopUA
-      head.delete 'User-Agent' if %w{po.st t.co}.member? host
       head[:redirect] = false                            # halt internal redirects
       query = if @r[:query]
                 q = @r[:query].dup || {}
@@ -684,6 +682,8 @@ class WebResource
         # strip local headers
         head[key] = v.to_s unless %w{host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri response script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
       head['Referer'] = 'http://drudgereport.com/' if env['SERVER_NAME'].match? /wsj\.com/
+      head['User-Agent'] = DesktopUA
+      head.delete 'User-Agent' if %w{po.st t.co}.member? host
       head
     end
 
