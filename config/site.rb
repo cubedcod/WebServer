@@ -71,7 +71,14 @@ class WebResource
     end
 
     # redirects
-    PathGET['/mu']  = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'}, []]} # new posts in bostonmusic blog
+    PathGET['/mu']  = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'}, []]}
+    PathGET['/resizer'] = -> r {
+      parts = r.path.split /\/\d+x\d+\//
+      if parts.size > 1
+        [301, {'Location' => 'https://' + parts[-1]}, []]
+      else
+        r.remote
+      end}
     PathGET['/url'] = -> r {[301,{'Location' => (r.q['url'] || r.q['q'])}, []]}
 
     # DuckDuckGo

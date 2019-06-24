@@ -642,14 +642,6 @@ class WebResource
       [302, {'Location' => e.io.meta['location']}, []]
     end
 
-    PathGET['/resizer'] = -> r {
-      parts = r.path.split /\/\d+x\d+\//
-      if parts.size > 1
-        [301, {'Location' => 'https://' + parts[-1]}, []]
-      else
-        r.remote
-      end}
-
     def selectFormat
       accept.sort.reverse.map{|q, formats| # formats in descending qval order
         formats.map{|f|
