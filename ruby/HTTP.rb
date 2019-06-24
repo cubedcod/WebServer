@@ -35,7 +35,7 @@ class WebResource
     # cache location
     def cache format=nil
       ('/' + host +
-       ((!path || path[-1] == '/') ? '/index' : path) +
+       ((!path || path[-1] == '/') ? '/index' : (path.size > 127 ? path.sha2.do{|p|'/'+p[0..1]+'/'+p[2..-1]} : path)) +
        (qs.empty? ? '' : ('.' + qs.sha2)) +
        ((format && ext.empty? && Extensions[RDF::Format.content_types[format]]) ? ('.' + Extensions[RDF::Format.content_types[format]].to_s) : '')).R env
     end

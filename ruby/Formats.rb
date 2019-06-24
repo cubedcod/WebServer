@@ -501,6 +501,7 @@ sidebar [class^='side']    [id^='side']
                 v = v.hrefs
               else
                 v = HTML.webizeString v
+                v = @base.join v if v.class == WebResource
               end
 
               yield subject, k, v unless k == :drop

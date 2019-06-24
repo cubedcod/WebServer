@@ -274,7 +274,7 @@ class WebResource
         x.map{|n|render n}.join
       when WebResource
         render({_: :a, href: x.uri, id: x[:id][0] || ('link'+rand.to_s.sha2), class: x[:class][0],
-                c: x[:label][0] || (%w{gif ico jpg png webp}.member?(x.ext.downcase) ? {_: :img, src: x.uri} : CGI.escapeHTML(x.uri[0..64]))})
+                c: x[:label][0] || (%w{gif ico jpeg jpg png webp}.member?(x.ext.downcase) ? {_: :img, src: x.uri} : CGI.escapeHTML(x.uri[0..64]))})
       when NilClass
         ''
       when FalseClass
@@ -396,10 +396,9 @@ class WebResource
           keyval v, env
         end
       elsif v.class == WebResource
-        # blank-node reference
-        if v.uri.match?(/^_:/) && env[:graph] && env[:graph][v.uri]
+        if v.uri.match?(/^_:/) && env[:graph] && env[:graph][v.uri] # blank-node
           value nil, env[:graph][v.uri], env
-        elsif %w{jpg JPG png PNG webp}.member? v.ext
+        elsif %w{jpeg jpg JPG png PNG webp}.member? v.ext           # image
           Markup[Image][v, env]
         else
           [v.data({label: CGI.escapeHTML((v.query || (v.basename && v.basename != '/' && v.basename) || (v.path && v.path != '/' && v.path) || v.host || v.to_s)[0..48])}), ' ']
