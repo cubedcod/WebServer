@@ -243,15 +243,13 @@ class WebResource
           end
         rescue Exception => e
           case e.message
-          when /304/
-          # no updates
-          when /401/     # unauthorized
+          when /304/ # no updates
+            status = 304
+          when /401/ # unauthorized
             status = 401
-          when /403/     # forbidden
+          when /403/ # forbidden
             status = 403
-          when /404/     # not found
-            # set status hint for 404 responses with data from local cache (should we just hide origin 404 and return 200?)
-            env[:status] = 404
+          when /404/ # not found
             status = 404
           else
             raise
@@ -260,7 +258,7 @@ class WebResource
 
       begin
         fetchURL[url]       #   try (HTTPS default)
-      rescue Exception => e # retry network/SSL-related failures on HTTP
+      rescue Exception => e # retry (HTTP         )
         case e.class.to_s
         when 'Errno::ECONNREFUSED'
           fetchURL[fallback]
@@ -676,7 +674,7 @@ class WebResource
         key = key.downcase if underscored
         # strip local headers
         head[key] = v.to_s unless %w{host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri response script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
-      head['Referer'] = 'http://drudgereport.com/' if env['SERVER_NAME'].match? /wsj\.com/
+      head['Referer'] = 'http://drudgereport.com/' if env['SERVER_NAME']&.match? /wsj\.com/
       head['User-Agent'] = DesktopUA
       head.delete 'User-Agent' if %w{po.st t.co}.member? host
       head
