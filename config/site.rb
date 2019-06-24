@@ -120,7 +120,7 @@ class WebResource
         else
           if OFFLINE && search # search local index
             [302, {'Location' => 'http://localhost:8000/m' + req.qs}, []]
-          else
+          else                 # fetch
             req.fetch.do{|status, head, body|
               case status
               when 403 # blocked by a middlebox, try DDG
@@ -178,6 +178,14 @@ class WebResource
         r.graphResponse graph
       else
         r.remote
+      end}
+
+    HostGET['s.yimg.com'] = -> r {
+      parts = r.path.split /https?:\/+/
+      if parts.size > 1
+        [301, {'Location' => 'https://' + parts[-1]}, []]
+      else
+        r.drop
       end}
 
     # YouTube
