@@ -23,7 +23,7 @@ class WebResource
     end
 
     # GLOB(7)
-    def glob; (Pathname.glob localPath).map &:R end
+    def glob; (Pathname.glob relPath).map &:R end
 
     # GREP(1)
     def grep q
@@ -51,11 +51,11 @@ class WebResource
     def ln_s n; FileUtils.ln_s node.expand_path, n.node.expand_path end
     def link n; n.dir.mkdir; send LinkMethod, n unless n.exist? end
 
-    def lines; e ? (open localPath).readlines.map(&:chomp) : [] end
+    def lines; e ? (open relPath).readlines.map(&:chomp) : [] end
 
     # MKDIR(1)
     def mkdir
-      FileUtils.mkdir_p localPath unless exist?
+      FileUtils.mkdir_p relPath unless exist?
       self
     end
 
@@ -63,7 +63,7 @@ class WebResource
     alias_method :m, :mtime
 
     # URI -> file
-    def node; @node ||= (Pathname.new localPath) end
+    def node; @node ||= (Pathname.new relPath) end
 
     # URI -> file(s)
     def nodes
@@ -92,7 +92,7 @@ class WebResource
        end).justArray.flatten.compact.uniq.select &:exist?
     end
 
-    def readFile; File.open(localPath).read end
+    def readFile; File.open(relPath).read end
 
     def size; node.size rescue 0 end
 
@@ -107,12 +107,12 @@ class WebResource
     # TOUCH(1)
     def touch
       dir.mkdir
-      FileUtils.touch localPath
+      FileUtils.touch relPath
     end
 
     def writeFile o
       dir.mkdir
-      File.open(localPath,'w'){|f|f << o}
+      File.open(relPath,'w'){|f|f << o}
       self
     end
 

@@ -139,7 +139,7 @@ class WebResource < RDF::URI
       ('/' + p.gsub(' ','%20').gsub('#','%23')).R
     end
 
-    def toRelativePath
+    def relPath
       URI.unescape case path
                    when '/'
                      '.'
@@ -149,7 +149,6 @@ class WebResource < RDF::URI
                      path
                    end
     end
-    alias_method :localPath,:toRelativePath
 
     # dirname as reference
     def dir; dirname.R if path end
@@ -158,7 +157,7 @@ class WebResource < RDF::URI
     def dirname; File.dirname path if path end
 
     # shell-escaped path
-    def shellPath; localPath.force_encoding('UTF-8').sh end
+    def shellPath; relPath.force_encoding('UTF-8').sh end
     alias_method :sh, :shellPath
 
     # path nodes

@@ -147,7 +147,7 @@ class WebResource
       else                                       # generate
         body = generator ? generator.call : self # call generator
         if body.class == WebResource             # static response
-          (Rack::File.new nil).serving((Rack::Request.new env), body.localPath).do{|s,h,b| # Rack handler
+          (Rack::File.new nil).serving((Rack::Request.new env), body.relPath).do{|s,h,b| # Rack handler
             if s == 304
               [s, {}, []]                        # not modified
             else
@@ -377,7 +377,7 @@ class WebResource
             # store version
             unless doc.e
               doc.dir.mkdir
-              RDF::Writer.open(doc.localPath){|f|f << graph}
+              RDF::Writer.open(doc.relPath){|f|f << graph}
               updates << doc
               puts  "\e[32m+\e[0m http://localhost:8000" + doc.stripDoc
             else
@@ -415,7 +415,7 @@ class WebResource
           set.select(&:file?).map{|node|
             options = {base_uri: node}
             options[:format] = :mail if node.basename.split('.')[0] == 'msg'
-            graph.load node.localPath, options rescue puts("error reading RDF in #{node}")}
+            graph.load node.relPath, options rescue puts("error reading RDF in #{node}")}
           #index graph
           nodeMeta nodes, graph
           graphResponse graph
