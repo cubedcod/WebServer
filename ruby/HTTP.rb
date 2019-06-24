@@ -243,8 +243,10 @@ class WebResource
                   puts "no RDF reader for MIME #{format} #{url}"
                 end
               end
-              RDF::Reader.for(:rdfa).new(body, :base_uri => url.R){|_|graph << _ rescue nil} if format=='text/html' # read RDFa
-              index graph                                                                                 # index RDF
+              if format=='text/html' # read RDFa
+                RDF::Reader.for(:rdfa).new(body, :base_uri => url.R){|_|graph << _ } rescue nil
+              end
+              index graph            # index RDF
             end
           end
         rescue Exception => e

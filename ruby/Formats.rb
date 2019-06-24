@@ -519,16 +519,16 @@ sidebar [class^='side']    [id^='side']
           if body = n.css('body')[0]
             %w{content-body entry-content}.map{|bsel|
               if content = body.css('.' + bsel)[0]
-                yield subject, Content, HTML.clean(content.inner_html)
+                yield subject, Content, HTML.clean(content.inner_html) rescue nil
               end}
             [*BasicGunk,*Gunk].map{|selector|
               body.css(selector).map{|sel|
                 sel.remove }} # strip elements
-            yield subject, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
+            yield subject, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '') rescue nil
           else
             puts "no <body> found in HTML #{@base}"
             n.css('head').remove
-            yield subject, Content, HTML.clean(n.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
+            yield subject, Content, HTML.clean(n.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '') rescue nil
           end
         end
       end
