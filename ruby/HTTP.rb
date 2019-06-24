@@ -408,17 +408,16 @@ class WebResource
           fileResponse
         else
           graph = RDF::Repository.new
-          files, dirs = nodes.partition &:file?
-          puts dirs
+          dirs, files = nodes.partition &:directory?
+          dirs.map{|dir|
+            subject = dir.path[-1] == '/' ? dir : (dir + '/')
+            graph << RDF::Statement.new(subject, Type.R, Container.R)
+            graph << RDF::Statement.new(subject, Title.R, dir.basename)
+            graph << RDF::Statement.new(subject, Date.R, dir.mtime.iso8601)}
           files.map{|node|
-            begin
-              options = {base_uri: node}
-              options[:format] = :mail if node.basename.split('.')[0] == 'msg'
-              graph.load node.localPath, options
-            rescue RDF::FormatError => e
-              puts [node.localPath, e.class, e.message].join " "
-            end
-          }
+            options = {base_uri: node}
+            options[:format] = :mail if node.basename.split('.')[0] == 'msg'
+            graph.load node.localPath, options rescue puts("error reading RDF in #{node}")}
           index graph
           graphResponse graph
         end
