@@ -337,13 +337,10 @@ class WebResource
     end
 
     def graphResponse graph
-      if graph.empty?
-        if !localNode? && (cached = ('/' + host + (path || '/')).R).directory?
-          nodeMeta cached.children, graph
-        else
-          return notfound
-        end
+      if graph.empty? && !localNode? && (cached = ('/' + host + (path || '/')).R).directory?
+        nodeMeta cached.children, graph
       end
+      return notfound if graph.empty?
       format = selectFormat
       dateMeta if localNode?
       @r[:Response] ||= {}
@@ -363,7 +360,7 @@ class WebResource
 
     def HEAD
      self.GET.do{| s, h, b|
-       [ s, h, []]}
+                 [ s, h, []]}
     end
 
     # stored named-graph(s) in turtle files
