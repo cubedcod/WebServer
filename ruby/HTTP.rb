@@ -40,7 +40,7 @@ class WebResource
                   else
                     ''
                   end
-      ('/' + host + path + extension).R env
+      ('/' + host + ((!path||path=='/') ? '/index' : path) + extension).R env
     end
 
     # return resource on hit
@@ -195,7 +195,8 @@ class WebResource
           end
       url      = (options[:scheme] || 'https').to_s    + ':' + u # primary URL
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u # fallback URL
-      options[:content_type] = FeedMIME if FeedURL[u] # ignore remote feed MIME, often text/html
+      options[:content_type] = FeedMIME if FeedURL[u]  # ignore upstream feed MIME
+      options[:cookies] = true if host.match? POSThost # allow cookies
 
       # response meta
       status = nil; meta = {}; body = nil
@@ -242,7 +243,7 @@ class WebResource
                   puts "no RDF reader for MIME #{format} #{url}"
                 end
               end
-              RDF::Reader.for(:rdfa).new(body, :base_uri => url.R){|_| graph << _ } if format=='text/html' # read RDFa
+              RDF::Reader.for(:rdfa).new(body, :base_uri => url.R){|_|graph << _ rescue nil} if format=='text/html' # read RDFa
               index graph                                                                                 # index RDF
             end
           end
