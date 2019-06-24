@@ -34,19 +34,17 @@ class WebResource
 
     # cache location
     def cache format=nil
-      extension = if format && ext.empty? # format-suffix missing but known
-                    puts "suffix undefined for MIME #{format}" unless Extensions[RDF::Format.content_types[format]]
-                    '.' + Extensions[RDF::Format.content_types[format]].to_s
-                  else
-                    ''
-                  end
-      ('/' + host + ((!path||path=='/') ? '/index' : path) + extension).R env
+      ('/' + host +
+       ((!path || path[-1] == '/') ? '/index' : path) +
+       (qs.empty? ? '' : ('.' + qs.sha2)) +
+       ((format && ext.empty? && Extensions[RDF::Format.content_types[format]]) ? ('.' + Extensions[RDF::Format.content_types[format]].to_s) : '')).R env
     end
 
     # return resource on hit
     def cached?
-      return cache if cache.file?      # direct match
-      (cache + '.*').glob.find &:file? # suffix match
+      location = cache
+      return location if location.file? # direct match
+      (location+'.*').glob.find &:file? # suffix match
     end
 
     def self.call env
