@@ -65,33 +65,6 @@ class WebResource
     # URI -> file
     def node; @node ||= (Pathname.new relPath) end
 
-    # URI -> file(s)
-    def nodes
-      (if directory? # directory
-       if q.has_key?('f') && path!='/' # FIND
-         found = find q['f']
-         found
-       elsif q.has_key?('q') && path!='/' # GREP
-         grep q['q']
-       else # LS
-         index = (self+'index.html').glob
-         if !index.empty? && qs.empty? # static index-file exists and no query
-           index
-         else
-           children
-         end
-       end
-      else # files
-        if uri.match GlobChars # glob
-          files = glob
-        else # default glob
-          files = (self + '.*').glob                # base + extension
-          files = (self + '*').glob if files.empty? # prefix match
-        end
-        [self, files]
-       end).justArray.flatten.compact.uniq.select &:exist?
-    end
-
     def readFile; File.open(relPath).read end
 
     def size; node.size rescue 0 end

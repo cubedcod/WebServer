@@ -276,7 +276,7 @@ class WebResource
             if options[:no_response]
               puts "REDIRECT #{url} -> \e[32;7m" + location + "\e[0m"
             else
-              return updateLocation location
+              return [302, {'Location' => location}, []]
             end
           end
         when 'RuntimeError'
@@ -416,8 +416,7 @@ class WebResource
             options = {base_uri: node}
             options[:format] = :mail if node.basename.split('.')[0] == 'msg'
             graph.load node.relPath, options rescue puts("error reading RDF in #{node}")}
-          #index graph
-          nodeMeta nodes, graph
+          nodeMeta set, graph
           graphResponse graph
         end
       end
@@ -428,6 +427,33 @@ class WebResource
     def localNode?; LocalAddr.member?(@r['SERVER_NAME']||host) end
 
     def no_cache; pragma && pragma == 'no-cache' end
+
+    # URI -> file(s)
+    def nodes
+      (if directory? # directory
+       if q.has_key?('f') && path!='/' # FIND
+         found = find q['f']
+         found
+       elsif q.has_key?('q') && path!='/' # GREP
+         grep q['q']
+       else # LS
+         index = (self+'index.html').glob
+         if !index.empty? && qs.empty? # static index-file exists and no query
+           index
+         else
+           children
+         end
+       end
+      else # files
+        if uri.match GlobChars # glob
+          files = glob
+        else # default glob
+          files = (self + '.*').glob                # base + extension
+          files = (self + '*').glob if files.empty? # prefix match
+        end
+        [self, files]
+       end).justArray.flatten.compact.uniq.select &:exist?
+    end
 
     def nodeMeta nodes, graph
       dirs, files = nodes.partition &:directory?
@@ -589,19 +615,6 @@ class WebResource
       end
     end
 
-    def relocation
-      hash = (host + (path || '') + qs).sha2
-      ('/cache/location/' + hash[0..2] + '/' + hash[3..-1] + '.u').R
-    end
-
-    def redirect
-      [302, {'Location' => relocation.readFile}, []]
-    end
-
-    def relocated?
-      relocation.exist?
-    end
-
     # dispatch request for remote resource
     def remote
       if env.has_key? 'HTTP_TYPE'
@@ -626,7 +639,7 @@ class WebResource
         fetch
       end
     rescue OpenURI::HTTPRedirect => e
-      updateLocation e.io.meta['location']
+      [302, {'Location' => e.io.meta['location']}, []]
     end
 
     PathGET['/resizer'] = -> r {
@@ -646,20 +659,10 @@ class WebResource
       'text/html'                                            # default writer
     end
 
-    def subscribe
-      return if subscriptionFile.e
-      puts "SUBSCRIBE https:/" + subscriptionFile.dirname
-      subscriptionFile.touch
-    end
-
-    def subscribed?
-      subscriptionFile.exist?
-    end
+    def subscribe; subscriptionFile.touch end
+    def subscribed?; subscriptionFile.exist? end
     def subs; puts subscriptions.sort.join ' ' end
-
-    def subscriptions
-      subscriptionFile('*').R.glob.map(&:dir).map &:basename
-    end
+    def subscriptions; subscriptionFile('*').R.glob.map(&:dir).map &:basename end
 
     PathGET['/subscribe'] = -> r {
       url = (r.q['u'] || '/').R
@@ -689,19 +692,12 @@ class WebResource
       head
     end
 
-    def unsubscribe
-      subscriptionFile.e && subscriptionFile.node.delete
-    end
+    def unsubscribe; subscriptionFile.e && subscriptionFile.node.delete end
 
     PathGET['/unsubscribe']  = -> r {
       url = (r.q['u'] || '/').R
       url.unsubscribe
       [302, {'Location' => url.to_s}, []]}
-
-    def updateLocation location
-      relocation.writeFile location unless host.match? /(alibaba|google|soundcloud|twitter|youtube)\.com$/
-      [302, {'Location' => location}, []]
-    end
 
     def upstreamUI?
       if %w{duckduckgo.com soundcloud.com}.member? host
