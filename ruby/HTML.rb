@@ -1,6 +1,26 @@
 # coding: utf-8
 class WebResource
   module HTML
+    include URIs
+
+    Icons = {
+      'https://twitter.com' => '🐦',
+      Abstract => '✍',
+      Content => '✏',
+      DC + 'hasFormat' => '≈',
+      DC + 'identifier' => '☸',
+      Date => '⌚',
+      Image => '🖼',
+      Link => '☛',
+      SIOC + 'attachment' => '✉',
+      SIOC + 'reply_of' => '↩',
+      Schema + 'height' => '↕',
+      Schema + 'width' => '↔',
+      Video => '🎞',
+      W3 + 'ns/ldp#contains' => '📁',
+    }
+
+    Markup = {}
 
     Treeize = -> graph {
       t = {}
@@ -176,6 +196,11 @@ class WebResource
     Markup[Date] = -> date, env=nil {
       {_: :a, class: :date, href: (env && %w{l localhost}.member?(env['SERVER_NAME']) && '/' || 'http://localhost:8000/') + date[0..13].gsub(/[-T:]/,'/'), c: date}}
 
+    Markup[Link] = -> ref, env=nil {
+      u = ref.to_s
+      [{_: :a, class: :link, title: u, id: 'l'+rand.to_s.sha2,
+        href: u, c: u.sub(/^https?.../,'')[0..127]}," \n"]}
+
     Markup[Type] = -> t, env=nil {
       if t.respond_to? :uri
         t = t.R
@@ -304,7 +329,7 @@ class WebResource
 
     def self.tabular graph, env
       graph = graph.values if graph.class == Hash
-      keys = graph.map{|resource|resource.keys}.flatten.uniq - [Content, DC+'hasFormat', Identifier, Image, Mtime, SIOC+'reply_of', SIOC+'user_agent', Title, Type]
+      keys = graph.map{|resource|resource.keys}.flatten.uniq - [Content, DC+'hasFormat', DC+'identifier', Image, Mtime, SIOC+'reply_of', SIOC+'user_agent', Title, Type]
       if env[:query] && env[:query].has_key?('sort')
         attr = env[:query]['sort']
         attr = Date if attr == 'date'
@@ -388,7 +413,7 @@ class WebResource
       elsif v.class == Hash # RDF type
         resource = v.R
         types = resource.types
-        if (types.member? Post) || (types.member? BlogPost) || (types.member? Email)
+        if (types.member? Post) || (types.member? SIOC+'BlogPost') || (types.member? Email)
           Markup[Post][v,env]
         elsif types.member? Image
           Markup[Image][v,env]

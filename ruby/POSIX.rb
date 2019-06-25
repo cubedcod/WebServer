@@ -2,15 +2,36 @@ class WebResource
   module POSIX
     include URIs
 
+    def basename; File.basename ( path || '/' ) end                     # BASENAME(1)
+    def dir; dirname.R if path end
     def directory?; node.directory? end
+    def dirname; File.dirname path if path end
+    def du; `du -s #{sh}| cut -f 1`.chomp.to_i end                      # DU(1)
     def exist?; node.exist? end
+    def ext; File.extname( path || '' )[1..-1] || '' end
     def file?; node.file? end
+    def glob; (Pathname.glob relPath).map &:R end                       # GLOB(7)
+    def ln   n; FileUtils.ln   node.expand_path, n.node.expand_path end
+    def ln_s n; FileUtils.ln_s node.expand_path, n.node.expand_path end
+    def link n; n.dir.mkdir; send :ln, n unless n.exist? end            # LN(1)
+    def lines; exist? ? (open relPath).readlines.map(&:chomp) : [] end
+    def mkdir; FileUtils.mkdir_p relPath unless exist?; self end        # MKDIR(1)
     def mtime; node.stat.mtime end
+    def node; @node ||= (Pathname.new relPath) end
+    def readFile; File.open(relPath).read end
+    def sha2; to_s.sha2 end
+    def shellPath; relPath.force_encoding('UTF-8').sh end
     def size; node.size rescue 0 end
+    def stripDoc; (uri.sub /\.(bu|e|html|json|log|md|msg|opml|ttl|txt|u)$/,'').R end
     def symlink?; node.symlink? end
+    def touch; dir.mkdir; FileUtils.touch relPath end                   # TOUCH(1)
+    def writeFile o; dir.mkdir; File.open(relPath,'w'){|f|f << o}; self end
 
-    # DU(1)
-    def du; `du -s #{sh}| cut -f 1`.chomp.to_i end
+    alias_method :sh, :shellPath
+
+    def self.absolutePath p
+      ('/' + p.gsub(' ','%20').gsub('#','%23')).R
+    end
 
     # FIND(1)
     def find p
@@ -22,7 +43,7 @@ class WebResource
       subject = options[:base_uri] || self
       if directory?
         subject = subject.path[-1] == '/' ? subject : (subject + '/') # ensure trailing-slash on container URI
-        graph << (RDF::Statement.new subject, Type.R, Container.R)
+        graph << (RDF::Statement.new subject, Type.R, (W3 + 'ns/ldp#Container').R)
       else
         graph << (RDF::Statement.new subject, Type.R, Stat.R + 'File')
       end
@@ -30,9 +51,6 @@ class WebResource
       graph << (RDF::Statement.new subject, Size.R, size)
       graph << (RDF::Statement.new subject, Date.R, mtime.iso8601)
     end
-
-    # GLOB(7)
-    def glob; (Pathname.glob relPath).map &:R end
 
     # GREP(1)
     def grep q
@@ -55,40 +73,33 @@ class WebResource
         POSIX.absolutePath path.chomp}
     end
 
-    # LN(1)
-    def ln   n; FileUtils.ln   node.expand_path, n.node.expand_path end
-    def ln_s n; FileUtils.ln_s node.expand_path, n.node.expand_path end
-    def link n; n.dir.mkdir; send :ln, n unless n.exist? end
-
-    def lines; exist? ? (open relPath).readlines.map(&:chomp) : [] end
-
-    # MKDIR(1)
-    def mkdir
-      FileUtils.mkdir_p relPath unless exist?
-      self
+    def parts
+      @parts ||= if path
+                   if path[0]=='/'
+                     path[1..-1]
+                   else
+                     path
+                   end.split '/'
+                 else
+                   []
+                 end
     end
 
-    # URI -> file
-    def node; @node ||= (Pathname.new relPath) end
-
-    def readFile; File.open(relPath).read end
+    def relPath
+      URI.unescape case path
+                   when '/'
+                     '.'
+                   when /^\//
+                     path[1..-1]
+                   else
+                     path
+                   end
+    end
 
     def self.splitArgs args
       args.shellsplit
     rescue
       args.split /\W/
-    end
-
-    # TOUCH(1)
-    def touch
-      dir.mkdir
-      FileUtils.touch relPath
-    end
-
-    def writeFile o
-      dir.mkdir
-      File.open(relPath,'w'){|f|f << o}
-      self
     end
 
   end

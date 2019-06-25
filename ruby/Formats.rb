@@ -1,7 +1,22 @@
 # coding: utf-8
 class WebResource
   RDFformats = /^(application|text)\/(atom|html|json|rss|turtle|.*urlencoded|xml)/
-
+  module URIs
+    BasicSlugs = %w{
+ article archives articles
+ blog blogs blogspot
+ columns co com comment comments
+ edu entry
+ feed feeds feedproxy forum forums
+ go google gov
+ html index local medium
+ net news org p php post
+ r reddit rss rssfeed
+ sports source story
+ t the threads topic tumblr
+ uk utm www}
+    FeedMIME = 'application/atom+xml'
+  end
   module Calendar
     class Format < RDF::Format
       content_type 'text/calendar', :extension => :ics
@@ -151,37 +166,34 @@ class WebResource
       def normalizePredicates *f
         send(*f){|s,p,o|
           yield s,
-                {DCe+'type' => Type,
+                {DCelement+'type' => Type,
 
                  Podcast+'author' => Creator,
 
-                 Atom+'title'       => Title,
-                 DCe+'subject'      => Title,
-                 Media+'title'      => Title,
-                 Podcast+'title'    => Title,
-                 Podcast+'subtitle' => Title,
-                 RSS+'title'        => Title,
+                 Atom+'title'        => Title,
+                 DCelement+'subject' => Title,
+                 Podcast+'subtitle'  => Title,
+                 Podcast+'title'     => Title,
+                 RSS+'title'         => Title,
+                 'http://search.yahoo.com/mrss/title' => Title,
 
-                 Media+'description' => Abstract,
-                 Atom+'summary'      => Abstract,
+                 Atom+'summary'                             => Abstract,
+                 'http://search.yahoo.com/mrss/description' => Abstract,
 
                  Atom+'content'                => Content,
                  RSS+'description'             => Content,
                  RSS+'encoded'                 => Content,
                  RSS+'modules/content/encoded' => Content,
 
-                 RSS+'category'           => Label,
+                 Atom+'displaycategories' => Label,
                  Podcast+'episodeType'    => Label,
                  Podcast+'keywords'       => Label,
-                 YouTube+'videoId'        => Label,
-                 Atom+'displaycategories' => Label,
+                 RSS+'category'           => Label,
 
-                 RSS+'comments'               => Comments,
-                 RSS+'modules/slash/comments' => SIOC+'num_replies',
                  Atom+'enclosure'             => SIOC+'attachment',
-                 YouTube+'channelId'          => SIOC+'user_agent',
-                 RSS+'source'                 => DC+'source',
                  Atom+'link'                  => DC+'link',
+                 RSS+'modules/slash/comments' => SIOC+'num_replies',
+                 RSS+'source'                 => DC+'source',
 
                 }[p]||p, o }
       end
@@ -192,7 +204,7 @@ class WebResource
                       'Date' => true,
                       RSS+'pubDate' => true,
                       Date => true,
-                      DCe+'date' => true,
+                      DCelement+'date' => true,
                       Atom+'published' => true,
                       Atom+'updated' => true}[p]
           if dateType
@@ -255,7 +267,7 @@ class WebResource
             resource = u.R
 
             # type-tag
-            yield u, Type, BlogPost.R
+            yield u, Type, (SIOC + 'BlogPost').R
 
             # post target (blog, re-blog)
             blogs = [resource.join('/')]
@@ -291,7 +303,7 @@ class WebResource
               p = (x[e[0] && e[0].chop]||WebResource::RSS) + e[1] # attribute URI
               if [Atom+'id', RSS+'link', RSS+'guid', Atom+'link'].member? p
               # subject URI candidates
-              elsif [Atom+'author', RSS+'author', RSS+'creator', DCe+'creator'].member? p
+              elsif [Atom+'author', RSS+'author', RSS+'creator', DCelement+'creator'].member? p
                 # creators
                 crs = []
                 # XML name + URI
@@ -484,11 +496,11 @@ sidebar [class^='side']    [id^='side']
                 'sailthru.secondary_image' => Image,
                 'sailthru.title' => Title,
                 'thumbnail' => Image,
-                'twitter:creator' => Twitter,
+                'twitter:creator' => 'https://twitter.com',
                 'twitter:description' => Abstract,
                 'twitter:image' => Image,
                 'twitter:image:src' => Image,
-                'twitter:site' => Twitter,
+                'twitter:site' => 'https://twitter.com',
                 'twitter:title' => Title,
                 'viewport' => :drop,
               }[k] || ('#' + k.gsub(' ','_'))
@@ -496,8 +508,8 @@ sidebar [class^='side']    [id^='side']
               case k
               when /lytics/
                 k = :drop
-              when Twitter
-                v = (Twitter + '/' + v.sub(/^@/,'')).R
+              when 'https://twitter.com'
+                v = ('https://twitter.com/' + v.sub(/^@/,'')).R
               when Abstract
                 v = v.hrefs
               else
@@ -710,7 +722,7 @@ sidebar [class^='side']    [id^='side']
           srcFile.writeFile @doc # store in canonical-location
           puts "LINK #{srcFile}" if @verbose
         end
-        yield e, Identifier, id # Message-ID
+        yield e, DC + 'identifier', id # Message-ID
         yield e, Type, Email.R
 
         # HTML
@@ -942,33 +954,6 @@ sidebar [class^='side']    [id^='side']
       end
     end
   end
-=begin
-URI-list
-    def triplrUriList addHost = false
-      base = stripDoc
-      name = base.basename
-
-      # containing file
-      yield base.uri, Type, Container.R
-      yield base.uri, Title, name
-      prefix = addHost ? "https://#{name}/" : ''
-
-      # resources
-      lines.map{|line|
-        t = line.chomp.split ' '
-        unless t.empty?
-          uri = prefix + t[0]
-          resource = uri.R
-          title = t[1..-1].join ' ' if t.size > 1
-          yield uri, Title, title if title
-          alpha = resource.host && resource.host.sub(/^www\./,'')[0] || ''
-          container = base.uri + '#' + alpha
-          yield container, Type, Container.R
-          yield container, Title, alpha
-          yield container, Contains, resource
-        end}
-    end
-=end
   module WebP
     class Format < RDF::Format
       content_type 'image/webp', :extension => :webp
