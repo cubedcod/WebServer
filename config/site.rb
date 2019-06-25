@@ -17,21 +17,9 @@ class WebResource
     TrackHost = /\.(bandcamp|soundcloud|theplatform|track-blaster)\.com$/
 
     # POSTs, allow in regex and define handler if needed
-    POSThost = /(^|\.)(anvato|brightcove|(accounts|android.*|clients?[0-9]*|drive|groups|images|mail|maps|photos|www|youtubei?)\.google(apis)?|reddit|soundcloud|youtube|zillow)\.(com|net)$/
+    POSThost = /(^|\.)(anvato|brightcove|reddit|soundcloud|youtube|zillow)\.(com|net)$/
     def sitePOST
       case host
-      when 'www.facebook.com'
-        if %w{/api/graphql/}.member? path
-          self.POSTthru
-        else
-          denyPOST
-        end
-      when /\.google\.com$/
-        if path.match? /searchbyimage|signin/
-          self.POSTthru
-        else
-          denyPOST
-        end
       when 'metrics.brightcove.com'
         denyPOST
       when /\.soundcloud\.com$/
