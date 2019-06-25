@@ -18,18 +18,18 @@ class WebResource
     def mkdir; FileUtils.mkdir_p relPath unless exist?; self end        # MKDIR(1)
     def mtime; node.stat.mtime end
     def node; @node ||= (Pathname.new relPath) end
+    def parts; path ? path.split('/').-(['']) : [] end
     def readFile; File.open(relPath).read end
+    def relPath; URI.unescape(path == '/' ? '.' : (path[0] == '/' ? path[1..-1] : path)) end
     def self.absolutePath p; ('/' + p.gsub(' ','%20').gsub('#','%23')).R end
     def self.splitArgs args; args.shellsplit rescue args.split /\W/ end
     def sha2; to_s.sha2 end
-    def shellPath; relPath.force_encoding('UTF-8').sh end
+    def shellPath; relPath.force_encoding('UTF-8').sh end; alias_method :sh, :shellPath
     def size; node.size rescue 0 end
     def stripDoc; (uri.sub /\.(bu|e|html|json|log|md|msg|opml|ttl|txt|u)$/,'').R end
     def symlink?; node.symlink? end
     def touch; dir.mkdir; FileUtils.touch relPath end                   # TOUCH(1)
     def writeFile o; dir.mkdir; File.open(relPath,'w'){|f|f << o}; self end
-
-    alias_method :sh, :shellPath
 
     # FIND(1)
     def find p
@@ -69,29 +69,6 @@ class WebResource
       end
       `#{cmd} | head -n 1024`.lines.map{|path|
         POSIX.absolutePath path.chomp}
-    end
-
-    def parts
-      @parts ||= if path
-                   if path[0]=='/'
-                     path[1..-1]
-                   else
-                     path
-                   end.split '/'
-                 else
-                   []
-                 end
-    end
-
-    def relPath
-      URI.unescape case path
-                   when '/'
-                     '.'
-                   when /^\//
-                     path[1..-1]
-                   else
-                     path
-                   end
     end
   end
   include POSIX
