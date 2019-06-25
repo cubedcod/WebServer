@@ -174,7 +174,7 @@ class WebResource
       if !r.path || r.path == '/'
         graph = RDF::Repository.new
         r.subscriptions.shuffle.each_slice(18){|s|
-          (Twitter+'/search?f=tweets&vertical=default&q='+s.map{|u|'from:' + u}.intersperse('+OR+').join).R.fetch graph: graph, no_response: true}
+          ('https://twitter.com/search?f=tweets&vertical=default&q='+s.map{|u|'from:' + u}.intersperse('+OR+').join).R.fetch graph: graph, no_response: true}
         r.graphResponse graph
       else
         r.remote
@@ -222,7 +222,7 @@ yts
 
   def self.twits
     `cd ~/src/WebServer && git show -s --format=%B f8f21ef33eaa3fba034d9868d3bc4cd2f68bede4`.split.map{|twit|
-      (Twitter + '/' + twit).R.subscribe}
+      ('https://twitter.com/' + twit).R.subscribe}
   end
 
   module Webize
@@ -287,20 +287,20 @@ yts
     def Twitter doc
       %w{grid-tweet tweet}.map{|tweetclass|
       doc.css('.' + tweetclass).map{|tweet|
-        s = Twitter + (tweet.css('.js-permalink').attr('href') || tweet.attr('data-permalink-path'))
+        s = 'https://twitter.com' + (tweet.css('.js-permalink').attr('href') || tweet.attr('data-permalink-path'))
         authorName = tweet.css('.username b')[0].do{|b|b.inner_text} || s.R.parts[0]
-        author = (Twitter + '/' + authorName).R
+        author = ('https://twitter.com/' + authorName).R
         ts = (tweet.css('[data-time]')[0].do{|unixtime|
                 Time.at(unixtime.attr('data-time').to_i)} || Time.now).iso8601
         yield s, Type, Post.R
         yield s, Date, ts
         yield s, Creator, author
-        yield s, To, Twitter.R
+        yield s, To, 'https://twitter.com'.R
         content = tweet.css('.tweet-text')[0]
         if content
           content.css('a').map{|a|
             a.set_attribute('id', 'link'+rand.to_s.sha2)
-            a.set_attribute('href', Twitter + (a.attr 'href')) if (a.attr 'href').match /^\//
+            a.set_attribute('href', 'https://twitter.com' + (a.attr 'href')) if (a.attr 'href').match /^\//
             yield s, DC+'link', (a.attr 'href').R}
           yield s, Content, HTML.clean(content.inner_html).gsub(/<\/?span[^>]*>/,'').gsub(/\n/,'').gsub(/\s+/,' ')
         end
