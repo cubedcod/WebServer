@@ -41,7 +41,7 @@ class WebResource
     end
 
     def cached?
-      return false if env['HTTP_PRAGMA'] == 'no-cache'
+      return false if env && env['HTTP_PRAGMA'] == 'no-cache'
       location = cache
       return location if location.file? # direct match
       (location+'.*').glob.find &:file? # suffix match
@@ -289,7 +289,7 @@ class WebResource
 
       begin
         fetchURL[url]       #   try (HTTPS default)
-      rescue Exception => e # retry (HTTP         )
+      rescue Exception => e # retry (HTTP)
         case e.class.to_s
         when 'Errno::ECONNREFUSED'
           fetchURL[fallback]
@@ -319,7 +319,7 @@ class WebResource
         else
           raise
         end
-      end
+      end unless OFFLINE
 
       return if options[:no_response] # no HTTP response
 
@@ -331,9 +331,13 @@ class WebResource
         [status, meta, [body]]
       elsif 304 == status       # not modified
         [304, {}, []]
-      elsif [401, 403].member? status
-        [status, meta, []]      # authn failure
+      #elsif [401, 403].member? status
+      #  [status, meta, []]      # authn failed
       else
+        if graph.empty? && !local? && env['REQUEST_PATH'][-1]=='/' # remote container
+          ('/' + host + path).R.children.map{|entry| #local index of remote container
+            entry.fsMeta graph, base_uri: 'https://' + entry.relPath}
+        end
         graphResponse graph     # content-negotiated graph
       end
     end

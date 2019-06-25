@@ -35,7 +35,7 @@ class WebResource
 
     # STAT(1) fs metadata -> RDF::Graph
     def fsMeta graph, options = {}
-      subject = options[:base_uri] || self
+      subject = options[:base_uri]&.R || self
       if directory?
         subject = subject.path[-1] == '/' ? subject : (subject + '/') # ensure trailing-slash on container URI
         graph << (RDF::Statement.new subject, Type.R, (W3 + 'ns/ldp#Container').R)
