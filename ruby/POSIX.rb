@@ -10,6 +10,7 @@ class WebResource
     def exist?; node.exist? end
     def ext; File.extname( path || '' )[1..-1] || '' end
     def file?; node.file? end
+    def find p; `find #{sh} -ipath #{('*'+p+'*').sh} | head -n 2048`.lines.map{|p|POSIX.absPath p.chomp} end # FIND(1)
     def glob; (Pathname.glob relPath).map &:R end                       # GLOB(7)
     def ln   n; FileUtils.ln   node.expand_path, n.node.expand_path end
     def ln_s n; FileUtils.ln_s node.expand_path, n.node.expand_path end
@@ -21,7 +22,7 @@ class WebResource
     def parts; path ? path.split('/').-(['']) : [] end
     def readFile; File.open(relPath).read end
     def relPath; URI.unescape(path == '/' ? '.' : (path[0] == '/' ? path[1..-1] : path)) end
-    def self.absolutePath p; ('/' + p.gsub(' ','%20').gsub('#','%23')).R end
+    def self.absPath p; ('/' + p.gsub(' ','%20').gsub('#','%23')).R end
     def self.splitArgs args; args.shellsplit rescue args.split /\W/ end
     def sha2; to_s.sha2 end
     def shellPath; relPath.force_encoding('UTF-8').sh end; alias_method :sh, :shellPath
@@ -30,11 +31,6 @@ class WebResource
     def symlink?; node.symlink? end
     def touch; dir.mkdir; FileUtils.touch relPath end                   # TOUCH(1)
     def writeFile o; dir.mkdir; File.open(relPath,'w'){|f|f << o}; self end
-
-    # FIND(1)
-    def find p
-      (p && !p.empty?) ? `find #{sh} -ipath #{('*'+p+'*').sh} | head -n 2048`.lines.map{|path| POSIX.absolutePath path.chomp} : []
-    end
 
     # STAT(1) fs metadata -> RDF::Graph
     def fsMeta graph, options = {}
@@ -68,7 +64,7 @@ class WebResource
         cmd = "grep -ril #{pattern.sh} #{sh}"
       end
       `#{cmd} | head -n 1024`.lines.map{|path|
-        POSIX.absolutePath path.chomp}
+        POSIX.absPath path.chomp}
     end
   end
   include POSIX
@@ -77,9 +73,9 @@ end
 class Pathname
   def R env=nil
     if env
-     (WebResource::POSIX.absolutePath to_s.force_encoding 'UTF-8').environment env
+     (WebResource::POSIX.absPath to_s.force_encoding 'UTF-8').environment env
     else
-      WebResource::POSIX.absolutePath to_s.force_encoding 'UTF-8'
+      WebResource::POSIX.absPath to_s.force_encoding 'UTF-8'
     end
   end
 end

@@ -468,7 +468,7 @@ class WebResource
     def nodes
       (if directory?            # directory
        if q.has_key?('f') && path!='/'    # FIND
-         find q['f']
+         find q['f'] unless q['f'].empty?
        elsif q.has_key?('q') && path!='/' # GREP
          grep q['q']
        else                               # LS
