@@ -66,10 +66,10 @@ class WebResource
   end
   module Feed
     class Format < RDF::Format
-      content_type 'application/atom+xml',
-                   extension: :atom,
+      content_type 'application/rss+xml',
+                   extension: :rss,
                    aliases: %w(
-                   application/rss+xml;q=0.9
+                   application/atom+xml;q=0.8
                    application/xml;q=0.2
                    text/xml;q=0.2
                    )
@@ -209,7 +209,7 @@ class WebResource
                       Atom+'updated' => true}[p]
           if dateType
             if !o.empty?
-              yield s, Date, Time.parse(o).utc.iso8601
+              yield s, Date, Time.parse(o).utc.iso8601 rescue nil
             end
           else
             yield s,p,o
