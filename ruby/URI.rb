@@ -90,7 +90,6 @@ class WebResource < RDF::URI
     def [] p; (@data||{})[p].justArray end
     def a type; types.member? type end
     def data d={}; @data = (@data||{}).merge(d); self end
-    def resources; lines.map &:R end
     def types; @types ||= self[Type].select{|t|t.respond_to? :uri}.map(&:uri) end
 
     def dateMeta
@@ -127,15 +126,15 @@ class WebResource < RDF::URI
       end
       remainder = parts.empty? ? '' : ['', *parts].join('/')
       remainder += '/' if @r['REQUEST_PATH'][-1] == '/'
-      @r[:links][:prev] = p + remainder + qs + '#prev' if p && p.R.e
-      @r[:links][:next] = n + remainder + qs + '#next' if n && n.R.e
+      @r[:links][:prev] = p + remainder + qs + '#prev' if p && p.R.exist?
+      @r[:links][:next] = n + remainder + qs + '#next' if n && n.R.exist?
     end
 
   end
   include URIs
   module POSIX
 
-    def self.fromRelativePath p
+    def self.absolutePath p
       ('/' + p.gsub(' ','%20').gsub('#','%23')).R
     end
 

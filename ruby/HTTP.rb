@@ -68,7 +68,7 @@ class WebResource
                     '37' # white - basic
                   end
                 else
-                  '30' # gray - misc
+                  '30' # gray - cache hit, NOOP
                 end) + ';1'
         location = head['Location'] ? (" ↝ " + head['Location']) : ""
         referer  = env['HTTP_REFERER'] ? ("\e[" + color + ";7m" + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m -> ") : ''

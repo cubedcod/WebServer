@@ -2,22 +2,19 @@ class WebResource
   module POSIX
     include URIs
 
-    def children
-      node.children.delete_if{|f| f.basename.to_s.index('.')==0}.map &:R
-    end
-
     def directory?; node.directory? end
+    def exist?; node.exist? end
+    def file?; node.file? end
+    def mtime; node.stat.mtime end
+    def size; node.size rescue 0 end
+    def symlink?; node.symlink? end
 
     # DU(1)
     def du; `du -s #{sh}| cut -f 1`.chomp.to_i end
 
-    def exist?; node.exist? end
-
-    def file?; node.file? end
-
     # FIND(1)
     def find p
-      (p && !p.empty?) ? `find #{sh} -ipath #{('*'+p+'*').sh} | head -n 2048`.lines.map{|path| POSIX.fromRelativePath path.chomp} : []
+      (p && !p.empty?) ? `find #{sh} -ipath #{('*'+p+'*').sh} | head -n 2048`.lines.map{|path| POSIX.absolutePath path.chomp} : []
     end
 
     # STAT(1) fs meta-data -> RDF::Graph
@@ -55,15 +52,13 @@ class WebResource
         cmd = "grep -ril #{pattern.sh} #{sh}"
       end
       `#{cmd} | head -n 1024`.lines.map{|path|
-        POSIX.fromRelativePath path.chomp}
+        POSIX.absolutePath path.chomp}
     end
 
     # LN(1)
-    LinkMethod = :ln
-
     def ln   n; FileUtils.ln   node.expand_path, n.node.expand_path end
     def ln_s n; FileUtils.ln_s node.expand_path, n.node.expand_path end
-    def link n; n.dir.mkdir; send LinkMethod, n unless n.exist? end
+    def link n; n.dir.mkdir; send :ln, n unless n.exist? end
 
     def lines; exist? ? (open relPath).readlines.map(&:chomp) : [] end
 
@@ -73,22 +68,16 @@ class WebResource
       self
     end
 
-    def mtime; node.stat.mtime end
-
     # URI -> file
     def node; @node ||= (Pathname.new relPath) end
 
     def readFile; File.open(relPath).read end
-
-    def size; node.size rescue 0 end
 
     def self.splitArgs args
       args.shellsplit
     rescue
       args.split /\W/
     end
-
-    def symlink?; node.symlink? end
 
     # TOUCH(1)
     def touch
@@ -109,9 +98,9 @@ end
 class Pathname
   def R env=nil
     if env
-     (WebResource::POSIX.fromRelativePath to_s.force_encoding 'UTF-8').environment env
+     (WebResource::POSIX.absolutePath to_s.force_encoding 'UTF-8').environment env
     else
-      WebResource::POSIX.fromRelativePath to_s.force_encoding 'UTF-8'
+      WebResource::POSIX.absolutePath to_s.force_encoding 'UTF-8'
     end
   end
 end

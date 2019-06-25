@@ -719,7 +719,7 @@ sidebar [class^='side']    [id^='side']
         htmlFiles.map{|p| # HTML file
           html = srcDir + "#{htmlCount}.html"  # file location
           yield e, DC+'hasFormat', html        # file pointer
-          unless html.e
+          unless html.exist?
             html.writeFile p.decoded  # store HTML email
             puts "HTML #{html}" if @verbose
           end
@@ -846,14 +846,14 @@ sidebar [class^='side']    [id^='side']
           name = p.filename.do{|f|f.to_utf8.do{|f|!f.empty? && f}} ||                           # explicit name
                  (rand.to_s.sha2 + (Rack::Mime::MIME_TYPES.invert[p.mime_type] || '.bin').to_s) # generated name
           file = srcDir + name                     # file location
-          unless file.e
-            file.writeFile p.body.decoded # store
+          unless file.exist?
+            file.writeFile p.body.decoded # store attachment
             puts "FILE #{file}" if @verbose
           end
           yield e, SIOC+'attachment', file         # file pointer
           if p.main_type=='image'                  # image attachments
-            yield e, Image, file                   # image link represented in RDF
-            yield e, Content,                      # image link represented in HTML
+            yield e, Image, file                   # image link in RDF
+            yield e, Content,                      # image link in HTML
                   HTML.render({_: :a, href: file.uri, c: [{_: :img, src: file.uri}, p.filename]}) # render HTML
           end }
       end
