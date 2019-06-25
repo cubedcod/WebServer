@@ -94,8 +94,8 @@ class WebResource
       n = nil # next page
       p = nil # prev page
       # date parts
-      dp = []
-      dp.push parts.shift.to_i while parts[0] && parts[0].match(/^[0-9]+$/)
+      dp = []; ps = parts
+      dp.push ps.shift.to_i while ps[0] && ps[0].match(/^[0-9]+$/)
       case dp.length
       when 1 # Y
         year = dp[0]
@@ -120,7 +120,7 @@ class WebResource
           n = hour >= 23 ? (day + 1).strftime('/%Y/%m/%d/00') : (day.strftime('/%Y/%m/%d/')+('%02d' % (hour+1)))
         end
       end
-      remainder = parts.empty? ? '' : ['', *parts].join('/')
+      remainder = ps.empty? ? '' : ['', *ps].join('/')
       remainder += '/' if @r['REQUEST_PATH'][-1] == '/'
       @r[:links][:prev] = p + remainder + qs + '#prev' if p && p.R.exist?
       @r[:links][:next] = n + remainder + qs + '#next' if n && n.R.exist?
