@@ -79,7 +79,7 @@ class WebResource
       else
         r.remote
       end}
-    PathGET['/url'] = -> r {[301,{'Location' => (r.q['url'] || r.q['q'])}, []]}
+    PathGET['/url'] = HostGET['gate.sc'] = HostGET['go.skimresources.com'] = -> r {[301,{'Location' => (r.q['url'] || r.q['q'])}, []]}
 
     # DuckDuckGo
     HostGET['duckduckgo.com'] = -> r {%w{ac}.member?(r.parts[0]) ? r.drop : r.remote}
@@ -165,9 +165,6 @@ class WebResource
         else
           r.noexec
         end}}
-
-    # Soundcloud
-    HostGET['gate.sc'] = -> r {[301, {'Location' =>  r.q['url']},[]]}
 
     # Twitter
     HostGET['twitter.com'] = -> r {
