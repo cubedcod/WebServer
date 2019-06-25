@@ -2,22 +2,22 @@ class WebResource
   module POSIX
     include URIs
 
-    def basename; File.basename ( path || '/' ) end                     # BASENAME(1)
+    def basename; File.basename ( path || '/' ) end                        # BASENAME(1)
     def children; node.children.delete_if{|f|f.basename.to_s.index('.')==0}.map &:R end
     def dir; dirname.R if path end
     def directory?; node.directory? end
     def dirname; File.dirname path if path end
-    def du; `du -s #{sh}| cut -f 1`.chomp.to_i end                      # DU(1)
+    def du; `du -s #{sh}| cut -f 1`.chomp.to_i end                         # DU(1)
     def exist?; node.exist? end
     def ext; File.extname( path || '' )[1..-1] || '' end
     def file?; node.file? end
     def find p; `find #{sh} -iname #{p.sh}`.lines.map{|p|POSIX.path p} end # FIND(1)
-    def glob; (Pathname.glob relPath).map &:R end                       # GLOB(7)
+    def glob; (Pathname.glob relPath).map &:R end                          # GLOB(7)
     def ln   n; FileUtils.ln   node.expand_path, n.node.expand_path end
     def ln_s n; FileUtils.ln_s node.expand_path, n.node.expand_path end
-    def link n; n.dir.mkdir; send :ln, n unless n.exist? end            # LN(1)
+    def link n; n.dir.mkdir; send :ln, n unless n.exist? end               # LN(1)
     def lines; exist? ? (open relPath).readlines.map(&:chomp) : [] end
-    def mkdir; FileUtils.mkdir_p relPath unless exist?; self end        # MKDIR(1)
+    def mkdir; FileUtils.mkdir_p relPath unless exist?; self end           # MKDIR(1)
     def mtime; node.stat.mtime end
     def node; @node ||= (Pathname.new relPath) end
     def parts; path ? path.split('/').-(['']) : [] end
@@ -28,9 +28,9 @@ class WebResource
     def sha2; to_s.sha2 end
     def shellPath; relPath.force_encoding('UTF-8').sh end; alias_method :sh, :shellPath
     def size; node.size rescue 0 end
-    def stripDoc; (uri.sub /\.(bu|e|html|json|log|md|msg|opml|ttl|txt|u)$/,'').R end
+    def stripDoc; uri.sub(/\.(html|json|md|ttl|txt)$/,'').R end
     def symlink?; node.symlink? end
-    def touch; dir.mkdir; FileUtils.touch relPath end                   # TOUCH(1)
+    def touch; dir.mkdir; FileUtils.touch relPath end                      # TOUCH(1)
     def writeFile o; dir.mkdir; File.open(relPath,'w'){|f|f << o}; self end
 
     # STAT(1) fs metadata -> RDF::Graph
