@@ -268,7 +268,7 @@ class WebResource
               file = (cache format).writeFile body unless format.match? RDFformats  # cache non-RDF
               reader = RDF::Reader.for(content_type: format)                  # RDF reader
               reader.new(body, :base_uri => url.R){|_| graph << _ } if reader # read RDF
-              RDF::Reader.for(:rdfa).new(body, :base_uri => url.R){|_|graph << _ } if format=='text/html' # read RDFa
+              RDF::Reader.for(:rdfa).new(body, :base_uri => url.R){|_|graph << _ } if format=='text/html' && !upstreamUI? # parse RDFa if HTML rewritten
               index graph                                                     # index RDF
             end
           end
