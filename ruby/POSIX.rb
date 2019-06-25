@@ -1,6 +1,6 @@
 class WebResource
   module POSIX
-    LinkMethod = :ln#_s
+    include URIs
 
     def children
       node.children.delete_if{|f| f.basename.to_s.index('.')==0}.map &:R
@@ -12,13 +12,26 @@ class WebResource
     def du; `du -s #{sh}| cut -f 1`.chomp.to_i end
 
     def exist?; node.exist? end
-    alias_method :e, :exist?
 
     def file?; node.file? end
 
     # FIND(1)
     def find p
       (p && !p.empty?) ? `find #{sh} -ipath #{('*'+p+'*').sh} | head -n 2048`.lines.map{|path| POSIX.fromRelativePath path.chomp} : []
+    end
+
+    # STAT(1) fs meta-data -> RDF::Graph
+    def fsMeta graph, options = {}
+      subject = options[:base_uri] || self
+      if directory?
+        subject = subject.path[-1] == '/' ? subject : (subject + '/') # ensure trailing-slash on container URI
+        graph << (RDF::Statement.new subject, Type.R, Container.R)
+      else
+        graph << (RDF::Statement.new subject, Type.R, Stat.R + 'File')
+      end
+      graph << (RDF::Statement.new subject, Title.R, basename)
+      graph << (RDF::Statement.new subject, Size.R, size)
+      graph << (RDF::Statement.new subject, Date.R, mtime.iso8601)
     end
 
     # GLOB(7)
@@ -46,11 +59,13 @@ class WebResource
     end
 
     # LN(1)
+    LinkMethod = :ln
+
     def ln   n; FileUtils.ln   node.expand_path, n.node.expand_path end
     def ln_s n; FileUtils.ln_s node.expand_path, n.node.expand_path end
     def link n; n.dir.mkdir; send LinkMethod, n unless n.exist? end
 
-    def lines; e ? (open relPath).readlines.map(&:chomp) : [] end
+    def lines; exist? ? (open relPath).readlines.map(&:chomp) : [] end
 
     # MKDIR(1)
     def mkdir
@@ -59,7 +74,6 @@ class WebResource
     end
 
     def mtime; node.stat.mtime end
-    alias_method :m, :mtime
 
     # URI -> file
     def node; @node ||= (Pathname.new relPath) end

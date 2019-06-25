@@ -317,7 +317,7 @@ class WebResource
       elsif handler = HostGET[host] # host binding
         handler[self]
       else
-        local || remote
+        localNode? ? local : remote
       end
     end
 
@@ -331,9 +331,6 @@ class WebResource
     end
 
     def graphResponse graph
-      if graph.empty? && !localNode? && (cached = ('/' + host + (path || '/')).R).directory?
-        nodeMeta cached.children, graph
-      end
       return notfound if graph.empty?
       format = selectFormat
       dateMeta if localNode?
@@ -369,7 +366,7 @@ class WebResource
                    %w{host path query fragment}.map{|a|n.send(a).do{|p|p.split(/[\W_]/)}},'ttl']. #  slugs
                     flatten.-([nil,'',*BasicSlugs]).join('.').R  # apply skiplist, mint URI
             # store version
-            unless doc.e
+            unless doc.exist?
               doc.dir.mkdir
               RDF::Writer.open(doc.relPath){|f|f << graph}
               updates << doc
@@ -385,34 +382,42 @@ class WebResource
       updates
     end
 
+    def load graph
+      options = {base_uri: self}
+      if basename.split('.')[0] == 'msg'
+        options[:format] = :mail
+      elsif ext == 'html'
+        options[:format] = :html
+        graph.load relPath, format: :rdfa, base_uri: ('https://' + (host || 'localhost') + path).R
+      end
+      graph.load relPath, options
+    rescue Exception => e
+      puts [uri, relPath, e.class, e.message].join ' '
+    end
+
     def local
-      if localNode?
-        if %w{y year m month d day h hour}.member? parts[0] # timeslice redirect
-          time = Time.now
-          loc = time.strftime(case parts[0][0].downcase
-                              when 'y'
-                                '/%Y/'
-                              when 'm'
-                                '/%Y/%m/'
-                              when 'd'
-                                '/%Y/%m/%d/'
-                              when 'h'
-                                '/%Y/%m/%d/%H/'
-                              else
-                              end)
-          [303, @r[:Response].update({'Location' => loc + parts[1..-1].join('/') + qs}), []]
-        elsif file?
-          fileResponse
-        else
-          set = nodes
-          graph = RDF::Repository.new
-          set.select(&:file?).map{|node|
-            options = {base_uri: node}
-            options[:format] = :mail if node.basename.split('.')[0] == 'msg'
-            graph.load node.relPath, options rescue puts("error reading RDF in #{node}")}
-          nodeMeta set, graph
-          graphResponse graph
-        end
+      if %w{y year m month d day h hour}.member? parts[0] # timeseg redirect
+        time = Time.now
+        loc = time.strftime(case parts[0][0].downcase
+                            when 'y'
+                              '/%Y/'
+                            when 'm'
+                              '/%Y/%m/'
+                            when 'd'
+                              '/%Y/%m/%d/'
+                            when 'h'
+                              '/%Y/%m/%d/%H/'
+                            else
+                            end)
+        [303, @r[:Response].update({'Location' => loc + parts[1..-1].join('/') + qs}), []]
+      elsif file?
+        fileResponse
+      else
+        graph = RDF::Repository.new
+        nodes.map{|node|
+          node.fsMeta graph unless node.ext=='ttl' # hide native graph-storage files
+          node.load graph if node.file?} # read RDF
+        graphResponse graph
       end
     end
 
@@ -424,42 +429,28 @@ class WebResource
 
     # URI -> file(s)
     def nodes
-      (if directory? # directory
-       if q.has_key?('f') && path!='/' # FIND
-         found = find q['f']
-         found
+      (if directory?            # directory
+       if q.has_key?('f') && path!='/'    # FIND
+         find q['f']
        elsif q.has_key?('q') && path!='/' # GREP
          grep q['q']
-       else # LS
-         index = (self+'index.html').glob
-         if !index.empty? && qs.empty? # static index-file exists and no query
+       else                               # LS
+         index = (self+'index.{html,ttl}').glob
+         if !index.empty? && qs.empty? # static index-file
            index
          else
            children
          end
        end
-      else # files
-        if uri.match /[\*\{\[]/ # glob chars
+      else                                # GLOB
+        if uri.match /[\*\{\[]/ # custom glob
           files = glob
-        else # default glob
-          files = (self + '.*').glob                # base + extension
+        else                    # default glob
+          files = (self + '.*').glob                # base + extension match
           files = (self + '*').glob if files.empty? # prefix match
         end
         [self, files]
        end).justArray.flatten.compact.uniq.select &:exist?
-    end
-
-    def nodeMeta nodes, graph
-      dirs, files = nodes.partition &:directory?
-      dirs.map{|dir|
-        subject = dir.path[-1] == '/' ? dir : (dir + '/')
-        graph << (RDF::Statement.new subject, Type.R, Container.R)
-        graph << (RDF::Statement.new subject, Title.R, dir.basename)
-        graph << (RDF::Statement.new subject, Date.R, dir.mtime.iso8601)}
-      files.map{|node|
-        graph << (RDF::Statement.new node, Type.R, Stat.R + 'File')
-        graph << (RDF::Statement.new node, Title.R, node.basename)
-        graph << (RDF::Statement.new node, Size.R, node.size)}
     end
 
     # filter scripts
@@ -642,7 +633,7 @@ class WebResource
       head
     end
 
-    def unsubscribe; subscriptionFile.e && subscriptionFile.node.delete end
+    def unsubscribe; subscriptionFile.exist? && subscriptionFile.node.delete end
 
     PathGET['/unsubscribe']  = -> r {
       url = (r.q['u'] || '/').R

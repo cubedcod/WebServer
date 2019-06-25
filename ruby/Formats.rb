@@ -389,6 +389,7 @@ sidebar [class^='side']    [id^='side']
       def initialize(input = $stdin, options = {}, &block)
         @doc = input.respond_to?(:read) ? input.read : input
         @base = options[:base_uri]
+
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -501,9 +502,8 @@ sidebar [class^='side']    [id^='side']
                 v = v.hrefs
               else
                 v = HTML.webizeString v
-                v = @base.join v if v.class == WebResource
+                v = @base.join v if v.class == WebResource || v.class == RDF::URI
               end
-
               yield subject, k, v unless k == :drop
             }}}
 
@@ -755,7 +755,7 @@ sidebar [class^='side']    [id^='side']
         parts.select{|p|p.mime_type=='message/rfc822'}.map{|m|
           content = m.body.decoded                   # decode message
           f = srcDir + content.sha2 + '.inlined.eml' # message location
-          f.writeFile content if !f.e                # store message
+          f.writeFile content if !f.exist?           # store message
           f.triplrMail &b} # triplr on contained message
 
         # From
@@ -814,7 +814,7 @@ sidebar [class^='side']    [id^='side']
               mpath = apath + '.' + dstr[8..-1].gsub(/[^0-9]+/,'.') + slug # (month,addr,title) path
               [(mpath + (mpath[-1] == '.' ? '' : '.')  + 'eml').R, # monthdir entry
                ('mail/cur/' + id.sha2 + '.eml').R].map{|entry|     # maildir entry
-                srcFile.link entry unless entry.e} # link if missing
+                srcFile.link entry unless entry.exist?} # link if missing
             end
           end
         }
@@ -831,14 +831,14 @@ sidebar [class^='side']    [id^='side']
               # bidirectional reference link
               rev = destDir + id.sha2 + '.eml'
               rel = srcDir + r.sha2 + '.eml'
-              if !rel.e # link missing
-                if destFile.e # link
+              if !rel.exist? # link missing
+                if destFile.exist? # link
                   destFile.link rel
                 else # referenced file may appear later on
                   destFile.ln_s rel unless rel.symlink?
                 end
               end
-              srcFile.link rev if !rev.e}}}
+              srcFile.link rev if !rev.exist?}}}
 
         # attachments
         m.attachments.select{|p|
