@@ -41,6 +41,7 @@ class WebResource
     end
 
     def cached?
+      return false if env['HTTP_PRAGMA'] == 'no-cache'
       location = cache
       return location if location.file? # direct match
       (location+'.*').glob.find &:file? # suffix match
@@ -425,8 +426,6 @@ class WebResource
 
     def local?; LocalAddr.member?(@r['SERVER_NAME']||host) end
 
-    def no_cache; pragma && pragma == 'no-cache' end
-
     # URI -> file(s)
     def nodes
       (if directory?            # directory
@@ -532,8 +531,6 @@ class WebResource
       [s, h, [b]]
     end
 
-    def pragma; env['HTTP_PRAGMA'] end
-
     def HTTP.print_header header; header.map{|k,v| puts [k,v].join "\t"} end
 
     def PUT
@@ -564,9 +561,9 @@ class WebResource
       end
     end
 
-    # dispatch request for remote resource
+    # request for remote resource
     def remote
-      if env.has_key? 'HTTP_TYPE'
+      if env.has_key? 'HTTP_TYPE' # tagged
         case env['HTTP_TYPE']
         when /drop/
           if ((host.match? /track/) || (env['REQUEST_URI'].match? /track/)) && (host.match? TrackHost)
@@ -592,7 +589,7 @@ class WebResource
     end
 
     def selectFormat
-      accept.sort.reverse.map{|q, formats| # formats in descending qval order
+      accept.sort.reverse.map{|q,formats| # formats in descending qval order
         formats.map{|f|
           return f if RDF::Writer.for(:content_type => f) || # RDF writer defined
                       [FeedMIME, 'text/html'].member?(f)     # non-RDF writer defined
@@ -600,9 +597,9 @@ class WebResource
       'text/html'                                            # default writer
     end
 
-    def subscribe; subscriptionFile.touch end
-    def subscribed?; subscriptionFile.exist? end
-    def subs; puts subscriptions.sort.join ' ' end
+    def subscribe;     subscriptionFile.touch end
+    def subscribed?;   subscriptionFile.exist? end
+    def subs; puts     subscriptions.sort.join ' ' end
     def subscriptions; subscriptionFile('*').R.glob.map(&:dir).map &:basename end
 
     PathGET['/subscribe'] = -> r {
@@ -625,7 +622,7 @@ class WebResource
           k
         }.join(underscored ? '_' : '-')
         key = key.downcase if underscored
-        # strip local headers
+        # hide local headers
         head[key] = v.to_s unless %w{host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri response script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
       head['Referer'] = 'http://drudgereport.com/' if env['SERVER_NAME']&.match? /wsj\.com/
       head['User-Agent'] = DesktopUA
