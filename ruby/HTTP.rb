@@ -317,7 +317,7 @@ class WebResource
       elsif handler = HostGET[host] # host binding
         handler[self]
       else
-        localNode? ? local : remote
+        local? ? local : remote
       end
     end
 
@@ -333,7 +333,7 @@ class WebResource
     def graphResponse graph
       return notfound if graph.empty?
       format = selectFormat
-      dateMeta if localNode?
+      dateMeta if local?
       @r[:Response] ||= {}
       @r[:Response]['Access-Control-Allow-Origin'] ||= allowedOrigin
       @r[:Response].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})      
@@ -423,7 +423,7 @@ class WebResource
 
     LocalAddr = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
 
-    def localNode?; LocalAddr.member?(@r['SERVER_NAME']||host) end
+    def local?; LocalAddr.member?(@r['SERVER_NAME']||host) end
 
     def no_cache; pragma && pragma == 'no-cache' end
 

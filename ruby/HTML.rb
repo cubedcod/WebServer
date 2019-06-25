@@ -106,7 +106,7 @@ class WebResource
                         {_: :body,
                          c: ["\n", link[:up, '&#9650;'], {_: :a, id: :tabular, style: tabular ? 'color: #fff' : 'color: #555', href: tabular ? '?' : tabularOverview, c: '↨'},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
-                             unless localNode?
+                             unless local?
                                {class: :toolbox,
                                 c: {_: :a, id: :subscribe,
                                      href: '/' + (subbed ? 'un' : '') + 'subscribe' + HTTP.qs({u: 'https://' + host + (@r['REQUEST_URI'] || path)}), class: subbed ? :on : :off, c: 'subscribe' + (subbed ? 'd' : '')}}
