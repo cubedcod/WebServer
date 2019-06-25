@@ -19,6 +19,8 @@ class WebResource
     def mtime; node.stat.mtime end
     def node; @node ||= (Pathname.new relPath) end
     def readFile; File.open(relPath).read end
+    def self.absolutePath p; ('/' + p.gsub(' ','%20').gsub('#','%23')).R end
+    def self.splitArgs args; args.shellsplit rescue args.split /\W/ end
     def sha2; to_s.sha2 end
     def shellPath; relPath.force_encoding('UTF-8').sh end
     def size; node.size rescue 0 end
@@ -29,16 +31,12 @@ class WebResource
 
     alias_method :sh, :shellPath
 
-    def self.absolutePath p
-      ('/' + p.gsub(' ','%20').gsub('#','%23')).R
-    end
-
     # FIND(1)
     def find p
       (p && !p.empty?) ? `find #{sh} -ipath #{('*'+p+'*').sh} | head -n 2048`.lines.map{|path| POSIX.absolutePath path.chomp} : []
     end
 
-    # STAT(1) fs meta-data -> RDF::Graph
+    # STAT(1) fs metadata -> RDF::Graph
     def fsMeta graph, options = {}
       subject = options[:base_uri] || self
       if directory?
@@ -95,13 +93,6 @@ class WebResource
                      path
                    end
     end
-
-    def self.splitArgs args
-      args.shellsplit
-    rescue
-      args.split /\W/
-    end
-
   end
   include POSIX
 end
