@@ -10,13 +10,12 @@ class WebResource
   end
   module HTTP
 
-    # UA must match this to request upstream UI. on mobile choose "Desktop Site" in browser menu
     DesktopUA = 'Mozilla/5.0 (X11; Linux RISC-V; rv:69.0) Gecko/20100101 Firefox/69.0'
 
-    # hosts with dirs named 'track'
-    TrackHost = /\.(bandcamp|soundcloud|theplatform|track-blaster)\.com$/
+    # track hosts
+    TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
 
-    # POSTs, allow in regex and define handler if needed
+    # POSTs, allow in pattern and define handler if needed
     POSThost = /(^|\.)(anvato|brightcove|reddit|soundcloud|youtube|zillow)\.(com|net)$/
     def sitePOST
       case host
