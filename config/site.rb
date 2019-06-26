@@ -11,7 +11,7 @@ class WebResource
   module HTTP
 
     # UA must match this to request upstream UI. on mobile choose "Desktop Site" in browser menu
-    DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64; rv:67.0) Gecko/20100101 Firefox/67.0'
+    DesktopUA = 'Mozilla/5.0 (X11; Linux RISC-V; rv:69.0) Gecko/20100101 Firefox/69.0'
 
     # hosts with dirs named 'track'
     TrackHost = /\.(bandcamp|soundcloud|theplatform|track-blaster)\.com$/
@@ -61,7 +61,7 @@ class WebResource
     # redirects
     PathGET['/mu']  = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'}, []]}
     PathGET['/resizer'] = -> r {
-      parts = r.path.split /\/\d+x\d+\//
+      parts = r.path.split /\/\d+x\d+\/(filter[^\/]+\/)?/
       if parts.size > 1
         [301, {'Location' => 'https://' + parts[-1]}, []]
       else
