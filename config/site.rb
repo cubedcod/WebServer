@@ -73,7 +73,8 @@ class WebResource
       [301,{'Location' => (r.q['url'] || r.q['q'])}, []]}
 
     # Bing
-    HostGET['www.bing.com'] = -> r {(%w(fd notifications secure).member?(r.parts[0]) || r.path.index('/api/ping') == 0) ? r.deny : r.desktop.fetch}
+    HostGET['www.bing.com'] = -> r {
+      (%w(fd hamburger Identity notifications secure).member?(r.parts[0]) || r.path.index('/api/ping') == 0) ? r.deny : r.desktop.fetch}
 
     # DuckDuckGo
     HostGET['duckduckgo.com'] = -> r {%w{ac}.member?(r.parts[0]) ? r.drop : r.remote}
