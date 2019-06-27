@@ -16,7 +16,7 @@ class WebResource
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
 
     # POSTs, allow in pattern and define handler if needed
-    POSThost = /(^|\.)(anvato|brightcove|reddit|soundcloud|youtube|zillow)\.(com|net)$/
+    POSThost = /(^|\.)(anvato|brightcove|reddit|(mix|sound)cloud|youtube|zillow)\.(com|net)$/
     def sitePOST
       case host
       when 'metrics.brightcove.com'
@@ -58,7 +58,9 @@ class WebResource
     end
 
     # redirects
-    PathGET['/mu']  = -> r {[301,{'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'}, []]}
+    PathGET['/mu']  = -> r {[302,
+     {'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'}, []]}
+
     PathGET['/resizer'] = -> r {
       parts = r.path.split /\/\d+x\d+\/(filter[^\/]+\/)?/
       if parts.size > 1
@@ -66,7 +68,12 @@ class WebResource
       else
         r.remote
       end}
-    PathGET['/url'] = HostGET['gate.sc'] = HostGET['go.skimresources.com'] = -> r {[301,{'Location' => (r.q['url'] || r.q['q'])}, []]}
+
+    PathGET['/url'] = HostGET['gate.sc'] = HostGET['go.skimresources.com'] = -> r {
+      [301,{'Location' => (r.q['url'] || r.q['q'])}, []]}
+
+    # Bing
+    HostGET['www.bing.com'] = -> r {(%w(fd notifications secure).member?(r.parts[0]) || r.path.index('/api/ping') == 0) ? r.deny : r.desktop.fetch}
 
     # DuckDuckGo
     HostGET['duckduckgo.com'] = -> r {%w{ac}.member?(r.parts[0]) ? r.drop : r.remote}
@@ -85,7 +92,7 @@ class WebResource
     HostGET['l.instagram.com'] = HostGET['l.facebook.com'] = -> r {[301, {'Location' => r.q['u']},[]]}
 
     # Gitter
-    HostGET['gitter.im'] = -> req {req.env['HTTP_USER_AGENT'] = DesktopUA; req.remote}
+    HostGET['gitter.im'] = -> req {req.desktop.remote}
 
     # Google
     (0..3).map{|i|HostGET["encrypted-tbn#{i}.gstatic.com"] = -> r {r.noexec}}
@@ -98,8 +105,7 @@ class WebResource
       if %w{async complete js recaptcha searchdomaincheck xjs}.member? mode
         req.drop
       elsif mode == 'maps'
-        req.env['HTTP_USER_AGENT'] = DesktopUA
-        req.GETthru
+        req.desktop.GETthru
       else
         case req.env['HTTP_TYPE']
         when /dropURI/
@@ -194,8 +200,7 @@ watch
 watch_videos
 yts
 }.member?(mode)
-        r.env['HTTP_USER_AGENT'] = DesktopUA
-        r.fetch cookies: true
+        r.desktop.fetch cookies: true
       elsif %w{attribution_link redirect}.member? mode
         [301, {'Location' =>  r.q['q'] || r.q['u']},[]]
       else

@@ -173,6 +173,8 @@ class WebResource
       [202,{},[]]
     end
 
+    def desktop; env['HTTP_USER_AGENT'] = DesktopUA; self end
+
     def entity generator = nil
       entities = env['HTTP_IF_NONE_MATCH'].do{|m| m.strip.split /\s*,\s*/ } # entities
       if entities && entities.include?(env[:Response]['ETag']) # client has entity
@@ -268,7 +270,7 @@ class WebResource
               file = (cache format).writeFile body unless format.match? RDFformats  # cache non-RDF
               reader = RDF::Reader.for(content_type: format)                  # RDF reader
               reader.new(body, :base_uri => url.R){|_| graph << _ } if reader # read RDF
-              RDF::Reader.for(:rdfa).new(body, :base_uri => url.R){|_|graph << _ } if format=='text/html' && !upstreamUI? # parse RDFa if HTML rewritten
+              RDF::Reader.for(:rdfa).new(body, :base_uri => url.R){|_|graph << _ } if format=='text/html' && !upstreamUI? # parse RDFa if HTML to be rewritten
               index graph                                                     # index RDF
             end
           end
