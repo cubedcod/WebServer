@@ -19,8 +19,8 @@ pathname
 rack
 rdf
 redcarpet
-shellwords}.map{|r|
-  require r}
+shellwords
+}.map{|r|require r}
 
 class Array
   def justArray; self end
@@ -31,7 +31,6 @@ class FalseClass
   def do; self end
 end
 
-# everything is a webresource
 class Hash
   def R; WebResource.new(uri).data self end # preserve data
   def uri; self['uri'] end
@@ -46,10 +45,6 @@ class Object
   def justArray; [self] end
   def do; yield self end
   def to_time; [Time, DateTime].member?(self.class) ? self : Time.parse(self) end
-end
-
-class Pathname
-  def R; WebResource.new to_s end
 end
 
 class RDF::Node
@@ -115,15 +110,10 @@ class WebResource < RDF::URI
     Video    = DC + 'Video'
   end
   include URIs
-
   alias_method :uri, :to_s
-
   ConfDir = Pathname.new(__dir__).join('../config').relative_path_from Pathname.new Dir.pwd
-
 end
-
 # library components
 %w{POSIX Formats HTML HTTP}.map{|i|require_relative i}
-
 # site config
 require_relative '../config/site.rb'
