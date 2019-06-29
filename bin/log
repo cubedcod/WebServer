@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 require 'open3'
 require_relative '../ruby/index'
-tail = "tail #{ARGV.empty? ? '-f' : ARGV.join(' ')} log/access.log"
+tail = "tail #{ARGV.empty? ? '-f ~/web/log/access.log' : ARGV.join(' ')}"
 Open3.popen3(tail) do |stdin, stdout, stderr, thread|
   hosts={}
   while line=stdout.gets do
