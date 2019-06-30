@@ -420,7 +420,6 @@ class WebResource
         options[:format] = :mail
       elsif ext == 'html'
         options[:format] = :html
-        graph.load relPath, format: :rdfa, base_uri: ('https://' + (host || 'localhost') + path).R
       end
       graph.load relPath, options
     rescue Exception => e

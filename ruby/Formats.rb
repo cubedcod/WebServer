@@ -430,8 +430,9 @@ sidebar [class^='side']    [id^='side']
 
       # HTML -> RDF
       def scanContent &f
-        subject = @base
-        n = Nokogiri::HTML.parse @doc # parse HTML
+        embeds = RDF::Graph.new # embedded triples
+        subject = @base         # subject URI
+        n = Nokogiri::HTML.parse @doc # parse doc
 
         # triplr host-binding
         if hostTriples = WebResource::Webize::Triplr[:HTML][@base.host]
@@ -439,7 +440,6 @@ sidebar [class^='side']    [id^='side']
         end
 
         # JSON-LD
-        graph = RDF::Graph.new
         n.css('script[type="application/ld+json"]').map{|json|
           tree = begin
                    ::JSON.parse json.inner_text
@@ -447,8 +447,15 @@ sidebar [class^='side']    [id^='side']
                    puts "JSON parse failed: #{json.inner_text}"
                    {}
                  end
-          graph << ::JSON::LD::API.toRdf(tree) rescue puts("JSON-LD read-error on #{@base}")}
-        graph.each_triple{|s,p,o|yield s, p, o}
+          embeds << ::JSON::LD::API.toRdf(tree) rescue puts("JSON-LD read-error on #{@base}")}
+
+        # RDFa
+        RDF::Reader.for(:rdfa).new(@doc, base_uri: @base){|_| embeds << _ }
+
+        # embedded RDF
+        embeds.each_triple{|s,p,o|
+          yield s, p, o
+        }
 
         # <link>
         n.css('head link[rel]').map{|m|
