@@ -100,7 +100,17 @@ class WebResource
     HostGET['ajax.googleapis.com'] = HostGET['cdnjs.cloudflare.com'] = -> r {r.fetch}     # allow JS libraries
     HostGET['feedproxy.google.com'] = HostGET['storage.googleapis.com'] = -> r {r.noexec} # filter jungle JS
     HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.drop : r.noexec}
-    HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['maps.googleapis.com'] = HostGET['www.google.com'] = -> r {[nil,*%w(images maps search)].member?(r.parts[0]) ? r.desktop.fetch : r.drop}
+    HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['maps.googleapis.com'] = HostGET['www.google.com'] = -> r {
+      case r.parts[0]
+      when nil
+        r.desktop.fetch
+      when /images|maps/
+        r.desktop.fetch
+      when 'search'
+        r.fetch
+      else
+        r.drop
+      end}
     HostGET['www.googleadservices.com'] = -> r {r.q['adurl'] ? [301, {'Location' => r.q['adurl']},[]] : r.drop}
 
     # Mozilla
