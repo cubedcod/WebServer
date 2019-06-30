@@ -1,9 +1,4 @@
 #!/bin/sh
-
-## filesystem deps
-mkdir -p ~/web/log
-
-## package deps
 # https://www.alpinelinux.org/
 which apk && su -c 'apk add alpine-sdk graphicsmagick ruby ruby-dev python python3-dev py3-cffi py3-pip openssl-dev rsync libxslt-dev tmux squid'
 # https://www.archlinux.org/
@@ -13,9 +8,9 @@ which apt-add-repository && su -c 'apt-get install graphicsmagick git ruby ruby-
 # https://termux.com/
 which pkg && pkg install graphicsmagick git ruby ruby-dev grep file findutils pkg-config libiconv-dev libexif-dev libprotobuf-dev libxslt-dev clang tmux squid make rsync libffi-dev python python-dev libcap libcrypt-dev openssl-tool openssl-dev zlib-dev
 
-## language-library deps
 # Python
 pip install --upgrade pip pygments
+
 # Ruby
 cd ~/src/WebServer/ruby
 which bundle || gem install bundler
