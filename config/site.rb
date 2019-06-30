@@ -145,6 +145,11 @@ class WebResource
         else
           r.noexec
         end}}
+    # Soundcloud
+    HostGET['api-v2.soundcloud.com'] = -> r {
+      re = HTTParty.get ('https://' + r.host + r.path + r.qs), headers: r.headers
+      puts re.headers
+      [re.code, re.headers, [re.body]]}
 
     # Twitter
     HostGET['twitter.com'] = -> r {
