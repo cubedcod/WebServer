@@ -34,7 +34,7 @@ class WebResource
 
     # cache location
     def cache format=nil
-      ('/' + host +
+      (Cache + host +
        ((!path || path[-1] == '/') ? '/index' : (path.size > 127 ? path.sha2.do{|p|'/'+p[0..1]+'/'+p[2..-1]} : path)) +
        (qs.empty? ? '' : ('.' + qs.sha2)) +
        ((format && ext.empty? && Extensions[RDF::Format.content_types[format]]) ? ('.' + Extensions[RDF::Format.content_types[format]].to_s) : '')).R env
@@ -43,8 +43,8 @@ class WebResource
     def cached?
       return false if env && env['HTTP_PRAGMA'] == 'no-cache'
       location = cache
-      return location if location.file? # direct match
-      (location+'.*').glob.find &:file? # suffix match
+      return location if location.file?   # direct match
+      (location + '.*').glob.find &:file? # suffix match
     end
 
     def self.call env
@@ -336,8 +336,8 @@ class WebResource
       #elsif [401, 403].member? status
       #  [status, meta, []]      # authn failed
       else
-        if graph.empty? && !local? && env['REQUEST_PATH'][-1]=='/' # remote container
-          ('/' + host + path).R.children.map{|entry| #local index of remote container
+        if graph.empty? && !local? && env['REQUEST_PATH'][-1]=='/' # empty remote container index
+          (Cache + host + path).R.children.map{|entry| # generate local container index
             entry.fsMeta graph, base_uri: 'https://' + entry.relPath}
         end
         graphResponse graph     # content-negotiated graph
