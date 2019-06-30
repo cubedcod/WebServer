@@ -240,9 +240,7 @@ class WebResource
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
         if @verbose
-          print url , "\n"
-          HTTP.print_header head
-          puts ""
+          print url , "\n"; HTTP.print_header head; puts ""
         end
         begin
           open(url, head) do |response|
@@ -264,14 +262,12 @@ class WebResource
                          'application/octet-stream'
                        end
             if status == 206
-              body = response.read                                                  # partial body
-            else                                                                    # complete body
-              body = decompress meta, response.read; meta.delete 'content-encoding' # decompress body
-              file = (cache format).writeFile body unless format.match? RDFformats  # cache non-RDF
-              reader = RDF::Reader.for(content_type: format)                  # RDF reader
-              reader.new(body, :base_uri => url.R){|_| graph << _ } if reader # read RDF
-              RDF::Reader.for(:rdfa).new(body, :base_uri => url.R){|_|graph << _ } if format=='text/html' && !upstreamUI? # parse RDFa if HTML to be rewritten
-              index graph                                                     # index RDF
+              body = response.read                                                                # partial body
+            else                                                                                  # complete body
+              body = decompress meta, response.read; meta.delete 'content-encoding'                # decompress body
+              file = (cache format).writeFile body unless format.match? RDFformats                 # cache non-RDF
+              RDF::Reader.for(content_type: format).new(body, :base_uri => url.R){|_| graph << _ } # parse RDF
+              index graph                                                                          # cache RDF
             end
           end
         rescue Exception => e
