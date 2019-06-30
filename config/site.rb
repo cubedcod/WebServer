@@ -100,31 +100,7 @@ class WebResource
     HostGET['ajax.googleapis.com'] = HostGET['cdnjs.cloudflare.com'] = -> r {r.fetch}     # allow JS libraries
     HostGET['feedproxy.google.com'] = HostGET['storage.googleapis.com'] = -> r {r.noexec} # filter jungle JS
     HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.drop : r.noexec}
-    HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['maps.googleapis.com'] = HostGET['www.google.com'] = -> req {
-      mode = req.parts[0]
-      search = mode == 'search'
-      if %w{async complete js recaptcha searchdomaincheck xjs}.member? mode
-        req.drop
-      elsif mode == 'maps'
-        req.desktop.GETthru
-      else
-        case req.env['HTTP_TYPE']
-        when /dropURI/
-          req.drop
-        else
-          if OFFLINE && search # search local index
-            [302, {'Location' => 'http://localhost:8000/m' + req.qs}, []]
-          else                 # fetch
-            req.fetch.do{|status, head, body|
-              case status
-              when 403 # blocked by a middlebox, try DDG
-                [302, {'Location' => 'https://duckduckgo.com/' + req.qs}, []]
-              else
-                [status, head, body]
-              end}
-          end
-        end
-      end}
+    HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['maps.googleapis.com'] = HostGET['www.google.com'] = -> r {[nil,*%w(images maps search)].member?(r.parts[0]) ? r.desktop.fetch : r.drop}
     HostGET['www.googleadservices.com'] = -> r {r.q['adurl'] ? [301, {'Location' => r.q['adurl']},[]] : r.drop}
 
     # Mozilla

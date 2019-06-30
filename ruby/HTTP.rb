@@ -366,15 +366,6 @@ class WebResource
       end
     end
 
-    def GETthru
-      # request
-      url = 'https://' + host + path + qs
-      body = env['rack.input'].read
-      # response
-      r = HTTParty.get url, :headers => headers, :body => body
-      [r.code, r.headers, [r.body]]
-    end
-
     def graphResponse graph
       return notfound if graph.empty?
       format = selectFormat
@@ -611,7 +602,7 @@ class WebResource
         case env['HTTP_TYPE']
         when /drop/
           if ((host.match? /track/) || (env['REQUEST_URI'].match? /track/)) && (host.match? TrackHost)
-            fetch # allow music tracks
+            fetch # music tracks
           elsif q.has_key? 'allow' # allow with stripped querystring
             env.delete 'QUERY_STRING'
             env['REQUEST_URI'] = env['REQUEST_PATH']
@@ -621,9 +612,10 @@ class WebResource
             drop
           end
         when /noexec/
-          noexec # strip JS
+          noexec
         when /direct/
-          self.GETthru # direct to origin
+          r = HTTParty.get ('https://' + host + path + qs), headers: headers
+          [r.code, r.headers, [r.body]]
         end
       else
         fetch
