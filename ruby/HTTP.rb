@@ -414,8 +414,7 @@ class WebResource
       updates
     end
 
-    def load graph
-      options = {base_uri: self}
+    def load graph, options = {}
       if basename.split('.')[0] == 'msg'
         options[:format] = :mail
       elsif ext == 'html'
@@ -445,9 +444,9 @@ class WebResource
         fileResponse
       else
         graph = RDF::Repository.new
-        nodes.map{|node|
-          node.fsMeta graph unless node.ext=='ttl' # hide native graph-storage files
-          node.load graph if node.file?} # read RDF
+        nodes.map{|node|node.load graph, base_uri: 'http://localhost:8000/'.R.join(node) if node.file?} # read RDF
+        index graph
+        nodes.map{|node|node.fsMeta graph unless node.ext == 'ttl'} # file metadata (hide graph-storage nodes)
         graphResponse graph
       end
     end

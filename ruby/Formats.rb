@@ -430,7 +430,7 @@ sidebar [class^='side']    [id^='side']
 
       # HTML -> RDF
       def scanContent &f
-        embeds = RDF::Graph.new # embedded triples
+        embeds = RDF::Graph.new # embedded graph-data
         subject = @base         # subject URI
         n = Nokogiri::HTML.parse @doc # parse doc
 
@@ -452,10 +452,17 @@ sidebar [class^='side']    [id^='side']
         # RDFa
         RDF::Reader.for(:rdfa).new(@doc, base_uri: @base){|_| embeds << _ }
 
-        # embedded RDF
+        # embedded triples
         embeds.each_triple{|s,p,o|
-          yield s, p, o
-        }
+          case p.to_s
+          when 'http://purl.org/dc/terms/created'
+            p = Date.R
+          when 'content:encoded'
+            p = Content.R
+            o = o.to_s.hrefs
+          end
+
+          yield s, p, o}
 
         # <link>
         n.css('head link[rel]').map{|m|
@@ -750,25 +757,24 @@ sidebar [class^='side']    [id^='side']
             ::Mail::Encodings.defined?(p.body.encoding)      # decodable?
         }.map{|p|
           yield e, Content,
-                HTML.render({_: :pre,
-                             c: p.decoded.to_utf8.lines.to_a.map{|l| # split lines
-                               l = l.chomp # strip any remaining [\n\r]
-                               if qp = l.match(/^((\s*[>|]\s*)+)(.*)/) # quoted line
-                                 depth = (qp[1].scan /[>|]/).size # > count
-                                 if qp[3].empty? # drop blank quotes
-                                   nil
-                                 else # wrap quotes in <span>
-                                   indent = "<span name='quote#{depth}'>&gt;</span>"
-                                   {_: :span, class: :quote,
-                                    c: [indent * depth,' ',
-                                        {_: :span, class: :quoted,
-                                         c: qp[3].hrefs{|p,o|
-                                           yield e, p, o }}]}
-                                 end
-                               else # fresh line
-                                 [l.hrefs{|p, o|
-                                    yield e, p, o}]
-                               end}.compact.intersperse("\n")})} # join lines
+                HTML.render(p.decoded.to_utf8.lines.to_a.map{|l| # split lines
+                              l = l.chomp # strip any remaining [\n\r]
+                              if qp = l.match(/^((\s*[>|]\s*)+)(.*)/) # quoted line
+                                depth = (qp[1].scan /[>|]/).size # > count
+                                if qp[3].empty? # drop blank quotes
+                                  nil
+                                else # wrap quotes in <span>
+                                  indent = "<span name='quote#{depth}'>&gt;</span>"
+                                  {_: :span, class: :quote,
+                                   c: [indent * depth,' ',
+                                       {_: :span, class: :quoted,
+                                        c: qp[3].hrefs{|p,o|
+                                          yield e, p, o }}]}
+                                end
+                              else # fresh line
+                                [l.hrefs{|p, o|
+                                   yield e, p, o}]
+                              end})} # join lines
 
         # recursive contained messages: digests, forwards, archives
         parts.select{|p|p.mime_type=='message/rfc822'}.map{|m|

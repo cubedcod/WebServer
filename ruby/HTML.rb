@@ -490,7 +490,7 @@ class String
   # text -> HTML, also yielding found (rel,href) tuples to block
   def hrefs &blk               # leading/trailing <>()[] and trailing ,. not captured in URL
     pre, link, post = self.partition(/(https?:\/\/(\([^)>\s]*\)|[,.]\S|[^\s),.”\'\"<>\]])+)/)
-    pre.gsub('&','&amp;').gsub('<','&lt;').gsub('>','&gt;') + # pre-match
+    pre.gsub('&','&amp;').gsub('<','&lt;').gsub('>','&gt;').gsub("\n",'<br>') + # pre-match
       (link.empty? && '' ||
        '<a class="link" href="' + link.gsub('&','&amp;').gsub('<','&lt;').gsub('>','&gt;') + '">' +
        (resource = link.R
