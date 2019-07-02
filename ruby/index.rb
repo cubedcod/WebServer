@@ -15,6 +15,7 @@ mail
 nokogiri
 open-uri
 pathname
+pdf/reader
 rack
 rdf
 redcarpet
@@ -38,7 +39,6 @@ end
 class Object
   def justArray; [self] end
   def do; yield self end
-  def to_time; [Time, DateTime].member?(self.class) ? self : Time.parse(self) end
   def R env=nil
     if env
       (WebResource.new to_s).environment env

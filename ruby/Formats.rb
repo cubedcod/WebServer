@@ -1062,7 +1062,7 @@ sidebar [class^='side']    [id^='side']
         [:ifd0, :ifd1, :exif, :gps].map{|fields|
           @img[fields].map{|k,v|
             if k == :date_time
-              yield Date, v.sub(':','-').sub(':','-').to_time.iso8601
+              yield Date, Time.parse(v.sub(':','-').sub(':','-')).iso8601
             else
               yield ('http://www.w3.org/2003/12/exif/ns#' + k.to_s), v.to_s.to_utf8
             end
@@ -1285,11 +1285,11 @@ sidebar [class^='side']    [id^='side']
 
         # Date
         date = m.date || Time.now rescue Time.now
-        date = date.to_time.utc
-        dstr = date.iso8601
+        date = Time.parse(date.to_s) unless [Time, DateTime].member? date.class
+        dstr = date.utc.iso8601
         yield e, Date, dstr
         dpath = '/' + dstr[0..6].gsub('-','/') + '/msg/' # month
-        puts "DATE #{date}\nSUBJ #{subject}" if @verbose && subject
+        puts "DATE #{dstr}\nSUBJ #{subject}" if @verbose && subject
 
         # index addresses
         [*from,*to].map{|addr|
