@@ -1,4 +1,3 @@
-# dependencies
 %w{
 brotli
 cgi
@@ -26,39 +25,31 @@ class Array
   def justArray; self end
   def intersperse i; inject([]){|a,b|a << b << i}[0..-2] end
 end
-
 class FalseClass
   def do; self end
 end
-
 class Hash
   def R; WebResource.new(uri).data self end # preserve data
   def uri; self['uri'] end
 end
-
 class NilClass
   def justArray; [] end
   def do; self end
 end
-
 class Object
   def justArray; [self] end
   def do; yield self end
   def to_time; [Time, DateTime].member?(self.class) ? self : Time.parse(self) end
 end
-
 class RDF::Node
   def R; WebResource.new to_s end
 end
-
 class RDF::URI
   def R; WebResource.new to_s end
 end
-
 class Symbol
   def R; WebResource.new to_s end
 end
-
 class String
   def R env=nil
     if env
@@ -70,11 +61,9 @@ class String
 end
 
 class WebResource < RDF::URI
-
   def R; self end
 
   module URIs
-
     def + u; (to_s + u.to_s).R end
     def [] p; (@data||{})[p].justArray end
     def data d={}; @data = (@data||{}).merge(d); self end
@@ -104,7 +93,6 @@ class WebResource < RDF::URI
   CacheDir = '../.cache/web/'
   ConfDir = Pathname.new(__dir__).join('../config').relative_path_from Pathname.new Dir.pwd
 end
-# library components
-%w{POSIX Formats HTTP}.map{|i|require_relative i}
-# site config
-require_relative '../config/site.rb'
+
+%w{POSIX Formats HTTP ../config/site.rb}.map{|i|
+  require_relative i}
