@@ -111,7 +111,7 @@ class WebResource < RDF::URI
   end
   include URIs
   alias_method :uri, :to_s
-  Cache = '../.cache/web/'
+  CacheDir = '../.cache/web/'
   ConfDir = Pathname.new(__dir__).join('../config').relative_path_from Pathname.new Dir.pwd
 end
 # library components
