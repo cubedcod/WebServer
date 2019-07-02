@@ -1232,10 +1232,9 @@ sidebar [class^='side']    [id^='side']
                                         c: qp[3].hrefs{|p,o|
                                           yield e, p, o }}]}
                                 end
-                              else # fresh line
-                                [l.hrefs{|p, o|
-                                   yield e, p, o}]
-                              end})} # join lines
+                              else # unquoted line
+                                [l.hrefs{|p, o| yield e, p, o}]
+                              end}.map{|line| [line, '<br>']})}
 
         # recursive contained messages: digests, forwards, archives
         parts.select{|p|p.mime_type=='message/rfc822'}.map{|m|
