@@ -601,7 +601,7 @@ class WebResource
       post.delete Type
       titles = post.delete(Title).justArray.map(&:to_s).map(&:strip).uniq
       date = post.delete(Date).justArray[0]
-      from = post.delete(From).justArray
+      from = post.delete(Creator).justArray
       to = post.delete(To).justArray
       images = post.delete(Image).justArray
       content = post.delete(Content).justArray

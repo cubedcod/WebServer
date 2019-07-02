@@ -21,7 +21,6 @@ rdf
 redcarpet
 shellwords
 }.map{|r|require r}
-
 class Array
   def justArray; self end
 end
@@ -48,7 +47,6 @@ class Object
 end
 class WebResource < RDF::URI
   def R; self end
-
   module URIs
     def + u; (to_s + u.to_s).R end
     def [] p; (@data||{})[p].justArray end
@@ -62,7 +60,6 @@ class WebResource < RDF::URI
     Creator  = SIOC + 'has_creator'
     DCelement = 'http://purl.org/dc/elements/1.1/'
     Date     = DC   + 'date'
-    From     = SIOC + 'has_creator'
     Image    = DC + 'Image'
     Link     = DC + 'link'
     Post     = SIOC + 'Post'
