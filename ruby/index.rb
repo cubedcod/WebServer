@@ -29,8 +29,7 @@ class FalseClass
   def do; self end
 end
 class Hash
-  def R; WebResource.new(uri).data self end # preserve data
-  def uri; self['uri'] end
+  def R; WebResource.new(self['uri']).data self end
 end
 class NilClass
   def justArray; [] end
@@ -40,26 +39,14 @@ class Object
   def justArray; [self] end
   def do; yield self end
   def to_time; [Time, DateTime].member?(self.class) ? self : Time.parse(self) end
-end
-class RDF::Node
-  def R; WebResource.new to_s end
-end
-class RDF::URI
-  def R; WebResource.new to_s end
-end
-class Symbol
-  def R; WebResource.new to_s end
-end
-class String
   def R env=nil
     if env
-      WebResource.new(self).environment env
+      (WebResource.new to_s).environment env
     else
-      WebResource.new self
+      (WebResource.new to_s)
     end
   end
 end
-
 class WebResource < RDF::URI
   def R; self end
 
@@ -68,8 +55,6 @@ class WebResource < RDF::URI
     def [] p; (@data||{})[p].justArray end
     def data d={}; @data = (@data||{}).merge(d); self end
     def types; @types ||= self[Type].select{|t|t.respond_to? :uri}.map(&:uri) end
-
-    # URI constants
     W3       = 'http://www.w3.org/'
     DC       = 'http://purl.org/dc/terms/'
     SIOC     = 'http://rdfs.org/sioc/ns#'
