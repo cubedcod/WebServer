@@ -170,12 +170,12 @@ class WebResource
       def normalizePredicates *f
         send(*f){|s,p,o|
           yield s,
-                {DCelement+'type' => Type,
+                {'http://purl.org/dc/elements/1.1/type' => Type,
 
                  Podcast+'author' => Creator,
 
                  Atom+'title'        => Title,
-                 DCelement+'subject' => Title,
+                 'http://purl.org/dc/elements/1.1/subject' => Title,
                  Podcast+'subtitle'  => Title,
                  Podcast+'title'     => Title,
                  RSS+'title'         => Title,
@@ -203,7 +203,7 @@ class WebResource
                       'Date' => true,
                       RSS+'pubDate' => true,
                       Date => true,
-                      DCelement+'date' => true,
+                      'http://purl.org/dc/elements/1.1/date' => true,
                       Atom+'published' => true,
                       Atom+'updated' => true}[p]
           if dateType
@@ -302,7 +302,7 @@ class WebResource
               p = (x[e[0] && e[0].chop]||WebResource::RSS) + e[1] # attribute URI
               if [Atom+'id', RSS+'link', RSS+'guid', Atom+'link'].member? p
               # subject URI candidates
-              elsif [Atom+'author', RSS+'author', RSS+'creator', DCelement+'creator'].member? p
+              elsif [Atom+'author', RSS+'author', RSS+'creator', 'http://purl.org/dc/elements/1.1/creator'].member? p
                 # creators
                 crs = []
                 # XML name + URI

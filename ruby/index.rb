@@ -58,7 +58,6 @@ class WebResource < RDF::URI
     Abstract = DC   + 'abstract'
     Content  = SIOC + 'content'
     Creator  = SIOC + 'has_creator'
-    DCelement = 'http://purl.org/dc/elements/1.1/'
     Date     = DC   + 'date'
     Image    = DC + 'Image'
     Link     = DC + 'link'
