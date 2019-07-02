@@ -1426,7 +1426,7 @@ sidebar [class^='side']    [id^='side']
                                               c: @doc.hrefs{|p,o| # hypertextize
                                                 # yield detected links to consumer
                                                 yield @subject, p, o
-                                                yield o, Type, Resource.R}})
+                                                yield o, Type, (W3 + '2000/01/rdf-schema#Resource').R}})
       end
     end
   end

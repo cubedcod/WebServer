@@ -93,7 +93,6 @@ class WebResource < RDF::URI
     Image    = DC + 'Image'
     Link     = DC + 'link'
     Post     = SIOC + 'Post'
-    Resource = W3   + '2000/01/rdf-schema#Resource'
     Schema   = 'http://schema.org/'
     Title    = DC   + 'title'
     To       = SIOC + 'addressed_to'
