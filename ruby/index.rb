@@ -91,7 +91,6 @@ class WebResource < RDF::URI
     Creator  = SIOC + 'has_creator'
     DCelement = Purl + 'dc/elements/1.1/'
     Date     = DC   + 'date'
-    Email    = SIOC + 'MailMessage'
     From     = SIOC + 'has_creator'
     Image    = DC + 'Image'
     Link     = DC + 'link'

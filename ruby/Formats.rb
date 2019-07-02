@@ -783,7 +783,7 @@ class WebResource
       elsif v.class == Hash # RDF type
         resource = v.R
         types = resource.types
-        if (types.member? Post) || (types.member? SIOC+'BlogPost') || (types.member? Email)
+        if (types.member? Post) || (types.member? SIOC+'BlogPost') || (types.member? SIOC+'MailMessage')
           Markup[Post][v,env]
         elsif types.member? Image
           Markup[Image][v,env]
@@ -1200,7 +1200,7 @@ sidebar [class^='side']    [id^='side']
           puts "LINK #{srcFile}" if @verbose
         end
         yield e, DC + 'identifier', id # Message-ID
-        yield e, Type, Email.R
+        yield e, Type, (SIOC + 'MailMessage').R
 
         # HTML
         htmlFiles, parts = m.all_parts.push(m).partition{|p|p.mime_type=='text/html'}
