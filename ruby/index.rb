@@ -82,13 +82,12 @@ class WebResource < RDF::URI
 
     # URI constants
     W3       = 'http://www.w3.org/'
-    Purl     = 'http://purl.org/'
-    DC       = Purl + 'dc/terms/'
+    DC       = 'http://purl.org/dc/terms/'
     SIOC     = 'http://rdfs.org/sioc/ns#'
     Abstract = DC   + 'abstract'
     Content  = SIOC + 'content'
     Creator  = SIOC + 'has_creator'
-    DCelement = Purl + 'dc/elements/1.1/'
+    DCelement = 'http://purl.org/dc/elements/1.1/'
     Date     = DC   + 'date'
     From     = SIOC + 'has_creator'
     Image    = DC + 'Image'

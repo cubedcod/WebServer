@@ -88,7 +88,7 @@ class WebResource
 
       Atom     = W3   + '2005/Atom#'
       Podcast  = 'http://www.itunes.com/dtds/podcast-1.0.dtd#'
-      RSS      = Purl + 'rss/1.0/'
+      RSS      = 'http://purl.org/rss/1.0/'
 
       def initialize(input = $stdin, options = {}, &block)
         @doc = (input.respond_to?(:read) ? input.read : input).to_utf8
