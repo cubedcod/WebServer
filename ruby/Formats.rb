@@ -189,11 +189,6 @@ class WebResource
                  RSS+'encoded'                 => Content,
                  RSS+'modules/content/encoded' => Content,
 
-                 Atom+'displaycategories' => Label,
-                 Podcast+'episodeType'    => Label,
-                 Podcast+'keywords'       => Label,
-                 RSS+'category'           => Label,
-
                  Atom+'enclosure'             => SIOC+'attachment',
                  Atom+'link'                  => DC+'link',
                  RSS+'modules/slash/comments' => SIOC+'num_replies',
@@ -1285,7 +1280,7 @@ sidebar [class^='side']    [id^='side']
         subject = nil
         m.subject.do{|s|
           subject = s.to_utf8
-          subject.scan(/\[[^\]]+\]/){|l| yield e, Label, l[1..-2]}
+          subject.scan(/\[[^\]]+\]/){|l| yield e, Schema + 'group', l[1..-2]}
           yield e, Title, subject}
 
         # Date

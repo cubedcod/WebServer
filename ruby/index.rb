@@ -94,7 +94,6 @@ class WebResource < RDF::URI
     Email    = SIOC + 'MailMessage'
     From     = SIOC + 'has_creator'
     Image    = DC + 'Image'
-    Label    = W3 + '2000/01/rdf-schema#label'
     Link     = DC + 'link'
     Mtime    = Stat + 'mtime'
     Post     = SIOC + 'Post'
