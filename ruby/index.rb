@@ -115,6 +115,6 @@ class WebResource < RDF::URI
   ConfDir = Pathname.new(__dir__).join('../config').relative_path_from Pathname.new Dir.pwd
 end
 # library components
-%w{POSIX Formats HTML HTTP}.map{|i|require_relative i}
+%w{POSIX Formats HTTP}.map{|i|require_relative i}
 # site config
 require_relative '../config/site.rb'
