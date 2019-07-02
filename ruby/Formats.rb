@@ -86,6 +86,10 @@ class WebResource
       include URIs
       format Format
 
+      Atom     = W3   + '2005/Atom#'
+      Podcast  = 'http://www.itunes.com/dtds/podcast-1.0.dtd#'
+      RSS      = Purl + 'rss/1.0/'
+
       def initialize(input = $stdin, options = {}, &block)
         @doc = (input.respond_to?(:read) ? input.read : input).to_utf8
         @base = options[:base_uri].R
