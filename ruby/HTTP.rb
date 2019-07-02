@@ -325,12 +325,12 @@ class WebResource
         file.fileResponse
       elsif upstreamUI? && body # remote static-content
         [200, {'Content-Type' => format, 'Content-Length' => body.bytesize.to_s}, [body]]
-      elsif 206 == status       # partial static-content
+      elsif 206 == status       # partial remote static-content
         [status, meta, [body]]
-      elsif 304 == status       # not modified
+      elsif 304 == status       # unmodified
         [304, {}, []]
       #elsif [401, 403].member? status
-      #  [status, meta, []]      # authn failed
+      #  [status, meta, []]     # authn failed
       else
         if graph.empty? && !local? && env['REQUEST_PATH'][-1]=='/' # empty remote container index
           (CacheDir + host + path).R.children.map{|entry|          # local container index
@@ -392,24 +392,18 @@ class WebResource
       g.each_graph.map{|graph|
         if n = graph.name
           n = n.R
-          graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value.do{|t| # timestamp
-            # doc URI in timeline
+          graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value.do{|t| # find timestamp
+            # doc URI
             doc = ['/' + t.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/\+?(00.00|Z)$/,''),  # hour-dir
                    %w{host path query fragment}.map{|a|n.send(a).do{|p|p.split(/[\W_]/)}},'ttl']. #  slugs
                     flatten.-([nil,'',*BasicSlugs]).join('.').R  # apply skiplist, mint URI
-            # store version
             unless doc.exist?
               doc.dir.mkdir
               RDF::Writer.open(doc.relPath){|f|f << graph}
               updates << doc
               puts  "\e[32m+\e[0m http://localhost:8000" + doc.stripDoc
-            else
-              #puts  "= http://localhost:8000" + doc.stripDoc
             end
             true}
-        else
-          #puts "anonymous graph:"
-          #puts graph.dump (RDF::Writer.for :turtle).to_sym
         end}
       updates
     end
