@@ -40,7 +40,7 @@ class WebResource
         subject = subject.path[-1] == '/' ? subject : (subject + '/') # ensure trailing-slash on container URI
         graph << (RDF::Statement.new subject, Type.R, (W3 + 'ns/ldp#Container').R)
       else
-        graph << (RDF::Statement.new subject, Type.R, Stat.R + 'File')
+        graph << (RDF::Statement.new subject, Type.R, (W3 + 'ns/posix/stat#File').R)
       end
       graph << (RDF::Statement.new subject, Title.R, basename)
       graph << (RDF::Statement.new subject, Size.R, size)
