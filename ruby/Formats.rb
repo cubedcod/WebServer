@@ -581,7 +581,7 @@ class WebResource
       end}
 
     Markup[Creator] = -> c, env, uris=nil {
-      if c.respond_to? :uri
+      if c.class == Hash || c.respond_to?(:uri)
         u = c.R
 
         name = u.fragment ||
@@ -590,7 +590,7 @@ class WebResource
                'user'
 
         color = env[:colors][name] ||= HTML.colorize
-        {_: :a, id: 'a'+rand.to_s.sha2, class: :creator, style: color, href: uris.justArray[0] || c.uri, c: name}
+        {_: :a, id: 'a'+rand.to_s.sha2, class: :creator, style: color, href: uris.justArray[0] || u.to_s, c: name}
       else
         CGI.escapeHTML (c||'')
       end}
@@ -719,22 +719,22 @@ class WebResource
                      ts.map{|t|
                        title = t.to_s.sub(/\/u\/\S+ on /,'')
                        if titles[title]
-                         {_: :a, href: resource.uri, id: 'r' + rand.to_s.sha2, class: :id, c: '☚'}
+                         {_: :a, href: resource['uri'], id: 'r' + rand.to_s.sha2, class: :id, c: '☚'}
                        else
                          titles[title] = true
-                         {_: :a, href: resource.uri, id: 'r' + rand.to_s.sha2, class: :title,
+                         {_: :a, href: resource['uri'], id: 'r' + rand.to_s.sha2, class: :title,
                           c: [(CGI.escapeHTML title), ' ',
-                              {_: :span, class: :uri, c: CGI.escapeHTML(resource.uri)}, ' ']}
+                              {_: :span, class: :uri, c: CGI.escapeHTML(resource['uri'])}, ' ']}
                        end}
                    else
-                     {_: :a, href: resource.uri, id: 'r' + rand.to_s.sha2, class: :id, c: '&#x1f517;'}
+                     {_: :a, href: resource['uri'], id: 'r' + rand.to_s.sha2, class: :id, c: '&#x1f517;'}
                    end
                  else
                    resource[k].justArray.map{|v|value k, v, env }
                   end}}},
               ({_: :tr, c: {_: :td, colspan: keys.size,
                             c: [resource[Image].justArray.map{|i|{style: 'max-width: 20em', c: Markup[Image][i,env]}},
-                                resource[Content]]}} if (resource[Content] || resource[Image]) && !env[:query].has_key?('head'))]}]}
+                                resource[Content]]}} if (resource[Content] || resource[Image]) && !env[:query]&.has_key?('head'))]}]}
     end
 
     def self.tree t, env, name=nil
