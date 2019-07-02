@@ -43,7 +43,7 @@ class WebResource
         graph << (RDF::Statement.new subject, Type.R, (W3 + 'ns/posix/stat#File').R)
       end
       graph << (RDF::Statement.new subject, Title.R, basename)
-      graph << (RDF::Statement.new subject, Size.R, size)
+      graph << (RDF::Statement.new subject, (W3+'ns/posix/stat#size').R, size)
       graph << (RDF::Statement.new subject, Date.R, mtime.iso8601)
     end
 

@@ -699,7 +699,7 @@ class WebResource
 
     def self.tabular graph, env
       graph = graph.values if graph.class == Hash
-      keys = graph.map{|resource|resource.keys}.flatten.uniq - [Content, DC+'hasFormat', DC+'identifier', Image, Mtime, SIOC+'reply_of', SIOC+'user_agent', Title, Type]
+      keys = graph.map{|resource|resource.keys}.flatten.uniq - [Content, DC+'hasFormat', DC+'identifier', Image, SIOC+'reply_of', SIOC+'user_agent', Title, Type]
       if env[:query] && env[:query].has_key?('sort')
         attr = env[:query]['sort']
         attr = Date if attr == 'date'
