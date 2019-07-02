@@ -293,13 +293,13 @@ class WebResource
                     when 'png'
                       WebResource::Image
                     else
-                      WebResource::Atom + rel
+                      Atom + rel
                     end
                 yield u,p,o unless resource == o}}
 
             # process XML elements
             inner.gsub(reGroup,'').scan(reElement){|e|
-              p = (x[e[0] && e[0].chop]||WebResource::RSS) + e[1] # attribute URI
+              p = (x[e[0] && e[0].chop]||RSS) + e[1] # attribute URI
               if [Atom+'id', RSS+'link', RSS+'guid', Atom+'link'].member? p
               # subject URI candidates
               elsif [Atom+'author', RSS+'author', RSS+'creator', 'http://purl.org/dc/elements/1.1/creator'].member? p
