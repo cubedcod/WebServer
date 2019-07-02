@@ -596,7 +596,7 @@ class WebResource
       end}
 
     Markup[Post] = -> post , env {
-      uri = post.uri.justArray[0]
+      uri = post['uri'].justArray[0]
       post.delete 'uri'
       post.delete Type
       titles = post.delete(Title).justArray.map(&:to_s).map(&:strip).uniq
@@ -624,23 +624,21 @@ class WebResource
            content, ((HTML.keyval post, env) unless post.keys.size < 1)]}}
 
     Markup[Image] = -> image,env {
-      if image.respond_to? :uri
-        img = image.R
-        if env[:images] && env[:images][img.uri]
-        # deduplicate
-        else
-          env[:images] ||= {}
-          env[:images][img.uri] = true
-          {class: :thumb, c: {_: :a, href: img.uri, c: {_: :img, src: img.uri}}}
-        end
+      img = image.R
+      if env[:images] && env[:images][img.uri]
+      # deduplicated
       else
-        CGI.escapeHTML image.to_s
+        env[:images] ||= {}
+        env[:images][img.uri] = true
+        {class: :thumb, c: {_: :a, href: img.uri, c: {_: :img, src: img.uri}}}
       end}
 
     Markup[Video] = -> video,env {
       video = video.R
-      if env[:images][video.uri]
+      if env[:images] && env[:images][video.uri]
+      # deduplicated
       else
+        env[:images] ||= {}
         env[:images][video.uri] = true
         if video.uri.match /youtu/
           id = (HTTP.parseQs video.query)['v'] || video.parts[-1]
@@ -740,7 +738,7 @@ class WebResource
     end
 
     def self.tree t, env, name=nil
-      url = t[:RDF].uri if t[:RDF]
+      url = t[:RDF]['uri'] if t[:RDF]
       if name && t.keys.size > 1
         color = '#%06x' % rand(16777216)
         scale = rand(7) + 1
