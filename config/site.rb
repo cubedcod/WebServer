@@ -156,7 +156,7 @@ class WebResource
       if !r.path || r.path == '/'
         graph = RDF::Repository.new
         r.subscriptions.shuffle.each_slice(18){|s|
-          ('https://twitter.com/search?f=tweets&vertical=default&q='+s.map{|u|'from:' + u}.intersperse('+OR+').join).R.fetch graph: graph, no_response: true}
+          ('https://twitter.com/search?f=tweets&vertical=default&q='+s.map{|u|'from:' + u}.join('+OR+')).R.fetch graph: graph, no_response: true}
         r.graphResponse graph
       else
         r.remote

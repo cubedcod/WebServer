@@ -369,7 +369,7 @@ class WebResource
       @r[:Response] ||= {}
       @r[:Response]['Access-Control-Allow-Origin'] ||= allowedOrigin
       @r[:Response].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})      
-      @r[:Response].update({'Link' => @r[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.intersperse(', ').join}) unless !@r[:links] || @r[:links].empty?
+      @r[:Response].update({'Link' => @r[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !@r[:links] || @r[:links].empty?
       entity ->{
         case format
         when /^text\/html/
@@ -576,7 +576,7 @@ class WebResource
     def HTTP.qs h
       '?' + h.map{|k,v|
         k.to_s + '=' + (v ? (CGI.escape [*v][0].to_s) : '')
-      }.intersperse("&").join('')
+      }.join("&")
     end
 
     # env or URI -> query-string

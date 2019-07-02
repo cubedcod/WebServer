@@ -558,7 +558,7 @@ class WebResource
          ([{_: :tr, name: type.fragment || type.basename,
             c: [{_: :td, class: 'k', c: Markup[Type][type]},
                 {_: :td, class: 'v', c: vs.justArray.map{|v|
-                   value k, v, env}.intersperse(' ')}]}, "\n"] unless k=='uri' && vs.justArray[0].to_s.match?(/^_:/))}}
+                   [(value k, v, env), ' ']}}]}, "\n"] unless k=='uri' && vs.justArray[0].to_s.match?(/^_:/))}}
     end
 
     Markup['uri'] = -> uri, env=nil {uri.R}

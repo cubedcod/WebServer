@@ -24,7 +24,6 @@ shellwords
 
 class Array
   def justArray; self end
-  def intersperse i; inject([]){|a,b|a << b << i}[0..-2] end
 end
 class FalseClass
   def do; self end
