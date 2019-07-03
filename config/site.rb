@@ -104,6 +104,8 @@ class WebResource
       case r.parts[0]
       when nil
         r.desktop.fetch
+      when 'imgres'
+        r.q.has_key?('imgurl') ? [301, {'Location' => r.q['imgurl']}, []] : r.fetch
       when /images|maps/
         r.desktop.fetch
       when 'search'

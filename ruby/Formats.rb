@@ -64,6 +64,44 @@ class WebResource
       end
     end
   end
+  module CSS
+    class Format < RDF::Format
+      content_type 'text/css', :extension => :css
+      content_encoding 'utf-8'
+      reader { WebResource::CSS::Reader }
+    end
+
+    class Reader < RDF::Reader
+      include URIs
+      format Format
+
+      def initialize(input = $stdin, options = {}, &block)
+        @doc = input.respond_to?(:read) ? input.read : input
+        @subject = (options[:base_uri] || '#css').R
+        if block_given?
+          case block.arity
+          when 0 then instance_eval(&block)
+          else block.call(self)
+          end
+        end
+        nil
+      end
+
+      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
+
+      def each_statement &fn
+        css_triples{|s,p,o|
+          fn.call RDF::Statement.new(@subject, p.R,
+                                     (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal o
+                                                                                            l.datatype=RDF.XMLLiteral if p == Content
+                                                                                            l),
+                                     :graph_name => @subject)}
+      end
+
+      def css_triples
+      end
+    end
+  end
   module Feed
     class Format < RDF::Format
       content_type 'application/rss+xml',
@@ -1069,6 +1107,44 @@ sidebar [class^='side']    [id^='side']
       
     end
   end
+  module JS
+    class Format < RDF::Format
+      content_type 'application/javascript', :extension => :js
+      content_encoding 'utf-8'
+      reader { WebResource::JS::Reader }
+    end
+
+    class Reader < RDF::Reader
+      include URIs
+      format Format
+
+      def initialize(input = $stdin, options = {}, &block)
+        @doc = input.respond_to?(:read) ? input.read : input
+        @subject = (options[:base_uri] || '#js').R
+        if block_given?
+          case block.arity
+          when 0 then instance_eval(&block)
+          else block.call(self)
+          end
+        end
+        nil
+      end
+
+      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
+
+      def each_statement &fn
+        js_triples{|s,p,o|
+          fn.call RDF::Statement.new(@subject, p.R,
+                                     (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal o
+                                                                                            l.datatype=RDF.XMLLiteral if p == Content
+                                                                                            l),
+                                     :graph_name => @subject)}
+      end
+
+      def js_triples
+      end
+    end
+  end
   module JSON
     class Format < RDF::Format
       content_type 'application/json', :extension => :json
@@ -1424,6 +1500,44 @@ sidebar [class^='side']    [id^='side']
                                                 # yield detected links to consumer
                                                 yield @subject, p, o
                                                 yield o, Type, (W3 + '2000/01/rdf-schema#Resource').R}})
+      end
+    end
+  end
+  module Playlist
+    class Format < RDF::Format
+      content_type 'application/vnd.apple.mpegurl', :extension => :m3u8
+      content_encoding 'utf-8'
+      reader { WebResource::Playlist::Reader }
+    end
+
+    class Reader < RDF::Reader
+      include URIs
+      format Format
+
+      def initialize(input = $stdin, options = {}, &block)
+        @doc = input.respond_to?(:read) ? input.read : input
+        @subject = (options[:base_uri] || '#js').R
+        if block_given?
+          case block.arity
+          when 0 then instance_eval(&block)
+          else block.call(self)
+          end
+        end
+        nil
+      end
+
+      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
+
+      def each_statement &fn
+        playlist_triples{|s,p,o|
+          fn.call RDF::Statement.new(@subject, p.R,
+                                     (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal o
+                                                                                            l.datatype=RDF.XMLLiteral if p == Content
+                                                                                            l),
+                                     :graph_name => @subject)}
+      end
+
+      def playlist_triples
       end
     end
   end
