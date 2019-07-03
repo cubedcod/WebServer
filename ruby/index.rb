@@ -12,7 +12,7 @@ icalendar
 json
 linkeddata
 mail
-nokogumbo
+nokogiri
 open-uri
 pathname
 pdf/reader
