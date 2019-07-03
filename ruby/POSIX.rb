@@ -4,17 +4,17 @@ class WebResource
 
     def basename; File.basename ( path || '/' ) end                        # BASENAME(1)
     def children; node.children.delete_if{|f|f.basename.to_s.index('.')==0}.map &:R end
-    def dir; dirname.R if path end
+    def dir; dirname.R if path end                                         # DIRNAME(1)
     def directory?; node.directory? end
-    def dirname; File.dirname path if path end
-    def du; `du -s #{sh}| cut -f 1`.chomp.to_i end                         # DU(1)
+    def dirname; File.dirname path if path end                             # DIRNAME(1)
+    def du; `du -s #{shellPath}| cut -f 1`.chomp.to_i end                  # DU(1)
     def exist?; node.exist? end
     def ext; File.extname( path || '' )[1..-1] || '' end
     def file?; node.file? end
-    def find p; `find #{sh} -iname #{p.sh}`.lines.map{|p|POSIX.path p} end # FIND(1)
+    def find p; `find #{shellPath} -iname #{Shellwords.escape p}`.lines.map{|p|POSIX.path p} end # FIND(1)
     def glob; (Pathname.glob relPath).map &:R end                          # GLOB(7)
-    def ln   n; FileUtils.ln   node.expand_path, n.node.expand_path end
-    def ln_s n; FileUtils.ln_s node.expand_path, n.node.expand_path end
+    def ln   n; FileUtils.ln   node.expand_path, n.node.expand_path end    # LN(1)
+    def ln_s n; FileUtils.ln_s node.expand_path, n.node.expand_path end    # LN(1)
     def link n; n.dir.mkdir; send :ln, n unless n.exist? end               # LN(1)
     def lines; exist? ? (open relPath).readlines.map(&:chomp) : [] end
     def mkdir; FileUtils.mkdir_p relPath unless exist?; self end           # MKDIR(1)
@@ -26,7 +26,7 @@ class WebResource
     def self.path p; ('/' + p.to_s.chomp.gsub(' ','%20').gsub('#','%23')).R end
     def self.splitArgs args; args.shellsplit rescue args.split /\W/ end
     def sha2; to_s.sha2 end
-    def shellPath; relPath.force_encoding('UTF-8').sh end; alias_method :sh, :shellPath
+    def shellPath; Shellwords.escape relPath.force_encoding 'UTF-8' end
     def size; node.size rescue 0 end
     def stripDoc; uri.sub(/\.(html|json|md|ttl|txt)$/,'').R end
     def symlink?; node.symlink? end
@@ -55,14 +55,14 @@ class WebResource
       when 0
         return []
       when 2 # two unordered terms
-        cmd = "grep -rilZ #{args[0].sh} #{sh} | xargs -0 grep -il #{args[1].sh}"
+        cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -il #{Shellwords.escape args[1]}"
       when 3 # three unordered terms
-        cmd = "grep -rilZ #{args[0].sh} #{sh} | xargs -0 grep -ilZ #{args[1].sh} | xargs -0 grep -il #{args[2].sh}"
+        cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -il #{Shellwords.escape args[2]}"
       when 4 # four unordered terms
-        cmd = "grep -rilZ #{args[0].sh} #{sh} | xargs -0 grep -ilZ #{args[1].sh} | xargs -0 grep -ilZ #{args[2].sh} | xargs -0 grep -il #{args[3].sh}"
+        cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -ilZ #{Shellwords.escape args[2]} | xargs -0 grep -il #{Shellwords.escape args[3]}"
       else # N ordered terms
         pattern = args.join '.*'
-        cmd = "grep -ril #{pattern.sh} #{sh}"
+        cmd = "grep -ril #{Shellwords.escape pattern} #{shellPath}"
       end
       `#{cmd} | head -n 1024`.lines.map{|path|POSIX.path path}
     end
@@ -78,8 +78,4 @@ class Pathname
       WebResource::POSIX.path self
     end
   end
-end
-
-class String
-  def sh; Shellwords.escape self end
 end
