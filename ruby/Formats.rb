@@ -938,17 +938,15 @@ sidebar [class^='side']    [id^='side']
         end
 
         # JSON-LD
-        n.css('script[type="application/ld+json"]').map{|json|
-          tree = begin
-                   ::JSON.parse json.inner_text
-                 rescue
-                   puts "JSON parse failed: #{json.inner_text}"
-                   {}
-                 end
-          embeds << ::JSON::LD::API.toRdf(tree) rescue puts("JSON-LD read-error on #{@base}")}
+        n.css('script[type="application/ld+json"]').map{|dataElement|
+          begin
+            embeds << (::JSON::LD::API.toRdf ::JSON.parse dataElement.inner_text)
+          rescue
+            puts "JSON-LD parse failed in #{@base}"
+          end}
 
         # RDFa
-        RDF::Reader.for(:rdfa).new(@doc, base_uri: @base){|_| embeds << _ }
+        RDF::Reader.for(:rdfa).new(@doc, base_uri: @base){|_| embeds << _ } rescue "RDFa parse failed in #{@base}"
 
         # embedded triples
         embeds.each_triple{|s,p,o|
