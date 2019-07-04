@@ -43,8 +43,8 @@ class WebResource
     def cached?
       return false if env && env['HTTP_PRAGMA'] == 'no-cache'
       location = cache
-      return location if location.file?   # direct match
-      (location + '.*').glob.find &:file? # suffix match
+      return location if location.file?     # direct match
+      (location + '.*').R.glob.find &:file? # suffix match
     end
 
     def self.call env
@@ -456,7 +456,7 @@ class WebResource
        elsif q.has_key?('q') && path!='/' # GREP
          grep q['q']
        else                               # LS
-         index = (self+'index.{html,ttl}').glob
+         index = (self + 'index.{html,ttl}').R.glob
          if !index.empty? && qs.empty? # static index-file
            index
          else
@@ -467,8 +467,8 @@ class WebResource
         if uri.match /[\*\{\[]/ # custom glob
           files = glob
         else                    # default glob
-          files = (self + '.*').glob                # base + extension match
-          files = (self + '*').glob if files.empty? # prefix match
+          files = (self + '.*').R.glob                # base + extension match
+          files = (self + '*').R.glob if files.empty? # prefix match
         end
         [self, files]
        end).justArray.flatten.compact.uniq.select &:exist?
