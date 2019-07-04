@@ -11,7 +11,7 @@ linkeddata
 mail
 nokogiri
 open-uri
-pathname pdf/reader
+pathname
 rack rdf redcarpet
 shellwords
 }.map{|r|require r}
