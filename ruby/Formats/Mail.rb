@@ -80,7 +80,7 @@ module Webize
             ::Mail::Encodings.defined?(p.body.encoding)      # decodable?
         }.map{|p|
           yield e, Content,
-                HTML.render(p.decoded.to_utf8.lines.to_a.map{|l| # split lines
+                WebResource::HTML.render(p.decoded.to_utf8.lines.to_a.map{|l| # split lines
                               l = l.chomp # strip any remaining [\n\r]
                               if qp = l.match(/^((\s*[>|]\s*)+)(.*)/) # quoted line
                                 depth = (qp[1].scan /[>|]/).size # > count
@@ -202,7 +202,7 @@ module Webize
           if p.main_type=='image'                  # image attachments
             yield e, Image, file                   # image link in RDF
             yield e, Content,                      # image link in HTML
-                  HTML.render({_: :a, href: file.uri, c: [{_: :img, src: file.uri}, p.filename]}) # render HTML
+                  WebResource::HTML.render({_: :a, href: file.uri, c: [{_: :img, src: file.uri}, p.filename]}) # render HTML
           end }
       end
 
