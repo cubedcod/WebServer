@@ -65,7 +65,7 @@ module Webize
 
             # <a>
             content.css('a').map{|a|
-              if href = a.attr 'href'
+              if href = a.attr('href')
                 # resolve URIs
                 link = subject.join href
                 re = link.R
@@ -82,7 +82,7 @@ module Webize
 
             # <img>
             content.css('img').map{|i|
-              if src = i.attr 'src'
+              if src = i.attr('src')
                 # TODO find reblogs with relative URIs in content and check RFCish specs on whether relURI base is resource or doc
                 src = subject.join src
                 i.set_attribute 'src', src
@@ -91,7 +91,7 @@ module Webize
 
             # <iframe>
             content.css('iframe').map{|i|
-              if src = i.attr 'src'
+              if src = i.attr('src')
                 src = src.R
                 if src.host && src.host.match(/youtu/)
                   id = src.parts[-1]
@@ -221,7 +221,7 @@ module Webize
 
             # media links
             inner.scan(reMedia){|e|
-              e[1].match(reSrc).do{|url|
+              if url = e[1].match(reSrc)
                 rel = e[1].match reRel
                 rel = rel ? rel[1] : 'link'
                 o = (@base.join url[2]).R
@@ -235,7 +235,8 @@ module Webize
                     else
                       Atom + rel
                     end
-                yield u,p,o unless resource == o}}
+                yield u,p,o unless resource == o
+              end}
 
             # process XML elements
             inner.gsub(reGroup,'').scan(reElement){|e|
@@ -251,7 +252,7 @@ module Webize
                 crs.push uri[1].R if uri
                 crs.push name[1] if name && !(uri && (uri[1].R.path||'/').sub('/user/','/u/') == name[1])
                 unless name || uri
-                  crs.push e[3].do{|o|
+                  crs.push e[3].yield_self{|o|
                     case o
                     when isURL
                       o.R
@@ -264,7 +265,7 @@ module Webize
                 # author(s) -> RDF
                 crs.map{|cr|yield u, Creator, cr}
               else # element -> RDF
-                yield u,p,e[3].do{|o|
+                yield u, p, e[3].yield_self{|o|
                   case o
                   when isCDATA
                     o.sub reCDATA, '\1'
@@ -273,7 +274,7 @@ module Webize
                   else
                     CGI.unescapeHTML o
                   end
-                }.do{|o|
+                }.yield_self{|o|
                   o.match(isURL) ? o.R : o }
               end
             }

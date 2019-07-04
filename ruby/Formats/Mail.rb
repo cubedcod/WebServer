@@ -107,7 +107,7 @@ module Webize
 
         # From
         from = []
-        m.from.do{|f|
+        m.from && m.from.yield_self{|f|
           f.justArray.compact.map{|f|
             noms = f.split ' '
             if noms.size > 2 && noms[1] == 'at'
@@ -115,16 +115,17 @@ module Webize
             end
             puts "FROM #{f}" if @verbose 
             from.push f.to_utf8.downcase}} # queue address for indexing + triple-emitting
-        m[:from].do{|fr|
+
+        m[:from] && m[:from].yield_self{|fr|
           fr.addrs.map{|a|
             name = a.display_name || a.name # human-readable name
             yield e, Creator, name
             puts "NAME #{name}" if @verbose
           } if fr.respond_to? :addrs}
-        m['X-Mailer'].do{|m|
+
+        m['X-Mailer'] && m['X-Mailer'].yield_self{|m|
           yield e, SIOC+'user_agent', m.to_s
-          puts " MLR #{m}" if @verbose
-        }
+          puts " MLR #{m}" if @verbose}
 
         # To
         to = []
@@ -133,11 +134,11 @@ module Webize
             puts "  TO #{r}" if @verbose
             to.push r.to_utf8.downcase }}    # queue for indexing
         m['X-BeenThere'].justArray.map{|r|to.push r.to_s} # anti-loop recipient
-        m['List-Id'].do{|name|yield e, To, name.decoded.sub(/<[^>]+>/,'').gsub(/[<>&]/,'')} # mailinglist name
+        m['List-Id'] && m['List-Id'].yield_self{|name|yield e, To, name.decoded.sub(/<[^>]+>/,'').gsub(/[<>&]/,'')} # mailinglist name
 
         # Subject
         subject = nil
-        m.subject.do{|s|
+        m.subject && m.subject.yield_self{|s|
           subject = s.to_utf8
           subject.scan(/\[[^\]]+\]/){|l| yield e, Schema + 'group', l[1..-2]}
           yield e, Title, subject}
@@ -168,7 +169,7 @@ module Webize
 
         # index bidirectional refs
         %w{in_reply_to references}.map{|ref|
-          m.send(ref).do{|rs|
+          m.send(ref).yield_self{|rs|
             rs.justArray.map{|r|
               dest = msgURI[r]
               yield e, SIOC+'reply_of', dest
@@ -190,7 +191,7 @@ module Webize
         # attachments
         m.attachments.select{|p|
           ::Mail::Encodings.defined?(p.body.encoding)}.map{|p| # decodability check
-          name = p.filename.do{|f|f.to_utf8.do{|f|!f.empty? && f}} ||                           # explicit name
+          name = p.filename && !p.filename.empty? && p.filename || # explicit name
                  (rand.to_s.sha2 + (Rack::Mime::MIME_TYPES.invert[p.mime_type] || '.bin').to_s) # generated name
           file = srcDir + name                     # file location
           unless file.exist?
