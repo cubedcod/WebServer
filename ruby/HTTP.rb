@@ -13,7 +13,7 @@ class WebResource
     # env -> accepted formats
     def accept k = 'HTTP_ACCEPT'
       index = {}
-      @r && @r[k].do{|v| # header data
+      @r && @r[k].yield_self{|v| # header data
         (v.split /,/).map{|e|  # split to (MIME,q) pairs
           format, q = e.split /;/ # split (MIME,q) pair
           i = q && q.split(/=/)[1].to_f || 1.0 # find q-value
@@ -35,7 +35,7 @@ class WebResource
     # cache location
     def cache format=nil
       (CacheDir + host +
-       ((!path || path[-1] == '/') ? '/index' : (path.size > 127 ? path.sha2.do{|p|'/'+p[0..1]+'/'+p[2..-1]} : path)) +
+       ((!path || path[-1] == '/') ? '/index' : (path.size > 127 ? path.sha2.yield_self{|p| '/' + p[0..1] + '/' + p[2..-1]} : path)) +
        (qs.empty? ? '' : ('.' + qs.sha2)) +
        ((format && ext.empty? && Extensions[RDF::Format.content_types[format]]) ? ('.' + Extensions[RDF::Format.content_types[format]].to_s) : '')).R env
     end
@@ -53,26 +53,26 @@ class WebResource
       path = Pathname.new(env['REQUEST_PATH'].force_encoding('UTF-8')).expand_path.to_s # evaluate path
       query = env[:query] = parseQs env['QUERY_STRING']                                 # parse query
       resource = ('//' + env['SERVER_NAME'] + path).R env                               # instantiate resource
-      resource.send(env['REQUEST_METHOD']).do{|status,head,body| # dispatch
-        color = (if resource.env[:deny]                          # logging
-                  '31' # red - denied
+      resource.send(env['REQUEST_METHOD']).yield_self{|status,head,body| # dispatch
+        color = (if resource.env[:deny]                                  # log
+                  '31' # red :: blocked
                 elsif !Hosts.has_key? env['SERVER_NAME']
                   Hosts[env['SERVER_NAME']] = resource
-                  '32' # green - new host
+                  '32' # green :: new host
                 elsif env['REQUEST_METHOD'] == 'POST'
-                  '32' # green - new POST data
+                  '32' # green :: POSTed data
                 elsif status == 200
                   if resource.ext == 'js' || (head['Content-Type'] && head['Content-Type'].match?(/script/))
-                    '36' # lightblue - code
+                    '36' # lightblue :: code
                   else
-                    '37' # white - basic
+                    '37' # white :: basic
                   end
                 else
-                  '30' # gray - cache hit, NOOP
+                  '30' # gray :: cache hit, NOOP
                 end) + ';1'
         location = head['Location'] ? (" ↝ " + head['Location']) : ""
         referer  = env['HTTP_REFERER'] ? ("\e[" + color + ";7m" + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m -> ") : ''
-        puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + "\e[" + color + "m "  + status.to_s + "\e[0m " + referer + ' ' + "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs + "\e[0m " + location                                            # log
+        puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + "\e[" + color + "m "  + status.to_s + "\e[0m " + referer + ' ' + "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs + "\e[0m " + location
         status == 304 ? [304, {}, []] : [status, head, body]} # response
     rescue Exception => e
       uri = 'https://' + env['SERVER_NAME'] + env['REQUEST_URI']
@@ -84,8 +84,8 @@ class WebResource
                                                  {uri => {Content => [
                                                             {_: :h3, c: msg.hrefs, style: 'color: red'},
                                                             {_: :pre, c: trace.hrefs},
-                                                            (HTML.keyval (HTML.webizeHash env), env),
-                                                            (HTML.keyval (HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
+                                                            (HTML.keyval (Webize::HTML.webizeHash env), env),
+                                                            (HTML.keyval (Webize::HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
     end
 
     def dateMeta
@@ -176,18 +176,18 @@ class WebResource
     def desktop; env['HTTP_USER_AGENT'] = DesktopUA; self end
 
     def entity generator = nil
-      entities = env['HTTP_IF_NONE_MATCH'].do{|m| m.strip.split /\s*,\s*/ } # entities
+      entities = env['HTTP_IF_NONE_MATCH']&.strip&.split /\s*,\s*/ # entities
       if entities && entities.include?(env[:Response]['ETag']) # client has entity
         [304, {}, []]                            # not modified
       else                                       # generate
         body = generator ? generator.call : self # call generator
         if body.class == WebResource             # static response
-          (Rack::File.new nil).serving((Rack::Request.new env), body.relPath).do{|s,h,b| # Rack handler
-            if s == 304
-              [s, {}, []]                        # not modified
-            else
-              [s, h.update(env[:Response]), b]   # file
-            end}
+          s,h,b = Rack::File.new(nil).serving Rack::Request.new(env), body.relPath # Rack handler
+          if s == 304
+            [s, {}, []]                          # not modified
+          else
+            [s, h.update(env[:Response]), b]     # file response
+          end
         else
           [env[:status] || 200, env[:Response], [body]] # generated response
         end
@@ -382,28 +382,27 @@ class WebResource
     end
 
     def HEAD
-     self.GET.do{| s, h, b|
-                 [ s, h, []]}
+       c,h,b = self.GET
+      [c,h,[]]
     end
 
-    # stored named-graph(s) in turtle files
+    # stored named-graph(s) in turtle documents
     def index g
       updates = []
       g.each_graph.map{|graph|
         if n = graph.name
           n = n.R
-          graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value.do{|t| # find timestamp
-            # doc URI
-            doc = ['/' + t.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/\+?(00.00|Z)$/,''),  # hour-dir
-                   %w{host path query fragment}.map{|a|n.send(a).do{|p|p.split(/[\W_]/)}},'ttl']. #  slugs
-                    flatten.-([nil,'',*BasicSlugs]).join('.').R  # apply skiplist, mint URI
+          if timestamp = graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value
+            doc = ['/' + timestamp.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/\+?(00.00|Z)$/,''), # hour-dir
+                   %w{host path query fragment}.map{|a|n.send(a).yield_self{|p|p&&p.split(/[\W_]/)}},'ttl']. # slugs
+                    flatten.-([nil,'',*BasicSlugs]).join('.').R                                        # skiplist
             unless doc.exist?
               doc.dir.mkdir
               RDF::Writer.open(doc.relPath){|f|f << graph}
               updates << doc
               puts  "\e[32m+\e[0m http://localhost:8000" + doc.stripDoc
             end
-            true}
+          end
         end}
       updates
     end
@@ -484,7 +483,7 @@ class WebResource
           deny
         end
       else # fetch and inspect
-        fetch.do{|status, h, b|
+        fetch.yield_self{|status, h, b|
           if status.to_s.match? /30[1-3]/ # redirected
             [status, h, b]
           else

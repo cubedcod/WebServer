@@ -24,19 +24,14 @@ shellwords
 class Array
   def justArray; self end
 end
-class FalseClass
-  def do; self end
-end
 class Hash
   def R; WebResource.new(self['uri']).data self end
 end
 class NilClass
   def justArray; [] end
-  def do; self end
 end
 class Object
   def justArray; [self] end
-  def do; yield self end
   def R env=nil
     if env
       (WebResource.new to_s).environment env
@@ -52,6 +47,9 @@ class WebResource < RDF::URI
     def [] p; (@data||{})[p].justArray end
     def data d={}; @data = (@data||{}).merge(d); self end
     def types; @types ||= self[Type].select{|t|t.respond_to? :uri}.map(&:uri) end
+
+    # URI constants
+
     W3       = 'http://www.w3.org/'
     DC       = 'http://purl.org/dc/terms/'
     SIOC     = 'http://rdfs.org/sioc/ns#'
@@ -67,12 +65,43 @@ class WebResource < RDF::URI
     To       = SIOC + 'addressed_to'
     Type     = W3 + '1999/02/22-rdf-syntax-ns#type'
     Video    = DC + 'Video'
+
+    CacheDir = '../.cache/web/'
+    ConfDir = Pathname.new(__dir__).join('../config').relative_path_from Pathname.new Dir.pwd
+
+    BasicSlugs = %w{
+ article archives articles
+ blog blogs blogspot
+ columns co com comment comments
+ edu entry
+ feed feeds feedproxy forum forums
+ go google gov
+ html index local medium
+ net news org p php post
+ r reddit rss rssfeed
+ sports source story
+ t the threads topic tumblr
+ uk utm www}
+
   end
   include URIs
   alias_method :uri, :to_s
-  CacheDir = '../.cache/web/'
-  ConfDir = Pathname.new(__dir__).join('../config').relative_path_from Pathname.new Dir.pwd
 end
 
-%w{POSIX Formats HTTP ../config/site.rb}.map{|i|
+%w(POSIX HTTP).map{|i|
   require_relative i}
+%w(Calendar CSS Feed GIF HTML JPEG JSON JS Mail Markdown Plaintext Playlist PNG WebP).map{|format|
+  require_relative 'Formats/' + format}
+
+require_relative '../config/site.rb'
+
+class WebResource
+
+  RDFformats = /^(application|text)\/(atom|html|json|rss|turtle|.*urlencoded|xml)/
+  FeedMIME = 'application/atom+xml'
+
+  module URIs
+    Extensions = RDF::Format.file_extensions.invert
+  end
+
+end

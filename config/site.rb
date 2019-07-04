@@ -1,13 +1,32 @@
-class WebResource
+module Webize
   module HTML
     class Reader
+
       Gunk = %w{
  .ActionBar .ActionBar-items .SocialBar
  .featured-headlines
  .global-audio-components
 }
+      Triplr = {
+        'apnews.com' => :AP,
+        'www.apnews.com' => :AP,
+        'www.instagram.com' => :Instagram,
+        'www.patriotledger.com' => :GateHouse,
+        'twitter.com' => :Twitter,
+        'www.youtube.com' => :YouTube,
+      }
+
     end
   end
+  module JSON
+    Triplr = {
+      'outline.com' => :Outline,
+      'outlineapi.com' => :Outline,
+      'www.youtube.com' => :YouTubeJSON,
+    }
+  end
+end
+class WebResource
   module HTTP
 
     DesktopUA = 'Mozilla/5.0 (X11; Linux RISC-V; rv:69.0) Gecko/20100101 Firefox/69.0'
@@ -173,6 +192,7 @@ class WebResource
       end}
 
     # YouTube
+    HostGET['youtu.be'] = -> re {[301, {'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]}, []]}
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
       if !mode || %w{
@@ -202,79 +222,83 @@ yts
       end}
 
   end
-
   def self.twits
     `cd ~/src/WebServer && git show -s --format=%B f8f21ef33eaa3fba034d9868d3bc4cd2f68bede4`.split.map{|twit|
       ('https://twitter.com/' + twit).R.subscribe}
   end
 
-  module Webize
+  def AP doc
+    doc.css('script').map{|script|
+      script.inner_text.scan(/window\['[-a-z]+'\] = ([^\n]+)/){|data|
+        data = data[0]
+        data = data[0..-2] if data[-1] == ';'
+        json = ::JSON.parse data
+        yield self, Content, HTML.render(HTML.keyval (Webize::HTML.webizeHash json), env)}}
+  end
 
-    def AP doc
-      doc.css('script').map{|script|
-        script.inner_text.scan(/window\['[-a-z]+'\] = ([^\n]+)/){|data|
-          data = data[0]
-          data = data[0..-2] if data[-1] == ';'
-          json = ::JSON.parse data
-          yield self, Content, HTML.render(HTML.keyval (HTML.webizeHash json), env)}}
-    end
+  GHgraph = /__gh__coreData.content=(.*?)\s*__gh__coreData.content.bylineFormat/m
+  def GateHouse doc
+    doc.css('script').map{|script|
+      if data = script.inner_text.match(GHgraph)
+        graph = ::JSON.parse data[1][0..-2]
+        Webize::HTML.webizeHash(graph){|h|
+          if h['type'] == 'gallery'
+            h['items'].map{|i|
+              subject = i['link']
+              yield subject, Type, Post.R
+              yield subject, Image, subject.R
+              yield subject, Abstract, CGI.escapeHTML(i['caption'])
+            }
+          end}
+      end}
+  end
 
-    GHgraph = /__gh__coreData.content=(.*?)\s*__gh__coreData.content.bylineFormat/m
-    def GateHouse doc
-      doc.css('script').map{|script|
-        if data = script.inner_text.match(GHgraph)
-          graph = ::JSON.parse data[1][0..-2]
-          HTML.webizeHash(graph){|h|
-            if h['type'] == 'gallery'
-              h['items'].map{|i|
-                subject = i['link']
-                yield subject, Type, Post.R
-                yield subject, Image, subject.R
-                yield subject, Abstract, CGI.escapeHTML(i['caption'])
-              }
-            end}
-        end}
-    end
+  IGgraph = /^window._sharedData = /
+  def Instagram doc
+    doc.css('script').map{|script|
+      if script.inner_text.match? IGgraph
+        graph = ::JSON.parse script.inner_text.sub(IGgraph,'')[0..-2]
+        Webize::HTML.webizeHash(graph){|h|
+          if h['shortcode']
+            #puts ::JSON.pretty_generate h
+            s = 'https://www.instagram.com/p/' + h['shortcode']
+            yield s, Type, Post.R
+            yield s, Image, h['display_url'].R if h['display_url']
+            if owner = h['owner']
+              yield s, Creator, ('https://www.instagram.com/' + owner['username']).R
+              yield s, To, 'https://www.instagram.com/'.R
+            end
+            if text = h['edge_media_to_caption']['edges'][0]['node']['text']
+              yield s, Abstract, (CGI.escapeHTML text)
+            end rescue nil
+          end}
+      end}
+  end
 
-    IGgraph = /^window._sharedData = /
-    def Instagram doc
-      doc.css('script').map{|script|
-        if script.inner_text.match? IGgraph
-          graph = ::JSON.parse script.inner_text.sub(IGgraph,'')[0..-2]
-          HTML.webizeHash(graph){|h|
-            if h['shortcode']
-              #puts ::JSON.pretty_generate h
-              s = 'https://www.instagram.com/p/' + h['shortcode']
-              yield s, Type, Post.R
-              yield s, Image, h['display_url'].R if h['display_url']
-              h['owner'].do{|o|
-                yield s, Creator, ('https://www.instagram.com/' + o['username']).R
-                yield s, To, 'https://www.instagram.com/'.R
-              }
-              h['edge_media_to_caption']['edges'][0]['node']['text'].do{|t|
-                yield s, Abstract, CGI.escapeHTML(t)
-              } rescue nil
-            end}
-        end}
-    end
+  def Outline tree
+    subject = tree['data']['article_url']
+    yield subject, Type, Post.R
+    yield subject, Title, tree['data']['title']
+    yield subject, To, ('//' + tree['data']['domain']).R
+    yield subject, Content, (HTML.clean tree['data']['html'])
+    yield subject, Image, tree['data']['meta']['og']['og:image'].R
+  end
 
-    def Outline tree
-      subject = tree['data']['article_url']
-      yield subject, Type, Post.R
-      yield subject, Title, tree['data']['title']
-      yield subject, To, ('//' + tree['data']['domain']).R
-      yield subject, Content, (HTML.clean tree['data']['html'])
-      yield subject, Image, tree['data']['meta']['og']['og:image'].R
-    end
-
-    def Twitter doc
-      %w{grid-tweet tweet}.map{|tweetclass|
+  def Twitter doc
+    %w{grid-tweet tweet}.map{|tweetclass|
       doc.css('.' + tweetclass).map{|tweet|
         s = 'https://twitter.com' + (tweet.css('.js-permalink').attr('href') || tweet.attr('data-permalink-path'))
-        authorName = tweet.css('.username b')[0].do{|b|b.inner_text} || s.R.parts[0]
+        authorName = if b = tweet.css('.username b')[0]
+                       b.inner_text
+                     else
+                       s.R.parts[0]
+                     end
         author = ('https://twitter.com/' + authorName).R
-        ts = (tweet.css('[data-time]')[0].do{|unixtime|
-                Time.at(unixtime.attr('data-time').to_i)} || Time.now).iso8601
+        ts = (if unixtime = tweet.css('[data-time]')[0]
+              Time.at(unixtime.attr('data-time').to_i)
+             else
+               Time.now
+              end).iso8601
         yield s, Type, Post.R
         yield s, Date, ts
         yield s, Creator, author
@@ -292,31 +316,14 @@ yts
         end
         tweet.css('img').map{|img|
           yield s, Image, img.attr('src').to_s.R}}}
-    end
-
-    def YouTube doc
-      yield self, Video, self if path == '/watch'
-    end
-
-    def YouTubeJSON doc
-
-    end
-    Triplr = {}
-    Triplr[:HTML] = {
-      'apnews.com' => :AP,
-      'www.apnews.com' => :AP,
-      'www.instagram.com' => :Instagram,
-      'www.patriotledger.com' => :GateHouse,
-      'twitter.com' => :Twitter,
-      'www.youtube.com' => :YouTube,
-    }
-    Triplr[:JSON] = {
-      'outline.com' => :Outline,
-      'outlineapi.com' => :Outline,
-      'www.youtube.com' => :YouTubeJSON,
-    }
-
-    include URIs
   end
-  include Webize
+
+  def YouTube doc
+    yield self, Video, self if path == '/watch'
+  end
+
+  def YouTubeJSON doc
+
+  end
+
 end
