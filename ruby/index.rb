@@ -45,7 +45,6 @@ class WebResource < RDF::URI
   def [] p; (@data||{})[p].justArray end
   def data d={}; @data = (@data||{}).merge(d); self end
   module URIs
-    # URI constants
     W3       = 'http://www.w3.org/'
     DC       = 'http://purl.org/dc/terms/'
     SIOC     = 'http://rdfs.org/sioc/ns#'
@@ -84,19 +83,13 @@ class WebResource < RDF::URI
   alias_method :uri, :to_s
 end
 
-%w(POSIX HTTP).map{|i|
-  require_relative i}
-%w(Calendar CSS Feed GIF HTML JPEG JSON JS Mail Markdown Plaintext Playlist PNG WebP).map{|format|
-  require_relative 'Formats/' + format}
-
-require_relative '../config/site.rb'
+%w(POSIX HTTP).map{|_| require_relative _}
+%w(Calendar CSS Feed GIF HTML JPEG JSON JS Mail Markdown Plaintext Playlist PNG WebP).map{|_| require_relative 'Formats/' + _}
 
 class WebResource
-
-  RDFformats = /^(application|text)\/(atom|html|json|rss|turtle|.*urlencoded|xml)/
-
   module URIs
     Extensions = RDF::Format.file_extensions.invert
   end
-
 end
+
+require_relative '../config/site.rb'
