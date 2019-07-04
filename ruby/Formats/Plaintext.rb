@@ -34,7 +34,7 @@ module Webize
       end
 
       def text_triples
-        yield @subject, Content, HTML.render({_: :pre, style: 'white-space: pre-wrap',
+        yield @subject, Content, WebResource::HTML.render({_: :pre, style: 'white-space: pre-wrap',
                                               c: @doc.hrefs{|p,o| # hypertextize
                                                 # yield detected links to consumer
                                                 yield @subject, p, o

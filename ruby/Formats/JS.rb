@@ -1,8 +1,12 @@
 module Webize
   module JS
     class Format < RDF::Format
-      content_type 'application/javascript', :extension => :js
+      content_type 'application/javascript',
+                   extension: :js,
+                   aliases: %w(
+                   text/javascript;q=0.8)
       content_encoding 'utf-8'
+
       reader { Reader }
     end
 
