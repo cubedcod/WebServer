@@ -280,7 +280,7 @@ yts
     yield subject, Type, Post.R
     yield subject, Title, tree['data']['title']
     yield subject, To, ('//' + tree['data']['domain']).R
-    yield subject, Content, (HTML.clean tree['data']['html'])
+    yield subject, Content, (Webize::HTML.clean tree['data']['html'])
     yield subject, Image, tree['data']['meta']['og']['og:image'].R
   end
 
@@ -309,7 +309,7 @@ yts
             a.set_attribute('id', 'link'+rand.to_s.sha2)
             a.set_attribute('href', 'https://twitter.com' + (a.attr 'href')) if (a.attr 'href').match /^\//
             yield s, DC+'link', (a.attr 'href').R}
-          yield s, Content, HTML.clean(content.inner_html).gsub(/<\/?span[^>]*>/,'').gsub(/\n/,'').gsub(/\s+/,' ')
+          yield s, Content, Webize::HTML.clean(content.inner_html).gsub(/<\/?span[^>]*>/,'').gsub(/\n/,'').gsub(/\s+/,' ')
         end
         if img = tweet.attr('data-resolved-url-large')
           yield s, Image, img.to_s.R

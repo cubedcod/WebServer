@@ -1,6 +1,37 @@
 # coding: utf-8
 module Webize
   module HTML
+
+    def self.clean body
+      # parse
+      html = Nokogiri::HTML.fragment body
+      # strip elements
+      %w{iframe link[rel='stylesheet'] style link[type='text/javascript'] link[as='script'] script}.map{|s| html.css(s).remove}
+      # strip Javascript and tracking-images
+      html.css('a[href^="javascript"]').map{|a| a.remove }
+      %w{quantserve scorecardresearch}.map{|co|
+        html.css('img[src*="' + co + '"]').map{|img| img.remove }}
+
+      # lift CSS background-image to image element
+      html.css('[style^="background-image"]').map{|node|
+        node['style'].match(/url\('([^']+)'/).yield_self{|url|
+          node.add_child "<img src=\"#{url[1]}\">" if url}}
+
+      # traverse nodes
+      html.traverse{|e|
+        # assign link identifier
+        e.set_attribute 'id', 'id'+rand.to_s.sha2 if e['href'] && !e['id']
+        # traverse attribute nodes
+        e.attribute_nodes.map{|a|
+          # move nonstandard src attrs
+          e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-menuimg data-native-src data-original data-src data-src1}.member? a.name
+          e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
+          # strip attributes
+          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor class height layout ping role style tabindex target width}.member?(a.name)}}
+      # unparse
+      html.to_xhtml(:indent => 0)
+    end
+
     def self.webizeValue v, &y
       case v.class.to_s
       when 'Hash'
@@ -79,7 +110,7 @@ sidebar [class^='side']    [id^='side']
                                      p.class == String ? p.R : p,
                                      (o.class == WebResource || o.class == RDF::Node ||
                                       o.class == RDF::URI) ? o : (l = RDF::Literal (if [Abstract,Content].member? p
-                                                                                    WebResource::HTML.clean o
+                                                                                    HTML.clean o
                                                                                    else
                                                                                      o
                                                                                     end)
@@ -206,16 +237,16 @@ sidebar [class^='side']    [id^='side']
           if body = n.css('body')[0]
             %w{content-body entry-content}.map{|bsel|
               if content = body.css('.' + bsel)[0]
-                yield subject, Content, HTML.clean(content.inner_html) rescue nil
+                yield subject, Content, HTML.clean(content.inner_html)
               end}
             [*BasicGunk,*Gunk].map{|selector|
               body.css(selector).map{|sel|
                 sel.remove }} # strip elements
-            yield subject, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '') rescue nil
+            yield subject, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
           else
             puts "no <body> found in HTML #{@base}"
             n.css('head').remove
-            yield subject, Content, HTML.clean(n.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '') rescue nil
+            yield subject, Content, HTML.clean(n.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
           end
         end
       end
@@ -264,36 +295,6 @@ class WebResource
 
     SiteCSS = ConfDir.join('site.css').read
     SiteJS  = ConfDir.join('site.js').read
-
-    def self.clean body
-      # parse
-      html = Nokogiri::HTML.fragment body
-      # strip elements
-      %w{iframe link[rel='stylesheet'] style link[type='text/javascript'] link[as='script'] script}.map{|s| html.css(s).remove}
-      # strip Javascript and tracking-images
-      html.css('a[href^="javascript"]').map{|a| a.remove }
-      %w{quantserve scorecardresearch}.map{|co|
-        html.css('img[src*="' + co + '"]').map{|img| img.remove }}
-
-      # lift CSS background-image to image element
-      html.css('[style^="background-image"]').map{|node|
-        node['style'].match(/url\('([^']+)'/).yield_self{|url|
-          node.add_child "<img src=\"#{url[1]}\">" if url}}
-
-      # traverse nodes
-      html.traverse{|e|
-        # assign link identifier
-        e.set_attribute 'id', 'id'+rand.to_s.sha2 if e['href'] && !e['id']
-        # traverse attribute nodes
-        e.attribute_nodes.map{|a|
-          # move nonstandard src attrs
-          e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-menuimg data-native-src data-original data-src data-src1}.member? a.name
-          e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
-          # strip attributes
-          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor class height layout ping role style tabindex target width}.member?(a.name)}}
-      # unparse
-      html.to_xhtml(:indent => 0)
-    end
 
     def self.colorize bg = true
       "#{bg ? 'color' : 'background-color'}: black; #{bg ? 'background-' : ''}color: #{'#%06x' % (rand 16777216)}"
