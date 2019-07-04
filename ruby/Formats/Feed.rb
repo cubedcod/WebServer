@@ -65,7 +65,7 @@ module Webize
 
             # <a>
             content.css('a').map{|a|
-              (a.attr 'href').do{|href|
+              if href = a.attr 'href'
                 # resolve URIs
                 link = subject.join href
                 re = link.R
@@ -77,24 +77,27 @@ module Webize
                   yield s, Video, re
                 elsif re != subject
                   yield s, DC+'link', re
-                end }}
+                end
+              end}
 
             # <img>
             content.css('img').map{|i|
-              (i.attr 'src').do{|src|
+              if src = i.attr 'src'
                 # TODO find reblogs with relative URIs in content and check RFCish specs on whether relURI base is resource or doc
                 src = subject.join src
                 i.set_attribute 'src', src
-                yield s, Image, src.R}}
+                yield s, Image, src.R
+              end}
 
             # <iframe>
             content.css('iframe').map{|i|
-              (i.attr 'src').do{|src|
+              if src = i.attr 'src'
                 src = src.R
                 if src.host && src.host.match(/youtu/)
                   id = src.parts[-1]
                   yield s, Video, ('https://www.youtube.com/watch?v='+id).R
-                end }}
+                end
+              end}
 
             # full HTML content
             yield s, p, content.to_xhtml
@@ -154,7 +157,7 @@ module Webize
 
       def rawTriples
         # identifier-search regular expressions
-        reRDF = /about=["']?([^'">\s]+)/              # RDF @about
+        reRDFabout = /about=["']?([^'">\s]+)/         # RDF @about
         reLink = /<link>([^<]+)/                      # <link> element
         reLinkCData = /<link><\!\[CDATA\[([^\]]+)/    # <link> CDATA block
         reLinkHref = /<link[^>]+rel=["']?alternate["']?[^>]+href=["']?([^'">\s]+)/ # <link> @href @rel=alternate
@@ -188,12 +191,13 @@ module Webize
           attrs = m[2]
           inner = m[3]
           # identifier search
-          u = (attrs.do{|a|a.match(reRDF)} ||
+          u = (attrs && attrs.match(reRDFabout) ||
                inner.match(reLink) ||
                inner.match(reLinkCData) ||
                inner.match(reLinkHref) ||
                inner.match(reLinkRel) ||
-               inner.match(reId)).do{|s|s[1]}
+               inner.match(reId)).yield_self{|capture|
+            capture && capture[1]}
 
           puts "post-identifier search failed #{@base}" unless u
           if u # identifier found
