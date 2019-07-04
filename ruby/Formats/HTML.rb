@@ -634,8 +634,7 @@ class WebResource
       elsif Markup[type] # supplied type argument
         Markup[type][v,env]
       elsif v.class == Hash # RDF type
-        resource = v.R
-        types = resource.types
+        types = v[Type].justArray.map &:R
         if (types.member? Post) || (types.member? SIOC+'BlogPost') || (types.member? SIOC+'MailMessage')
           Markup[Post][v,env]
         elsif types.member? Image

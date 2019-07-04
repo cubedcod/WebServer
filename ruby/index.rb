@@ -42,14 +42,10 @@ class Object
 end
 class WebResource < RDF::URI
   def R; self end
+  def [] p; (@data||{})[p].justArray end
+  def data d={}; @data = (@data||{}).merge(d); self end
   module URIs
-    def + u; (to_s + u.to_s).R end
-    def [] p; (@data||{})[p].justArray end
-    def data d={}; @data = (@data||{}).merge(d); self end
-    def types; @types ||= self[Type].select{|t|t.respond_to? :uri}.map(&:uri) end
-
     # URI constants
-
     W3       = 'http://www.w3.org/'
     DC       = 'http://purl.org/dc/terms/'
     SIOC     = 'http://rdfs.org/sioc/ns#'
@@ -98,7 +94,6 @@ require_relative '../config/site.rb'
 class WebResource
 
   RDFformats = /^(application|text)\/(atom|html|json|rss|turtle|.*urlencoded|xml)/
-  FeedMIME = 'application/atom+xml'
 
   module URIs
     Extensions = RDF::Format.file_extensions.invert

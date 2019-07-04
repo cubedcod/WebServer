@@ -228,7 +228,7 @@ class WebResource
           end
       url      = (options[:scheme] || 'https').to_s    + ':' + u # primary URL
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u # fallback URL
-      options[:content_type] = FeedMIME if FeedURL[u]  # ignore upstream feed MIME
+      options[:content_type] = 'application/atom+xml' if FeedURL[u]  # ignore upstream feed MIME
       options[:cookies] = true if host.match? POSThost # allow cookies
 
       # response meta
@@ -615,7 +615,7 @@ class WebResource
       accept.sort.reverse.map{|q,formats| # formats in descending qval order
         formats.map{|f|
           return f if RDF::Writer.for(:content_type => f) || # RDF writer defined
-                      [FeedMIME, 'text/html'].member?(f)     # non-RDF writer defined
+            ['application/atom+xml', 'text/html'].member?(f) # non-RDF writer defined
           return 'text/html' if f == '*/*' }}                # wildcard writer
       'text/html'                                            # default writer
     end
@@ -668,7 +668,7 @@ class WebResource
     FeedURL.values.shuffle.map{|feed|
       begin
         options = {
-          content_type: FeedMIME,
+          content_type: 'application/atom+xml',
           no_response: true,
         }
         options[:scheme] = :http if feed.scheme == 'http'
