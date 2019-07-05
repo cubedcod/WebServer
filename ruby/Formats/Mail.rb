@@ -53,8 +53,8 @@ module Webize
         e = resource.uri
         puts " URI #{resource}" if @verbose
 
-        srcDir = resource.path.R      # message dir
-        srcFile = srcDir + 'this.eml' # message path
+        srcDir = resource.path.R          # message dir
+        srcFile = (srcDir + 'this.eml').R # message file
         unless srcFile.exist?
           srcFile.writeFile @doc # store in canonical-location
           puts "LINK #{srcFile}" if @verbose
@@ -66,8 +66,8 @@ module Webize
         htmlFiles, parts = m.all_parts.push(m).partition{|p|p.mime_type=='text/html'}
         htmlCount = 0
         htmlFiles.map{|p| # HTML file
-          html = srcDir + "#{htmlCount}.html"  # file location
-          yield e, DC+'hasFormat', html        # file pointer
+          html = (srcDir + "#{htmlCount}.html").R # file ref
+          yield e, DC+'hasFormat', html           # file ref in RDF
           unless html.exist?
             html.writeFile p.decoded  # store HTML email
             puts "HTML #{html}" if @verbose
@@ -100,9 +100,9 @@ module Webize
 
         # recursive contained messages: digests, forwards, archives
         parts.select{|p|p.mime_type=='message/rfc822'}.map{|m|
-          content = m.body.decoded                   # decode message
-          f = srcDir + content.sha2 + '.inlined.eml' # message location
-          f.writeFile content if !f.exist?           # store message
+          content = m.body.decoded                       # decode message
+          f = (srcDir + content.sha2 + '.inlined.eml').R # storage location
+          f.writeFile content if !f.exist?               # store message
           f.triplrMail &b} # triplr on contained message
 
         # From
@@ -177,8 +177,8 @@ module Webize
               destDir.mkdir
               destFile = destDir + 'this.eml'
               # bidirectional reference link
-              rev = destDir + id.sha2 + '.eml'
-              rel = srcDir + r.sha2 + '.eml'
+              rev = (destDir + id.sha2 + '.eml').R
+              rel = (srcDir + r.sha2 + '.eml').R
               if !rel.exist? # link missing
                 if destFile.exist? # link
                   destFile.link rel
@@ -193,7 +193,7 @@ module Webize
           ::Mail::Encodings.defined?(p.body.encoding)}.map{|p| # decodability check
           name = p.filename && !p.filename.empty? && p.filename || # explicit name
                  (rand.to_s.sha2 + (Rack::Mime::MIME_TYPES.invert[p.mime_type] || '.bin').to_s) # generated name
-          file = srcDir + name                     # file location
+          file = (srcDir + name).R                 # file location
           unless file.exist?
             file.writeFile p.body.decoded # store attachment
             puts "FILE #{file}" if @verbose
