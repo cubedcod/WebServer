@@ -19,7 +19,7 @@ class Array
   def justArray; self end
 end
 class Hash
-  def R; WebResource.new(self['uri']).data self end
+  def R; WebResource.new self['uri'] end
 end
 class NilClass
   def justArray; [] end
@@ -85,7 +85,7 @@ end
 require_relative '../config/site.rb'
 
 class WebResource
-  module URIs # build an extension to format mapping after all readers have been defined
+  module URIs # build extension->format mapping after all readers have been defined
     Extensions = RDF::Format.file_extensions.invert
   end
 end

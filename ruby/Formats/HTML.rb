@@ -324,7 +324,7 @@ class WebResource
       # render HEAD link as HTML
       link = -> key, displayname {
         if url = @r[:links][key]
-          [url.R.data({id: key, label: displayname}),
+          [{_: :a, href: url, id: key, c: displayname},
            "\n"]
           end}
 
@@ -510,19 +510,18 @@ class WebResource
       case x
       when String
         x
-      when Hash # element
+      when Hash
         void = [:img, :input, :link, :meta].member? x[:_]
-        '<' + (x[:_] || 'div').to_s +                        # open
+        '<' + (x[:_] || 'div').to_s +                        # open tag
           (x.keys - [:_,:c]).map{|a|                         # attr name
           ' ' + a.to_s + '=' + "'" + x[a].to_s.chars.map{|c| # attr value
             {"'"=>'%27', '>'=>'%3E', '<'=>'%3C'}[c]||c}.join + "'"}.join +
-          (void ? '/' : '') + '>' + (render x[:c]) +         # children
+          (void ? '/' : '') + '>' + (render x[:c]) +         # child nodes
           (void ? '' : ('</'+(x[:_]||'div').to_s+'>'))       # close
       when Array
         x.map{|n|render n}.join
       when WebResource
-        render({_: :a, href: x.uri, id: x[:id][0] || ('link'+rand.to_s.sha2), class: x[:class][0],
-                c: x[:label][0] || (%w{gif ico jpeg jpg png webp}.member?(x.ext.downcase) ? {_: :img, src: x.uri} : CGI.escapeHTML(x.uri[0..64]))})
+        render({_: :a, href: x.uri, id: 'l'+rand.to_s.sha2, c: (%w{gif ico jpeg jpg png webp}.member?(x.ext.downcase) ? {_: :img, src: x.uri} : CGI.escapeHTML(x.uri[0..64]))})
       when NilClass
         ''
       when FalseClass
@@ -648,7 +647,7 @@ class WebResource
         elsif %w{jpeg jpg JPG png PNG webp}.member? v.ext           # image
           Markup[Image][v, env]
         else
-          [v.data({label: CGI.escapeHTML((v.query || (v.basename && v.basename != '/' && v.basename) || (v.path && v.path != '/' && v.path) || v.host || v.to_s)[0..48])}), ' ']
+          [{_: :a, href: v.uri, c: CGI.escapeHTML((v.query || (v.basename && v.basename != '/' && v.basename) || (v.path && v.path != '/' && v.path) || v.host || v.to_s)[0..48])}, ' ']
         end
       else # undefined
         CGI.escapeHTML v.to_s
