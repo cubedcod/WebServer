@@ -1,10 +1,7 @@
 %w{
 brotli
-cgi
-csv
-date
-digest/sha2
-dimensions
+cgi csv
+date digest/sha2 dimensions
 exif
 fileutils
 httparty
@@ -15,10 +12,7 @@ mail
 nokogiri
 open-uri
 pathname
-pdf/reader
-rack
-rdf
-redcarpet
+rack rdf redcarpet
 shellwords
 }.map{|r|require r}
 class Array
@@ -60,7 +54,6 @@ class WebResource < RDF::URI
     To       = SIOC + 'addressed_to'
     Type     = W3 + '1999/02/22-rdf-syntax-ns#type'
     Video    = DC + 'Video'
-
     CacheDir = '../.cache/web/'
     ConfDir = Pathname.new(__dir__).join('../config').relative_path_from Pathname.new Dir.pwd
 
@@ -77,7 +70,6 @@ class WebResource < RDF::URI
  sports source story
  t the threads topic tumblr
  uk utm www}
-
   end
   include URIs
   alias_method :uri, :to_s
