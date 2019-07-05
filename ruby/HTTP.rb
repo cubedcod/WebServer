@@ -395,7 +395,7 @@ class WebResource
           if timestamp = graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value
             doc = ['/' + timestamp.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/\+?(00.00|Z)$/,''), # hour-dir
                    %w{host path query fragment}.map{|a|n.send(a).yield_self{|p|p&&p.split(/[\W_]/)}},'ttl']. # slugs
-                    flatten.-([nil,'',*BasicSlugs]).join('.').R                                        # skiplist
+                    flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.').R                         # skiplist
             unless doc.exist?
               doc.dir.mkdir
               RDF::Writer.open(doc.relPath){|f|f << graph}

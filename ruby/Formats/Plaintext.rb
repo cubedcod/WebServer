@@ -1,5 +1,20 @@
 module Webize
   module Plaintext
+
+    BasicSlugs = %w{
+ article archives articles
+ blog blogs blogspot
+ columns co com comment comments
+ edu entry
+ feed feeds feedproxy forum forums
+ go google gov
+ html index local medium
+ net news org p php post
+ r reddit rss rssfeed
+ sports source story
+ t the threads topic tumblr
+ uk utm www}
+
     class Format < RDF::Format
       content_type 'text/plain', :extension => :txt
       content_encoding 'utf-8'

@@ -26,6 +26,8 @@ class NilClass
 end
 class Object
   def justArray; [self] end
+end
+class RDF::URI
   def R env=nil
     if env
       (WebResource.new to_s).environment env
@@ -34,11 +36,27 @@ class Object
     end
   end
 end
+class RDF::Node
+  def R env=nil
+    if env
+      (WebResource.new to_s).environment env
+    else
+      (WebResource.new to_s)
+    end
+  end
+end
+class String
+  def R env=nil
+    if env
+      (WebResource.new self).environment env
+    else
+      (WebResource.new self)
+    end
+  end
+end
 class WebResource < RDF::URI
   def R; self end
-  def [] p; (@data||{})[p].justArray end
-  def data d={}; @data = (@data||{}).merge(d); self end
-  module URIs
+  module URIs # TODO investigate RDF::Vocab
     W3       = 'http://www.w3.org/'
     DC       = 'http://purl.org/dc/terms/'
     SIOC     = 'http://rdfs.org/sioc/ns#'
@@ -56,32 +74,18 @@ class WebResource < RDF::URI
     Video    = DC + 'Video'
     CacheDir = '../.cache/web/'
     ConfDir = Pathname.new(__dir__).join('../config').relative_path_from Pathname.new Dir.pwd
-
-    BasicSlugs = %w{
- article archives articles
- blog blogs blogspot
- columns co com comment comments
- edu entry
- feed feeds feedproxy forum forums
- go google gov
- html index local medium
- net news org p php post
- r reddit rss rssfeed
- sports source story
- t the threads topic tumblr
- uk utm www}
   end
   include URIs
   alias_method :uri, :to_s
 end
 
+# require library and site config
 %w(POSIX HTTP).map{|_| require_relative _}
 %w(Calendar CSS Feed GIF HTML JPEG JSON JS Mail Markdown Plaintext Playlist PNG WebP).map{|_| require_relative 'Formats/' + _}
+require_relative '../config/site.rb'
 
 class WebResource
-  module URIs
+  module URIs # build an extension to format mapping after all readers have been defined
     Extensions = RDF::Format.file_extensions.invert
   end
 end
-
-require_relative '../config/site.rb'
