@@ -86,11 +86,10 @@ footer  [class^='footer']  [id^='footer']
 header  [class*='header']  [id*='header'] [class*='Header'] [id*='Header']
 nav     [class^='nav']     [id^='nav']
 sidebar [class^='side']    [id^='side']
-}#.map{|sel| sel.sub /\]$/, ' i]'}
-      #TODO see if Oga https://gitlab.com/yorickpeterse/oga et al support case-insensitive attribute selectors
+}#.map{|sel| sel.sub /\]$/, ' i]'} # TODO find library w case-insensitive attribute-selector capability
 
       def initialize(input = $stdin, options = {}, &block)
-        @doc = input.respond_to?(:read) ? input.read : input
+        @doc = (input.respond_to?(:read) ? input.read : input).to_utf8.gsub(/<![^>]+>/,'')
         @base = options[:base_uri]
 
         if block_given?
@@ -123,7 +122,7 @@ sidebar [class^='side']    [id^='side']
       def scanContent &f
         embeds = RDF::Graph.new # embedded graph-data
         subject = @base         # subject URI
-        n = Nokogiri::HTML.parse @doc # parse doc
+        n = Nokogiri::HTML.parse @doc # parse
 
         # triplr host-binding
         if hostTriples = Triplr[@base.host]
