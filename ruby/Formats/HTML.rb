@@ -525,7 +525,7 @@ class WebResource
       when Array
         x.map{|n|render n}.join
       when WebResource
-        render({_: :a, href: x.uri, id: 'l' + Digest::SHA2.hexdigest(rand.to_s), c: (%w{gif ico jpeg jpg png webp}.member?(x.ext.downcase) ? {_: :img, src: x.uri} : CGI.escapeHTML(x.uri[0..64]))})
+        render [{_: :a, href: x.uri, id: 'l' + Digest::SHA2.hexdigest(rand.to_s), c: (%w{gif ico jpeg jpg png webp}.member?(x.ext.downcase) ? {_: :img, src: x.uri} : CGI.escapeHTML((x.query || (x.basename && x.basename != '/' && x.basename) || (x.path && x.path != '/' && x.path) || x.host || x.to_s)[0..48]))}, ' ']
       when NilClass
         ''
       when FalseClass
@@ -652,7 +652,7 @@ class WebResource
         elsif %w{jpeg jpg JPG png PNG webp}.member? v.ext           # image
           Markup[Image][v, env]
         else
-          [{_: :a, href: v.uri, c: CGI.escapeHTML((v.query || (v.basename && v.basename != '/' && v.basename) || (v.path && v.path != '/' && v.path) || v.host || v.to_s)[0..48])}, ' ']
+          v
         end
       else # undefined
         CGI.escapeHTML v.to_s
