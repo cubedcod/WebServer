@@ -459,7 +459,7 @@ class WebResource
        else
          index = (self + 'index.{html,ttl}').R.glob
          if !index.empty? && qs.empty?    # static index
-           index
+           [index]
          else
            children                       # LS
          end
@@ -472,7 +472,7 @@ class WebResource
           files = (self + '*').R.glob if files.empty? # prefix
         end
         [self, files]
-       end).justArray.flatten.compact.uniq.select &:exist?
+       end).flatten.compact.uniq.select &:exist?
     end
 
     def noexec

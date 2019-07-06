@@ -277,20 +277,27 @@ class WebResource
     Markup = {}
 
     Treeize = -> graph {
-      t = {}
+      tree = {}
       # visit nodes
-      (graph.class==Array ? graph : graph.values).map{|node| re = node.R
-        cursor = t  # cursor start
+      (graph.class == Array ? graph : graph.values).map{|node|
+        re = node.R
         # traverse
+        cursor = tree
         [re.host ? re.host.split('.').reverse : nil, re.parts, re.qs, re.fragment].flatten.compact.map{|name|
           cursor = cursor[name] ||= {}}
-        if cursor[:RDF] # merge to node
+        if cursor[:RDF] # merge to existing node
           node.map{|k,v|
-            cursor[:RDF][k] = cursor[:RDF][k].justArray.concat v.justArray unless k == 'uri'}
+            unless k == 'uri'
+              if cursor[:RDF][k]
+                cursor[:RDF][k].concat v # merge value-lists
+              else
+                cursor[:RDF][k] = v # new key
+              end
+            end}
         else
-          cursor[:RDF] = node # insert node
+          cursor[:RDF] = node # new node
         end}
-      t } # tree
+      tree }
 
     SiteCSS = ConfDir.join('site.css').read
     SiteJS  = ConfDir.join('site.js').read
@@ -318,7 +325,8 @@ class WebResource
         host && path && ('https://' + host + path),
         host && path && ('//' + host + path + '#this'),
         host && path && ('//' + host + path)
-      ].compact.find{|u| graph[u] && !graph[u][Title].justArray.empty?}
+      ].compact.find{|u|
+        graph[u] && graph[u][Title]}
 
       # render HEAD link as HTML
       link = -> key, displayname {
@@ -341,7 +349,7 @@ class WebResource
                     c: ["\n\n",
                         {_: :head,
                          c: [{_: :meta, charset: 'utf-8'},
-                             ({_: :title, c: CGI.escapeHTML(graph[titleRes][Title].justArray.map(&:to_s).join ' ')} if titleRes),
+                             ({_: :title, c: CGI.escapeHTML(graph[titleRes][Title].map(&:to_s).join ' ')} if titleRes),
                              {_: :style, c: ["\n", SiteCSS]}, "\n",
                              {_: :script, c: ["\n", SiteJS]}, "\n",
                              *@r[:links]&.map{|type,uri|
@@ -367,7 +375,7 @@ class WebResource
                                end
                                bins = {}
                                graph.map{|uri, resource|
-                                 resource[p].justArray.map{|o|
+                                 resource[p].map{|o|
                                    o = o.to_s
                                    bins[o] ||= []
                                    bins[o].push resource}}
@@ -394,7 +402,7 @@ class WebResource
 
       # highlight matches in exerpt
       graph.values.map{|r|
-        (r[Content]||r[Abstract]).justArray.map{|v|v.respond_to?(:lines) ? v.lines : nil}.flatten.compact.grep(pattern).yield_self{|lines|
+        (r[Content]||r[Abstract]).map{|v|v.respond_to?(:lines) ? v.lines : nil}.flatten.compact.grep(pattern).yield_self{|lines|
           r[Abstract] = lines[0..5].map{|l|
             l.gsub(/<[^>]+>/,'')[0..512].gsub(pattern){|g| # matches
               HTML.render({_: :span, class: "w#{wordIndex[g.downcase]}", c: g}) # wrap in styled node
@@ -408,11 +416,12 @@ class WebResource
     def self.keyval t, env
       {_: :table, class: :kv,
        c: t.map{|k,vs|
+         vs = (vs.class == Array ? vs : [vs]).compact
          type = (k ? k.to_s : '#notype').R
          ([{_: :tr, name: type.fragment || type.basename,
             c: [{_: :td, class: 'k', c: Markup[Type][type]},
-                {_: :td, class: 'v', c: vs.justArray.map{|v|
-                   [(value k, v, env), ' ']}}]}, "\n"] unless k=='uri' && vs.justArray[0].to_s.match?(/^_:/))}}
+                {_: :td, class: 'v', c: vs.map{|v|
+                   [(value k, v, env), ' ']}}]}, "\n"] unless k=='uri' && vs[0] && vs[0].to_s.match?(/^_:/))}}
     end
 
     Markup['uri'] = -> uri, env=nil {uri.R}
@@ -434,7 +443,7 @@ class WebResource
         CGI.escapeHTML t.to_s
       end}
 
-    Markup[Creator] = -> c, env, uris=nil {
+    Markup[Creator] = -> c, env {
       if c.class == Hash || c.respond_to?(:uri)
         u = c.R
         basename = u.basename
@@ -444,21 +453,20 @@ class WebResource
                (host && host.sub(/\.com$/,'')) ||
                'user'
         color = env[:colors][name] ||= HTML.colorize
-        {_: :a, id: 'a' + Digest::SHA2.hexdigest(rand.to_s), class: :creator, style: color, href: uris.justArray[0] || u.to_s, c: name}
+        {_: :a, id: 'a' + Digest::SHA2.hexdigest(rand.to_s), class: :creator, style: color, href: u.to_s, c: name}
       else
         CGI.escapeHTML (c||'')
       end}
 
     Markup[Post] = -> post , env {
-      uri = post['uri'].justArray[0]
-      post.delete 'uri'
       post.delete Type
-      titles = post.delete(Title).justArray.map(&:to_s).map(&:strip).uniq
-      date = post.delete(Date).justArray[0]
-      from = post.delete(Creator).justArray
-      to = post.delete(To).justArray
-      images = post.delete(Image).justArray
-      content = post.delete(Content).justArray
+      uri = post.delete 'uri'
+      titles = (post.delete(Title)||[]).map(&:to_s).map(&:strip).uniq
+      date = (post.delete(Date) || [])[0]
+      from = post.delete(Creator) || []
+      to = post.delete(To) || []
+      images = post.delete(Image) || []
+      content = post.delete(Content) || []
       uri_hash = 'r' + Digest::SHA2.hexdigest(uri)
       {class: :post, id: uri_hash,
        c: [{_: :a, id: 'pt' + uri_hash, class: :id, c: '☚', href: uri},
@@ -559,7 +567,13 @@ class WebResource
       if env[:query] && env[:query].has_key?('sort')
         attr = env[:query]['sort']
         attr = Date if attr == 'date'
-        graph = graph.sort_by{|r| r[attr].justArray[0].to_s}.reverse
+        graph = graph.sort_by{|r|
+          if values = r[attr]
+            values[0].to_s
+          else
+            ''
+          end
+         }.reverse
       end
       titles = {}
       {_: :table, class: :tabular,
@@ -572,7 +586,7 @@ class WebResource
              [{_: :tr, c: keys.map{|k|
                  {_: :td, class: 'v',
                   c: if k=='uri' # title with URI subscript
-                   ts = resource[Title].justArray
+                   ts = resource[Title] || []
                    if ts.size > 0
                      ts.map{|t|
                        title = t.to_s.sub(/\/u\/\S+ on /,'')
@@ -588,10 +602,10 @@ class WebResource
                      {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: :id, c: '&#x1f517;'}
                    end
                  else
-                   resource[k].justArray.map{|v|value k, v, env }
+                   (resource[k]||[]).map{|v|value k, v, env }
                   end}}},
               ({_: :tr, c: {_: :td, colspan: keys.size,
-                            c: [resource[Image].justArray.map{|i|{style: 'max-width: 20em', c: Markup[Image][i,env]}},
+                            c: [(resource[Image]||[]).map{|i|{style: 'max-width: 20em', c: Markup[Image][i,env]}},
                                 resource[Content]]}} if resource[Content] || resource[Image])]}]}
     end
 
@@ -638,7 +652,7 @@ class WebResource
       elsif Markup[type] # supplied type argument
         Markup[type][v,env]
       elsif v.class == Hash # RDF type
-        types = v[Type].justArray.map &:R
+        types = (v[Type]||[]).map &:R
         if (types.member? Post) || (types.member? SIOC+'BlogPost') || (types.member? SIOC+'MailMessage')
           Markup[Post][v,env]
         elsif types.member? Image

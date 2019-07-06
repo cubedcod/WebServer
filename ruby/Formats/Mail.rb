@@ -107,8 +107,8 @@ module Webize
 
         # From
         from = []
-        m.from && m.from.yield_self{|f|
-          f.justArray.compact.map{|f|
+        m.from.yield_self{|f|
+          (f.class == Array ? f : [f]).compact.map{|f|
             noms = f.split ' '
             if noms.size > 2 && noms[1] == 'at'
               f = "#{noms[0]}@#{noms[2]}"
@@ -130,10 +130,11 @@ module Webize
         # To
         to = []
         %w{to cc bcc resent_to}.map{|p|      # recipient fields
-          m.send(p).justArray.map{|r|        # recipient
+          m.send(p).yield_self{|r|           # recipient lookup
+            (r.class == Array ? r : [r]).compact.map{|r| # recipient
             puts "  TO #{r}" if @verbose
-            to.push r.downcase }}    # queue for indexing
-        m['X-BeenThere'].justArray.map{|r|to.push r.to_s} # anti-loop recipient
+            to.push r.downcase }}} # queue for indexing
+        m['X-BeenThere'].yield_self{|b|(b.class == Array ? b : [b]).compact.map{|r|to.push r.to_s}} # anti-loop recipient
         m['List-Id'] && m['List-Id'].yield_self{|name|yield e, To, name.decoded.sub(/<[^>]+>/,'').gsub(/[<>&]/,'')} # mailinglist name
 
         # Subject
@@ -170,7 +171,7 @@ module Webize
         # index bidirectional refs
         %w{in_reply_to references}.map{|ref|
           m.send(ref).yield_self{|rs|
-            rs.justArray.map{|r|
+            (rs.class == Array ? rs : [rs]).compact.map{|r|
               dest = msgURI[r]
               yield e, SIOC+'reply_of', dest
               destDir = dest.path.R

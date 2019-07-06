@@ -15,17 +15,8 @@ pathname
 rack rdf redcarpet
 shellwords
 }.map{|r|require r}
-class Array
-  def justArray; self end
-end
 class Hash
   def R; WebResource.new self['uri'] end
-end
-class NilClass
-  def justArray; [] end
-end
-class Object
-  def justArray; [self] end
 end
 class RDF::URI
   def R
