@@ -25,7 +25,6 @@ class WebResource
     def relPath; URI.unescape(path == '/' ? '.' : (path[0] == '/' ? path[1..-1] : path)) end
     def self.path p; ('/' + p.to_s.chomp.gsub(' ','%20').gsub('#','%23')).R end
     def self.splitArgs args; args.shellsplit rescue args.split /\W/ end
-    def sha2; to_s.sha2 end
     def shellPath; Shellwords.escape relPath.force_encoding 'UTF-8' end
     def size; node.size rescue 0 end
     def stripDoc; uri.sub(/\.(html|json|md|ttl|txt)$/,'').R end

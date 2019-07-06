@@ -42,12 +42,12 @@ module Webize
           return
         end
         # Message-ID
-        id = m.message_id || m.resent_message_id || rand.to_s.sha2
+        id = m.message_id || m.resent_message_id || Digest::SHA2.hexdigest(rand.to_s)
         puts "\n MID #{id}" if @verbose
 
         # Message URI
         msgURI = -> id {
-          h = id.sha2
+          h = Digest::SHA2.hexdigest id
           ['', 'msg', h[0], h[1], h[2], id.gsub(/[^a-zA-Z0-9]+/,'.')[0..96], '#this'].join('/').R}
         resource = msgURI[id]
         e = resource.uri
@@ -101,7 +101,7 @@ module Webize
         # recursive contained messages: digests, forwards, archives
         parts.select{|p|p.mime_type=='message/rfc822'}.map{|m|
           content = m.body.decoded                       # decode message
-          f = (srcDir + content.sha2 + '.inlined.eml').R # storage location
+          f = (srcDir + Digest::SHA2.hexdigest(content) + '.inlined.eml').R # storage location
           f.writeFile content if !f.exist?               # store message
           f.triplrMail &b} # triplr on contained message
 
@@ -161,7 +161,7 @@ module Webize
               slug = subject.scan(/[\w]+/).map(&:downcase).uniq.join('.')[0..63]
               mpath = apath + '.' + dstr[8..-1].gsub(/[^0-9]+/,'.') + slug # (month,addr,title) path
               [(mpath + (mpath[-1] == '.' ? '' : '.')  + 'eml').R, # monthdir entry
-               ('mail/cur/' + id.sha2 + '.eml').R].map{|entry|     # maildir entry
+               ('mail/cur/' + Digest::SHA2.hexdigest(id) + '.eml').R].map{|entry|     # maildir entry
                 srcFile.link entry unless entry.exist?} # link if missing
             end
           end
@@ -177,8 +177,8 @@ module Webize
               destDir.mkdir
               destFile = destDir + 'this.eml'
               # bidirectional reference link
-              rev = (destDir + id.sha2 + '.eml').R
-              rel = (srcDir + r.sha2 + '.eml').R
+              rev = (destDir + Digest::SHA2.hexdigest(id) + '.eml').R
+              rel = (srcDir + Digest::SHA2.hexdigest(r) + '.eml').R
               if !rel.exist? # link missing
                 if destFile.exist? # link
                   destFile.link rel
@@ -192,7 +192,7 @@ module Webize
         m.attachments.select{|p|
           ::Mail::Encodings.defined?(p.body.encoding)}.map{|p| # decodability check
           name = p.filename && !p.filename.empty? && p.filename || # explicit name
-                 (rand.to_s.sha2 + (Rack::Mime::MIME_TYPES.invert[p.mime_type] || '.bin').to_s) # generated name
+                 (Digest::SHA2.hexdigest(rand.to_s) + (Rack::Mime::MIME_TYPES.invert[p.mime_type] || '.bin').to_s) # generated name
           file = (srcDir + name).R                 # file location
           unless file.exist?
             file.writeFile p.body.decoded # store attachment

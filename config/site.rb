@@ -306,7 +306,7 @@ yts
         content = tweet.css('.tweet-text')[0]
         if content
           content.css('a').map{|a|
-            a.set_attribute('id', 'link'+rand.to_s.sha2)
+            a.set_attribute('id', 'l' + Digest::SHA2.hexdigest(rand.to_s))
             a.set_attribute('href', 'https://twitter.com' + (a.attr 'href')) if (a.attr 'href').match /^\//
             yield s, DC+'link', (a.attr 'href').R}
           yield s, Content, Webize::HTML.clean(content.inner_html).gsub(/<\/?span[^>]*>/,'').gsub(/\n/,'').gsub(/\s+/,' ')

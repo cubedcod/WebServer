@@ -1,4 +1,5 @@
 module Webize
+
   module MP3
     class Format < RDF::Format
       content_type 'audio/mpeg', :extension => :mp3
@@ -26,8 +27,8 @@ module Webize
       end
     end
   end
-end
-module M4S
+
+  module M4S
     class Format < RDF::Format
       content_type 'audio/m4s', :extension => :m4s
       reader { Reader }
@@ -54,8 +55,7 @@ module M4S
       end
     end
   end
-end
-module Webize
+
   module Playlist
     class Format < RDF::Format
       content_type 'application/vnd.apple.mpegurl', :extension => :m3u8
@@ -94,4 +94,5 @@ module Webize
       end
     end
   end
+
 end

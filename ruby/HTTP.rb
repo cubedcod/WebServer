@@ -35,8 +35,8 @@ class WebResource
     # cache location
     def cache format=nil
       (CacheDir + host +
-       ((!path || path[-1] == '/') ? '/index' : (path.size > 127 ? path.sha2.yield_self{|p| '/' + p[0..1] + '/' + p[2..-1]} : path)) +
-       (qs.empty? ? '' : ('.' + qs.sha2)) +
+       ((!path || path[-1] == '/') ? '/index' : (path.size > 127 ? Digest::SHA2.hexdigest(path).yield_self{|p| '/' + p[0..1] + '/' + p[2..-1]} : path)) +
+       (qs.empty? ? '' : ('.' + Digest::SHA2.hexdigest(qs))) +
        ((format && ext.empty? && Extensions[RDF::Format.content_types[format]]) ? ('.' + Extensions[RDF::Format.content_types[format]].to_s) : '')).R env
     end
 
@@ -345,7 +345,7 @@ class WebResource
       @r ||= {}
       @r[:Response] ||= {}
       @r[:Response]['Access-Control-Allow-Origin'] ||= allowedOrigin
-      @r[:Response]['ETag'] ||= [uri, mtime, size].join.sha2
+      @r[:Response]['ETag'] ||= Digest::SHA2.hexdigest [uri, mtime, size].join
       entity
     end
 

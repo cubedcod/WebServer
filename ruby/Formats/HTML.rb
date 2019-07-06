@@ -20,7 +20,7 @@ module Webize
       # traverse nodes
       html.traverse{|e|
         # assign link identifier
-        e.set_attribute 'id', 'id'+rand.to_s.sha2 if e['href'] && !e['id']
+        e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) if e['href'] && !e['id']
         # traverse attribute nodes
         e.attribute_nodes.map{|a|
           # move nonstandard src attrs
@@ -332,7 +332,7 @@ class WebResource
       subbed = subscribed?
       tabular = q['view'] == 'table'
       tabularOverview = '?view=table&sort=date'
-      @r[:links][:up] = dirname + '/' + qs + '#r' + (path||'/').sha2 unless !path || path=='/'
+      @r[:links][:up] = dirname + '/' + qs + '#r' + Digest::SHA2.hexdigest(path||'/') unless !path || path=='/'
       @r[:links][:down] = path + '/' if env['REQUEST_PATH'] && directory? && env['REQUEST_PATH'][-1] != '/'
 
       # Markup -> HTML
@@ -422,7 +422,7 @@ class WebResource
 
     Markup[Link] = -> ref, env=nil {
       u = ref.to_s
-      [{_: :a, class: :link, title: u, id: 'l'+rand.to_s.sha2,
+      [{_: :a, class: :link, title: u, id: 'l' + Digest::SHA2.hexdigest(rand.to_s),
         href: u, c: u.sub(/^https?.../,'')[0..127]}," \n"]}
 
     Markup[Type] = -> t, env=nil {
@@ -444,7 +444,7 @@ class WebResource
                (host && host.sub(/\.com$/,'')) ||
                'user'
         color = env[:colors][name] ||= HTML.colorize
-        {_: :a, id: 'a'+rand.to_s.sha2, class: :creator, style: color, href: uris.justArray[0] || u.to_s, c: name}
+        {_: :a, id: 'a' + Digest::SHA2.hexdigest(rand.to_s), class: :creator, style: color, href: uris.justArray[0] || u.to_s, c: name}
       else
         CGI.escapeHTML (c||'')
       end}
@@ -459,14 +459,14 @@ class WebResource
       to = post.delete(To).justArray
       images = post.delete(Image).justArray
       content = post.delete(Content).justArray
-      uri_hash = 'r' + uri.sha2
+      uri_hash = 'r' + Digest::SHA2.hexdigest(uri)
       {class: :post, id: uri_hash,
        c: [{_: :a, id: 'pt' + uri_hash, class: :id, c: '☚', href: uri},
            titles.map{|title|
              title = title.to_s.sub(/\/u\/\S+ on /,'')
              unless env[:title] == title
                env[:title] = title
-               [{_: :a, id: 't'+rand.to_s.sha2, class: :title, href: uri, c: CGI.escapeHTML(title)}, ' ']
+               [{_: :a, id: 't' + Digest::SHA2.hexdigest(rand.to_s), class: :title, href: uri, c: CGI.escapeHTML(title)}, ' ']
              end},
            ({_: :a, class: :date, id: 'date' + uri_hash, href: (env && %w{l localhost}.member?(env['SERVER_NAME']) && '/' || 'http://localhost:8000/') + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date} if date),
            images.map{|i| Markup[Image][i,env]},
@@ -520,7 +520,7 @@ class WebResource
       when Array
         x.map{|n|render n}.join
       when WebResource
-        render({_: :a, href: x.uri, id: 'l'+rand.to_s.sha2, c: (%w{gif ico jpeg jpg png webp}.member?(x.ext.downcase) ? {_: :img, src: x.uri} : CGI.escapeHTML(x.uri[0..64]))})
+        render({_: :a, href: x.uri, id: 'l' + Digest::SHA2.hexdigest(rand.to_s), c: (%w{gif ico jpeg jpg png webp}.member?(x.ext.downcase) ? {_: :img, src: x.uri} : CGI.escapeHTML(x.uri[0..64]))})
       when NilClass
         ''
       when FalseClass
@@ -572,15 +572,15 @@ class WebResource
                      ts.map{|t|
                        title = t.to_s.sub(/\/u\/\S+ on /,'')
                        if titles[title]
-                         {_: :a, href: resource['uri'], id: 'r' + rand.to_s.sha2, class: :id, c: '☚'}
+                         {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: :id, c: '☚'}
                        else
                          titles[title] = true
-                         {_: :a, href: resource['uri'], id: 'r' + rand.to_s.sha2, class: :title,
+                         {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: :title,
                           c: [(CGI.escapeHTML title), ' ',
                               {_: :span, class: :uri, c: CGI.escapeHTML(resource['uri'])}, ' ']}
                        end}
                    else
-                     {_: :a, href: resource['uri'], id: 'r' + rand.to_s.sha2, class: :id, c: '&#x1f517;'}
+                     {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: :id, c: '&#x1f517;'}
                    end
                  else
                    resource[k].justArray.map{|v|value k, v, env }
@@ -701,5 +701,4 @@ class String
     puts "failed to scan #{self}"
     ''
   end
-  def sha2; Digest::SHA2.hexdigest self end
 end

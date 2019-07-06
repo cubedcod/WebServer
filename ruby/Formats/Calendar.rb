@@ -36,7 +36,7 @@ module Webize
       def calendar_triples
         Icalendar::Calendar.parse(@doc).map{|cal|
           cal.events.map{|event|
-            subject = event.url || ('#event'+rand.to_s.sha2)
+            subject = event.url || ('#event' + Digest::SHA2.hexdigest(rand.to_s))
             yield subject, Date, event.dtstart
             yield subject, Title, event.summary
             yield subject, Abstract, CGI.escapeHTML(event.description)
