@@ -415,8 +415,8 @@ class WebResource
         options[:format] = :html
       end
       graph.load relPath, options
-    rescue Exception => e
-      puts [uri, relPath, e.class, e.message].join ' '
+#    rescue Exception => e
+#      puts [uri, relPath, e.class, e.message].join ' '
     end
 
     def local

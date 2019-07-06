@@ -176,7 +176,7 @@ module Webize
               yield e, SIOC+'reply_of', dest
               destDir = dest.path.R
               destDir.mkdir
-              destFile = destDir + 'this.eml'
+              destFile = (destDir + 'this.eml').R
               # bidirectional reference link
               rev = (destDir + Digest::SHA2.hexdigest(id) + '.eml').R
               rel = (srcDir + Digest::SHA2.hexdigest(r) + '.eml').R
