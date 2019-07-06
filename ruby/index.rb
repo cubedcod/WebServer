@@ -73,7 +73,7 @@ end
 
 # require library and site config
 %w(POSIX HTTP).map{|_| require_relative _}
-%w(Calendar CSS Feed GIF HTML JPEG JSON JS Mail Markdown Plaintext Playlist PNG WebP).map{|_| require_relative 'Formats/' + _}
+%w(Audio Calendar CSS Feed HTML Image JSON JS Mail Markdown Plaintext).map{|_| require_relative 'Formats/' + _}
 require_relative '../config/site.rb'
 
 class WebResource

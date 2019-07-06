@@ -588,7 +588,7 @@ class WebResource
                   end}}},
               ({_: :tr, c: {_: :td, colspan: keys.size,
                             c: [resource[Image].justArray.map{|i|{style: 'max-width: 20em', c: Markup[Image][i,env]}},
-                                resource[Content]]}} if (resource[Content] || resource[Image]) && !env[:query]&.has_key?('head'))]}]}
+                                resource[Content]]}} if resource[Content] || resource[Image])]}]}
     end
 
     def self.tree t, env, name=nil
