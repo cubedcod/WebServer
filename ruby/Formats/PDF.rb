@@ -10,7 +10,6 @@ module Webize
       format Format
 
       def initialize(input = $stdin, options = {}, &block)
-        #@img = Exif::Data.new(input.respond_to?(:read) ? input.read : input)
         @subject = (options[:base_uri] || '#image').R 
         if block_given?
           case block.arity

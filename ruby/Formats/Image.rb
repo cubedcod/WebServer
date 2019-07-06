@@ -94,7 +94,7 @@ module Webize
             if k == :date_time
               yield Date, Time.parse(v.sub(':','-').sub(':','-')).iso8601
             else
-              yield ('http://www.w3.org/2003/12/exif/ns#' + k.to_s), v.to_s.to_utf8
+              yield ('http://www.w3.org/2003/12/exif/ns#' + k.to_s), v.to_s.encode('UTF-8', undef: :replace, invalid: :replace, replace: '?')
             end
           }} if @img
       end

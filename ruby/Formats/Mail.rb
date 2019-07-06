@@ -80,7 +80,7 @@ module Webize
             ::Mail::Encodings.defined?(p.body.encoding)      # decodable?
         }.map{|p|
           yield e, Content,
-                WebResource::HTML.render(p.decoded.to_utf8.lines.to_a.map{|l| # split lines
+                WebResource::HTML.render(p.decoded.lines.to_a.map{|l| # split lines
                               l = l.chomp # strip any remaining [\n\r]
                               if qp = l.match(/^((\s*[>|]\s*)+)(.*)/) # quoted line
                                 depth = (qp[1].scan /[>|]/).size # > count
@@ -114,7 +114,7 @@ module Webize
               f = "#{noms[0]}@#{noms[2]}"
             end
             puts "FROM #{f}" if @verbose 
-            from.push f.to_utf8.downcase}} # queue address for indexing + triple-emitting
+            from.push f.downcase}} # queue address for indexing + triple-emitting
 
         m[:from] && m[:from].yield_self{|fr|
           fr.addrs.map{|a|
@@ -132,14 +132,14 @@ module Webize
         %w{to cc bcc resent_to}.map{|p|      # recipient fields
           m.send(p).justArray.map{|r|        # recipient
             puts "  TO #{r}" if @verbose
-            to.push r.to_utf8.downcase }}    # queue for indexing
+            to.push r.downcase }}    # queue for indexing
         m['X-BeenThere'].justArray.map{|r|to.push r.to_s} # anti-loop recipient
         m['List-Id'] && m['List-Id'].yield_self{|name|yield e, To, name.decoded.sub(/<[^>]+>/,'').gsub(/[<>&]/,'')} # mailinglist name
 
         # Subject
         subject = nil
         m.subject && m.subject.yield_self{|s|
-          subject = s.to_utf8
+          subject = s
           subject.scan(/\[[^\]]+\]/){|l| yield e, Schema + 'group', l[1..-2]}
           yield e, Title, subject}
 
