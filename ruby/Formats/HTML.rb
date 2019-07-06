@@ -472,9 +472,14 @@ class WebResource
            images.map{|i| Markup[Image][i,env]},
            {_: :table, class: :fromTo,
             c: {_: :tr,
-                c: [{_: :td, c: from.map{|f|Markup[Creator][f,env]}, class: :from},
+                c: [{_: :td,
+                     c: from.map{|f|Markup[Creator][f,env]},
+                     class: :from},
                     {_: :td, c: '&rarr;'},
-                    {_: :td, c: to.map{|f|Markup[Creator][f,env]}, class: :to}]}},
+                    {_: :td,
+                     c: [to.map{|f|Markup[Creator][f,env]},
+                         post.delete(SIOC+'reply_of')],
+                     class: :to}]}},
            content, ((HTML.keyval post, env) unless post.keys.size < 1)]}}
 
     Markup[Image] = -> image,env {
