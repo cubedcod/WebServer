@@ -432,7 +432,7 @@ class WebResource
     Markup[Link] = -> ref, env=nil {
       u = ref.to_s
       [{_: :a, class: :link, title: u, id: 'l' + Digest::SHA2.hexdigest(rand.to_s),
-        href: u, c: u.sub(/^https?.../,'')[0..127]}," \n"]}
+        href: u, c: u.sub(/^https?.../,'')[0..79]}," \n"]}
 
     Markup[Type] = -> t, env=nil {
       if t.respond_to? :uri
@@ -453,7 +453,7 @@ class WebResource
                (host && host.sub(/\.com$/,'')) ||
                'user'
         color = env[:colors][name] ||= HTML.colorize
-        {_: :a, id: 'a' + Digest::SHA2.hexdigest(rand.to_s), class: :creator, style: color, href: u.to_s, c: name}
+        [{_: :a, id: 'a' + Digest::SHA2.hexdigest(rand.to_s), class: :creator, style: color, href: u.to_s, c: name}, ' ']
       else
         CGI.escapeHTML (c||'')
       end}
@@ -713,7 +713,7 @@ class String
                  end
           yield type, resource
         end
-        CGI.escapeHTML(resource.uri.sub /^http:../,'')) +
+        CGI.escapeHTML(resource.uri.sub(/^http:../,'')[0..79])) +
        '</a>') +
       (post.empty? && '' || post.hrefs(&blk)) # prob not properly tail-recursive, getting overflow on logfiles, may need to rework
   rescue

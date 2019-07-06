@@ -35,7 +35,7 @@ module Webize
                                                                                             l),
                                      :graph_name => s.R)}
       end
-      def mail_triples &b; @verbose = true
+      def mail_triples &b; #@verbose = true
         m = ::Mail.new @doc
         unless m
           puts "mail parse failed:", @doc

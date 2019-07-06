@@ -12,7 +12,7 @@
 .bold {font-weight: bold; font-size: 1.1em}
 .group > .label {font-size: 1.2em; font-weight: bold; color: #000}
 .group {margin-bottom: .5em; margin-right: .5em; border-radius: .2em .8em .8em .8em}
-.post {background-color: #000; color: #fff; max-width: 255ex; margin: .08em; border: .08em solid #333; border-radius: .38em}
+.post {background-color: #000; color: #fff; max-width: 127ex; margin: .08em; border: .08em solid #333; border-radius: .38em}
 .toolbox {position: fixed; top: 0; right: 0; z-index: 1}
 .tree > .label {font-size: .8em}
 .tree > a.label {color: #ccc}
@@ -22,6 +22,7 @@
 a {text-decoration: none; border-width: 0 0 0 .1em; border-style: solid; border-color: #fff; background-color: #ccc; color: #000; padding: 0 .2em 0 .1em; border-radius: 0 .3em .3em 0}
 a.date {float: right; background-color: #000; color: #888; font-size: .8em; margin-right: .1em}
 a.id {float: right; background-color: #000; color: #333}
+a.link {white-space: nowrap}
 a.link, .thumb {background-color: #fff; color: #000}
 a.title > span.uri {font-size: .7em; font-weight: normal; background-color: #aaa}
 a.title {float: left; vertical-align: top; background-color: #ddd; color: #000; font-size: 1.1em; font-weight: bold }
