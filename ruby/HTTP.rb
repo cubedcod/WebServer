@@ -259,7 +259,7 @@ class WebResource
                        when 'gif'
                          'image/gif'
                        else
-                         'application/octet-stream'
+                         'text/html'
                        end
             if status == 206
               body = response.read                                                                 # partial body
@@ -450,31 +450,30 @@ class WebResource
 
     # URI -> file(s)
     def nodes
-      (if directory?            # directory
+      (if directory?
        if q.has_key?('f') && path!='/'    # FIND
          find q['f'] unless q['f'].empty?
        elsif q.has_key?('q') && path!='/' # GREP
          grep q['q']
-       else                               # LS
+       else
          index = (self + 'index.{html,ttl}').R.glob
-         if !index.empty? && qs.empty? # static index-file
+         if !index.empty? && qs.empty?    # static index
            index
          else
-           children
+           children                       # LS
          end
        end
       else                                # GLOB
-        if uri.match /[\*\{\[]/ # custom glob
+        if uri.match /[\*\{\[]/           #  custom glob
           files = glob
-        else                    # default glob
-          files = (self + '.*').R.glob                # base + extension match
-          files = (self + '*').R.glob if files.empty? # prefix match
+        else                              #  default glob
+          files = (self + '.*').R.glob    #             base + extension
+          files = (self + '*').R.glob if files.empty? # prefix
         end
         [self, files]
        end).justArray.flatten.compact.uniq.select &:exist?
     end
 
-    # filter scripts
     def noexec
       if %w{gif js}.member? ext.downcase # filtered suffix
         if ext=='gif' && qs.empty? # no querystring, allow GIF
