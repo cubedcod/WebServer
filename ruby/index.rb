@@ -28,21 +28,13 @@ class Object
   def justArray; [self] end
 end
 class RDF::URI
-  def R env=nil
-    if env
-      (WebResource.new to_s).environment env
-    else
-      (WebResource.new to_s)
-    end
+  def R
+    WebResource.new to_s
   end
 end
 class RDF::Node
-  def R env=nil
-    if env
-      (WebResource.new to_s).environment env
-    else
-      (WebResource.new to_s)
-    end
+  def R
+    WebResource.new to_s
   end
 end
 class String
