@@ -186,6 +186,7 @@ class WebResource
           if s == 304
             [s, {}, []]                          # not modified
           else
+            h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type'] == 'application/javascript'
             [s, h.update(env[:Response]), b]     # file response
           end
         else
