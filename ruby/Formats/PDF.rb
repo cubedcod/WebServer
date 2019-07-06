@@ -2,7 +2,6 @@ module Webize
   module PDF
     class Format < RDF::Format
       content_type 'application/pdf', :extension => :pdf
-      content_encoding 'utf-8'
       reader { Reader }
     end
 

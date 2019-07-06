@@ -4,6 +4,7 @@ module Webize
       content_type 'application/javascript',
                    extension: :js,
                    aliases: %w(
+                   application/x-javascript;q=0.8
                    text/javascript;q=0.8)
       content_encoding 'utf-8'
 
@@ -41,8 +42,7 @@ module Webize
       end
     end
   end
-end
-module Webize
+
   module JSON
     class Format < RDF::Format
       content_type 'application/json', :extension => :json

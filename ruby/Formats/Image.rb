@@ -2,7 +2,6 @@ module Webize
   module GIF
     class Format < RDF::Format
       content_type 'image/gif', :extension => :gif
-      content_encoding 'utf-8'
       reader { Reader }
     end
 
@@ -28,11 +27,37 @@ module Webize
       end
     end
   end
+  module Icon
+    class Format < RDF::Format
+      content_type 'image/x-icon', :extension => :ico
+      reader { Reader }
+    end
+
+    class Reader < RDF::Reader
+      include WebResource::URIs
+      format Format
+
+      def initialize(input = $stdin, options = {}, &block)
+        @subject = (options[:base_uri] || '#icon').R
+        if block_given?
+          case block.arity
+          when 0 then instance_eval(&block)
+          else block.call(self)
+          end
+        end
+        nil
+      end
+
+      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
+
+      def each_statement &fn
+      end
+    end
+  end
 
   module JPEG
     class Format < RDF::Format
       content_type 'image/jpeg', :extension => :jpg
-      content_encoding 'utf-8'
       reader { Reader }
     end
 
@@ -80,7 +105,6 @@ module Webize
   module PNG
     class Format < RDF::Format
       content_type 'image/png', :extension => :png
-      content_encoding 'utf-8'
       reader { Reader }
     end
 
@@ -118,7 +142,6 @@ module Webize
   module WebP
     class Format < RDF::Format
       content_type 'image/webp', :extension => :webp
-      content_encoding 'utf-8'
       reader { Reader }
     end
 

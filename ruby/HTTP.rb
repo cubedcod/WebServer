@@ -659,7 +659,7 @@ class WebResource
       url.unsubscribe
       [302, {'Location' => url.to_s}, []]}
 
-    def upstreamUI?; env['HTTP_USER_AGENT'] == DesktopUA || host == 'soundcloud.com' end
+    def upstreamUI?; env['HTTP_USER_AGENT'] == DesktopUA || host.match?(/(mix|sound)cloud.com/) end
 
   end
   include HTTP
