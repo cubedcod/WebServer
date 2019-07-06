@@ -35,7 +35,7 @@ class WebResource
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
 
     # POSTs, allow in pattern and define handler if needed
-    POSThost = /(^|\.)(anvato|brightcove|reddit|(mix|sound)cloud|youtube|zillow)\.(com|net)$/
+    POSThost = /(^|\.)(anvato|brightcove|git(lab|ter)|reddit|(mix|sound)cloud|youtube|zillow)\.(com|im|net)$/
     def sitePOST
       case host
       when 'metrics.brightcove.com'
