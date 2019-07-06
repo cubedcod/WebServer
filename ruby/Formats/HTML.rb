@@ -614,15 +614,16 @@ class WebResource
     # tree with nested S -> P -> O indexing (renderer input)
     def treeFromGraph graph
       g = {}                    # empty tree
-
+      head = q.has_key? 'head'
       # traverse
       graph.each_triple{|s,p,o| # (subject,predicate,object) triple
         s = s.to_s; p = p.to_s  # subject, predicate
-        o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object
-        g[s] ||= {'uri'=>s}                      # insert subject
-        g[s][p] ||= []                           # insert predicate
-        g[s][p].push o unless g[s][p].member? o} # insert object
-
+        unless head && p == Content
+          o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object
+          g[s] ||= {'uri'=>s}                     # insert subject
+          g[s][p] ||= []                          # insert predicate
+          g[s][p].push o unless g[s][p].member? o # insert object
+        end}
       g # tree
     end
 
