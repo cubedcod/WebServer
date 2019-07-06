@@ -72,7 +72,7 @@ class WebResource < RDF::URI
 end
 # require library and site config
 %w(POSIX HTTP).map{|_| require_relative _}
-%w(Audio Calendar CSS Feed HTML Image JSON JS Mail Markdown Plaintext).map{|_| require_relative 'Formats/' + _}
+%w(Audio Calendar CSS Feed HTML Image JS Mail Markdown Plaintext Web).map{|_| require_relative 'Formats/' + _}
 require_relative '../config/site.rb'
 class WebResource
   module URIs # build extension->format mapping after all readers have been defined
