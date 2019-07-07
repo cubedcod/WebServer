@@ -115,6 +115,7 @@ class WebResource
       else
         r.fetch
       end}
+    HostGET['rover.ebay.com'] = -> r {r.q.has_key?('mpre') ? [301, {'Location' => r.q['mpre']}, []] : r.deny}
 
     # Facebook
     HostGET['facebook.com'] = HostGET['www.facebook.com'] = -> r {%w{connect pages_reaction_units plugins security tr}.member?(r.parts[0]) ? r.drop : r.remote}

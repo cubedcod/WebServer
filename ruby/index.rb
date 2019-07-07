@@ -15,8 +15,7 @@ class WebResource < RDF::URI
   alias_method :uri, :to_s
   module URIs
     CacheDir = '../.cache/web/'
-    ConfDir = Pathname.new(__dir__).join('../config').relative_path_from Pathname.new Dir.pwd
-
+    ConfDir  = Pathname.new(__dir__).join('../config').relative_path_from Pathname.new Dir.pwd
     W3       = 'http://www.w3.org/'
     DC       = 'http://purl.org/dc/terms/'
     SIOC     = 'http://rdfs.org/sioc/ns#'
@@ -40,7 +39,7 @@ end
 %w(Audio Calendar CSS Feed HTML Image JS Mail Text Video Web).map{|_| require_relative 'Formats/' + _}
 require_relative '../config/site.rb'
 class WebResource
-  module URIs # build extension->format mapping after all readers have been defined
+  module URIs # build extension->format mapping after all readers are defined
     Extensions = RDF::Format.file_extensions.invert
   end
 end
