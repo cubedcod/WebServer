@@ -181,10 +181,10 @@ module Webize
               rev = (destDir + Digest::SHA2.hexdigest(id) + '.eml').R
               rel = (srcDir + Digest::SHA2.hexdigest(r) + '.eml').R
               if !rel.exist? # link missing
-                if destFile.exist? # link
+                if destFile.exist? # target exists
                   destFile.link rel
-                else # referenced file may appear later on
-                  destFile.ln_s rel unless rel.symlink?
+                else # link anyway, referenced node may appear
+                  destFile.ln_s rel unless rel.node.symlink?
                 end
               end
               srcFile.link rev if !rev.exist?}}}

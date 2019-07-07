@@ -21,14 +21,11 @@ class WebResource
     def mtime; node.stat.mtime end
     def node; @node ||= (Pathname.new relPath) end
     def parts; path ? path.split('/').-(['']) : [] end
-    def readFile; File.open(relPath).read end
     def relPath; URI.unescape(path == '/' ? '.' : (path[0] == '/' ? path[1..-1] : path)) end
     def self.path p; ('/' + p.to_s.chomp.gsub(' ','%20').gsub('#','%23')).R end
     def self.splitArgs args; args.shellsplit rescue args.split /\W/ end
     def shellPath; Shellwords.escape relPath.force_encoding 'UTF-8' end
-    def size; node.size rescue 0 end
     def stripDoc; uri.sub(/\.(html|json|md|ttl|txt)$/,'').R end
-    def symlink?; node.symlink? end
     def touch; dir.mkdir; FileUtils.touch relPath end                      # TOUCH(1)
     def writeFile o; dir.mkdir; File.open(relPath,'w'){|f|f << o}; self end
 
@@ -42,7 +39,7 @@ class WebResource
         graph << (RDF::Statement.new subject, Type.R, (W3 + 'ns/posix/stat#File').R)
       end
       graph << (RDF::Statement.new subject, Title.R, basename)
-      graph << (RDF::Statement.new subject, (W3+'ns/posix/stat#size').R, size)
+      graph << (RDF::Statement.new subject, (W3+'ns/posix/stat#size').R, node.size)
       graph << (RDF::Statement.new subject, Date.R, mtime.iso8601)
     end
 
