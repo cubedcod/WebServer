@@ -32,7 +32,7 @@ class String
 end
 class WebResource < RDF::URI
   def R; self end
-  module URIs # TODO investigate RDF::Vocab
+  module URIs
     W3       = 'http://www.w3.org/'
     DC       = 'http://purl.org/dc/terms/'
     SIOC     = 'http://rdfs.org/sioc/ns#'

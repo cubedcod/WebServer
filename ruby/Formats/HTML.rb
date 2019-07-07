@@ -338,8 +338,9 @@ class WebResource
 
       htmlGrep graph, q['q'] if @r[:grep]
       subbed = subscribed?
+
       tabular = q['view'] == 'table'
-      tabularOverview = '?view=table&sort=date'
+      shrunken = q.has_key? 'head'
       @r[:links][:up] = dirname + '/' + qs + '#r' + Digest::SHA2.hexdigest(path||'/') unless !path || path=='/'
       @r[:links][:down] = path + '/' if env['REQUEST_PATH'] && directory? && env['REQUEST_PATH'][-1] != '/'
 
@@ -356,7 +357,11 @@ class WebResource
                                  {_: :link, rel: type, href: CGI.escapeHTML(uri.to_s)}}
                             ].map{|e|['  ',e,"\n"]}}, "\n\n",
                         {_: :body,
-                         c: ["\n", link[:up, '&#9650;'], {_: :a, id: :tabular, style: tabular ? 'color: #fff' : 'color: #555', href: tabular ? '?' : tabularOverview, c: '↨'},
+                         c: ["\n", link[:up, '&#9650;'],
+                             {_: :a, id: :tabular, style: tabular ? 'color: #fff' : 'color: #555',
+                              href: HTTP.qs(tabular ? q.reject{|k,v|k=='view'} : q.merge({'view' => 'table', 'sort' => 'date'})), c: '↨'},
+                             {_: :a, id: :shrink, style: shrunken ? 'color: #fff' : 'color: #555',
+                              href: HTTP.qs(shrunken ? q.reject{|k,v|k=='head'} : q.merge({'head' => ''})), c: shrunken ? '&#9661;' : '&#9651;'},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              unless local?
                                {class: :toolbox,
