@@ -16,14 +16,10 @@ rack rdf redcarpet
 shellwords
 }.map{|r|require r}
 class RDF::URI
-  def R
-    WebResource.new to_s
-  end
+  def R; WebResource.new to_s end
 end
 class RDF::Node
-  def R
-    WebResource.new to_s
-  end
+  def R; WebResource.new to_s end
 end
 class String
   def R env=nil
@@ -60,7 +56,7 @@ class WebResource < RDF::URI
 end
 # require library and site config
 %w(POSIX HTTP).map{|_| require_relative _}
-%w(Audio Calendar CSS Feed HTML Image JS Mail Markdown Plaintext Web).map{|_| require_relative 'Formats/' + _}
+%w(Audio Calendar CSS Feed HTML Image JS Mail Text Web).map{|_| require_relative 'Formats/' + _}
 require_relative '../config/site.rb'
 class WebResource
   module URIs # build extension->format mapping after all readers have been defined
