@@ -333,9 +333,9 @@ class WebResource
       #elsif [401, 403].member? status
       #  [status, meta, []]     # authn failed
       else
-        if graph.empty? && !local? && env['REQUEST_PATH'][-1]=='/' # empty remote container index
-          (CacheDir + host + path).R.children.map{|entry|          # local container index
-            entry.fsMeta graph, base_uri: 'https://' + entry.relPath}
+        if graph.empty? && !local? && env['REQUEST_PATH'][-1]=='/' # unlistable remote container
+          localContainer = (CacheDir + host + path).R              # local container
+          localContainer.children.map{|e| e.fsMeta graph, base_uri: 'https://' + e.relPath} if localContainer.directory?
         end
         graphResponse graph     # content-negotiated graph
       end
