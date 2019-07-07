@@ -23,11 +23,7 @@ class RDF::Node
 end
 class String
   def R env=nil
-    if env
-      (WebResource.new self).environment env
-    else
-      (WebResource.new self)
-    end
+    env ? WebResource.new(self).environment(env) : WebResource.new(self)
   end
 end
 class WebResource < RDF::URI
