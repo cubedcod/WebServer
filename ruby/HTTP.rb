@@ -334,8 +334,8 @@ class WebResource
       #  [status, meta, []]     # authn failed
       else
         if graph.empty? && !local? && env['REQUEST_PATH'][-1]=='/' # unlistable remote container
-          localContainer = (CacheDir + host + path).R              # local container
-          localContainer.children.map{|e| e.fsMeta graph, base_uri: 'https://' + e.relPath} if localContainer.directory?
+          localIndex = (CacheDir + host + path).R                  # local container
+          localIndex.children.map{|e| e.fsMeta graph, base_uri: 'https://' + e.relPath} if localIndex.directory?
         end
         graphResponse graph     # content-negotiated graph
       end
@@ -483,15 +483,15 @@ class WebResource
           deny
         end
       else # fetch and inspect
-        fetch.yield_self{|status, h, b|
+        fetch.yield_self{|status, head, body|
           if status.to_s.match? /30[1-3]/ # redirected
-            [status, h, b]
+            [status, head, body]
           else
-            if h['Content-Type'] && !h['Content-Type'].match?(/image.(bmp|gif)|script/)
-              [status, h, b] # allow MIME
-            else             # filter MIME
-              env[:GIF] = true if h['Content-Type']&.match? /image\/gif/
-              env[:script] = true if h['Content-Type']&.match? /script/
+            if head['Content-Type'] && !head['Content-Type'].match?(/image.(bmp|gif)|script/)
+              [status, head, body] # allowed MIME
+            else                   # filtered MIME
+              env[:GIF] = true    if head['Content-Type']&.match? /image\/gif/
+              env[:script] = true if head['Content-Type']&.match? /script/
               deny status
             end
           end}
@@ -499,8 +499,8 @@ class WebResource
     end
 
     def notfound
-      dateMeta # nearby page may exist, search for pointers
-      [404,{'Content-Type' => 'text/html'},[htmlDocument]]
+      dateMeta # nearby nodes may exist, search for pointers
+      [404, {'Content-Type' => 'text/html'}, [htmlDocument]]
     end
 
     def OPTIONS
@@ -518,10 +518,7 @@ class WebResource
       body = env['rack.input'].read
       # response
       r = HTTParty.options url, :headers => headers, :body => body
-      s = r.code
-      h = r.headers
-      b = r.body
-      [s, h, [b]]
+      [r.code, r.headers, [r.body]]
     end
 
     # String -> Hash

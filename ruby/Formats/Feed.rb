@@ -27,7 +27,7 @@ module Webize
       RSS      = 'http://purl.org/rss/1.0/'
 
       def initialize(input = $stdin, options = {}, &block)
-        @doc = (input.respond_to?(:read) ? input.read : input)#.encode('UTF-8', undef: :replace, invalid: :replace, replace: '?')
+        @doc = (input.respond_to?(:read) ? input.read : input).encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ')
         @base = options[:base_uri].R
         @host = @base.host
         if block_given?

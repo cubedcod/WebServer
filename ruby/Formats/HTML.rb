@@ -280,7 +280,7 @@ class WebResource
       tree = {}
       # visit nodes
       (graph.class == Array ? graph : graph.values).map{|node|
-        re = node.R
+        re = (node['uri'] || '').R
         # traverse
         cursor = tree
         [re.host ? re.host.split('.').reverse : nil, re.parts, re.qs, re.fragment].flatten.compact.map{|name|
@@ -435,10 +435,8 @@ class WebResource
         href: u, c: u.sub(/^https?.../,'')[0..79]}," \n"]}
 
     Markup[Type] = -> t, env=nil {
-      if t.respond_to? :uri
-        t = t.R
-        {_: :a, href: t.uri,
-         c: Icons[t.uri] || t.fragment || t.basename}
+      if t.class == WebResource
+        {_: :a, href: t.uri, c: Icons[t.uri] || t.fragment || t.basename}
       else
         CGI.escapeHTML t.to_s
       end}

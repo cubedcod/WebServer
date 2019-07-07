@@ -15,9 +15,6 @@ pathname
 rack rdf redcarpet
 shellwords
 }.map{|r|require r}
-class Hash
-  def R; WebResource.new self['uri'] end
-end
 class RDF::URI
   def R
     WebResource.new to_s
