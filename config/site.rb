@@ -12,6 +12,7 @@ module Webize
         'www.apnews.com' => :AP,
         'www.instagram.com' => :Instagram,
         'www.patriotledger.com' => :GateHouse,
+        'www.providencejournal.com' => :GateHouse,
         'twitter.com' => :Twitter,
         'www.youtube.com' => :YouTube,
       }
@@ -84,6 +85,14 @@ class WebResource
       parts = r.path.split /\/\d+x\d+\/(filter[^\/]+\/)?/
       if parts.size > 1
         [301, {'Location' => 'https://' + parts[-1]}, []]
+      else
+        r.remote
+      end}
+
+    PathGET['/storyimage'] = -> r {
+      parts = r.path.split '&'
+      if parts.size > 1
+        [301, {'Location' => 'https://' + r.host + parts[0]}, []]
       else
         r.remote
       end}

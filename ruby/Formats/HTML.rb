@@ -89,7 +89,7 @@ sidebar [class^='side']    [id^='side']
 }#.map{|sel| sel.sub /\]$/, ' i]'} # TODO find library w case-insensitive attribute-selector capability
 
       def initialize(input = $stdin, options = {}, &block)
-        @doc = (input.respond_to?(:read) ? input.read : input)#.encode('UTF-8', undef: :replace, invalid: :replace, replace: '?')
+        @doc = (input.respond_to?(:read) ? input.read : input).encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ')
         @base = options[:base_uri]
 
         if block_given?
