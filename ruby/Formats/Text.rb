@@ -57,7 +57,15 @@ module Webize
       end
     end
   end
+  module TempFile
+    class Format < Plaintext::Format
+      content_type 'text/plain', :extension => :tmp
+      content_encoding 'utf-8'
+      reader { Plaintext::Reader }
+    end
+  end
 end
+
 module Webize
   module Markdown
     class Format < RDF::Format
