@@ -70,10 +70,14 @@ class WebResource
                 else
                   '30' # gray :: cache hit, NOOP
                 end) + ';1'
-        location = head['Location'] ? (" ↝ " + head['Location']) : ""
-        referer  = env['HTTP_REFERER'] ? ("\e[" + color + ";7m" + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m -> ") : ''
-        puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + "\e[" + color + "m "  + status.to_s + "\e[0m " + referer + ' ' + "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs + "\e[0m " + location
-        status == 304 ? [304, {}, []] : [status, head, body]} # response
+
+        location = head['Location'] ? (" ↝ " + head['Location']) : ''
+        referer  = env['HTTP_REFERER'] ? (" \e[" + color + ";7m" + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m -> ") : ' '
+        turtle = head['Content-Type'] == 'text/turtle; charset=utf-8' ? '🐢 ' : ''
+
+        puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + "\e[" + color + "m "  + status.to_s + "\e[0m" + referer + turtle + "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs + "\e[0m " + location
+
+        [status, head, body]} # response
     rescue Exception => e
       uri = 'https://' + env['SERVER_NAME'] + env['REQUEST_URI']
       msg = [uri, e.class, e.message].join " "
@@ -374,7 +378,8 @@ class WebResource
       entity ->{
         case format
         when /^text\/html/
-          if path == '/' || env['QUERY_STRING'] == 'data'
+          puts path
+          if path == '/2019' || env['QUERY_STRING'] == 'data'
             ConfDir.join('databrowser.html').R.env env
           else
             htmlDocument treeFromGraph graph # HTML
