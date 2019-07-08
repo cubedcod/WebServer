@@ -182,28 +182,27 @@ class WebResource
       else                                       # generate
         body = generator ? generator.call : self # call generator
         if body.class == WebResource             # static response
-          s,h,b = Rack::File.new(nil).serving Rack::Request.new(env), body.relPath # Rack handler
+          Rack::File.new(nil).serving(Rack::Request.new(env), body.relPath).yield_self{|s,h,b|
           if s == 304
             [s, {}, []]                          # not modified
           else
             h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type'] == 'application/javascript'
             [s, h.update(env[:Response]), b]     # file response
-          end
+          end}
         else
           [env[:status] || 200, env[:Response], [body]] # generated response
         end
       end
     end
 
-    def environment env = nil
-      if env
-        @r = env
+    def env e = nil
+      if e
+        @r = e
         self
       else
         @r
       end
     end
-    alias_method :env, :environment
 
     PathGET['/favicon.ico']  = -> r {r.upstreamUI? ? r.fetch : [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
 
@@ -333,9 +332,9 @@ class WebResource
       #elsif [401, 403].member? status
       #  [status, meta, []]     # authn failed
       else
-        if graph.empty? && !local? && env['REQUEST_PATH'][-1]=='/' # unlistable remote container
-          localIndex = (CacheDir + host + path).R                  # local container
-          localIndex.children.map{|e| e.fsMeta graph, base_uri: 'https://' + e.relPath} if localIndex.directory?
+        if graph.empty? && !local? && env['REQUEST_PATH'][-1]=='/' # unlistable remote
+          index = (CacheDir + host + path).R                       # local index
+          index.children.map{|e| e.fsMeta graph, base_uri: 'https://' + e.relPath} if index.node.directory?
         end
         graphResponse graph     # content-negotiated graph
       end
@@ -345,7 +344,7 @@ class WebResource
       @r ||= {}
       @r[:Response] ||= {}
       @r[:Response]['Access-Control-Allow-Origin'] ||= allowedOrigin
-      @r[:Response]['ETag'] ||= Digest::SHA2.hexdigest [uri, mtime, size].join
+      @r[:Response]['ETag'] ||= Digest::SHA2.hexdigest [uri, node.stat.mtime, node.size].join
       entity
     end
 
@@ -374,7 +373,11 @@ class WebResource
       entity ->{
         case format
         when /^text\/html/
-          htmlDocument treeFromGraph graph # HTML
+          if path == '/' || env['QUERY_STRING'] == 'data'
+            ConfDir.join('databrowser.html').R.env env
+          else
+            htmlDocument treeFromGraph graph # HTML
+          end
         when /^application\/atom+xml/
           renderFeed treeFromGraph graph   # feed
         else                               # RDF
@@ -451,7 +454,7 @@ class WebResource
 
     # URI -> file(s)
     def nodes
-      (if directory?
+      (if node.directory?
        if q.has_key?('f') && path!='/'    # FIND
          find q['f'] unless q['f'].empty?
        elsif q.has_key?('q') && path!='/' # GREP

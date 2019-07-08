@@ -5,7 +5,6 @@ class WebResource
     def basename; File.basename ( path || '/' ) end                        # BASENAME(1)
     def children; node.children.delete_if{|f|f.basename.to_s.index('.')==0}.map &:R end
     def dir; dirname.R if path end                                         # DIRNAME(1)
-    def directory?; node.directory? end
     def dirname; File.dirname path if path end                             # DIRNAME(1)
     def du; `du -s #{shellPath}| cut -f 1`.chomp.to_i end                  # DU(1)
     def exist?; node.exist? end
@@ -18,7 +17,6 @@ class WebResource
     def link n; n.dir.mkdir; send :ln, n unless n.exist? end               # LN(1)
     def lines; exist? ? (open relPath).readlines.map(&:chomp) : [] end
     def mkdir; FileUtils.mkdir_p relPath unless exist?; self end           # MKDIR(1)
-    def mtime; node.stat.mtime end
     def node; @node ||= (Pathname.new relPath) end
     def parts; path ? path.split('/').-(['']) : [] end
     def relPath; URI.unescape(path == '/' ? '.' : (path[0] == '/' ? path[1..-1] : path)) end
@@ -32,7 +30,7 @@ class WebResource
     # STAT(1) fs metadata -> RDF::Graph
     def fsMeta graph, options = {}
       subject = options[:base_uri]&.R || self
-      if directory?
+      if node.directory?
         subject = subject.path[-1] == '/' ? subject : (subject + '/') # ensure trailing-slash on container URI
         graph << (RDF::Statement.new subject, Type.R, (W3 + 'ns/ldp#Container').R)
       else
@@ -40,7 +38,7 @@ class WebResource
       end
       graph << (RDF::Statement.new subject, Title.R, basename)
       graph << (RDF::Statement.new subject, (W3+'ns/posix/stat#size').R, node.size)
-      graph << (RDF::Statement.new subject, Date.R, mtime.iso8601)
+      graph << (RDF::Statement.new subject, Date.R, node.stat.mtime.iso8601)
     end
 
     # GREP(1)
@@ -67,9 +65,9 @@ class WebResource
 end
 
 class Pathname
-  def R env=nil
+  def R env = nil
     if env
-     (WebResource::POSIX.path self).environment env
+     (WebResource::POSIX.path self).env env
     else
       WebResource::POSIX.path self
     end
