@@ -10,13 +10,13 @@
         const UI = panes.UI
         const $rdf = UI.rdf
         $rdf.Fetcher.crossSiteProxyTemplate = self.origin + '/xss/?uri={uri}'
-//        UI.authn.checkUser().then(function () {
+        UI.authn.checkUser().then(function () {
             const kb = UI.store
             const uri = window.location.href
             const subject = kb.sym(uri)
             const outliner = panes.getOutliner(document)
             outliner.GotoSubject(subject, true, undefined, true, undefined)
-//          })
+          })
       })
     </script>
 </head>

@@ -205,6 +205,7 @@ class WebResource
     end
 
     PathGET['/favicon.ico']  = -> r {r.upstreamUI? ? r.fetch : [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
+    PathGET['/common/js/mashlib.min.js'] = -> r {'/common/js/mashlib.min.js'.R.env(r.env).fileResponse}
 
     def fetch options = {}; #@verbose = true
       if this = cached?; return this.fileResponse end
