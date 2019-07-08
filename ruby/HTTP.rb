@@ -10,18 +10,6 @@ class WebResource
     OFFLINE = ENV.has_key? 'OFFLINE'
     SiteGIF = ConfDir.join('site.gif').read
 
-    # env -> accepted formats
-    def accept k = 'HTTP_ACCEPT'
-      index = {}
-      @r && @r[k].yield_self{|v| # header data
-        (v.split /,/).map{|e|  # split to (MIME,q) pairs
-          format, q = e.split /;/ # split (MIME,q) pair
-          i = q && q.split(/=/)[1].to_f || 1.0 # find q-value
-          index[i] ||= []              # initialize index-entry
-          index[i].push format.strip}} # index on q-value
-      index
-    end
-
     def allowedOrigin
       if referer = env['HTTP_REFERER']
         'https://' + referer.R.host
@@ -73,9 +61,9 @@ class WebResource
 
         location = head['Location'] ? (" ↝ " + head['Location']) : ''
         referer  = env['HTTP_REFERER'] ? (" \e[" + color + ";7m" + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m -> ") : ' '
-        turtle = head['Content-Type'] == 'text/turtle; charset=utf-8' ? '🐢 ' : ''
+        content_type = head['Content-Type'] == 'text/turtle; charset=utf-8' ? '🐢' : (head['Content-Type'] || '')
 
-        puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + "\e[" + color + "m "  + status.to_s + "\e[0m" + referer + turtle + "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs + "\e[0m " + location
+        puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + "\e[" + color + "m "  + status.to_s + "\e[0m" + referer + "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs + "\e[0m " + location + ' ' + content_type + ' ' + (env['HTTP_ACCEPT'] || '')
 
         [status, head, body]} # response
     rescue Exception => e
@@ -209,7 +197,7 @@ class WebResource
     end
 
     PathGET['/favicon.ico']  = -> r {r.upstreamUI? ? r.fetch : [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
-    PathGET['/common/js/mashlib.min.js'] = -> r {'/common/js/mashlib.min.js'.R.env(r.env).fileResponse}
+    PathGET['/common/js/mashlib.min.js'] = -> r {'/common/js/mashlib.min.js'.R(r.env).fileResponse}
 
     def fetch options = {}; #@verbose = true
       if this = cached?; return this.fileResponse end
@@ -378,9 +366,8 @@ class WebResource
       entity ->{
         case format
         when /^text\/html/
-          puts path
           if path == '/2019' || env['QUERY_STRING'] == 'data'
-            ConfDir.join('databrowser.html').R.env env
+            ConfDir.join('databrowser.html').R env
           else
             htmlDocument treeFromGraph graph # HTML
           end
@@ -618,10 +605,17 @@ class WebResource
     end
 
     def selectFormat
-      accept.sort.reverse.map{|q,formats| # formats in descending qval order
+      index = {}
+      @r['HTTP_ACCEPT'].split(/,/).map{|e|   # split to (MIME,q) pairs
+        format, q = e.split /;/              # split (MIME,q) pair
+        i = q && q.split(/=/)[1].to_f || 1.0 # q-value w/ default
+        index[i] ||= []                      # index location
+        index[i].push format.strip}          # index on q-value
+
+      index.sort.reverse.map{|q,formats| # formats in descending q-value order
         formats.map{|f|
-          return f if RDF::Writer.for(:content_type => f) || # RDF writer defined
-            ['application/atom+xml', 'text/html'].member?(f) # non-RDF writer defined
+          return f if RDF::Writer.for(:content_type => f) || # RDF writer found
+            ['application/atom+xml', 'text/html'].member?(f) # non-RDF writer found
           return 'text/html' if f == '*/*' }}                # wildcard writer
       'text/html'                                            # default writer
     end
