@@ -1,15 +1,19 @@
 require 'linkeddata'
+
 class RDF::URI
   def R; WebResource.new to_s end
 end
+
 class RDF::Node
   def R; WebResource.new to_s end
 end
+
 class String
   def R env = nil
     env ? WebResource.new(self).env(env) : WebResource.new(self)
   end
 end
+
 class WebResource < RDF::URI
   def R; self end
   alias_method :uri, :to_s
@@ -32,8 +36,10 @@ class WebResource < RDF::URI
   end
   include URIs
 end
-%w(POSIX HTTP).map{|_| require_relative _}
-%w(Audio Calendar CSS Feed HTML Image JS Mail Text Video Web).map{|_| require_relative 'Formats/' + _}
+
+%w(POSIX HTTP).map{|_|                                                require_relative _}
+%w(Audio Calendar CSS Feed HTML Image JS Mail Text Video Web).map{|_| require_relative 'Formats/'+_}
+
 class WebResource
   module URIs
     CacheDir = '../.cache/web/'
@@ -41,4 +47,5 @@ class WebResource
     Extensions = RDF::Format.file_extensions.invert
   end
 end
+
 require_relative '../config/site.rb'
