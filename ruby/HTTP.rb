@@ -36,8 +36,8 @@ class WebResource
     end
 
     def self.call env
-      return [405,{},[]] unless %w{GET HEAD OPTIONS PUT POST}.member? env['REQUEST_METHOD'] # allow methods
-      env[:Response] = {}; env[:links] = {}                                             # allocate response-meta
+      return [405,{},[]] unless %w{GET HEAD OPTIONS POST}.member? env['REQUEST_METHOD'] # allow methods
+      env['HTTP_ACCEPT'] ||= '*/*'; env[:Response] = {}; env[:links] = {}               # metadata
       path = Pathname.new(env['REQUEST_PATH'].force_encoding('UTF-8')).expand_path.to_s # evaluate path
       query = env[:query] = parseQs env['QUERY_STRING']                                 # parse query
       resource = ('//' + env['SERVER_NAME'] + path).R env                               # instantiate resource
@@ -411,8 +411,6 @@ class WebResource
         options[:format] = :html
       end
       graph.load relPath, options
-#    rescue Exception => e
-#      puts [uri, relPath, e.class, e.message].join ' '
     end
 
     def local
@@ -606,29 +604,20 @@ class WebResource
 
     def selectFormat
       index = {}
-      @r['HTTP_ACCEPT'].split(/,/).map{|e|   # split to (MIME,q) pairs
+      prefer = {'text/turtle' => 1}
+      env['HTTP_ACCEPT'].split(/,/).map{|e|  # split to (MIME,q) pairs
         format, q = e.split /;/              # split (MIME,q) pair
-        i = q && q.split(/=/)[1].to_f || 1.0 # q-value w/ default
+        i = q && q.split(/=/)[1].to_f|| 0.99 # explicit highest-q higher than implicit
         index[i] ||= []                      # index location
         index[i].push format.strip}          # index on q-value
 
       index.sort.reverse.map{|q,formats| # formats in descending q-value order
-        formats.map{|f|
+        formats.sort_by{|f|prefer[f]||0}.map{|f| # tiebreak via local format-preference
           return f if RDF::Writer.for(:content_type => f) || # RDF writer found
             ['application/atom+xml', 'text/html'].member?(f) # non-RDF writer found
-          return 'text/html' if f == '*/*' }}                # wildcard writer
+          return 'text/turtle' if f == '*/*' }}              # wildcard writer
       'text/html'                                            # default writer
     end
-
-    def subscribe;     subscriptionFile.touch end
-    def subscribed?;   subscriptionFile.exist? end
-    def subs; puts     subscriptions.sort.join ' ' end
-    def subscriptions; subscriptionFile('*').R.glob.map(&:dir).map &:basename end
-
-    PathGET['/subscribe'] = -> r {
-      url = (r.q['u'] || '/').R
-      url.subscribe
-      [302, {'Location' => url.to_s}, []]}
 
     # request headers
     def headers
@@ -653,32 +642,7 @@ class WebResource
       head
     end
 
-    def unsubscribe; subscriptionFile.exist? && subscriptionFile.node.delete end
-
-    PathGET['/unsubscribe']  = -> r {
-      url = (r.q['u'] || '/').R
-      url.unsubscribe
-      [302, {'Location' => url.to_s}, []]}
-
     def upstreamUI?; env['HTTP_USER_AGENT'] == DesktopUA || host.match?(/(mix|sound)cloud.com/) end
-
   end
   include HTTP
-  def self.getFeeds
-    FeedURL.values.shuffle.map{|feed|
-      begin
-        options = {
-          content_type: 'application/atom+xml',
-          no_response: true,
-        }
-        options[:scheme] = :http if feed.scheme == 'http'
-        feed.fetch options
-      rescue Exception => e
-        puts 'https:' + feed.uri, e.class, e.message
-      end}
-  end
-  module URIs
-    FeedURL = {}
-    ConfDir.join('feeds/*.u').R.glob.map{|list| list.lines.map{|u| FeedURL[u] = u.R }}
-  end
 end
