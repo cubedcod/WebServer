@@ -107,12 +107,14 @@ class WebResource
         r.remote
       end}
 
-    PathGET['/url'] = HostGET['gate.sc'] = HostGET['go.skimresources.com'] = -> r {
-      [301,{'Location' => (r.q['url'] || r.q['q'])}, []]}
+    PathGET['/url'] = HostGET['gate.sc'] = HostGET['go.skimresources.com'] = -> r {[301,{'Location' => (r.q['url'] || r.q['q'])}, []]}
 
     # Bing
     HostGET['www.bing.com'] = -> r {
       (%w(fd hamburger Identity notifications secure).member?(r.parts[0]) || r.path.index('/api/ping') == 0) ? r.deny : r.desktop.fetch}
+
+    # DartSearch
+    HostGET['clickserve.dartsearch.net'] = -> r {[301,{'Location' => r.q['ds_dest_url']}, []]}
 
     # DuckDuckGo
     HostGET['duckduckgo.com'] = -> r {%w{ac}.member?(r.parts[0]) ? r.drop : r.remote}
@@ -147,7 +149,7 @@ class WebResource
         r.q.has_key?('imgurl') ? [301, {'Location' => r.q['imgurl']}, []] : r.fetch
       when /images|maps/
         r.desktop.fetch
-      when 'search'
+      when /aclk|search/
         r.fetch
       else
         r.drop
