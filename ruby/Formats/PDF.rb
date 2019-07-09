@@ -10,7 +10,9 @@ module Webize
       format Format
 
       def initialize(input = $stdin, options = {}, &block)
-        @subject = (options[:base_uri] || '#image').R 
+        require 'pdf/reader'
+        @subject = (options[:base_uri] || '#image').R
+        @doc = ::PDF::Reader.new input
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -23,13 +25,17 @@ module Webize
       def each_triple &block; each_statement{|s| block.call *s.to_triple} end
 
       def each_statement &fn
-        image_tuples{|p, o|
+        pdf_tuples{|p, o|
           fn.call RDF::Statement.new(@subject, p, (o.class == WebResource || o.class == RDF::URI) ? o : RDF::Literal(o),
                                      :graph_name => @subject)}
       end
 
-      def image_tuples
-
+      def pdf_tuples
+        puts @doc.info,:___________
+        puts @doc.metadata
+        @doc.pages.each do |page|
+          yield Content, page.text.hrefs
+        end
       end
 
     end
