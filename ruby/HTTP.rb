@@ -37,7 +37,7 @@ class WebResource
 
     def self.call env
       return [405,{},[]] unless %w{GET HEAD OPTIONS POST}.member? env['REQUEST_METHOD'] # allow methods
-      env['HTTP_ACCEPT'] ||= '*/*'; env[:Response] = {}; env[:links] = {}               # metadata
+      env[:Response] = {}; env[:links] = {}                                             # metadata storage
       path = Pathname.new(env['REQUEST_PATH'].force_encoding('UTF-8')).expand_path.to_s # evaluate path
       query = env[:query] = parseQs env['QUERY_STRING']                                 # parse query
       resource = ('//' + env['SERVER_NAME'] + path).R env                               # instantiate resource
@@ -204,10 +204,10 @@ class WebResource
 
       # request meta
       @r ||= {}
+      env['HTTP_ACCEPT'] ||= '*/*'
       head = headers
       head.delete 'Cookie' unless options[:cookies]
       head['Accept'] += ',text/turtle' unless head['Accept'].match /text\/turtle/ # accept graph-data
-puts head
       head[:redirect] = false                                                     # halt on redirect
       query = if @r[:query]
                 q = @r[:query].dup || {}                                          # copy qs
@@ -314,24 +314,21 @@ puts head
         end
       end unless OFFLINE
 
-      return if options[:no_response] # no HTTP response
-
+      return if options[:no_response]
       if file                   # local static-content
         file.fileResponse
-      elsif upstreamUI? && body # remote static-content
-        [200, {'Content-Type' => format, 'Content-Length' => body.bytesize.to_s}, [body]]
       elsif 206 == status       # partial remote static-content
         [status, meta, [body]]
-      elsif 304 == status       # unmodified
+      elsif 304 == status       # unmodified, no content
         [304, {}, []]
-      #elsif [401, 403].member? status
-      #  [status, meta, []]     # authn failed
-      else
+      elsif upstreamUI? && body # remote static-content
+        [200, {'Content-Type' => format, 'Content-Length' => body.bytesize.to_s}, [body]]
+      else                      # graph data
         if graph.empty? && !local? && env['REQUEST_PATH'][-1]=='/' # unlistable remote
           index = (CacheDir + host + path).R                       # local index
           index.children.map{|e| e.fsMeta graph, base_uri: 'https://' + e.relPath} if index.node.directory?
         end
-        graphResponse graph     # content-negotiated graph
+        graphResponse graph
       end
     end
 
