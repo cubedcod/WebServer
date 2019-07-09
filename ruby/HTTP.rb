@@ -63,7 +63,7 @@ class WebResource
         referer  = env['HTTP_REFERER'] ? (" \e[" + color + ";7m" + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m -> ") : ' '
         content_type = head['Content-Type'] == 'text/turtle; charset=utf-8' ? '🐢' : (head['Content-Type'] || '')
 
-        puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + "\e[" + color + "m "  + status.to_s + "\e[0m" + referer + "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs + "\e[0m " + location + ' ' + content_type + ' ' + (env['HTTP_ACCEPT'] || '')
+        puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + "\e[" + color + "m "  + status.to_s + "\e[0m" + referer + "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs + "\e[0m " + location #+ ' ' + content_type + ' ' + (env['HTTP_ACCEPT'] || '')
 
         [status, head, body]} # response
     rescue Exception => e
@@ -363,7 +363,7 @@ class WebResource
       entity ->{
         case format
         when /^text\/html/
-          if env['QUERY_STRING'] == 'solid-ui'
+          if q.has_key? 'solid-ui'
             ConfDir.join('databrowser.html').R env
           else
             htmlDocument treeFromGraph graph # HTML
@@ -638,7 +638,7 @@ class WebResource
       head
     end
 
-    def upstreamUI?; env['QUERY_STRING'] == 'ui' || env['HTTP_USER_AGENT'] == DesktopUA || host.match?(/(mix|sound)cloud.com/) end
+    def upstreamUI?; q.has_key?('ui') || env['HTTP_USER_AGENT'] == DesktopUA || host.match?(/(mix|sound)cloud.com/) end
   end
   include HTTP
 end
