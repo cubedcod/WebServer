@@ -604,15 +604,14 @@ class WebResource
 
     def selectFormat
       index = {}
-      prefer = {'text/turtle' => 1}
-      env['HTTP_ACCEPT'].split(/,/).map{|e|  # split to (MIME,q) pairs
-        format, q = e.split /;/              # split (MIME,q) pair
-        i = q && q.split(/=/)[1].to_f|| 0.99 # explicit highest-q higher than implicit
-        index[i] ||= []                      # index location
-        index[i].push format.strip}          # index on q-value
+      env['HTTP_ACCEPT'].split(/,/).map{|e| # split to (MIME,q) pairs
+        format, q = e.split /;/             # split (MIME,q) pair
+        i = q && q.split(/=/)[1].to_f|| 1   # q-value with default
+        index[i] ||= []                     # index location
+        index[i].push format.strip}         # index on q-value
 
       index.sort.reverse.map{|q,formats| # formats in descending q-value order
-        formats.sort_by{|f|prefer[f]||0}.map{|f| # tiebreak via local format-preference
+        formats.sort_by{|f|{'text/turtle'=>0}[f]||1}.map{|f| # tiebreak
           return f if RDF::Writer.for(:content_type => f) || # RDF writer found
             ['application/atom+xml', 'text/html'].member?(f) # non-RDF writer found
           return 'text/turtle' if f == '*/*' }}              # wildcard writer
