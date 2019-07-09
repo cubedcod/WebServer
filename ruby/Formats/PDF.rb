@@ -31,7 +31,14 @@ module Webize
       end
 
       def pdf_tuples
-        puts @doc.info,:___________
+        @doc.info.map{|k,v|
+          k = {
+            Author: Creator,
+            Title: Title,
+            ModDate: Date,
+          }[k] || ('#' + k.to_s.gsub(' ','_'))
+          yield k, v
+        }
         puts @doc.metadata
         @doc.pages.each do |page|
           yield Content, page.text.hrefs
