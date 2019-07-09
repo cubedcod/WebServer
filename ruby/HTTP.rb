@@ -199,7 +199,7 @@ class WebResource
     PathGET['/favicon.ico']  = -> r {r.upstreamUI? ? r.fetch : [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
     PathGET['/common/js/mashlib.min.js'] = -> r {'/common/js/mashlib.min.js'.R(r.env).fileResponse}
 
-    def fetch options = {}; #@verbose = true
+    def fetch options = {}
       if this = cached?; return this.fileResponse end
 
       # request meta
@@ -207,19 +207,19 @@ class WebResource
       env['HTTP_ACCEPT'] ||= '*/*'
       head = headers
       head.delete 'Cookie' unless options[:cookies]
-      head['Accept'] += ',text/turtle' unless head['Accept'].match /text\/turtle/ # accept graph-data
-      head[:redirect] = false                                                     # halt on redirect
-      query = if @r[:query]
-                q = @r[:query].dup || {}                                          # copy qs
-                %w{data group view sort}.map{|a| q.delete a }                     # strip local args
-                q.empty? ? '' : HTTP.qs(q)                                        # unparse qs
-              else
-                qs
-              end
+      head['Accept'] = 'text/turtle' if env['QUERY_STRING'] == 'rdf' # request graph-data
+      head[:redirect] = false                                        # halt on redirect
+      qs = if @r[:query]
+             q = @r[:query].dup || {}                                # copy qs
+             %w{group view rdf solid-ui sort ui}.map{|a|q.delete a}  # strip local args
+             q.empty? ? '' : HTTP.qs(q)                              # unparse qs
+           else
+             qs
+           end
       u = if suffix = ext.empty? && host.match?(/reddit.com$/) && !upstreamUI? && '.rss'
-            '//' + (env['HTTP_HOST'] || host) + path + suffix + query                  # insert format-suffix
+            '//' + (env['HTTP_HOST'] || host) + path + suffix + qs                  # insert format-suffix
           else
-            '//' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + query)) # original URL
+            '//' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + qs)) # original URL
           end
       url      = (options[:scheme] || 'https').to_s    + ':' + u # primary URL
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u # fallback URL
@@ -234,14 +234,12 @@ class WebResource
 
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
-        if @verbose
-          print url , "\n"; HTTP.print_header head; puts ""
-        end
+        #HTTP.print_header head; puts "^^^vvv"
         begin
           open(url, head) do |response|
             status = response.status.to_s.match(/\d{3}/)[0]
             meta = response.meta
-            HTTP.print_header meta if @verbose
+            #HTTP.print_header meta
             allowed_meta = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag}
             allowed_meta.push 'Set-Cookie' if options[:cookies]
             allowed_meta.map{|k| @r[:Response][k] ||= meta[k.downcase] if meta[k.downcase]}
@@ -365,7 +363,7 @@ class WebResource
       entity ->{
         case format
         when /^text\/html/
-          if env['QUERY_STRING'] == 'data'
+          if env['QUERY_STRING'] == 'solid-ui'
             ConfDir.join('databrowser.html').R env
           else
             htmlDocument treeFromGraph graph # HTML
@@ -640,7 +638,7 @@ class WebResource
       head
     end
 
-    def upstreamUI?; env['HTTP_USER_AGENT'] == DesktopUA || host.match?(/(mix|sound)cloud.com/) end
+    def upstreamUI?; env['QUERY_STRING'] == 'ui' || env['HTTP_USER_AGENT'] == DesktopUA || host.match?(/(mix|sound)cloud.com/) end
   end
   include HTTP
 end
