@@ -211,8 +211,8 @@ class WebResource
       head[:redirect] = false                                                     # halt on redirect
       query = if @r[:query]
                 q = @r[:query].dup || {}                                          # copy qs
-                %w{group view sort}.map{|a| q.delete a }                          # strip local args
-                q.empty? ? '' : HTTP.qs(q)                                        # unparse remote qs
+                %w{data group view sort}.map{|a| q.delete a }                     # strip local args
+                q.empty? ? '' : HTTP.qs(q)                                        # unparse qs
               else
                 qs
               end
@@ -365,7 +365,7 @@ class WebResource
       entity ->{
         case format
         when /^text\/html/
-          if path == '/2019' || env['QUERY_STRING'] == 'data'
+          if env['QUERY_STRING'] == 'data'
             ConfDir.join('databrowser.html').R env
           else
             htmlDocument treeFromGraph graph # HTML
