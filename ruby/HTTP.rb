@@ -206,11 +206,13 @@ class WebResource
       @r ||= {}
       head = headers
       head.delete 'Cookie' unless options[:cookies]
-      head[:redirect] = false                            # halt internal redirects
+      head['Accept'] += ',text/turtle' unless head['Accept'].match /text\/turtle/ # accept graph-data
+puts head
+      head[:redirect] = false                                                     # halt on redirect
       query = if @r[:query]
-                q = @r[:query].dup || {}
-                %w{group view sort}.map{|a| q.delete a } # strip local args
-                q.empty? ? '' : HTTP.qs(q)               # remote qs
+                q = @r[:query].dup || {}                                          # copy qs
+                %w{group view sort}.map{|a| q.delete a }                          # strip local args
+                q.empty? ? '' : HTTP.qs(q)                                        # unparse remote qs
               else
                 qs
               end
