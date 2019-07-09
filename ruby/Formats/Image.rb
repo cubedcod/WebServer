@@ -1,3 +1,4 @@
+%w(exif).map{|_| require _}
 module Webize
   module GIF
     class Format < RDF::Format

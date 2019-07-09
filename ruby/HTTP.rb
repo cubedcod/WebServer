@@ -1,14 +1,13 @@
 # coding: utf-8
+%w(brotli cgi httparty open-uri rack).map{|_| require _}
 class WebResource
   module HTTP
-    include MIME
     include URIs
 
     Hosts = {}   # seen hosts
     HostGET = {} # lambda tables
     PathGET = {}
     OFFLINE = ENV.has_key? 'OFFLINE'
-    SiteGIF = ConfDir.join('site.gif').read
 
     def allowedOrigin
       if referer = env['HTTP_REFERER']
@@ -201,32 +200,27 @@ class WebResource
 
     def fetch options = {}
       if this = cached?; return this.fileResponse end
-
-      # request meta
+      # request metadata
       @r ||= {}
       env['HTTP_ACCEPT'] ||= '*/*'
       head = headers
       head.delete 'Cookie' unless options[:cookies]
       head['Accept'] = 'text/turtle' if env['QUERY_STRING'] == 'rdf' # request graph-data
       head[:redirect] = false                                        # halt on redirect
-      qs = if @r[:query]
-             q = @r[:query].dup || {}                                # copy qs
-             %w{group view rdf solid-ui sort ui}.map{|a|q.delete a}  # strip local args
-             q.empty? ? '' : HTTP.qs(q)                              # unparse qs
-           else
-             qs
-           end
-      u = if suffix = ext.empty? && host.match?(/reddit.com$/) && !upstreamUI? && '.rss'
-            '//' + (env['HTTP_HOST'] || host) + path + suffix + qs                  # insert format-suffix
-          else
-            '//' + (env['HTTP_HOST'] || host) + (env['REQUEST_URI'] || (path + qs)) # original URL
-          end
+      qStr = if @r[:query]
+               q = @r[:query].dup || {}                              # copy qs
+              %w{group view rdf solid-ui sort ui}.map{|a|q.delete a} # consume local args
+               q.empty? ? '' : HTTP.qs(q)                            # unparse qs
+             else
+               qs
+             end
+      suffix = ext.empty? && host.match?(/reddit.com$/) && !upstreamUI? && '.rss'
+      u = '//' + (env['HTTP_HOST'] || host) + (suffix ? (path + suffix + qStr) : (env['REQUEST_URI'] || (path + qStr)))
       url      = (options[:scheme] || 'https').to_s    + ':' + u # primary URL
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u # fallback URL
       options[:content_type] = 'application/atom+xml' if FeedURL[u]  # ignore upstream feed MIME
       options[:cookies] = true if host.match? POSThost # allow cookies
-
-      # response meta
+      # response metadata
       status = nil; meta = {}; body = nil
       format = nil; file = nil
       graph = options[:graph] || RDF::Repository.new
@@ -234,12 +228,12 @@ class WebResource
 
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
-        #HTTP.print_header head; puts "^^^vvv"
+        HTTP.print_header head; puts "^^^vvv"
         begin
           open(url, head) do |response|
             status = response.status.to_s.match(/\d{3}/)[0]
             meta = response.meta
-            #HTTP.print_header meta
+            HTTP.print_header meta
             allowed_meta = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag}
             allowed_meta.push 'Set-Cookie' if options[:cookies]
             allowed_meta.map{|k| @r[:Response][k] ||= meta[k.downcase] if meta[k.downcase]}

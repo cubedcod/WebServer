@@ -318,8 +318,4 @@ class WebResource
     end
 
   end
-  module URIs
-    FeedURL = {}
-    ConfDir.join('feeds/*.u').R.glob.map{|list| list.lines.map{|u| FeedURL[u] = u.R }}
-  end
 end

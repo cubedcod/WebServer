@@ -1,3 +1,4 @@
+%w(date icalendar).map{|_| require _}
 module Webize
   module Calendar
     class Format < RDF::Format

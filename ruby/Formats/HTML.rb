@@ -1,4 +1,5 @@
 # coding: utf-8
+%w(nokogiri redcarpet).map{|_| require _}
 module Webize
   module HTML
 
@@ -298,9 +299,6 @@ class WebResource
           cursor[:RDF] = node # new node
         end}
       tree }
-
-    SiteCSS = ConfDir.join('site.css').read
-    SiteJS  = ConfDir.join('site.js').read
 
     def self.colorize bg = true
       "#{bg ? 'color' : 'background-color'}: black; #{bg ? 'background-' : ''}color: #{'#%06x' % (rand 16777216)}"

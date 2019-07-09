@@ -1,3 +1,4 @@
+require 'json'
 module Webize
   module JS
     class Format < RDF::Format

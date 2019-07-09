@@ -1,3 +1,4 @@
+require 'mail'
 module Webize
   module Mail
     class Format < RDF::Format

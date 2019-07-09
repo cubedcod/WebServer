@@ -28,11 +28,21 @@ module Webize
   end
 end
 class WebResource
+  module URIs
+
+    FeedURL = {}
+    ConfDir.join('feeds/*.u').R.glob.map{|list|
+      list.lines.map{|u|
+        FeedURL[u] = u.R }}
+
+    SiteGIF = ConfDir.join('site.gif').read
+    SiteCSS = ConfDir.join('site.css').read
+    SiteJS  = ConfDir.join('site.js').read
+
+  end
   module HTTP
 
     DesktopUA = 'Mozilla/5.0 (X11; Linux RISC-V; rv:69.0) Gecko/20100101 Firefox/69.0'
-
-    # track hosts
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
 
     # POSTs, allow in pattern and define handler if needed
