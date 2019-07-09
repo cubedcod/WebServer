@@ -228,12 +228,12 @@ class WebResource
 
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
-        HTTP.print_header head; puts "^^^vvv"
+        #HTTP.print_header head; puts "^^^vvv"
         begin
           open(url, head) do |response|
             status = response.status.to_s.match(/\d{3}/)[0]
             meta = response.meta
-            HTTP.print_header meta
+            #HTTP.print_header meta
             allowed_meta = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag}
             allowed_meta.push 'Set-Cookie' if options[:cookies]
             allowed_meta.map{|k| @r[:Response][k] ||= meta[k.downcase] if meta[k.downcase]}
