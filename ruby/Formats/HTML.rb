@@ -6,6 +6,7 @@ module Webize
     def self.clean body
       # parse
       html = Nokogiri::HTML.fragment body
+
       # strip elements
       %w{iframe link[rel='stylesheet'] style link[type='text/javascript'] link[as='script'] script}.map{|s| html.css(s).remove}
       # strip Javascript and tracking-images
@@ -29,6 +30,7 @@ module Webize
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
           # strip attributes
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor class height layout ping role style tabindex target width}.member?(a.name)}}
+
       # unparse
       html.to_xhtml(:indent => 0)
     end
@@ -175,16 +177,18 @@ sidebar [class^='side']    [id^='side']
           if k = (m.attr("name") || m.attr("property")) # predicate
             if v = m.attr("content")                    # object
 
-              # normalize predicates
+              # map predicates
               k = {
                 'al:ios:url' => :drop,
                 'apple-itunes-app' => :drop,
                 'article:modified_time' => Date,
                 'article:published_time' => Date,
                 'description' => Abstract,
+                'enabled-features' => :drop,
                 'fb:admins' => :drop,
                 'fb:pages' => :drop,
                 'image' => Image,
+                'js-proxy-site-detection-payload' => :drop,
                 'msapplication-TileImage' => Image,
                 'og:description' => Abstract,
                 'og:image' => Image,
