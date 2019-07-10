@@ -205,6 +205,12 @@ class WebResource
         r.remote
       end}
 
+    # WordPress
+    HostGET['i0.wp.com'] = HostGET['i1.wp.com'] = HostGET['i2.wp.com'] = -> r {
+      r.qs.empty? ? r.noexec : [301, {'Location' => r.env['REQUEST_PATH']}, []]
+    }
+
+    # Yahoo!
     HostGET['s.yimg.com'] = -> r {
       parts = r.path.split /https?:\/+/
       if parts.size > 1
