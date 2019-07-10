@@ -187,6 +187,7 @@ sidebar [class^='side']    [id^='side']
                 'enabled-features' => :drop,
                 'fb:admins' => :drop,
                 'fb:pages' => :drop,
+                'google-site-verification' => :drop,
                 'image' => Image,
                 'js-proxy-site-detection-payload' => :drop,
                 'msapplication-TileImage' => Image,
