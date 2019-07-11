@@ -365,6 +365,7 @@ class WebResource
                               href: HTTP.qs(tabular ? q.reject{|k,v|k=='view'} : q.merge({'view' => 'table', 'sort' => 'date'})), c: '↨'},
                              {_: :a, id: :shrink, style: shrunken ? 'color: #fff' : 'color: #555',
                               href: HTTP.qs(shrunken ? q.reject{|k,v|k=='head'} : q.merge({'head' => ''})), c: shrunken ? '&#9661;' : '&#9651;'},
+                             {_: :a, id: :ui, style: 'color: #555', href: HTTP.qs(q.merge({'ui' => ''})), c: '⚗'},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              unless local?
                                {class: :toolbox,

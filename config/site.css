@@ -3,11 +3,11 @@
 #prev {left:  0}
 #prev, #next {position: fixed; top: 0; height: 100%; max-width: 1em}
 #prev, #next, #up, #down {font-size: 2em; margin: 0; padding: 0}
-#prev, #next, #up, #down, #tabular, #shrink {color: #fff; background-color: #000; border-width: 0}
+#prev, #next, #up, #down, #tabular, #shrink, #ui {color: #fff; background-color: #000; border-width: 0}
 #subscribe {vertical-align: top}
 #subscribe.off {color: #777; background-color: #000; border: .1em solid #555}
 #subscribe.on  {color: #000; background-color: #fff}
-#tabular, #shrink {font-size: 1.8em}
+#tabular, #shrink, #ui {font-size: 1.8em}
 #tabular, #up {vertical-align: top}
 .bold {font-weight: bold; font-size: 1.1em}
 .group > .label {font-size: 1.2em; font-weight: bold; color: #000}

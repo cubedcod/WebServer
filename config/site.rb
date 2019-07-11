@@ -113,6 +113,11 @@ class WebResource
     HostGET['www.bing.com'] = -> r {
       (%w(fd hamburger Identity notifications secure).member?(r.parts[0]) || r.path.index('/api/ping') == 0) ? r.deny : r.desktop.fetch}
 
+    # BusinessWire
+    HostGET['cts.businesswire.com'] = -> r {
+      r.q.has_key?('url') ? [301, {'Location' => r.q['url']}, []] : r.deny
+    }
+
     # DartSearch
     HostGET['clickserve.dartsearch.net'] = -> r {[301,{'Location' => r.q['ds_dest_url']}, []]}
 
