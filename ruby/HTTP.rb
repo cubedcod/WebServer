@@ -219,7 +219,7 @@ class WebResource
       url      = (options[:scheme] || 'https').to_s    + ':' + u # primary URL
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u # fallback URL
       options[:content_type] = 'application/atom+xml' if FeedURL[u]  # ignore upstream feed MIME
-      options[:cookies] = true if host.match? POSThost # allow cookies
+      options[:cookies] = true if host.match?(POSThost) || host.match?(TrackHost) # allow cookies
       # response metadata
       status = nil; meta = {}; body = nil
       format = nil; file = nil
@@ -632,7 +632,7 @@ class WebResource
       head
     end
 
-    def upstreamUI?; q.has_key?('ui') || env['HTTP_USER_AGENT'] == DesktopUA || host.match?(/(mix|sound)cloud.com/) end
+    def upstreamUI?; q.has_key?('ui') || env['HTTP_USER_AGENT'] == DesktopUA || host.match?(/(bandcamp|(mix|sound)cloud).com/) end
   end
   include HTTP
 end
