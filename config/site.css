@@ -27,7 +27,7 @@ a.link, .thumb {background-color: #fff; color: #000}
 a.title > span.uri {font-size: .7em; font-weight: normal; background-color: #aaa}
 a.title {float: left; vertical-align: top; background-color: #ddd; color: #000; font-size: 1.1em; font-weight: bold }
 a.title:visited > span.uri {background-color: #111; color: #aaa}
-a.title:visited {background-color: #111; color: #ccc}
+a:visited {background-color: #111; color: #ccc}
 body {font-family: sans-serif; margin: 0 2em 0 2em}
 body, pre, p, span, li, time, td.v {background-color: #000; color: #fff}
 div, td {padding: 0}
@@ -45,5 +45,5 @@ table.tabular td.v {vertical-align: top; border-color: #888; border-style: solid
 td.k > a {background-color: #111; color: #fff}
 td.k {max-width: 32ex; overflow: hidden; text-align: right}
 td.v div {border: .05em solid #333}
-tr[name="title"] > td.v {max-width: 40ex; overflow: hidden}
 tr[name="articleBody"] > td.v {max-width: 100ex; overflow: hidden}
+tr[name="title"] > td.v {max-width: 40ex; overflow: hidden}

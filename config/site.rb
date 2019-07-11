@@ -202,6 +202,7 @@ class WebResource
       [re.code, re.headers, [re.body]]}
 
     # Twitter
+    HostGET['t.co'] = -> r {r.parts[0] == 'i' ? r.drop : r.noexec}
     HostGET['twitter.com'] = -> r {
       if !r.path || r.path == '/'
         graph = RDF::Repository.new
