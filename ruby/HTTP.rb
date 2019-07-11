@@ -267,8 +267,8 @@ class WebResource
           when /403/ # forbidden
             status = 403
             puts "403 #{url}"
-          when /404/ # not found
-            status = 404
+          #when /404/ # not found
+          #  status = 404
           else
             raise
           end
