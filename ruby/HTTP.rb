@@ -219,12 +219,12 @@ class WebResource
       url      = (options[:scheme] || 'https').to_s    + ':' + u # primary URL
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u # fallback URL
       options[:content_type] = 'application/atom+xml' if FeedURL[u]  # ignore upstream feed MIME
-      options[:cookies] = true if host.match?(TrackHost) || host.match?(POSThost) || host.match?(TrackHost)
-      # response metadata
+      options[:cookies] = true if host.match?(TrackHost) || host.match?(POSThost) #|| host.match?(CookieHost)
+      # response metadata allocation
       status = nil; meta = {}; body = nil
       format = nil; file = nil
       graph = options[:graph] || RDF::Repository.new
-      @r[:Response] ||= {}
+      @r[:Response] ||= {} # TODO remove this and query graph for doc-uri
 
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
@@ -634,7 +634,7 @@ class WebResource
       head
     end
 
-    def upstreamUI?; q.has_key?('ui') || env['HTTP_USER_AGENT'] == DesktopUA || host.match?(/(bandcamp|(mix|sound)cloud).com/) end
+    def upstreamUI?; q.has_key?('ui') || env['HTTP_USER_AGENT'] == DesktopUA || host.match?(UIhost) end
   end
   include HTTP
 end
