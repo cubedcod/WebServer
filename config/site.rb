@@ -41,7 +41,7 @@ class WebResource
 
   end
   module HTTP
-
+    CookieHost = /outline(api)?\.com$/
     DesktopUA = 'Mozilla/5.0 (X11; Linux RISC-V; rv:69.0) Gecko/20100101 Firefox/69.0'
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
 
@@ -167,6 +167,8 @@ class WebResource
     # Outline
     HostGET['outline.com'] = -> r {
       if r.parts.size == 1 && r.parts[0] != 'favicon.ico'
+        r.env['HTTP_ORIGIN'] = 'https://outline.com'
+        r.env['HTTP_REFERER'] = r.env['HTTP_ORIGIN'] + r.path
         r.env['HTTP_HOST'] = 'outlineapi.com'
         r.env['REQUEST_URI'] = '/v4/get_article?id=' + r.parts[0]
         r.fetch

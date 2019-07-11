@@ -219,7 +219,7 @@ class WebResource
       url      = (options[:scheme] || 'https').to_s    + ':' + u # primary URL
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u # fallback URL
       options[:content_type] = 'application/atom+xml' if FeedURL[u]  # ignore upstream feed MIME
-      options[:cookies] = true if host.match?(POSThost) || host.match?(TrackHost) # allow cookies
+      options[:cookies] = true if host.match?(TrackHost) || host.match?(POSThost) || host.match?(TrackHost)
       # response metadata
       status = nil; meta = {}; body = nil
       format = nil; file = nil
@@ -227,13 +227,13 @@ class WebResource
       @r[:Response] ||= {}
 
       fetchURL = -> url {
-        print '🌍🌎🌏'[rand 3] , ' '
-        #HTTP.print_header head; puts "^^^vvv"
+        print '🌍🌎🌏'[rand 3] , ' ', url, ' '
+        HTTP.print_header head; puts "^^^vvv"
         begin
           open(url, head) do |response|
             status = response.status.to_s.match(/\d{3}/)[0]
             meta = response.meta
-            #HTTP.print_header meta
+            HTTP.print_header meta
             allowed_meta = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag}
             allowed_meta.push 'Set-Cookie' if options[:cookies]
             allowed_meta.map{|k| @r[:Response][k] ||= meta[k.downcase] if meta[k.downcase]}
@@ -263,8 +263,10 @@ class WebResource
             status = 304
           when /401/ # unauthorized
             status = 401
+            puts "401 #{url}"
           when /403/ # forbidden
             status = 403
+            puts "403 #{url}"
           when /404/ # not found
             status = 404
           else
