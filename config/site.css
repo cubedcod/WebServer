@@ -2,18 +2,14 @@
 #next {right: 0}
 #prev {left:  0}
 #prev, #next {position: fixed; top: 0; height: 100%; max-width: 1em}
-#prev, #next, #up, #down {font-size: 2em; margin: 0; padding: 0}
-#prev, #next, #up, #down, #tabular, #shrink, #ui {color: #fff; background-color: #000; border-width: 0}
-#subscribe {vertical-align: top}
+#prev, #next, #up, #down, #tabular, #shrink, #ui {font-size: 1.8em; margin: 0; padding: 0; color: #fff; background-color: #000; border-width: 0; display: inline-block}
+#subscribe {float: right}
 #subscribe.off {color: #777; background-color: #000; border: .1em solid #555}
 #subscribe.on  {color: #000; background-color: #fff}
-#tabular, #shrink, #ui {font-size: 1.8em}
-#tabular, #up {vertical-align: top}
 .bold {font-weight: bold; font-size: 1.1em}
 .group > .label {font-size: 1.2em; font-weight: bold; color: #000}
 .group {margin-bottom: .5em; margin-right: .5em; border-radius: .2em .8em .8em .8em}
 .post {background-color: #000; color: #fff; max-width: 127ex; margin: .08em; border: .08em solid #333; border-radius: .38em}
-.toolbox {position: fixed; top: 0; right: 0; z-index: 1}
 .tree > .label {font-size: .8em}
 .tree > a.label {color: #ccc}
 .tree > span.label {display: none}

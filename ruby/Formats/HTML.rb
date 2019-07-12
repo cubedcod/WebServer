@@ -350,8 +350,7 @@ class WebResource
       # Markup -> HTML
       HTML.render ["<!DOCTYPE html>\n\n",
                    {_: :html,
-                    c: ["\n\n",
-                        {_: :head,
+                    c: [{_: :head,
                          c: [{_: :meta, charset: 'utf-8'},
                              ({_: :title, c: CGI.escapeHTML(graph[titleRes][Title].map(&:to_s).join ' ')} if titleRes),
                              {_: :style, c: ["\n", SiteCSS]}, "\n",
@@ -360,16 +359,14 @@ class WebResource
                                  {_: :link, rel: type, href: CGI.escapeHTML(uri.to_s)}}
                             ].map{|e|['  ',e,"\n"]}}, "\n\n",
                         {_: :body,
-                         c: ["\n", link[:up, '&#9650;'], link[:prev, '&#9664;'], link[:next, '&#9654;'],
+                         c: [link[:up, '&#9650;'], link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              {_: :a, id: :tabular, style: tabular ? 'color: #fff' : 'color: #555',
                               href: HTTP.qs(tabular ? q.reject{|k,v|k=='view'} : q.merge({'view' => 'table', 'sort' => 'date'})), c: '↨'},
                              {_: :a, id: :shrink, style: shrunken ? 'color: #fff' : 'color: #555',
                               href: HTTP.qs(shrunken ? q.reject{|k,v|k=='head'} : q.merge({'head' => ''})), c: shrunken ? '&#9661;' : '&#9651;'},
                              unless local?
                                [{_: :a, id: :ui, style: 'color: #555', href: HTTP.qs(q.merge({'ui' => ''})), c: '⚗'},
-                                {class: :toolbox,
-                                c: {_: :a, id: :subscribe,
-                                    href: '/' + (subbed ? 'un' : '') + 'subscribe' + HTTP.qs({u: 'https://' + host + (@r['REQUEST_URI'] || path)}), class: subbed ? :on : :off, c: 'subscribe' + (subbed ? 'd' : '')}}]
+                                {_: :a, id: :subscribe, href: '/' + (subbed ? 'un' : '') + 'subscribe' + HTTP.qs({u: 'https://' + host + (@r['REQUEST_URI'] || path)}), class: subbed ? :on : :off, c: 'subscribe' + (subbed ? 'd' : '')}]
                              end,
                              if graph.empty?
                                HTML.keyval (Webize::HTML.webizeHash @r), @r # 404
