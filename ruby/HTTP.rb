@@ -425,9 +425,11 @@ class WebResource
         fileResponse
       else
         graph = RDF::Repository.new
-        nodes.map{|node|node.load graph, base_uri: 'http://localhost:8000/'.R.join(node) if node.file?} # read RDF
+        nodes.map{|node|
+          node.load graph, base_uri: 'http://localhost:8000/'.R.join(node) if node.file?} # read RDF
         index graph
-        nodes.map{|node|node.fsMeta graph unless node.ext == 'ttl'} # file metadata (hide graph-storage nodes)
+        nodes.map{|node|
+          node.fsMeta graph unless node.ext=='ttl' || node.basename.split('.')[0]=='msg' }
         graphResponse graph
       end
     end
