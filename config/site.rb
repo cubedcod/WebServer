@@ -42,7 +42,6 @@ class WebResource
   end
   module HTTP
 
-    #CookieHost = /outline(api)?\.com$/
     DesktopUA = 'Mozilla/5.0 (X11; Linux RISC-V; rv:69.0) Gecko/20100101 Firefox/69.0'
     POSThost = /(^|\.)(anvato|brightcove|git(lab|ter)|reddit|(mix|sound)cloud|youtube)\.(com|im|net)$/
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/

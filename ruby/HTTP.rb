@@ -130,7 +130,8 @@ class WebResource
         body
       end
     rescue Zlib::DataError
-      puts body
+      puts "Zlib error on #{uri}"
+      ''
     end
 
     def deny status = 200
@@ -222,7 +223,7 @@ class WebResource
       url      = (options[:scheme] || 'https').to_s    + ':' + u # primary URL
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u # fallback URL
       options[:content_type] = 'application/atom+xml' if FeedURL[u]  # ignore upstream feed MIME
-      options[:cookies] = true if host.match?(TrackHost) || host.match?(POSThost) #|| host.match?(CookieHost)
+      options[:cookies] = true if host.match?(TrackHost) || host.match?(POSThost)
       # response metadata allocation
       status = nil; meta = {}; body = nil
       format = nil; file = nil
