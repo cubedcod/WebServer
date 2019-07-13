@@ -63,7 +63,7 @@ class WebResource
         referer  = env['HTTP_REFERER'] ? (" \e[" + color + ";7m" + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m -> ") : ' '
         content_type = head['Content-Type'] == 'text/turtle; charset=utf-8' ? '🐢' : (head['Content-Type'] || '')
 
-        puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + "\e[" + color + "m "  + status.to_s + "\e[0m" + referer + "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs + "\e[0m " + location #+ ' ' + content_type + ' ' + (env['HTTP_ACCEPT'] || '')
+        puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + "\e[" + color + "m "  + status.to_s + "\e[0m" + referer + "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs + "\e[0m " + location #+ ' ' + content_type + ' :: ' + (env['HTTP_ACCEPT'] || '')
 
         [status, head, body]} # response
     rescue Exception => e
@@ -129,6 +129,8 @@ class WebResource
       else
         body
       end
+    rescue Zlib::DataError
+      puts body
     end
 
     def deny status = 200
@@ -268,8 +270,8 @@ class WebResource
           when /403/ # forbidden
             status = 403
             puts "403 #{url}"
-          #when /404/ # not found
-          #  status = 404
+          when /404/ # not found
+            status = 404
           else
             raise
           end
