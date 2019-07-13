@@ -22,7 +22,8 @@ class WebResource
     # cache location
     def cache format=nil
       (CacheDir + host +
-       ((!path || path[-1] == '/') ? '/index' : (path.size > 127 ? Digest::SHA2.hexdigest(path).yield_self{|p| '/' + p[0..1] + '/' + p[2..-1]} : path)) +
+       ((!path || path[-1] == '/') ? '/index' : (path.size > 127 ? Digest::SHA2.hexdigest(path).yield_self{|p|
+                                                                                '/' + p[0..1] + '/' + p[2..-1]} : path)) +
        (qs.empty? ? '' : ('.' + Digest::SHA2.hexdigest(qs))) +
        ((format && ext.empty? && Extensions[RDF::Format.content_types[format]]) ? ('.' + Extensions[RDF::Format.content_types[format]].to_s) : '')).R env
     end
@@ -40,8 +41,8 @@ class WebResource
       path = Pathname.new(env['REQUEST_PATH'].force_encoding('UTF-8')).expand_path.to_s # evaluate path
       query = env[:query] = parseQs env['QUERY_STRING']                                 # parse query
       resource = ('//' + env['SERVER_NAME'] + path).R env                               # instantiate resource
-      resource.send(env['REQUEST_METHOD']).yield_self{|status,head,body| # dispatch
-        color = (if resource.env[:deny]                                  # log
+      resource.send(env['REQUEST_METHOD']).yield_self{|status,head,body|                # dispatch
+        color = (if resource.env[:deny]                                                 # log
                   '31' # red :: blocked
                 elsif !Hosts.has_key? env['SERVER_NAME']
                   Hosts[env['SERVER_NAME']] = resource
