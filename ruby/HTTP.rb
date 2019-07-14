@@ -324,7 +324,7 @@ class WebResource
       else                      # graph data
         if graph.empty? && !local? && env['REQUEST_PATH'][-1]=='/' # unlistable remote
           index = (CacheDir + host + path).R                       # local index
-          index.children.map{|e| e.fsMeta graph, base_uri: 'https://' + e.relPath} if index.node.directory?
+          index.children.map{|e| e.fsStat graph, base_uri: 'https://' + e.relPath} if index.node.directory?
         end
         graphResponse graph
       end
@@ -433,7 +433,7 @@ class WebResource
           node.load graph, base_uri: 'http://localhost:8000/'.R.join(node) if node.file?} # read RDF
         index graph
         nodes.map{|node|
-          node.fsMeta graph unless node.ext=='ttl' || node.basename.split('.')[0]=='msg' }
+          node.fsStat graph unless node.ext=='ttl' || node.basename.split('.')[0]=='msg' }
         graphResponse graph
       end
     end

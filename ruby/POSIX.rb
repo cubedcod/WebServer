@@ -27,12 +27,10 @@ class WebResource
     def stripDoc; uri.sub(/\.(html|json|md|ttl|txt)$/,'').R end
     def touch; dir.mkdir; FileUtils.touch relPath end                      # TOUCH(1)
     def writeFile o; dir.mkdir; File.open(relPath,'w'){|f|f << o}; self end
-
-    # STAT(1) fs metadata -> RDF::Graph
-    def fsMeta graph, options = {}
+    def fsStat graph, options = {}                                         # STAT(1)
       subject = options[:base_uri]&.R || self
       if node.directory?
-        subject = subject.path[-1] == '/' ? subject : (subject + '/') # ensure trailing-slash on container URI
+        subject = subject.path[-1] == '/' ? subject : (subject + '/') # normalize trailing-slash
         graph << (RDF::Statement.new subject, Type.R, (W3 + 'ns/ldp#Container').R)
       else
         graph << (RDF::Statement.new subject, Type.R, (W3 + 'ns/posix/stat#File').R)
