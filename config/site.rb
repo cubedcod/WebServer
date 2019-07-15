@@ -41,8 +41,8 @@ class WebResource
 
   end
   module HTTP
-
     DesktopUA = 'Mozilla/5.0 (X11; Linux RISC-V; rv:69.0) Gecko/20100101 Firefox/69.0'
+
     POSThost = /(^|\.)(anvato|brightcove|git(lab|ter)|reddit|(mix|sound)cloud|youtube)\.(com|im|net)$/
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
     UIhost = /(anvato|bandcamp|(mix|sound)cloud).(com|net)$/

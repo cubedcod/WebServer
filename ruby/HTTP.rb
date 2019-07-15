@@ -202,33 +202,29 @@ class WebResource
     PathGET['/favicon.ico']  = -> r {r.upstreamUI? ? r.fetch : [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
     PathGET['/common/js/mashlib.min.js'] = -> r {'/common/js/mashlib.min.js'.R(r.env).fileResponse}
 
-    def fetch options = {}
+    def fetch options = {} ; @r ||= {}
       if this = cached?; return this.fileResponse end
-      # request metadata
-      @r ||= {}
-      env['HTTP_ACCEPT'] ||= '*/*'
-      head = headers
-      head.delete 'Cookie' unless options[:cookies]
-      head['Accept'] = 'text/turtle' if env['QUERY_STRING'] == 'rdf' # request graph-data
+      options[:cookies] ||= true if host.match?(TrackHost) || host.match?(POSThost)
+      options[:content_type] = 'application/atom+xml' if FeedURL[u]  # fix MIME on feed URLs
+      env['HTTP_ACCEPT'] ||= '*/*'                                   # Accept header default
+      head = headers                                                 # read headers
       head[:redirect] = false                                        # halt on redirect
-      qStr = if @r[:query]
-               q = @r[:query].dup || {}                              # copy qs
+      head['Accept'] = 'text/turtle' if env['QUERY_STRING'] == 'rdf' # prefer graph-data
+      head.delete 'Cookie' unless options[:cookies]                  # allow/deny cookies
+      qStr = if @r[:query]                                           # query?
+               q = @r[:query].dup || {}                              # read query
               %w{group view rdf solid-ui sort ui}.map{|a|q.delete a} # consume local args
-               q.empty? ? '' : HTTP.qs(q)                            # unparse qs
+               q.empty? ? '' : HTTP.qs(q)                            # external querystring
              else
                qs
              end
-      suffix = ext.empty? && host.match?(/reddit.com$/) && !upstreamUI? && '.rss'
-      u = '//' + (env['HTTP_HOST'] || host) + (suffix ? (path + suffix + qStr) : (env['REQUEST_URI'] || (path + qStr)))
-      url      = (options[:scheme] || 'https').to_s    + ':' + u # primary URL
-      fallback = (options[:scheme] ? 'https' : 'http') + ':' + u # fallback URL
-      options[:content_type] = 'application/atom+xml' if FeedURL[u]  # ignore upstream feed MIME
-      options[:cookies] = true if host.match?(TrackHost) || host.match?(POSThost)
-      # response metadata allocation
-      status = nil; meta = {}; body = nil
-      format = nil; file = nil
-      graph = options[:graph] || RDF::Repository.new
-      @r[:Response] ||= {} # TODO remove this and query graph for doc-uri
+      suffix = ext.empty? && host.match?(/reddit.com$/) && !upstreamUI? && '.rss' # add format suffix
+      u = '//' + (env['HTTP_HOST'] || host) + (suffix ? (path + suffix + qStr) : (env['REQUEST_URI'] || (path + qStr))) # schemeless URL
+      url      = (options[:scheme] || 'https').to_s    + ':' + u    # primary locator
+      fallback = (options[:scheme] ? 'https' : 'http') + ':' + u    # fallback locator
+      status = nil; meta = {}; body = nil; format = nil; file = nil # response-metadata allocations
+      graph = options[:graph] || RDF::Repository.new                # response graph
+      @r[:Response] ||= {} # TODO remove this and insert/query response-graph
 
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
