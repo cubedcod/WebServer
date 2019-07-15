@@ -633,20 +633,18 @@ class WebResource
            }]}.update(css ? css : {})
     end
 
-    # tree with nested S -> P -> O indexing (renderer input)
-    def treeFromGraph graph
-      g = {}                    # empty tree
+    # tree with S -> P -> O indexing
+    def treeFromGraph graph ; tree = {}
       head = q.has_key? 'head'
-      # traverse
-      graph.each_triple{|s,p,o| # (subject,predicate,object) triple
-        s = s.to_s; p = p.to_s  # subject, predicate
+      graph.each_triple{|s,p,o|
+        s = s.to_s; p = p.to_s # subject URI, predicate URI
         unless head && p == Content
-          o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object
-          g[s] ||= {'uri'=>s}                     # insert subject
-          g[s][p] ||= []                          # insert predicate
-          g[s][p].push o unless g[s][p].member? o # insert object
+          o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object URI or literal
+          tree[s] ||= {'uri' => s}                      # subject
+          tree[s][p] ||= []                             # predicate
+          tree[s][p].push o unless tree[s][p].member? o # object
         end}
-      g # tree
+      tree
     end
 
     # Markup dispatcher
