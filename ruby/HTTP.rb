@@ -305,12 +305,12 @@ class WebResource
       end unless OFFLINE
 
       return if options[:no_response]
-      if file                   # static content on file
+      if code == 304            # no content
+        [304, {}, []]
+      elsif file                # static content from file
         file.fileResponse
       elsif code == 206         # partial content from upstream
         [206, meta, [body]]
-      elsif code == 304         # no content
-        [304, {}, []]
       elsif upstreamUI? && body # static content from upstream
         [200, {'Content-Type' => format, 'Content-Length' => body.bytesize.to_s}, [body]]
       else                      # transformable content
