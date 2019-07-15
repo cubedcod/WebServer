@@ -1,5 +1,5 @@
 # coding: utf-8
-%w(nokogiri redcarpet).map{|_| require _}
+require 'nokogiri'
 module Webize
   module HTML
 
@@ -678,24 +678,6 @@ class WebResource
     end
   end
   include HTML
-end
-
-module Redcarpet
-  module Render
-    class Pygment < HTML
-      def block_code(code, lang)
-        if lang
-          IO.popen("pygmentize -l #{lang.downcase.sh} -f html",'r+'){|p|
-            p.puts code
-            p.close_write
-            p.read
-          }
-        else
-          code
-        end
-      end
-    end
-  end
 end
 
 class String

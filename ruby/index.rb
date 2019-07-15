@@ -37,8 +37,10 @@ class WebResource < RDF::URI
   include URIs
 end
 
-%w(POSIX HTTP).map{|_|                                                require_relative _}
-%w(Audio Calendar CSS Feed HTML Image JS Mail PDF Text Video Web).map{|_| require_relative 'Formats/'+_}
+%w(POSIX HTTP).map{|_|
+  require_relative  _}
+%w(Audio Calendar CSS Feed HTML Image JS Mail Markdown PDF Text Video Web).map{|_|
+  require_relative 'Formats/'+_}
 
 class WebResource
   module URIs

@@ -1,3 +1,4 @@
+require 'redcarpet'
 module Webize
   module Markdown
     class Format < RDF::Format
@@ -35,6 +36,24 @@ module Webize
 
       def markdown_triples
         yield @subject, Content, ::Redcarpet::Markdown.new(::Redcarpet::Render::Pygment, fenced_code_blocks: true).render(@doc)
+      end
+    end
+  end
+end
+
+module Redcarpet
+  module Render
+    class Pygment < HTML
+      def block_code(code, lang)
+        if lang
+          IO.popen("pygmentize -l #{Shellwords.escape lang.downcase} -f html",'r+'){|p|
+            p.puts code
+            p.close_write
+            p.read
+          }
+        else
+          code
+        end
       end
     end
   end
