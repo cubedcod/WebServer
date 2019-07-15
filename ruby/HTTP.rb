@@ -37,7 +37,7 @@ class WebResource
 
     def self.call env
       return [405,{},[]] unless %w{GET HEAD OPTIONS POST}.member? env['REQUEST_METHOD'] # allow methods
-      env[:Response] = {}; env[:links] = {}                                             # metadata storage
+      env[:resp] = {}; env[:links] = {}                                             # metadata storage
       path = Pathname.new(env['REQUEST_PATH'].force_encoding('UTF-8')).expand_path.to_s # evaluate path
       query = env[:query] = parseQs env['QUERY_STRING']                                 # parse query
       resource = ('//' + env['SERVER_NAME'] + path).R env                               # instantiate resource
@@ -172,7 +172,7 @@ class WebResource
 
     def entity generator = nil
       entities = env['HTTP_IF_NONE_MATCH']&.strip&.split /\s*,\s*/ # entities
-      if entities && entities.include?(env[:Response]['ETag']) # client has entity
+      if entities && entities.include?(env[:resp]['ETag']) # client has entity
         [304, {}, []]                            # not modified
       else                                       # generate
         body = generator ? generator.call : self # call generator
@@ -182,10 +182,10 @@ class WebResource
             [s, {}, []]                          # not modified
           else
             h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type'] == 'application/javascript'
-            [s, h.update(env[:Response]), b]     # file response
+            [s, h.update(env[:resp]), b]     # file response
           end}
         else
-          [env[:status] || 200, env[:Response], [body]] # generated response
+          [env[:status] || 200, env[:resp], [body]] # generated response
         end
       end
     end
@@ -205,38 +205,34 @@ class WebResource
     def fetch options = {} ; @r ||= {}
       if this = cached?; return this.fileResponse end
       options[:cookies] ||= true if host.match?(TrackHost) || host.match?(POSThost)
-      options[:content_type] = 'application/atom+xml' if FeedURL[u]  # fix MIME on feed URLs
-      env['HTTP_ACCEPT'] ||= '*/*'                                   # Accept header default
-      head = headers                                                 # read headers
-      head[:redirect] = false                                        # halt on redirect
-      head['Accept'] = 'text/turtle' if env['QUERY_STRING'] == 'rdf' # prefer graph-data
-      head.delete 'Cookie' unless options[:cookies]                  # allow/deny cookies
-      qStr = if @r[:query]                                           # query?
-               q = @r[:query].dup || {}                              # read query
-              %w{group view rdf solid-ui sort ui}.map{|a|q.delete a} # consume local args
-               q.empty? ? '' : HTTP.qs(q)                            # external querystring
-             else
-               qs
-             end
+      env['HTTP_ACCEPT'] ||= '*/*'                                 # Accept header default
+      head = headers                                               # read headers
+      head[:redirect] = false                                      # halt on redirect
+      head['Accept'] = 'text/turtle' if env['QUERY_STRING']=='rdf' # prefer graph-data
+      head.delete 'Cookie' unless options[:cookies]                # allow/deny cookies
+      qStr = @r[:query] ? (                                        # query?
+        q = @r[:query].dup                                         # load query
+        %w{group view rdf solid-ui sort ui}.map{|a|q.delete a}     # consume local args
+        q.empty? ? '' : HTTP.qs(q)) : qs                           # external querystring
       suffix = ext.empty? && host.match?(/reddit.com$/) && !upstreamUI? && '.rss' # add format suffix
-      u = '//' + (env['HTTP_HOST'] || host) + (suffix ? (path + suffix + qStr) : (env['REQUEST_URI'] || (path + qStr))) # schemeless URL
-      url      = (options[:scheme] || 'https').to_s    + ':' + u    # primary locator
-      fallback = (options[:scheme] ? 'https' : 'http') + ':' + u    # fallback locator
-      status = nil; meta = {}; body = nil; format = nil; file = nil # response-metadata allocations
-      graph = options[:graph] || RDF::Repository.new                # response graph
-      @r[:Response] ||= {} # TODO remove this and insert/query response-graph
+      u = '//'+(env['HTTP_HOST']||host) + (suffix ? (path+suffix+qStr) : (env['REQUEST_URI']||(path+qStr))) # schemeless URL
+      url      = (options[:scheme] || 'https').to_s    + ':' + u   # primary locator
+      fallback = (options[:scheme] ? 'https' : 'http') + ':' + u   # fallback locator
+      options[:content_type]='application/atom+xml' if FeedURL[u]  # fix MIME on feed URLs
+      code=nil;meta={};body=nil;format=nil;file=nil;@r[:resp]||={} # response metadata
+      graph = options[:graph] || RDF::Repository.new               # response graph
 
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
         #HTTP.print_header head; puts "^^^vvv"
         begin
           open(url, head) do |response|
-            status = response.status.to_s.match(/\d{3}/)[0]
+            code = response.status.to_s.match(/\d{3}/)[0]
             meta = response.meta
             #HTTP.print_header meta
             allowed_meta = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag}
             allowed_meta.push 'Set-Cookie' if options[:cookies]
-            allowed_meta.map{|k| @r[:Response][k] ||= meta[k.downcase] if meta[k.downcase]}
+            allowed_meta.map{|k| @r[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
             format = options[:content_type] || meta['content-type'] && meta['content-type'].split(/;/)[0]
             format ||= case ext
                        when 'jpg'
@@ -248,7 +244,7 @@ class WebResource
                        else
                          'text/html'
                        end
-            if status == 206
+            if code == 206
               body = response.read                                                                 # partial body
             else                                                                                   # complete body
               body = decompress meta, response.read; meta.delete 'content-encoding'                # decompress body
@@ -260,15 +256,15 @@ class WebResource
         rescue Exception => e
           case e.message
           when /304/ # no updates
-            status = 304
+            code = 304
           when /401/ # unauthorized
-            status = 401
+            code = 401
             puts "401 #{url}"
           when /403/ # forbidden
-            status = 403
+            code = 403
             puts "403 #{url}"
           when /404/ # not found
-            status = 404
+            code = 404
           else
             raise
           end
@@ -309,18 +305,18 @@ class WebResource
       end unless OFFLINE
 
       return if options[:no_response]
-      if file                   # local static-content
+      if file                   # static content on file
         file.fileResponse
-      elsif 206 == status       # partial remote static-content
-        [status, meta, [body]]
-      elsif 304 == status       # unmodified, no content
+      elsif code == 206         # partial content from upstream
+        [206, meta, [body]]
+      elsif code == 304         # no content
         [304, {}, []]
-      elsif upstreamUI? && body # remote static-content
+      elsif upstreamUI? && body # static content from upstream
         [200, {'Content-Type' => format, 'Content-Length' => body.bytesize.to_s}, [body]]
-      else                      # graph data
-        if graph.empty? && !local? && env['REQUEST_PATH'][-1]=='/' # unlistable remote
-          index = (CacheDir + host + path).R                       # local index
-          index.children.map{|e| e.fsStat graph, base_uri: 'https://' + e.relPath} if index.node.directory?
+      else                      # transformable content
+        if graph.empty? && !local? && env['REQUEST_PATH'][-1]=='/' # unlistable remote container
+          index = (CacheDir + host + path).R                       # local-cache container
+          index.children.map{|e| e.fsStat graph, base_uri: 'https://' + e.relPath} if index.node.directory? # list contents
         end
         graphResponse graph
       end
@@ -328,9 +324,9 @@ class WebResource
 
     def fileResponse
       @r ||= {}
-      @r[:Response] ||= {}
-      @r[:Response]['Access-Control-Allow-Origin'] ||= allowedOrigin
-      @r[:Response]['ETag'] ||= Digest::SHA2.hexdigest [uri, node.stat.mtime, node.size].join
+      @r[:resp] ||= {}
+      @r[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
+      @r[:resp]['ETag'] ||= Digest::SHA2.hexdigest [uri, node.stat.mtime, node.size].join
       entity
     end
 
@@ -352,10 +348,10 @@ class WebResource
       return notfound if graph.empty?
       format = selectFormat
       dateMeta if local?
-      @r[:Response] ||= {}
-      @r[:Response]['Access-Control-Allow-Origin'] ||= allowedOrigin
-      @r[:Response].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})      
-      @r[:Response].update({'Link' => @r[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !@r[:links] || @r[:links].empty?
+      @r[:resp] ||= {}
+      @r[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
+      @r[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})      
+      @r[:resp].update({'Link' => @r[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !@r[:links] || @r[:links].empty?
       entity ->{
         case format
         when /^text\/html/
@@ -420,7 +416,7 @@ class WebResource
                               '/%Y/%m/%d/%H/'
                             else
                             end)
-        [303, @r[:Response].update({'Location' => loc + parts[1..-1].join('/') + qs}), []]
+        [303, @r[:resp].update({'Location' => loc + parts[1..-1].join('/') + qs}), []]
       elsif file?
         fileResponse
       else
