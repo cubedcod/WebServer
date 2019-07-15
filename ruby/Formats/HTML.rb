@@ -9,21 +9,22 @@ module Webize
 
       # strip elements
       %w{iframe link[rel='stylesheet'] style link[type='text/javascript'] link[as='script'] script}.map{|s| html.css(s).remove}
-      # strip Javascript and tracking-images
+
+      # strip Javascript and tracker-images
       html.css('a[href^="javascript"]').map{|a| a.remove }
       %w{quantserve scorecardresearch}.map{|co|
         html.css('img[src*="' + co + '"]').map{|img| img.remove }}
 
-      # lift CSS background-image to image element
+      # CSS:background-image → <img>
       html.css('[style^="background-image"]').map{|node|
         node['style'].match(/url\('([^']+)'/).yield_self{|url|
           node.add_child "<img src=\"#{url[1]}\">" if url}}
+      # <amp-img> → <img>
+      html.css('amp-img').map{|amp|amp.add_child "<img src=\"#{amp['src']}\">"}
 
       # traverse nodes
       html.traverse{|e|
-        # assign link identifier
-        e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) if e['href'] && !e['id']
-        # traverse attribute nodes
+        e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) if e['href'] && !e['id'] # link identifier
         e.attribute_nodes.map{|a|
           # move nonstandard src attrs
           e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-menuimg data-native-src data-original data-src data-src1}.member? a.name
