@@ -1,19 +1,10 @@
 require 'linkeddata'
-
 class RDF::URI
   def R; WebResource.new to_s end
 end
-
 class RDF::Node
   def R; WebResource.new to_s end
 end
-
-class String
-  def R env = nil
-    env ? WebResource.new(self).env(env) : WebResource.new(self)
-  end
-end
-
 class WebResource < RDF::URI
   def R; self end
   alias_method :uri, :to_s
@@ -44,8 +35,6 @@ end
 
 class WebResource
   module URIs
-    CacheDir = '../.cache/web/'
-    ConfDir  = Pathname.new(__dir__).join('../config').relative_path_from Pathname.new Dir.pwd
     Extensions = RDF::Format.file_extensions.invert
   end
 end

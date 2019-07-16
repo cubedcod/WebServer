@@ -26,6 +26,10 @@ class String
     puts "failed to scan #{self}"
     ''
   end
+
+  def R env = nil
+    env ? WebResource.new(self).env(env) : WebResource.new(self)
+  end
 end
 
 module Webize
