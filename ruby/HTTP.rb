@@ -154,7 +154,6 @@ class WebResource
         'Content-Type' => type},
        [content]]
     end
-    alias_method :drop, :deny
 
     def denyPOST
       head = headers
@@ -578,7 +577,7 @@ class WebResource
             puts "ALLOW #{uri}" # notify on console
             fetch
           else
-            drop
+            deny
           end
         when /noexec/
           noexec

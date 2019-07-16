@@ -125,7 +125,7 @@ class WebResource
     HostGET['clickserve.dartsearch.net'] = -> r {[301,{'Location' => r.q['ds_dest_url']}, []]}
 
     # DuckDuckGo
-    HostGET['duckduckgo.com'] = -> r {%w{ac}.member?(r.parts[0]) ? r.drop : r.remote}
+    HostGET['duckduckgo.com'] = -> r {%w{ac}.member?(r.parts[0]) ? r.deny : r.remote}
     HostGET['proxy.duckduckgo.com'] = -> r {%w{iu}.member?(r.parts[0]) ? [301, {'Location' => r.q['u']}, []] : r.remote}
 
     # eBay
@@ -138,7 +138,7 @@ class WebResource
     HostGET['rover.ebay.com'] = -> r {r.q.has_key?('mpre') ? [301, {'Location' => r.q['mpre']}, []] : r.deny}
 
     # Facebook
-    HostGET['facebook.com'] = HostGET['www.facebook.com'] = -> r {%w{connect pages_reaction_units plugins security tr}.member?(r.parts[0]) ? r.drop : r.remote}
+    HostGET['facebook.com'] = HostGET['www.facebook.com'] = -> r {%w{connect pages_reaction_units plugins security tr}.member?(r.parts[0]) ? r.deny : r.remote}
     HostGET['l.instagram.com'] = HostGET['l.facebook.com'] = -> r {[301, {'Location' => r.q['u']},[]]}
 
     # Gitter
@@ -148,7 +148,7 @@ class WebResource
     (0..3).map{|i|HostGET["encrypted-tbn#{i}.gstatic.com"] = -> r {r.noexec}}
     HostGET['ajax.googleapis.com'] = HostGET['cdnjs.cloudflare.com'] = -> r {r.fetch}     # allow JS libraries
     HostGET['feedproxy.google.com'] = HostGET['storage.googleapis.com'] = -> r {r.noexec} # filter jungle JS
-    HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.drop : r.noexec}
+    HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.deny : r.noexec}
     HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['maps.googleapis.com'] = HostGET['www.google.com'] = -> r {
       case r.parts[0]
       when nil
@@ -160,9 +160,9 @@ class WebResource
       when /aclk|search/
         r.fetch
       else
-        r.drop
+        r.deny
       end}
-    HostGET['www.googleadservices.com'] = -> r {r.q['adurl'] ? [301, {'Location' => r.q['adurl']},[]] : r.drop}
+    HostGET['www.googleadservices.com'] = -> r {r.q['adurl'] ? [301, {'Location' => r.q['adurl']},[]] : r.deny}
 
     # Mozilla
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
@@ -176,7 +176,7 @@ class WebResource
         r.env['REQUEST_URI'] = '/v4/get_article?id=' + r.parts[0]
         r.fetch
       else
-        r.drop
+        r.deny
       end}
 
     # Reddit
@@ -205,7 +205,7 @@ class WebResource
       [re.code, re.headers, [re.body]]}
 
     # Twitter
-    HostGET['t.co'] = -> r {r.parts[0] == 'i' ? r.drop : r.noexec}
+    HostGET['t.co'] = -> r {r.parts[0] == 'i' ? r.deny : r.noexec}
     HostGET['twitter.com'] = -> r {
       if !r.path || r.path == '/'
         graph = RDF::Repository.new
@@ -227,7 +227,7 @@ class WebResource
       if parts.size > 1
         [301, {'Location' => 'https://' + parts[-1]}, []]
       else
-        r.drop
+        r.deny
       end}
 
     # YouTube
@@ -257,7 +257,7 @@ yts
       elsif %w{attribution_link redirect}.member? mode
         [301, {'Location' =>  r.q['q'] || r.q['u']},[]]
       else
-        r.drop
+        r.deny
       end}
 
   end
