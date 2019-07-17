@@ -204,10 +204,9 @@ class WebResource
     def fetch options = {} ; @r ||= {}
       if this = cached?; return this.fileResponse end
       options[:cookies] ||= true if host.match?(TrackHost) || host.match?(POSThost)
-      env['HTTP_ACCEPT'] ||= '*/*'                                 # Accept header default
-      head = headers                                               # read headers
+      env['HTTP_ACCEPT'] ||= '*/*'                                 # Accept-header default
+      head = headers                                               # load headers
       head[:redirect] = false                                      # halt on redirect
-      head['Accept'] = 'text/turtle' if env['QUERY_STRING']=='rdf' # prefer graph-data
       head.delete 'Cookie' unless options[:cookies]                # allow/deny cookies
       qStr = @r[:query] ? (                                        # query?
         q = @r[:query].dup                                         # load query
@@ -217,7 +216,7 @@ class WebResource
       u = '//'+(env['HTTP_HOST']||host) + (suffix ? (path+suffix+qStr) : (env['REQUEST_URI']||(path+qStr))) # schemeless URL
       url      = (options[:scheme] || 'https').to_s    + ':' + u   # primary locator
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u   # fallback locator
-      options[:content_type]='application/atom+xml' if FeedURL[u]  # fix MIME on feed URLs
+      options[:content_type]='application/atom+xml' if FeedURL[u]  # fixed MIME on feed URLs
       code=nil;meta={};body=nil;format=nil;file=nil;@r[:resp]||={} # response metadata
       graph = options[:graph] || RDF::Repository.new               # response graph
 
@@ -624,10 +623,11 @@ class WebResource
         }.join(underscored ? '_' : '-')
         key = key.downcase if underscored
         # hide local headers
-        head[key] = v.to_s unless %w{host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri response script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
+        head[key] = v.to_s unless %w{host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri resp script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
       head['Referer'] = 'http://drudgereport.com/' if env['SERVER_NAME']&.match? /wsj\.com/
       head['User-Agent'] = DesktopUA
-      head.delete 'User-Agent' if %w{po.st t.co}.member? host
+      head.delete 'User-Agent' if host == 't.co'
+      head['User-Agent'] = 'curl/7.65.1' if host == 'po.st'
       head
     end
 
