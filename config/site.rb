@@ -145,9 +145,9 @@ class WebResource
     HostGET['gitter.im'] = -> req {req.desktop.remote}
 
     # Google
-    (0..3).map{|i|HostGET["encrypted-tbn#{i}.gstatic.com"] = -> r {r.noexec}}
-    HostGET['ajax.googleapis.com'] = HostGET['cdnjs.cloudflare.com'] = -> r {r.fetch}     # allow JS libraries
-    HostGET['feedproxy.google.com'] = HostGET['storage.googleapis.com'] = -> r {r.noexec} # filter jungle JS
+    (0..3).map{|i|
+      HostGET["encrypted-tbn#{i}.gstatic.com"] = -> r {r.noexec}}
+    HostGET['feedproxy.google.com'] = -> r {r.noexec}
     HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.deny : r.noexec}
     HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['maps.googleapis.com'] = HostGET['www.google.com'] = -> r {
       case r.parts[0]

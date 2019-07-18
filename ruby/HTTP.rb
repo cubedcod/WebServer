@@ -246,9 +246,13 @@ class WebResource
               body = response.read                                                                 # partial body
             else                                                                                   # complete body
               body = decompress meta, response.read; meta.delete 'content-encoding'                # decompress body
-              file = (cache format).writeFile body unless format.match? /^(application|text)\/(atom|html|json|rss|turtle|.*urlencoded|xml)/ # cache non-RDF file
-              RDF::Reader.for(content_type: format).new(body, :base_uri => url.R){|_| graph << _ } # parse RDF
-              index graph                                                                          # cache RDF
+              file = (cache format).writeFile body unless format.match? /^(application|text)\/(atom|html|json|rss|turtle|.*urlencoded|xml)/ # cache non-RDF
+              if reader = RDF::Reader.for(content_type: format)
+                reader.new(body, :base_uri => url.R){|_| graph << _ } # parse RDF
+                index graph                                           # cache RDF
+              else
+                print " no Reader for #{format} "
+              end
             end
           end
         rescue Exception => e
