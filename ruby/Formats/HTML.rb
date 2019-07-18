@@ -611,7 +611,7 @@ class WebResource
                    (resource[k]||[]).map{|v|value k, v, env }
                   end}}},
               ({_: :tr, c: {_: :td, colspan: keys.size,
-                            c: [resource[Abstract],
+                            c: [resource[Abstract] ? [resource[Abstract], '<br>'] : '',
                                 (resource[Image]||[]).map{|i| {style: 'max-width: 28em', c: Markup[Image][i,env]}},
                                 (resource[Video]||[]).map{|i| {style: 'max-width: 32em', c: Markup[Video][i,env]}},
                                 resource[Content]]}} if contentRow)]}]}

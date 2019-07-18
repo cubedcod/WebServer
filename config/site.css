@@ -37,7 +37,8 @@ table {border-spacing: 1px}
 table, div {display: inline-block}
 table, p {margin: 0}
 table.fromTo {float: left; border-spacing: 0}
-table.tabular td.v {vertical-align: top; border-color: #888; border-style: solid; border-width: .2em .08em 0 0; border-radius: 0}
+table.tabular td.v {border-color: #888; border-style: solid; border-width: .2em .08em 0 0; border-radius: 0}
+td { vertical-align: top }
 td.k > a {background-color: #111; color: #fff}
 td.k {max-width: 32ex; overflow: hidden; text-align: right}
 td.v div {border: .05em solid #333}
