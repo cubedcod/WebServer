@@ -568,7 +568,7 @@ class WebResource
 
     def self.tabular graph, env
       graph = graph.values if graph.class == Hash
-      keys = graph.map{|resource|resource.keys}.flatten.uniq - [Content, DC+'hasFormat', DC+'identifier', Image, SIOC+'reply_of', SIOC+'user_agent', Title, Type]
+      keys = graph.map{|resource|resource.keys}.flatten.uniq - [Abstract, Content, DC+'hasFormat', DC+'identifier', Image, Video, SIOC+'reply_of', SIOC+'user_agent', Title, Type]
       if env[:query] && env[:query].has_key?('sort')
         attr = env[:query]['sort']
         attr = Date if attr == 'date'
@@ -588,6 +588,7 @@ class WebResource
               icon = Icons[p.uri] || slug
               {_: :td, class: 'k', c: env[:query]['sort'] == p.uri ? icon : {_: :a, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}}},
            graph.map{|resource|
+             contentRow = resource[Abstract] || resource[Content] || resource[Image] || resource[Video]
              [{_: :tr, c: keys.map{|k|
                  {_: :td, class: 'v',
                   c: if k=='uri' # title with URI subscript
@@ -610,8 +611,10 @@ class WebResource
                    (resource[k]||[]).map{|v|value k, v, env }
                   end}}},
               ({_: :tr, c: {_: :td, colspan: keys.size,
-                            c: [(resource[Image]||[]).map{|i|{style: 'max-width: 20em', c: Markup[Image][i,env]}},
-                                resource[Content]]}} if resource[Content] || resource[Image])]}]}
+                            c: [resource[Abstract],
+                                (resource[Image]||[]).map{|i| {style: 'max-width: 28em', c: Markup[Image][i,env]}},
+                                (resource[Video]||[]).map{|i| {style: 'max-width: 32em', c: Markup[Video][i,env]}},
+                                resource[Content]]}} if contentRow)]}]}
     end
 
     def self.tree t, env, name=nil
