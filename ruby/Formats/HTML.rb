@@ -601,7 +601,7 @@ class WebResource
                          titles[title] = true
                          {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: :title,
                           c: [(CGI.escapeHTML title), ' ',
-                              {_: :span, class: :uri, c: CGI.escapeHTML(resource['uri'])}, ' ']}
+                              {_: :span, class: :uri, c: CGI.escapeHTML(resource['uri'][0..96])}, ' ']}
                        end}
                    else
                      {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: :id, c: '&#x1f517;'}
@@ -624,7 +624,7 @@ class WebResource
       end
 
       {class: :tree,
-       c: [({_: (url ? :a : :span), class: :label, c: (CGI.escapeHTML name.to_s)}.update(url ? {href: url} : {}) if name),
+       c: [({_: (url ? :a : :span), class: :label, c: (CGI.escapeHTML name.to_s[0..85])}.update(url ? {href: url} : {}) if name),
            t.map{|_name, _t|
              if :RDF == _name
                value nil, _t, env
