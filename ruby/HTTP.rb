@@ -251,7 +251,7 @@ class WebResource
                 reader.new(body, :base_uri => url.R){|_| graph << _ } # parse RDF
                 index graph                                           # cache RDF
               else
-                print " no Reader for #{format} "
+                print " no RDF::Reader for #{format} "
               end
             end
           end
