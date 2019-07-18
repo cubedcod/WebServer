@@ -221,7 +221,7 @@ class WebResource
       graph = options[:graph] || RDF::Repository.new               # response graph
 
       fetchURL = -> url {
-        print '🌍🌎🌏'[rand 3] , ' '
+        print '🌍🌎🌏'[rand 3] , ' ', url, ' '
         #HTTP.print_header head; puts "^^^vvv"
         begin
           open(url, head) do |response|
@@ -611,31 +611,36 @@ class WebResource
       'text/html'                                            # default writer
     end
 
-    # request headers
+    # convert ALLCAPS CGI/envvar to HTTP capitalization
     def headers
       head = {}
       env.map{|k,v|
         k = k.to_s
         underscored = k.match? /(_AP_|PASS_SFP)/i
-        key = k.downcase.sub(/^http_/,'').split('_').map{|k| # eat prefix and process tokens
-          if %w{cl id spf utc xsrf}.member? k # acronyms
-            k = k.upcase       # all caps
+        key = k.downcase.sub(/^http_/,'').split('_').map{|k| # eat prefix
+          if %w{cl id spf utc xsrf}.member? k # all-cap acronyms
+            k = k.upcase
           else
-            k[0] = k[0].upcase # capitalize
+            k[0] = k[0].upcase
           end
           k
         }.join(underscored ? '_' : '-')
         key = key.downcase if underscored
-        # hide local headers
+
+        # set external headers
         head[key] = v.to_s unless %w{host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri resp script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
+
       head['Referer'] = 'http://drudgereport.com/' if env['SERVER_NAME']&.match? /wsj\.com/
       head['User-Agent'] = DesktopUA
+
+      # try for redirection in HTTP headers rather than Javascript
       head.delete 'User-Agent' if host == 't.co'
       head['User-Agent'] = 'curl/7.65.1' if host == 'po.st'
+
       head
     end
 
-    def upstreamUI?; q.has_key?('ui') || env['HTTP_USER_AGENT'] == DesktopUA || host.match?(UIhost) end
+    def upstreamUI?; !local? && (env['HTTP_USER_AGENT'] == DesktopUA || (host.match? UIhost)) end
   end
   include HTTP
 end
