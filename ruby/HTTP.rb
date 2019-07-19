@@ -61,9 +61,8 @@ class WebResource
 
         location = head['Location'] ? (" ↝ " + head['Location']) : ''
         referer  = env['HTTP_REFERER'] ? (" \e[" + color + ";7m" + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m -> ") : ' '
-        content_type = head['Content-Type'] == 'text/turtle; charset=utf-8' ? '🐢' : (head['Content-Type'] || '')
 
-        puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + "\e[" + color + "m "  + status.to_s + "\e[0m" + referer + "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs + "\e[0m " + location #+ ' ' + content_type + ' :: ' + (env['HTTP_ACCEPT'] || '')
+        puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + "\e[" + color + "m "  + status.to_s + "\e[0m" + referer + "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs + "\e[0m " + location + ' ' + (head['Content-Type'] == 'text/turtle; charset=utf-8' ? '🐢' : (head['Content-Type']||''))
 
         [status, head, body]} # response
     rescue Exception => e
@@ -221,7 +220,7 @@ class WebResource
       graph = options[:graph] || RDF::Repository.new               # response graph
 
       fetchURL = -> url {
-        print '🌍🌎🌏'[rand 3] , ' ', url, ' '
+        print '🌍🌎🌏'[rand 3] , ' ', #url, ' '
         #HTTP.print_header head; puts "^^^vvv"
         begin
           open(url, head) do |response|
@@ -640,7 +639,7 @@ class WebResource
       head
     end
 
-    def upstreamUI?; !local? && (env['HTTP_USER_AGENT'] == DesktopUA || (host.match? UIhost)) end
+    def upstreamUI?; !local? && (env['HTTP_USER_AGENT'] == DesktopUA || (host.match? UIhost) || q['ui'] == 'upstream') end
   end
   include HTTP
 end

@@ -366,7 +366,7 @@ class WebResource
                              {_: :a, id: :shrink, style: shrunken ? 'color: #fff' : 'color: #555',
                               href: HTTP.qs(shrunken ? q.reject{|k,v|k=='head'} : q.merge({'head' => ''})), c: shrunken ? '&#9661;' : '&#9651;'},
                              unless local?
-                               [{_: :a, id: :ui, style: 'color: #555', href: HTTP.qs(q.merge({'ui' => ''})), c: '⚗'},
+                               [{_: :a, id: :ui, style: 'color: #555', href: HTTP.qs(q.merge({'ui' => 'upstream'})), c: '⚗'},
                                 {_: :a, id: :subscribe, href: '/' + (subbed ? 'un' : '') + 'subscribe' + HTTP.qs({u: 'https://' + host + (@r['REQUEST_URI'] || path)}), class: subbed ? :on : :off, c: 'subscribe' + (subbed ? 'd' : '')}]
                              end,
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
