@@ -307,6 +307,8 @@ yts
       end
       post.remove
     }
+    %w{form #fixed_sidebar}.map{|sel|
+      doc.css(sel).map{|_| _.remove}}
   end
 
   GHgraph = /__gh__coreData.content=(.*?)\s*__gh__coreData.content.bylineFormat/m
