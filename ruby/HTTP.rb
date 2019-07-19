@@ -59,10 +59,13 @@ class WebResource
                   '30' # gray :: cache hit, NOOP
                 end) + ';1'
 
-        location = head['Location'] ? (" ↝ " + head['Location']) : ''
-        referer  = env['HTTP_REFERER'] ? (" \e[" + color + ";7m" + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m -> ") : ' '
-
-        puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + "\e[" + color + "m "  + status.to_s + "\e[0m" + referer + "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs + "\e[0m " + location + ' ' + (head['Content-Type'] == 'text/turtle; charset=utf-8' ? '🐢' : (head['Content-Type']||''))
+        puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) +
+             "\e[" + color + "m "  + status.to_s +
+             "\e[0m" + (env['HTTP_REFERER'] ? (" \e[" + color + ";7m" + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m -> ") : ' ') +
+             "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] +
+             "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs +
+             "\e[0m " + (head['Location'] ? (" ↝ " + head['Location']) : '') + ' ' +
+             (head['Content-Type'] == 'text/turtle; charset=utf-8' ? '🐢' : (head['Content-Type']||''))
 
         [status, head, body]} # response
     rescue Exception => e
@@ -220,8 +223,8 @@ class WebResource
       graph = options[:graph] || RDF::Repository.new               # response graph
 
       fetchURL = -> url {
-        print '🌍🌎🌏'[rand 3] , ' ', #url, ' '
-        #HTTP.print_header head; puts "^^^vvv"
+        print '🌍🌎🌏'[rand 3] , ' '
+        #HTTP.print_header head
         begin
           open(url, head) do |response|
             code = response.status.to_s.match(/\d{3}/)[0]
@@ -536,7 +539,11 @@ class WebResource
       [s, h, [b]]
     end
 
-    def HTTP.print_header header; header.map{|k,v| puts [k,v].join "\t"} end
+    def HTTP.print_header header
+      header.map{|k,v|
+      puts       [k,v].join "\t"}
+      puts " "
+    end
 
     def PUT
       env[:deny] = true
