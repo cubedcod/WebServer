@@ -290,7 +290,11 @@ yts
         datetime = headers[1].inner_text.strip
         date, timeAP = datetime.split ','
         if %w{Today Yesterday}.member? date
-          month, day, year = 1,1,2020
+          dt = Time.now
+          dt = dt.yesterday if date == 'Yesterday'
+          year = dt.year
+          month = dt.month
+          day = dt.day
         else
           month, day, year = date.split '-'
         end
@@ -299,7 +303,7 @@ yts
         hour = hour.to_i
         pm = ampm == 'PM'
         hour += 12 if pm
-        yield subject, Date, "#{year}-#{month}-#{day}T#{'%02d' % hour}:#{min}:00+00:00"
+        yield subject, Date, "#{year}-#{'%02d' % month}-#{day}T#{'%02d' % hour}:#{min}:00+00:00"
       end
       post.remove
     }
