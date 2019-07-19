@@ -282,33 +282,34 @@ yts
       subject = join '#' + post['id']
       yield subject, Type, Post.R
       post.css('a.bigusername').map{|user|
-        yield subject, Creator, user['href'].R
+        yield subject, Creator, (join user['href'])
         yield subject, Creator, user.inner_text }
       post.css("div[id^='post_message']").map{|content|
         yield subject, Content, Webize::HTML.clean(content.inner_html)}
       if headers = post.css('td.thead > div.normal')
-        datetime = headers[1].inner_text.strip
-        date, timeAP = datetime.split ','
-        if %w{Today Yesterday}.member? date
-          dt = Time.now
-          dt = dt.yesterday if date == 'Yesterday'
-          year = dt.year
-          month = dt.month
-          day = dt.day
-        else
-          month, day, year = date.split '-'
+        if datetime = headers[1]
+          datetime = datetime.inner_text.strip
+          date, timeAP = datetime.split ','
+          if %w{Today Yesterday}.member? date
+            dt = Time.now
+            dt = dt.yesterday if date == 'Yesterday'
+            year = dt.year
+            month = dt.month
+            day = dt.day
+          else
+            month, day, year = date.split '-'
+          end
+          time, ampm = timeAP.strip.split ' '
+          hour, min = time.split ':'
+          hour = hour.to_i
+          pm = ampm == 'PM'
+          hour += 12 if pm
+          yield subject, Date, "#{year}-#{'%02d' % month}-#{day}T#{'%02d' % hour}:#{min}:00+00:00"
         end
-        time, ampm = timeAP.strip.split ' '
-        hour, min = time.split ':'
-        hour = hour.to_i
-        pm = ampm == 'PM'
-        hour += 12 if pm
-        yield subject, Date, "#{year}-#{'%02d' % month}-#{day}T#{'%02d' % hour}:#{min}:00+00:00"
       end
-      post.remove
-    }
-    %w{form #fixed_sidebar}.map{|sel|
-      doc.css(sel).map{|_| _.remove}}
+      post.remove }
+    %w{#fixed_sidebar}.map{|sel|
+      (doc.css sel).map{|_| _.remove}}
   end
 
   GHgraph = /__gh__coreData.content=(.*?)\s*__gh__coreData.content.bylineFormat/m
