@@ -180,6 +180,7 @@ sidebar [class^='side']    [id^='side']
 
               # map predicates
               k = {
+                'adtargeting' => :drop,
                 'al:ios:url' => :drop,
                 'apple-itunes-app' => :drop,
                 'article:modified_time' => Date,
