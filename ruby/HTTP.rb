@@ -224,12 +224,12 @@ class WebResource
 
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
-        #HTTP.print_header head
+        HTTP.print_header head
         begin
           open(url, head) do |response|
             code = response.status.to_s.match(/\d{3}/)[0]
             meta = response.meta
-            #HTTP.print_header meta
+            print " " + code.to_s + " " ; HTTP.print_header meta
             allowed_meta = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag}
             allowed_meta.push 'Set-Cookie' if options[:cookies]
             allowed_meta.map{|k| @r[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
@@ -263,10 +263,8 @@ class WebResource
             code = 304
           when /401/ # unauthorized
             code = 401
-            puts "401 #{url}"
           when /403/ # forbidden
             code = 403
-            puts "403 #{url}"
           when /404/ # not found
             code = 404
           else
@@ -309,18 +307,20 @@ class WebResource
       end unless OFFLINE
 
       return if options[:no_response]
-      if code == 304            # no content
+      if code == 304                                               # no data
         [304, {}, []]
-      elsif file                # static content from file
+      elsif file                                                   # data from file
         file.fileResponse
-      elsif code == 206         # partial content from upstream
+      elsif code == 206                                            # partial data from upstream
         [206, meta, [body]]
-      elsif upstreamUI? && body # static content from upstream
-        [200, {'Content-Type' => format, 'Content-Length' => body.bytesize.to_s}, [body]]
-      else                      # transformable content
-        if graph.empty? && !local? && env['REQUEST_PATH'][-1]=='/' # unlistable remote container
-          index = (CacheDir + host + path).R                       # local-cache container
-          index.children.map{|e| e.fsStat graph, base_uri: 'https://' + e.relPath} if index.node.directory? # list contents
+      elsif body&&(upstreamUI? || (format.match? ImmutableFormat)) # data from upstream
+        [200, {'Access-Control-Allow-Origin' => allowedOrigin,
+               'Content-Type' => format,
+               'Content-Length' => body.bytesize.to_s}, [body]]
+      else                                                         # graph data
+        if graph.empty? && !local? && env['REQUEST_PATH'][-1]=='/' # unlistable remote
+          index = (CacheDir + host + path).R                       # local container
+          index.children.map{|e| e.fsStat graph, base_uri: 'https://' + e.relPath} if index.node.directory? # list cache
         end
         graphResponse graph
       end
