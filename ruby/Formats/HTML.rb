@@ -79,7 +79,6 @@ module Webize
 
       BasicGunk = %w{
         [class*='cookie']  [id*='cookie']
-        [class*='message'] [id*='message']
         [class*='related'] [id*='related']
         [class*='share']   [id*='share']
         [class*='social']  [id*='social']

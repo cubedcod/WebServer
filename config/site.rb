@@ -10,6 +10,7 @@ module Webize
       Triplr = {
         'apnews.com' => :AP,
         'www.apnews.com' => :AP,
+        'www.city-data.com' => :CityData,
         'www.instagram.com' => :Instagram,
         'www.patriotledger.com' => :GateHouse,
         'www.providencejournal.com' => :GateHouse,
@@ -276,6 +277,34 @@ yts
         yield self, Content, HTML.render(HTML.keyval (Webize::HTML.webizeHash json), env)}}
   end
 
+  def CityData doc
+    doc.css("table[id^='post']").map{|post|
+      subject = join '#' + post['id']
+      yield subject, Type, Post.R
+      post.css('a.bigusername').map{|user|
+        yield subject, Creator, user['href'].R
+        yield subject, Creator, user.inner_text }
+      post.css("div[id^='post_message']").map{|content|
+        yield subject, Content, Webize::HTML.clean(content.inner_html)}
+      if headers = post.css('td.thead > div.normal')
+        datetime = headers[1].inner_text.strip
+        date, timeAP = datetime.split ','
+        if %w{Today Yesterday}.member? date
+          month, day, year = 1,1,2020
+        else
+          month, day, year = date.split '-'
+        end
+        time, ampm = timeAP.strip.split ' '
+        hour, min = time.split ':'
+        hour = hour.to_i
+        pm = ampm == 'PM'
+        hour += 12 if pm
+        yield subject, Date, "#{year}-#{month}-#{day}T#{'%02d' % hour}:#{min}:00+00:00"
+      end
+      post.remove
+    }
+  end
+
   GHgraph = /__gh__coreData.content=(.*?)\s*__gh__coreData.content.bylineFormat/m
   def GateHouse doc
     doc.css('script').map{|script|
@@ -328,17 +357,20 @@ yts
     %w{grid-tweet tweet}.map{|tweetclass|
       doc.css('.' + tweetclass).map{|tweet|
         s = 'https://twitter.com' + (tweet.css('.js-permalink').attr('href') || tweet.attr('data-permalink-path'))
+
         authorName = if b = tweet.css('.username b')[0]
                        b.inner_text
                      else
                        s.R.parts[0]
                      end
         author = ('https://twitter.com/' + authorName).R
+
         ts = (if unixtime = tweet.css('[data-time]')[0]
               Time.at(unixtime.attr('data-time').to_i)
              else
                Time.now
               end).iso8601
+
         yield s, Type, Post.R
         yield s, Date, ts
         yield s, Creator, author
