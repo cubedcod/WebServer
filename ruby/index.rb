@@ -1,3 +1,4 @@
+require 'pathname'
 require 'linkeddata'
 class RDF::URI
   def R; WebResource.new to_s end
@@ -8,7 +9,11 @@ end
 class WebResource < RDF::URI
   def R; self end
   alias_method :uri, :to_s
+
   module URIs
+    PWD = Pathname.new Dir.pwd
+    CacheDir = (Pathname.new ENV['HOME'] + '/.cache/web').relative_path_from(PWD).to_s
+
     W3       = 'http://www.w3.org/'
     DC       = 'http://purl.org/dc/terms/'
     SIOC     = 'http://rdfs.org/sioc/ns#'
@@ -28,11 +33,11 @@ class WebResource < RDF::URI
   include URIs
 end
 
-%w(POSIX HTTP).map{|_|
-  require_relative _}
+%w(POSIX HTTP).map{|component|require_relative component}
 
-%w(Audio Calendar CSS Feed HTML Image JS Mail Markdown PDF Text Video Web).map{|_|
-  require_relative 'Formats/'+_}
+%w(Audio Calendar CSS Feed HTML Image JS Mail Markdown PDF Text Video Web).map{|format|
+  require_relative 'Formats/' + format}
+
 class WebResource
   module URIs
     Extensions = RDF::Format.file_extensions.invert

@@ -30,8 +30,6 @@ module Webize
 end
 class WebResource
   module URIs
-    PWD = Pathname.new Dir.pwd
-    CacheDir = (Pathname.new ENV['HOME'] + '/.cache/web').relative_path_from PWD
     ConfDir  = (Pathname.new __dir__).relative_path_from PWD
 
     FeedURL = {}

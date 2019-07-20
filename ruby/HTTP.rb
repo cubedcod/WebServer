@@ -389,7 +389,7 @@ class WebResource
               doc.dir.mkdir
               RDF::Writer.open(doc.relPath){|f|f << graph}
               updates << doc
-              puts  "\e[32m+\e[0m http://localhost:8000" + doc.stripDoc
+              puts  "\e[32m+\e[0m http://localhost:8000" + doc.path.sub(/\.ttl$/,'')
             end
           end
         end}

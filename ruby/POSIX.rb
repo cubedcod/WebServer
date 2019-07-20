@@ -1,4 +1,4 @@
-%w(digest/sha2 fileutils pathname shellwords).map{|_| require _}
+%w(digest/sha2 fileutils shellwords).map{|_| require _}
 class WebResource
   module POSIX
     include URIs
@@ -20,11 +20,10 @@ class WebResource
     def mkdir; FileUtils.mkdir_p relPath unless exist?; self end           # MKDIR(1)
     def node; @node ||= (Pathname.new relPath) end
     def parts; path ? path.split('/').-(['']) : [] end
-    def relPath; URI.unescape(path == '/' ? '.' : (path[0] == '/' ? path[1..-1] : path)) end
+    def relPath; URI.unescape(['/','','.',nil].member?(path) ? '.' : (path[0]=='/' ? path[1..-1] : path)) end
     def self.path p; ('/' + p.to_s.chomp.gsub(' ','%20').gsub('#','%23')).R end
     def self.splitArgs args; args.shellsplit rescue args.split /\W/ end
     def shellPath; Shellwords.escape relPath.force_encoding 'UTF-8' end
-    def stripDoc; uri.sub(/\.(html|json|md|ttl|txt)$/,'').R end
     def touch; dir.mkdir; FileUtils.touch relPath end                      # TOUCH(1)
     def writeFile o; dir.mkdir; File.open(relPath,'w'){|f|f << o}; self end
     def fsStat graph, options = {}                                         # STAT(1)
