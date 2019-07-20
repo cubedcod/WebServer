@@ -32,7 +32,7 @@ class WebResource
         subject = subject.path[-1] == '/' ? subject : (subject + '/') # normalize trailing-slash
         graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#BasicContainer').R)
         graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#Container').R)
-        if env && env['REQUEST_PATH'] == path # show children of request-container
+        if env && subject.path == env['REQUEST_PATH'] # children of request-container
           children.map{|child|
             graph << (RDF::Statement.new subject, (W3+'ns/ldp#contains').R, child.node.directory? ? (child+'/') : child)}
         end

@@ -345,7 +345,7 @@ class WebResource
 
       tabular = q['view'] == 'table'
       shrunken = q.has_key? 'head'
-      @r[:links][:up] = dirname + '/' + qs + '#r' + Digest::SHA2.hexdigest(path||'/') unless !path || path == '/'
+      @r[:links][:up] = dirname + (dirname[-1] == '/' ? '' : '/') + qs + '#r' + Digest::SHA2.hexdigest(path||'/') unless !path || path == '/'
       @r[:links][:down] = path + '/' if env['REQUEST_PATH'] && node.directory? && env['REQUEST_PATH'][-1] != '/'
 
       # Markup -> HTML
