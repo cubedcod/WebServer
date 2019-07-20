@@ -204,10 +204,11 @@ class WebResource
 
     def fetch options = {} ; @r ||= {}
       if this = cached?; return this.fileResponse end
-      options[:cookies] ||= true if host.match?(TrackHost) || host.match?(POSThost) || host.match?(UIhost)
+      graph = options[:graph] || RDF::Repository.new               # request graph
       env['HTTP_ACCEPT'] ||= '*/*'                                 # Accept-header default
       head = headers                                               # load headers
       head[:redirect] = false                                      # halt on redirect
+      options[:cookies] ||= true if host.match?(TrackHost) || host.match?(POSThost) || host.match?(UIhost)
       head.delete 'Cookie' unless options[:cookies]                # allow/deny cookies
       qStr = @r[:query] ? (                                        # query?
         q = @r[:query].dup                                         # load query
@@ -219,7 +220,6 @@ class WebResource
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u   # fallback locator
       options[:content_type]='application/atom+xml' if FeedURL[u]  # fixed MIME on feed URLs
       code=nil;meta={};body=nil;format=nil;file=nil;@r[:resp]||={} # response metadata
-      graph = options[:graph] || RDF::Repository.new               # response graph
 
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
@@ -252,7 +252,7 @@ class WebResource
                 reader.new(body, :base_uri => url.R){|_| graph << _ } # parse RDF
                 index graph                                           # cache RDF
               else
-                print " no RDF::Reader for #{format} "
+                print "MISSING RDF::Reader for #{format} "
               end
             end
           end

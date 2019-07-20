@@ -30,9 +30,9 @@ module Webize
 end
 class WebResource
   module URIs
-    CacheDir = ENV['HOME'] + '/.cache/web/'
-
-    ConfDir = (Pathname.new __dir__).relative_path_from(Pathname.new Dir.pwd)
+    PWD = Pathname.new Dir.pwd
+    CacheDir = (Pathname.new ENV['HOME'] + '/.cache/web').relative_path_from PWD
+    ConfDir  = (Pathname.new __dir__).relative_path_from PWD
 
     FeedURL = {}
     ConfDir.join('feeds/*.u').R.glob.map{|list|
