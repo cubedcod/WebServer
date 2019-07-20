@@ -30,7 +30,12 @@ module Webize
   end
   module Icon
     class Format < RDF::Format
-      content_type 'image/x-icon', :extension => :ico
+      content_type 'image/x-icon',
+                   extension: :ico,
+                   aliases: %w(
+                   image/vnd.microsoft.icon;q=0.8
+                   )
+
       reader { Reader }
     end
 

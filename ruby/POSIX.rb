@@ -16,7 +16,6 @@ class WebResource
     def ln   n; FileUtils.ln   node.expand_path, n.node.expand_path end    # LN(1)
     def ln_s n; FileUtils.ln_s node.expand_path, n.node.expand_path end    # LN(1)
     def link n; n.dir.mkdir; send :ln, n unless n.exist? end               # LN(1)
-    def lines; exist? ? (open relPath).readlines.map(&:chomp) : [] end
     def mkdir; FileUtils.mkdir_p relPath unless exist?; self end           # MKDIR(1)
     def node; @node ||= (Pathname.new relPath) end
     def parts; path ? path.split('/').-(['']) : [] end

@@ -34,7 +34,7 @@ class WebResource
 
     FeedURL = {}
     ConfDir.join('feeds/*.u').R.glob.map{|list|
-      list.lines.map{|u|
+      (open list.relPath).readlines.map(&:chomp).map{|u|
         FeedURL[u] = u.R }}
 
     SiteGIF = ConfDir.join('site.gif').read
@@ -48,7 +48,7 @@ class WebResource
     ImmutableFormat = /^application\/json/
     POSThost = /(^|\.)(anvato|brightcove|git(lab|ter)|reddit|(mix|sound)cloud|youtube)\.(com|im|net)$/
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
-    UIhost = /(anvato|bandcamp|(mix|sound)cloud|spotify).(com|net)$/
+    UIhost = /((anvato|bandcamp|(mix|sound)cloud|spotify).(com|net)|github.io)$/
 
     def sitePOST
       case host
