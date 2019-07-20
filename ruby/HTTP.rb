@@ -37,7 +37,7 @@ class WebResource
 
     def self.call env
       return [405,{},[]] unless %w{GET HEAD OPTIONS POST}.member? env['REQUEST_METHOD'] # allow methods
-      env[:resp] = {}; env[:links] = {}                                             # metadata storage
+      env[:resp] = {}; env[:links] = {}                                                 # header storage
       path = Pathname.new(env['REQUEST_PATH'].force_encoding('UTF-8')).expand_path.to_s # evaluate path
       query = env[:query] = parseQs env['QUERY_STRING']                                 # parse query
       resource = ('//' + env['SERVER_NAME'] + path).R env                               # instantiate resource
@@ -366,7 +366,8 @@ class WebResource
         when /^application\/atom+xml/
           renderFeed treeFromGraph graph   # feed
         else                               # RDF
-          graph.dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true
+          base = (env['SERVER_NAME']=='localhost' ? 'http://localhost:8000' : ('https://'+host)).R.join env['REQUEST_PATH']
+          graph.dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => base, :standard_prefixes => true
         end}
     end
 
@@ -423,12 +424,15 @@ class WebResource
       elsif file?
         fileResponse
       else
+        # load RDF
         graph = RDF::Repository.new
         nodes.map{|node|
-          node.load graph, base_uri: 'http://localhost:8000/'.R.join(node) if node.file?} # read RDF
+          node.load graph, base_uri: 'http://localhost:8000/'.R.join(node) if node.file?}
         index graph
+        # add node metadata
         nodes.map{|node|
           node.fsStat graph unless node.ext=='ttl' || node.basename.split('.')[0]=='msg' }
+
         graphResponse graph
       end
     end
@@ -449,17 +453,17 @@ class WebResource
          if !index.empty? && qs.empty?    # static index
            [index]
          else
-           children                       # LS
+           [self, children]               # LS
          end
        end
       else                                # GLOB
-        if uri.match /[\*\{\[]/           #  custom glob
-          files = glob
-        else                              #  default glob
-          files = (self + '.*').R.glob    #             base + extension
-          files = (self + '*').R.glob if files.empty? # prefix
+        if uri.match /[\*\{\[]/           #  parametric glob
+          glob
+        else                              #  basic glob
+          files = (self + '.*').R.glob    #   base + extension match
+          files = (self + '*').R.glob if files.empty? # prefix match
+          [self, files]
         end
-        [self, files]
        end).flatten.compact.uniq.select &:exist?
     end
 

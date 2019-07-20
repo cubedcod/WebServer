@@ -25,17 +25,26 @@ class WebResource
     def shellPath; Shellwords.escape relPath.force_encoding 'UTF-8' end
     def touch; dir.mkdir; FileUtils.touch relPath end                      # TOUCH(1)
     def writeFile o; dir.mkdir; File.open(relPath,'w'){|f|f << o}; self end
+
     def fsStat graph, options = {}                                         # STAT(1)
-      subject = options[:base_uri]&.R || self
+      subject = (options[:base_uri] || path).R
       if node.directory?
         subject = subject.path[-1] == '/' ? subject : (subject + '/') # normalize trailing-slash
-        graph << (RDF::Statement.new subject, Type.R, (W3 + 'ns/ldp#Container').R)
+        graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#BasicContainer').R)
+        graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#Container').R)
+        if env && env['REQUEST_PATH'] == path # show children of request-container
+          children.map{|child|
+            graph << (RDF::Statement.new subject, (W3+'ns/ldp#contains').R, child.node.directory? ? (child+'/') : child)}
+        end
       else
-        graph << (RDF::Statement.new subject, Type.R, (W3 + 'ns/posix/stat#File').R)
+        graph << (RDF::Statement.new subject, Type.R, (W3+'ns/posix/stat#File').R)
       end
+      graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#Resource').R)
       graph << (RDF::Statement.new subject, Title.R, basename)
       graph << (RDF::Statement.new subject, (W3+'ns/posix/stat#size').R, node.size)
-      graph << (RDF::Statement.new subject, Date.R, node.stat.mtime.iso8601)
+      mtime = node.stat.mtime
+      graph << (RDF::Statement.new subject, (W3+'ns/posix/stat#mtime').R, mtime.to_i)
+      graph << (RDF::Statement.new subject, Date.R, mtime.iso8601)
     end
 
     # GREP(1)
