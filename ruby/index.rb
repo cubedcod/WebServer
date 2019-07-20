@@ -12,7 +12,7 @@ class WebResource < RDF::URI
 
   module URIs
     PWD = Pathname.new Dir.pwd
-    CacheDir = (Pathname.new ENV['HOME'] + '/.cache/web').relative_path_from(PWD).to_s
+    CacheDir = (Pathname.new ENV['HOME'] + '/.cache/web').relative_path_from(PWD).to_s + '/'
 
     W3       = 'http://www.w3.org/'
     DC       = 'http://purl.org/dc/terms/'
