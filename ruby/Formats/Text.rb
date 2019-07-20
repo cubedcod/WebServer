@@ -44,9 +44,9 @@ module Webize
  go google gov
  html index local medium
  net news org p php post
- r reddit rss rssfeed
+ r rss rssfeed
  sports source story
- t the threads topic tumblr
+ t the threads topic
  uk utm www}
 
     class Format < RDF::Format

@@ -142,8 +142,7 @@ class WebResource
                         ['application/javascript',
                          '// TODO deliver modified scripts']
                       elsif path[-3..-1] == 'css'
-                        ['text/css',
-                         'body {background-color: #000; color: #fff}']
+                        ['text/css',"body {background: repeating-linear-gradient(#{rand 360}deg, #000, #000 6.5em, #fff 6.5em, #fff 8em)"]
                       elsif env[:GIF]
                         ['image/gif', SiteGIF]
                       else
