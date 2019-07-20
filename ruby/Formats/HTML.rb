@@ -2,7 +2,6 @@
 require 'nokogiri'
 module Webize
   module HTML
-
     def self.clean body
       # parse
       html = Nokogiri::HTML.fragment body
@@ -263,6 +262,16 @@ end
 class WebResource
   module HTML
     include URIs
+
+    Avatars = {}
+    'avatars/*png'.R.glob.map{|a|
+      Avatars[Base64.decode64 a.basename.split('.')[0]] = a
+    }
+
+    def avatar
+      ('avatars/' + Base64.encode64(uri).gsub("\n",'') + '.png').R
+    end
+
 
     Icons = {
       'https://twitter.com' => '🐦',
