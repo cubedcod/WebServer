@@ -11,7 +11,7 @@ class WebResource
 
     def allowedOrigin
       if referer = env['HTTP_REFERER']
-        'https://' + referer.R.host
+        'http' + (env['SERVER_NAME'] == 'localhost' ? '' : 's') + '://' + referer.R.host
       else
         '*'
       end

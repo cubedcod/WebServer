@@ -26,7 +26,8 @@ module Webize
 
       def each_statement &fn
         pdf_tuples{|p, o|
-          fn.call RDF::Statement.new(@subject, p, (o.class == WebResource || o.class == RDF::URI) ? o : RDF::Literal(o),
+          fn.call RDF::Statement.new(@subject, p.R,
+                                     (o.class == WebResource || o.class == RDF::URI) ? o : RDF::Literal(o),
                                      :graph_name => @subject)}
       end
 
