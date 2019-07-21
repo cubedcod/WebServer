@@ -6,6 +6,7 @@
 #subscribe {float: right}
 #subscribe.off {color: #777; background-color: #000; border: .1em solid #555}
 #subscribe.on  {color: #000; background-color: #fff}
+.avatar {max-height: 2em}
 .bold {font-weight: bold; font-size: 1.1em}
 .group > .label {font-size: 1.2em; font-weight: bold; color: #000}
 .group {margin-bottom: .5em; margin-right: .5em; border-radius: .2em .8em .8em .8em}

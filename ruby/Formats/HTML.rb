@@ -467,7 +467,7 @@ class WebResource
                (host && host.sub(/\.com$/,'')) ||
                'user'
         color = env[:colors][name] ||= HTML.colorize
-        [{_: :a, id: 'a' + Digest::SHA2.hexdigest(rand.to_s), class: :creator, style: color, href: u.to_s, c: name}, ' ']
+        [{_: :a, id: 'a' + Digest::SHA2.hexdigest(rand.to_s), class: :creator, style: color, href: u.to_s, c: Avatars[u.to_s] ? {_: :img, class: :avatar, src: Avatars[u.to_s]} : name}, ' ']
       else
         CGI.escapeHTML (c||'')
       end}
