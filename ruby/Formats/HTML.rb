@@ -530,7 +530,7 @@ class WebResource
            graph.map{|resource|
              contentRow = resource[Abstract] || resource[Content] || resource[Image] || resource[Video]
              [{_: :tr, c: keys.map{|k|
-                 {_: :td, class: k == 'uri' ? :title : :v,
+                 {_: :td,
                   c: if k == 'uri'
                    ts = resource[Title] || []
                    if ts.size > 0
