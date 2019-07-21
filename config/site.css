@@ -1,6 +1,5 @@
 #down {display: block}
 #next {float: right}
-#prev {float: left}
 #prev, #next {height: 100%}
 #prev, #next, #up, #down, #tabular, #shrink, #ui {font-size: 2em; color: #fff; background-color: #000; border-width: 0; border-radius: 0}
 #subscribe.off {color: #777; background-color: #000; border: .1em solid #555}
@@ -21,21 +20,17 @@ a.id {float: right; background-color: #000; color: #333}
 a.link {white-space: nowrap}
 a.link, .thumb {background-color: #fff; color: #000}
 a.title > span.uri {font-size: .7em; font-weight: normal; background-color: #aaa}
-a.title {float: left; vertical-align: top; background-color: #ddd; color: #000; font-size: 1.1em; font-weight: bold }
+a.title {vertical-align: top; background-color: #eee; color: #000; font-size: 1.1em; font-weight: bold }
 a:visited {background-color: #000; color: #eee; border-color: #ddd}
 body {font-family: sans-serif; margin: 0 2em 0 2em}
 body, pre, p, span, li, time, td.v {background-color: #000; color: #fff}
-div, td {padding: 0}
-div.md {float: left}
+div.md, table.fromTo, #prev {float: left}
 h1, h2, h3, h4, h5, h6 {}
 img, video, .post {max-width: 100%}
 img.thumb, svg {max-width: 28em}
-p {max-width: 80ex}
+p {max-width: 80ex; margin: 0}
 pre {white-space: pre-wrap}
-table {border-spacing: 1px}
 table, div {display: inline-block}
-table, p {margin: 0}
-table.fromTo {float: left; border-spacing: 0}
 table.tabular td.v {border-color: #888; border-style: solid; border-width: .2em .08em 0 0; border-radius: 0}
 td, .toolbox { vertical-align: top }
 td.k > a {background-color: #111; color: #fff}
