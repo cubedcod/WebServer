@@ -30,7 +30,7 @@ module Webize
 end
 class WebResource
   module URIs
-    ConfDir  = (Pathname.new __dir__).relative_path_from PWD
+    ConfDir  = (Pathname.new __dir__).relative_path_from Pathname.new Dir.pwd
 
     FeedURL = {}
     ConfDir.join('feeds/*.u').R.glob.map{|list|
@@ -393,7 +393,8 @@ yts
           yield s, Image, img.to_s.R
         end
         tweet.css('img').map{|img|
-          yield s, Image, img.attr('src').to_s.R}}}
+          yield s, Image, img.attr('src').to_s.R}
+        tweet.remove }}
   end
 
   def YouTube doc

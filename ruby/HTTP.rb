@@ -4,6 +4,7 @@ class WebResource
   module HTTP
     include URIs
 
+    CacheDir = (Pathname.new ENV['HOME'] + '/.cache/web').relative_path_from(Pathname.new Dir.pwd).to_s + '/'
     Hosts = {}   # seen hosts
     HostGET = {} # lambda tables
     PathGET = {}

@@ -22,10 +22,6 @@ module Webize
       include WebResource::URIs
       format Format
 
-      Atom     = W3   + '2005/Atom#'
-      Podcast  = 'http://www.itunes.com/dtds/podcast-1.0.dtd#'
-      RSS      = 'http://purl.org/rss/1.0/'
-
       def initialize(input = $stdin, options = {}, &block)
         @doc = (input.respond_to?(:read) ? input.read : input).encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ')
         @base = options[:base_uri].R
@@ -108,32 +104,7 @@ module Webize
 
       def normalizePredicates *f
         send(*f){|s,p,o|
-          yield s,
-                {'http://purl.org/dc/elements/1.1/type' => Type,
-
-                 Podcast+'author' => Creator,
-
-                 Atom+'title'        => Title,
-                 'http://purl.org/dc/elements/1.1/subject' => Title,
-                 Podcast+'subtitle'  => Title,
-                 Podcast+'title'     => Title,
-                 RSS+'title'         => Title,
-                 'http://search.yahoo.com/mrss/title' => Title,
-
-                 Atom+'summary'                             => Abstract,
-                 'http://search.yahoo.com/mrss/description' => Abstract,
-
-                 Atom+'content'                => Content,
-                 RSS+'description'             => Content,
-                 RSS+'encoded'                 => Content,
-                 RSS+'modules/content/encoded' => Content,
-
-                 Atom+'enclosure'             => SIOC+'attachment',
-                 Atom+'link'                  => DC+'link',
-                 RSS+'modules/slash/comments' => SIOC+'num_replies',
-                 RSS+'source'                 => DC+'source',
-
-                }[p]||p, o }
+          yield s, MetaMap[p]||p, o }
       end
 
       def normalizeDates *f
