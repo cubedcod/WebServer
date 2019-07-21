@@ -150,6 +150,7 @@ sidebar [class^='side']    [id^='side']
         'og:image:url' => Image,
         'og:image:width' => :drop,
         'og:last_name' => Creator,
+        'og:locale' => :drop,
         'og:site_name' => To,
         'og:title' => Title,
         'og:type' => Type,
@@ -205,6 +206,7 @@ sidebar [class^='side']    [id^='side']
         'twitter:player:height' => :drop,
         'twitter:player:width' => :drop,
         'twitter:site' => 'https://twitter.com',
+        'twitter:text:title' => Title,
         'twitter:title' => Title,
         'twitter:url' => Link,
         'video:director' => Creator,
@@ -526,8 +528,15 @@ class WebResource
 
     Markup[Link] = -> ref, env=nil {
       u = ref.to_s
-      [{_: :a, class: :link, title: u, id: 'l' + Digest::SHA2.hexdigest(rand.to_s),
-        href: u, c: u.sub(/^https?.../,'')[0..79]}," \n"]}
+      avatar = Avatars[u.gsub(/\/$/,'')]
+      [{_: :a,
+        c: avatar ? {_: :img, class: :avatar, src: avatar} : u.sub(/^https?.../,'')[0..79],
+        class: :link,
+        href: u,
+        id: 'l' + Digest::SHA2.hexdigest(rand.to_s),
+        title: u,
+       },
+       " \n"]}
 
     Markup[Type] = -> t, env=nil {
       if t.class == WebResource
