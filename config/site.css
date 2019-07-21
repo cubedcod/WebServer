@@ -1,8 +1,8 @@
 #down {display: block}
-#next {right: 0}
-#prev {left:  0}
-#prev, #next {position: fixed; top: 0; height: 100%}
-#prev, #next, #up, #down, #tabular, #shrink, #ui {font-size: 2em; color: #fff; background-color: #000; border-width: 0; border-radius: 0; display: inline-block }
+#next {float: right}
+#prev {float: left}
+#prev, #next {height: 100%}
+#prev, #next, #up, #down, #tabular, #shrink, #ui {font-size: 2em; color: #fff; background-color: #000; border-width: 0; border-radius: 0}
 #subscribe {float: right}
 #subscribe.off {color: #777; background-color: #000; border: .1em solid #555}
 #subscribe.on  {color: #000; background-color: #fff}

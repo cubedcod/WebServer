@@ -21,6 +21,7 @@ class WebResource < RDF::URI
 
     W3       = 'http://www.w3.org/'
     DC       = 'http://purl.org/dc/terms/'
+    OG       = 'http://ogp.me/ns#'
     SIOC     = 'http://rdfs.org/sioc/ns#'
     Abstract = DC + 'abstract'
     Content  = SIOC + 'content'

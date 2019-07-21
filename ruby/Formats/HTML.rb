@@ -88,7 +88,129 @@ footer  [class^='footer']  [id^='footer']
 header  [class*='header']  [id*='header'] [class*='Header'] [id*='Header']
 nav     [class^='nav']     [id^='nav']
 sidebar [class^='side']    [id^='side']
-}#.map{|sel| sel.sub /\]$/, ' i]'} # TODO find library w case-insensitive attribute-selector capability
+}
+
+      MetaMap = {
+        'HandheldFriendly' => :drop,
+        'adtargeting' => :drop,
+        'al:android:app_name' => :drop,
+        'al:android:package' => :drop,
+        'al:android:url' => :drop,
+        'al:ios:app_name' => :drop,
+        'al:ios:app_store_id' => :drop,
+        'al:ios:url' => :drop,
+        'al:web:should_fallback' => :drop,
+        'alternate' => DC + 'hasFormat',
+        'apple-itunes-app' => :drop,
+        'apple-mobile-web-app-title' => :drop,
+        'apple-touch-icon' => Image,
+        'apple-touch-icon-precomposed' => Image,
+        'application-name' => :drop,
+        'article:author' => Creator,
+        'article:modified_time' => Date,
+        'article:published_time' => Date,
+        'article:publisher' => To,
+        'article:section' => Abstract,
+        'article:tag' => Abstract,
+        'author' => Creator,
+        'canonical' => Link,
+        'csrf-param' => :drop,
+        'csrf-token' => :drop,
+        'description' => Abstract,
+        'enabled-features' => :drop,
+        'fb:admins' => :drop,
+        'fb:app_id' => :drop,
+        'fb:pages' => :drop,
+        'five_hundred_pixels:author' => Creator,
+        'five_hundred_pixels:category' => Abstract,
+        'five_hundred_pixels:highest_rating' => :drop,
+        'five_hundred_pixels:location:latitude' => Schema+'latitude',
+        'five_hundred_pixels:location:longitude' => Schema+'longitude',
+        'five_hundred_pixels:tags' => Abstract,
+        'five_hundred_pixels:uploaded' => Date,
+        'format-detection' => :drop,
+        'google-site-verification' => :drop,
+        'icon' => Image,
+        'image' => Image,
+        'image_src' => Image,
+        'js-proxy-site-detection-payload' => :drop,
+        'keywords' => Abstract,
+        'msapplication-TileColor' => :drop,
+        'msapplication-TileImage' => Image,
+        'news_keywords' => Abstract,
+        'og:description' => Abstract,
+        'og:first_name' => Creator,
+        'og:image' => Image,
+        'og:image:height' => :drop,
+        'og:image:secure_url' => Image,
+        'og:image:type' => :drop,
+        'og:image:width' => :drop,
+        'og:last_name' => Creator,
+        'og:site_name' => To,
+        'og:title' => Title,
+        'og:type' => Type,
+        'og:updated_time' => Date,
+        'og:url' => Link,
+        'og:username' => Creator,
+        'prefetch' => :drop,
+        'sailthru.date' => Date,
+        'sailthru.description' => Abstract,
+        'sailthru.image.full' => Image,
+        'sailthru.image.thumb' => Image,
+        'sailthru.lead_image' => Image,
+        'sailthru.secondary_image' => Image,
+        'sailthru.title' => Title,
+        'shortcut icon' => Image,
+        'smartbanner:button' => :drop,
+        'smartbanner:button-url-apple' => :drop,
+        'smartbanner:button-url-google' => :drop,
+        'smartbanner:enabled-platforms' => :drop,
+        'smartbanner:icon-apple' => :drop,
+        'smartbanner:icon-google' => :drop,
+        'smartbanner:price' => :drop,
+        'smartbanner:price-suffix-apple' => :drop,
+        'smartbanner:price-suffix-google' => :drop,
+        'smartbanner:title' => :drop,
+        'stylesheet' => :drop,
+        'theme-color' => :drop,
+        'thumbnail' => Image,
+        'twitter:app:id:googleplay' => :drop,
+        'twitter:app:id:ipad' => :drop,
+        'twitter:app:id:iphone' => :drop,
+        'twitter:app:name:googleplay' => :drop,
+        'twitter:app:name:ipad' => :drop,
+        'twitter:app:name:iphone' => :drop,
+        'twitter:app:url:googleplay' => :drop,
+        'twitter:app:url:ipad' => :drop,
+        'twitter:app:url:iphone' => :drop,
+        'twitter:card' => :drop,
+        'twitter:creator' => 'https://twitter.com',
+        'twitter:creator:id' => :drop,
+        'twitter:description' => Abstract,
+        'twitter:dnt' => :drop,
+        'twitter:domain' => :drop,
+        'twitter:image' => Image,
+        'twitter:image:height' => :drop,
+        'twitter:image:src' => Image,
+        'twitter:image:width' => :drop,
+        'twitter:player' => Video,
+        'twitter:player:height' => :drop,
+        'twitter:player:width' => :drop,
+        'twitter:site' => 'https://twitter.com',
+        'twitter:title' => Title,
+        'video:director' => Creator,
+        'viewport' => :drop,
+        OG+'description' => Abstract,
+        OG+'first_name' => Creator,
+        OG+'image' => Image,
+        OG+'image:height' => :drop,
+        OG+'image:width' => :drop,
+        OG+'last_name' => Creator,
+        OG+'title' => Title,
+        OG+'type' => Type,
+        OG+'url' => Link,
+        OG+'username' => Creator,
+      }
 
       def initialize(input = $stdin, options = {}, &block)
         @doc = (input.respond_to?(:read) ? input.read : input).encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ')
@@ -110,11 +232,7 @@ sidebar [class^='side']    [id^='side']
           fn.call RDF::Statement.new(s.class == String ? s.R : s,
                                      p.class == String ? p.R : p,
                                      (o.class == WebResource || o.class == RDF::Node ||
-                                      o.class == RDF::URI) ? o : (l = RDF::Literal (if [Abstract,Content].member? p
-                                                                                    HTML.clean o
-                                                                                   else
-                                                                                     o
-                                                                                    end)
+                                      o.class == RDF::URI) ? o : (l = RDF::Literal o
                                                                   l.datatype=RDF.XMLLiteral if p == Content
                                                                   l),
                                      :graph_name => s.R)}
@@ -126,47 +244,29 @@ sidebar [class^='side']    [id^='side']
         subject = @base         # subject URI
         n = Nokogiri::HTML.parse @doc # parse
 
-        # triplr host-binding
+        # host bindings
         if hostTriples = Triplr[@base.host]
           @base.send hostTriples, n, &f
         end
 
-        # JSON-LD
+        # read JSON-LD
         n.css('script[type="application/ld+json"]').map{|dataElement|
-          begin
-            embeds << (::JSON::LD::API.toRdf ::JSON.parse dataElement.inner_text)
-          rescue
-            nil
-          end}
+          embeds << (::JSON::LD::API.toRdf ::JSON.parse dataElement.inner_text)} rescue "JSON-LD read failure in #{@base}"
 
-        # RDFa
-        RDF::Reader.for(:rdfa).new(@doc, base_uri: @base){|_| embeds << _ } rescue "RDFa parse failed in #{@base}"
+        # read RDFa
+        RDF::Reader.for(:rdfa).new(@doc, base_uri: @base){|_| embeds << _ } rescue "RDFa read failure in #{@base}"
 
-        # embedded triples
+        # normalized JSON-LD/RDFa
         embeds.each_triple{|s,p,o|
-          case p.to_s
-          when 'http://purl.org/dc/terms/created'
-            p = Date.R
-          when 'content:encoded'
-            p = Content.R
-            o = o.to_s.hrefs
-          end
-
-          yield s, p, o}
+          p = MetaMap[p.to_s] || p
+          puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/
+          yield s, p, o unless p == :drop}
 
         # <link>
         n.css('head link[rel]').map{|m|
           if k = m.attr("rel") # predicate
             if v = m.attr("href") # object
-              k = {
-                'alternate' => DC + 'hasFormat',
-                'icon' => Image,
-                'image_src' => Image,
-                'apple-touch-icon' => Image,
-                'apple-touch-icon-precomposed' => Image,
-                'shortcut icon' => Image,
-                'stylesheet' => :drop,
-              }[k] || ('#' + k.gsub(' ','_'))
+              k = MetaMap[k] || ('#' + k.gsub(' ','_'))
               yield subject, k, v.R unless k == :drop
             end
           end}
@@ -175,76 +275,8 @@ sidebar [class^='side']    [id^='side']
         n.css('head meta').map{|m|
           if k = (m.attr("name") || m.attr("property")) # predicate
             if v = m.attr("content")                    # object
-
-              # map predicates
-              k = {
-                'adtargeting' => :drop,
-                'al:ios:app_name' => :drop,
-                'al:ios:app_store_id' => :drop,
-                'al:ios:url' => :drop,
-                'apple-itunes-app' => :drop,
-                'apple-mobile-web-app-title' => :drop,
-                'application-name' => :drop,
-                'article:author' => Creator,
-                'article:modified_time' => Date,
-                'article:published_time' => Date,
-                'article:publisher' => To,
-                'article:section' => Abstract,
-                'article:tag' => Abstract,
-                'author' => Creator,
-                'description' => Abstract,
-                'enabled-features' => :drop,
-                'fb:admins' => :drop,
-                'fb:app_id' => :drop,
-                'fb:pages' => :drop,
-                'format-detection' => :drop,
-                'google-site-verification' => :drop,
-                'HandheldFriendly' => :drop,
-                'image' => Image,
-                'js-proxy-site-detection-payload' => :drop,
-                'keywords' => Abstract,
-                'news_keywords' => Abstract,
-                'msapplication-TileColor' => :drop,
-                'msapplication-TileImage' => Image,
-                'og:description' => Abstract,
-                'og:image' => Image,
-                'og:image:height' => Schema + 'height',
-                'og:image:secure_url' => Image,
-                'og:image:width' => Schema + 'width',
-                'og:title' => Title,
-                'og:url' => Link,
-                'og:site_name' => To,
-                'og:type' => Type,
-                'sailthru.date' => Date,
-                'sailthru.description' => Abstract,
-                'sailthru.image.thumb' => Image,
-                'sailthru.image.full' => Image,
-                'sailthru.lead_image' => Image,
-                'sailthru.secondary_image' => Image,
-                'sailthru.title' => Title,
-                'theme-color' => :drop,
-                'thumbnail' => Image,
-                'twitter:app:id:iphone' => :drop,
-                'twitter:app:name:googleplay' => :drop,
-                'twitter:app:name:ipad' => :drop,
-                'twitter:app:url:ipad' => :drop,
-                'twitter:card' => :drop,
-                'twitter:app:name:iphone' => :drop,
-                'twitter:app:id:ipad' => :drop,
-                'twitter:app:id:googleplay' => :drop,
-                'twitter:app:url:googleplay' => :drop,
-                'twitter:app:url:iphone' => :drop,
-                'twitter:dnt' => :drop,
-                'twitter:creator' => 'https://twitter.com',
-                'twitter:description' => Abstract,
-                'twitter:image' => Image,
-                'twitter:image:src' => Image,
-                'twitter:site' => 'https://twitter.com',
-                'twitter:title' => Title,
-                'viewport' => :drop,
-              }[k] || ('#' + k.gsub(' ','_'))
-
-              #puts [k,v].join "\t" unless k.match? /^(drop|http)/
+              k = MetaMap[k] || k
+              puts [k,v].join "\t" unless k.to_s.match? /^(drop|http)/
               case k
               when /lytics/
                 k = :drop
