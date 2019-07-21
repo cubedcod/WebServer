@@ -295,7 +295,7 @@ class WebResource
 
     Avatars = {}
     'avatars/*png'.R.glob.map{|a|
-      Avatars[Base64.decode64 a.basename.split('.')[0]] = a
+      Avatars[Base64.decode64 a.basename.split('.')[0]] = 'http://localhost:8000' + a.path
     }
 
     def avatar
@@ -497,8 +497,11 @@ class WebResource
                (basename && !['','/'].member?(basename) && basename) ||
                (host && host.sub(/\.com$/,'')) ||
                'user'
-        color = env[:colors][name] ||= HTML.colorize
-        [{_: :a, id: 'a' + Digest::SHA2.hexdigest(rand.to_s), class: :creator, style: color, href: u.to_s, c: Avatars[u.to_s] ? {_: :img, class: :avatar, src: Avatars[u.to_s]} : name}, ' ']
+        avatar = Avatars[u.to_s]
+        [{_: :a, href: u.to_s, id: 'a' + Digest::SHA2.hexdigest(rand.to_s),
+          class: :creator,
+          style: avatar ? 'border-width: 0; background-color: #000' : (env[:colors][name] ||= HTML.colorize),
+          c: avatar ? {_: :img, class: :avatar, src: avatar} : name}, ' ']
       else
         CGI.escapeHTML (c||'')
       end}
