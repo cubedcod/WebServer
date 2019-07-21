@@ -561,8 +561,7 @@ class WebResource
     def self.tree t, env, name=nil
       url = t[:RDF]['uri'] if t[:RDF]
       css = {style: "background-color: #{'#%06x' % rand(16777216)}"} if name && t.keys.size > 1
-      {class: :tree,
-       c: [({_: (url ? :a : :span), class: :label, c: (CGI.escapeHTML name.to_s[0..85])}.update(url ? {href: url} : {}) if name),
+      {c: [({_: (url ? :a : :span), c: (CGI.escapeHTML name.to_s[0..85])}.update(url ? {href: url} : {}) if name),
            t.map{|_name, _t|
              _name == :RDF ? (value nil, _t, env) : (tree _t, env, _name)}]}.update(css ? css : {})
     end

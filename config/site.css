@@ -7,7 +7,6 @@
 * {border-radius: .2em}
 .avatar {max-height: 2em}
 .bold {font-weight: bold; font-size: 1.1em}
-.post {background-color: #000; color: #fff}
 .toolbox { vertical-align: top }
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
 a {text-decoration: none; background-color: #eee; color: #000; border-style: solid; border-width: 0 0 1px 0; border-color: #000}
@@ -17,11 +16,12 @@ a.link {white-space: nowrap}
 a.title {vertical-align: top; background-color: #eee; color: #000; font-size: 1.1em; font-weight: bold }
 a:visited {background-color: #000; color: #eee; border-color: #ddd}
 body {font-family: sans-serif}
-div {display: inline-block}
+div {display: inline-block; padding-top: .05em}}
 img, video, .post {max-width: 100%}
 img.thumb, svg {max-width: 28em}
 p {max-width: 80ex; margin: 0}
 pre {white-space: pre-wrap}
 table.fromTo, #prev {float: left}
+td, .post {background-color: #000; color: #fff}
 td.k {max-width: 28ex; overflow: hidden; text-align: right}
 tr[name="title"] > td.v {max-width: 40ex; overflow: hidden}
