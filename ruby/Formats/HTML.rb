@@ -315,20 +315,18 @@ sidebar [class^='side']    [id^='side']
             yield subject, Video, v.attr('src').R }}
 
         # <body>
-        unless (@base.host || '').match?(/(twitter).com/)
-          if body = n.css('body')[0]
-            %w{content-body entry-content}.map{|bsel|
-              if content = body.css('.' + bsel)[0]
-                yield subject, Content, HTML.clean(content.inner_html)
-              end}
-            [*BasicGunk,*Gunk].map{|selector|
-              body.css(selector).map{|sel|
-                sel.remove }} # strip elements
-            yield subject, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
-          else
-            n.css('head').remove
-            yield subject, Content, HTML.clean(n.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
-          end
+        if body = n.css('body')[0]
+          %w{content-body entry-content}.map{|bsel|
+            if content = body.css('.' + bsel)[0]
+              yield subject, Content, HTML.clean(content.inner_html)
+            end}
+          [*BasicGunk,*Gunk].map{|selector|
+            body.css(selector).map{|sel|
+              sel.remove }} # strip elements
+          yield subject, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
+        else # body element missing
+          n.css('head').remove
+          yield subject, Content, HTML.clean(n.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
         end
       end
     end

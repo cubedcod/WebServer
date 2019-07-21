@@ -205,6 +205,7 @@ class WebResource
       [re.code, re.headers, [re.body]]}
 
     # Twitter
+    HostGET['mobile.twitter.com'] = -> r {[301,{'Location' => 'https://twitter.com' + r.path },[]]}
     HostGET['t.co'] = -> r {r.parts[0] == 'i' ? r.deny : r.noexec}
     HostGET['twitter.com'] = -> r {
       if !r.path || r.path == '/'
