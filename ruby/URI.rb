@@ -1,8 +1,7 @@
 # coding: utf-8
 class WebResource
+  alias_method :uri, :to_s
   module URIs
-    alias_method :uri, :to_s
-
     # vocabulary prefixes
     W3       = 'http://www.w3.org/'
     DC       = 'http://purl.org/dc/terms/'

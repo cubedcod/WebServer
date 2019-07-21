@@ -394,7 +394,8 @@ yts
         end
         tweet.css('img').map{|img|
           yield s, Image, img.attr('src').to_s.R}
-        tweet.remove }}
+      }}
+    doc.css('body').remove
   end
 
   def YouTube doc
