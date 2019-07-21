@@ -136,7 +136,7 @@ sidebar [class^='side']    [id^='side']
           begin
             embeds << (::JSON::LD::API.toRdf ::JSON.parse dataElement.inner_text)
           rescue
-            puts "JSON-LD parse failed in #{@base}"
+            nil
           end}
 
         # RDFa
@@ -244,7 +244,7 @@ sidebar [class^='side']    [id^='side']
                 'viewport' => :drop,
               }[k] || ('#' + k.gsub(' ','_'))
 
-              puts [k,v].join "\t" unless k.match? /^(drop|http)/
+              #puts [k,v].join "\t" unless k.match? /^(drop|http)/
               case k
               when /lytics/
                 k = :drop
@@ -280,7 +280,6 @@ sidebar [class^='side']    [id^='side']
                 sel.remove }} # strip elements
             yield subject, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
           else
-            puts "no <body> found in HTML #{@base}"
             n.css('head').remove
             yield subject, Content, HTML.clean(n.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
           end
