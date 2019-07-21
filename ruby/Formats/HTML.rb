@@ -526,12 +526,12 @@ class WebResource
               p = p.R
               slug = p.fragment || p.basename
               icon = Icons[p.uri] || slug
-              {_: :td, class: 'k', c: env[:query]['sort'] == p.uri ? icon : {_: :a, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}}},
+              {_: :td, c: env[:query]['sort'] == p.uri ? icon : {_: :a, class: :head, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}}},
            graph.map{|resource|
              contentRow = resource[Abstract] || resource[Content] || resource[Image] || resource[Video]
              [{_: :tr, c: keys.map{|k|
-                 {_: :td, class: 'v',
-                  c: if k=='uri' # title with URI subscript
+                 {_: :td, class: k == 'uri' ? :title : :v,
+                  c: if k == 'uri'
                    ts = resource[Title] || []
                    if ts.size > 0
                      ts.map{|t|

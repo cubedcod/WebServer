@@ -1,27 +1,28 @@
+
 #down {display: block}
 #next {float: right}
 #prev, #next {height: 100%}
-#prev, #next, #up, #down, #tabular, #shrink, #ui {font-size: 2em; border-width: 0; border-radius: 0}
+#prev, #next, #up, #down, #tabular, #shrink, #ui {font-size: 2em}
 #subscribe.off {color: #777; background-color: #000}
 #subscribe.on  {color: #000; background-color: #fff}
 * {border-radius: .2em}
 .avatar {max-height: 2em}
 .bold {font-weight: bold; font-size: 1.1em}
+.title {background-color: #eee; color: #000; font-size: 1.1em; font-weight: bold }
 .toolbox { vertical-align: top }
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
-a {text-decoration: none; background-color: #eee; color: #000; border-style: solid; border-width: 0 0 1px 0; border-color: #000}
+a {text-decoration: none; background-color: #eee; color: #000}
 a.date {float: right; background-color: #000; color: #888; font-size: .8em}
 a.id {float: right; background-color: #000; color: #333}
 a.link {white-space: nowrap}
-a.title {vertical-align: top; background-color: #eee; color: #000; font-size: 1.1em; font-weight: bold }
-a:visited {background-color: #000; color: #eee; border-color: #ddd}
+a:visited {background-color: #000; color: #fff}
 body {font-family: sans-serif}
+body, td, .post, a.head {background-color: #000; color: #fff}
 div {display: inline-block; padding-top: .05em}}
 img, video, .post {max-width: 100%}
 img.thumb, svg {max-width: 28em}
 p {max-width: 80ex; margin: 0}
 pre {white-space: pre-wrap}
 table.fromTo, #prev {float: left}
-td, .post {background-color: #000; color: #fff}
+td {border-color: #333; border-width: 0 1px 1px 0; border-style: dotted}
 td.k {max-width: 28ex; overflow: hidden; text-align: right}
-tr[name="title"] > td.v {max-width: 40ex; overflow: hidden}
