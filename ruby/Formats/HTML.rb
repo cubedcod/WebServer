@@ -295,11 +295,13 @@ class WebResource
 
     Avatars = {}
     'avatars/*png'.R.glob.map{|a|
-      Avatars[Base64.decode64 a.basename.split('.')[0]] = 'http://localhost:8000' + a.path
+      Avatars[Base64.decode64(a.basename.split('.')[0]).downcase] = 'http://localhost:8000' + a.path
     }
 
-    def avatar
-      ('avatars/' + Base64.encode64(uri).gsub("\n",'') + '.png').R
+    def avatar link = nil
+      location = ('avatars/' + Base64.encode64(uri).gsub("\n",'') + '.png').R
+      location.writeFile open(link).read if link
+      location
     end
 
 
@@ -488,7 +490,7 @@ class WebResource
         CGI.escapeHTML t.to_s
       end}
 
-    Markup[Creator] = -> c, env {
+    Markup[Creator] = Markup[To] = -> c, env {
       if c.class == Hash || c.respond_to?(:uri)
         u = c.R
         basename = u.basename
@@ -497,7 +499,7 @@ class WebResource
                (basename && !['','/'].member?(basename) && basename) ||
                (host && host.sub(/\.com$/,'')) ||
                'user'
-        avatar = Avatars[u.to_s]
+        avatar = Avatars[u.to_s.downcase]
         [{_: :a, href: u.to_s, id: 'a' + Digest::SHA2.hexdigest(rand.to_s),
           class: :creator,
           style: avatar ? 'border-width: 0; background-color: #000' : (env[:colors][name] ||= HTML.colorize),
@@ -533,7 +535,7 @@ class WebResource
                      class: :from},
                     {_: :td, c: '&rarr;'},
                     {_: :td,
-                     c: [to.map{|f|Markup[Creator][f,env]},
+                     c: [to.map{|f|Markup[To][f,env]},
                          post.delete(SIOC+'reply_of')],
                      class: :to}]}},
            content, ((HTML.keyval post, env) unless post.keys.size < 1)]}}
