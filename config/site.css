@@ -1,29 +1,25 @@
 #down {display: block}
 #next {float: right}
 #prev, #next {height: 100%}
-#prev, #next, #up, #down, #tabular, #shrink, #ui {font-size: 2em; color: #fff; background-color: #000; border-width: 0; border-radius: 0}
-#subscribe.off {color: #777; background-color: #000; border: .1em solid #555}
+#prev, #next, #up, #down, #tabular, #shrink, #ui {font-size: 2em; border-width: 0; border-radius: 0}
+#subscribe.off {color: #777; background-color: #000}
 #subscribe.on  {color: #000; background-color: #fff}
 .avatar {max-height: 2em}
 .bold {font-weight: bold; font-size: 1.1em}
-.post {background-color: #000; color: #fff}
-.tree > .label {font-size: .8em}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
 a {text-decoration: none; background-color: #eee; color: #000; border-style: solid; border-width: 0 0 1px 0; border-color: #000}
-a.date {float: right; background-color: #000; color: #888; font-size: .8em}
-a.id {float: right; background-color: #000; color: #333}
+a.date {float: right; color: #888; font-size: .8em}
+a.id {float: right; color: #333}
 a.link {white-space: nowrap}
-a.link, .thumb {background-color: #fff; color: #000}
 a.title {vertical-align: top; background-color: #eee; color: #000; font-size: 1.1em; font-weight: bold }
 a:visited {background-color: #000; color: #eee; border-color: #ddd}
 body {font-family: sans-serif}
 * {background-color: #000; color: #fff; border-radius: .2em}
-div.md, table.fromTo, #prev {float: left}
+table.fromTo, #prev {float: left}
 img, video, .post {max-width: 100%}
 img.thumb, svg {max-width: 28em}
 p {max-width: 80ex; margin: 0}
 pre {white-space: pre-wrap}
-table, div {display: inline-block}
-td, .toolbox { vertical-align: top }
-td.k {max-width: 32ex; overflow: hidden; text-align: right}
+.toolbox { vertical-align: top }
+td.k {max-width: 28ex; overflow: hidden; text-align: right}
 tr[name="title"] > td.v {max-width: 40ex; overflow: hidden}
