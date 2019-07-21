@@ -31,19 +31,16 @@ end
 class WebResource
   module URIs
     ConfDir  = (Pathname.new __dir__).relative_path_from Pathname.new Dir.pwd
-
+    Extensions = RDF::Format.file_extensions.invert
     FeedURL = {}
     ConfDir.join('feeds/*.u').R.glob.map{|list|
       (open list.relPath).readlines.map(&:chomp).map{|u|
         FeedURL[u] = u.R }}
-
     SiteGIF = ConfDir.join('site.gif').read
     SiteCSS = ConfDir.join('site.css').read
     SiteJS  = ConfDir.join('site.js').read
-
   end
   module HTTP
-
     DesktopUA = 'Mozilla/5.0 (X11; Linux RISC-V; rv:69.0) Gecko/20100101 Firefox/69.0'
     ImmutableFormat = /^application\/json/
     POSThost = /(^|\.)(anvato|brightcove|git(lab|ter)|reddit|(mix|sound)cloud|music.apple|weather|youtube)\.(com|gov|im|net)$/

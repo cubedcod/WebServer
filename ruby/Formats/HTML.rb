@@ -371,9 +371,9 @@ class WebResource
       avatar = Avatars[u.gsub(/\/$/,'')]
       [{_: :a,
         c: avatar ? {_: :img, class: :avatar, src: avatar} : u.sub(/^https?.../,'')[0..79],
-        class: :link,
         href: u,
         id: 'l' + Digest::SHA2.hexdigest(rand.to_s),
+        style: avatar ? 'background-color: #000' : (env[:colors][ref.host] ||= HTML.colorize),
         title: u,
        },
        " \n"]}
@@ -397,7 +397,7 @@ class WebResource
         avatar = Avatars[u.to_s.downcase]
         [{_: :a, href: u.to_s, id: 'a' + Digest::SHA2.hexdigest(rand.to_s),
           class: :creator,
-          style: avatar ? 'border-width: 0; background-color: #000' : (env[:colors][name] ||= HTML.colorize),
+          style: avatar ? 'background-color: #000' : (env[:colors][name] ||= HTML.colorize),
           c: avatar ? {_: :img, class: :avatar, src: avatar} : name}, ' ']
       else
         CGI.escapeHTML (c||'')
@@ -561,7 +561,8 @@ class WebResource
     def self.tree t, env, name=nil
       url = t[:RDF]['uri'] if t[:RDF]
       css = {style: "background-color: #{'#%06x' % rand(16777216)}"} if name && t.keys.size > 1
-      {c: [({_: (url ? :a : :span), c: (CGI.escapeHTML name.to_s[0..85])}.update(url ? {href: url} : {}) if name),
+      {class: :tree,
+       c: [({_: (url ? :a : :span), c: (CGI.escapeHTML name.to_s[0..85])}.update(url ? {href: url} : {}) if name),
            t.map{|_name, _t|
              _name == :RDF ? (value nil, _t, env) : (tree _t, env, _name)}]}.update(css ? css : {})
     end

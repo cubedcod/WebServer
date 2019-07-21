@@ -1,5 +1,18 @@
 # coding: utf-8
-class WebResource
+require 'linkeddata'
+class RDF::URI
+  def R; WebResource.new to_s end
+end
+class RDF::Node
+  def R; WebResource.new to_s end
+end
+class String
+  def R env = nil
+    env ? WebResource.new(self).env(env) : WebResource.new(self)
+  end
+end
+class WebResource < RDF::URI
+  def R; self end
   alias_method :uri, :to_s
   module URIs
     # vocabulary prefixes
@@ -25,7 +38,7 @@ class WebResource
     Type     = W3 + '1999/02/22-rdf-syntax-ns#type'
     Video    = DC + 'Video'
 
-    # single-character representation of URI
+    # single-character representation of URIs
     Icons = {
       'https://twitter.com' => '🐦',
       Abstract => '✍',
