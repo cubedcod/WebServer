@@ -693,7 +693,8 @@ class WebResource
                          titles[title] = true
                          {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: :title,
                           c: [(CGI.escapeHTML title), ' ',
-                              {_: :span, class: :uri, c: CGI.escapeHTML(resource['uri'][0..96])}, ' ']}
+                              #{_: :span, class: :uri, c: CGI.escapeHTML(resource['uri'][0..96])},
+                              ' ']}
                        end}
                    else
                      {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: :id, c: '&#x1f517;'}
