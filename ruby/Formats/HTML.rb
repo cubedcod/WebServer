@@ -720,22 +720,11 @@ class WebResource
 
     def self.tree t, env, name=nil
       url = t[:RDF]['uri'] if t[:RDF]
-      if name && t.keys.size > 1
-        color = '#%06x' % rand(16777216)
-        scale = rand(7) + 1
-        position = scale * rand(960) / 960.0
-        css = {style: "border: .08em solid #{color}; background: repeating-linear-gradient(#{rand 360}deg, #000, #000 #{position}em, #{color} #{position}em, #{color} #{scale}em)"}
-      end
-
+      css = {style: "background-color: #{'#%06x' % rand(16777216)}"} if name && t.keys.size > 1
       {class: :tree,
        c: [({_: (url ? :a : :span), class: :label, c: (CGI.escapeHTML name.to_s[0..85])}.update(url ? {href: url} : {}) if name),
            t.map{|_name, _t|
-             if :RDF == _name
-               value nil, _t, env
-             else
-               tree _t, env, _name
-             end
-           }]}.update(css ? css : {})
+             _name == :RDF ? (value nil, _t, env) : (tree _t, env, _name)}]}.update(css ? css : {})
     end
 
     # tree with S -> P -> O indexing

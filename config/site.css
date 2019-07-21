@@ -16,14 +16,14 @@
 .tree > span.label {display: none}
 .tree, td.v {border-radius: .2em}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
-a {text-decoration: none; background-color: #eee; color: #000; border: 1px solid #000}
+a {text-decoration: none; background-color: #eee; color: #000; border: 1px solid #000; border-radius: .18em}
 a.date {float: right; background-color: #000; color: #888; font-size: .8em; margin-right: .1em}
 a.id {float: right; background-color: #000; color: #333}
 a.link {white-space: nowrap}
 a.link, .thumb {background-color: #fff; color: #000}
 a.title > span.uri {font-size: .7em; font-weight: normal; background-color: #aaa}
 a.title {float: left; vertical-align: top; background-color: #ddd; color: #000; font-size: 1.1em; font-weight: bold }
-a:visited {background-color: #000; color: #eee; border-color: #888}
+a:visited {background-color: #000; color: #eee; border-color: #ddd}
 body {font-family: sans-serif; margin: 0 2em 0 2em}
 body, pre, p, span, li, time, td.v {background-color: #000; color: #fff}
 div, td {padding: 0}
