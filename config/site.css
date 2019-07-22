@@ -8,7 +8,7 @@
 .avatar {max-height: 2em}
 .bold {font-weight: bold; font-size: 1.1em}
 .post {border-radius: .38em; max-width: 100ex}
-.title {background-color: #eee; color: #000; font-size: 1.18em; font-weight: bold; display: block}
+.title {background-color: #eee; color: #000; font-size: 1.18em; font-weight: bold; vertical-align: top}
 .toolbox { vertical-align: top }
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
 a {text-decoration: none; background-color: #eee; color: #000}
