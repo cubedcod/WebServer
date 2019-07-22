@@ -8,7 +8,7 @@
 .avatar {max-height: 2em}
 .post {border-radius: .38em; max-width: 100ex}
 .title {background-color: #eee; color: #000; font-size: 1.18em; font-weight: bold; vertical-align: top}
-.toolbox a {font-size: 2em; background-color: #000; color: #ccc}
+.toolbox a.icon {font-size: 2em; background-color: #000; color: #ccc}
 .toolbox { vertical-align: top }
 .tree {margin: .1em}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
