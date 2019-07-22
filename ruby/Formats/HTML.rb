@@ -373,7 +373,7 @@ class WebResource
         c: avatar ? {_: :img, class: :avatar, src: avatar} : u.sub(/^https?.../,'')[0..79],
         href: u,
         id: 'l' + Digest::SHA2.hexdigest(rand.to_s),
-        style: avatar ? 'background-color: #000' : (env[:colors][ref.host] ||= HTML.colorize),
+        style: avatar ? 'background-color: #000' : (env[:colors][u.R.host] ||= HTML.colorize),
         title: u,
        },
        " \n"]}

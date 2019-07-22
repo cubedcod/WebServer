@@ -16,7 +16,7 @@ a.date {float: right; background-color: #000; color: #888; font-size: .8em}
 a.id {float: right; background-color: #000; color: #333}
 body {font-family: sans-serif}
 body, td, .post, a.head, a:visited {background-color: #000; color: #fff}
-a, .tree {padding: 1px}
+a, .tree {padding-top: 1px}
 div, li {display: inline-block}
 img, video, .post {max-width: 100%}
 img.thumb, svg {max-width: 28em}
