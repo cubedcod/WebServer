@@ -29,14 +29,14 @@ module Webize
       def each_triple &block; each_statement{|s| block.call *s.to_triple} end
 
       def each_statement &fn
-        mail_triples{|s,p,o|
+        mail_triples{|s,p,o,graph=nil|
           fn.call RDF::Statement.new(s.R, p.R,
                                      (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal o
                                                                                             l.datatype=RDF.XMLLiteral if p == Content
                                                                                             l),
                                      :graph_name => s.R)}
       end
-      def mail_triples &b; #@verbose = true
+      def mail_triples &b
         m = ::Mail.new @doc
         unless m
           puts "mail parse failed:", @doc
@@ -44,7 +44,6 @@ module Webize
         end
         # Message-ID
         id = m.message_id || m.resent_message_id || Digest::SHA2.hexdigest(rand.to_s)
-        puts "\n MID #{id}" if @verbose
 
         # Message URI
         msgURI = -> id {
@@ -52,13 +51,11 @@ module Webize
           ['', 'msg', h[0], h[1], h[2], id.gsub(/[^a-zA-Z0-9]+/,'.')[0..96], '#this'].join('/').R}
         resource = msgURI[id]
         e = resource.uri
-        puts " URI #{resource}" if @verbose
 
         srcDir = resource.path.R          # message dir
         srcFile = (srcDir + 'this.eml').R # message file
         unless srcFile.exist?
           srcFile.writeFile @doc # store in canonical-location
-          puts "LINK #{srcFile}" if @verbose
         end
         yield e, DC + 'identifier', id # Message-ID
         yield e, Type, (SIOC + 'MailMessage').R
@@ -71,7 +68,6 @@ module Webize
           yield e, DC+'hasFormat', html           # file ref in RDF
           unless html.exist?
             html.writeFile p.decoded  # store HTML email
-            puts "HTML #{html}" if @verbose
           end
           htmlCount += 1 } # increment count
 
@@ -114,26 +110,22 @@ module Webize
             if noms.size > 2 && noms[1] == 'at'
               f = "#{noms[0]}@#{noms[2]}"
             end
-            puts "FROM #{f}" if @verbose 
             from.push f.downcase}} # queue address for indexing + triple-emitting
 
         m[:from] && m[:from].yield_self{|fr|
           fr.addrs.map{|a|
             name = a.display_name || a.name # human-readable name
             yield e, Creator, name
-            puts "NAME #{name}" if @verbose
           } if fr.respond_to? :addrs}
 
         m['X-Mailer'] && m['X-Mailer'].yield_self{|m|
-          yield e, SIOC+'user_agent', m.to_s
-          puts " MLR #{m}" if @verbose}
+          yield e, SIOC+'user_agent', m.to_s}
 
         # To
         to = []
         %w{to cc bcc resent_to}.map{|p|      # recipient fields
           m.send(p).yield_self{|r|           # recipient lookup
             ((r.class == Array || r.class == ::Mail::AddressContainer) ? r : [r]).compact.map{|r| # recipient
-              puts "  TO #{r}" if @verbose
             to.push r.downcase }}} # queue for indexing
         m['X-BeenThere'].yield_self{|b|(b.class == Array ? b : [b]).compact.map{|r|to.push r.to_s}} # anti-loop recipient
         m['List-Id'] && m['List-Id'].yield_self{|name|yield e, To, name.decoded.sub(/<[^>]+>/,'').gsub(/[<>&]/,'')} # mailinglist name
@@ -151,7 +143,6 @@ module Webize
         dstr = date.utc.iso8601
         yield e, Date, dstr
         dpath = '/' + dstr[0..6].gsub('-','/') + '/msg/' # month
-        puts "DATE #{dstr}\nSUBJ #{subject}" if @verbose && subject
 
         # index addresses
         [*from,*to].map{|addr|
@@ -198,7 +189,6 @@ module Webize
           file = (srcDir + name).R                 # file location
           unless file.exist?
             file.writeFile p.body.decoded # store attachment
-            puts "FILE #{file}" if @verbose
           end
           yield e, SIOC+'attachment', file         # file pointer
           if p.main_type=='image'                  # image attachments

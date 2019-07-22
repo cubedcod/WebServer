@@ -30,7 +30,7 @@ class WebResource
       subject = (options[:base_uri] || path).R
       if node.directory?
         subject = subject.path[-1] == '/' ? subject : (subject + '/') # normalize trailing-slash
-        graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#BasicContainer').R)
+        #graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#BasicContainer').R)
         graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#Container').R)
         if env && subject.path == env['REQUEST_PATH'] # children of request-container
           children.map{|child|
@@ -39,7 +39,7 @@ class WebResource
       else
         graph << (RDF::Statement.new subject, Type.R, (W3+'ns/posix/stat#File').R)
       end
-      graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#Resource').R)
+      #graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#Resource').R)
       graph << (RDF::Statement.new subject, Title.R, basename)
       graph << (RDF::Statement.new subject, (W3+'ns/posix/stat#size').R, node.size)
       mtime = node.stat.mtime
