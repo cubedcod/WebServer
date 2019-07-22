@@ -15,8 +15,8 @@ module Webize
       format Format
 
       def initialize(input = $stdin, options = {}, &block)
+        @base = options[:base_uri]
         @doc = input.respond_to?(:read) ? input.read : input
-        @subject = (options[:base_uri] || '#textfile').R
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -29,54 +29,43 @@ module Webize
       def each_triple &block; each_statement{|s| block.call *s.to_triple} end
 
       def each_statement &fn
-        mail_triples{|s,p,o,graph=nil|
-          fn.call RDF::Statement.new(s.R, p.R,
+        mail_triples{|subject, predicate, o, graph=nil|
+          fn.call RDF::Statement.new(subject.R,
+                                     predicate.R,
                                      (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal o
-                                                                                            l.datatype=RDF.XMLLiteral if p == Content
+                                                                                            l.datatype=RDF.XMLLiteral if predicate == Content
                                                                                             l),
-                                     :graph_name => s.R)}
+                                     :graph_name => graph || subject.R)}
       end
-      def mail_triples &b
-        m = ::Mail.new @doc
-        unless m
-          puts "mail parse failed:", @doc
-          return
-        end
-        # Message-ID
-        id = m.message_id || m.resent_message_id || Digest::SHA2.hexdigest(rand.to_s)
 
-        # Message URI
-        msgURI = -> id {
+      def mail_triples body = nil, &b
+        m = ::Mail.new (body || @doc)
+        return puts "mail-read failed #{@base}" unless m
+
+        # Message-ID and URI
+        mailResource = -> id {
           h = Digest::SHA2.hexdigest id
-          ['', 'msg', h[0], h[1], h[2], id.gsub(/[^a-zA-Z0-9]+/,'.')[0..96], '#this'].join('/').R}
-        resource = msgURI[id]
-        e = resource.uri
+          ['', 'mail', '.msg', h[0], h[1], h[2], id[0..96] + '#msg'].join('/').R}
+        id = (m.message_id || m.resent_message_id || Digest::SHA2.hexdigest(rand.to_s)).gsub /[^a-zA-Z0-9]+/, '.'
+        mail = mailResource[id]
+        yield mail, Type, (SIOC + 'MailMessage').R
 
-        srcDir = resource.path.R          # message dir
-        srcFile = (srcDir + 'this.eml').R # message file
-        unless srcFile.exist?
-          srcFile.writeFile @doc # store in canonical-location
-        end
-        yield e, DC + 'identifier', id # Message-ID
-        yield e, Type, (SIOC + 'MailMessage').R
-
-        # HTML
-        htmlFiles, parts = m.all_parts.push(m).partition{|p|p.mime_type=='text/html'}
+        # HTML message
+        htmlFiles, parts = m.all_parts.push(m).partition{|p|
+          p.mime_type == 'text/html'}
         htmlCount = 0
-        htmlFiles.map{|p| # HTML file
-          html = (srcDir + "#{htmlCount}.html").R # file ref
-          yield e, DC+'hasFormat', html           # file ref in RDF
-          unless html.exist?
-            html.writeFile p.decoded  # store HTML email
-          end
+        htmlFiles.map{|p|
+          html = (mail.path + ".#{htmlCount}.html").R # HTML-file
+          yield mail, DC + 'hasFormat', html          # reference
+          html.writeFile p.decoded unless html.exist? # store
           htmlCount += 1 } # increment count
 
-        # plaintext
+        # plaintext message
         parts.select{|p|
           (!p.mime_type || p.mime_type == 'text/plain') && # text parts
-            ::Mail::Encodings.defined?(p.body.encoding)      # decodable?
+            ::Mail::Encodings.defined?(p.body.encoding)    # decodable?
         }.map{|p|
-          yield e, Content,
+          yield mail, Content,
                 WebResource::HTML.render(p.decoded.lines.to_a.map{|l| # split lines
                               l = l.chomp # strip any remaining [\n\r]
                               if qp = l.match(/^((\s*[>|]\s*)+)(.*)/) # quoted line
@@ -89,18 +78,16 @@ module Webize
                                    c: [indent * depth,' ',
                                        {_: :span, class: :quoted,
                                         c: qp[3].hrefs{|p,o|
-                                          yield e, p, o }}]}
+                                          yield mail, p, o }}]}
                                 end
                               else # unquoted line
-                                [l.hrefs{|p, o| yield e, p, o}]
+                                [l.hrefs{|p, o|
+                                   yield mail, p, o}]
                               end}.map{|line| [line, '<br>']})}
 
         # recursive contained messages: digests, forwards, archives
         parts.select{|p|p.mime_type=='message/rfc822'}.map{|m|
-          content = m.body.decoded                       # decode message
-          f = (srcDir + Digest::SHA2.hexdigest(content) + '.inlined.eml').R # storage location
-          f.writeFile content if !f.exist?               # store message
-          f.triplrMail &b} # triplr on contained message
+          mail_triples m.body.decoded, &b}
 
         # From
         from = []
@@ -111,15 +98,11 @@ module Webize
               f = "#{noms[0]}@#{noms[2]}"
             end
             from.push f.downcase}} # queue address for indexing + triple-emitting
-
         m[:from] && m[:from].yield_self{|fr|
           fr.addrs.map{|a|
             name = a.display_name || a.name # human-readable name
-            yield e, Creator, name
+            yield mail, Creator, name
           } if fr.respond_to? :addrs}
-
-        m['X-Mailer'] && m['X-Mailer'].yield_self{|m|
-          yield e, SIOC+'user_agent', m.to_s}
 
         # To
         to = []
@@ -128,76 +111,62 @@ module Webize
             ((r.class == Array || r.class == ::Mail::AddressContainer) ? r : [r]).compact.map{|r| # recipient
             to.push r.downcase }}} # queue for indexing
         m['X-BeenThere'].yield_self{|b|(b.class == Array ? b : [b]).compact.map{|r|to.push r.to_s}} # anti-loop recipient
-        m['List-Id'] && m['List-Id'].yield_self{|name|yield e, To, name.decoded.sub(/<[^>]+>/,'').gsub(/[<>&]/,'')} # mailinglist name
+        m['List-Id'] && m['List-Id'].yield_self{|name|
+          yield mail, To, name.decoded.sub(/<[^>]+>/,'').gsub(/[<>&]/,'')} # mailinglist name
 
         # Subject
         subject = nil
         m.subject && m.subject.yield_self{|s|
           subject = s
-          subject.scan(/\[[^\]]+\]/){|l| yield e, Schema + 'group', l[1..-2]}
-          yield e, Title, subject}
+          subject.scan(/\[[^\]]+\]/){|l|
+            yield mail, Schema + 'group', l[1..-2]}
+          yield mail, Title, subject}
 
         # Date
         date = m.date || Time.now rescue Time.now
-        date = Time.parse(date.to_s) unless [Time, DateTime].member? date.class
-        dstr = date.utc.iso8601
-        yield e, Date, dstr
-        dpath = '/' + dstr[0..6].gsub('-','/') + '/msg/' # month
+        timestamp = ([Time, DateTime].member?(date.class) ? date : Time.parse(date.to_s)).utc.iso8601
+        yield mail, Date, timestamp
 
         # index addresses
-        [*from,*to].map{|addr|
+        [*from, *to].map{|addr|
           user, domain = addr.split '@'
           if user && domain
-            apath = dpath + domain + '/' + user # address
-            yield e, (from.member? addr) ? Creator : To, apath.R # To/From triple
+            apath = '/mail/' + domain + '/' + user + '/' # address container
+            yield mail, from.member?(addr) ? Creator : To, apath.R # To/From triple
             if subject
               slug = subject.scan(/[\w]+/).map(&:downcase).uniq.join('.')[0..63]
-              mpath = apath + '.' + dstr[8..-1].gsub(/[^0-9]+/,'.') + slug # (month,addr,title) path
-              [(mpath + (mpath[-1] == '.' ? '' : '.')  + 'eml').R, # monthdir entry
-               ('mail/cur/' + Digest::SHA2.hexdigest(id) + '.eml').R].map{|entry|     # maildir entry
-                srcFile.link entry unless entry.exist?} # link if missing
+              addrIndex = (apath + timestamp + '.' + slug).R
+              yield mail, Title, subject, addrIndex if subject
+              yield mail, Date, timestamp, addrIndex
             end
-          end
-        }
+          end }
 
-        # index bidirectional refs
+        # references
         %w{in_reply_to references}.map{|ref|
           m.send(ref).yield_self{|rs|
             (rs.class == Array ? rs : [rs]).compact.map{|r|
-              dest = msgURI[r]
-              yield e, SIOC+'reply_of', dest
-              destDir = dest.path.R
-              destDir.mkdir
-              destFile = (destDir + 'this.eml').R
-              # bidirectional reference link
-              rev = (destDir + Digest::SHA2.hexdigest(id) + '.eml').R
-              rel = (srcDir + Digest::SHA2.hexdigest(r) + '.eml').R
-              if !rel.exist? # link missing
-                if destFile.exist? # target exists
-                  destFile.link rel
-                else # link anyway, referenced node may appear
-                  destFile.ln_s rel unless rel.node.symlink?
-                end
-              end
-              srcFile.link rev if !rev.exist?}}}
+              dest = mailResource[r.gsub /[^a-zA-Z0-9]+/, '.']
+              yield mail, SIOC + 'reply_of', dest
+              yield dest, SIOC + 'has_reply', mail, (dest.path + '.' + Digest::SHA2.hexdigest(id)).R }}}
 
         # attachments
         m.attachments.select{|p|
-          ::Mail::Encodings.defined?(p.body.encoding)}.map{|p| # decodability check
-          name = p.filename && !p.filename.empty? && p.filename || # explicit name
-                 (Digest::SHA2.hexdigest(rand.to_s) + (Rack::Mime::MIME_TYPES.invert[p.mime_type] || '.bin').to_s) # generated name
-          file = (srcDir + name).R                 # file location
+          ::Mail::Encodings.defined?(p.body.encoding)}.map{|p|     # decodability check
+          name = p.filename && !p.filename.empty? && p.filename || # attachment name
+                 (Digest::SHA2.hexdigest(rand.to_s) + (Rack::Mime::MIME_TYPES.invert[p.mime_type] || '.bin').to_s) # generate name
+          file = (mail.path + '.' + name).R   # attachment location
           unless file.exist?
-            file.writeFile p.body.decoded # store attachment
+            file.writeFile p.body.decoded     # store attachment
           end
-          yield e, SIOC+'attachment', file         # file pointer
-          if p.main_type=='image'                  # image attachments
-            yield e, Image, file                   # image link in RDF
-            yield e, Content,                      # image link in HTML
+          yield mail, SIOC+'attachment', file # attachment pointer
+          if p.main_type == 'image'           # image attachments
+            yield mail, Image, file           # image link in RDF
+            yield mail, Content,              # image link in HTML
                   WebResource::HTML.render({_: :a, href: file.uri, c: [{_: :img, src: file.uri}, p.filename]}) # render HTML
           end }
-      end
 
+        yield mail, SIOC+'user_agent', m['X-Mailer'].to_s if m['X-Mailer']
+      end
     end
   end
 end
