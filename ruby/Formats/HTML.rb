@@ -380,7 +380,7 @@ class WebResource
 
     Markup[Type] = -> t, env=nil {
       if t.class == WebResource
-        {_: :a, href: t.uri, c: Icons[t.uri] || t.fragment || t.basename}
+        {_: :a, href: t.uri, c: Icons[t.uri] || t.fragment || t.basename}.update(Icons[t.uri] ? {} : {style: 'font-weight: bold'})
       else
         CGI.escapeHTML t.to_s
       end}

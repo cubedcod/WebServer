@@ -24,3 +24,4 @@ pre {white-space: pre-wrap}
 table, div, li {display: inline-block}
 td {border-color: #333; border-width: 0 1px 1px 0; border-style: dotted}
 td.k {max-width: 28ex; overflow: hidden; text-align: right}
+td.k a {background-color: #000; color: #eee}
