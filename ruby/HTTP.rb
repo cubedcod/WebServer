@@ -386,7 +386,7 @@ class WebResource
           docs = []
           # local docs are already stored on timeline (mails/chatlogs in hour-dirs), so we only try for canonical location (messageID, username-derived indexes)
           # canonical location
-          docs.push (n.path + '.ttl').R unless n.host
+          docs.push (n.path + '.ttl').R unless n.host || n.uri.match?(/^_:/)
           # timeline location
           if n.host && (timestamp = graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value)
             docs.push ['/' + timestamp.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/\+?(00.00|Z)$/,''), # hour-dir

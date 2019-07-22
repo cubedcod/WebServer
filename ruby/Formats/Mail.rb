@@ -42,7 +42,7 @@ module Webize
         m = ::Mail.new (body || @doc)
         return puts "mail-read failed #{@base}" unless m
 
-        # Message-ID and URI
+        # Message resource
         mailResource = -> id {
           h = Digest::SHA2.hexdigest id
           ['', 'mail', '.msg', h[0], h[1], h[2], id[0..96] + '#msg'].join('/').R}
