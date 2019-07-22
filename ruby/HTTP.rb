@@ -621,7 +621,7 @@ class WebResource
       'text/html'                                            # default writer
     end
 
-    # convert ALLCAPS CGI/envvar to HTTP capitalization
+    # convert ALLCAPS CGI vars to HTTP capitalization
     def headers
       head = {}
       env.map{|k,v|
@@ -642,11 +642,9 @@ class WebResource
 
       head['Referer'] = 'http://drudgereport.com/' if env['SERVER_NAME']&.match? /wsj\.com/
       head['User-Agent'] = DesktopUA
-
-      # try for redirection in HTTP headers rather than Javascript
+      # try for redirection via HTTP headers, rather than Javascript
       head.delete 'User-Agent' if host == 't.co'
       head['User-Agent'] = 'curl/7.65.1' if host == 'po.st'
-
       head
     end
 

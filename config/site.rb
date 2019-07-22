@@ -337,7 +337,7 @@ yts
             yield s, Type, Post.R
             yield s, Image, h['display_url'].R if h['display_url']
             if owner = h['owner']
-              yield s, Creator, ('https://www.instagram.com/' + owner['username']).R
+              yield s, Creator, ('https://www.instagram.com/' + owner['username']).R if owner['username']
               yield s, To, 'https://www.instagram.com/'.R
             end
             if text = h['edge_media_to_caption']['edges'][0]['node']['text']
