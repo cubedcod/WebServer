@@ -1,27 +1,26 @@
 #down {display: block}
-#next {float: right}
-#prev, #next {height: 100%}
-#prev, #next, #up, #down, #tabular, #shrink, #ui {font-size: 2em;background-color: #000; color: #ccc}
+#next {right: 0}
+#prev {left: 0}
+#prev, #next {position: fixed; height: 100%; font-size: 2em}
 #subscribe.off {color: #777; background-color: #000}
 #subscribe.on  {color: #000; background-color: #fff}
 * {border-radius: .2em}
 .avatar {max-height: 2em}
-.bold {font-weight: bold; font-size: 1.1em}
 .post {border-radius: .38em; max-width: 100ex}
 .title {background-color: #eee; color: #000; font-size: 1.18em; font-weight: bold; vertical-align: top}
+.toolbox a {font-size: 2em; background-color: #000; color: #ccc}
 .toolbox { vertical-align: top }
 .tree {margin: .1em}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
 a {text-decoration: none; background-color: #eee; color: #000; padding-top: 1px}
 a.date {float: right; background-color: #000; color: #888; font-size: .8em}
 a.id {float: right; background-color: #000; color: #333}
-body {font-family: sans-serif}
+body {font-family: sans-serif; padding: 0; margin: 0 2em 0 2em}
 body, td, .post, a.head, a:visited {background-color: #000; color: #fff}
-div, li {display: inline-block}
 img, video, .post {max-width: 100%}
 img.thumb, svg {max-width: 28em}
 p {max-width: 80ex; margin: 0}
 pre {white-space: pre-wrap}
-table.fromTo, #prev {float: left}
+table, div, li {display: inline-block}
 td {border-color: #333; border-width: 0 1px 1px 0; border-style: dotted}
 td.k {max-width: 28ex; overflow: hidden; text-align: right}
