@@ -23,11 +23,42 @@ class WebResource
 
     # cache location
     def cache format=nil
-      (CacheDir + (host || 'localhost') +
-       ((!path || path[-1] == '/') ? '/index' : (path.size > 127 ? Digest::SHA2.hexdigest(path).yield_self{|p|
-                                                                                '/' + p[0..1] + '/' + p[2..-1]} : path)) +
-       (qs.empty? ? '' : ('.' + Digest::SHA2.hexdigest(qs))) +
-       ((format && ext.empty? && Extensions[RDF::Format.content_types[format]]) ? ('.' + Extensions[RDF::Format.content_types[format]].to_s) : '')).R env
+      want_suffix = ext.empty?
+      hostPart = CacheDir + (host || 'localhost')
+      pathPart = if !path || path[-1] == '/'
+                   want_suffix = true
+                   '/index'
+                 elsif path.size > 127
+                   want_suffix = true
+                   hash = Digest::SHA2.hexdigest path
+                   '/' + hash[0..1] + '/' + hash[2..-1]
+                 else
+                   path
+                 end
+      qsPart = if qs.empty?
+                 ''
+               else
+                 want_suffix = true
+                 '.' + Digest::SHA2.hexdigest(qs)
+               end
+      suffix = if want_suffix
+                 if !ext || ext.empty?
+                   if format
+                     if xt = Extensions[RDF::Format.content_types[format]]
+                       '.' + xt.to_s # suffix found in format-map
+                     else
+                       '' # content-type unmapped
+                     end
+                   else
+                     '' # content-type unknown
+                   end
+                 else
+                   '.' + ext # restore known suffix
+                 end
+               else
+                 '' # suffix already exists
+               end
+      (hostPart + pathPart + qsPart + suffix).R env
     end
 
     def cached?
@@ -180,7 +211,10 @@ class WebResource
       else                                       # generate
         body = generator ? generator.call : self # call generator
         if body.class == WebResource             # static response
+          puts body.relPath
           Rack::File.new(nil).serving(Rack::Request.new(env), body.relPath).yield_self{|s,h,b|
+            puts "wtf #{s}"
+            HTTP.print_header h
           if s == 304
             [s, {}, []]                          # not modified
           else
