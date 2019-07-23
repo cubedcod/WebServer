@@ -342,7 +342,7 @@ class WebResource
         handler[self]
       elsif handler = PathGET[path]
         handler[self]
-      elsif handler = HostGET[hostname]
+      elsif handler = HostGET[host]
         handler[self]
       else
         local? ? local : remote

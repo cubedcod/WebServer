@@ -178,6 +178,7 @@ class WebResource
     HostGET['reddit.com'] = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path},[]]}
     HostGET['www.reddit.com'] = -> r {
       if r.path == '/'
+        r.env[:resp]['Refresh'] = 1800
         ('//www.reddit.com/r/' + r.subscriptions.join('+') + '/new').R(r.env).fetch
       else
         r.remote
@@ -211,6 +212,7 @@ class WebResource
             q: s.map{|u|'from:' + u}.join('+OR+'),
             vertical: :default}
           '/search'.R(r.env).fetch graph: graph, no_response: true}
+        r.env[:resp]['Refresh'] = 1800
         r.graphResponse graph
       else
         r.remote
