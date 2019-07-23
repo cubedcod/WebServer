@@ -207,16 +207,16 @@ class WebResource
       if this = cached?; return this.fileResponse end
       graph = options[:graph] || RDF::Repository.new # request graph
       @r['HTTP_ACCEPT'] ||= '*/*'                    # Accept-header default
-      host = host || @r['SERVER_NAME']               # hostname
+      hostname = host || @r['SERVER_NAME']           # hostname
       head = headers                                 # headers
       head[:redirect] = false                        # don't internally follow redirects
-      options[:cookies] ||= true if host.match?(TrackHost) || host.match?(POSThost) || host.match?(UIhost)
+      options[:cookies] ||= true if hostname.match?(TrackHost) || hostname.match?(POSThost) || hostname.match?(UIhost)
       head.delete 'Cookie' unless options[:cookies]  # allow/deny cookies
       qStr = @r[:query] ? (q = @r[:query].dup        # load query
         %w{group view sort ui}.map{|a|q.delete a}    # consume local arguments
         q.empty? ? '' : HTTP.qs(q)) : qs             # external query
-      suffix = ext.empty? && host.match?(/reddit.com$/) && !upstreamUI? && '.rss' # format suffix
-      u = '//' + host + path + (suffix || '') + qStr               # base locator
+      suffix = ext.empty? && hostname.match?(/reddit.com$/) && !upstreamUI? && '.rss' # format suffix
+      u = '//' + hostname + path + (suffix || '') + qStr           # base locator
       url      = (options[:scheme] || 'https').to_s    + ':' + u   # primary locator
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u   # fallback locator
       options[:content_type]='application/atom+xml' if FeedURL[u]  # fix MIME on feed URLs
@@ -320,7 +320,7 @@ class WebResource
                'Content-Length' => body.bytesize.to_s}, [body]]
       else                                                        # graph data
         if graph.empty? && !local? && @r['REQUEST_PATH'][-1]=='/' # unlistable remote
-          index = (CacheDir + host + path).R                      # local container
+          index = (CacheDir + hostname + path).R                  # local container
           index.children.map{|e| e.fsStat graph, base_uri: 'https://' + e.relPath} if index.node.directory? # list cache
         end
         graphResponse graph
@@ -338,11 +338,11 @@ class WebResource
     def GET
       if path.match? /204$/
         [204, {}, []]
-      elsif handler = PathGET['/' + parts[0].to_s] # toplevel-path
+      elsif handler = PathGET['/' + parts[0].to_s] # path binding
         handler[self]
-      elsif handler = PathGET[path] # path binding
+      elsif handler = PathGET[path]
         handler[self]
-      elsif handler = HostGET[host] # host binding
+      elsif handler = HostGET[hostname]
         handler[self]
       else
         local? ? local : remote
