@@ -167,9 +167,12 @@ class WebResource
     # Outline
     HostGET['outline.com'] = -> r {
       if r.parts.size == 1 && r.parts[0] != 'favicon.ico'
+        graph = RDF::Repository.new
         r.env['HTTP_ORIGIN'] = 'https://outline.com'
         r.env['HTTP_REFERER'] = r.env['HTTP_ORIGIN'] + r.path
-        ('//outlineapi.com/v4/get_article?id='+r.parts[0]).R(r.env).fetch
+        r.env[:query] = {id: r.parts[0]}
+        ('//outlineapi.com/v4/get_article').R(r.env).fetch graph: graph, no_response: true
+        r.graphResponse graph
       else
         r.deny
       end}
