@@ -166,15 +166,21 @@ class WebResource
 
     # Outline
     HostGET['outline.com'] = -> r {
-      if r.parts.size == 1 && r.parts[0] != 'favicon.ico'
+      if r.parts[0] == 'favicon.ico'
+        r.deny
+      else
         graph = RDF::Repository.new
         r.env['HTTP_ORIGIN'] = 'https://outline.com'
         r.env['HTTP_REFERER'] = r.env['HTTP_ORIGIN'] + r.path
-        r.env[:query] = {id: r.parts[0]}
-        ('//outlineapi.com/v4/get_article').R(r.env).fetch graph: graph, no_response: true
+        r.env['SERVER_NAME'] = 'outlineapi.com'
+        if r.parts.size == 1
+          r.env[:query] = {id: r.parts[0]}
+          '/v4/get_article'.R(r.env).fetch graph: graph, no_response: true
+        elsif r.env['REQUEST_PATH'][1..5] == 'https'
+          r.env[:query] = {source_url: r.env['REQUEST_PATH'][1..-1]}
+          '/article'.R(r.env).fetch graph: graph, no_response: true
+        end
         r.graphResponse graph
-      else
-        r.deny
       end}
 
     # Reddit
