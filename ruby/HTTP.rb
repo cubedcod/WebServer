@@ -4,7 +4,6 @@ class WebResource
   module HTTP
     include URIs
 
-    CacheDir = (Pathname.new ENV['HOME'] + '/.cache/web').relative_path_from(Pathname.new Dir.pwd).to_s + '/'
     Hosts = {}   # seen hosts
     HostGET = {} # lambda tables
     PathGET = {}
@@ -179,12 +178,12 @@ class WebResource
 
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
-        #print url, "\n"; HTTP.print_header head
+        print url, "\n"; HTTP.print_header head
         begin
           open(url, head) do |response|
             code = response.status.to_s.match(/\d{3}/)[0]
             meta = response.meta
-            #print ' ', code, ' ' ; HTTP.print_header meta
+            print ' ', code, ' ' ; HTTP.print_header meta
             allowed_meta = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag}
             allowed_meta.push 'Set-Cookie' if options[:cookies]
             allowed_meta.map{|k| @r[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
@@ -200,13 +199,13 @@ class WebResource
                          'text/html'
                        end
             if code == 206
-              body = response.read                                                                 # partial body
-            else                                                                                   # complete body
-              body = decompress meta, response.read; meta.delete 'content-encoding'                # decompress body
-              file = (cacheLocation format).writeFile body unless format.match? Webize::RDFformats # cache non-RDF
-              if reader = RDF::Reader.for(content_type: format)                                    # find RDF reader
-                reader.new(body, :base_uri => url.R){|_| graph << _ }                              # parse RDF
-                index graph                                                                        # cache RDF
+              body = response.read                                                         # partial body
+            else                                                                           # complete body
+              body = decompress meta, response.read; meta.delete 'content-encoding'        # decompress body
+              file = (cacheLocation format).writeFile body unless format.match? RDFformats # cache non-RDF
+              if reader = RDF::Reader.for(content_type: format)                            # find RDF reader
+                reader.new(body, :base_uri => url.R){|_| graph << _ }                      # parse RDF
+                index graph                                                                # cache RDF
               end
             end
           end

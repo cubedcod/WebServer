@@ -1,4 +1,5 @@
 # coding: utf-8
+require 'pathname'
 require 'linkeddata'
 class RDF::URI
   def R; WebResource.new to_s end
@@ -229,6 +230,7 @@ class WebResource < RDF::URI
       RSS+'title' => Title,
     }
 
+    CacheDir = (Pathname.new ENV['HOME'] + '/.cache/web').relative_path_from(Pathname.new Dir.pwd).to_s + '/'
     def cacheLocation format=nil
       want_suffix = ext.empty?
       hostPart = CacheDir + (host || 'localhost')

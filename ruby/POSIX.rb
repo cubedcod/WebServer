@@ -1,4 +1,4 @@
-%w(digest/sha2 fileutils pathname shellwords).map{|_| require _}
+%w(digest/sha2 fileutils shellwords).map{|_| require _}
 class WebResource
   module POSIX
     include URIs
