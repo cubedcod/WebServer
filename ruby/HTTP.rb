@@ -208,7 +208,7 @@ class WebResource
       graph = options[:graph] || RDF::Repository.new               # request graph
       env['HTTP_ACCEPT'] ||= '*/*'                                 # Accept-header default
       head = headers                                               # load headers
-      head[:redirect] = false                                      # halt on redirect
+      head[:redirect] = false #unless options[:no_response]         # don't internally follow redirection
       options[:cookies] ||= true if host.match?(TrackHost) || host.match?(POSThost) || host.match?(UIhost)
       head.delete 'Cookie' unless options[:cookies]                # allow/deny cookies
       qStr = @r[:query] ? (                                        # query?
@@ -293,6 +293,7 @@ class WebResource
           else
             if options[:no_response]
               puts "REDIRECT #{url} -> \e[32;7m" + location + "\e[0m"
+              #HTTP.print_header e.io.meta
             else
               return [302, {'Location' => location}, []]
             end
