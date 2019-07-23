@@ -21,49 +21,9 @@ class WebResource
 
     def allowPOST?; host.match? POSThost end
 
-    # cache location
-    def cache format=nil
-      want_suffix = ext.empty?
-      hostPart = CacheDir + (host || 'localhost')
-      pathPart = if !path || path[-1] == '/'
-                   want_suffix = true
-                   '/index'
-                 elsif path.size > 127
-                   want_suffix = true
-                   hash = Digest::SHA2.hexdigest path
-                   '/' + hash[0..1] + '/' + hash[2..-1]
-                 else
-                   path
-                 end
-      qsPart = if qs.empty?
-                 ''
-               else
-                 want_suffix = true
-                 '.' + Digest::SHA2.hexdigest(qs)
-               end
-      suffix = if want_suffix
-                 if !ext || ext.empty?
-                   if format
-                     if xt = Extensions[RDF::Format.content_types[format]]
-                       '.' + xt.to_s # suffix found in format-map
-                     else
-                       '' # content-type unmapped
-                     end
-                   else
-                     '' # content-type unknown
-                   end
-                 else
-                   '.' + ext # restore known suffix
-                 end
-               else
-                 '' # suffix already exists
-               end
-      (hostPart + pathPart + qsPart + suffix).R env
-    end
-
     def cached?
       return false if env && env['HTTP_PRAGMA'] == 'no-cache'
-      location = cache
+      location = cacheLocation
       return location if location.file?     # direct match
       (location + '.*').R.glob.find &:file? # suffix match
     end
@@ -114,44 +74,6 @@ class WebResource
                                                             {_: :pre, c: trace.hrefs},
                                                             (HTML.keyval (Webize::HTML.webizeHash env), env),
                                                             (HTML.keyval (Webize::HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
-    end
-
-    def dateMeta
-      @r ||= {}
-      @r[:links] ||= {}
-      n = nil # next page
-      p = nil # prev page
-      # date parts
-      dp = []; ps = parts
-      dp.push ps.shift.to_i while ps[0] && ps[0].match(/^[0-9]+$/)
-      case dp.length
-      when 1 # Y
-        year = dp[0]
-        n = '/' + (year + 1).to_s
-        p = '/' + (year - 1).to_s
-      when 2 # Y-m
-        year = dp[0]
-        m = dp[1]
-        n = m >= 12 ? "/#{year + 1}/#{01}" : "/#{year}/#{'%02d' % (m + 1)}"
-        p = m <=  1 ? "/#{year - 1}/#{12}" : "/#{year}/#{'%02d' % (m - 1)}"
-      when 3 # Y-m-d
-        day = ::Date.parse "#{dp[0]}-#{dp[1]}-#{dp[2]}" rescue nil
-        if day
-          p = (day-1).strftime('/%Y/%m/%d')
-          n = (day+1).strftime('/%Y/%m/%d')
-        end
-      when 4 # Y-m-d-H
-        day = ::Date.parse "#{dp[0]}-#{dp[1]}-#{dp[2]}" rescue nil
-        if day
-          hour = dp[3]
-          p = hour <=  0 ? (day - 1).strftime('/%Y/%m/%d/23') : (day.strftime('/%Y/%m/%d/')+('%02d' % (hour-1)))
-          n = hour >= 23 ? (day + 1).strftime('/%Y/%m/%d/00') : (day.strftime('/%Y/%m/%d/')+('%02d' % (hour+1)))
-        end
-      end
-      remainder = ps.empty? ? '' : ['', *ps].join('/')
-      remainder += '/' if @r['REQUEST_PATH'][-1] == '/'
-      @r[:links][:prev] = p + remainder + qs + '#prev' if p && p.R.exist?
-      @r[:links][:next] = n + remainder + qs + '#next' if n && n.R.exist?
     end
 
     def decompress head, body
@@ -211,10 +133,7 @@ class WebResource
       else                                       # generate
         body = generator ? generator.call : self # call generator
         if body.class == WebResource             # static response
-          puts body.relPath
           Rack::File.new(nil).serving(Rack::Request.new(env), body.relPath).yield_self{|s,h,b|
-            puts "wtf #{s}"
-            HTTP.print_header h
           if s == 304
             [s, {}, []]                          # not modified
           else
@@ -284,12 +203,10 @@ class WebResource
               body = response.read                                                                 # partial body
             else                                                                                   # complete body
               body = decompress meta, response.read; meta.delete 'content-encoding'                # decompress body
-              file = (cache format).writeFile body unless format.match? /^(application|text)\/(atom|html|json|rss|turtle|.*urlencoded|xml)/ # cache non-RDF
-              if reader = RDF::Reader.for(content_type: format)
-                reader.new(body, :base_uri => url.R){|_| graph << _ } # parse RDF
-                index graph                                           # cache RDF
-              else
-                print "MISSING RDF::Reader for #{format} "
+              file = (cacheLocation format).writeFile body unless format.match? Webize::RDFformats # cache non-RDF
+              if reader = RDF::Reader.for(content_type: format)                                    # find RDF reader
+                reader.new(body, :base_uri => url.R){|_| graph << _ }                              # parse RDF
+                index graph                                                                        # cache RDF
               end
             end
           end
@@ -415,35 +332,6 @@ class WebResource
       [c,h,[]]
     end
 
-    # store graph-data in Turtle at index locations derived from graph URI(s)
-    def index g
-      updates = []
-      g.each_graph.map{|graph|
-        if n = graph.name
-          n = n.R
-          docs = []
-          # local docs are already stored on timeline (mails/chatlogs in hour-dirs), so we only try for canonical location (messageID, username-derived indexes)
-          # canonical location
-          docs.push (n.path + '.ttl').R unless n.host || n.uri.match?(/^_:/)
-          # timeline location
-          if n.host && (timestamp = graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value)
-            docs.push ['/' + timestamp.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/\+?(00.00|Z)$/,''), # hour-dir
-                       %w{host path query fragment}.map{|a|n.send(a).yield_self{|p|p&&p.split(/[\W_]/)}},'ttl']. # slugs
-                        flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.').R                         # skiplist
-          end
-          # store
-          #puts docs
-          docs.map{|doc|
-            unless doc.exist?
-              doc.dir.mkdir
-              RDF::Writer.open(doc.relPath){|f|f << graph}
-              updates << doc
-              puts  "\e[32m+\e[0m http://localhost:8000" + doc.path.sub(/\.ttl$/,'')
-            end}
-        end}
-      updates
-    end
-
     def load graph, options = {}
       if basename.split('.')[0] == 'msg'
         options[:format] = :mail
@@ -487,32 +375,6 @@ class WebResource
     LocalAddr = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
 
     def local?; LocalAddr.member?(@r['SERVER_NAME']||host) end
-
-    # URI -> file(s)
-    def nodes
-      (if node.directory?
-       if q.has_key?('f') && path!='/'    # FIND
-         find q['f'] unless q['f'].empty?
-       elsif q.has_key?('q') && path!='/' # GREP
-         grep q['q']
-       else
-         index = (self + 'index.{html,ttl}').R.glob
-         if !index.empty? && qs.empty?    # static index
-           [index]
-         else
-           [self, children]               # LS
-         end
-       end
-      else                                # GLOB
-        if uri.match /[\*\{\[]/           #  parametric glob
-          glob
-        else                              #  basic glob
-          files = (self + '.*').R.glob    #   base + extension match
-          files = (self + '*').R.glob if files.empty? # prefix match
-          [self, files]
-        end
-       end).flatten.compact.uniq.select &:exist?
-    end
 
     def noexec
       if %w{gif js}.member? ext.downcase # filtered suffix

@@ -229,6 +229,83 @@ class WebResource < RDF::URI
       RSS+'title' => Title,
     }
 
+    def cacheLocation format=nil
+      want_suffix = ext.empty?
+      hostPart = CacheDir + (host || 'localhost')
+      pathPart = if !path || path[-1] == '/'
+                   want_suffix = true
+                   '/index'
+                 elsif path.size > 127
+                   want_suffix = true
+                   hash = Digest::SHA2.hexdigest path
+                   '/' + hash[0..1] + '/' + hash[2..-1]
+                 else
+                   path
+                 end
+      qsPart = if qs.empty?
+                 ''
+               else
+                 want_suffix = true
+                 '.' + Digest::SHA2.hexdigest(qs)
+               end
+      suffix = if want_suffix
+                 if !ext || ext.empty?
+                   if format
+                     if xt = Extensions[RDF::Format.content_types[format]]
+                       '.' + xt.to_s # suffix found in format-map
+                     else
+                       '' # content-type unmapped
+                     end
+                   else
+                     '' # content-type unknown
+                   end
+                 else
+                   '.' + ext # restore known suffix
+                 end
+               else
+                 '' # suffix already exists
+               end
+      (hostPart + pathPart + qsPart + suffix).R env
+    end
+
+    def dateMeta
+      @r ||= {}
+      @r[:links] ||= {}
+      n = nil # next page
+      p = nil # prev page
+      # date parts
+      dp = []; ps = parts
+      dp.push ps.shift.to_i while ps[0] && ps[0].match(/^[0-9]+$/)
+      case dp.length
+      when 1 # Y
+        year = dp[0]
+        n = '/' + (year + 1).to_s
+        p = '/' + (year - 1).to_s
+      when 2 # Y-m
+        year = dp[0]
+        m = dp[1]
+        n = m >= 12 ? "/#{year + 1}/#{01}" : "/#{year}/#{'%02d' % (m + 1)}"
+        p = m <=  1 ? "/#{year - 1}/#{12}" : "/#{year}/#{'%02d' % (m - 1)}"
+      when 3 # Y-m-d
+        day = ::Date.parse "#{dp[0]}-#{dp[1]}-#{dp[2]}" rescue nil
+        if day
+          p = (day-1).strftime('/%Y/%m/%d')
+          n = (day+1).strftime('/%Y/%m/%d')
+        end
+      when 4 # Y-m-d-H
+        day = ::Date.parse "#{dp[0]}-#{dp[1]}-#{dp[2]}" rescue nil
+        if day
+          hour = dp[3]
+          p = hour <=  0 ? (day - 1).strftime('/%Y/%m/%d/23') : (day.strftime('/%Y/%m/%d/')+('%02d' % (hour-1)))
+          n = hour >= 23 ? (day + 1).strftime('/%Y/%m/%d/00') : (day.strftime('/%Y/%m/%d/')+('%02d' % (hour+1)))
+        end
+      end
+      remainder = ps.empty? ? '' : ['', *ps].join('/')
+      remainder += '/' if @r['REQUEST_PATH'][-1] == '/'
+      @r[:links][:prev] = p + remainder + qs + '#prev' if p && p.R.exist?
+      @r[:links][:next] = n + remainder + qs + '#next' if n && n.R.exist?
+    end
+
   end
   include URIs
 end

@@ -66,6 +66,33 @@ class WebResource
       end
       `#{cmd} | head -n 1024`.lines.map{|path|POSIX.path path}
     end
+
+    # URI -> file(s)
+    def nodes
+      (if node.directory?
+       if q.has_key?('f') && path!='/'    # FIND
+         find q['f'] unless q['f'].empty?
+       elsif q.has_key?('q') && path!='/' # GREP
+         grep q['q']
+       else
+         index = (self + 'index.{html,ttl}').R.glob
+         if !index.empty? && qs.empty?    # static index
+           [index]
+         else
+           [self, children]               # LS
+         end
+       end
+      else                                # GLOB
+        if uri.match /[\*\{\[]/           #  parametric glob
+          glob
+        else                              #  basic glob
+          files = (self + '.*').R.glob    #   base + extension match
+          files = (self + '*').R.glob if files.empty? # prefix match
+          [self, files]
+        end
+       end).flatten.compact.uniq.select &:exist?
+    end
+
   end
   include POSIX
 end
