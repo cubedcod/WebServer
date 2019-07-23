@@ -22,7 +22,7 @@ class WebResource
 
     # cache location
     def cache format=nil
-      (CacheDir + host +
+      (CacheDir + (host || 'localhost') +
        ((!path || path[-1] == '/') ? '/index' : (path.size > 127 ? Digest::SHA2.hexdigest(path).yield_self{|p|
                                                                                 '/' + p[0..1] + '/' + p[2..-1]} : path)) +
        (qs.empty? ? '' : ('.' + Digest::SHA2.hexdigest(qs))) +
@@ -143,7 +143,7 @@ class WebResource
                         ['application/javascript',
                          '// TODO deliver modified scripts']
                       elsif path[-3..-1] == 'css'
-                        ['text/css',"body {background: repeating-linear-gradient(#{rand 360}deg, #000, #000 6.5em, #fff 6.5em, #fff 8em)"]
+                        ['text/css',"body {background: repeating-linear-gradient(#{rand 360}deg, #000, #000 6.5em, #fff 6.5em, #fff 8em)\ndiv, p {background-color: #000; color: #fff}"]
                       elsif env[:GIF]
                         ['image/gif', SiteGIF]
                       else
@@ -378,23 +378,31 @@ class WebResource
       [c,h,[]]
     end
 
-    # stored named-graph(s) in turtle documents
+    # store graph-data in Turtle at index locations derived from graph URI(s)
     def index g
       updates = []
       g.each_graph.map{|graph|
         if n = graph.name
           n = n.R
-          if timestamp = graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value
-            doc = ['/' + timestamp.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/\+?(00.00|Z)$/,''), # hour-dir
-                   %w{host path query fragment}.map{|a|n.send(a).yield_self{|p|p&&p.split(/[\W_]/)}},'ttl']. # slugs
-                    flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.').R                         # skiplist
+          docs = []
+          # local docs are already stored on timeline (mails/chatlogs in hour-dirs), so we only try for canonical location (messageID, username-derived indexes)
+          # canonical location
+          docs.push (n.path + '.ttl').R unless n.host || n.uri.match?(/^_:/)
+          # timeline location
+          if n.host && (timestamp = graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value)
+            docs.push ['/' + timestamp.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/\+?(00.00|Z)$/,''), # hour-dir
+                       %w{host path query fragment}.map{|a|n.send(a).yield_self{|p|p&&p.split(/[\W_]/)}},'ttl']. # slugs
+                        flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.').R                         # skiplist
+          end
+          # store
+          #puts docs
+          docs.map{|doc|
             unless doc.exist?
               doc.dir.mkdir
               RDF::Writer.open(doc.relPath){|f|f << graph}
               updates << doc
               puts  "\e[32m+\e[0m http://localhost:8000" + doc.path.sub(/\.ttl$/,'')
-            end
-          end
+            end}
         end}
       updates
     end
