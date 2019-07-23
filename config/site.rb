@@ -169,9 +169,7 @@ class WebResource
       if r.parts.size == 1 && r.parts[0] != 'favicon.ico'
         r.env['HTTP_ORIGIN'] = 'https://outline.com'
         r.env['HTTP_REFERER'] = r.env['HTTP_ORIGIN'] + r.path
-        r.env['HTTP_HOST'] = 'outlineapi.com'
-        r.env['REQUEST_URI'] = '/v4/get_article?id=' + r.parts[0]
-        r.fetch
+        ('//outlineapi.com/v4/get_article?id='+r.parts[0]).R(r.env).fetch
       else
         r.deny
       end}
@@ -208,7 +206,11 @@ class WebResource
       if !r.path || r.path == '/'
         graph = RDF::Repository.new
         r.subscriptions.shuffle.each_slice(18){|s|
-          ('https://twitter.com/search?f=tweets&vertical=default&q='+s.map{|u|'from:' + u}.join('+OR+')).R.fetch graph: graph, no_response: true}
+          r.env[:query] = {
+            f: :tweets,
+            q: s.map{|u|'from:' + u}.join('+OR+'),
+            vertical: :default}
+          '/search'.R(r.env).fetch graph: graph, no_response: true}
         r.graphResponse graph
       else
         r.remote

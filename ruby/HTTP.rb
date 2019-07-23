@@ -70,7 +70,7 @@ class WebResource
 
         [status, head, body]} # response
     rescue Exception => e
-      uri = 'https://' + env['SERVER_NAME'] + env['REQUEST_URI']
+      uri = 'https://' + env['SERVER_NAME'] + (env['REQUEST_URI']||'')
       msg = [uri, e.class, e.message].join " "
       trace = e.backtrace.join "\n"
       puts "\e[7;31m500\e[0m " + msg , trace
@@ -205,21 +205,21 @@ class WebResource
 
     def fetch options = {} ; @r ||= {}
       if this = cached?; return this.fileResponse end
-      graph = options[:graph] || RDF::Repository.new               # request graph
-      env['HTTP_ACCEPT'] ||= '*/*'                                 # Accept-header default
-      head = headers                                               # load headers
-      head[:redirect] = false #unless options[:no_response]         # don't internally follow redirection
+      graph = options[:graph] || RDF::Repository.new # request graph
+      @r['HTTP_ACCEPT'] ||= '*/*'                    # Accept-header default
+      host = host || @r['SERVER_NAME']               # hostname
+      head = headers                                 # headers
+      head[:redirect] = false                        # don't internally follow redirects
       options[:cookies] ||= true if host.match?(TrackHost) || host.match?(POSThost) || host.match?(UIhost)
-      head.delete 'Cookie' unless options[:cookies]                # allow/deny cookies
-      qStr = @r[:query] ? (                                        # query?
-        q = @r[:query].dup                                         # load query
-        %w{group view rdf solid-ui sort ui}.map{|a|q.delete a}     # consume local args
-        q.empty? ? '' : HTTP.qs(q)) : qs                           # external querystring
-      suffix = ext.empty? && host.match?(/reddit.com$/) && !upstreamUI? && '.rss' # add format suffix
-      u = '//'+(env['HTTP_HOST']||host) + (suffix ? (path+suffix+qStr) : (env['REQUEST_URI']||(path+qStr))) # schemeless URL
+      head.delete 'Cookie' unless options[:cookies]  # allow/deny cookies
+      qStr = @r[:query] ? (q = @r[:query].dup        # load query
+        %w{group view sort ui}.map{|a|q.delete a}    # consume local arguments
+        q.empty? ? '' : HTTP.qs(q)) : qs             # external query
+      suffix = ext.empty? && host.match?(/reddit.com$/) && !upstreamUI? && '.rss' # format suffix
+      u = '//' + host + path + (suffix || '') + qStr               # base locator
       url      = (options[:scheme] || 'https').to_s    + ':' + u   # primary locator
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u   # fallback locator
-      options[:content_type]='application/atom+xml' if FeedURL[u]  # fixed MIME on feed URLs
+      options[:content_type]='application/atom+xml' if FeedURL[u]  # fix MIME on feed URLs
       code=nil;meta={};body=nil;format=nil;file=nil;@r[:resp]||={} # response metadata
 
       fetchURL = -> url {
@@ -318,9 +318,9 @@ class WebResource
         [200, {'Access-Control-Allow-Origin' => allowedOrigin,
                'Content-Type' => format,
                'Content-Length' => body.bytesize.to_s}, [body]]
-      else                                                         # graph data
-        if graph.empty? && !local? && env['REQUEST_PATH'][-1]=='/' # unlistable remote
-          index = (CacheDir + host + path).R                       # local container
+      else                                                        # graph data
+        if graph.empty? && !local? && @r['REQUEST_PATH'][-1]=='/' # unlistable remote
+          index = (CacheDir + host + path).R                      # local container
           index.children.map{|e| e.fsStat graph, base_uri: 'https://' + e.relPath} if index.node.directory? # list cache
         end
         graphResponse graph
@@ -360,7 +360,7 @@ class WebResource
       entity ->{
         case format
         when /^text\/html/
-          if q.has_key? 'solid-ui'
+          if q['ui'] == 'solid'
             ConfDir.join('databrowser.html').R env
           else
             htmlDocument treeFromGraph graph # HTML
@@ -594,10 +594,8 @@ class WebResource
           if ((host.match? /track/) || (env['REQUEST_URI'].match? /track/)) && (host.match? TrackHost)
             fetch # music tracks
           elsif q.has_key? 'allow' # allow with stripped querystring
-            env.delete 'QUERY_STRING'
-            env['REQUEST_URI'] = env['REQUEST_PATH']
-            puts "ALLOW #{uri}" # notify on console
-            fetch
+            ['QUERY_STRING', :query].map{|q|env.delete q}
+            path.R(env).fetch
           else
             deny
           end
