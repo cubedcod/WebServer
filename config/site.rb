@@ -364,6 +364,8 @@ yts
     %w{grid-tweet tweet}.map{|tweetclass|
       doc.css('.' + tweetclass).map{|tweet|
         s = 'https://twitter.com' + (tweet.css('.js-permalink').attr('href') || tweet.attr('data-permalink-path'))
+        yield s, Type, Post.R
+        yield s, To, 'https://twitter.com'.R
 
         authorName = if b = tweet.css('.username b')[0]
                        b.inner_text
@@ -371,17 +373,15 @@ yts
                        s.R.parts[0]
                      end
         author = ('https://twitter.com/' + authorName).R
+        yield s, Creator, author
 
         ts = (if unixtime = tweet.css('[data-time]')[0]
               Time.at(unixtime.attr('data-time').to_i)
              else
                Time.now
               end).iso8601
-
-        yield s, Type, Post.R
         yield s, Date, ts
-        yield s, Creator, author
-        yield s, To, 'https://twitter.com'.R
+
         content = tweet.css('.tweet-text')[0]
         if content
           content.css('a').map{|a|
@@ -390,12 +390,18 @@ yts
             yield s, DC+'link', (a.attr 'href').R}
           yield s, Content, Webize::HTML.clean(content.inner_html).gsub(/<\/?span[^>]*>/,'').gsub(/\n/,'').gsub(/\s+/,' ')
         end
+
         if img = tweet.attr('data-resolved-url-large')
           yield s, Image, img.to_s.R
         end
         tweet.css('img').map{|img|
           yield s, Image, img.attr('src').to_s.R}
-      }}
+
+        tweet.css('.PlayableMedia-player').map{|player|
+          player['style'].match(/url\('([^']+)'/).yield_self{|url|
+            yield s, Video, url[1].sub('pbs','video').sub('_thumb','').sub('jpg','mp4')
+          }}}}
+
     doc.css('body').remove
   end
 
