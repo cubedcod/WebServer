@@ -8,6 +8,7 @@ class WebResource
     Hosts = {}   # seen hosts
     HostGET = {} # lambda tables
     PathGET = {}
+    Methods = %w(GET HEAD OPTIONS POST)
     OFFLINE = ENV.has_key? 'OFFLINE'
 
     def allowedOrigin
@@ -37,27 +38,28 @@ class WebResource
     end
 
     def self.call env
-      return [405,{},[]] unless %w{GET HEAD OPTIONS POST}.member? env['REQUEST_METHOD'] # allow methods
-      env[:resp] = {}; env[:links] = {}                                                 # header storage
-      path = Pathname.new(env['REQUEST_PATH'].force_encoding('UTF-8')).expand_path.to_s # evaluate path
-      query = env[:query] = parseQs env['QUERY_STRING']                                 # parse query
-      resource = ('//' + env['SERVER_NAME'] + path).R env                               # instantiate resource
-      resource.send(env['REQUEST_METHOD']).yield_self{|status,head,body|                # dispatch
-        color = (if resource.env[:deny]                                                 # log
-                  '31' # red :: blocked
+      return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']    # allow methods
+      env[:resp] = {}; env[:links] = {}                                  # header storage
+      path = Pathname.new(env['REQUEST_PATH']).expand_path.to_s          # evaluate path
+      path += '/' if env['REQUEST_PATH'][-1]=='/' && path[-1]!='/'       # preserve trailing-slash
+      query = env[:query] = parseQs env['QUERY_STRING']                  # parse query
+      resource = ('//' + env['SERVER_NAME'] + path).R env                # instantiate request-resource
+      resource.send(env['REQUEST_METHOD']).yield_self{|status,head,body| # dispatch
+        color = (if resource.env[:deny]                                  # log
+                  '31'                                                   # red -> blocked
                 elsif !Hosts.has_key? env['SERVER_NAME']
                   Hosts[env['SERVER_NAME']] = resource
-                  '32' # green :: new host
+                  '32'                                                   # green -> new host
                 elsif env['REQUEST_METHOD'] == 'POST'
-                  '32' # green :: POSTed data
+                  '32'                                                   # green -> POSTed data
                 elsif status == 200
-                  if resource.ext == 'js' || (head['Content-Type'] && head['Content-Type'].match?(/script/))
-                    '36' # lightblue :: code
+                  if resource.ext=='js' || (head['Content-Type'] && head['Content-Type'].match?(/script/))
+                    '36'                                                 # lightblue -> executable
                   else
-                    '37' # white :: basic
+                    '37'                                                 # white -> basic response
                   end
                 else
-                  '30' # gray :: cache hit, NOOP
+                  '30'                                                   # gray -> cache hit, NOOP, 304
                 end) + ';1'
 
         puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) +
