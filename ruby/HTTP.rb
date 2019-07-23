@@ -155,7 +155,6 @@ class WebResource
     end
 
     PathGET['/favicon.ico']  = -> r {r.upstreamUI? ? r.fetch : [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
-    PathGET['/common/js/mashlib.min.js'] = -> r {'/common/js/mashlib.min.js'.R(r.env).fileResponse}
 
     def fetch options = {} ; @r ||= {}
       if this = cached?; return this.fileResponse end
@@ -329,15 +328,6 @@ class WebResource
     def HEAD
        c,h,b = self.GET
       [c,h,[]]
-    end
-
-    def load graph, options = {}
-      if basename.split('.')[0] == 'msg'
-        options[:format] = :mail
-      elsif ext == 'html'
-        options[:format] = :html
-      end
-      graph.load relPath, options
     end
 
     def local

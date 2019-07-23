@@ -29,4 +29,14 @@ class WebResource
       end}
     updates
   end
+
+  def load graph, options = {}
+    if basename.split('.')[0] == 'msg'
+      options[:format] = :mail
+    elsif ext == 'html'
+      options[:format] = :html
+    end
+    graph.load relPath, options
+  end
+
 end

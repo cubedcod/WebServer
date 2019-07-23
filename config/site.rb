@@ -109,6 +109,8 @@ class WebResource
 
     PathGET['/url'] = HostGET['gate.sc'] = HostGET['go.skimresources.com'] = -> r {[301,{'Location' => (r.q['url'] || r.q['q'])}, []]}
 
+    PathGET['/common/js/mashlib.min.js'] = -> r {'/common/js/mashlib.min.js'.R(r.env).fileResponse}
+
     # Bing
     HostGET['www.bing.com'] = -> r {
       (%w(fd hamburger Identity notifications secure).member?(r.parts[0]) || r.path.index('/api/ping') == 0) ? r.deny : r.desktop.fetch}
