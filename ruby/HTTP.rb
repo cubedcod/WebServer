@@ -112,13 +112,6 @@ class WebResource
     end
 
     def denyPOST
-      head = headers
-      body = env['rack.input'].read
-      body = if head['Content-Encoding'].to_s.match?(/zip/)
-               Zlib::Inflate.inflate(body) rescue ''
-             else
-               body
-             end
       env[:deny] = true
       [202,{},[]]
     end
