@@ -457,7 +457,7 @@ class WebResource
           {_: :iframe, width: 560, height: 315, src: "https://www.youtube.com/embed/#{id}", frameborder: 0, gesture: "media", allow: "encrypted-media", allowfullscreen: :true}
         else
           {class: :video,
-           c: [{_: :video, src: video.uri, controls: :true}, '<br>',
+           c: [{_: :video, src: video.uri, controls: :true}.update(video.uri.match?(/twimg/) ? {autoplay: :true} : {}), '<br>',
                {_: :span, class: :notes, c: video.basename}]}
         end
       end}
