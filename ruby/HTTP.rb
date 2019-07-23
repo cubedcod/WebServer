@@ -317,7 +317,8 @@ class WebResource
       elsif code == 206                                            # partial data from upstream
         [206, meta, [body]]
       elsif body&&(upstreamUI? || (format.match? ImmutableFormat)) # data from upstream
-        [200, {'Access-Control-Allow-Origin' => allowedOrigin,
+        [200, {'Access-Control-Allow-Credentials' => 'true',
+               'Access-Control-Allow-Origin' => allowedOrigin,
                'Content-Type' => format,
                'Content-Length' => body.bytesize.to_s}, [body]]
       else                                                        # graph data
@@ -544,14 +545,16 @@ class WebResource
       # request
       url = 'https://' + host + path + qs
       head = headers
-      %w{Host Query}.map{|k| head.delete k }
       body = env['rack.input'].read
+      #HTTP.print_header head
+
       # response
       r = HTTParty.post url, :headers => head, :body => body
-      s = r.code
-      h = r.headers
-      b = r.body
-      [s, h, [b]]
+      code = r.code
+      head = r.headers
+      body = r.body
+      #HTTP.print_header head
+      [code, head, [body]]
     end
 
     def HTTP.print_header header
