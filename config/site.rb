@@ -45,7 +45,7 @@ class WebResource
     ImmutableFormat = /^application\/json/
     POSThost = /(^|\.)(anvato|brightcove|git(lab|ter)|reddit|(mix|sound)cloud|music.apple|api.twitter|weather|youtube)\.(com|gov|im|net)$/
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
-    UIhost = /((anvato|bandcamp|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io)$/
+    UIhost = /((anvato|bandcamp|jwplatform|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io)$/
 
     def sitePOST
       case host
