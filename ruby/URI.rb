@@ -228,6 +228,13 @@ class WebResource < RDF::URI
       RSS+'modules/slash/comments' => SIOC+'num_replies',
       RSS+'source' => DC+'source',
       RSS+'title' => Title,
+      Schema+'articleBody' => Content,
+      Schema+'author' => Creator,
+      Schema+'datePublished' => Date,
+      Schema+'headline' => Title,
+      Schema+'image' => Image,
+      Schema+'interactionStatistic' => :drop,
+      Schema+'url' => Link,
     }
 
     CacheDir = (Pathname.new ENV['HOME'] + '/.cache/web').relative_path_from(Pathname.new Dir.pwd).to_s + '/'

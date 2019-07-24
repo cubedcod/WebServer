@@ -601,7 +601,7 @@ class WebResource
         Markup[type][v,env]
       elsif v.class == Hash # RDF type
         types = (v[Type]||[]).map &:R
-        if (types.member? Post) || (types.member? SIOC+'BlogPost') || (types.member? SIOC+'MailMessage')
+        if (types.member? Post) || (types.member? SIOC+'BlogPost') || (types.member? SIOC+'MailMessage') || (types.member? Schema+'DiscussionForumPosting')
           Markup[Post][v,env]
         elsif types.member? Image
           Markup[Image][v,env]
