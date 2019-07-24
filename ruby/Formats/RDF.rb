@@ -36,6 +36,7 @@ class WebResource
     elsif ext == 'html'
       options[:format] = :html
     end
+    #puts "load #{relPath}"
     graph.load relPath, options
   end
 

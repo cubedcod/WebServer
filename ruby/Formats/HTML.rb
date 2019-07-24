@@ -396,9 +396,8 @@ class WebResource
                'user'
         avatar = Avatars[u.to_s.downcase]
         [{_: :a, href: u.to_s, id: 'a' + Digest::SHA2.hexdigest(rand.to_s),
-          class: :creator,
-          style: avatar ? 'background-color: #000' : (env[:colors][name] ||= HTML.colorize),
-          c: avatar ? {_: :img, class: :avatar, src: avatar} : name}, ' ']
+          style: avatar ? '' : (env[:colors][name] ||= HTML.colorize),
+          c: avatar ? {_: :img, class: :avatar, src: avatar} : name}.update(avatar ? {style: :avatar} : {}), ' ']
       else
         CGI.escapeHTML (c||'')
       end}
@@ -406,9 +405,9 @@ class WebResource
     Markup[W3+'ns/ldp#Container'] = -> dir , env {
       uri = dir.delete 'uri'
       [Type, Title, W3+'ns/posix/stat#mtime', W3+'ns/posix/stat#size'].map{|p|dir.delete p}
-      {class: :container, style: 'margin: .3em',
-       c: [{class: :label, style: 'border-radius: .5em .5em 0 0; font-weight: bold; font-size: 1.2em; padding: .1em; background-color: #fff; color: #000', c: uri.R.basename}, '<br>',
-           {class: :body, style: 'border-radius: 0 .2em .2em .2em; background-color: #fff; color: #000; width: 100%', c: HTML.keyval(dir, env)}]}}
+      {class: :container,
+       c: [{class: :label, c: uri.R.basename}, '<br>',
+           {class: :body, c: HTML.keyval(dir, env)}]}}
 
     Markup[Post] = -> post , env {
       post.delete Type
