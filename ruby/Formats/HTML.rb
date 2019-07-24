@@ -403,6 +403,13 @@ class WebResource
         CGI.escapeHTML (c||'')
       end}
 
+    Markup[W3+'ns/ldp#Container'] = -> dir , env {
+      uri = dir.delete 'uri'
+      [Type, Title, W3+'ns/posix/stat#mtime', W3+'ns/posix/stat#size'].map{|p|dir.delete p}
+      {class: :container, style: 'margin: .3em',
+       c: [{class: :label, style: 'border-radius: .5em .5em 0 0; font-weight: bold; font-size: 1.2em; padding: .1em; background-color: #fff; color: #000', c: uri.R.basename}, '<br>',
+           {class: :body, style: 'border-radius: 0 .2em .2em .2em; background-color: #fff; color: #000; width: 100%', c: HTML.keyval(dir, env)}]}}
+
     Markup[Post] = -> post , env {
       post.delete Type
       uri = post.delete 'uri'
@@ -598,6 +605,8 @@ class WebResource
           Markup[Post][v,env]
         elsif types.member? Image
           Markup[Image][v,env]
+        elsif types.member? W3+'ns/ldp#Container'
+          Markup[W3+'ns/ldp#Container'][v,env]
         else
           keyval v, env
         end
