@@ -30,6 +30,7 @@ class WebResource < RDF::URI
     Date     = DC + 'date'
     Image    = DC + 'Image'
     Link     = DC + 'link'
+    LDP      = W3 + 'ns/ldp#'
     Podcast  = 'http://www.itunes.com/dtds/podcast-1.0.dtd#'
     Post     = SIOC + 'Post'
     RSS      = 'http://purl.org/rss/1.0/'

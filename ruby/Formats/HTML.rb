@@ -154,7 +154,6 @@ sidebar [class^='side']    [id^='side']
           if k = (m.attr("name") || m.attr("property")) # predicate
             if v = m.attr("content")                    # object
               k = MetaMap[k] || k                  # normalize predicates
-
               case k                           # per-predicate custom processing
               when /lytics/
                 k = :drop
@@ -166,10 +165,9 @@ sidebar [class^='side']    [id^='side']
                 v = HTML.webizeString v
                 v = @base.join v if v.class == WebResource || v.class == RDF::URI
               end
-                                              # highlight unusual predicates
+                                # notify on predicates lacking HTTP mapping
               puts [k,v].join "\t" unless k.to_s.match? /^(drop|http)/
-
-              yield subject, k, v unless k == :drop # meta tag in RDF
+              yield subject, k, v unless k == :drop # meta-tag RDF
             end
           end}
 
@@ -405,12 +403,15 @@ class WebResource
         CGI.escapeHTML (c||'')
       end}
 
-    Markup[W3+'ns/ldp#Container'] = -> dir , env {
+    Markup[LDP+'Container'] = -> dir , env {
       uri = dir.delete 'uri'
       [Type, Title, W3+'ns/posix/stat#mtime', W3+'ns/posix/stat#size'].map{|p|dir.delete p}
       {class: :container,
        c: [{class: :label, c: uri.R.basename}, '<br>',
            {class: :body, c: HTML.keyval(dir, env)}]}}
+
+    Markup[Schema+'BreadcrumbList'] = -> list, env {
+      {class: :list, c: tabular(list[Schema+'itemListElement'].map{|el|env[:graph][el.uri] || el}, env)}}
 
     Markup[Stat+'File'] = -> file, env {
       uri = file.delete 'uri'
@@ -608,15 +609,19 @@ class WebResource
       elsif Markup[type] # supplied type argument
         Markup[type][v,env]
       elsif v.class == Hash # RDF type
+        # TODO just render resource (potentially N times) for every type that has a defined renderer?
+        # would simplify this but we'd still need deduplication and type normalization
         types = (v[Type]||[]).map &:R
         if (types.member? Post) || (types.member? SIOC+'BlogPost') || (types.member? SIOC+'MailMessage') || (types.member? Schema+'DiscussionForumPosting') || (types.member? Schema+'Answer') || (types.member? Schema+'Review')
           Markup[Post][v,env]
         elsif (types.member? Image) || (types.member? Schema+'ImageObject')
           Markup[Image][v,env]
-        elsif types.member? W3+'ns/ldp#Container'
-          Markup[W3+'ns/ldp#Container'][v,env]
+        elsif types.member? LDP+'Container'
+          Markup[LDP+'Container'][v,env]
         elsif types.member? Stat+'File'
           Markup[Stat+'File'][v,env]
+        elsif types.member? Schema+'BreadcrumbList'
+          Markup[Schema+'BreadcrumbList'][v,env]
         else
           keyval v, env
         end
