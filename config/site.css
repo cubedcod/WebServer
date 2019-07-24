@@ -8,20 +8,21 @@
 .avatar {max-height: 2em}
 .post {border-radius: .38em; max-width: 85ex; margin: 1px; border: 1px solid #333}
 .title {background-color: #eee; color: #000; font-size: 1.12em; font-weight: bold; vertical-align: top; border-radius: 0 .3em .3em 0}
-tr[name='title'] > td.v {max-width: 80ex; overflow: hidden}
 .toolbox a.icon {font-size: 1.8em; background-color: #000; color: #ccc}
 .toolbox { vertical-align: top }
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
-a {text-decoration: none; background-color: #eee; color: #000; padding-top: 1px}
+a {text-decoration: none; background-color: #eee; color: #000; border: 1px solid white}
 a.date {float: right; background-color: #000; color: #888; font-size: .8em}
 a.id {float: right; background-color: #000; color: #333}
+a:visited {border-color: #777; background-color: #444; color: #fff}
 body {font-family: sans-serif; margin: 0 2em 0 2em}
-body, td, .post, a.head, a:visited {background-color: #000; color: #fff}
+body, td, .post, a.head {background-color: #000; color: #fff}
 img, video {max-width: 100%}
 img.thumb, svg {max-width: 28em}
 p {max-width: 80ex; margin: 0}
 pre {white-space: pre-wrap}
 table, div, li {display: inline-block}
 td {border-color: #333; border-width: 0 1px 1px 0; border-style: dotted}
-td.k {max-width: 28ex; overflow: hidden; text-align: right}
 td.k a {background-color: #000; color: #eee}
+td.k {max-width: 28ex; overflow: hidden; text-align: right}
+tr[name='title'] > td.v {max-width: 80ex; overflow: hidden}
