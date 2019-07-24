@@ -443,7 +443,7 @@ class WebResource
            content, ((HTML.keyval post, env) unless post.keys.size < 1)]}}
 
     Markup[Image] = -> image,env {
-      img = image.R
+      img = image.class == WebResource ? image : (image['uri'] || image[Schema+'url'] || '#image').R
       if env[:images] && env[:images][img.uri]
       # deduplicated
       else
@@ -601,9 +601,9 @@ class WebResource
         Markup[type][v,env]
       elsif v.class == Hash # RDF type
         types = (v[Type]||[]).map &:R
-        if (types.member? Post) || (types.member? SIOC+'BlogPost') || (types.member? SIOC+'MailMessage') || (types.member? Schema+'DiscussionForumPosting')
+        if (types.member? Post) || (types.member? SIOC+'BlogPost') || (types.member? SIOC+'MailMessage') || (types.member? Schema+'DiscussionForumPosting') || (types.member? Schema+'Answer') || (types.member? Schema+'Review')
           Markup[Post][v,env]
-        elsif types.member? Image
+        elsif (types.member? Image) || (types.member? Schema+'ImageObject')
           Markup[Image][v,env]
         elsif types.member? W3+'ns/ldp#Container'
           Markup[W3+'ns/ldp#Container'][v,env]
