@@ -274,8 +274,9 @@ yts
       end}
 
   end
-  def self.twits
-    `cd ~/src/WebServer && git show -s --format=%B f8f21ef33eaa3fba034d9868d3bc4cd2f68bede4`.split.map{|twit|
+
+  def HTTP.twits
+    `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|twit|
       ('https://twitter.com/' + twit).R.subscribe}
   end
 
