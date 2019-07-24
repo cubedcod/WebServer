@@ -217,7 +217,7 @@ class WebResource
     HostGET['twitter.com'] = -> r {
       if !r.path || r.path == '/'
         graph = RDF::Repository.new
-        r.subscriptions.shuffle.each_slice(18){|s|
+        r.subscriptions.shuffle.each_slice(16){|s|
           r.env[:query] = {
             f: :tweets,
             q: s.map{|u|'from:' + u}.join('+OR+'),
