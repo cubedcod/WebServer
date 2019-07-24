@@ -13,6 +13,9 @@ module Webize
     class Reader < RDF::Reader
       include WebResource::URIs
       format Format
+      EmailAddress = ENV['EMAIL']
+      MailDir = (Pathname.new ENV['HOME'] + '/.mail').relative_path_from(PWD).to_s
+      #MailDir = 'mail'
 
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri]
@@ -29,7 +32,7 @@ module Webize
       def each_triple &block; each_statement{|s| block.call *s.to_triple} end
 
       def each_statement &fn
-        mail_triples{|subject, predicate, o, graph=nil|
+        mail_triples(@doc){|subject, predicate, o, graph=nil|
           fn.call RDF::Statement.new(subject.R,
                                      predicate.R,
                                      (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal o
@@ -38,8 +41,8 @@ module Webize
                                      :graph_name => graph || subject.R)}
       end
 
-      def mail_triples body = nil, &b
-        m = ::Mail.new (body || @doc)
+      def mail_triples body, &b
+        m = ::Mail.new body
         return puts "mail-read failed #{@base}" unless m
 
         # Message resource
@@ -127,8 +130,12 @@ module Webize
         timestamp = ([Time, DateTime].member?(date.class) ? date : Time.parse(date.to_s)).utc.iso8601
         yield mail, Date, timestamp
 
+        mailFile = (MailDir + '/cur/' + timestamp.gsub(/\D/,'.') + Digest::SHA2.hexdigest(id) + '.eml').R
+        mailFile.writeFile body unless mailFile.exist?
+
         # index addresses
         [*from, *to].map{|addr|
+          #mailFile.writeFile body if EmailAddress == addr && !mailFile.exist?
           user, domain = addr.split '@'
           if user && domain
             apath = '/mail/' + domain + '/' + user + '/' # address container

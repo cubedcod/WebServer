@@ -16,13 +16,13 @@ class WebResource < RDF::URI
   def R; self end
   alias_method :uri, :to_s
   module URIs
-    # vocabulary prefixes
+    PWD = Pathname.new Dir.pwd
+
+    # vocab prefixes
     W3       = 'http://www.w3.org/'
     DC       = 'http://purl.org/dc/terms/'
     OG       = 'http://ogp.me/ns#'
     SIOC     = 'http://rdfs.org/sioc/ns#'
-
-    # common URIs
     Abstract = DC + 'abstract'
     Atom     = W3 + '2005/Atom#'
     Content  = SIOC + 'content'
@@ -40,8 +40,7 @@ class WebResource < RDF::URI
     Type     = W3 + '1999/02/22-rdf-syntax-ns#type'
     Video    = DC + 'Video'
 
-    # single-character representation of URIs
-    Icons = {
+    Icons = { # single-character representation of URI
       'https://twitter.com' => '🐦',
       Abstract => '✍',
       Content => '✏',
@@ -249,7 +248,8 @@ class WebResource < RDF::URI
       #Schema+'url' => Link,
     }
 
-    CacheDir = (Pathname.new ENV['HOME'] + '/.cache/web').relative_path_from(Pathname.new Dir.pwd).to_s + '/'
+    CacheDir = (Pathname.new ENV['HOME'] + '/.cache/web').relative_path_from(PWD).to_s + '/'
+
     def cacheLocation format=nil
       want_suffix = ext.empty?
       hostPart = CacheDir + (host || 'localhost')
