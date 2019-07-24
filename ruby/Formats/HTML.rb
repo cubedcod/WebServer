@@ -237,8 +237,8 @@ class WebResource
         end}
       tree }
 
-    def self.colorize bg = true
-      "#{bg ? 'color' : 'background-color'}: black; #{bg ? 'background-' : ''}color: #{'#%06x' % (rand 16777216)}"
+    def self.colorize color = '#%06x' % (rand 16777216)
+      "color: black; background-color: #{color}; border-color: #{color}"
     end
 
     # JSON-graph -> HTML

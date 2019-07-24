@@ -5,16 +5,17 @@
 #subscribe.off {color: #777; background-color: #000}
 #subscribe.on  {color: #000; background-color: #fff}
 * {border-radius: .2em}
-.avatar {max-height: 2em}
+.avatar {max-height: 2em; border-color: #000}
 .post {border-radius: .38em; max-width: 85ex; margin: 1px; border: 1px solid #333}
+.post a {border: 1px solid white}
 .title {background-color: #eee; color: #000; font-size: 1.12em; font-weight: bold; vertical-align: top; border-radius: 0 .3em .3em 0}
 .toolbox a.icon {font-size: 1.8em; background-color: #000; color: #ccc}
 .toolbox { vertical-align: top }
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
-a {text-decoration: none; background-color: #eee; color: #000; border: 1px solid white}
-a.date {float: right; background-color: #000; color: #888; font-size: .8em}
-a.id {float: right; background-color: #000; color: #333}
-a:visited {border-color: #777; background-color: #444; color: #fff}
+a {text-decoration: none; background-color: #eee; color: #000}
+a.date {float: right; background-color: #000; color: #888; font-size: .8em; border-color: #222}
+a.id {float: right; background-color: #000; color: #333; border-color: #222}
+a:visited {border-color: #444; background-color: #222; color: #fff}
 body {font-family: sans-serif; margin: 0 2em 0 2em}
 body, td, .post, a.head {background-color: #000; color: #fff}
 img, video {max-width: 100%}
