@@ -409,6 +409,12 @@ class WebResource
        c: [{class: :label, c: uri.R.basename}, '<br>',
            {class: :body, c: HTML.keyval(dir, env)}]}}
 
+    Markup[Stat+'File'] = -> file, env {
+      uri = file.delete 'uri'
+      {class: :file,
+       c: [{_: :span, class: :icon, c: Icons[Stat+'File']},
+           {_: :span, class: :name, c: uri.R.basename}]}}
+
     Markup[Post] = -> post , env {
       post.delete Type
       uri = post.delete 'uri'
@@ -606,6 +612,8 @@ class WebResource
           Markup[Image][v,env]
         elsif types.member? W3+'ns/ldp#Container'
           Markup[W3+'ns/ldp#Container'][v,env]
+        elsif types.member? Stat+'File'
+          Markup[Stat+'File'][v,env]
         else
           keyval v, env
         end

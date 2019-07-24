@@ -34,6 +34,7 @@ class WebResource < RDF::URI
     Post     = SIOC + 'Post'
     RSS      = 'http://purl.org/rss/1.0/'
     Schema   = 'http://schema.org/'
+    Stat     = W3 + 'ns/posix/stat#'
     Title    = DC + 'title'
     To       = SIOC + 'addressed_to'
     Type     = W3 + '1999/02/22-rdf-syntax-ns#type'
@@ -43,8 +44,8 @@ class WebResource < RDF::URI
     Icons = {
       'https://twitter.com' => '🐦',
       Abstract => '✍',
-      Creator => '👤',
       Content => '✏',
+      Creator => '👤',
       DC + 'hasFormat' => '≈',
       DC + 'identifier' => '☸',
       Date => '⌚',
@@ -55,6 +56,7 @@ class WebResource < RDF::URI
       SIOC + 'reply_of' => '↩',
       Schema + 'height' => '↕',
       Schema + 'width' => '↔',
+      Stat + 'File' => '🗎',
       To => '☇',
       Video => '🎞',
       W3 + 'ns/ldp#contains' => '📁',
