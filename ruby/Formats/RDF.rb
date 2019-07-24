@@ -35,6 +35,8 @@ class WebResource
       options[:format] = :mail
     elsif ext == 'html'
       options[:format] = :html
+    elsif %w(Cookies).member? basename
+      options[:format] = :sqlite
     end
     #puts "load #{relPath}"
     graph.load relPath, options
