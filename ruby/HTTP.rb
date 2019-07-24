@@ -222,9 +222,13 @@ class WebResource
         case e.class.to_s
         when 'Errno::ECONNREFUSED'
           fetchURL[fallback]
+        when 'Errno::ECONNRESET'
+          fetchURL[fallback]
         when 'Errno::ENETUNREACH'
           fetchURL[fallback]
         when 'Net::OpenTimeout'
+          fetchURL[fallback]
+        when 'Net::ReadTimeout'
           fetchURL[fallback]
         when 'OpenSSL::SSL::SSLError'
           fetchURL[fallback]

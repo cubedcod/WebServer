@@ -5,7 +5,7 @@
 #subscribe.off {color: #777; background-color: #000}
 #subscribe.on  {color: #000; background-color: #fff}
 * {border-radius: .2em}
-.avatar {max-height: 2em; border-color: #000}
+.avatar {max-height: 2em; background-color: #000; border-color: #000}
 .container {margin: .3em}
 .container > .label {border-radius: .5em .5em 0 0; font-weight: bold; font-size: 1.2em; padding: .1em; background-color: #fff; color: #000}
 .container > .body {border-radius: 0 .2em .2em .2em; background-color: #fff; color: #000; width: 100%}
@@ -31,6 +31,6 @@ pre {white-space: pre-wrap}
 table, div, li {display: inline-block}
 table.fromTo {border-spacing: 0}
 td {border-color: #333; border-width: 0 1px 1px 0; border-style: dotted}
-td.k a {background-color: #000; color: #eee}
+td.k a {background-color: #000; color: #eee; border-color: #111}
 td.k {max-width: 28ex; overflow: hidden; text-align: right}
 tr[name='title'] > td.v {max-width: 80ex; overflow: hidden}
