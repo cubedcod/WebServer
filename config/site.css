@@ -10,8 +10,8 @@
 .container > .label {border-radius: .5em .5em 0 0; font-weight: bold; font-size: 1.2em; padding: .1em; background-color: #fff; color: #000}
 .container > .body {border-radius: 0 .2em .2em .2em; background-color: #fff; color: #000; width: 100%}
 .file {position: relative}
-.file > .icon {font-size: 4.2em}
-.file > .name {font-size: .8em; position: absolute; top: 4.6em; left: .4em}
+.file > .icon {font-size: 4.2em; background-color: #000; color: #fff}
+.file > .name {font-size: .8em; position: absolute; top: 4.8em; left: .4em}
 .post {border-radius: .38em; max-width: 85ex; margin: 1px; border: 1px solid #333}
 .post a {border: 1px solid white}
 .title {background-color: #eee; color: #000; font-size: 1.12em; font-weight: bold; vertical-align: top; padding: .06em .1em .06em .1em; border-radius: 0 .3em .3em 0}

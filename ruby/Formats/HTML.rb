@@ -412,7 +412,7 @@ class WebResource
     Markup[Stat+'File'] = -> file, env {
       uri = file.delete 'uri'
       {class: :file,
-       c: [{_: :span, class: :icon, c: Icons[Stat+'File']},
+       c: [{_: :a, href: uri, class: :icon, c: Icons[Stat+'File']},
            {_: :span, class: :name, c: uri.R.basename}]}}
 
     Markup[Post] = -> post , env {
