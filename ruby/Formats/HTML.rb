@@ -452,6 +452,20 @@ class WebResource
         {class: :thumb, c: {_: :a, href: src, c: {_: :img, src: src}}}
       end}
 
+    Markup[SIOC+'UserAccount'] = -> user, env {
+      if u = user['uri']
+        {class: :user, style: 'background-color: white; color: black',
+         c: [(if avatar = Avatars[u.downcase]
+              {_: :img, style: 'max-width: 20em', src: avatar}
+             else
+               {_: :span, style: 'font-size: 8em', c: '👤'}
+              end),
+             (HTML.keyval user, env)]}
+      else
+        puts :useraccount, user
+      end
+    }
+
     Markup[Video] = -> video,env {
       video = video.R
       if env[:images] && env[:images][video.uri]
@@ -586,8 +600,8 @@ class WebResource
       elsif Markup[type] # supplied type argument
         Markup[type][v,env]
       elsif v.class == Hash # RDF type
-        # TODO just render resource (potentially N times) for every type that has a defined renderer?
-        # would simplify this but we'd still need deduplication and type normalization
+        # TODO just render resource (potentially N times) for each type with a defined renderer?
+        # could simplify this but we'd still need deduplication and type-merging logic
         types = (v[Type]||[]).map &:R
         if (types.member? Post) || (types.member? SIOC+'BlogPost') || (types.member? SIOC+'MailMessage') || (types.member? Schema+'DiscussionForumPosting') || (types.member? Schema+'Answer') || (types.member? Schema+'Review')
           Markup[Post][v,env]
@@ -599,6 +613,8 @@ class WebResource
           Markup[Stat+'File'][v,env]
         elsif (types.member? Schema+'BreadcrumbList') || (types.member? 'https://schema.org/BreadcrumbList')
           Markup[Schema+'BreadcrumbList'][v,env]
+        elsif types.member? SIOC+'UserAccount'
+          Markup[SIOC+'UserAccount'][v,env]
         else
           keyval v, env
         end
