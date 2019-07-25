@@ -64,6 +64,7 @@ class WebResource < RDF::URI
     }
 
     # metadata-normalization map
+    # TODO move to Yaml or Turtle and suport http/https-scheme w/ declare-once 
     MetaMap = {
       'HandheldFriendly' => :drop,
       'ROBOTS' => :drop,
@@ -191,6 +192,7 @@ class WebResource < RDF::URI
       'og:video:type' => :drop,
       'og:video:url' => Video,
       'og:video:width' => :drop,
+      'preconnect' => :drop,
       'prefetch' => :drop,
       'preload' => :drop,
       'referrer' => :drop,

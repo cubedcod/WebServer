@@ -231,6 +231,9 @@ class WebResource
         r.remote
       end}
 
+    # WGBH
+    HostGET['wgbh.brightspotcdn.com'] = -> r {r.q.has_key?('url') ? [301, {'Location' => r.q['url']}, []] : r.noexec}
+
     # WordPress
     HostGET['i0.wp.com'] = HostGET['i1.wp.com'] = HostGET['i2.wp.com'] = -> r {
       r.qs.empty? ? r.noexec : [301, {'Location' => r.env['REQUEST_PATH']}, []]
