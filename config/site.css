@@ -18,6 +18,9 @@
 .title {background-color: #eee; color: #000; font-size: 1.12em; font-weight: bold; vertical-align: top; padding: .06em .1em .06em .1em; border-radius: 0 .3em .3em 0}
 .toolbox a.icon {font-size: 1.8em; background-color: #000; color: #ccc}
 .toolbox { vertical-align: top }
+.user {background-color: white; color: black; margin: .5em; border-radius: .4em}
+.user > img {max-width: 20em}
+.user > span {font-size: 3em}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
 a {text-decoration: none; background-color: #eee; color: #000}
 a.date {float: right; background-color: #000; color: #888; font-size: .8em; border-color: #222}
