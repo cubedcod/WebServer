@@ -274,8 +274,7 @@ class WebResource
 
       htmlGrep graph, q['q'] if @r[:grep]
       subbed = subscribed?
-
-      tabular = q['view'] == 'table'
+      tabular = q['view'] == 'table' || uri == '//www.w3.org/1999/02/22-rdf-syntax-ns'
       shrunken = q.has_key? 'head'
       @r[:links][:up] = dirname + (dirname[-1] == '/' ? '' : '/') + qs + '#r' + Digest::SHA2.hexdigest(path||'/') unless !path || path == '/'
       @r[:links][:down] = path + '/' if env['REQUEST_PATH'] && node.directory? && env['REQUEST_PATH'][-1] != '/'
@@ -303,27 +302,10 @@ class WebResource
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?
                                HTML.keyval (Webize::HTML.webizeHash @r), @r # 404
-                             elsif q['group']
-                               p = q['group']
-                               case p
-                               when 'to'
-                                 p = To
-                               when 'from'
-                                 p = Creator
-                               end
-                               bins = {}
-                               graph.map{|uri, resource|
-                                 resource[p].map{|o|
-                                   o = o.to_s
-                                   bins[o] ||= []
-                                   bins[o].push resource}}
-                               bins.map{|bin, resources|
-                                 {class: :group, style: HTML.colorize, c: [{_: :span, class: :label, c: CGI.escapeHTML(bin)}, HTML.tabular(resources, @r)]}}
                              elsif tabular
-                               HTML.tabular graph, @r       # table layout
+                               HTML.tabular graph, @r       # table
                              else
-                               env[:graph] = graph
-                               HTML.tree Treeize[graph], @r # tree layout
+                               HTML.tree Treeize[graph], @r # tree
                              end,
                              link[:down,'&#9660;']]}]}]
     end
@@ -575,7 +557,7 @@ class WebResource
                    end
                  else
                    (resource[k]||[]).map{|v|value k, v, env }
-                  end}}},
+                  end}}}.update(resource['uri'] && resource['uri'].R.path == env['REQUEST_PATH'] && {id: resource['uri'].R.fragment} || {}),
               ({_: :tr, c: {_: :td, colspan: keys.size,
                             c: [resource[Abstract] ? [resource[Abstract], '<br>'] : '',
                                 (resource[Image]||[]).map{|i| {style: 'max-width: 28em', c: Markup[Image][i,env]}},
@@ -595,20 +577,6 @@ class WebResource
        c: [({_: :a, href: url, c: CGI.escapeHTML(name.to_s[0..85])} if name && url),
            t.map{|_name, _t|
              _name == :RDF ? (value nil, _t, env) : (tree _t, env, _name)}]}.update(css ? css : {})
-    end
-
-    # tree with S -> P -> O indexing
-    def treeFromGraph graph ; tree = {}
-      head = q.has_key? 'head'
-      graph.each_triple{|s,p,o|
-        s = s.to_s; p = p.to_s # subject URI, predicate URI
-        unless head && p == Content
-          o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object URI or literal
-          tree[s] ||= {'uri' => s}                      # subject
-          tree[s][p] ||= []                             # predicate
-          tree[s][p].push o unless tree[s][p].member? o # object
-        end}
-      tree
     end
 
     # Markup dispatcher

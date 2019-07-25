@@ -30,6 +30,7 @@ class WebResource
     updates
   end
 
+  # load resource to RDF graph
   def load graph, options = {}
     if basename.split('.')[0] == 'msg'
       options[:format] = :mail
@@ -40,6 +41,21 @@ class WebResource
     end
     #puts "load #{relPath}"
     graph.load relPath, options
+  end
+
+  # RDF::Graph to Hash with URI keys (HTML/Feed renderer input)
+  def treeFromGraph graph ; tree = {}
+    head = q.has_key? 'head'
+    graph.each_triple{|s,p,o|
+      s = s.to_s; p = p.to_s # subject URI, predicate URI
+      unless head && p == Content
+        o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object URI or literal
+        tree[s] ||= {'uri' => s}                      # subject
+        tree[s][p] ||= []                             # predicate
+        tree[s][p].push o unless tree[s][p].member? o # object
+      end}
+    @r[:graph] = tree
+    tree
   end
 
 end

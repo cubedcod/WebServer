@@ -228,6 +228,8 @@ class WebResource < RDF::URI
       'http://purl.org/dc/elements/1.1/type' => Type,
       'http://search.yahoo.com/mrss/description' => Abstract,
       'http://search.yahoo.com/mrss/title' => Title,
+      'https://ogp.me/ns#image' => Image,
+      'https://ogp.me/ns#type' => Type,
       Atom+'content' => Content,
       Atom+'enclosure' => SIOC+'attachment',
       Atom+'link' => DC+'link',
