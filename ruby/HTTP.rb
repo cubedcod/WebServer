@@ -156,7 +156,7 @@ class WebResource
       hostname = host || @r['SERVER_NAME']           # hostname
       head = headers                                 # headers
       head[:redirect] = false                        # don't internally follow redirects
-      options[:cookies] ||= true if hostname.match?(TrackHost) || hostname.match?(POSThost) || hostname.match?(UIhost)
+      options[:cookies] ||= true if hostname.match?(CookieHost) || hostname.match?(TrackHost) || hostname.match?(POSThost) || hostname.match?(UIhost)
       head.delete 'Cookie' unless options[:cookies]  # allow/deny cookies
       qStr = @r[:query] ? (q = @r[:query].dup        # load query
         %w{group view sort ui}.map{|a|q.delete a}    # consume local arguments

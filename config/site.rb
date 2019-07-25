@@ -41,6 +41,7 @@ class WebResource
     SiteJS  = ConfDir.join('site.js').read
   end
   module HTTP
+    CookieHost = /twitter.com$/
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.6969.420 Safari/537.36'
     ImmutableFormat = /^application\/json/
     POSThost = /(^|\.)(anvato|brightcove|git(lab|ter)|reddit|(mix|sound)cloud|music.apple|api.twitter|weather|youtube)\.(com|gov|im|net)$/
