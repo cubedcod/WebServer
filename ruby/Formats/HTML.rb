@@ -605,7 +605,7 @@ class WebResource
         # TODO just render resource (potentially N times) for each type with a defined renderer?
         # could simplify this but we'd still need deduplication and type-merging logic
         types = (v[Type]||[]).map &:R
-        if (types.member? Post) || (types.member? SIOC+'BlogPost') || (types.member? SIOC+'MailMessage') || (types.member? Schema+'DiscussionForumPosting') || (types.member? Schema+'Answer') || (types.member? Schema+'Review')
+        if (types.member? Post) || (types.member? SIOC+'BlogPost') || (types.member? SIOC+'MailMessage') || (types.member? Schema+'DiscussionForumPosting') || (types.member? Schema+'Answer') || (types.member? Schema+'Review') || (types.member? 'https://schema.org/Comment')
           Markup[Post][v,env]
         elsif (types.member? Image) || (types.member? Schema+'ImageObject') || (types.member? 'https://schema.org/ImageObject')
           Markup[Image][v,env]
@@ -615,7 +615,7 @@ class WebResource
           Markup[Stat+'File'][v,env]
         elsif (types.member? Schema+'BreadcrumbList') || (types.member? 'https://schema.org/BreadcrumbList')
           Markup[Schema+'BreadcrumbList'][v,env]
-        elsif types.member? SIOC+'UserAccount'
+        elsif (types.member? SIOC+'UserAccount') || (types.member? 'https://schema.org/Person')
           Markup[SIOC+'UserAccount'][v,env]
         else
           keyval v, env
