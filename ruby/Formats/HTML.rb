@@ -411,7 +411,7 @@ class WebResource
            {class: :body, c: HTML.keyval(dir, env)}]}}
 
     Markup[Schema+'BreadcrumbList'] = -> list, env {
-      {class: :list, c: tabular(list[Schema+'itemListElement'].map{|el|env[:graph][el.uri] || el}, env)}}
+      {class: :list, c: tabular((list[Schema+'itemListElement']||list['https://schema.org/itemListElement']).map{|el|env[:graph][el.uri] || el}, env)}}
 
     Markup[Stat+'File'] = -> file, env {
       uri = file.delete 'uri'
@@ -452,13 +452,22 @@ class WebResource
            content, ((HTML.keyval post, env) unless post.keys.size < 1)]}}
 
     Markup[Image] = -> image,env {
-      img = image.class == WebResource ? image : (image['uri'] || image[Schema+'url'] || '#image').R
-      if env[:images] && env[:images][img.uri]
+      src = if image.class == WebResource
+              image.to_s
+            else
+              image['https://schema.org/url'] || image[Schema+'url'] || image[Link] || image['uri']
+            end
+      puts "no img-src found:", image unless src
+      if src.class == Array
+        puts "multiple img-src found:", src if src.size > 1
+        src = src[0]
+      end
+      if env[:images] && env[:images][src]
       # deduplicated
       else
         env[:images] ||= {}
-        env[:images][img.uri] = true
-        {class: :thumb, c: {_: :a, href: img.uri, c: {_: :img, src: img.uri}}}
+        env[:images][src] = true
+        {class: :thumb, c: {_: :a, href: src, c: {_: :img, src: src}}}
       end}
 
     Markup[Video] = -> video,env {
@@ -614,13 +623,13 @@ class WebResource
         types = (v[Type]||[]).map &:R
         if (types.member? Post) || (types.member? SIOC+'BlogPost') || (types.member? SIOC+'MailMessage') || (types.member? Schema+'DiscussionForumPosting') || (types.member? Schema+'Answer') || (types.member? Schema+'Review')
           Markup[Post][v,env]
-        elsif (types.member? Image) || (types.member? Schema+'ImageObject')
+        elsif (types.member? Image) || (types.member? Schema+'ImageObject') || (types.member? 'https://schema.org/ImageObject')
           Markup[Image][v,env]
         elsif types.member? LDP+'Container'
           Markup[LDP+'Container'][v,env]
         elsif types.member? Stat+'File'
           Markup[Stat+'File'][v,env]
-        elsif types.member? Schema+'BreadcrumbList'
+        elsif (types.member? Schema+'BreadcrumbList') || (types.member? 'https://schema.org/BreadcrumbList')
           Markup[Schema+'BreadcrumbList'][v,env]
         else
           keyval v, env
