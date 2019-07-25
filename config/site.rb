@@ -112,6 +112,9 @@ class WebResource
 
     PathGET['/common/js/mashlib.min.js'] = -> r {'/common/js/mashlib.min.js'.R(r.env).fileResponse}
 
+    # AOL
+    HostGET['o.aolcdn.com'] = -> r {r.q.has_key?('image_uri') ? [301, {'Location' => r.q['image_uri']}, []] : r.noexec}
+
     # Bing
     HostGET['www.bing.com'] = -> r {
       (%w(fd hamburger Identity notifications secure).member?(r.parts[0]) || r.path.index('/api/ping') == 0) ? r.deny : r.desktop.fetch}
@@ -241,7 +244,7 @@ class WebResource
       if parts.size > 1
         [301, {'Location' => 'https://' + parts[-1]}, []]
       else
-        r.deny
+        r.noexec
       end}
 
     # YouTube
