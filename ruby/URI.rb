@@ -33,6 +33,7 @@ class WebResource < RDF::URI
     LDP      = W3 + 'ns/ldp#'
     Podcast  = 'http://www.itunes.com/dtds/podcast-1.0.dtd#'
     Post     = SIOC + 'Post'
+    FOAF     = 'http://xmlns.com/foaf/0.1/'
     RSS      = 'http://purl.org/rss/1.0/'
     Schema   = 'http://schema.org/'
     Stat     = W3 + 'ns/posix/stat#'
@@ -236,6 +237,7 @@ class WebResource < RDF::URI
       Atom+'summary' => Abstract,
       Atom+'title' => Title,
       DC+'created' => Date,
+      FOAF+'Image' => Image,
       OG+'description' => Abstract,
       OG+'first_name' => Creator,
       OG+'image' => Image,

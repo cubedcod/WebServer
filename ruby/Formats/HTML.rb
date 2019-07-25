@@ -454,11 +454,11 @@ class WebResource
 
     Markup[SIOC+'UserAccount'] = -> user, env {
       if u = user['uri']
-        {class: :user, style: 'background-color: white; color: black',
+        {class: :user, style: 'background-color: white; color: black; margin: .5em',
          c: [(if avatar = Avatars[u.downcase]
               {_: :img, style: 'max-width: 20em', src: avatar}
              else
-               {_: :span, style: 'font-size: 8em', c: '👤'}
+               {_: :span, style: 'font-size: 3em', c: '👤'}
               end),
              (HTML.keyval user, env)]}
       else
