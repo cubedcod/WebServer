@@ -1,7 +1,7 @@
 class WebResource
   RDFformats = /^(application|text)\/(atom|html|json|rss|turtle|.*urlencoded|xml)/
 
-  # stash Turtle in index locations derived from graph URI(s)
+  # stash Turtle in locations derived from graph URI(s)
   def index g
     updates = []
     g.each_graph.map{|graph|
@@ -43,7 +43,7 @@ class WebResource
     graph.load relPath, options
   end
 
-  # RDF::Graph to Hash with URI keys (HTML/Feed renderer input)
+  # RDF::Graph -> Hash with URI keys (HTML/Feed renderer input)
   def treeFromGraph graph ; tree = {}
     head = q.has_key? 'head'
     graph.each_triple{|s,p,o|
@@ -74,6 +74,7 @@ module Webize
       format Format
 
       def initialize(input = $stdin, options = {}, &block)
+        @base = options[:base_uri].path.sub(/.u$/,'').R
         @doc = input.respond_to?(:read) ? input.read : input
         if block_given?
           case block.arity
@@ -87,12 +88,9 @@ module Webize
       def each_triple &block; each_statement{|s| block.call *s.to_triple} end
 
       def each_statement &fn
+        fn.call RDF::Statement.new(@base, Type.R, (Schema+'BreadcrumbList').R)
         @doc.lines.map{|line|
-          line = line.chomp
-          resource = line.R
-          fn.call RDF::Statement.new(resource, Type.R, (W3 + '2000/01/rdf-schema#Resource').R)
-          fn.call RDF::Statement.new(resource, Title.R, RDF::Literal(line))
-        }
+          fn.call RDF::Statement.new(@base, ('https://schema.org/itemListElement').R, line.chomp.R)}
       end
     end
   end

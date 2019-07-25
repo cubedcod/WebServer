@@ -393,13 +393,16 @@ class WebResource
            {class: :body, c: HTML.keyval(dir, env)}]}}
 
     Markup[Schema+'BreadcrumbList'] = -> list, env {
-      {class: :list, c: tabular((list[Schema+'itemListElement']||list['https://schema.org/itemListElement']).map{|el|env[:graph][el.uri] || el}, env)}}
+      {class: :list,
+       c: tabular((list[Schema+'itemListElement']||
+                   list['https://schema.org/itemListElement']).map{|l|
+                                  env[:graph][l.uri] || (l.class == WebResource ? {'uri' => l.uri, Title => [l.uri]} : l)}, env)}}
 
     Markup[Stat+'File'] = -> file, env {
       uri = file.delete 'uri'
       {class: :file,
        c: [{_: :a, href: uri, class: :icon, c: Icons[Stat+'File']},
-           {_: :span, class: :name, c: uri.R.basename}]}}
+           {_: :span, class: :name, c: uri.R.basename}]} if uri}
 
     Markup[Post] = -> post , env {
       post.delete Type
