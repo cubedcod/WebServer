@@ -389,7 +389,7 @@ class WebResource
       uri = dir.delete 'uri'
       [Type, Title, W3+'ns/posix/stat#mtime', W3+'ns/posix/stat#size'].map{|p|dir.delete p}
       {class: :container,
-       c: [{class: :label, c: uri.R.basename}, '<br>',
+       c: [{_: :a, class: :label, href: uri, c: uri.R.basename}, '<br>',
            {class: :body, c: HTML.keyval(dir, env)}]}}
 
     Markup[Schema+'BreadcrumbList'] = -> list, env {
