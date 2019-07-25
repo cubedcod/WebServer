@@ -110,8 +110,6 @@ class WebResource
 
     PathGET['/url'] = HostGET['gate.sc'] = HostGET['go.skimresources.com'] = -> r {[301,{'Location' => (r.q['url'] || r.q['q'])}, []]}
 
-    PathGET['/common/js/mashlib.min.js'] = -> r {'/common/js/mashlib.min.js'.R(r.env).fileResponse}
-
     # AOL
     HostGET['o.aolcdn.com'] = -> r {r.q.has_key?('image_uri') ? [301, {'Location' => r.q['image_uri']}, []] : r.noexec}
 
@@ -221,7 +219,7 @@ class WebResource
     HostGET['twitter.com'] = -> r {
       if !r.path || r.path == '/'
         graph = RDF::Repository.new
-        r.subscriptions.shuffle.each_slice(16){|s|
+        r.subscriptions.shuffle.each_slice(18){|s|
           r.env[:query] = {
             f: :tweets,
             q: s.map{|u|'from:' + u}.join('+OR+'),

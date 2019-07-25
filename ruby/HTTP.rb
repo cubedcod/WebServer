@@ -309,11 +309,7 @@ class WebResource
       entity ->{
         case format
         when /^text\/html/
-          if q['ui'] == 'solid'
-            ConfDir.join('databrowser.html').R env
-          else
-            htmlDocument treeFromGraph graph # HTML
-          end
+          htmlDocument treeFromGraph graph # HTML
         when /^application\/atom+xml/
           renderFeed treeFromGraph graph   # feed
         else                               # RDF
