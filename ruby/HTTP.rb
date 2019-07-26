@@ -285,7 +285,7 @@ class WebResource
     end
 
     def GET
-      if path.match? /204$/
+      if path.match? /[^\/]204$/
         [204, {}, []]
       elsif handler = PathGET['/' + parts[0].to_s] # path binding
         handler[self]
