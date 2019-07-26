@@ -497,7 +497,7 @@ class WebResource
 
     def selectFormat
       index = {}
-      env['HTTP_ACCEPT'].split(/,/).map{|e| # split to (MIME,q) pairs
+      (env['HTTP_ACCEPT']||'').split(/,/).map{|e| # split to (MIME,q) pairs
         format, q = e.split /;/             # split (MIME,q) pair
         i = q && q.split(/=/)[1].to_f|| 1   # q-value with default
         index[i] ||= []                     # index location
