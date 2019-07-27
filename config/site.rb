@@ -42,11 +42,12 @@ class WebResource
   end
   module HTTP
     CookieHost = /twitter.com$/
+    DebugHost = /(amplitude|crashlytics)\.com$/
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.6969.420 Safari/537.36'
     ImmutableFormat = /^application\/json/
-    POSThost = /(^|\.)(anvato|brightcove|git(lab|ter)|reddit|(mix|sound)cloud|music.apple|api.twitter|weather|youtube)\.(com|gov|im|net)$/
+    POSThost = /(^|\.)(android.googleapis|anvato|brightcove|clients[0-9]?.google|git(lab|ter)|moovitapp|reddit|(mix|sound)cloud|music.apple|api.twitter|weather|youtube)\.(com|gov|im|net)$/
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
-    UIhost = /((anvato|bandcamp|jwplatform|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io)$/
+    UIhost = /((anvato|bandcamp|googleapis|jwplatform|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io)$/
 
     def sitePOST
       case host
