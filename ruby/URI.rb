@@ -383,4 +383,9 @@ class WebResource < RDF::URI
 
   end
   include URIs
+  module HTML
+    include URIs
+    Markup = {}
+  end
+  include HTML
 end

@@ -1,3 +1,4 @@
+# coding: utf-8
 require 'mail'
 module Webize
   module Mail
@@ -175,5 +176,59 @@ module Webize
         yield mail, SIOC+'user_agent', m['X-Mailer'].to_s if m['X-Mailer']
       end
     end
+  end
+end
+class WebResource
+  module HTML
+
+    Markup[Creator] = Markup[To] = -> c, env {
+      if c.class == Hash || c.respond_to?(:uri)
+        u = c.R
+        basename = u.basename
+        host = u.host
+        name = u.fragment ||
+               (basename && !['','/'].member?(basename) && basename) ||
+               (host && host.sub(/\.com$/,'')) ||
+               'user'
+        avatar = Avatars[u.to_s.downcase]
+        [{_: :a, href: u.to_s, id: 'a' + Digest::SHA2.hexdigest(rand.to_s),
+          style: avatar ? '' : (env[:colors][name] ||= HTML.colorize),
+          c: avatar ? {_: :img, class: :avatar, src: avatar} : name}.update(avatar ? {class: :avatar} : {}), ' ']
+      else
+        CGI.escapeHTML (c||'')
+      end}
+
+    Markup[SIOC+'MailMessage'] = -> post , env {
+      post.delete Type
+      uri = post.delete 'uri'
+      titles = (post.delete(Title)||[]).map(&:to_s).map(&:strip).uniq
+      date = (post.delete(Date) || [])[0]
+      from = post.delete(Creator) || []
+      to = post.delete(To) || []
+      images = post.delete(Image) || []
+      content = post.delete(Content) || []
+      uri_hash = 'r' + Digest::SHA2.hexdigest(uri)
+      {class: :post, id: uri_hash,
+       c: [titles.map{|title|
+             title = title.to_s.sub(/\/u\/\S+ on /,'')
+             unless env[:title] == title
+               env[:title] = title
+               [{_: :a, id: 't' + Digest::SHA2.hexdigest(rand.to_s), class: :title, href: uri, c: CGI.escapeHTML(title)}, ' ']
+             end},
+           {_: :a, id: 'pt' + uri_hash, class: :id, c: '☚', href: uri},
+           ({_: :a, class: :date, id: 'date' + uri_hash, href: (env && %w{l localhost}.member?(env['SERVER_NAME']) && '/' || 'http://localhost:8000/') + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date} if date),
+           images.map{|i| Markup[Image][i,env]},
+           {_: :table, class: :fromTo,
+            c: {_: :tr,
+                c: [{_: :td,
+                     c: from.map{|f|Markup[Creator][f,env]},
+                     class: :from},
+                    {_: :td, c: '&rarr;'},
+                    {_: :td,
+                     c: [to.map{|f|Markup[To][f,env]},
+                         post.delete(SIOC+'reply_of')],
+                     class: :to}]}},
+           content, ((HTML.keyval post, env) unless post.keys.size < 1)]}}
+
   end
 end
