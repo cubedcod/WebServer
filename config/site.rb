@@ -363,6 +363,9 @@ yts
               yield s, Creator, ('https://www.instagram.com/' + owner['username']).R if owner['username']
               yield s, To, 'https://www.instagram.com/'.R
             end
+            if time = h['taken_at_timestamp']
+              yield s, Date, Time.at(time).iso8601
+            end
             if text = h['edge_media_to_caption']['edges'][0]['node']['text']
               yield s, Abstract, (CGI.escapeHTML text)
             end rescue nil
