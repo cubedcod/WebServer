@@ -15,6 +15,7 @@
 .list {background-color: #fff; color: #000}
 .post {border-radius: .38em; max-width: 85ex; margin: 1px; border: 1px solid #333}
 .post a {border: 1px solid white}
+.post a.avatar {border-width: 0}
 .title {background-color: #eee; color: #000; font-size: 1.12em; font-weight: bold; vertical-align: top; padding: .06em .1em .06em .1em; border-radius: 0 .3em .3em 0}
 .toolbox a.icon {font-size: 1.8em; background-color: #000; color: #ccc}
 .toolbox { vertical-align: top }
@@ -29,7 +30,7 @@ a:visited {border-color: #333; background-color: #111; color: #fff}
 body {font-family: sans-serif; margin: 0 2em 0 2em}
 body, td, .post, a.head {background-color: #000; color: #fff}
 img, video {max-width: 100%}
-img.thumb, svg {max-width: 28em}
+.thumb, svg {max-width: 28em}
 p {max-width: 80ex; margin: 0}
 pre {white-space: pre-wrap}
 table, div, li {display: inline-block}

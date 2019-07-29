@@ -41,10 +41,11 @@ class WebResource
     SiteJS  = ConfDir.join('site.js').read
   end
   module HTTP
+    DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.6969.420 Safari/537.36'
+    ImmutableFormat = /^(application\/json|audio|font|video)/
+
     CookieHost = /twitter.com$/
     DebugHost = /(amplitude|crashlytics)\.com$/
-    DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.6969.420 Safari/537.36'
-    ImmutableFormat = /^application\/json/
     POSThost = /(^|\.)(android.googleapis|anvato|brightcove|clients[0-9]?.google|git(lab|ter)|moovitapp|reddit|(mix|sound)cloud|music.apple|api.twitter|weather|youtube)\.(com|gov|im|net)$/
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
     UIhost = /((anvato|bandcamp|googleapis|jwplatform|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io)$/
@@ -67,8 +68,8 @@ class WebResource
         else
           denyPOST
         end
-      when 'youtubei.googleapis.com'
-        if path.match? /\/log/
+      when /google/
+        if path.match?(/\/log/) || !ENV.has_key?('GOOGLE')
           denyPOST
         else
           self.POSTthru
@@ -140,7 +141,7 @@ class WebResource
     HostGET['rover.ebay.com'] = -> r {r.q.has_key?('mpre') ? [301, {'Location' => r.q['mpre']}, []] : r.deny}
 
     # Facebook
-    HostGET['facebook.com'] = HostGET['www.facebook.com'] = -> r {%w{connect pages_reaction_units plugins security tr}.member?(r.parts[0]) ? r.deny : r.remote}
+    HostGET['facebook.com'] = HostGET['www.facebook.com'] = -> r {%w{connect pages_reaction_units plugins security tr}.member?(r.parts[0]) ? r.deny : r.noexec}
     HostGET['l.instagram.com'] = HostGET['l.facebook.com'] = -> r {[301, {'Location' => r.q['u']},[]]}
 
     # Gitter

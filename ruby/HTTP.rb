@@ -387,12 +387,12 @@ class WebResource
     end
 
     def OPTIONS
-      if allowPOST?
+#      if allowPOST?
         self.OPTIONSthru
-      else
-        env[:deny] = true
-        [202,{},[]]
-      end
+#      else
+#        env[:deny] = true
+#        [202,{},[]]
+#      end
     end
 
     def OPTIONSthru
