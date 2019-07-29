@@ -395,8 +395,9 @@ class WebResource
     Markup[Schema+'BreadcrumbList'] = -> list, env {
       {class: :list,
        c: tabular((list[Schema+'itemListElement']||
-                   list['https://schema.org/itemListElement']).map{|l|
-                                  env[:graph][l.uri] || (l.class == WebResource ? {'uri' => l.uri, Title => [l.uri]} : l)}, env)}}
+                   list['https://schema.org/itemListElement']||[]).map{|l|
+                    env[:graph][l.uri] || (l.class == WebResource ? {'uri' => l.uri,
+                                                                     Title => [l.uri]} : l)}, env)}}
 
     Markup[Stat+'File'] = -> file, env {
       uri = file.delete 'uri'
