@@ -482,8 +482,13 @@ class WebResource
           id = (HTTP.parseQs video.query)['v'] || video.parts[-1]
           {_: :iframe, width: 560, height: 315, src: "https://www.youtube.com/embed/#{id}", frameborder: 0, gesture: "media", allow: "encrypted-media", allowfullscreen: :true}
         else
+          src = if video.uri.match /v.redd.it/
+                  video.uri + '/DASH_480'
+                else
+                  video.uri
+                end
           {class: :video,
-           c: [{_: :video, src: video.uri, controls: :true}.update(video.uri.match?(/twimg/) ? {autoplay: :true} : {}), '<br>',
+           c: [{_: :video, src: src, controls: :true}, '<br>',
                {_: :span, class: :notes, c: video.basename}]}
         end
       end}

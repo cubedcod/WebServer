@@ -69,7 +69,7 @@ module Webize
                 # emit hyperlinks as RDF
                 if %w{gif jpeg jpg png webp}.member? re.ext.downcase
                   yield s, Image, re
-                elsif (%w{mp4 webm}.member? re.ext.downcase) || (re.host && re.host.match(/(vimeo|youtu)/))
+                elsif (%w{mp4 webm}.member? re.ext.downcase) || (re.host && re.host.match(/v.redd.it|vimeo|youtu/))
                   yield s, Video, re
                 elsif re != subject
                   yield s, DC+'link', re
