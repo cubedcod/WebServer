@@ -96,8 +96,24 @@ class WebResource
        end).R
     end
 
-    # redirects
-    PathGET['/mail'] = -> r {[302, {'Location' => '/d/*/msg*?head&sort=date&view=table'}, []]}
+    # path handlers
+
+    PathGET['/mail'] = -> r {
+      if r.local?
+        parts = r.parts
+        case parts[1]
+        when nil # inbox
+          [302, {'Location' => '/d/*/msg*?head&sort=date&view=table'}, []]
+        when /^(to|from)$/ # match slug to address containers
+          [302, {'Location' => "/mail/*/*#{parts[2]}*/*?head&sort=date&view=table"}, []]
+        else
+          r.local # default local handling
+        end
+      else
+        r.remote
+      end
+    }
+
     PathGET['/mu']   = -> r {[302, {'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'}, []]}
 
     PathGET['/resizer'] = -> r {
