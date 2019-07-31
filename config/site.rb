@@ -97,8 +97,8 @@ class WebResource
     end
 
     # redirects
-    PathGET['/mu']  = -> r {[302,
-     {'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'}, []]}
+    PathGET['/mail'] = -> r {[302, {'Location' => '/d/*/msg*?head&sort=date&view=table'}, []]}
+    PathGET['/mu']   = -> r {[302, {'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'}, []]}
 
     PathGET['/resizer'] = -> r {
       parts = r.path.split /\/\d+x\d+\/(filter[^\/]+\/)?/
