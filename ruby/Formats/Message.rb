@@ -199,7 +199,7 @@ class WebResource
       end}
 
     Markup[SIOC+'MailMessage'] = -> post, env {
-      unless env[:query].has_key?('head') && !post[Title] #&& !post[Video]
+      unless env[:query] && env[:query].has_key?('head') && !post[Title] # hide title-less posts in heading mode
         post.delete Type
         uri = post.delete 'uri'
         titles = (post.delete(Title)||[]).map(&:to_s).map(&:strip).uniq
