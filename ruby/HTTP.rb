@@ -290,15 +290,15 @@ class WebResource
     end
 
     def GET
-      if path.match? /[^\/]204$/
-        [204, {}, []]
-      elsif handler = PathGET['/' + parts[0].to_s] # path binding
+      if path.match? /[^\/]204$/ # connect check
+        [204, {}, []]                             # binding lookup
+      elsif handler = PathGET['/' + parts[0].to_s] # any host, path-and-children
         handler[self]
-      elsif handler = PathGET[path]
+      elsif handler = PathGET[path]                # any host, exact path
         handler[self]
-      elsif handler = HostGET[host]
+      elsif handler = HostGET[host]                # any path, exact host
         handler[self]
-      else
+      else                                         # default
         local? ? local : remote
       end
     end
