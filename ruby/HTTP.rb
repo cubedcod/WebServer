@@ -92,6 +92,7 @@ class WebResource
     end
 
     def deny status = 200
+      HTTP.print_header env if host.match? DebugHost
       env[:deny] = true
       type, content = if ext == 'js' || env[:script]
                         ['application/javascript',
@@ -112,6 +113,10 @@ class WebResource
     end
 
     def denyPOST
+      if host.match? DebugHost
+        HTTP.print_header env
+        puts env['rack.input'].read
+      end
       env[:deny] = true
       [202,{},[]]
     end

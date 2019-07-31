@@ -45,7 +45,7 @@ class WebResource
     ImmutableFormat = /^(application\/json|audio|font|video)/
 
     CookieHost = /twitter.com$/
-    DebugHost = /(amplitude|crashlytics)\.com$/
+    DebugHost = /(amplitude|app-measurement.com|crashlytics|qualcomm)\.com$/
     POSThost = /(^|\.)(android.googleapis|anvato|brightcove|clients[0-9]?.google|git(lab|ter)|moovitapp|reddit|(mix|sound)cloud|music.apple|api.twitter|weather|youtube)\.(com|gov|im|net)$/
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
     UIhost = /((anvato|bandcamp|googleapis|jwplatform|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io)$/
