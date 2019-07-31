@@ -429,14 +429,17 @@ class WebResource
       url = 'https://' + host + path + qs
       head = headers
       body = env['rack.input'].read
-      #HTTP.print_header head
+      if host.match? DebugHost
+        HTTP.print_header head
+        puts body
+      end
 
       # response
       r = HTTParty.post url, :headers => head, :body => body
       code = r.code
       head = r.headers
       body = r.body
-      #HTTP.print_header head
+      HTTP.print_header head if host.match? DebugHost
       [code, head, [body]]
     end
 

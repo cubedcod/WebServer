@@ -45,8 +45,8 @@ class WebResource
     ImmutableFormat = /^(application\/json|audio|font|video)/
 
     CookieHost = /twitter.com$/
-    DebugHost = /(amplitude|app-measurement.com|crashlytics|qualcomm)\.com$/
-    POSThost = /(^|\.)(android.googleapis|anvato|brightcove|clients[0-9]?.google|git(lab|ter)|moovitapp|reddit|(mix|sound)cloud|music.apple|api.twitter|weather|youtube)\.(com|gov|im|net)$/
+    DebugHost = /(amplitude|app-measurement.com|crashlytics|google|qualcomm)\.com$/
+    POSThost = /(^|\.)(android.googleapis|anvato|brightcove|(clients[0-9]?|www).google|git(lab|ter)|moovitapp|reddit|(mix|sound)cloud|music.apple|api.twitter|weather|youtube)\.(com|gov|im|net)$/
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
     UIhost = /((anvato|bandcamp|googleapis|jwplatform|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io)$/
 
@@ -150,7 +150,7 @@ class WebResource
     # Google
     (0..3).map{|i|
       HostGET["encrypted-tbn#{i}.gstatic.com"] = -> r {r.noexec}}
-    HostGET['feedproxy.google.com'] = -> r {r.noexec}
+    HostGET['feedproxy.google.com'] = HostGET['ssl.gstatic.com'] = -> r {r.noexec}
     HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.deny : r.noexec}
     HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['maps.googleapis.com'] = HostGET['www.google.com'] = -> r {
       case r.parts[0]
