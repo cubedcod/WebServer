@@ -45,8 +45,8 @@ class WebResource
     ImmutableFormat = /^(application\/json|audio|font|video)/
 
     CookieHost = /twitter.com$/
-    DebugHost = /(amplitude|app-measurement.com|crashlytics|google|qualcomm)\.com$/
-    POSThost = /(^|\.)(android.googleapis|anvato|brightcove|(clients[0-9]?|www).google|git(lab|ter)|moovitapp|reddit|(mix|sound)cloud|music.apple|api.twitter|weather|youtube)\.(com|gov|im|net)$/
+    DebugHost = /(amazonaws|amplitude|app-measurement.com|crashlytics|google|qualcomm)\.com$/
+    POSThost = /(^|\.)(amazonaws|anvato|brightcove|google(apis)?|git(lab|ter)|moovitapp|reddit|(mix|sound)cloud|music.apple|api.twitter|weather|youtube)\.(com|gov|im|net)$/
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
     UIhost = /((anvato|bandcamp|googleapis|jwplatform|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io)$/
 
@@ -68,8 +68,14 @@ class WebResource
         else
           denyPOST
         end
+      when /amazon/
+        if !ENV.has_key?('AMAZON')
+          denyPOST
+        else
+          self.POSTthru
+        end
       when /google/
-        if path.match?(/\/log/) || !ENV.has_key?('GOOGLE')
+        if !ENV.has_key?('GOOGLE')
           denyPOST
         else
           self.POSTthru
