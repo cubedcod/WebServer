@@ -42,7 +42,7 @@ class WebResource
   end
   module HTTP
     # User-Agent for upstream UI. use mobile-browser Desktop/Mobile toggle to select
-    DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.6969.420 Safari/537.36'
+    DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.143 Safari/537.36'
 
     # allow cookies (POST/Track/UI hosts also allowed)
     CookieHost = /(twitter)\.com$/

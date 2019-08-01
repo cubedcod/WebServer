@@ -180,10 +180,11 @@ class WebResource
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u   # fallback locator
       options[:content_type]='application/atom+xml' if FeedURL[u]  # fix MIME on feed URLs
       code=nil;meta={};body=nil;format=nil;file=nil;@r[:resp]||={} # response metadata
+      verbose = hostname.match? DebugHost
 
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
-        if hostname.match? DebugHost
+        if verbose
           print url, "\n"
           HTTP.print_header head
         end
@@ -191,7 +192,7 @@ class WebResource
           open(url, head) do |response|
             code = response.status.to_s.match(/\d{3}/)[0]
             meta = response.meta
-            if hostname.match? DebugHost
+            if verbose
               print ' ', code, ' '
               HTTP.print_header meta
             end
@@ -238,6 +239,7 @@ class WebResource
       begin
         fetchURL[url]       #   try (HTTPS default)
       rescue Exception => e # retry (HTTP)
+        HTTP.print_header e.io.meta if verbose
         case e.class.to_s
         when 'Errno::ECONNREFUSED'
           fetchURL[fallback]
@@ -260,7 +262,6 @@ class WebResource
           else
             if options[:no_response]
               puts "REDIRECT #{url} -> \e[32;7m" + location + "\e[0m"
-              #HTTP.print_header e.io.meta
             else
               return [302, {'Location' => location}, []]
             end

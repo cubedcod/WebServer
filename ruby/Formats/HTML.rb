@@ -219,7 +219,7 @@ class WebResource
     def htmlDocument graph = {}
 
       # HEAD links
-      @r ||= {}
+      @r ||= {query: {}}
       @r[:links] ||= {}
       @r[:images] ||= {}
       @r[:colors] ||= {}
