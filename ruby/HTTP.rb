@@ -460,17 +460,6 @@ class WebResource
       [202,{},[]]
     end
 
-    # query-string -> Hash
-    def q
-      @q ||= (
-        puts "parsing QS in " + uri
-         if env && env[:query]
-           puts "NOTICE already parsed in ENV #{Digest::SHA2.hexdigest env.to_s}"
-           puts caller[0]
-         end
-        HTTP.parseQs qs[1..-1])
-    end
-
     # Hash -> query-string
     def HTTP.qs h
       '?' + h.map{|k,v|

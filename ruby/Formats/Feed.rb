@@ -284,12 +284,12 @@ class WebResource
     def subs; puts     subscriptions.sort.join ' ' end
 
     PathGET['/subscribe'] = -> r {
-      url = (r.q['u'] || '/').R
+      url = (r.env[:query]['u'] || '/').R
       url.subscribe
       [302, {'Location' => url.to_s}, []]}
 
     PathGET['/unsubscribe']  = -> r {
-      url = (r.q['u'] || '/').R
+      url = (r.env[:query]['u'] || '/').R
       url.unsubscribe
       [302, {'Location' => url.to_s}, []]}
 

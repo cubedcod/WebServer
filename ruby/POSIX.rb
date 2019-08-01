@@ -45,7 +45,7 @@ class WebResource
 
     # GREP(1)
     def grep q
-      env[:grep] = true
+      env[:GrepRequest] = true
       args = POSIX.splitArgs q
       case args.size
       when 0
@@ -66,10 +66,10 @@ class WebResource
     # URI -> file(s)
     def nodes
       (if node.directory?
-       if q.has_key?('f') && path!='/'    # FIND
-         find q['f'] unless q['f'].empty?
-       elsif q.has_key?('q') && path!='/' # GREP
-         grep q['q']
+       if env[:query].has_key?('f') && path != '/'  # FIND
+         find env[:query]['f'] unless env[:query]['f'].empty?
+       elsif env[:query].has_key?('q') && path!='/' # GREP
+         grep env[:query]['q']
        else
          index = (self + 'index.{html,ttl}').R.glob
          if !index.empty? && qs.empty?    # static index

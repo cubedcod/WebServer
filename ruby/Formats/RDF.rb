@@ -44,7 +44,7 @@ class WebResource
 
   # graph -> Hash
   def treeFromGraph graph ; tree = {}
-    head = q.has_key? 'head'
+    head = env[:query].has_key? 'head'
     graph.each_triple{|s,p,o|
       s = s.to_s; p = p.to_s # subject URI, predicate URI
       unless head && p == Content

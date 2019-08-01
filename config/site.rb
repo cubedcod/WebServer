@@ -132,10 +132,10 @@ class WebResource
         r.remote
       end}
 
-    PathGET['/url'] = HostGET['gate.sc'] = HostGET['go.skimresources.com'] = -> r {[301,{'Location' => (r.q['url'] || r.q['q'])}, []]}
+    PathGET['/url'] = HostGET['gate.sc'] = HostGET['go.skimresources.com'] = -> r {[301,{'Location' => (r.env[:query]['url'] || r.env[:query]['q'])}, []]}
 
     # AOL
-    HostGET['o.aolcdn.com'] = -> r {r.q.has_key?('image_uri') ? [301, {'Location' => r.q['image_uri']}, []] : r.noexec}
+    HostGET['o.aolcdn.com'] = -> r {r.env[:query].has_key?('image_uri') ? [301, {'Location' => r.env[:query]['image_uri']}, []] : r.noexec}
 
     # Bing
     HostGET['www.bing.com'] = -> r {
@@ -143,15 +143,15 @@ class WebResource
 
     # BusinessWire
     HostGET['cts.businesswire.com'] = -> r {
-      r.q.has_key?('url') ? [301, {'Location' => r.q['url']}, []] : r.deny
+      r.env[:query].has_key?('url') ? [301, {'Location' => r.env[:query]['url']}, []] : r.deny
     }
 
     # DartSearch
-    HostGET['clickserve.dartsearch.net'] = -> r {[301,{'Location' => r.q['ds_dest_url']}, []]}
+    HostGET['clickserve.dartsearch.net'] = -> r {[301,{'Location' => r.env[:query]['ds_dest_url']}, []]}
 
     # DuckDuckGo
     HostGET['duckduckgo.com'] = -> r {%w{ac}.member?(r.parts[0]) ? r.deny : r.remote}
-    HostGET['proxy.duckduckgo.com'] = -> r {%w{iu}.member?(r.parts[0]) ? [301, {'Location' => r.q['u']}, []] : r.remote}
+    HostGET['proxy.duckduckgo.com'] = -> r {%w{iu}.member?(r.parts[0]) ? [301, {'Location' => r.env[:query]['u']}, []] : r.remote}
 
     # eBay
     HostGET['i.ebayimg.com'] = -> r {
@@ -160,11 +160,11 @@ class WebResource
       else
         r.fetch
       end}
-    HostGET['rover.ebay.com'] = -> r {r.q.has_key?('mpre') ? [301, {'Location' => r.q['mpre']}, []] : r.deny}
+    HostGET['rover.ebay.com'] = -> r {r.env[:query].has_key?('mpre') ? [301, {'Location' => r.env[:query]['mpre']}, []] : r.deny}
 
     # Facebook
     HostGET['facebook.com'] = HostGET['www.facebook.com'] = -> r {%w{connect pages_reaction_units plugins security tr}.member?(r.parts[0]) ? r.deny : r.noexec}
-    HostGET['l.instagram.com'] = HostGET['l.facebook.com'] = -> r {[301, {'Location' => r.q['u']},[]]}
+    HostGET['l.instagram.com'] = HostGET['l.facebook.com'] = -> r {[301, {'Location' => r.env[:query]['u']},[]]}
 
     # Forbes
     HostGET['thumbor.forbes.com'] = -> r {[301, {'Location' => URI.unescape(r.parts[-1])}, []]}
@@ -182,7 +182,7 @@ class WebResource
       when nil
         r.desktop.fetch
       when 'imgres'
-        r.q.has_key?('imgurl') ? [301, {'Location' => r.q['imgurl']}, []] : r.fetch
+        r.env[:query].has_key?('imgurl') ? [301, {'Location' => r.env[:query]['imgurl']}, []] : r.fetch
       when /images|maps/
         r.desktop.fetch
       when /aclk|search/
@@ -190,7 +190,7 @@ class WebResource
       else
         r.deny
       end}
-    HostGET['www.googleadservices.com'] = -> r {r.q['adurl'] ? [301, {'Location' => r.q['adurl']},[]] : r.deny}
+    HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
 
     # Mozilla
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
@@ -227,10 +227,8 @@ class WebResource
     # Reuters
     (0..5).map{|i|
       HostGET["s#{i}.reutersmedia.net"] = -> r {
-        if r.q.has_key? 'w'
-          q = r.q
-          q.delete 'w'
-          [301, {'Location' =>  r.env['REQUEST_PATH'] + (HTTP.qs q)}, []]
+        if r.env[:query].has_key? 'w'
+          [301, {'Location' =>  r.env['REQUEST_PATH'] + HTTP.qs(r.env[:query].reject{|k,_|k=='w'})}, []]
         else
           r.noexec
         end}}
@@ -259,7 +257,7 @@ class WebResource
       end}
 
     # WGBH
-    HostGET['wgbh.brightspotcdn.com'] = -> r {r.q.has_key?('url') ? [301, {'Location' => r.q['url']}, []] : r.noexec}
+    HostGET['wgbh.brightspotcdn.com'] = -> r {r.env[:query].has_key?('url') ? [301, {'Location' => r.env[:query]['url']}, []] : r.noexec}
 
     # WordPress
     HostGET['i0.wp.com'] = HostGET['i1.wp.com'] = HostGET['i2.wp.com'] = -> r {
@@ -300,7 +298,7 @@ yts
 }.member?(mode)
         r.desktop.fetch cookies: true
       elsif %w{attribution_link redirect}.member? mode
-        [301, {'Location' =>  r.q['q'] || r.q['u']},[]]
+        [301, {'Location' =>  r.env[:query]['q'] || r.env[:query]['u']},[]]
       else
         r.deny
       end}
