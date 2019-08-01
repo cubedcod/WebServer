@@ -557,7 +557,11 @@ class WebResource
       head
     end
 
-    def upstreamUI?; !local? && (env['HTTP_USER_AGENT'] == DesktopUA || (host||env['SERVER_NAME']).match?(UIhost) || q['ui'] == 'upstream') end
+    def upstreamUI?
+      !local? && (env['HTTP_USER_AGENT'] == DesktopUA ||
+                  env['SERVER_NAME'].match?(UIhost) ||
+                  env[:query]['ui'] == 'upstream')
+    end
   end
   include HTTP
 end
