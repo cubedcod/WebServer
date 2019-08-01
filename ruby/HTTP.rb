@@ -108,8 +108,11 @@ class WebResource
                       elsif env[:GIF]
                         ['image/gif', SiteGIF]
                       else
+                        q = env[:query].dup
+                        q.keys.map{|k|q.delete k if k.match? /^utm_/}
+                        q['allow'] = ServerKey
                         ['text/html; charset=utf-8',
-                         "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center'><a href='#{HTTP.qs q.merge({'allow' => ServerKey})}' style='color: #fff; font-weight: bold; font-size: 22em; text-decoration: none'>⌘</a></body></html>"]
+                         "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center'><a href='#{HTTP.qs q}' style='color: #fff; font-weight: bold; font-size: 22em; text-decoration: none'>⌘</a></body></html>"]
                       end
       [status,
        {'Access-Control-Allow-Credentials' => 'true',
@@ -459,7 +462,13 @@ class WebResource
 
     # query-string -> Hash
     def q
-      @q ||= HTTP.parseQs qs[1..-1]
+      @q ||= (
+        puts "parsing QS in " + uri
+         if env && env[:query]
+           puts "NOTICE already parsed in ENV #{Digest::SHA2.hexdigest env.to_s}"
+           puts caller[0]
+         end
+        HTTP.parseQs qs[1..-1])
     end
 
     # Hash -> query-string
