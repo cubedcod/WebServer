@@ -227,7 +227,7 @@ class WebResource
             end
           end
         rescue Exception => e
-          case e.message
+          case e.message # response codes handled in unexceptional control-flow
           when /304/ # no updates
             code = 304
           when /401/ # unauthorized
@@ -236,10 +236,6 @@ class WebResource
             code = 403
           when /404/ # not found
             code = 404
-          when /999/
-            upstream_meta.map{|k| @r[:resp][k] ||= meta[k.downcase] if e.io.meta[k.downcase]}
-            body = decompress e.io.meta, e.io.read
-            desktop
           else
             raise
           end
