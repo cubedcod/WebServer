@@ -11,6 +11,7 @@ class WebResource
     Methods = %w(GET HEAD OPTIONS POST)
     OffLine = ENV.has_key? 'OFFLINE'
     PathGET = {}
+    PreservedFormat = /^(application\/json|audio|font|video)/
     ServerKey = Digest::SHA2.hexdigest [`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join
 
     PathGET['/avatars'] = -> r {r.fileResponse}
@@ -171,7 +172,7 @@ class WebResource
       options[:cookies] ||= true if hostname.match?(CookieHost) || hostname.match?(TrackHost) || hostname.match?(POSThost) || hostname.match?(UIhost)
       head.delete 'Cookie' unless options[:cookies]  # allow/deny cookies
       qStr = @r[:query] ? (q = @r[:query].dup        # load query
-        %w{group view sort ui}.map{|a|q.delete a}    # consume local arguments
+        %w{allow view sort ui}.map{|a|q.delete a}    # consume local arguments
         q.empty? ? '' : HTTP.qs(q)) : qs             # external query
       suffix = ext.empty? && hostname.match?(/reddit.com$/) && !upstreamUI? && '.rss' # format suffix
       u = '//' + hostname + path + (suffix || '') + qStr           # base locator
@@ -182,12 +183,18 @@ class WebResource
 
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
-        #print url, "\n"; HTTP.print_header head
+        if hostname.match? DebugHost
+          print url, "\n"
+          HTTP.print_header head
+        end
         begin
           open(url, head) do |response|
             code = response.status.to_s.match(/\d{3}/)[0]
             meta = response.meta
-            #print ' ', code, ' ' ; HTTP.print_header meta
+            if hostname.match? DebugHost
+              print ' ', code, ' '
+              HTTP.print_header meta
+            end
             allowed_meta = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag}
             allowed_meta.push 'Set-Cookie' if options[:cookies]
             allowed_meta.map{|k| @r[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
@@ -274,7 +281,7 @@ class WebResource
         file.fileResponse
       elsif code == 206                                            # partial data from upstream
         [206, meta, [body]]
-      elsif body&&(upstreamUI? || (format.match? ImmutableFormat)) # data from upstream
+      elsif body&&(upstreamUI? || (format.match? PreservedFormat)) # data from upstream
         [200, {'Access-Control-Allow-Credentials' => 'true',
                'Access-Control-Allow-Origin' => allowedOrigin,
                'Content-Type' => format,
@@ -467,7 +474,7 @@ class WebResource
       }.join("&")
     end
 
-    # env or URI -> query-string
+    # query string, late-bound environment value takes precedence
     def qs
       if @r && @r['QUERY_STRING'] && !@r['QUERY_STRING'].empty?
         '?' +  @r['QUERY_STRING']

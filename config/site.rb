@@ -41,13 +41,21 @@ class WebResource
     SiteJS  = ConfDir.join('site.js').read
   end
   module HTTP
+    # User-Agent for upstream UI. use mobile-browser Desktop/Mobile toggle to select
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.6969.420 Safari/537.36'
-    ImmutableFormat = /^(application\/json|audio|font|video)/
 
-    CookieHost = /twitter.com$/
-    DebugHost = /(amazonaws|amplitude|app-measurement.com|crashlytics|google|qualcomm)\.com$/
+    # allow cookies (POST/Track/UI hosts also allowed)
+    CookieHost = /(twitter)\.com$/
+
+    # verbose request information
+    DebugHost = /(amazonaws|amplitude|app-measurement.com|crashlytics|google|linkedin|qualcomm)\.com$/
+
+    # allow POST
     POSThost = /(^|\.)(amazonaws|anvato|brightcove|google(apis)?|git(lab|ter)|moovitapp|reddit|(mix|sound)cloud|music.apple|api.twitter|weather|youtube)\.(com|gov|im|net)$/
+
+    # allow paths containing text 'track'
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
+
     UIhost = /((anvato|bandcamp|googleapis|jwplatform|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io)$/
 
     def sitePOST
