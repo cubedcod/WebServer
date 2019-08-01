@@ -282,6 +282,9 @@ class WebResource
         r.noexec
       end}
 
+    # Yelp
+    HostGET['www.yelp.com'] = -> r {r.env[:query]['redirect_url'] ? [301, {'Location' => r.env[:query]['redirect_url']},[]] : r.noexec}
+
     # YouTube
     HostGET['youtu.be'] = -> re {[301, {'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]}, []]}
     HostGET['www.youtube.com'] = -> r {

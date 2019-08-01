@@ -501,9 +501,9 @@ class WebResource
         case env['HTTP_TYPE']
         when /drop/
           if ((host.match? /track/) || (env['REQUEST_URI'].match? /track/)) && (host.match? TrackHost)
-            fetch
+            fetch # music track
           elsif env[:query]['allow'] == ServerKey
-            fetch
+            fetch # allow override
           else
             deny
           end
