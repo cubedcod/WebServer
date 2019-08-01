@@ -29,7 +29,7 @@ class WebResource
 
     def cached?
       return false if env && env['HTTP_PRAGMA'] == 'no-cache'
-      location = cacheLocation
+      location = cache
       return location if location.file?     # direct match
       (location + '.*').R.glob.find &:file? # suffix match
     end
@@ -144,10 +144,13 @@ class WebResource
           if s == 304
             [s, {}, []]                          # not modified
           else
+            #env[:resp]['Content-Length'] = body.node.size.to_s
+            puts h
             h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type'] == 'application/javascript'
             [s, h.update(env[:resp]), b]     # file response
           end}
         else
+          env[:resp]['Content-Length'] = body.bytesize.to_s
           [env[:status] || 200, env[:resp], [body]] # generated response
         end
       end
@@ -162,31 +165,30 @@ class WebResource
       end
     end
 
-    def fetch options = {} ; @r ||= {}
+    def fetch options = {}
       if this = cached?; return this.fileResponse end
-      graph = options[:graph] || RDF::Repository.new # request graph
-      @r['HTTP_ACCEPT'] ||= '*/*'                    # Accept-header default
+      head = headers                                 # request metadata
+      @r||={resp: {}} ; @r['HTTP_ACCEPT'] ||= '*/*'  # response metadata
       hostname = host || @r['SERVER_NAME']           # hostname
-      head = headers                                 # headers
-      head[:redirect] = false                        # don't internally follow redirects
+      head[:redirect] = false                        # don't follow redirects
       options[:cookies] ||= true if hostname.match?(CookieHost) || hostname.match?(TrackHost) || hostname.match?(POSThost) || hostname.match?(UIhost)
       head.delete 'Cookie' unless options[:cookies]  # allow/deny cookies
-      qStr = @r[:query] ? (q = @r[:query].dup        # load query
+      qStr = @r[:query] ? (q = @r[:query].dup        # read query
         %w{allow view sort ui}.map{|a|q.delete a}    # consume local arguments
         q.empty? ? '' : HTTP.qs(q)) : qs             # external query
       suffix = ext.empty? && hostname.match?(/reddit.com$/) && !upstreamUI? && '.rss' # format suffix
       u = '//' + hostname + path + (suffix || '') + qStr           # base locator
       url      = (options[:scheme] || 'https').to_s    + ':' + u   # primary locator
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u   # fallback locator
-      options[:content_type]='application/atom+xml' if FeedURL[u]  # fix MIME on feed URLs
-      code = nil # upstream response status
-      meta = {}  # upstream response headers
-      body = nil # upstream response body
-      format = nil # response format
-      file = nil   # response fileref
-      @r[:resp] ||= {} # response headers
+      options[:content_type]='application/atom+xml' if FeedURL[u]  # fixed MIME for feed URLs
+      code = nil # upstream status
+      meta = {}  # upstream metadata
       upstream_meta = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type Content-Length ETag}
       upstream_meta.push 'Set-Cookie' if options[:cookies]
+      graph = options[:graph] || RDF::Repository.new # response graph
+      body = nil   # response body
+      format = nil # response format
+      file = nil   # response fileref
       verbose = hostname.match? DebugHost
 
       fetchURL = -> url {
@@ -216,13 +218,13 @@ class WebResource
                          'text/html'
                        end
             if code == 206
-              body = response.read                                                         # partial body
-            else                                                                           # complete body
-              body = decompress meta, response.read; meta.delete 'content-encoding'        # decompress body
-              file = (cacheLocation format).writeFile body unless format.match? RDFformats # cache non-RDF
-              if reader = RDF::Reader.for(content_type: format)                            # find RDF reader
-                reader.new(body, :base_uri => url.R){|_| graph << _ }                      # parse RDF
-                index graph                                                                # cache RDF
+              body = response.read                                                # partial body
+            else                                                                  # complete body
+              body = decompress meta,response.read;meta.delete 'content-encoding' # decompress body
+              file = cache(format).writeFile body unless format.match? RDFformats # cache non-RDF
+              if reader = RDF::Reader.for(content_type: format)                   # find RDF reader
+                reader.new(body, :base_uri => url.R){|_| graph << _ }             # parse RDF
+                index graph                                                       # cache RDF
               end
             end
           end
@@ -302,8 +304,7 @@ class WebResource
     end
 
     def fileResponse
-      @r ||= {}
-      @r[:resp] ||= {}
+      @r ||= {resp: {}}
       @r[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
       @r[:resp]['ETag'] ||= Digest::SHA2.hexdigest [uri, node.stat.mtime, node.size].join
       entity
@@ -327,7 +328,7 @@ class WebResource
       return notfound if graph.empty?
       format = selectFormat
       dateMeta if local?
-      @r[:resp] ||= {}
+      @r ||= {resp: {}}
       @r[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
       @r[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})      
       @r[:resp].update({'Link' => @r[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !@r[:links] || @r[:links].empty?

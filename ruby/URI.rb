@@ -308,7 +308,8 @@ class WebResource < RDF::URI
 
     CacheDir = (Pathname.new ENV['HOME'] + '/.cache/web').relative_path_from(PWD).to_s + '/'
 
-    def cacheLocation format=nil
+    # local cache reference
+    def cache format=nil
       want_suffix = ext.empty?
       hostPart = CacheDir + (host || 'localhost')
       pathPart = if !path || path[-1] == '/'
