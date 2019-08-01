@@ -3,13 +3,13 @@
 class WebResource
   module HTTP
     include URIs
-
-    Hosts = {} # seen hosts
-    Methods = %w(GET HEAD OPTIONS POST)
-    OFFLINE = ENV.has_key? 'OFFLINE'
-
     HostGET = {}
+    Hosts = {}
+    Methods = %w(GET HEAD OPTIONS POST)
+    OffLine = ENV.has_key? 'OFFLINE'
     PathGET = {}
+    ServerKey = Digest::SHA2.hexdigest [`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join
+
     PathGET['/avatars'] = -> r {r.fileResponse}
     PathGET['/favicon.ico']  = -> r {r.upstreamUI? ? r.fetch : [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
 
@@ -106,7 +106,7 @@ class WebResource
                         ['image/gif', SiteGIF]
                       else
                         ['text/html; charset=utf-8',
-                         "<html><body style='#{qs.empty? ? ('background: repeating-linear-gradient(' + (rand 360).to_s + 'deg, #000, #000 6.5em, #f00 6.5em, #f00 8em)') : 'background-color: red'}; text-align: center'><a href='#{qs.empty? ? '?allow' : path}' style='color: #fff; font-weight: bold; font-size: 22em; text-decoration: none'>⌘</a></body></html>"]
+                         "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center'><a href='#{HTTP.qs q.merge({'allow' => ServerKey})}' style='color: #fff; font-weight: bold; font-size: 22em; text-decoration: none'>⌘</a></body></html>"]
                       end
       [status,
        {'Access-Control-Allow-Credentials' => 'true',
@@ -259,7 +259,7 @@ class WebResource
         else
           raise
         end
-      end unless OFFLINE
+      end unless OffLine
 
       return if options[:no_response]
       if code == 304                                               # no data
@@ -483,10 +483,9 @@ class WebResource
         case env['HTTP_TYPE']
         when /drop/
           if ((host.match? /track/) || (env['REQUEST_URI'].match? /track/)) && (host.match? TrackHost)
-            fetch # music tracks
-          elsif q.has_key? 'allow' # allow with stripped querystring
-            ['QUERY_STRING', :query].map{|q|env.delete q}
-            path.R(env).fetch
+            fetch
+          elsif q['allow'] == ServerKey
+            fetch
           else
             deny
           end
