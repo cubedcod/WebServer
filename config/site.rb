@@ -41,11 +41,12 @@ class WebResource
     SiteJS  = ConfDir.join('site.js').read
   end
   module HTTP
-    # User-Agent for upstream UI. use mobile-browser Desktop/Mobile toggle to select
+
+    # User-Agent for upstream UI, using mobile-browser Desktop/Mobile toggle to select
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.143 Safari/537.36'
 
     # allow cookies (POST/Track/UI hosts also allowed)
-    CookieHost = /(twitter)\.com$/
+    CookieHost = /(qualcomm|twitter)\.com$/
 
     # verbose request information
     DebugHost = /(amazonaws|amplitude|app-measurement.com|crashlytics|google|linkedin|qualcomm)\.com$/

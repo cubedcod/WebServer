@@ -179,7 +179,14 @@ class WebResource
       url      = (options[:scheme] || 'https').to_s    + ':' + u   # primary locator
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u   # fallback locator
       options[:content_type]='application/atom+xml' if FeedURL[u]  # fix MIME on feed URLs
-      code=nil;meta={};body=nil;format=nil;file=nil;@r[:resp]||={} # response metadata
+      code = nil # upstream response status
+      meta = {}  # upstream response headers
+      body = nil # upstream response body
+      format = nil # response format
+      file = nil   # response fileref
+      @r[:resp] ||= {} # response headers
+      upstream_meta = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type Content-Length ETag}
+      upstream_meta.push 'Set-Cookie' if options[:cookies]
       verbose = hostname.match? DebugHost
 
       fetchURL = -> url {
@@ -196,9 +203,7 @@ class WebResource
               print ' ', code, ' '
               HTTP.print_header meta
             end
-            allowed_meta = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag}
-            allowed_meta.push 'Set-Cookie' if options[:cookies]
-            allowed_meta.map{|k| @r[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
+            upstream_meta.map{|k| @r[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
             format = options[:content_type] || meta['content-type'] && meta['content-type'].split(/;/)[0]
             format ||= case ext
                        when 'jpg'
@@ -231,6 +236,10 @@ class WebResource
             code = 403
           when /404/ # not found
             code = 404
+          when /999/
+            upstream_meta.map{|k| @r[:resp][k] ||= meta[k.downcase] if e.io.meta[k.downcase]}
+            body = decompress e.io.meta, e.io.read
+            desktop
           else
             raise
           end
@@ -239,7 +248,10 @@ class WebResource
       begin
         fetchURL[url]       #   try (HTTPS default)
       rescue Exception => e # retry (HTTP)
-        HTTP.print_header e.io.meta if verbose
+        if verbose && e.respond_to?(:io)
+          puts e.io.status.join ' '
+          HTTP.print_header e.io.meta
+        end
         case e.class.to_s
         when 'Errno::ECONNREFUSED'
           fetchURL[fallback]
@@ -276,21 +288,18 @@ class WebResource
       end unless OffLine
 
       return if options[:no_response]
-      if code == 304                                               # no data
+      if code == 304                                              # no data
         [304, {}, []]
-      elsif file                                                   # data from file
+      elsif file                                                  # file data
         file.fileResponse
-      elsif code == 206                                            # partial data from upstream
-        [206, meta, [body]]
-      elsif body&&(upstreamUI? || (format.match? PreservedFormat)) # data from upstream
-        [200, {'Access-Control-Allow-Credentials' => 'true',
-               'Access-Control-Allow-Origin' => allowedOrigin,
-               'Content-Type' => format,
-               'Content-Length' => body.bytesize.to_s}, [body]]
+      elsif code == 206                                           # partial upstream data
+        [206, @r[:resp], [body]]
+      elsif body && (upstreamUI?||format.match?(PreservedFormat)) # upstream data
+        [200, @r[:resp], [body]]
       else                                                        # graph data
         if graph.empty? && !local? && @r['REQUEST_PATH'][-1]=='/' # unlistable remote
           index = (CacheDir + hostname + path).R                  # local container
-          index.children.map{|e| e.fsStat graph, base_uri: 'https://' + e.relPath} if index.node.directory? # list cache
+          index.children.map{|e| e.fsStat graph, base_uri: 'https://' + e.relPath} if index.node.directory? # local list
         end
         graphResponse graph
       end
@@ -406,12 +415,12 @@ class WebResource
     end
 
     def OPTIONS
-#      if allowPOST?
+      if allowPOST?
         self.OPTIONSthru
-#      else
-#        env[:deny] = true
-#        [202,{},[]]
-#      end
+      else
+        env[:deny] = true
+        [202,{},[]]
+      end
     end
 
     def OPTIONSthru
