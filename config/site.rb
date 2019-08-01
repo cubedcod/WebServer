@@ -166,6 +166,9 @@ class WebResource
     HostGET['facebook.com'] = HostGET['www.facebook.com'] = -> r {%w{connect pages_reaction_units plugins security tr}.member?(r.parts[0]) ? r.deny : r.noexec}
     HostGET['l.instagram.com'] = HostGET['l.facebook.com'] = -> r {[301, {'Location' => r.q['u']},[]]}
 
+    # Forbes
+    HostGET['thumbor.forbes.com'] = -> r {[301, {'Location' => URI.unescape(r.parts[-1])}, []]}
+
     # Gitter
     HostGET['gitter.im'] = -> req {req.desktop.remote}
 
@@ -212,7 +215,7 @@ class WebResource
       end}
 
     # Reddit
-    HostGET['reddit.com'] = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path},[]]}
+    HostGET['reddit.com'] = HostGET['old.reddit.com'] = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path},[]]}
     HostGET['www.reddit.com'] = -> r {
       if r.path == '/'
         r.env[:resp]['Refresh'] = 1800

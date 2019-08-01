@@ -4,11 +4,14 @@ class WebResource
   module HTTP
     include URIs
 
-    Hosts = {}   # seen hosts
-    HostGET = {} # lambda tables
-    PathGET = {}
+    Hosts = {} # seen hosts
     Methods = %w(GET HEAD OPTIONS POST)
     OFFLINE = ENV.has_key? 'OFFLINE'
+
+    HostGET = {}
+    PathGET = {}
+    PathGET['/avatars'] = -> r {r.fileResponse}
+    PathGET['/favicon.ico']  = -> r {r.upstreamUI? ? r.fetch : [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
 
     def allowedOrigin
       if referer = env['HTTP_REFERER']
@@ -151,8 +154,6 @@ class WebResource
         @r
       end
     end
-
-    PathGET['/favicon.ico']  = -> r {r.upstreamUI? ? r.fetch : [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
 
     def fetch options = {} ; @r ||= {}
       if this = cached?; return this.fileResponse end
@@ -318,7 +319,7 @@ class WebResource
         when /^application\/atom+xml/
           renderFeed treeFromGraph graph   # feed
         else                               # RDF
-          base = (env['SERVER_NAME']=='localhost' ? 'http://localhost:8000' : ('https://'+host)).R.join env['REQUEST_PATH']
+          base = ('https://' + env['SERVER_NAME']).R.join env['REQUEST_PATH']
           graph.dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => base, :standard_prefixes => true
         end}
     end
@@ -348,9 +349,8 @@ class WebResource
       else
         # load RDF
         graph = RDF::Repository.new
-        nodes.map{|node|
-          node.load graph, base_uri: 'http://localhost:8000/'.R.join(node) if node.file?}
-        index graph
+        nodes.map{|node| node.load graph if node.file?}
+        index graph # index resources found in RDFization ::TODO index only nonRDF (split nodeset above)
         # add node metadata
         nodes.map{|node|
           node.fsStat graph unless node.ext=='ttl' || node.basename.split('.')[0]=='msg' }

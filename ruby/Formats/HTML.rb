@@ -91,7 +91,7 @@ sidebar [class^='side']    [id^='side']
 
       def initialize(input = $stdin, options = {}, &block)
         @doc = (input.respond_to?(:read) ? input.read : input).encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ')
-        @base = options[:base_uri]
+        @base = options[:base_uri].R
 
         if block_given?
           case block.arity
@@ -203,8 +203,7 @@ class WebResource
 
     Avatars = {}
     'avatars/*png'.R.glob.map{|a|
-      Avatars[Base64.decode64(a.basename.split('.')[0]).downcase] = 'http://localhost:8000' + a.path
-    }
+      Avatars[Base64.decode64(a.basename.split('.')[0]).downcase] = a.path}
 
     def avatar link = nil
       location = ('avatars/' + Base64.encode64(uri).gsub("\n",'') + '.png').R
@@ -225,7 +224,7 @@ class WebResource
       @r[:images] ||= {}
       @r[:colors] ||= {}
 
-      # title
+      # title  TODO Canonicalize URIs in graphToTree? lookup all potential combinations here
       titleRes = [
         '#this', '',
         path && (path + '#this'), path,
