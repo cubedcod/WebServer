@@ -20,7 +20,7 @@ module Webize
 
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri]
-        @doc = input.respond_to?(:read) ? input.read : input
+        @doc = (input.respond_to?(:read) ? input.read : input).encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -217,7 +217,7 @@ class WebResource
                  [{_: :a, id: 't' + Digest::SHA2.hexdigest(rand.to_s), class: :title, href: uri, c: CGI.escapeHTML(title)}, ' ']
                end},
              {_: :a, id: 'pt' + uri_hash, class: :id, c: '☚', href: uri},
-             ({_: :a, class: :date, id: 'date' + uri_hash, href: (env && %w{l localhost}.member?(env['SERVER_NAME']) && '/' || 'http://localhost:8000/') + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date} if date),
+             ({_: :a, class: :date, id: 'date' + uri_hash, href: ServerAddr + '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date} if date),
              images.map{|i| Markup[Image][i,env]},
              {_: :table, class: :fromTo,
               c: {_: :tr,

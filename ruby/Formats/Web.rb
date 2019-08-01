@@ -32,8 +32,7 @@ class WebResource
   module HTML
     Markup['uri'] = -> uri, env=nil {uri.R}
 
-    Markup[Date] = -> date, env=nil {
-      {_: :a, class: :date, href: (env && %w{l localhost}.member?(env['SERVER_NAME']) && '/' || 'http://localhost:8000/') + date[0..13].gsub(/[-T:]/,'/'), c: date}}
+    Markup[Date] = -> date, env=nil {{_: :a, class: :date, href: ServerAddr + '/' + date[0..13].gsub(/[-T:]/,'/'), c: date}}
 
     Markup[Link] = -> ref, env=nil {
       u = ref.to_s

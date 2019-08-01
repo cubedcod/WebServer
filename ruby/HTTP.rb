@@ -1,6 +1,9 @@
 # coding: utf-8
 %w(brotli cgi httparty open-uri rack).map{|_| require _}
 class WebResource
+  module URIs
+    ServerAddr = 'http://l:8000'
+  end
   module HTTP
     include URIs
     HostGET = {}
