@@ -144,8 +144,6 @@ class WebResource
           if s == 304
             [s, {}, []]                          # not modified
           else
-            #env[:resp]['Content-Length'] = body.node.size.to_s
-            puts h
             h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type'] == 'application/javascript'
             [s, h.update(env[:resp]), b]     # file response
           end}
