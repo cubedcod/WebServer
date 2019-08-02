@@ -327,6 +327,7 @@ class WebResource
       if env[:query] && env[:query].has_key?('sort')
         attr = env[:query]['sort']
         attr = Date if attr == 'date'
+        attr = Content if attr == 'content'
         graph = graph.sort_by{|r|
           if values = r[attr]
             values[0].to_s

@@ -331,7 +331,7 @@ class WebResource < RDF::URI
                  '.' + Digest::SHA2.hexdigest(qs)
                end
       suffix = if want_suffix
-                 if !ext || ext.empty?
+                 if !ext || ext.empty? || ext.size > 11
                    if format
                      if xt = Extensions[RDF::Format.content_types[format]]
                        '.' + xt.to_s # suffix found in format-map
