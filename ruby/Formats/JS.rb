@@ -58,7 +58,7 @@ module Webize
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri]
         @subject = (options[:base_uri] || '#image').R 
-        @json = ::JSON.parse(input.respond_to?(:read) ? input.read : input)
+        @json = ::JSON.parse(input.respond_to?(:read) ? input.read : input) rescue {}
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)

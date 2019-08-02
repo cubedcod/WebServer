@@ -186,8 +186,18 @@ class WebResource
 
     # Google
     HostGET['ajax.googleapis.com'] = -> r {r.fetch}
-    (0..3).map{|i| HostGET["encrypted-tbn#{i}.gstatic.com"] = -> r {r.noexec}}
-    HostGET['feedproxy.google.com'] = HostGET['ssl.gstatic.com'] = -> r {r.noexec}
+    %w(
+developers.google.com
+encrypted-tbn0.gstatic.com
+encrypted-tbn1.gstatic.com
+encrypted-tbn2.gstatic.com
+encrypted-tbn3.gstatic.com
+feedproxy.google.com
+maps.gstatic.com
+ssl.gstatic.com
+www.gstatic.com
+).map{|host|
+      HostGET[host] = -> r {r.noexec}}
     HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.deny : r.noexec}
     HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['maps.googleapis.com'] = HostGET['www.google.com'] = -> r {
       case r.parts[0]
