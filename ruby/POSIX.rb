@@ -4,7 +4,7 @@ class WebResource
     include URIs
 
     def basename; File.basename ( path || '/' ) end                        # BASENAME(1)
-    def children; node.children.delete_if{|f|f.basename.to_s.index('.')==0}.map &:R end
+    def children; node.children.delete_if{|f|f.basename.to_s.index('.')==0}.map &:toWebResource end
     def dir; dirname.R if path end                                         # DIRNAME(1)
     def dirname; File.dirname path if path end                             # DIRNAME(1)
     def du; `du -s #{shellPath}| cut -f 1`.chomp.to_i end                  # DU(1)
@@ -12,7 +12,7 @@ class WebResource
     def ext; File.extname( path || '' )[1..-1] || '' end
     def file?; node.file? end
     def find p; `find #{shellPath} -iname #{Shellwords.escape p}`.lines.map{|p|POSIX.path p} end # FIND(1)
-    def glob; (Pathname.glob relPath).map &:R end                          # GLOB(7)
+    def glob; (Pathname.glob relPath).map &:toWebResource end              # GLOB(7)
     def ln   n; FileUtils.ln   node.expand_path, n.node.expand_path end    # LN(1)
     def ln_s n; FileUtils.ln_s node.expand_path, n.node.expand_path end    # LN(1)
     def link n; n.dir.mkdir; send :ln, n unless n.exist? end               # LN(1)
@@ -24,7 +24,7 @@ class WebResource
     def self.splitArgs args; args.shellsplit rescue args.split /\W/ end
     def shellPath; Shellwords.escape relPath.force_encoding 'UTF-8' end
     def touch; dir.mkdir; FileUtils.touch relPath end                      # TOUCH(1)
-    def writeFile o; dir.mkdir; File.open(relPath,'w'){|f|f << o}; self end
+    def write o; dir.mkdir; File.open(relPath,'w'){|f|f << o}; self end
 
     def fsStat graph, options = {}                                         # STAT(1)
       subject = (options[:base_uri] || path).R
@@ -141,7 +141,7 @@ class WebResource
 end
 
 class Pathname
-  def R env = nil
+  def toWebResource env = nil
     if env
      (WebResource::POSIX.path self).env env
     else

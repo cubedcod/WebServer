@@ -175,15 +175,14 @@ class WebResource
         %w{allow view sort ui}.map{|a|q.delete a}    # consume local arguments
         q.empty? ? '' : HTTP.qs(q)) : qs             # external query
       suffix = ext.empty? && hostname.match?(/reddit.com$/) && !upstreamUI? && '.rss' # format suffix
-      u = '//' + hostname + path + (suffix || '') + qStr           # base locator
-      url      = (options[:scheme] || 'https').to_s    + ':' + u   # primary locator
-      fallback = (options[:scheme] ? 'https' : 'http') + ':' + u   # fallback locator
-      options[:content_type]='application/atom+xml' if FeedURL[u]  # fixed MIME for feed URLs
-      code = nil # upstream status
-      meta = {}  # upstream metadata
-      upstream_meta = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type Content-Length ETag}
-      upstream_meta.push 'Set-Cookie' if options[:cookies]
+      u = '//' + hostname + path + (suffix || '') + qStr          # base locator
+      url      = (options[:scheme] || 'https').to_s    + ':' + u  # primary locator
+      fallback = (options[:scheme] ? 'https' : 'http') + ':' + u  # fallback locator
+      options[:content_type]='application/atom+xml' if FeedURL[u] # fixed MIME for feed URLs
+      upstream_metas = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type Content-Length ETag}
+      upstream_metas.push 'Set-Cookie' if options[:cookies]
       graph = options[:graph] || RDF::Repository.new # response graph
+      code = nil   # response status
       body = nil   # response body
       format = nil # response format
       file = nil   # response fileref
@@ -203,31 +202,32 @@ class WebResource
               print ' ', code, ' '
               HTTP.print_header meta
             end
-            upstream_meta.map{|k| @r[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
-            format = options[:content_type] || meta['content-type'] && meta['content-type'].split(/;/)[0]
-            format ||= case ext
-                       when 'jpg'
-                         'image/jpeg'
-                       when 'png'
-                         'image/png'
-                       when 'gif'
-                         'image/gif'
-                       else
-                         'text/html'
-                       end
             if code == 206
-              body = response.read                                                # partial body
-            else                                                                  # complete body
-              body = decompress meta,response.read;meta.delete 'content-encoding' # decompress body
-              file = cache(format).writeFile body unless format.match? RDFformats # cache non-RDF
-              if reader = RDF::Reader.for(content_type: format)                   # find RDF reader
-                reader.new(body, :base_uri => url.R){|_| graph << _ }             # parse RDF
-                index graph                                                       # cache RDF
+              body = response.read                                         # partial body
+              upstream_metas.push 'Content-Encoding'                       # encoding preserved
+            else                                                           # complete body
+              body = decompress meta, response.read                        # decode body
+              format = options[:content_type] || meta['content-type'] && meta['content-type'].split(/;/)[0]
+              format ||= case ext # TODO use RDF extension-mapping table
+                         when 'jpg'
+                           'image/jpeg'
+                         when 'png'
+                           'image/png'
+                         when 'gif'
+                           'image/gif'
+                         else
+                           'text/html'
+                         end
+              file = cache(format).write body if !format.match? RDFformats # cache non-RDF
+              if reader = RDF::Reader.for(content_type: format)            # find RDF reader
+                reader.new(body, :base_uri => url.R){|_| graph << _ }      # parse RDF
+                index graph                                                # cache RDF
               end
             end
+            upstream_metas.map{|k|@r[:resp][k]||=meta[k.downcase] if meta[k.downcase]} # response metadata
           end
         rescue Exception => e
-          case e.message # response codes handled in unexceptional control-flow
+          case e.message # codes handled in unexceptional control-flow
           when /304/ # no updates
             code = 304
           when /401/ # unauthorized
@@ -237,7 +237,7 @@ class WebResource
           when /404/ # not found
             code = 404
           else
-            raise
+            raise # exceptional code
           end
         end}
 
@@ -291,7 +291,7 @@ class WebResource
       elsif code == 206                                           # partial upstream data
         [206, @r[:resp], [body]]
       elsif body && (upstreamUI?||format.match?(PreservedFormat)) # upstream data
-        [200, @r[:resp], [body]]
+        [200, @r[:resp].merge({'Content-Length' => body.bytesize}), [body]]
       else                                                        # graph data
         if graph.empty? && !local? && @r['REQUEST_PATH'][-1]=='/' # unlistable remote
           index = (CacheDir + hostname + path).R                  # local container
@@ -348,8 +348,10 @@ class WebResource
 
     def noexec
       if %w{gif js}.member? ext.downcase # filtered suffix
-        if ext=='gif' && qs.empty? # no querystring, allow GIF
-          fetch
+        if ext=='gif' && qs.empty?
+          fetch # no querystring, allow GIF
+        elsif ext == 'js' && %w{ajax.googleapis.com}.member?(host)
+          fetch # JS CDN with vetted mainstream scripts
         else
           deny
         end
@@ -463,7 +465,7 @@ class WebResource
           if ((host.match? /track/) || (env['REQUEST_URI'].match? /track/)) && (host.match? TrackHost)
             fetch # music track
           elsif env[:query]['allow'] == ServerKey
-            fetch # allow override
+            fetch # drop override
           else
             deny
           end

@@ -207,7 +207,7 @@ class WebResource
 
     def avatar link = nil
       location = ('avatars/' + Base64.encode64(uri).gsub("\n",'') + '.png').R
-      location.writeFile open(link).read if link
+      location.write open(link).read if link
       location
     end
 

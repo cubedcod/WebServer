@@ -33,7 +33,7 @@ class WebResource
     ConfDir  = (Pathname.new __dir__).relative_path_from Pathname.new Dir.pwd
     Extensions = RDF::Format.file_extensions.invert
     FeedURL = {}
-    ConfDir.join('feeds/*.u').R.glob.map{|list|
+    ConfDir.join('feeds/*.u').toWebResource.glob.map{|list|
       (open list.relPath).readlines.map(&:chomp).map{|u|
         FeedURL[u] = u.R }}
     SiteGIF = ConfDir.join('site.gif').read
@@ -154,6 +154,9 @@ class WebResource
     HostGET['cts.businesswire.com'] = -> r {
       r.env[:query].has_key?('url') ? [301, {'Location' => r.env[:query]['url']}, []] : r.deny
     }
+
+    # Cloudflare
+    HostGET['cdnjs.cloudflare.com'] = -> r {r.fetch}
 
     # DartSearch
     HostGET['clickserve.dartsearch.net'] = -> r {[301,{'Location' => r.env[:query]['ds_dest_url']}, []]}
