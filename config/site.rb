@@ -42,25 +42,26 @@ class WebResource
   end
   module HTTP
 
-    # User-Agent for upstream UI, using mobile-browser Desktop/Mobile toggle to select
+    # User-Agent for upstream desktop UI (mobile-browser Desktop-mode toggle to select)
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.143 Safari/537.36'
 
-    # pass client UA info to origin
+    # default to desktop UI
+    UIhost = /((anvato|bandcamp|googleapis|jwplatform|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io|.tv)$/
+
+    # client UA info sent to origin
     UAhost = /(qualcomm)\.com$/
 
     # allow cookies (POST/Track/UI hosts also allowed)
-    CookieHost = /(qualcomm|twitter)\.com$/
+    CookieHost = /(qualcomm|twitch|twitter)\.(com|net|tv)$/
+
+    # allow POST
+    POSThost = /(^|\.)(amazonaws|anvato|brightcove|google(apis)?|git(lab|ter)|moovitapp|reddit|(mix|sound)cloud|music.apple|ttvnw|api.twitter|twitch|weather|youtube)\.(com|gov|im|net|tv)$/
+
+    # allow paths named 'track'
+    TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
 
     # verbose request information
     DebugHost = /(amazonaws|amplitude|app-measurement.com|crashlytics|google|linkedin|qualcomm)\.com$/
-
-    # allow POST
-    POSThost = /(^|\.)(amazonaws|anvato|brightcove|google(apis)?|git(lab|ter)|moovitapp|reddit|(mix|sound)cloud|music.apple|api.twitter|weather|youtube)\.(com|gov|im|net)$/
-
-    # allow paths containing text 'track'
-    TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
-
-    UIhost = /((anvato|bandcamp|googleapis|jwplatform|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io)$/
 
     def sitePOST
       case host
