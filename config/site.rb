@@ -271,14 +271,23 @@ www.gstatic.com
     HostGET['twitter.com'] = -> r {
       if !r.path || r.path == '/'
         graph = RDF::Repository.new
-        r.subscriptions.shuffle.each_slice(18){|s|
-          r.env[:query] = {
-            f: :tweets,
-            q: s.map{|u|'from:' + u}.join('+OR+'),
-            vertical: :default}
-          '/search'.R(r.env).fetch graph: graph, no_response: true}
+        fetch_options = {
+          graph: graph,
+          no_index: true,
+          no_response: true
+        }
+        if !r.env # REPL / script caller
+          r.env({resp: {}}) # blank environment
+          no_http = true
+        end
         r.env[:resp]['Refresh'] = 1800
-        r.graphResponse graph
+        '//twitter.com'.R.subscriptions.shuffle.each_slice(18){|s|
+          r.env[:query] = { vertical: :default, f: :tweets,
+                            q: s.map{|u|'from:' + u}.join('+OR+')}
+          '/search'.R(r.env).fetch fetch_options
+        }
+        updates = r.index graph
+        no_http ? updates : (r.graphResponse graph)
       else
         r.remote
       end}
