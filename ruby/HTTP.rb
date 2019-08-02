@@ -347,7 +347,9 @@ class WebResource
     def noexec
       if %w{gif js}.member? ext.downcase # filtered suffix
         if ext=='gif' && qs.empty?
-          fetch # no querystring, allow GIF
+          fetch # allowed GIF
+        elsif host.match?(/amazon(aws)?\.com$/) && ENV.has_key?('AMAZON')
+          fetch
         else
           deny
         end
@@ -358,6 +360,8 @@ class WebResource
           else
             if head['Content-Type'] && !head['Content-Type'].match?(/image.(bmp|gif)|script/)
               [status, head, body] # allowed MIME
+            elsif host.match?(/amazon(aws)?\.com$/) && ENV.has_key?('AMAZON')
+              [status, head, body] # allowed host
             else                   # filtered MIME
               env[:GIF] = true    if head['Content-Type']&.match? /image\/gif/
               env[:script] = true if head['Content-Type']&.match? /script/
