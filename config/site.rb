@@ -55,7 +55,7 @@ class WebResource
     CookieHost = /(qualcomm|twitch|twitter)\.(com|net|tv)$/
 
     # allow POST
-    POSThost = /(^|\.)(amazonaws|anvato|brightcove|google(apis)?|git(lab|ter)|moovitapp|reddit|(mix|sound)cloud|music.apple|ttvnw|api.twitter|twitch|weather|youtube)\.(com|gov|im|net|tv)$/
+    POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|moovitapp|reddit|(mix|sound)cloud|music.apple|ttvnw|api.twitter|twitch|weather|youtube)\.(com|gov|im|net|tv)$/
 
     # allow paths named 'track'
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
