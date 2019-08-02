@@ -322,26 +322,6 @@ class WebResource
       end
     end
 
-    def graphResponse graph
-      return notfound if graph.empty?
-      format = selectFormat
-      dateMeta if local?
-      @r ||= {resp: {}}
-      @r[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
-      @r[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})      
-      @r[:resp].update({'Link' => @r[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !@r[:links] || @r[:links].empty?
-      entity ->{
-        case format
-        when /^text\/html/
-          htmlDocument treeFromGraph graph # HTML
-        when /^application\/atom+xml/
-          renderFeed treeFromGraph graph   # feed
-        else                               # RDF
-          base = ('https://' + env['SERVER_NAME']).R.join env['REQUEST_PATH']
-          graph.dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => base, :standard_prefixes => true
-        end}
-    end
-
     def HEAD
        c,h,b = self.GET
       [c,h,[]]
@@ -364,15 +344,8 @@ class WebResource
         [303, @r[:resp].update({'Location' => loc + parts[1..-1].join('/') + qs}), []]
       elsif file? # local file
         fileResponse
-      else # local graph
-        graph = RDF::Repository.new
-        rdf, nonRDF = nodes.select(&:file?).partition{|node| node.ext == 'ttl'}
-        nonRDF.map{|node| node.load graph} # load non-RDF nodes
-        index graph                        # index resources from RDFization
-        rdf.map{|node| node.load graph}    # load RDF nodes
-        nonRDF.map{|node|                  # node metadata (omit raw email-files)
-          node.fsStat graph unless node.basename.split('.')[0]=='msg'}
-        graphResponse graph
+      else
+        localGraph
       end
     end
 
