@@ -163,8 +163,8 @@ class WebResource
 
     def fetch options = {}
       if this = cached?; return this.fileResponse end
-      head = headers                                 # request metadata
-      @r||={resp: {}} ; @r['HTTP_ACCEPT'] ||= '*/*'  # response metadata
+      @r ||= {resp: {}}; @r['HTTP_ACCEPT'] ||= '*/*' # response-meta storage
+      head = headers                                 # read request-meta
       hostname = host || @r['SERVER_NAME']           # hostname
       head[:redirect] = false                        # don't follow redirects
       options[:cookies] ||= true if hostname.match?(CookieHost) || hostname.match?(TrackHost) || hostname.match?(POSThost) || hostname.match?(UIhost)
