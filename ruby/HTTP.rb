@@ -301,13 +301,6 @@ class WebResource
       end
     end
 
-    def fileResponse
-      @r ||= {resp: {}}
-      @r[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
-      @r[:resp]['ETag'] ||= Digest::SHA2.hexdigest [uri, node.stat.mtime, node.size].join
-      entity
-    end
-
     def GET
       if path.match? /[^\/]204$/ # connect check
         [204, {}, []]                             # binding lookup
@@ -444,14 +437,14 @@ class WebResource
       [202,{},[]]
     end
 
-    # Hash -> query-string
+    # Hash -> querystring
     def HTTP.qs h
       '?' + h.map{|k,v|
         k.to_s + '=' + (v ? (CGI.escape [*v][0].to_s) : '')
       }.join("&")
     end
 
-    # query string, late-bound environment value takes precedence
+    # querystring, late-bound environment takes precedence, drop '?' if empty
     def qs
       if @r && @r['QUERY_STRING'] && !@r['QUERY_STRING'].empty?
         '?' +  @r['QUERY_STRING']
