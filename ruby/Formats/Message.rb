@@ -16,7 +16,6 @@ module Webize
       format Format
       EmailAddress = ENV['EMAIL']
       MailDir = (Pathname.new ENV['HOME'] + '/.mail').relative_path_from(PWD).to_s
-      #MailDir = 'mail'
 
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri]
@@ -136,7 +135,6 @@ module Webize
 
         # index addresses
         [*from, *to].map{|addr|
-          #mailFile.writeFile body if EmailAddress == addr && !mailFile.exist?
           user, domain = addr.split '@'
           if user && domain
             apath = '/mail/' + domain + '/' + user + '/' # address container

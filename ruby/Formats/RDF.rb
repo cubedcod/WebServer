@@ -24,11 +24,11 @@ class WebResource
             puts  "\e[32m+\e[0m " + ServerAddr + doc.path.sub(/\.ttl$/,'')
           end}
       end}
-    updates
+    updates # indexed resources
   end
 
   # WebResource -> Graph
-  def load graph, options = {}
+  def load graph, options = {base_uri: path}
     if basename.split('.')[0] == 'msg'
       options[:format] = :mail
     elsif ext == 'html'
