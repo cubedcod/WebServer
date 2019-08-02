@@ -348,7 +348,7 @@ class WebResource
     end
 
     def local
-      if %w{y year m month d day h hour}.member? parts[0] # timeseg redirect
+      if %w{y year m month d day h hour}.member? parts[0] # time-based redirect
         time = Time.now
         loc = time.strftime(case parts[0][0].downcase
                             when 'y'
@@ -362,17 +362,16 @@ class WebResource
                             else
                             end)
         [303, @r[:resp].update({'Location' => loc + parts[1..-1].join('/') + qs}), []]
-      elsif file?
+      elsif file? # local file
         fileResponse
-      else
-        # load RDF
+      else # local graph
         graph = RDF::Repository.new
-        nodes.map{|node| node.load graph if node.file?}
-        index graph # index resources found in RDFization ::TODO index only nonRDF (split nodeset above)
-        # add node metadata
-        nodes.map{|node|
-          node.fsStat graph unless node.ext=='ttl' || node.basename.split('.')[0]=='msg' }
-
+        rdf, nonRDF = nodes.select(&:file?).partition{|node| node.ext == 'ttl'}
+        nonRDF.map{|node| node.load graph} # load non-RDF nodes
+        index graph                        # index resources from RDFization
+        rdf.map{|node| node.load graph}    # load RDF nodes
+        nonRDF.map{|node|                  # node metadata (omit raw email-files)
+          node.fsStat graph unless node.basename.split('.')[0]=='msg'}
         graphResponse graph
       end
     end
