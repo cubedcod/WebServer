@@ -45,6 +45,9 @@ class WebResource
     # User-Agent for upstream UI, using mobile-browser Desktop/Mobile toggle to select
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.143 Safari/537.36'
 
+    # pass client UA info to origin
+    UAhost = /(qualcomm)\.com$/
+
     # allow cookies (POST/Track/UI hosts also allowed)
     CookieHost = /(qualcomm|twitter)\.com$/
 
@@ -193,6 +196,7 @@ encrypted-tbn1.gstatic.com
 encrypted-tbn2.gstatic.com
 encrypted-tbn3.gstatic.com
 feedproxy.google.com
+kh.google.com
 maps.gstatic.com
 ssl.gstatic.com
 www.gstatic.com
