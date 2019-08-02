@@ -185,8 +185,8 @@ class WebResource
     HostGET['gitter.im'] = -> req {req.desktop.remote}
 
     # Google
-    (0..3).map{|i|
-      HostGET["encrypted-tbn#{i}.gstatic.com"] = -> r {r.noexec}}
+    HostGET['ajax.googleapis.com'] = -> r {r.fetch}
+    (0..3).map{|i| HostGET["encrypted-tbn#{i}.gstatic.com"] = -> r {r.noexec}}
     HostGET['feedproxy.google.com'] = HostGET['ssl.gstatic.com'] = -> r {r.noexec}
     HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.deny : r.noexec}
     HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['maps.googleapis.com'] = HostGET['www.google.com'] = -> r {

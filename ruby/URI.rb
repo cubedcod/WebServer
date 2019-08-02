@@ -25,6 +25,7 @@ class WebResource < RDF::URI
     SIOC     = 'http://rdfs.org/sioc/ns#'
     Abstract = DC + 'abstract'
     Atom     = W3 + '2005/Atom#'
+    Audio    = DC + 'Audio'
     Content  = SIOC + 'content'
     Creator  = SIOC + 'has_creator'
     Date     = DC + 'date'
@@ -172,6 +173,7 @@ class WebResource < RDF::URI
       'msapplication-tooltip' => :drop,
       'msapplication-window' => :drop,
       'msvalidate.01' => :drop,
+      'music:song:url' => Audio,
       'news_keywords' => Abstract,
       'og:author' => Creator,
       'og:description' => Abstract,

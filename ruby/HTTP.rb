@@ -14,9 +14,6 @@ class WebResource
     PreservedFormat = /^(application\/json|audio|font|video)/
     ServerKey = Digest::SHA2.hexdigest [`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join
 
-    PathGET['/avatars'] = -> r {r.fileResponse}
-    PathGET['/favicon.ico']  = -> r {r.upstreamUI? ? r.fetch : [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
-
     def allowedOrigin
       if referer = env['HTTP_REFERER']
         'http' + (env['SERVER_NAME'] == 'localhost' ? '' : 's') + '://' + referer.R.host
@@ -136,20 +133,21 @@ class WebResource
     def entity generator = nil
       entities = env['HTTP_IF_NONE_MATCH']&.strip&.split /\s*,\s*/ # entities
       if entities && entities.include?(env[:resp]['ETag']) # client has entity
-        [304, {}, []]                            # not modified
-      else                                       # generate
-        body = generator ? generator.call : self # call generator
-        if body.class == WebResource             # static response
+        [304, {}, []]                            # unmodified
+      else
+        body = generator ? generator.call : self # generate
+        if body.class == WebResource             # resource reference?
           Rack::File.new(nil).serving(Rack::Request.new(env), body.relPath).yield_self{|s,h,b|
           if s == 304
-            [s, {}, []]                          # not modified
-          else
+            [s, {}, []]                          # unmodified
+          else                                   # Rack handler for reference
             h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type'] == 'application/javascript'
-            [s, h.update(env[:resp]), b]     # file response
+            env[:resp]['Content-Length'] = body.node.size.to_s
+            [s, h.update(env[:resp]), b]         # file
           end}
         else
           env[:resp]['Content-Length'] = body.bytesize.to_s
-          [env[:status] || 200, env[:resp], [body]] # generated response
+          [env[:status]||200,env[:resp],[body]]  # generated entity
         end
       end
     end
@@ -350,8 +348,6 @@ class WebResource
       if %w{gif js}.member? ext.downcase # filtered suffix
         if ext=='gif' && qs.empty?
           fetch # no querystring, allow GIF
-        elsif ext == 'js' && %w{ajax.googleapis.com}.member?(host)
-          fetch # JS CDN with vetted mainstream scripts
         else
           deny
         end
