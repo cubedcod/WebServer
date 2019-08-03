@@ -94,6 +94,7 @@ class WebResource < RDF::URI
       'apple-touch-icon-precomposed' => Image,
       'application-name' => :drop,
       'article:author' => Creator,
+      'article:author_name' => Creator,
       'article:modified' => Date,
       'article:modified_time' => Date,
       'article:published' => Date,
@@ -194,6 +195,8 @@ class WebResource < RDF::URI
       'og:updated_time' => Date,
       'og:url' => Link,
       'og:username' => Creator,
+      'og:video' => Video,
+      'og:video:duration' => :drop,
       'og:video:height' => :drop,
       'og:video:secure_url' => Video,
       'og:video:type' => :drop,
@@ -285,6 +288,8 @@ class WebResource < RDF::URI
       OG+'type' => Type,
       OG+'url' => Link,
       OG+'username' => Creator,
+      OG+'video' => Video,
+      OG+'video:duration' => :drop,
       Podcast+'author' => Creator,
       Podcast+'subtitle' => Title,
       Podcast+'title' => Title,
@@ -385,7 +390,7 @@ class WebResource < RDF::URI
         end
       end
       remainder = ps.empty? ? '' : ['', *ps].join('/')
-      remainder += '/' if @r['REQUEST_PATH'][-1] == '/'
+      remainder += '/' if @r['REQUEST_PATH'] && @r['REQUEST_PATH'][-1] == '/'
       @r[:links][:prev] = p + remainder + qs + '#prev' if p && p.R.exist?
       @r[:links][:next] = n + remainder + qs + '#next' if n && n.R.exist?
     end

@@ -219,7 +219,7 @@ class WebResource
               file = cache(format).write body if !format.match? RDFformats # cache non-RDF
               if reader = RDF::Reader.for(content_type: format)            # find RDF reader
                 reader.new(body, :base_uri => url.R){|_| graph << _ }      # parse RDF
-                index graph                                                # cache RDF
+                index graph unless options[:no_index]                      # cache RDF
               end
             end
             upstream_metas.map{|k|@r[:resp][k]||=meta[k.downcase] if meta[k.downcase]} # response metadata
