@@ -6,17 +6,22 @@ class WebResource
   def index g
     updates = []
     g.each_graph.map{|graph|
-      if n = graph.name
+      if n = graph.name # named graph
         n = n.R
         docs = []
-        # local docs are already stored on timeline (mails+chatlogs stored to hour-dirs) so we only try to index canonical location
+
+        # local graphs are already stored on timeline (mails+chatlogs etc in hour-dirs) so here we try to index canonical location
         docs.push (n.path + '.ttl').R unless n.host || n.uri.match?(/^_:/)                                     # canonical location
-        if n.host && (timestamp=graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value) # timeline location
+
+        # link graphs of nonlocal origin to timeline
+        if n.host && (timestamp=graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value) # find timestamp
           docs.push ['/' + timestamp.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/\+?(00.00|Z)$/,''),       # hour-dir
                      %w{host path query fragment}.map{|a|n.send(a).yield_self{|p|p&&p.split(/[\W_]/)}},'ttl']. # slugs
                       flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.').R                         # skiplist
         end
+
         docs.map{|doc|
+          print " doc "
           unless doc.exist? # new document
             doc.dir.mkdir
             RDF::Writer.open(doc.relPath){|f|f << graph}
