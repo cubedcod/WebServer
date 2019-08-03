@@ -22,6 +22,11 @@ class WebResource
       end
     end
 
+    def allowCookies?
+      hostname = env['SERVER_NAME'] || host || 'localhost'
+      hostname.match?(CookieHost) || hostname.match?(TrackHost) || hostname.match?(POSThost) || hostname.match?(UIhost)
+    end
+
     def allowPOST?; host.match? POSThost end
 
     def cached?
@@ -48,7 +53,7 @@ class WebResource
                   '32'                                                    # green -> POST
                 elsif status == 200
                   if resource.ext=='js' || (head['Content-Type'] && head['Content-Type'].match?(/script/))
-                    '36'                                                  # lightblue -> executable response
+                    '36'                                                  # lightblue -> executable
                   else
                     '37'                                                  # white -> basic response
                   end
@@ -165,9 +170,9 @@ class WebResource
       if this = cached?; return this.fileResponse end
       @r ||= {resp: {}}; @r['HTTP_ACCEPT'] ||= '*/*' # response-meta storage
       head = headers                                 # read request-meta
-      hostname = host || @r['SERVER_NAME']           # hostname
+      hostname = @r['SERVER_NAME'] || host           # hostname
       head[:redirect] = false                        # don't follow redirects
-      options[:cookies] ||= true if hostname.match?(CookieHost) || hostname.match?(TrackHost) || hostname.match?(POSThost) || hostname.match?(UIhost)
+      options[:cookies] ||= true if allowCookies?
       head.delete 'Cookie' unless options[:cookies]  # allow/deny cookies
       qStr = @r[:query] ? (q = @r[:query].dup        # read query
         %w{allow view sort ui}.map{|a|q.delete a}    # consume local arguments

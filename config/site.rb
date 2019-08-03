@@ -189,7 +189,9 @@ class WebResource
     HostGET['gitter.im'] = -> req {req.desktop.remote}
 
     # Google
+    # script hosts
     HostGET['ajax.googleapis.com'] = -> r {r.fetch}
+    # static-asset hosts w/o scripts
     %w(
 developers.google.com
 encrypted-tbn0.gstatic.com
@@ -203,7 +205,9 @@ ssl.gstatic.com
 www.gstatic.com
 ).map{|host|
       HostGET[host] = -> r {r.noexec}}
+    # misc hosts
     HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.deny : r.noexec}
+    HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
     HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['maps.googleapis.com'] = HostGET['www.google.com'] = -> r {
       case r.parts[0]
       when nil
@@ -217,7 +221,6 @@ www.gstatic.com
       else
         r.deny
       end}
-    HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
 
     # Mozilla
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
@@ -269,12 +272,13 @@ www.gstatic.com
     HostGET['mobile.twitter.com'] = -> r {[301,{'Location' => 'https://twitter.com' + r.path },[]]}
     HostGET['t.co'] = -> r {r.parts[0] == 'i' ? r.deny : r.noexec}
     HostGET['twitter.com'] = -> r {
+      r = r.R
       if !r.path || r.path == '/'
         if !r.env # REPL / script caller
           r.env({resp: {}}) # initialize environment
           no_response = true # no HTTP return-value
         end
-        r.env[:resp]['Refresh'] = 1800 # client refresh suggestion: 30 mins
+        r.env[:resp]['Refresh'] = 1800 # client refresh hint
 
         graph = RDF::Repository.new
         fetch_options = {
@@ -285,7 +289,7 @@ www.gstatic.com
 
         '//twitter.com'.R.subscriptions.shuffle.each_slice(18){|s|
           r.env[:query] = { vertical: :default, f: :tweets, q: s.map{|u|'from:' + u}.join('+OR+')}
-          '/search'.R(r.env).fetch fetch_options}
+          '//twitter.com/search'.R(r.env).fetch fetch_options}
         updates = r.index graph
 
         # return value
