@@ -177,7 +177,7 @@ class WebResource
       qStr = @r[:query] ? (q = @r[:query].dup        # read query
         %w{allow view sort ui}.map{|a|q.delete a}    # consume local arguments
         q.empty? ? '' : HTTP.qs(q)) : qs             # external query
-      suffix = ext.empty? && hostname.match?(/reddit.com$/) && !upstreamUI? && '.rss' # format suffix
+      suffix = ext.empty? && hostname.match?(/reddit.com$/) && '.rss' # format suffix
       u = '//' + hostname + path + (suffix || '') + qStr          # base locator
       url      = (options[:scheme] || 'https').to_s    + ':' + u  # primary locator
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u  # fallback locator
