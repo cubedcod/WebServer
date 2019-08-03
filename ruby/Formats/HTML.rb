@@ -90,6 +90,7 @@ sidebar [class^='side']    [id^='side']
 }
 
       def initialize(input = $stdin, options = {}, &block)
+        @opts = options
         @doc = (input.respond_to?(:read) ? input.read : input).encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ')
         @base = options[:base_uri].R
 
@@ -117,7 +118,6 @@ sidebar [class^='side']    [id^='side']
 
       # HTML -> RDF
       def scanContent &f
-        embeds = RDF::Graph.new # embedded graph-data
         subject = @base         # subject URI
         n = Nokogiri::HTML.parse @doc # parse
 
@@ -126,18 +126,20 @@ sidebar [class^='side']    [id^='side']
           @base.send hostTriples, n, &f
         end
 
-        # read JSON-LD
-        n.css('script[type="application/ld+json"]').map{|dataElement|
-          embeds << (::JSON::LD::API.toRdf ::JSON.parse dataElement.inner_text)} rescue "JSON-LD read failure in #{@base}"
-
-        # read RDFa
-        RDF::Reader.for(:rdfa).new(@doc, base_uri: @base){|_| embeds << _ } rescue "RDFa read failure in #{@base}"
-
-        # normalized JSON-LD/RDFa
-        embeds.each_triple{|s,p,o|
-          p = MetaMap[p.to_s] || p
-          puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/
-          yield s, p, o unless p == :drop}
+        # embedded graph-data in RDFa, JSON-LD
+        unless @opts[:no_embeds]
+          embeds = RDF::Graph.new
+          # JSON-LD
+          n.css('script[type="application/ld+json"]').map{|dataElement|
+            embeds << (::JSON::LD::API.toRdf ::JSON.parse dataElement.inner_text)} rescue "JSON-LD read failure in #{@base}"
+          # RDFa
+          RDF::Reader.for(:rdfa).new(@doc, base_uri: @base){|_| embeds << _ } rescue "RDFa read failure in #{@base}"
+          # emit normalized triples
+          embeds.each_triple{|s,p,o|
+            p = MetaMap[p.to_s] || p # predicate map
+            puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/ # notify on unmapped predicate
+            yield s, p, o unless p == :drop}
+        end
 
         # <link>
         n.css('head link[rel]').map{|m|

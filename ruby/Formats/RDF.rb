@@ -21,7 +21,6 @@ class WebResource
         end
 
         docs.map{|doc|
-          print " doc "
           unless doc.exist? # new document
             doc.dir.mkdir
             RDF::Writer.open(doc.relPath){|f|f << graph}

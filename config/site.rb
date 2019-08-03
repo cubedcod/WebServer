@@ -270,24 +270,26 @@ www.gstatic.com
     HostGET['t.co'] = -> r {r.parts[0] == 'i' ? r.deny : r.noexec}
     HostGET['twitter.com'] = -> r {
       if !r.path || r.path == '/'
+        if !r.env # REPL / script caller
+          r.env({resp: {}}) # initialize environment
+          no_response = true # no HTTP return-value
+        end
+        r.env[:resp]['Refresh'] = 1800 # client refresh suggestion: 30 mins
+
         graph = RDF::Repository.new
         fetch_options = {
           graph: graph,
-          no_index: true,
-          no_response: true
-        }
-        if !r.env # REPL / script caller
-          r.env({resp: {}}) # blank environment
-          no_http = true
-        end
-        r.env[:resp]['Refresh'] = 1800
+          no_embeds: true, # skip HTML RDF-embeds if any, use custom parser
+          no_index: true, # don't index during fetch
+          no_response: true} # no HTTP return-value from fetch
+
         '//twitter.com'.R.subscriptions.shuffle.each_slice(18){|s|
-          r.env[:query] = { vertical: :default, f: :tweets,
-                            q: s.map{|u|'from:' + u}.join('+OR+')}
-          '/search'.R(r.env).fetch fetch_options
-        }
+          r.env[:query] = { vertical: :default, f: :tweets, q: s.map{|u|'from:' + u}.join('+OR+')}
+          '/search'.R(r.env).fetch fetch_options}
         updates = r.index graph
-        no_http ? updates : (r.graphResponse graph)
+
+        # return value
+        no_response ? updates : (r.graphResponse graph)
       else
         r.remote
       end}

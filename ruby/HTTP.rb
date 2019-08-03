@@ -176,8 +176,12 @@ class WebResource
       u = '//' + hostname + path + (suffix || '') + qStr          # base locator
       url      = (options[:scheme] || 'https').to_s    + ':' + u  # primary locator
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u  # fallback locator
-      options[:content_type]='application/atom+xml' if FeedURL[u] # fixed MIME for feed URLs
-      upstream_metas = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type Content-Length ETag}
+      options[:content_type]='application/atom+xml' if FeedURL[u] # fix MIME on feed URLs
+      upstream_metas = %w{Access-Control-Allow-Origin
+                          Access-Control-Allow-Credentials
+                          Content-Type
+                          Content-Length
+                          ETag}
       upstream_metas.push 'Set-Cookie' if options[:cookies]
       graph = options[:graph] || RDF::Repository.new # response graph
       code = nil   # response status
@@ -206,7 +210,7 @@ class WebResource
             else                                                           # complete body
               body = decompress meta, response.read                        # decode body
               format = options[:content_type] || meta['content-type'] && meta['content-type'].split(/;/)[0]
-              format ||= case ext # TODO use RDF extension-mapping table
+              format ||= case ext # TODO use RDF->extension mapping table
                          when 'jpg'
                            'image/jpeg'
                          when 'png'
@@ -217,8 +221,9 @@ class WebResource
                            'text/html'
                          end
               file = cache(format).write body if !format.match? RDFformats # cache non-RDF
-              if reader = RDF::Reader.for(content_type: format)            # find RDF reader
-                reader.new(body, :base_uri => url.R){|_| graph << _ }      # parse RDF
+              if reader = RDF::Reader.for(content_type: format)            # RDF reader
+                reader_options = {base_uri: url.R, no_embeds: options[:no_embeds]}
+                reader.new(body, reader_options){|_| graph << _ }      # parse RDF
                 index graph unless options[:no_index]                      # cache RDF
               end
             end
