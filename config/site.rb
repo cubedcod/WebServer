@@ -45,9 +45,9 @@ class WebResource
     # User-Agent for upstream desktop UI (mobile-browser Desktop-mode toggle to select)
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.143 Safari/537.36'
 
-     # host patterns, maybe TODO move to files
+    # host patterns, maybe TODO move to files
     # desktop UI
-    UIhost = /((anvato|bandcamp|jwplatform|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io|.tv)$/
+    UIhost = /((anvato|bandcamp|duckduckgo|jwplatform|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io|.tv)$/
     # client UA thru to origin
     UAhost = /(qualcomm)\.com$/
     # allow cookies
