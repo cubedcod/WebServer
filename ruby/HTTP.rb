@@ -437,7 +437,10 @@ class WebResource
       code = r.code
       head = r.headers
       body = r.body
-      HTTP.print_header head if host.match? DebugHost
+      if host.match? DebugHost
+        HTTP.print_header head
+        puts body
+      end
       [code, head, [body]]
     end
 

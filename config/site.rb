@@ -47,17 +47,17 @@ class WebResource
 
      # host patterns, maybe TODO move to files
     # desktop UI
-    UIhost = /((anvato|bandcamp|googleapis|jwplatform|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io|.tv)$/
+    UIhost = /((anvato|bandcamp|jwplatform|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io|.tv)$/
     # client UA thru to origin
     UAhost = /(qualcomm)\.com$/
     # allow cookies
-    CookieHost = /(qualcomm|twitch|twitter)\.(com|net|tv)$/
+    CookieHost = /(google|qualcomm|twitch|twitter)\.(com|net|tv)$/
     # allow POST
     POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|moovitapp|reddit|(mix|sound)cloud|music.apple|ttvnw|api.twitter|twitch|weather|youtube)\.(com|gov|im|net|tv)$/
     # allow paths named 'track'
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
     # verbose request logging
-    DebugHost = /(amazonaws|amplitude|app-measurement.com|crashlytics|qualcomm)\.com$/
+    DebugHost = /(amazonaws|amplitude|app-measurement.com|crashlytics|google|qualcomm)\.com$/
 
     def sitePOST
       case host
@@ -84,10 +84,10 @@ class WebResource
           self.POSTthru
         end
       when /google/
-        if !ENV.has_key?('GOOGLE')
-          denyPOST
-        else
+        if ENV.has_key?('GOOGLE') || host=='groups.google.com'
           self.POSTthru
+        else
+          denyPOST
         end
       else
         self.POSTthru
@@ -194,6 +194,7 @@ class WebResource
                   gstatic.com).map{|n| Subdomain[n] = -> r {r.noexec}}
 
     # misc hosts
+    HostGET['groups.google.com'] = -> r {r.desktop.fetch}
     HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.deny : r.noexec}
     HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
     HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['maps.googleapis.com'] = HostGET['www.google.com'] = -> r {
