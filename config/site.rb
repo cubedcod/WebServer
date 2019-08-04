@@ -187,21 +187,12 @@ class WebResource
     # Google
     # script hosts
     HostGET['ajax.googleapis.com'] = -> r {r.fetch}
-    # static-asset hosts w/o scripts
-    %w(
-developers.google.com
-encrypted-tbn0.gstatic.com
-encrypted-tbn1.gstatic.com
-encrypted-tbn2.gstatic.com
-encrypted-tbn3.gstatic.com
-feedproxy.google.com
-kh.google.com
-maps.gstatic.com
-ssl.gstatic.com
-storage.googleapis.com
-www.gstatic.com
-).map{|host|
-      HostGET[host] = -> r {r.noexec}}
+    # static-asset hosts
+    %w(feedproxy.google.com
+              kh.google.com).map{|nom| HostGET[nom] = -> r {r.noexec}}
+    %w(storage.googleapis.com
+                  gstatic.com).map{|n| Subdomain[n] = -> r {r.noexec}}
+
     # misc hosts
     HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.deny : r.noexec}
     HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
