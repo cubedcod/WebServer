@@ -45,23 +45,19 @@ class WebResource
     # User-Agent for upstream desktop UI (mobile-browser Desktop-mode toggle to select)
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.143 Safari/537.36'
 
-    # default to desktop UI
+     # host patterns, maybe TODO move to files
+    # desktop UI
     UIhost = /((anvato|bandcamp|googleapis|jwplatform|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io|.tv)$/
-
-    # client UA info sent to origin
+    # client UA thru to origin
     UAhost = /(qualcomm)\.com$/
-
-    # allow cookies (POST/Track/UI hosts also allowed)
+    # allow cookies
     CookieHost = /(qualcomm|twitch|twitter)\.(com|net|tv)$/
-
     # allow POST
     POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|moovitapp|reddit|(mix|sound)cloud|music.apple|ttvnw|api.twitter|twitch|weather|youtube)\.(com|gov|im|net|tv)$/
-
     # allow paths named 'track'
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
-
-    # verbose request information
-    DebugHost = /(amazonaws|amplitude|app-measurement.com|crashlytics|google|linkedin|qualcomm)\.com$/
+    # verbose request logging
+    DebugHost = /(amazonaws|amplitude|app-measurement.com|crashlytics|qualcomm)\.com$/
 
     def sitePOST
       case host
@@ -202,6 +198,7 @@ feedproxy.google.com
 kh.google.com
 maps.gstatic.com
 ssl.gstatic.com
+storage.googleapis.com
 www.gstatic.com
 ).map{|host|
       HostGET[host] = -> r {r.noexec}}
