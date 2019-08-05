@@ -57,7 +57,7 @@ class WebResource
     # allow paths named 'track'
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
     # verbose request logging
-    DebugHost = /(amazonaws|amplitude|app-measurement.com|crashlytics|google|qualcomm)\.com$/
+    DebugHost = /(amazonaws|amplitude|app-measurement|crashlytics|google|qualcomm)\.com$/
 
     def sitePOST
       case host

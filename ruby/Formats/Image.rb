@@ -202,7 +202,7 @@ class WebResource
       else
         env[:images] ||= {}
         env[:images][src] = true
-        {class: :thumb, c: {_: :a, href: src, c: {_: :img, src: src}}}
+        {class: :thumb, c: {_: :a, id: 'img'+Digest::SHA2.hexdigest(rand.to_s), href: src, c: {_: :img, src: src}}}
       end}
   end
 end
