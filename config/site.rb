@@ -45,7 +45,7 @@ class WebResource
     # User-Agent for upstream desktop UI (mobile-browser Desktop-mode toggle to select)
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.143 Safari/537.36'
 
-    # host patterns, maybe TODO move to files
+    # host patterns
     # desktop UI
     UIhost = /((anvato|bandcamp|duckduckgo|jwplatform|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io|.tv)$/
     # client UA thru to origin
@@ -54,9 +54,9 @@ class WebResource
     CookieHost = /(google|qualcomm|twitch|twitter)\.(com|net|tv)$/
     # allow POST
     POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|moovitapp|reddit|(mix|sound)cloud|music.apple|ttvnw|api.twitter|twitch|weather|youtube)\.(com|gov|im|net|tv)$/
-    # allow paths named 'track'
+    # allow paths matching *track*
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
-    # verbose request logging
+    # verbose request inspection
     DebugHost = /(amazonaws|amplitude|app-measurement|crashlytics|google|qualcomm)\.com$/
 
     def sitePOST
@@ -207,6 +207,12 @@ class WebResource
         r.desktop.fetch
       when /aclk|search/
         r.fetch
+      when /^_$/
+        if r.path == '/_/chrome/newtab'
+          
+        else
+          r.deny
+        end
       else
         r.deny
       end}
