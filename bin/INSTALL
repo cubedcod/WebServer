@@ -15,3 +15,5 @@ pip install --upgrade pip pygments
 cd ~/src/WebServer/ruby
 which bundle || gem install bundler
 bundle install
+
+mkdir ~/web
