@@ -182,8 +182,10 @@ class WebResource
     HostGET['gitter.im'] = -> req {req.desktop.remote}
 
     # Google
+    Google = -> r { ENV.has_key?('GOOGLE') ? r.desktop.fetch : r.noexec }
     HostGET['ajax.googleapis.com'] = -> r {r.fetch}
     HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.deny : r.noexec}
+    HostGET['www.google.com'] = -> r {[nil,*%w(aclk images imgres maps search)].member?(r.parts[0]) ? Google[r] : r.deny}
     HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
     %w(
 developers.google.com
@@ -201,13 +203,10 @@ maps.gstatic.com
 ssl.gstatic.com
 www.gstatic.com
 ).map{|h|
-      HostGET[h] = -> r {
-        ENV.has_key?('GOOGLE') ? r.desktop.fetch : r.noexec }}
+      HostGET[h] = Google}
 
     %w(storage.googleapis.com gstatic.com).map{|n|
-      Subdomain[n] = HostGET['google.com']}
-
-    HostGET['www.google.com'] = -> r {[nil,*%w(aclk images imgres maps search)].member?(r.parts[0]) ? HostGET['google.com'][r] : r.deny}
+      Subdomain[n] = Google}
 
     # Mozilla
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
