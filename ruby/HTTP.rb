@@ -358,17 +358,17 @@ class WebResource
     def local?; LocalAddr.member?(@r['SERVER_NAME']||host) end
 
     def noexec
-      if %w{gif js}.member? ext.downcase # filtered suffix
-        if ext=='gif' && qs.empty?
-          fetch # allow GIFs without querystring
+      if %w{gif js}.member? ext.downcase # filter suffix
+        if ext == 'gif' && qs.empty?
+          fetch # allow GIFs without query
         else
           deny
         end
-      else # fetch and inspect
+      else # fetch
         fetch.yield_self{|status, head, body|
           if status.to_s.match? /30[1-3]/ # redirected
             [status, head, body]
-          else
+          else # inspect
             if head['Content-Type'] && !head['Content-Type'].match?(/image.(bmp|gif)|script/)
               [status, head, body] # allow MIME
             else                   # filter MIME
