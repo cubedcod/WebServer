@@ -236,7 +236,7 @@ class WebResource
             upstream_metas.map{|k|@r[:resp][k]||=meta[k.downcase] if meta[k.downcase]} # response metadata
           end
         rescue Exception => e
-          case e.message # codes handled in unexceptional control-flow
+          case e.message # response-types handled in unexceptional control-flow
           when /304/ # no updates
             code = 304
           when /401/ # unauthorized
