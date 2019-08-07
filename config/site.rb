@@ -41,26 +41,19 @@ class WebResource
     SiteJS  = ConfDir.join('site.js').read
   end
   module HTTP
-
-    # User-Agent for upstream desktop UI (mobile-browser Desktop-mode toggle to select)
+    # desktop UI user-agent identifier
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.143 Safari/537.36'
-
-    # default to desktop UI
+    # use desktop UI
     UIhost = /((anvato|bandcamp|googleapis|jwplatform|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io|.tv)$/
-
-    # client UA info sent to origin
+    # send client UA-string to origin
     UAhost = /(qualcomm)\.com$/
-
-    # allow cookies (POST/Track/UI hosts also allowed)
+    # allow cookies
     CookieHost = /(qualcomm|twitch|twitter)\.(com|net|tv)$/
-
     # allow POST
     POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|moovitapp|reddit|(mix|sound)cloud|music.apple|ttvnw|api.twitter|twitch|weather|youtube)\.(com|gov|im|net|tv)$/
-
     # allow paths named 'track'
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
-
-    # verbose request information
+    # verbose request logging
     DebugHost = /(amazonaws|amplitude|app-measurement.com|crashlytics|google|linkedin|qualcomm)\.com$/
 
     def sitePOST
@@ -82,16 +75,16 @@ class WebResource
           denyPOST
         end
       when /amazon/
-        if !ENV.has_key?('AMAZON')
-          denyPOST
-        else
+        if ENV.has_key?('AMAZON')
           self.POSTthru
+        else
+          denyPOST
         end
       when /google/
-        if !ENV.has_key?('GOOGLE')
-          denyPOST
-        else
+        if ENV.has_key?('GOOGLE')
           self.POSTthru
+        else
+          denyPOST
         end
       else
         self.POSTthru
@@ -189,38 +182,29 @@ class WebResource
     HostGET['gitter.im'] = -> req {req.desktop.remote}
 
     # Google
-    # script hosts
     HostGET['ajax.googleapis.com'] = -> r {r.fetch}
-    # static-asset hosts w/o scripts
+    HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.deny : r.noexec}
+    HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
     %w(
 developers.google.com
+drive.google.com
 encrypted-tbn0.gstatic.com
 encrypted-tbn1.gstatic.com
 encrypted-tbn2.gstatic.com
 encrypted-tbn3.gstatic.com
 feedproxy.google.com
+google.com
+groups.google.com
 kh.google.com
+maps.googleapis.com
 maps.gstatic.com
 ssl.gstatic.com
 www.gstatic.com
-).map{|host|
-      HostGET[host] = -> r {r.noexec}}
-    # misc hosts
-    HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.deny : r.noexec}
-    HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
-    HostGET['google.com'] = HostGET['maps.google.com'] = HostGET['maps.googleapis.com'] = HostGET['www.google.com'] = -> r {
-      case r.parts[0]
-      when nil
-        r.desktop.fetch
-      when 'imgres'
-        r.env[:query].has_key?('imgurl') ? [301, {'Location' => r.env[:query]['imgurl']}, []] : r.fetch
-      when /images|maps/
-        r.desktop.fetch
-      when /aclk|search/
-        r.fetch
-      else
-        r.deny
-      end}
+).map{|h|
+      HostGET[h] = -> r {
+        ENV.has_key?('GOOGLE') ? r.desktop.fetch : r.noexec }}
+
+    HostGET['www.google.com'] = -> r {[nil,*%w(aclk images imgres maps search)].member?(r.parts[0]) ? HostGET['google.com'][r] : r.deny}
 
     # Mozilla
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
