@@ -3,7 +3,7 @@ require 'nokogiri'
 module Webize
   module HTML
     def self.clean body
-      # parse
+      # parse input
       html = Nokogiri::HTML.fragment body
 
       # strip elements
@@ -11,27 +11,31 @@ module Webize
 
       # strip Javascript and tracker-images
       html.css('a[href^="javascript"]').map{|a| a.remove }
-      %w{quantserve scorecardresearch}.map{|co|
+      %w{quantserve scorecardresearch}.map{|co| # TODO apply nofetch rules
         html.css('img[src*="' + co + '"]').map{|img| img.remove }}
 
-      # CSS:background-image → <img>
+      # map CSS:background-image → <img>
       html.css('[style^="background-image"]').map{|node|
         node['style'].match(/url\('([^']+)'/).yield_self{|url|
           node.add_child "<img src=\"#{url[1]}\">" if url}}
-      # <amp-img> → <img>
+
+      # map <amp-img> → <img>
       html.css('amp-img').map{|amp|amp.add_child "<img src=\"#{amp['src']}\">"}
 
-      # traverse nodes
       html.traverse{|e|
         e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) if e['href'] && !e['id'] # link identifier
         e.attribute_nodes.map{|a|
-          # move nonstandard src attrs
+          # normalize @src
           e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-menuimg data-native-src data-original data-src data-src1}.member? a.name
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
-          # strip attributes
-          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor class height http-equiv layout ping role style tabindex target width}.member?(a.name)}}
 
-      # unparse
+          # strip attributes
+          dropa = a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || # script gunk
+                  %w{bgcolor class height http-equiv layout ping role style tabindex target width}.member?(a.name) || # misc attrs
+                  a.name == 'id' && e.name != 'a' # non-anchor elements with id
+          a.unlink if dropa}}
+
+      # output
       html.to_xhtml(:indent => 0)
     end
 

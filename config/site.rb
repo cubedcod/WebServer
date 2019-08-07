@@ -44,7 +44,7 @@ class WebResource
     # desktop UI user-agent identifier
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.143 Safari/537.36'
     # use desktop UI
-    UIhost = /((anvato|bandcamp|googleapis|jwplatform|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io|.tv)$/
+    UIhost = /((anvato|bandcamp|jwplatform|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io|.tv)$/
     # send client UA-string to origin
     UAhost = /(qualcomm)\.com$/
     # allow cookies
@@ -54,7 +54,7 @@ class WebResource
     # allow paths named 'track'
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
     # verbose request logging
-    DebugHost = /(amazonaws|amplitude|app-measurement.com|crashlytics|google|linkedin|qualcomm)\.com$/
+    DebugHost = /(amazonaws|amplitude|app-measurement|crashlytics|google|qualcomm)\.com$/
 
     def sitePOST
       case host
@@ -203,6 +203,9 @@ www.gstatic.com
 ).map{|h|
       HostGET[h] = -> r {
         ENV.has_key?('GOOGLE') ? r.desktop.fetch : r.noexec }}
+
+    %w(storage.googleapis.com gstatic.com).map{|n|
+      Subdomain[n] = HostGET['google.com']}
 
     HostGET['www.google.com'] = -> r {[nil,*%w(aclk images imgres maps search)].member?(r.parts[0]) ? HostGET['google.com'][r] : r.deny}
 

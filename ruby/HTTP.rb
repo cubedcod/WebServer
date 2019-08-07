@@ -13,6 +13,7 @@ class WebResource
     PathGET = {}
     PreservedFormat = /^(application\/json|audio|font|video)/
     ServerKey = Digest::SHA2.hexdigest [`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join
+    Subdomain = {}
 
     def allowedOrigin
       if referer = env['HTTP_REFERER']
@@ -318,6 +319,8 @@ class WebResource
         handler[self]
       elsif handler = HostGET[host]                # any path, exact host
         handler[self]
+      elsif handler = Subdomain[host.split('.')[1..-1].join('.')]
+        handler[self]
       else                                         # default
         local? ? local : remote
       end
@@ -430,7 +433,10 @@ class WebResource
       code = r.code
       head = r.headers
       body = r.body
-      HTTP.print_header head if host.match? DebugHost
+      if host.match? DebugHost
+        HTTP.print_header head
+        puts body
+      end
       [code, head, [body]]
     end
 
