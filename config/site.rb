@@ -140,6 +140,11 @@ class WebResource
 
     PathGET['/url'] = HostGET['gate.sc'] = HostGET['go.skimresources.com'] = -> r {[301,{'Location' => (r.env[:query]['url'] || r.env[:query]['q'])}, []]}
 
+    # Amazon
+    Amazon = -> r { ENV.has_key?('AMAZON') ? r.desktop.fetch : r.noexec }
+    %w(s3.amazonaws.com).map{|n|
+      Subdomain[n] = Amazon}
+
     # AOL
     HostGET['o.aolcdn.com'] = -> r {r.env[:query].has_key?('image_uri') ? [301, {'Location' => r.env[:query]['image_uri']}, []] : r.noexec}
 
@@ -198,6 +203,7 @@ feedproxy.google.com
 google.com
 groups.google.com
 kh.google.com
+maps.google.com
 maps.googleapis.com
 maps.gstatic.com
 ssl.gstatic.com
