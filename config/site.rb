@@ -44,7 +44,7 @@ class WebResource
     # desktop UI user-agent identifier
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.143 Safari/537.36'
     # use desktop UI
-    UIhost = /((anvato|bandcamp|jwplatform|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io|.tv)$/
+    UIhost = /((anvato|bandcamp|duckduckgo|jwplatform|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io|.tv)$/
     # send client UA-string to origin
     UAhost = /(qualcomm)\.com$/
     # allow cookies
@@ -142,8 +142,8 @@ class WebResource
 
     # Amazon
     Amazon = -> r { ENV.has_key?('AMAZON') ? r.desktop.fetch : r.noexec }
-    %w(s3.amazonaws.com).map{|n|
-      Subdomain[n] = Amazon}
+    HostGET['www.amazon.com'] = Amazon
+    %w(s3.amazonaws.com).map{|n| Subdomain[n] = Amazon}
 
     # AOL
     HostGET['o.aolcdn.com'] = -> r {r.env[:query].has_key?('image_uri') ? [301, {'Location' => r.env[:query]['image_uri']}, []] : r.noexec}
