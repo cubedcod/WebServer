@@ -376,14 +376,14 @@ yts
             month = dt.month
             day = dt.day
           else
-            month, day, year = date.split '-'
+            month, day, year = date.split('-').map &:to_i
           end
           time, ampm = timeAP.strip.split ' '
-          hour, min = time.split ':'
+          hour, min = time.split(':').map &:to_i
           hour = hour.to_i
           pm = ampm == 'PM'
           hour += 12 if pm
-          yield subject, Date, "#{year}-#{'%02d' % month}-#{day}T#{'%02d' % hour}:#{min}:00+00:00"
+          yield subject, Date, "#{year}-#{'%02d' % month}-#{'%02d' % day}T#{'%02d' % hour}:#{'%02d' % min}:00+00:00"
         end
       end
       post.remove }

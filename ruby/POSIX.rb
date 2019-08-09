@@ -67,7 +67,9 @@ class WebResource
     def nodes
       (if node.directory?
        if env[:query].has_key?('f') && path != '/'  # FIND
-         find env[:query]['f'] unless env[:query]['f'].empty?
+          find env[:query]['f'] unless env[:query]['f'].empty? # exact
+       elsif env[:query].has_key?('find') && path != '/' # easymode find
+          find '*' + env[:query]['find'] + '*' unless env[:query]['find'].empty?
        elsif env[:query].has_key?('q') && path!='/' # GREP
          grep env[:query]['q']
        else

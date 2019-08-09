@@ -39,6 +39,8 @@ class WebResource
       options[:format] = :html
     elsif %w(Cookies).member? basename
       options[:format] = :sqlite
+    elsif %w(Makefile).member? basename
+      options[:format] = :plaintext
     end
     graph.load relPath, options
   end
