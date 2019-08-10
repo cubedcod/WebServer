@@ -11,7 +11,7 @@ class WebResource
         docs = []
 
         # local graphs are already stored on timeline (mails+chatlogs etc in hour-dirs) so here we try to index canonical location
-        docs.push (n.path + '.ttl').R unless n.host || n.uri.match?(/^_:/)                                     # canonical location
+        docs.push (n.path + '.ttl').R unless n.host || n.uri.match?(/^(_|data):/) # store directly unless blank node or data: URI
 
         # link graphs of nonlocal origin to timeline
         if n.host && (timestamp=graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value) # find timestamp
