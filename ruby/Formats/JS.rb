@@ -56,7 +56,7 @@ module Webize
       format Format
 
       def initialize(input = $stdin, options = {}, &block)
-        @base = options[:base_uri]
+        @base = options[:base_uri].R
         @subject = (options[:base_uri] || '#image').R 
         @json = ::JSON.parse(input.respond_to?(:read) ? input.read : input) rescue {}
         if block_given?

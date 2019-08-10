@@ -329,7 +329,7 @@ class WebResource
     # Hash -> Markup
     def self.tabular graph, env
       graph = graph.values if graph.class == Hash
-      keys = graph.map{|resource|resource.keys}.flatten.uniq - [Abstract, Content, DC+'hasFormat', DC+'identifier', Image, Video, SIOC+'reply_of', SIOC+'user_agent', Title, Type]
+      keys = graph.select{|r|r.respond_to? :keys}.map{|r|r.keys}.flatten.uniq - [Abstract, Content, DC+'hasFormat', DC+'identifier', Image, Video, SIOC+'reply_of', SIOC+'user_agent', Title, Type]
       if env[:query] && env[:query].has_key?('sort')
         attr = env[:query]['sort']
         attr = Date if attr == 'date'
@@ -457,12 +457,49 @@ class WebResource
         end}
       tree }
 
+    Markup['uri'] = -> uri, env=nil {uri.R}
+
     Markup[Type] = -> t, env=nil {
       if t.class == WebResource
         {_: :a, href: t.uri, c: Icons[t.uri] || t.fragment || t.basename}.update(Icons[t.uri] ? {} : {style: 'font-weight: bold'})
       else
         CGI.escapeHTML t.to_s
       end}
+
+    Markup[Date] = -> date, env=nil {{_: :a, class: :date, href: ServerAddr + '/' + date[0..13].gsub(/[-T:]/,'/'), c: date}}
+
+    Markup[Link] = -> ref, env=nil {
+      u = ref.to_s
+      avatar = Avatars[u.downcase.gsub(/\/$/,'')]
+      [{_: :a,
+        c: avatar ? {_: :img, class: :avatar, src: avatar} : u.sub(/^https?.../,'')[0..79],
+        href: u,
+        id: 'l' + Digest::SHA2.hexdigest(rand.to_s),
+        style: avatar ? 'background-color: #000' : (env[:colors][u.R.host] ||= HTML.colorize),
+        title: u,
+       },
+       " \n"]}
+
+    Markup[Schema+'BreadcrumbList'] = -> list, env {
+      {class: :list,
+       c: tabular((list[Schema+'itemListElement']||
+                   list['https://schema.org/itemListElement']||[]).map{|l|
+                    l.respond_to?(:uri) && env[:graph][l.uri] || (l.class == WebResource ? {'uri' => l.uri,
+                                                                                             Title => [l.uri]} : l)}, env)}}
+
+    Markup[SIOC+'UserAccount'] = -> user, env {
+      if u = user['uri']
+        {class: :user,
+         c: [(if avatar = Avatars[u.downcase]
+              {_: :img, src: avatar}
+             else
+               {_: :span, c: '👤'}
+              end),
+             (HTML.keyval user, env)]}
+      else
+        puts :useraccount, user
+      end
+    }
 
   end
 end

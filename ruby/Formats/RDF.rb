@@ -32,7 +32,7 @@ class WebResource
   end
 
   # WebResource -> Graph
-  def load graph, options = {base_uri: path}
+  def load graph, options = {base_uri: path.R}
     if basename.split('.')[0] == 'msg'
       options[:format] = :mail
     elsif ext == 'html'
@@ -49,8 +49,9 @@ class WebResource
   def treeFromGraph graph ; tree = {}
     head = env[:query].has_key? 'head'
     graph.each_triple{|s,p,o|
-      s = s.to_s; p = p.to_s # subject URI, predicate URI
-      unless head && p == Content
+      s = s.to_s # subject URI
+      p = p.to_s # predicate URI
+      unless p == 'http://www.w3.org/1999/xhtml/vocab#role' || (head && p == Content)
         o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object URI or literal
         tree[s] ||= {'uri' => s}                      # subject
         tree[s][p] ||= []                             # predicate
@@ -96,8 +97,11 @@ class WebResource
     end
   end
 end
+
 module Webize
+
   module URIlist
+
     class Format < RDF::Format
       content_type 'text/uri-list',
                    extension: :u
@@ -111,7 +115,7 @@ module Webize
       format Format
 
       def initialize(input = $stdin, options = {}, &block)
-        @base = options[:base_uri].path.sub(/.u$/,'').R
+        @base = options[:base_uri].R.path.sub(/.u$/,'').R
         @doc = input.respond_to?(:read) ? input.read : input
         if block_given?
           case block.arity

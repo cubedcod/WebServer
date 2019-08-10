@@ -118,6 +118,8 @@ class WebResource
       end
     }
 
+    PathGET['/favicon.ico'] = -> _ {[200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
+
     PathGET['/mu']   = -> r {[302, {'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'}, []]}
 
     PathGET['/resizer'] = -> r {
@@ -157,6 +159,9 @@ class WebResource
 
     # Cloudflare
     HostGET['cdnjs.cloudflare.com'] = -> r {r.fetch}
+
+    # CNN
+    HostGET['dynaimage.cdn.cnn.com'] = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
 
     # DartSearch
     HostGET['clickserve.dartsearch.net'] = -> r {[301,{'Location' => r.env[:query]['ds_dest_url']}, []]}
