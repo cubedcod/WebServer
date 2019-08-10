@@ -413,7 +413,7 @@ class WebResource
           Markup[LDP+'Container'][v,env]
         elsif types.member? Stat+'File'
           Markup[Stat+'File'][v,env]
-        elsif (types.member? Schema+'BreadcrumbList') || (types.member? 'https://schema.org/BreadcrumbList')
+        elsif (types.member? Schema+'BreadcrumbList') || (types.member? Schema+'ItemList') || (types.member? 'https://schema.org/BreadcrumbList')
           Markup[Schema+'BreadcrumbList'][v,env]
         elsif (types.member? SIOC+'UserAccount') || (types.member? Schema+'Person') || (types.member? 'https://schema.org/Person')
           Markup[SIOC+'UserAccount'][v,env]

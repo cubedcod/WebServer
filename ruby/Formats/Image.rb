@@ -98,7 +98,7 @@ module Webize
         [:ifd0, :ifd1, :exif, :gps].map{|fields|
           @img[fields].map{|k,v|
             if k == :date_time
-              yield Date, Time.parse(v.sub(':','-').sub(':','-')).iso8601
+              yield Date, Time.parse(v.sub(':','-').sub(':','-')).iso8601 rescue nil
             else
               yield ('http://www.w3.org/2003/12/exif/ns#' + k.to_s), v.to_s.encode('UTF-8', undef: :replace, invalid: :replace, replace: '?')
             end
