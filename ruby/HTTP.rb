@@ -194,6 +194,7 @@ class WebResource
                           Content-Length
                           ETag}
       upstream_metas.push 'Set-Cookie' if options[:cookies]
+      noTransform = false
       graph = options[:graph] || RDF::Repository.new # response graph
       code = nil   # response status
       body = nil   # response body
@@ -275,7 +276,13 @@ class WebResource
         when 'OpenSSL::SSL::SSLError'
           fetchURL[fallback]
         when 'OpenURI::HTTPError'
-          fetchURL[fallback]
+          if e.respond_to?(:io) && e.io.status.to_s.match?(/999/)
+            noTransform = true
+            @r[:resp] = e.io.meta
+            body = e.io.read
+          else
+            fetchURL[fallback]
+          end
         when 'OpenURI::HTTPRedirect'
           location = e.io.meta['location']
           if location == fallback
@@ -303,7 +310,7 @@ class WebResource
         file.fileResponse
       elsif code == 206                                           # partial upstream data
         [206, @r[:resp], [body]]
-      elsif body && (upstreamUI?||format.match?(PreservedFormat)) # upstream data
+      elsif body && noTransform || (upstreamUI?||format.match?(PreservedFormat)) # upstream data
         [200, @r[:resp].merge({'Content-Length' => body.bytesize}), [body]]
       else                                                        # graph data
         if graph.empty? && !local? && @r['REQUEST_PATH'][-1]=='/' # unlistable remote
