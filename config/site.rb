@@ -48,7 +48,7 @@ class WebResource
     # send client UA-string to origin
     UAhost = /(qualcomm)\.com$/
     # allow cookies
-    CookieHost = /(qualcomm|twitch|twitter)\.(com|net|tv)$/
+    CookieHost = /(linkedin|qualcomm|twitch|twitter)\.(com|net|tv)$/
     # allow POST
     POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|moovitapp|reddit|(mix|sound)cloud|(music|xp).apple|ttvnw|api.twitter|twitch|weather|youtube)\.(com|gov|im|net|tv)$/
     # allow paths named 'track'
@@ -216,6 +216,9 @@ www.gstatic.com
 
     %w(storage.googleapis.com gstatic.com).map{|n|
       Subdomain[n] = Google}
+
+    # Linkedin
+    HostGET['www.linkedin.com'] = HostGET['media.licdn.com'] = -> r {r.noexec}
 
     # Medium
     #HostGET['medium.com'] = -> r {r.env[:query].has_key?('redirecturl') ? [301, {'Location' => r.env[:query]['redirecturl']}, []] : r.noexec}

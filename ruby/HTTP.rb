@@ -278,7 +278,7 @@ class WebResource
         when 'OpenURI::HTTPError'
           if e.respond_to?(:io) && e.io.status.to_s.match?(/999/)
             noTransform = true
-            @r[:resp] = e.io.meta
+            @r[:resp] = headers e.io.meta
             body = e.io.read
           else
             fetchURL[fallback]
@@ -521,13 +521,12 @@ class WebResource
       'text/html'                                            # default writer
     end
 
-    # convert ALLCAPS CGI vars to HTTP capitalization
-    def headers
+    def headers allCAPS = nil
       head = {}
-      env.map{|k,v|
+      (allCAPS || env).map{|k,v|
         k = k.to_s
         underscored = k.match? /(_AP_|PASS_SFP)/i
-        key = k.downcase.sub(/^http_/,'').split('_').map{|k| # eat prefix
+        key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|k| # eat prefix
           if %w{cl id spf utc xsrf}.member? k # all-cap acronyms
             k = k.upcase
           else
