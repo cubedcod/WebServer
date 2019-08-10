@@ -48,7 +48,7 @@ class WebResource
     # send client UA-string to origin
     UAhost = /(qualcomm)\.com$/
     # allow cookies
-    CookieHost = /(linkedin|qualcomm|twitch|twitter)\.(com|net|tv)$/
+    CookieHost = /twi(tch|tter)\.(com|net|tv)$/
     # allow POST
     POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|moovitapp|reddit|(mix|sound)cloud|(music|xp).apple|ttvnw|api.twitter|twitch|weather|youtube)\.(com|gov|im|net|tv)$/
     # allow paths named 'track'
