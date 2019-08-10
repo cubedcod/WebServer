@@ -70,6 +70,7 @@ class WebResource < RDF::URI
     MetaMap = {
       'HandheldFriendly' => :drop,
       'ROBOTS' => :drop,
+      'abstract' => Abstract,
       'adtargeting' => :drop,
       'al:android:app_name' => :drop,
       'al:android:package' => :drop,

@@ -12,7 +12,7 @@ class WebResource
     OffLine = ENV.has_key? 'OFFLINE'
     PathGET = {}
     PreservedFormat = /^(application\/json|audio|font|video)/
-    ServerKey = Digest::SHA2.hexdigest [`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join
+    ServerKey = Digest::SHA2.hexdigest([`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Subdomain = {}
 
     def allowedOrigin

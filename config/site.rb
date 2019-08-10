@@ -14,6 +14,7 @@ module Webize
         'www.instagram.com' => :Instagram,
         'www.patriotledger.com' => :GateHouse,
         'www.providencejournal.com' => :GateHouse,
+        'www.google.com' => :GoogleHTML,
         'twitter.com' => :Twitter,
         'www.youtube.com' => :YouTube,
       }
@@ -396,8 +397,7 @@ yts
         end
       end
       post.remove }
-    %w{#fixed_sidebar}.map{|sel|
-      (doc.css sel).map{|_| _.remove}}
+    %w{#fixed_sidebar}.map{|s|doc.css(s).map &:remove}
   end
 
   GHgraph = /__gh__coreData.content=(.*?)\s*__gh__coreData.content.bylineFormat/m
@@ -415,6 +415,10 @@ yts
             }
           end}
       end}
+  end
+
+  def GoogleHTML doc
+    doc.css('svg').map &:remove
   end
 
   IGgraph = /^window._sharedData = /
