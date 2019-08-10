@@ -25,7 +25,11 @@ class WebResource
 
     def allowCookies?
       hostname = env['SERVER_NAME'] || host || 'localhost'
-      hostname.match?(CookieHost) || hostname.match?(TrackHost) || hostname.match?(POSThost) || hostname.match?(UIhost)
+      ENV.has_key?('COOKIES') ||
+        hostname.match?(CookieHost) ||
+        hostname.match?(POSThost) ||
+        hostname.match?(TrackHost) ||
+        hostname.match?(UIhost)
     end
 
     def allowPOST?; host.match? POSThost end
@@ -102,7 +106,7 @@ class WebResource
     end
 
     def deny status = 200
-      HTTP.print_header env if host.match? DebugHost
+      HTTP.print_header env if verbose?
       env[:deny] = true
       type, content = if ext == 'js' || env[:script]
                         ['application/javascript',
@@ -126,7 +130,7 @@ class WebResource
     end
 
     def denyPOST
-      if host.match? DebugHost
+      if verbose?
         HTTP.print_header env
         puts env['rack.input'].read
       end
@@ -170,11 +174,12 @@ class WebResource
     def fetch options = {}
       if this = cached?; return this.fileResponse end
       @r ||= {resp: {}}; @r['HTTP_ACCEPT'] ||= '*/*' # response-meta storage
-      head = headers                                 # read request-meta
       hostname = @r['SERVER_NAME'] || host           # hostname
+      #HTTP.print_header env if verbose?             # inspect client metadata
+      head = headers                                 # read request-metadata
       head[:redirect] = false                        # don't follow redirects
-      options[:cookies] ||= true if allowCookies?
-      head.delete 'Cookie' unless options[:cookies]  # allow/deny cookies
+      options[:cookies] ||= true if allowCookies?    # allow or deny cookies
+      head.delete 'Cookie' unless options[:cookies]
       qStr = @r[:query] ? (q = @r[:query].dup        # read query
         %w{allow view sort ui}.map{|a|q.delete a}    # consume local arguments
         q.empty? ? '' : HTTP.qs(q)) : qs             # external query
@@ -194,11 +199,10 @@ class WebResource
       body = nil   # response body
       format = nil # response format
       file = nil   # response fileref
-      verbose = hostname.match? DebugHost
 
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
-        if verbose
+        if verbose?
           print url, "\n"
           HTTP.print_header head
         end
@@ -206,7 +210,7 @@ class WebResource
           open(url, head) do |response|
             code = response.status.to_s.match(/\d{3}/)[0]
             meta = response.meta
-            if verbose
+            if verbose?
               print ' ', code, ' '
               HTTP.print_header meta
             end
@@ -253,7 +257,7 @@ class WebResource
       begin
         fetchURL[url]       #   try (HTTPS default)
       rescue Exception => e # retry (HTTP)
-        if verbose && e.respond_to?(:io)
+        if verbose? && e.respond_to?(:io)
           puts e.io.status.join ' '
           HTTP.print_header e.io.meta
         end
@@ -423,7 +427,7 @@ class WebResource
       url = 'https://' + host + path + qs
       head = headers
       body = env['rack.input'].read
-      if host.match? DebugHost
+      if verbose?
         HTTP.print_header head
         puts body
       end
@@ -433,7 +437,7 @@ class WebResource
       code = r.code
       head = r.headers
       body = r.body
-      if host.match? DebugHost
+      if verbose?
         HTTP.print_header head
         puts body
       end
@@ -545,6 +549,11 @@ class WebResource
                   env['SERVER_NAME'].match?(UIhost) ||
                   env[:query]['ui'] == 'upstream')
     end
+
+    def verbose?
+      ENV.has_key? 'VERBOSE'
+    end
+
   end
   include HTTP
 end

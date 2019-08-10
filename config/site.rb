@@ -44,17 +44,15 @@ class WebResource
     # desktop UI user-agent identifier
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.143 Safari/537.36'
     # use desktop UI
-    UIhost = /((anvato|bandcamp|duckduckgo|jwplatform|(mix|sound)cloud|music.apple|spotify|vimeo).(com|net)|github.io|.tv)$/
+    UIhost = /((apple|anvato|bandcamp|duckduckgo|jwplatform|(mix|sound)cloud|spotify|vimeo).(com|net)|github.io|.tv)$/
     # send client UA-string to origin
     UAhost = /(qualcomm)\.com$/
     # allow cookies
     CookieHost = /(qualcomm|twitch|twitter)\.(com|net|tv)$/
     # allow POST
-    POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|moovitapp|reddit|(mix|sound)cloud|music.apple|ttvnw|api.twitter|twitch|weather|youtube)\.(com|gov|im|net|tv)$/
+    POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|moovitapp|reddit|(mix|sound)cloud|(music|xp).apple|ttvnw|api.twitter|twitch|weather|youtube)\.(com|gov|im|net|tv)$/
     # allow paths named 'track'
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
-    # verbose request logging
-    DebugHost = /(amazonaws|amplitude|app-measurement|crashlytics|google|qualcomm)\.com$/
 
     def sitePOST
       case host
@@ -213,6 +211,9 @@ www.gstatic.com
 
     %w(storage.googleapis.com gstatic.com).map{|n|
       Subdomain[n] = Google}
+
+    # Medium
+    #HostGET['medium.com'] = -> r {r.env[:query].has_key?('redirecturl') ? [301, {'Location' => r.env[:query]['redirecturl']}, []] : r.noexec}
 
     # Mozilla
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
