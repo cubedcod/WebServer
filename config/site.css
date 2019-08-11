@@ -33,6 +33,7 @@ img, video {max-width: 100%}
 .thumb, svg {max-width: 28em}
 p {max-width: 80ex}
 p, h1,h2,h3,h4,h5,h6 {margin: 0}
+h1,h2,h3,h4,h5,h6 {background-color: #ddd; color: #000}
 pre {white-space: pre-wrap}
 table, div, li, svg {display: inline-block}
 table.fromTo {border-spacing: 0}
