@@ -143,7 +143,7 @@ sidebar [class^='side']    [id^='side']
           # emit normalized triples
           embeds.each_triple{|s,p,o|
             p = MetaMap[p.to_s] || p # predicate map
-            puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/ # notify on unmapped predicate
+            puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/
             yield s, p, o unless p == :drop}
         end
 
@@ -151,7 +151,8 @@ sidebar [class^='side']    [id^='side']
         n.css('head link[rel]').map{|m|
           if k = m.attr("rel") # predicate
             if v = m.attr("href") # object
-              k = MetaMap[k] || ('#' + k.gsub(' ','_'))
+              k = MetaMap[k] || k
+              puts [k,v].join "\t" unless k.to_s.match? /^(drop|http)/
               yield subject, k, v.R unless k == :drop
             end
           end}
@@ -172,7 +173,6 @@ sidebar [class^='side']    [id^='side']
                 v = HTML.webizeString v
                 v = @base.join v if v.class == WebResource || v.class == RDF::URI
               end
-                                # notify on predicates lacking HTTP mapping
               puts [k,v].join "\t" unless k.to_s.match? /^(drop|http)/
               yield subject, k, v unless k == :drop # meta-tag RDF
             end

@@ -68,6 +68,7 @@ class WebResource
         puts "multiple video-src found:", src if src.size > 1
         src = src[0]
       end
+      src = src.to_s
       src = src + '/DASH_480' if src.match /v.redd.it/
       if env[:images] && env[:images][src]
       # deduplicated
