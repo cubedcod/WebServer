@@ -427,15 +427,22 @@ yts
     base = 'https://news.ycombinator.com/'
     doc.css('div.comment').map{|comment|
       post = comment.parent
-      date = post.css('span.age')[0]
-      subject = base + date.css('a')[0]['href']
+      date = post.css('.age > a')[0]
+      subject = base + date['href']
       yield subject, Type, Post.R
+      if story = post.css('.storyon > a')[0]
+        yield subject, Title, story.inner_text
+        yield subject, To, (base + story['href']).R
+      end
+      yield subject, Content, comment.inner_html
       yield subject, Date, Chronic.parse(date.inner_text).iso8601
-      user = post.css('a.hnuser')[0]
+      user = post.css('.hnuser')[0]
       yield subject, Creator, (base + user['href']).R
       yield subject, Creator, user.inner_text
       yield subject, To, self
-      yield subject, Content, comment.inner_html
+      if parent = post.css('.par > a')[0]
+        yield subject, To, (base + parent['href']).R
+      end
       post.remove }
   end
 
