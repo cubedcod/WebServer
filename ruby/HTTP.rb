@@ -32,7 +32,10 @@ class WebResource
         hostname.match?(UIhost)
     end
 
-    def allowPOST?; host.match? POSThost end
+    def allowPOST?
+      host.match?(POSThost) ||
+        path.match?(POSTpath)
+    end
 
     def cached?
       return false if env && env['HTTP_PRAGMA'] == 'no-cache'
@@ -310,7 +313,7 @@ class WebResource
         file.fileResponse
       elsif code == 206                                           # partial upstream data
         [206, @r[:resp], [body]]
-      elsif body && noTransform || (upstreamUI?||format.match?(PreservedFormat)) # upstream data
+      elsif body && noTransform || (upstreamUI? || (format && (format.match? PreservedFormat))) # upstream data
         [200, @r[:resp].merge({'Content-Length' => body.bytesize}), [body]]
       else                                                        # graph data
         if graph.empty? && !local? && @r['REQUEST_PATH'][-1]=='/' # unlistable remote
@@ -434,9 +437,9 @@ class WebResource
       url = 'https://' + host + path + qs
       head = headers
       body = env['rack.input'].read
-      if verbose?
+      if true #verbose?
         HTTP.print_header head
-        puts body
+        puts ::JSON.pretty_generate ::JSON.parse body if head['Content-Type'] == 'application/json'
       end
 
       # response
@@ -446,7 +449,7 @@ class WebResource
       body = r.body
       if verbose?
         HTTP.print_header head
-        puts body
+        puts ::JSON.pretty_generate ::JSON.parse body if head['Content-Type'] == 'application/json'
       end
       [code, head, [body]]
     end

@@ -52,6 +52,7 @@ class WebResource
     CookieHost = /twi(tch|tter)\.(com|net|tv)$/
     # allow POST
     POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|moovitapp|reddit|(mix|sound)cloud|(music|xp).apple|ttvnw|api.twitter|twitch|weather|youtube)\.(com|gov|im|net|tv)$/
+    POSTpath = /^\/graphql$/
     # allow paths named 'track'
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
 
