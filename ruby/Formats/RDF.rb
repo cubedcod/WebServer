@@ -89,7 +89,7 @@ class WebResource
     def localGraph
       rdf, nonRDF = nodes.partition{|node| node.ext == 'ttl'}
       if rdf.size==1 && nonRDF.size==0 && selectFormat == 'text/turtle'
-        rdf[0].fileResponse
+        rdf[0].fileResponse # input + output graph identical
       else
         graph = RDF::Repository.new                 # init repository
         nonRDF.select(&:file?).map{|n|n.load graph} # load non-RDF
