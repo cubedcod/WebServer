@@ -424,7 +424,19 @@ yts
   end
 
   def HackerNews doc
-    
+    base = 'https://news.ycombinator.com/'
+    doc.css('div.comment').map{|comment|
+      post = comment.parent
+      date = post.css('span.age')[0]
+      subject = base + date.css('a')[0]['href']
+      yield subject, Type, Post.R
+      yield subject, Date, Chronic.parse(date.inner_text).iso8601
+      user = post.css('a.hnuser')[0]
+      yield subject, Creator, (base + user['href']).R
+      yield subject, Creator, user.inner_text
+      yield subject, To, self
+      yield subject, Content, comment.inner_html
+      post.remove }
   end
 
   IGgraph = /^window._sharedData = /

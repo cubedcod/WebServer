@@ -66,7 +66,6 @@ class WebResource < RDF::URI
     }
 
     # metadata-normalization map
-    # TODO move to Yaml or Turtle and suport http/https-scheme w/ declare-once 
     MetaMap = {
       'HandheldFriendly' => :drop,
       'ROBOTS' => :drop,
@@ -318,7 +317,6 @@ class WebResource < RDF::URI
       Schema+'reviewBody' => Content,
       Schema+'text' => Content,
       Schema+'url' => Link,
-      #Schema+'url' => Link,
     }
 
     CacheDir = (Pathname.new ENV['HOME'] + '/.cache/web').relative_path_from(PWD).to_s + '/'

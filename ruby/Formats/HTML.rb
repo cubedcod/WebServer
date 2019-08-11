@@ -416,6 +416,8 @@ class WebResource
           Markup[Schema+'BreadcrumbList'][v,env]
         elsif (types.member? SIOC+'UserAccount') || (types.member? Schema+'Person') || (types.member? 'https://schema.org/Person')
           Markup[SIOC+'UserAccount'][v,env]
+        elsif types.member? 'http://schema.org/VideoObject'
+          Markup[Video][v,env]
         else
           keyval v, env
         end
