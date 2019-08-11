@@ -56,25 +56,31 @@ module Webize
 end
 class WebResource
   module HTML
-    Markup[Video] = -> video,env {
-      video = video.R
-      if env[:images] && env[:images][video.uri]
+    Markup[Video] = -> video, env {
+      src = if video.class == WebResource
+              video.to_s
+            elsif video.class == String && video.match?(/^http/)
+              video
+            else
+              video['https://schema.org/url'] || video[Schema+'contentURL'] || video[Schema+'url'] || video[Link] || video['uri']
+            end
+      if src.class == Array
+        puts "multiple video-src found:", src if src.size > 1
+        src = src[0]
+      end
+      src = src + '/DASH_480' if src.match /v.redd.it/
+      if env[:images] && env[:images][src]
       # deduplicated
       else
         env[:images] ||= {}
-        env[:images][video.uri] = true
-        if video.uri.match /youtu/
-          id = (HTTP.parseQs video.query)['v'] || video.parts[-1]
+        env[:images][src] = true
+        if src.match /youtu/
+          id = (HTTP.parseQs src.R.query)['v'] || src.R.parts[-1]
           {_: :iframe, width: 560, height: 315, src: "https://www.youtube.com/embed/#{id}", frameborder: 0, gesture: "media", allow: "encrypted-media", allowfullscreen: :true}
         else
-          src = if video.uri.match /v.redd.it/
-                  video.uri + '/DASH_480'
-                else
-                  video.uri
-                end
           {class: :video,
            c: [{_: :video, src: src, controls: :true}, '<br>',
-               {_: :span, class: :notes, c: video.basename}]}
+               {_: :a, href: src, c: src.R.basename}]}
         end
       end}
   end

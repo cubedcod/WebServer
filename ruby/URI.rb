@@ -306,7 +306,9 @@ class WebResource < RDF::URI
       RSS+'source' => DC+'source',
       RSS+'title' => Title,
       Schema+'articleBody' => Content,
+      Schema+'articleSection' => Abstract,
       Schema+'author' => Creator,
+      Schema+'creator' => Creator,
       Schema+'dateCreated' => Date,
       Schema+'dateModified' => Date,
       Schema+'datePublished' => Date,
@@ -314,9 +316,12 @@ class WebResource < RDF::URI
       Schema+'headline' => Title,
       Schema+'image' => Image,
       Schema+'interactionStatistic' => :drop,
+      Schema+'keywords' => Abstract,
       Schema+'reviewBody' => Content,
       Schema+'text' => Content,
+      Schema+'thumbnailUrl' => Image,
       Schema+'url' => Link,
+      Schema+'video' => Video,
     }
 
     CacheDir = (Pathname.new ENV['HOME'] + '/.cache/web').relative_path_from(PWD).to_s + '/'

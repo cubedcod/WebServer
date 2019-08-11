@@ -12,7 +12,7 @@ module Webize
 
       def initialize(input = $stdin, options = {}, &block)
         @subject = (options[:base_uri] || '#image').R
-        @img = Exif::Data.new(input.respond_to?(:read) ? input.read : input) rescue nil #puts("EXIF read failed on #{@subject}")
+        @img = Exif::Data.new(input.respond_to?(:read) ? input.read : input) rescue nil
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
