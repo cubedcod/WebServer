@@ -97,7 +97,6 @@ sidebar [class^='side']    [id^='side']
         @opts = options
         @doc = (input.respond_to?(:read) ? input.read : input).encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ')
         @base = options[:base_uri].R
-
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -126,7 +125,7 @@ sidebar [class^='side']    [id^='side']
         n = Nokogiri::HTML.parse @doc # parse
 
         # host bindings
-        if hostTriples = Triplr[@base.host]
+        if hostTriples = Triplr[@base.host] || Triplr[@base.respond_to?(:env) && @base.env && @base.env[:query]['host']]
           @base.send hostTriples, n, &f
         end
 

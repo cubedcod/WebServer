@@ -10,10 +10,10 @@ class WebResource
         n = n.R
         docs = []
 
-        # local graphs are already stored on timeline (mails+chatlogs etc in hour-dirs) so here we try to index canonical location
-        docs.push (n.path + '.ttl').R unless n.host || n.uri.match?(/^(_|data):/) # store directly unless blank node or data: URI
-
-        # link graphs of nonlocal origin to timeline
+        # local graph already in canonical location and on timeline (mail/chatlogs in hour-dirs)
+        # link nonlocal-origin graph to canonical location
+        docs.push (n.path + '.ttl').R unless n.host || n.uri.match?(/^(_|data):/) # don't store blank node or data-URI directly, only in doc-context
+        # link nonlocal-origin graph to timeline
         if n.host && (timestamp=graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value) # find timestamp
           docs.push ['/' + timestamp.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/\+?(00.00|Z)$/,''),       # hour-dir
                      %w{host path query fragment}.map{|a|n.send(a).yield_self{|p|p&&p.split(/[\W_]/)}},'ttl']. # slugs
@@ -33,7 +33,7 @@ class WebResource
 
   # WebResource -> Graph
   # frontend to RDF#load with format hints
-  def load graph, options = {base_uri: path.R}
+  def load graph, options = {base_uri: (path.R env)}
     if basename.split('.')[0] == 'msg'
       options[:format] = :mail
     elsif ext.match? /^html?$/

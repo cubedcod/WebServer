@@ -14,6 +14,7 @@ module Webize
         'www.instagram.com' => :Instagram,
         'www.patriotledger.com' => :GateHouse,
         'www.providencejournal.com' => :GateHouse,
+        'news.ycombinator.com' => :HackerNews,
         'www.google.com' => :GoogleHTML,
         'twitter.com' => :Twitter,
         'www.youtube.com' => :YouTube,
@@ -420,6 +421,10 @@ yts
 
   def GoogleHTML doc
     doc.css('svg').map &:remove
+  end
+
+  def HackerNews doc
+    
   end
 
   IGgraph = /^window._sharedData = /

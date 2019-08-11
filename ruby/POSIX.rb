@@ -88,7 +88,7 @@ class WebResource
           files = (self + '*').R.glob if files.empty? # prefix match
           [self, files]
         end
-       end).flatten.compact.uniq.select &:exist?
+       end).flatten.compact.uniq.select(&:exist?).map{|n|n.env env}
     end
   end
   include POSIX
