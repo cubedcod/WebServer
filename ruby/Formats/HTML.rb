@@ -14,13 +14,16 @@ module Webize
       %w{quantserve scorecardresearch}.map{|co| # TODO apply nofetch rules
         html.css('img[src*="' + co + '"]').map{|img| img.remove }}
 
-      # map CSS:background-image → <img>
+      # CSS:background-image → <img>
       html.css('[style^="background-image"]').map{|node|
         node['style'].match(/url\('([^']+)'/).yield_self{|url|
           node.add_child "<img src=\"#{url[1]}\">" if url}}
-
-      # map <amp-img> → <img>
+      # <amp-img> → <img>
       html.css('amp-img').map{|amp|amp.add_child "<img src=\"#{amp['src']}\">"}
+      # <div> → <img>
+      html.css("div[class*='image'][data-src]").map{|div|
+        puts "WONKY div-image #{div['data-src']}"
+        div.add_child "<img src=\"#{div['data-src']}\">"}
 
       html.traverse{|e|
         e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) if e['href'] && !e['id'] # link identifier
