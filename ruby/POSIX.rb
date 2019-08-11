@@ -73,19 +73,14 @@ class WebResource
        elsif env[:query].has_key?('q') && path!='/' # GREP
          grep env[:query]['q']
        else
-         index = (self + 'index.{html,ttl}').R.glob
-         if !index.empty? && qs.empty?    # static index
-           [index]
-         else
-           [self, children]               # LS
-         end
+         [self, children]              # LS
        end
-      else                                # GLOB
-        if uri.match /[\*\{\[]/           #  parametric glob
+      else                             # GLOB
+        if uri.match /[\*\{\[]/        #  parametric glob
           glob
-        else                              #  basic glob
-          files = (self + '.*').R.glob    #   base + extension match
-          files = (self + '*').R.glob if files.empty? # prefix match
+        else                           #  basic glob:
+          files = (self + '.*').R.glob #   base + extension
+          files = (self + '*').R.glob if files.empty? # prefix
           [self, files]
         end
        end).flatten.compact.uniq.select(&:exist?).map{|n|n.env env}

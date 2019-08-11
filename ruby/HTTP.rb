@@ -362,6 +362,8 @@ class WebResource
         [303, @r[:resp].update({'Location' => loc + parts[1..-1].join('/') + qs}), []]
       elsif file? # local file
         fileResponse
+      elsif node.directory? && qs.empty? && (index = (self+'index.html').R.env env).exist? && selectFormat == 'text/html'
+        index.fileResponse
       else
         localGraph
       end
