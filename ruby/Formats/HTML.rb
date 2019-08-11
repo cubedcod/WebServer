@@ -26,7 +26,7 @@ module Webize
         e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) if e['href'] && !e['id'] # link identifier
         e.attribute_nodes.map{|a|
           # normalize @src
-          e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-menuimg data-native-src data-original data-src data-src1}.member? a.name
+          e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-menuimg data-native-src data-original data-src}.member? a.name
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
 
           # strip attributes
@@ -88,7 +88,7 @@ module Webize
         [class*='topbar']  [id*='topbar']
         [class^='promo']   [id^='promo']  [class^='Promo']  [id^='Promo']
 footer  [class^='footer']  [id^='footer']
-header  [class*='header']  [id*='header'] [class*='Header'] [id*='Header']
+header  [class^='header']  [id^='header'] [class*='Header'] [id*='Header']
 nav     [class^='nav']     [id^='nav']
 sidebar [class^='side']    [id^='side']
 }
