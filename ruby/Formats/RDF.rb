@@ -32,6 +32,7 @@ class WebResource
   end
 
   # WebResource -> Graph
+  # frontend to RDF#load with format hints
   def load graph, options = {base_uri: path.R}
     if basename.split('.')[0] == 'msg'
       options[:format] = :mail
@@ -39,7 +40,7 @@ class WebResource
       options[:format] = :html
     elsif %w(Cookies).member? basename
       options[:format] = :sqlite
-    elsif %w(Makefile).member?(basename) || %w(cls).member?(ext)
+    elsif %w(Makefile).member?(basename) || %w(cls sty).member?(ext)
       options[:format] = :plaintext
     end
     graph.load relPath, options
