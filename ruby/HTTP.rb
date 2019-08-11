@@ -92,7 +92,7 @@ class WebResource
                                                             (HTML.keyval (Webize::HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
     end
 
-    def decompress head, body
+    def HTTP.decompress head, body
       case head['content-encoding'].to_s
       when /^br(otli)?$/i
         Brotli.inflate body
@@ -222,7 +222,7 @@ class WebResource
               body = response.read                                         # partial body
               upstream_metas.push 'Content-Encoding'                       # encoding preserved
             else                                                           # complete body
-              body = decompress meta, response.read                        # decode body
+              body = HTTP.decompress meta, response.read                   # decode body
               format = options[:content_type] || meta['content-type'] && meta['content-type'].split(/;/)[0]
               format ||= case ext # TODO use RDF->extension mapping table
                          when 'jpg'
@@ -439,7 +439,7 @@ class WebResource
       body = env['rack.input'].read
       if true #verbose?
         HTTP.print_header head
-        puts ::JSON.pretty_generate ::JSON.parse body if head['Content-Type'] == 'application/json'
+        HTTP.print_body head, body
       end
 
       # response
@@ -447,11 +447,24 @@ class WebResource
       code = r.code
       head = r.headers
       body = r.body
-      if verbose?
+      if true #verbose?
         HTTP.print_header head
-        puts ::JSON.pretty_generate ::JSON.parse body if head['Content-Type'] == 'application/json'
+        HTTP.print_body head, body
       end
       [code, head, [body]]
+    end
+
+    def HTTP.print_body head, body
+      body = HTTP.decompress head, body
+      body = case head['Content-Type']
+             when 'application/json'
+               json = ::JSON.parse body
+               puts json['query'] if json['query']
+               ::JSON.pretty_generate json
+             else
+               body
+             end
+      puts body
     end
 
     def HTTP.print_header header
