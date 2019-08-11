@@ -89,12 +89,16 @@ class WebResource
     def localGraph
       graph = RDF::Repository.new
       rdf, nonRDF = nodes.partition{|node| node.ext == 'ttl'}
-      nonRDF.select(&:file?).map{|n|n.load graph} # load non-RDF
-      index graph                        # index nonRDF
-      rdf.map{|node| node.load graph}    # load RDF
-      nonRDF.map{|node|                  # storage meta. omit raw email and native graph-storage pointers
-        node.fsStat graph unless node.basename.split('.')[0]=='msg'}
-      graphResponse graph
+      if rdf.size==1 && nonRDF.size==0 && selectFormat == 'text/turtle'
+        rdf[0].fileResponse
+      else
+        nonRDF.select(&:file?).map{|n|n.load graph} # load non-RDF
+        index graph                                 # index non-RDF
+        rdf.map{|node| node.load graph}             # load RDF
+        nonRDF.map{|node|                           # storage meta
+          node.fsStat graph unless node.basename.split('.')[0]=='msg'}
+        graphResponse graph
+      end
     end
   end
 end
