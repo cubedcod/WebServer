@@ -35,11 +35,11 @@ class WebResource
   def load graph, options = {base_uri: path.R}
     if basename.split('.')[0] == 'msg'
       options[:format] = :mail
-    elsif ext == 'html'
+    elsif ext.match? /^html?$/
       options[:format] = :html
     elsif %w(Cookies).member? basename
       options[:format] = :sqlite
-    elsif %w(Makefile).member? basename
+    elsif %w(Makefile).member?(basename) || %w(cls).member?(ext)
       options[:format] = :plaintext
     end
     graph.load relPath, options

@@ -1,3 +1,7 @@
-%w(URI POSIX HTTP).map{|l|require_relative l}
-%w(Audio Calendar CSS Feed HTML Image JS Markdown Message PDF RDF SQL Text Video Web YAML).map{|f|require_relative 'Formats/'+f}
+%w(URI POSIX HTTP).map{|lib|
+  require_relative lib}
+
+%w(Audio Calendar CSS Feed HTML Image JS LaTeX Markdown Message PDF RDF SQL Text Video Web YAML).map{|format|
+  require_relative 'Formats/' + format}
+
 require_relative '../config/site.rb'
