@@ -195,7 +195,9 @@ class WebResource
                           Access-Control-Allow-Credentials
                           Content-Type
                           Content-Length
-                          ETag}
+                          ETag
+                          x-iinfo
+}
       upstream_metas.push 'Set-Cookie' if options[:cookies]
       noTransform = false
       graph = options[:graph] || RDF::Repository.new # response graph
@@ -241,7 +243,10 @@ class WebResource
                 index graph unless options[:no_index]                      # cache RDF
               end
             end
-            upstream_metas.map{|k|@r[:resp][k]||=meta[k.downcase] if meta[k.downcase]} # response metadata
+            upstream_metas.map{|k| # response metadata
+              @r[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
+            HTTP.print_header @r[:resp] if verbose?
+            puts body if ENV['DEBUG']
           end
         rescue Exception => e
           case e.message # response-types handled in unexceptional control-flow
@@ -261,9 +266,13 @@ class WebResource
       begin
         fetchURL[url]       #   try (HTTPS default)
       rescue Exception => e # retry (HTTP)
-        if verbose? && e.respond_to?(:io)
-          puts e.io.status.join ' '
-          HTTP.print_header e.io.meta
+        if e.respond_to? :io
+          if verbose?
+            puts e.io.status.join ' '
+            HTTP.print_header e.io.meta
+          end
+          body = e.io.read
+          puts body if ENV['DEBUG']
         end
         case e.class.to_s
         when 'Errno::ECONNREFUSED'
@@ -282,7 +291,6 @@ class WebResource
           if e.respond_to?(:io) && e.io.status.to_s.match?(/999/)
             noTransform = true
             @r[:resp] = headers e.io.meta
-            body = e.io.read
           else
             fetchURL[fallback]
           end
@@ -366,12 +374,14 @@ class WebResource
         head[key] = v.to_s unless %w{host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri resp script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)
       }
 
+      # set Referer
       head['Referer'] = 'http://drudgereport.com/' if env['SERVER_NAME']&.match? /wsj\.com/
-      head['User-Agent'] = DesktopUA unless host && (host.match? UAhost)
+      head['Referer'] = head['Referer'].sub(/\?ui=upstream$/,'') if head['Referer'] && head['Referer'].match?(/\?ui=upstream$/) # strip local QS
 
-      # set UA for redirection via HTTP header rather than Javascript
-      head.delete 'User-Agent' if host == 't.co'
-      head['User-Agent'] = 'curl/7.65.1' if host == 'po.st'
+      # set User-Agent
+      head['User-Agent'] = DesktopUA unless host && (host.match? UAhost)
+      head.delete 'User-Agent' if host == 't.co'            # for redirection via HTTP header rather than Javascript
+      head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # 
 
       head
     end

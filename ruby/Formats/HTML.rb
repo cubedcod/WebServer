@@ -2,6 +2,19 @@
 require 'nokogiri'
 module Webize
   module HTML
+
+    LazySRC = %w(
+data-baseurl
+data-delayed-url
+data-hi-res-src
+data-img-src
+data-lazy-img
+data-lazy-src
+data-menuimg
+data-native-src
+data-original
+data-src)
+
     def self.clean body
       # parse input
       html = Nokogiri::HTML.fragment body
@@ -29,7 +42,7 @@ module Webize
         e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) if e['href'] && !e['id'] # link identifier
         e.attribute_nodes.map{|a|
           # normalize @src
-          e.set_attribute 'src', a.value if %w{data-baseurl data-hi-res-src data-img-src data-lazy-img data-lazy-src data-menuimg data-native-src data-original data-src}.member? a.name
+          e.set_attribute 'src', a.value if LazySRC.member? a.name
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
 
           # strip attributes
