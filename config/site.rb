@@ -432,18 +432,20 @@ yts
       date = post.css('.age > a')[0]
       subject = base + date['href']
       yield subject, Type, Post.R
-      if story = post.css('.storyon > a')[0]
-        yield subject, Title, story.inner_text
-        yield subject, To, (base + story['href']).R
-      end
       yield subject, Content, comment.inner_html
-      yield subject, Date, Chronic.parse(date.inner_text).iso8601
       user = post.css('.hnuser')[0]
       yield subject, Creator, (base + user['href']).R
       yield subject, Creator, user.inner_text
       yield subject, To, self
       if parent = post.css('.par > a')[0]
         yield subject, To, (base + parent['href']).R
+      end
+      if story = post.css('.storyon > a')[0]
+        yield subject, To, (base + story['href']).R
+        yield subject, Title, story.inner_text
+      end
+      if time = (Chronic.parse date.inner_text)
+        yield subject, Date, time.iso8601
       end
       post.remove }
   end
