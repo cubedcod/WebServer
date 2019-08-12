@@ -187,7 +187,7 @@ class WebResource
     Markup[Image] = -> image,env {
       src = if image.class == WebResource
               image.to_s
-            elsif image.class == String && image.match?(/^http/)
+            elsif image.class == String && image.match?(/^([\/]|http)/)
               image
             else
               image['https://schema.org/url'] || image[Schema+'url'] || image[Link] || image['uri']

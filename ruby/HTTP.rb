@@ -546,7 +546,7 @@ class WebResource
 
     # request for remote resource
     def remote
-      if env.has_key? 'HTTP_TYPE' # tagged
+      if env.has_key? 'HTTP_TYPE' # type-tagged request
         case env['HTTP_TYPE']
         when /drop/
           if ((host.match? /track/) || (env['REQUEST_URI'].match? /track/)) && (host.match? TrackHost)
@@ -569,20 +569,21 @@ class WebResource
       [302, {'Location' => e.io.meta['location']}, []]
     end
 
-    def selectFormat
+    def selectFormat default='text/html'
       index = {}
       (env['HTTP_ACCEPT']||'').split(/,/).map{|e| # split to (MIME,q) pairs
-        format, q = e.split /;/             # split (MIME,q) pair
-        i = q && q.split(/=/)[1].to_f|| 1   # q-value with default
-        index[i] ||= []                     # index location
-        index[i].push format.strip}         # index on q-value
+        format, q = e.split /;/           # split (MIME,q) pair
+        i = q && q.split(/=/)[1].to_f|| 1 # q-value with default
+        index[i] ||= []                   # index location
+        index[i].push format.strip}       # index on q-value
 
       index.sort.reverse.map{|q,formats| # formats in descending q-value order
-        formats.sort_by{|f|{'text/turtle'=>0}[f]||1}.map{|f| # tiebreak
-          return f if RDF::Writer.for(:content_type => f) || # RDF writer found
-            ['application/atom+xml', 'text/html'].member?(f) # non-RDF writer found
-          return 'text/turtle' if f == '*/*' }}              # wildcard writer
-      'text/html'                                            # default writer
+        formats.sort_by{|f|{'text/turtle'=>0}[f]||1}.map{|f|  # tiebreak with turtle-preference
+          return default if f == '*/*'                        # HTML via wildcard
+          return f if RDF::Writer.for(:content_type => f) ||  # RDF
+            ['application/atom+xml','text/html'].member?(f)}} # non-RDF
+
+      default                                                 # HTML via default
     end
 
     def upstreamUI?
