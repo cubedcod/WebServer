@@ -401,13 +401,14 @@ class WebResource
     def self.value type, v, env
       if Abstract == type || Content == type
         v
-      elsif Markup[type] # supplied type argument
+      elsif Markup[type] # explicit type-arg
         Markup[type][v,env]
-      elsif v.class == Hash # RDF type
+      elsif v.class == Hash
+        # RDF type to renderer mapping
         # TODO just render (potentially N times) for each type with a defined renderer?
-        # could simplify this but we'd need deduplication and type-merging that way also
+        # could simplify this but we'd still need deduplication and type-merging
         types = (v[Type]||[]).map &:R
-        if (types.member? Post) || (types.member? SIOC+'BlogPost') || (types.member? SIOC+'MailMessage') || (types.member? Schema+'DiscussionForumPosting') || (types.member? Schema+'Answer') || (types.member? Schema+'Review') || (types.member? 'https://schema.org/Comment') || (types.member? Schema+'NewsArticle')
+        if (types.member? Post) || (types.member? SIOC+'BlogPost') || (types.member? SIOC+'MailMessage') || (types.member? Schema+'DiscussionForumPosting') || (types.member? Schema+'Answer') || (types.member? Schema+'Review') || (types.member? 'https://schema.org/Comment') || (types.member? 'http://schema.org/Comment') || (types.member? Schema+'NewsArticle')
           Markup[SIOC+'MailMessage'][v,env]
         elsif (types.member? Image) || (types.member? Schema+'ImageObject') || (types.member? 'https://schema.org/ImageObject')
           Markup[Image][v,env]
