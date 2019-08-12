@@ -135,8 +135,9 @@ module Webize
 
       def each_statement &fn
         fn.call RDF::Statement.new(@base, Type.R, (Schema+'BreadcrumbList').R)
-        @doc.lines.map{|line|
-          fn.call RDF::Statement.new(@base, ('https://schema.org/itemListElement').R, line.chomp.R)}
+        @doc.lines.map(&:chomp).map{|line|
+          fn.call RDF::Statement.new @base, ('https://schema.org/itemListElement').R, line.R unless line.empty?
+        }
       end
     end
   end

@@ -444,7 +444,7 @@ yts
         yield subject, To, (base + story['href']).R
         yield subject, Title, story.inner_text
       end
-      if time = (Chronic.parse date.inner_text)
+      if time = (Chronic.parse date.inner_text.sub(/^on /,''))
         yield subject, Date, time.iso8601
       end
       post.remove }
