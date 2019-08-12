@@ -466,7 +466,12 @@ yts
               yield s, Date, Time.at(time).iso8601
             end
             if text = h['edge_media_to_caption']['edges'][0]['node']['text']
-              yield s, Abstract, CGI.escapeHTML(text).split(' ').map{|t|t.match?(/^@[a-zA-Z0-9._]+/) ? "<a href='https://www.instagram.com/#{t[1..-1]}'>#{t}</a>" : t}.join(' ')
+              yield s, Abstract, CGI.escapeHTML(text).split(' ').map{|t|
+                if match = (t.match /^@([a-zA-Z0-9._]+)(.*)/)
+                  "<a href='https://www.instagram.com/#{match[1]}'>#{match[1]}</a>#{match[2]}"
+                else
+                  t
+                end}.join(' ')
             end rescue nil
           end}
       end}
