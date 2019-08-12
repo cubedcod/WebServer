@@ -105,12 +105,8 @@ class WebResource
 
     PathGET['/mail'] = -> r {
       if r.local?
-        parts = r.parts
-        case parts[1]
-        when nil # inbox
+        if r.path=='/mail' # inbox
           [302, {'Location' => '/d/*/msg*?head&sort=date&view=table'}, []]
-        when /^(to|from)$/ # match slug to address containers
-          [302, {'Location' => "/mail/*/*#{parts[2]}*/*?head&sort=date&view=table"}, []]
         else
           r.local # default local handling
         end
