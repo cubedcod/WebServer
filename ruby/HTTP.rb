@@ -381,9 +381,9 @@ class WebResource
       head['Referer'] = head['Referer'].sub(/\?ui=upstream$/,'') if head['Referer'] && head['Referer'].match?(/\?ui=upstream$/) # strip local QS TODO remove all local vars
 
       # set User-Agent
-      head['User-Agent'] = DesktopUA unless host && (host.match? UAhost)
+      head['User-Agent'] = DesktopUA
+      head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # for redirection via HTTP header rather than Javascript
       head.delete 'User-Agent' if host == 't.co'            # for redirection via HTTP header rather than Javascript
-      head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # 
 
       head
     end

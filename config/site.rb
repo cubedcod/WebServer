@@ -43,12 +43,10 @@ class WebResource
     SiteJS  = ConfDir.join('site.js').read
   end
   module HTTP
-    # desktop UI user-agent identifier
+    # desktop UI user-agent
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.143 Safari/537.36'
-    # use desktop UI
+    # desktop UI hosts
     UIhost = /((apple|anvato|bandcamp|duckduckgo|jwplatform|(mix|sound)cloud|spotify|vimeo).(com|net)|github.io|.tv)$/
-    # send client UA-string to origin
-    UAhost = /(qualcomm)\.com$/
     # allow cookies
     CookieHost = /(bizjournals|twi(tch|tter))\.(com|net|tv)$/
     # allow POST
@@ -457,7 +455,6 @@ yts
         graph = ::JSON.parse script.inner_text.sub(IGgraph,'')[0..-2]
         Webize::HTML.webizeHash(graph){|h|
           if h['shortcode']
-            #puts ::JSON.pretty_generate h
             s = 'https://www.instagram.com/p/' + h['shortcode']
             yield s, Type, Post.R
             yield s, Image, h['display_url'].R if h['display_url']
@@ -469,7 +466,7 @@ yts
               yield s, Date, Time.at(time).iso8601
             end
             if text = h['edge_media_to_caption']['edges'][0]['node']['text']
-              yield s, Abstract, (CGI.escapeHTML text)
+              yield s, Abstract, CGI.escapeHTML(text).split(' ').map{|t|t.match?(/^@[a-zA-Z0-9._]+/) ? "<a href='https://www.instagram.com/#{t[1..-1]}'>#{t}</a>" : t}.join(' ')
             end rescue nil
           end}
       end}
