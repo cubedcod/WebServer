@@ -178,8 +178,8 @@ class WebResource
       if this = cached?; return this.fileResponse end
       @r ||= {resp: {}}; @r['HTTP_ACCEPT'] ||= '*/*' # response-meta storage
       hostname = @r['SERVER_NAME'] || host           # hostname
-      #HTTP.print_header env if verbose?             # inspect client metadata
-      head = headers                                 # read request-metadata
+      HTTP.print_header env if verbose?              # inspect request metadata
+      head = headers                                 # read request metadata
       head[:redirect] = false                        # don't follow redirects
       options[:cookies] ||= true if allowCookies?    # allow or deny cookies
       head.delete 'Cookie' unless options[:cookies]
@@ -345,6 +345,37 @@ class WebResource
       [c,h,[]]
     end
 
+    # header keys from lower-case and CGI_ALL_CAPS to canonical formatting
+    def headers hdr = nil
+      head = {}
+
+      (hdr || env).map{|k,v| # each key
+        k = k.to_s
+        underscored = k.match? /(_AP_|PASS_SFP)/i
+        key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|k| # eat HTTP prefix from Rack
+          if %w{cl id spf utc xsrf}.member? k
+            k = k.upcase       # acronymize
+          else
+            k[0] = k[0].upcase # capitalize token
+          end
+          k
+        }.join(underscored ? '_' : '-')
+        key = key.downcase if underscored
+
+        # set output header, strip Rack-internal keys
+        head[key] = v.to_s unless %w{host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri resp script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)
+      }
+
+      head['Referer'] = 'http://drudgereport.com/' if env['SERVER_NAME']&.match? /wsj\.com/
+      head['User-Agent'] = DesktopUA unless host && (host.match? UAhost)
+
+      # set UA for redirection via HTTP header rather than Javascript
+      head.delete 'User-Agent' if host == 't.co'
+      head['User-Agent'] = 'curl/7.65.1' if host == 'po.st'
+
+      head
+    end
+
     def local
       if %w{y year m month d day h hour}.member? parts[0] # time-based redirect
         time = Time.now
@@ -435,24 +466,27 @@ class WebResource
     def POST; allowPOST? ? sitePOST : denyPOST end
 
     def POSTthru
-      # request
+      # origin request
       url = 'https://' + host + path + qs
       head = headers
       body = env['rack.input'].read
-      if true #verbose?
+
+      if verbose?
         HTTP.print_header head
         HTTP.print_body head, body
       end
 
-      # response
+      # origin response
       r = HTTParty.post url, :headers => head, :body => body
       code = r.code
       head = r.headers
       body = r.body
-      if true #verbose?
+
+      if verbose?
         HTTP.print_header head
         HTTP.print_body head, body
       end
+
       [code, head, [body]]
     end
 
@@ -537,35 +571,6 @@ class WebResource
             ['application/atom+xml', 'text/html'].member?(f) # non-RDF writer found
           return 'text/turtle' if f == '*/*' }}              # wildcard writer
       'text/html'                                            # default writer
-    end
-
-    def headers allCAPS = nil
-      head = {}
-      (allCAPS || env).map{|k,v|
-        k = k.to_s
-        underscored = k.match? /(_AP_|PASS_SFP)/i
-        key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|k| # eat prefix
-          if %w{cl id spf utc xsrf}.member? k # all-cap acronyms
-            k = k.upcase
-          else
-            k[0] = k[0].upcase
-          end
-          k
-        }.join(underscored ? '_' : '-')
-        key = key.downcase if underscored
-
-        # set external headers
-        head[key] = v.to_s unless %w{host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri resp script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
-
-      head['Referer'] = 'http://drudgereport.com/' if env['SERVER_NAME']&.match? /wsj\.com/
-      head['User-Agent'] = DesktopUA unless host && (host.match? UAhost)
-
-      # try for redirection via HTTP headers, rather than Javascript
-      head.delete 'User-Agent' if host == 't.co'
-      head['User-Agent'] = 'curl/7.65.1' if host == 'po.st'
-
-      # unmangled headers
-      head
     end
 
     def upstreamUI?

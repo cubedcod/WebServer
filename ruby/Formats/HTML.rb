@@ -194,7 +194,7 @@ sidebar [class^='side']    [id^='side']
             end}
           [*BasicGunk,*Gunk].map{|selector|
             body.css(selector).map{|sel|
-              #puts "X"*80,"stripping #{selector}:", sel
+              #puts "X"*80,"stripping #{selector}:", sel if ENV['VERBOSE']
               sel.remove }} # strip elements
           yield subject, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
         else # body element missing
