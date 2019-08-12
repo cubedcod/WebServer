@@ -191,7 +191,7 @@ class WebResource
         avatar = Avatars[u.to_s.downcase]
         [{_: :a, href: u.to_s, id: 'a' + Digest::SHA2.hexdigest(rand.to_s),
           style: avatar ? '' : (env[:colors][name] ||= HTML.colorize),
-          c: avatar ? {_: :img, height: 48, class: :avatar, src: avatar} : name}.update(avatar ? {class: :avatar} : {}), ' ']
+          c: avatar ? {_: :img, class: :avatar, src: avatar} : name}.update(avatar ? {class: :avatar} : {}), ' ']
       else
         CGI.escapeHTML (c||'')
       end}

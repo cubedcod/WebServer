@@ -34,7 +34,7 @@ class WebResource
   # WebResource -> Graph
   # frontend to RDF#load with format hints
   def load graph, options = {base_uri: (path.R env)}
-    if basename.split('.')[0] == 'msg'
+    if basename.index('msg.')==0 || path.index('/mail/sent/cur')==0
       options[:format] = :mail
     elsif ext.match? /^html?$/
       options[:format] = :html
