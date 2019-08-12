@@ -183,8 +183,9 @@ class WebResource
       head[:redirect] = false                        # don't follow redirects
       options[:cookies] ||= true if allowCookies?    # allow or deny cookies
       head.delete 'Cookie' unless options[:cookies]
-      qStr = @r[:query] ? (q = @r[:query].dup        # read query
-        %w{allow view sort ui}.map{|a|q.delete a}    # consume local arguments
+      qStr = (@r[:query] && (@r[:query]['allow']||@r[:query]['view']||@r[:query]['sort']||@r[:query]['ui'])) ? (
+        q = @r[:query].dup                           # read query
+        %w{allow view sort ui}.map{|a|q.delete a}    # consume local args
         q.empty? ? '' : HTTP.qs(q)) : qs             # external query
       suffix = ext.empty? && hostname.match?(/reddit.com$/) && '.rss' # format suffix
       u = '//' + hostname + path + (suffix || '') + qStr          # base locator
@@ -196,7 +197,7 @@ class WebResource
                           Content-Type
                           Content-Length
                           ETag
-                          x-iinfo
+                          x-iinfo x-iejgwucgyu
 }
       upstream_metas.push 'Set-Cookie' if options[:cookies]
       noTransform = false
@@ -357,6 +358,7 @@ class WebResource
     def headers hdr = nil
       head = {}
 
+      # read raw headers
       (hdr || env).map{|k,v| # each key
         k = k.to_s
         underscored = k.match? /(_AP_|PASS_SFP)/i
@@ -376,7 +378,7 @@ class WebResource
 
       # set Referer
       head['Referer'] = 'http://drudgereport.com/' if env['SERVER_NAME']&.match? /wsj\.com/
-      head['Referer'] = head['Referer'].sub(/\?ui=upstream$/,'') if head['Referer'] && head['Referer'].match?(/\?ui=upstream$/) # strip local QS
+      head['Referer'] = head['Referer'].sub(/\?ui=upstream$/,'') if head['Referer'] && head['Referer'].match?(/\?ui=upstream$/) # strip local QS TODO remove all local vars
 
       # set User-Agent
       head['User-Agent'] = DesktopUA unless host && (host.match? UAhost)

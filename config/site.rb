@@ -50,7 +50,7 @@ class WebResource
     # send client UA-string to origin
     UAhost = /(qualcomm)\.com$/
     # allow cookies
-    CookieHost = /twi(tch|tter)\.(com|net|tv)$/
+    CookieHost = /(bizjournals|twi(tch|tter))\.(com|net|tv)$/
     # allow POST
     POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|mapbox|moovitapp|reddit|(mix|sound)cloud|(music|xp).apple|ttvnw|api.twitter|twitch|weather|youtube)\.(com|gov|im|net|tv)$/
     POSTpath = /\/graphql([\/]|$)/
