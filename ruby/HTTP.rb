@@ -181,7 +181,7 @@ class WebResource
       HTTP.print_header env if verbose?              # inspect request metadata
       head = headers                                 # read request metadata
       head[:redirect] = false                        # don't follow redirects
-      options[:cookies] ||= true if allowCookies?    # allow or deny cookies
+      options[:cookies] ||= true if allowCookies?    # selectively allow cookies
       head.delete 'Cookie' unless options[:cookies]
       qStr = (@r[:query] && (@r[:query]['allow']||@r[:query]['view']||@r[:query]['sort']||@r[:query]['ui'])) ? (
         q = @r[:query].dup                           # read query
@@ -191,14 +191,15 @@ class WebResource
       u = '//' + hostname + path + (suffix || '') + qStr          # base locator
       url      = (options[:scheme] || 'https').to_s    + ':' + u  # primary locator
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u  # fallback locator
+
       options[:content_type]='application/atom+xml' if FeedURL[u] # fix MIME on feed URLs
       upstream_metas = %w{Access-Control-Allow-Origin
                           Access-Control-Allow-Credentials
                           Content-Type
                           Content-Length
-                          ETag
-                          x-iinfo x-iejgwucgyu
-}
+                          ETag}
+                          #x-iinfo x-iejgwucgyu}
+
       upstream_metas.push 'Set-Cookie' if options[:cookies]
       noTransform = false
       graph = options[:graph] || RDF::Repository.new # response graph
@@ -240,17 +241,17 @@ class WebResource
               file = cache(format).write body if !format.match? RDFformats # cache non-RDF
               if reader = RDF::Reader.for(content_type: format)            # RDF reader
                 reader_options = {base_uri: url.R, no_embeds: options[:no_embeds]}
-                reader.new(body, reader_options){|_| graph << _ }      # parse RDF
-                index graph unless options[:no_index]                      # cache RDF
+                reader.new(body, reader_options){|_| graph << _ }          # read RDF
+                index graph unless options[:no_index]                      # cache+index RDF
               end
             end
-            upstream_metas.map{|k| # response metadata
+            upstream_metas.map{|k| # origin metadata
               @r[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
             HTTP.print_header @r[:resp] if verbose?
             puts body if ENV['DEBUG']
           end
         rescue Exception => e
-          case e.message # response-types handled in unexceptional control-flow
+          case e.message # response-types handled in normal control-flow
           when /304/ # no updates
             code = 304
           when /401/ # unauthorized
@@ -323,7 +324,7 @@ class WebResource
       elsif code == 206                                           # partial upstream data
         [206, @r[:resp], [body]]
       elsif body && noTransform || (upstreamUI? || (format && (format.match? PreservedFormat))) # upstream data
-        [200, @r[:resp].merge({'Content-Length' => body.bytesize}), [body]]
+        [200, @r[:resp].merge(body.respond_to?(:bytesize) ? {'Content-Length' => body.bytesize} : {}), [body]]
       else                                                        # graph data
         if graph.empty? && !local? && @r['REQUEST_PATH'][-1]=='/' # unlistable remote
           index = (CacheDir + hostname + path).R                  # local container
@@ -553,6 +554,8 @@ class WebResource
             fetch # music track
           elsif env[:query]['allow'] == ServerKey
             fetch # drop override
+          elsif env[:query].keys.grep(/^utm/)
+            [301, {'Location' => env['REQUEST_PATH']}, []]
           else
             deny
           end

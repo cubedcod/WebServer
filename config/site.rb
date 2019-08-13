@@ -156,6 +156,10 @@ class WebResource
       r.env[:query].has_key?('url') ? [301, {'Location' => r.env[:query]['url']}, []] : r.deny
     }
 
+    # BuzzFeed
+    HostGET['www.buzzfeed.com'] = -> r {r.fetch}
+    HostGET['img.buzzfeed.com'] = -> r {r.noexec}
+
     # Cloudflare
     HostGET['cdnjs.cloudflare.com'] = -> r {r.fetch}
 
