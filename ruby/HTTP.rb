@@ -32,6 +32,11 @@ class WebResource
         hostname.match?(UIhost)
     end
 
+    def allowHost
+      env['HTTP_TYPE'] = env['HTTP_TYPE'].split(',').-(%w(dropDNS)).join(',') if env['HTTP_TYPE']
+      remote
+    end
+
     def allowPOST?
       host.match?(POSThost) ||
         path.match?(POSTpath)
@@ -564,6 +569,8 @@ class WebResource
         when /direct/
           r = HTTParty.get ('https://' + host + path + qs), headers: headers
           [r.code, r.headers, [r.body]]
+        else
+          fetch
         end
       else
         fetch
