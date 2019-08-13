@@ -554,7 +554,7 @@ class WebResource
             fetch # music track
           elsif env[:query]['allow'] == ServerKey
             fetch # drop override
-          elsif env[:query].keys.grep(/^utm/)
+          elsif !env[:query].keys.grep(/^utm/).empty?
             [301, {'Location' => env['REQUEST_PATH']}, []]
           else
             deny

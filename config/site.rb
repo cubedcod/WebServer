@@ -157,8 +157,10 @@ class WebResource
     }
 
     # BuzzFeed
-    HostGET['www.buzzfeed.com'] = -> r {r.fetch}
     HostGET['img.buzzfeed.com'] = -> r {r.noexec}
+    HostGET['www.buzzfeed.com'] = -> r {
+      r.env['HTTP_TYPE'] = 'dropURI'
+      r.remote}
 
     # Cloudflare
     HostGET['cdnjs.cloudflare.com'] = -> r {r.fetch}
