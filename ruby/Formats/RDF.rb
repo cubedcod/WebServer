@@ -92,12 +92,13 @@ class WebResource
         rdf[0].fileResponse # input + output graph identical
       else
         graph = RDF::Repository.new                 # init repository
+
         nonRDF.select(&:file?).map{|n|n.load graph} # load non-RDF
         index graph                                 # index non-RDF
         rdf.map{|n|n.load graph}                    # load RDF
-        nonRDF.map{|node|                           # add storage meta
-          node.fsStat graph unless node.basename.split('.')[0]=='msg'}
-        graphResponse graph
+        nonRDF.map{|node| node.nodeStat graph }     # read node-meta
+
+        graphResponse graph                         # repository
       end
     end
   end

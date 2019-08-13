@@ -333,7 +333,7 @@ class WebResource
       else                                                        # graph data
         if graph.empty? && !local? && @r['REQUEST_PATH'][-1]=='/' # unlistable remote
           index = (CacheDir + hostname + path).R                  # local container
-          index.children.map{|e| e.fsStat graph, base_uri: 'https://' + e.relPath} if index.node.directory? # local list
+          index.children.map{|e|e.nodeStat graph, base_uri: 'https://' + e.relPath} if index.node.directory? # local list
         end
         graphResponse graph
       end

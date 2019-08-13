@@ -26,13 +26,14 @@ class WebResource
     def touch; dir.mkdir; FileUtils.touch relPath end                      # TOUCH(1)
     def write o; dir.mkdir; File.open(relPath,'w'){|f|f << o}; self end
 
-    def fsStat graph, options = {}                                         # STAT(1)
-      subject = (options[:base_uri] || path).R
+    def nodeStat graph, options = {}                                       # STAT(1)
+      subject = (options[:base_uri] || path.sub(/\.ttl$/,'')).R # point to generic node
       if node.directory?
-        subject = subject.path[-1] == '/' ? subject : (subject + '/') # normalize trailing-slash
+        subject = subject.path[-1] == '/' ? subject : (subject + '/') # enforce trailing-slash on container
         graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#Container').R)
         children.map{|child|
-          graph << (RDF::Statement.new subject, (W3+'ns/ldp#contains').R, child.node.directory? ? (child+'/') : child)}
+          graph << (RDF::Statement.new subject, (W3+'ns/ldp#contains').R,
+                                       child.node.directory? ? (child + '/') : child.path.sub(/\.ttl$/,'').R)}
       else
         graph << (RDF::Statement.new subject, Type.R, (W3+'ns/posix/stat#File').R)
       end
