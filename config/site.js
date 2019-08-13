@@ -57,6 +57,32 @@ document.addEventListener("DOMContentLoaded", function(){
 	    window.location.hash = cur.attr('prev');;
 	    e.preventDefault();
 	};
+	var selectNextNode = function(){
+	    var cur = null;
+	    if(window.location.hash)
+		cur = document.querySelector(window.location.hash);
+	    if(!cur)
+		cur = last;
+	    var start = cur;
+	    do {
+		cur = document.querySelector("[id='" + (cur.attr('next') || '') + "']");
+	    } while ((cur != start) && (cur.attr('class') != 'title'));
+	    window.location.hash = cur.attr('id');
+	    e.preventDefault();
+	};
+	var selectPrevNode = function(){
+	    var cur = null;
+	    if(window.location.hash)
+		cur = document.querySelector(window.location.hash);
+	    if(!cur)
+		cur = first;
+	    var start = cur;
+	    do {
+		cur = document.querySelector("[id='" + (cur.attr('prev') || '') + "']");
+	    } while ((cur != start) && (cur.attr('class') != 'title'));
+	    window.location.hash = cur.attr('id');
+	    e.preventDefault();
+	};
 	var gotoLink = function(arc) {
 	    var doc = document.querySelector("link[rel='" + arc + "']");
 	    if(doc)
@@ -73,14 +99,18 @@ document.addEventListener("DOMContentLoaded", function(){
 	    };
 	};
 	if(e.getModifierState("Shift")) {
-	    if(key==37||key==80) // [shift-left] previous page
+	    if(key==37) // [shift-left] previous page
 		gotoLink('prev');
-	    if(key==39||key==78) // [shift-right] next page
+	    if(key==39) // [shift-right] next page
 		gotoLink('next');
 	    if(key==38) // [shift-up] up to parent
 		gotoLink('up');
 	    if(key==40) // [shift-down] show children
 		gotoLink('down');
+	    if(key==80) // [shift-P] previous node
+		selectPrevNode();
+	    if(key==78) // [shift-N] next node
+		selectNextNode();
 	} else {
 	    if(key==80) // [p]revious link
 		selectPrevLink();
