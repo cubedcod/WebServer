@@ -141,8 +141,8 @@ class WebResource
 
     # Amazon
     Amazon = -> r { ENV.has_key?('AMAZON') ? r.desktop.fetch : r.noexec }
-    HostGET['www.amazon.com'] = Amazon
-    %w(s3.amazonaws.com).map{|n| Subdomain[n] = Amazon}
+    %w(www.amazon.com).map{|h| HostGET[h] = Amazon }
+    %w(media-amazon.com s3.amazonaws.com ssl-images-amazon.com).map{|n| Subdomain[n] = Amazon }
 
     # AOL
     HostGET['o.aolcdn.com'] = -> r {r.env[:query].has_key?('image_uri') ? [301, {'Location' => r.env[:query]['image_uri']}, []] : r.noexec}
@@ -216,9 +216,7 @@ ssl.gstatic.com
 www.gstatic.com
 ).map{|h|
       HostGET[h] = Google}
-
-    %w(storage.googleapis.com gstatic.com).map{|n|
-      Subdomain[n] = Google}
+    %w(storage.googleapis.com gstatic.com).map{|n| Subdomain[n] = Google }
 
     # Linkedin
     HostGET['www.linkedin.com'] = HostGET['media.licdn.com'] = -> r {r.noexec}
