@@ -13,7 +13,9 @@ data-lazy-src
 data-menuimg
 data-native-src
 data-original
-data-src)
+data-src
+image-src
+)
 
     def self.clean body
       # parse input
