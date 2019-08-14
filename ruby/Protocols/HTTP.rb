@@ -89,7 +89,7 @@ class WebResource
       trace = e.backtrace.join "\n"
       puts "\e[7;31m500\e[0m " + msg , trace
       [500, {'Content-Type' => 'text/html'},
-       env['REQUEST_METHOD'] == 'HEAD' ? [] : [uri.R.htmlDocument(
+       env['REQUEST_METHOD'] == 'HEAD' ? [] : [uri.R(env).htmlDocument(
                                                  {uri => {Content => [
                                                             {_: :h3, c: msg.hrefs, style: 'color: red'},
                                                             {_: :pre, c: trace.hrefs},
@@ -172,33 +172,31 @@ class WebResource
 
     def env e = nil
       if e
-        @r = e
+        @env = e
         self
       else
-        @r
+        @env
       end
     end
 
+    LocalArgs = %w(allow view sort ui)
     def fetch options = {}
       if this = cached?; return this.fileResponse end
-      @r ||= {resp: {}} # init request-meta storage for non-HTTP callers
-      env[:repository] ||= RDF::Repository.new       # RDF storage (in-memory)
-      env['HTTP_ACCEPT'] ||= '*/*'                    # default Accept header
-      hostname = env['SERVER_NAME'] || host           # hostname
-      HTTP.print_header env if verbose?              # inspect request metadata
-      head = headers                                 # read request metadata
-      head[:redirect] = false                        # don't follow redirects
-      options[:cookies] ||= true if allowCookies?    # selectively allow cookies
-      head.delete 'Cookie' unless options[:cookies]
-      qStr = (env[:query] && (env[:query]['allow']||env[:query]['view']||env[:query]['sort']||env[:query]['ui'])) ? (
-        q = env[:query].dup                           # read query
-        %w{allow view sort ui}.map{|a|q.delete a}    # consume local args
-        q.empty? ? '' : HTTP.qs(q)) : qs             # external query
+      @env ||= {resp: {}}              # init request-meta for non-HTTP callers
+      env[:repository] ||= RDF::Repository.new # RDF storage (in-memory)
+      env['HTTP_ACCEPT'] ||= '*/*'             # default Accept header
+      hostname = env['SERVER_NAME'] || host    # hostname
+      HTTP.print_header env if verbose?        # inspect request metadata
+      head = headers                           # read request metadata
+      head[:redirect] = false                  # don't follow redirects
+      qStr = (env[:query] && LocalArgs.find{|arg|env[:query].has_key? arg}) ? (
+        q = env[:query].dup                    # read query
+        LocalArgs.map{|a|q.delete a} # consume local args
+        q.empty? ? '' : HTTP.qs(q)) : qs       # external query
       suffix = ext.empty? && hostname.match?(/reddit.com$/) && '.rss' # format suffix
       u = '//' + hostname + path + (suffix || '') + qStr          # base locator
       url      = (options[:scheme] || 'https').to_s    + ':' + u  # primary locator
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u  # fallback locator
-
       options[:content_type]='application/atom+xml' if FeedURL[u] # fix MIME on feed URLs
       upstream_metas = %w{Access-Control-Allow-Origin
                           Access-Control-Allow-Credentials
@@ -206,8 +204,8 @@ class WebResource
                           Content-Length
                           ETag}
                           #x-iinfo x-iejgwucgyu}
+      upstream_metas.push 'Set-Cookie' if allowCookies?
 
-      upstream_metas.push 'Set-Cookie' if options[:cookies]
       noTransform = false
       code = nil   # response status
       body = nil   # response body
@@ -383,11 +381,17 @@ class WebResource
         head[key] = v.to_s unless %w{host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri resp script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)
       }
 
-      # set Referer
+      # Cookie
+      unless allowCookies?
+        head.delete 'Cookie'
+        head.delete 'Set-Cookie'
+      end
+
+      # Referer
       head['Referer'] = 'http://drudgereport.com/' if env['SERVER_NAME']&.match? /wsj\.com/
       head['Referer'] = head['Referer'].sub(/\?ui=upstream$/,'') if head['Referer'] && head['Referer'].match?(/\?ui=upstream$/) # strip local QS TODO remove all local vars
 
-      # set User-Agent
+      # User-Agent
       head['User-Agent'] = DesktopUA
       head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # for redirection via HTTP header rather than Javascript
       head.delete 'User-Agent' if host == 't.co'            # for redirection via HTTP header rather than Javascript
@@ -409,7 +413,7 @@ class WebResource
                               '/%Y/%m/%d/%H/'
                             else
                             end)
-        [303, @r[:resp].update({'Location' => loc + parts[1..-1].join('/') + qs}), []]
+        [303, env[:resp].update({'Location' => loc + parts[1..-1].join('/') + qs}), []]
       elsif file? # local file
         fileResponse
       elsif node.directory? && qs.empty? && (index = (self+'index.html').R.env env).exist? && selectFormat == 'text/html'
@@ -421,7 +425,7 @@ class WebResource
 
     LocalAddr = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
 
-    def local?; LocalAddr.member?(@r['SERVER_NAME']||host) end
+    def local?; LocalAddr.member?(env['SERVER_NAME']||host) end
 
     def noexec
       if %w{gif js}.member? ext.downcase # filter suffix
@@ -540,10 +544,10 @@ class WebResource
       }.join("&")
     end
 
-    # querystring, late-bound environment takes precedence, drop '?' if empty
+    # querystring - late-bound environment takes precedence, dropped '?' if empty
     def qs
-      if @r && @r['QUERY_STRING'] && !@r['QUERY_STRING'].empty?
-        '?' +  @r['QUERY_STRING']
+      if env && env['QUERY_STRING'] && !env['QUERY_STRING'].empty?
+        '?' + env['QUERY_STRING']
       elsif query && !query.empty?
         '?' + query
       else

@@ -70,10 +70,9 @@ class WebResource
       end
       src = src.to_s
       src = src + '/DASH_480' if src.match /v.redd.it/
-      if env[:images] && env[:images][src]
-      # deduplicated
+      if env[:images][src]
+       # deduplicate
       else
-        env[:images] ||= {}
         env[:images][src] = true
         if src.match /youtu/
           id = (HTTP.parseQs src.R.query)['v'] || src.R.parts[-1]

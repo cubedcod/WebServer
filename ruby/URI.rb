@@ -393,8 +393,6 @@ class WebResource < RDF::URI
     end
 
     def dateMeta
-      @r ||= {}
-      @r[:links] ||= {}
       n = nil # next page
       p = nil # prev page
       # date parts
@@ -425,9 +423,9 @@ class WebResource < RDF::URI
         end
       end
       remainder = ps.empty? ? '' : ['', *ps].join('/')
-      remainder += '/' if @r['REQUEST_PATH'] && @r['REQUEST_PATH'][-1] == '/'
-      @r[:links][:prev] = p + remainder + qs + '#prev' if p && p.R.exist?
-      @r[:links][:next] = n + remainder + qs + '#next' if n && n.R.exist?
+      remainder += '/' if env['REQUEST_PATH'] && env['REQUEST_PATH'][-1] == '/'
+      env[:links][:prev] = p + remainder + qs + '#prev' if p && p.R.exist?
+      env[:links][:next] = n + remainder + qs + '#next' if n && n.R.exist?
     end
 
   end

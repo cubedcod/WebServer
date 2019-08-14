@@ -77,9 +77,9 @@ class WebResource
       return notfound if env[:repository].empty?
       format = selectFormat
       dateMeta if local?
-      @r[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
-      @r[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
-      @r[:resp].update({'Link' => @r[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !@r[:links] || @r[:links].empty?
+      env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
+      env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
+      env[:resp].update({'Link' => env[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless env[:links].empty?
       entity ->{
         case format
         when /^text\/html/

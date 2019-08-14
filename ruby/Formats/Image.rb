@@ -197,10 +197,9 @@ class WebResource
         puts "multiple img-src found:", src if src.size > 1
         src = src[0]
       end
-      if env[:images] && env[:images][src]
-      # deduplicated
+      if env[:images][src]
+       # deduplicate
       else
-        env[:images] ||= {}
         env[:images][src] = true
         {class: :thumb, c: {_: :a, id: 'img'+Digest::SHA2.hexdigest(rand.to_s), href: src, c: {_: :img, src: src}}}
       end}

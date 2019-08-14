@@ -131,8 +131,8 @@ class WebResource
   end
   module HTTP
     def fileResponse
-      @r[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
-      @r[:resp]['ETag'] ||= Digest::SHA2.hexdigest [uri, node.stat.mtime, node.size].join
+      env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
+      env[:resp]['ETag'] ||= Digest::SHA2.hexdigest [uri, node.stat.mtime, node.size].join
       entity
     end
   end
