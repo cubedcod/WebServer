@@ -39,14 +39,54 @@ class WebResource
 
     def allowPOST?
       host.match?(POSThost) ||
-        path.match?(POSTpath)
+      path.match?(POSTpath)
+    end
+
+    # cache reference
+    def cache format=nil
+      want_suffix = ext.empty?
+      hostPart = CacheDir + (host || 'localhost')
+      pathPart = if !path || path[-1] == '/'
+                   want_suffix = true
+                   '/index'
+                 elsif path.size > 127
+                   want_suffix = true
+                   hash = Digest::SHA2.hexdigest path
+                   '/' + hash[0..1] + '/' + hash[2..-1]
+                 else
+                   path
+                 end
+      qsPart = if qs.empty?
+                 ''
+               else
+                 want_suffix = true
+                 '.' + Digest::SHA2.hexdigest(qs)
+               end
+      suffix = if want_suffix
+                 if !ext || ext.empty? || ext.size > 11
+                   if format
+                     if xt = Extensions[RDF::Format.content_types[format]]
+                       '.' + xt.to_s # suffix found in format-map
+                     else
+                       '' # content-type unmapped
+                     end
+                   else
+                     '' # content-type unknown
+                   end
+                 else
+                   '.' + ext # restore known suffix
+                 end
+               else
+                 '' # suffix already exists
+               end
+      (hostPart + pathPart + qsPart + suffix).R env
     end
 
     def cached?
       return false if env && env['HTTP_PRAGMA'] == 'no-cache'
-      location = cache
-      return location if location.file?     # direct match
-      (location + '.*').R.glob.find &:file? # suffix match
+      loc = cache
+      return loc if loc.file?     # direct match
+      (loc+'.*').R.glob.find &:file? # suffix match
     end
 
     def self.call env
@@ -191,7 +231,7 @@ class WebResource
       head[:redirect] = false                  # don't follow redirects
       qStr = (env[:query] && LocalArgs.find{|arg|env[:query].has_key? arg}) ? (
         q = env[:query].dup                    # read query
-        LocalArgs.map{|a|q.delete a} # consume local args
+        LocalArgs.map{|a|q.delete a}           # consume local args
         q.empty? ? '' : HTTP.qs(q)) : qs       # external query
       suffix = ext.empty? && hostname.match?(/reddit.com$/) && '.rss' # format suffix
       u = '//' + hostname + path + (suffix || '') + qStr          # base locator
@@ -339,8 +379,8 @@ class WebResource
     end
 
     def GET
-      if path.match? /[^\/]204$/ # connect check
-        [204, {}, []]                             # binding lookup
+      if path.match? /[^\/]204$/
+        [204, {}, []] # connect check               lambda lookup:
       elsif handler = PathGET['/' + parts[0].to_s] # any host, path-and-children
         handler[self]
       elsif handler = PathGET[path]                # any host, exact path
@@ -393,8 +433,8 @@ class WebResource
 
       # User-Agent
       head['User-Agent'] = DesktopUA
-      head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # for redirection via HTTP header rather than Javascript
-      head.delete 'User-Agent' if host == 't.co'            # for redirection via HTTP header rather than Javascript
+      head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # redirect via HTTP header rather than Javascript
+      head.delete 'User-Agent' if host == 't.co'            # redirect via HTTP header rather than Javascript
 
       head
     end
