@@ -181,15 +181,17 @@ class WebResource
 
     def fetch options = {}
       if this = cached?; return this.fileResponse end
-      @r ||= {resp: {}}; @r['HTTP_ACCEPT'] ||= '*/*' # response-meta storage
-      hostname = @r['SERVER_NAME'] || host           # hostname
+      @r ||= {resp: {}} # init request-meta storage for non-HTTP callers
+      env[:repository] ||= RDF::Repository.new       # RDF storage (in-memory)
+      env['HTTP_ACCEPT'] ||= '*/*'                    # default Accept header
+      hostname = env['SERVER_NAME'] || host           # hostname
       HTTP.print_header env if verbose?              # inspect request metadata
       head = headers                                 # read request metadata
       head[:redirect] = false                        # don't follow redirects
       options[:cookies] ||= true if allowCookies?    # selectively allow cookies
       head.delete 'Cookie' unless options[:cookies]
-      qStr = (@r[:query] && (@r[:query]['allow']||@r[:query]['view']||@r[:query]['sort']||@r[:query]['ui'])) ? (
-        q = @r[:query].dup                           # read query
+      qStr = (env[:query] && (env[:query]['allow']||env[:query]['view']||env[:query]['sort']||env[:query]['ui'])) ? (
+        q = env[:query].dup                           # read query
         %w{allow view sort ui}.map{|a|q.delete a}    # consume local args
         q.empty? ? '' : HTTP.qs(q)) : qs             # external query
       suffix = ext.empty? && hostname.match?(/reddit.com$/) && '.rss' # format suffix
@@ -207,7 +209,6 @@ class WebResource
 
       upstream_metas.push 'Set-Cookie' if options[:cookies]
       noTransform = false
-      graph = options[:graph] || RDF::Repository.new # response graph
       code = nil   # response status
       body = nil   # response body
       format = nil # response format
@@ -246,13 +247,13 @@ class WebResource
               file = cache(format).write body if !format.match? RDFformats # cache non-RDF
               if reader = RDF::Reader.for(content_type: format)            # RDF reader
                 reader_options = {base_uri: url.R, no_embeds: options[:no_embeds]}
-                reader.new(body, reader_options){|_| graph << _ }          # read RDF
-                index graph unless options[:no_index]                      # cache+index RDF
+                reader.new(body, reader_options){|_| env[:repository] << _ } # read RDF
+                index unless options[:no_index]                      # cache+index RDF
               end
             end
             upstream_metas.map{|k| # origin metadata
-              @r[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
-            HTTP.print_header @r[:resp] if verbose?
+              env[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
+            HTTP.print_header env[:resp] if verbose?
             puts body if ENV['DEBUG']
           end
         rescue Exception => e
@@ -297,7 +298,7 @@ class WebResource
         when 'OpenURI::HTTPError'
           if e.respond_to?(:io) && e.io.status.to_s.match?(/999/)
             noTransform = true
-            @r[:resp] = headers e.io.meta
+            env[:resp] = headers e.io.meta
           else
             fetchURL[fallback]
           end
@@ -327,15 +328,15 @@ class WebResource
       elsif file                                                  # file data
         file.fileResponse
       elsif code == 206                                           # partial upstream data
-        [206, @r[:resp], [body]]
+        [206, env[:resp], [body]]
       elsif body && noTransform || (upstreamUI? || (format && (format.match? PreservedFormat))) # upstream data
-        [200, @r[:resp].merge(body.respond_to?(:bytesize) ? {'Content-Length' => body.bytesize} : {}), [body]]
-      else                                                        # graph data
-        if graph.empty? && !local? && @r['REQUEST_PATH'][-1]=='/' # unlistable remote
-          index = (CacheDir + hostname + path).R                  # local container
-          index.children.map{|e|e.nodeStat graph, base_uri: 'https://' + e.relPath} if index.node.directory? # local list
+        [200, env[:resp].merge(body.respond_to?(:bytesize) ? {'Content-Length' => body.bytesize} : {}), [body]]
+      else                                                         # graph data
+        if env[:repository].empty? && !local? && env['REQUEST_PATH'][-1]=='/' # unlistable remote
+          index = (CacheDir + hostname + path).R                              # local container
+          index.children.map{|e|e.nodeStat base_uri: 'https://' + e.relPath} if index.node.directory? # local list
         end
-        graphResponse graph
+        graphResponse
       end
     end
 

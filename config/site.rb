@@ -46,9 +46,9 @@ class WebResource
     # desktop UI user-agent
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.143 Safari/537.36'
     # desktop UI hosts
-    UIhost = /((apple|anvato|bandcamp|duckduckgo|jwplatform|(mix|sound)cloud|spotify|vimeo).(com|net)|github.io|.tv)$/
+    UIhost = /((apple|anvato|bandcamp|duckduckgo|jwplatform|(mix|sound)cloud|spotify|vimeo|youtube).(com|net)|github.io|.tv)$/
     # allow cookies
-    CookieHost = /(bizjournals|twi(tch|tter))\.(com|net|tv)$/
+    CookieHost = /(bizjournals|twi(tch|tter)|youtube)\.(com|net|tv)$/
     # allow POST
     POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|mapbox|moovitapp|reddit|(mix|sound)cloud|(music|xp).apple|ttvnw|api.twitter|twitch|weather|youtube)\.(com|gov|im|net|tv)$/
     POSTpath = /\/graphql([\/]|$)/
@@ -232,18 +232,17 @@ www.gstatic.com
       if r.parts[0] == 'favicon.ico'
         r.deny
       else
-        graph = RDF::Repository.new
         r.env['HTTP_ORIGIN'] = 'https://outline.com'
         r.env['HTTP_REFERER'] = r.env['HTTP_ORIGIN'] + r.path
         r.env['SERVER_NAME'] = 'outlineapi.com'
         if r.parts.size == 1
           r.env[:query] = {id: r.parts[0]}
-          '/v4/get_article'.R(r.env).fetch graph: graph, no_response: true
+          '/v4/get_article'.R(r.env).fetch no_response: true
         elsif r.env['REQUEST_PATH'][1..5] == 'https'
           r.env[:query] = {source_url: r.env['REQUEST_PATH'][1..-1]}
-          '/article'.R(r.env).fetch graph: graph, no_response: true
+          '/article'.R(r.env).fetch no_response: true
         end
-        r.graphResponse graph
+        r.graphResponse
       end}
 
     # Reddit
@@ -253,7 +252,7 @@ www.gstatic.com
         r.env[:resp]['Refresh'] = 1800
         ('//www.reddit.com/r/' + r.subscriptions.join('+') + '/new').R(r.env).fetch
       else
-        r.remote
+        r.allowHost
       end}
 
     # Reuters
@@ -274,28 +273,17 @@ www.gstatic.com
     HostGET['mobile.twitter.com'] = -> r {[301,{'Location' => 'https://twitter.com' + r.path },[]]}
     HostGET['t.co'] = -> r {r.parts[0] == 'i' ? r.deny : r.noexec}
     HostGET['twitter.com'] = -> r {
-      r = r.R
       if !r.path || r.path == '/'
-        if !r.env # REPL / script caller
-          r.env({resp: {}}) # initialize environment
-          no_response = true # no HTTP return-value
-        end
         r.env[:resp]['Refresh'] = 1800 # client refresh hint
-
-        graph = RDF::Repository.new
         fetch_options = {
-          graph: graph,
-          no_embeds: true, # skip HTML RDF-embeds if any, use custom parser
-          no_index: true, # don't index during fetch
-          no_response: true} # no HTTP return-value from fetch
-
+          no_embeds: true,   # skip HTML+RDF-embed parse
+          no_index: true,    # don't index after fetch
+          no_response: true} # don't forward HTTP response from fetch
         '//twitter.com'.R.subscriptions.shuffle.each_slice(18){|s|
           r.env[:query] = { vertical: :default, f: :tweets, q: s.map{|u|'from:' + u}.join('+OR+')}
           '//twitter.com/search'.R(r.env).fetch fetch_options}
-        updates = r.index graph
-
-        # return value
-        no_response ? updates : (r.graphResponse graph)
+        r.index
+        r.graphResponse
       else
         r.remote
       end}
@@ -324,7 +312,9 @@ www.gstatic.com
     HostGET['youtu.be'] = -> re {[301, {'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]}, []]}
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
-      if !mode || %w{
+      if %w{attribution_link redirect}.member? mode
+        [301, {'Location' =>  r.env[:query]['q'] || r.env[:query]['u']},[]]
+      elsif !mode || %w(
 browse_ajax
 c
 channel
@@ -342,10 +332,8 @@ user
 watch
 watch_videos
 yts
-}.member?(mode)
-        r.desktop.fetch cookies: true
-      elsif %w{attribution_link redirect}.member? mode
-        [301, {'Location' =>  r.env[:query]['q'] || r.env[:query]['u']},[]]
+).member?(mode)
+        r.fetch
       else
         r.deny
       end}

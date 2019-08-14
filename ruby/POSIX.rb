@@ -26,7 +26,8 @@ class WebResource
     def touch; dir.mkdir; FileUtils.touch relPath end                      # TOUCH(1)
     def write o; dir.mkdir; File.open(relPath,'w'){|f|f << o}; self end
 
-    def nodeStat graph, options = {}                                       # STAT(1)
+    def nodeStat options = {}                                       # STAT(1)
+      graph = env[:repository]
       subject = (options[:base_uri] || path.sub(/\.ttl$/,'')).R # point to generic node
       if node.directory?
         subject = subject.path[-1] == '/' ? subject : (subject + '/') # enforce trailing-slash on container
@@ -130,7 +131,6 @@ class WebResource
   end
   module HTTP
     def fileResponse
-      @r ||= {resp: {}}
       @r[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
       @r[:resp]['ETag'] ||= Digest::SHA2.hexdigest [uri, node.stat.mtime, node.size].join
       entity

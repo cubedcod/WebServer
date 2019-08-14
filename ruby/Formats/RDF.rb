@@ -3,9 +3,10 @@ class WebResource
   RDFformats = /^(application|text)\/(atom|html|json|rss|turtle|.*urlencoded|xml)/
 
   # Repository -> file(s)
-  def index g
+  def index
+    return unless env[:repository]
     updates = []
-    g.each_graph.map{|graph|
+    env[:repository].each_graph.map{|graph|
       if n = graph.name # named graph
         n = n.R
         docs = []
@@ -31,25 +32,33 @@ class WebResource
     updates # indexed resources
   end
 
-  # WebResource -> Graph
-  # frontend to RDF#load with format hints
-  def load graph, options = {base_uri: (path.R env)}
-    if basename.index('msg.')==0 || path.index('/mail/sent/cur')==0
-      options[:format] = :mail
-    elsif ext.match? /^html?$/
-      options[:format] = :html
-    elsif %w(Cookies).member? basename
-      options[:format] = :sqlite
-    elsif %w(Makefile).member?(basename) || %w(cls sty).member?(ext)
-      options[:format] = :plaintext
+  def isRDF?; ext == 'ttl' end
+
+  # WebResource -> Graph (RDF#load with format hints)
+  def load options = {base_uri: (path.R env)}
+    env[:repository] ||= RDF::Repository.new
+    nodeStat unless isRDF?
+    if file?
+      if basename.index('msg.')==0 || path.index('/mail/sent/cur')==0
+        # procmail doesnt allow suffix (like .eml), only prefix? email author if you find solution
+        # presumably this is due to crazy maildir suffix-rewrites etc
+        options[:format] = :mail
+      elsif ext.match? /^html?$/
+        options[:format] = :html
+      elsif %w(Cookies).member? basename
+        options[:format] = :sqlite
+      elsif %w(Makefile).member?(basename) || %w(cls sty).member?(ext)
+        options[:format] = :plaintext
+      end
+      env[:repository].load relPath, options
     end
-    graph.load relPath, options
   end
 
   # Graph -> Hash
-  def treeFromGraph graph ; tree = {}
+  def treeFromGraph
+    tree = {}
     head = env[:query].has_key? 'head'
-    graph.each_triple{|s,p,o|
+    env[:repository].each_triple{|s,p,o|
       s = s.to_s # subject URI
       p = p.to_s # predicate URI
       unless p == 'http://www.w3.org/1999/xhtml/vocab#role' || (head && p == Content)
@@ -58,47 +67,41 @@ class WebResource
         tree[s][p] ||= []                             # predicate
         tree[s][p].push o unless tree[s][p].member? o # object
       end}
-    @r[:graph] = tree
-    tree # renderer input
+    env[:graph] = tree
   end
 
   module HTTP
 
     # Graph -> HTTP Response
-    def graphResponse graph
-      return notfound if graph.empty?
+    def graphResponse
+      return notfound if env[:repository].empty?
       format = selectFormat
       dateMeta if local?
-      @r ||= {resp: {}}
       @r[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
       @r[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
       @r[:resp].update({'Link' => @r[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !@r[:links] || @r[:links].empty?
       entity ->{
         case format
         when /^text\/html/
-          htmlDocument treeFromGraph graph # HTML
+          htmlDocument treeFromGraph # HTML
         when /^application\/atom+xml/
-          renderFeed treeFromGraph graph   # feed
-        else                               # RDF
+          renderFeed treeFromGraph   # Atom/RSS-feed
+        else                         # RDF
           base = ('https://' + env['SERVER_NAME']).R.join env['REQUEST_PATH']
-          graph.dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => base, :standard_prefixes => true
+          env[:repository].dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => base, :standard_prefixes => true
         end}
     end
 
     # WebResource -> HTTP Response
     def localGraph
-      rdf, nonRDF = nodes.partition{|node| node.ext == 'ttl'}
+      rdf, nonRDF = nodes.partition &:isRDF?
       if rdf.size==1 && nonRDF.size==0 && selectFormat == 'text/turtle'
-        rdf[0].fileResponse # input + output graph identical
+        rdf[0].fileResponse # response on file
       else
-        graph = RDF::Repository.new                 # init repository
-
-        nonRDF.select(&:file?).map{|n|n.load graph} # load non-RDF
-        index graph                                 # index non-RDF
-        rdf.map{|n|n.load graph}                    # load RDF
-        nonRDF.map{|node| node.nodeStat graph }     # read node-meta
-
-        graphResponse graph                         # repository
+        nonRDF.map &:load # load  non-RDF
+        index             # index non-RDF
+        rdf.map &:load    # load  RDF
+        graphResponse     # response
       end
     end
   end

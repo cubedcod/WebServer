@@ -302,6 +302,7 @@ class WebResource
           }
           options[:scheme] = :http if feed.scheme == 'http'
           feed.fetch options
+          nil
         rescue Exception => e
           puts 'https:' + feed.uri, e.class, e.message, e.backtrace
         end}
