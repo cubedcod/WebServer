@@ -44,13 +44,13 @@ class WebResource
   end
   module HTTP
     # desktop UI user-agent
-    DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.143 Safari/537.36'
+    DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3869.0 Safari/537.36'
     # desktop UI hosts
     UIhost = /((apple|anvato|bandcamp|duckduckgo|jwplatform|(mix|sound)cloud|spotify|vimeo|youtube).(com|net)|github.io|.tv)$/
     # allow cookies
-    CookieHost = /(bizjournals|twi(tch|tter)|youtube)\.(com|net|tv)$/
+    CookieHost = /(bizjournals|microcenter|twi(tch|tter)|youtube)\.(com|net|tv)$/
     # allow POST
-    POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|mapbox|moovitapp|reddit|(mix|sound)cloud|(music|xp).apple|ttvnw|api.twitter|twitch|weather|youtube)\.(com|gov|im|net|tv)$/
+    POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|mapbox|microcenter|moovitapp|reddit|(mix|sound)cloud|(music|xp).apple|ttvnw|api.twitter|twitch|weather|youtube)\.(com|gov|im|net|tv)$/
     POSTpath = /\/graphql([\/]|$)/
     # allow paths named 'track'
     TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
