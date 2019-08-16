@@ -158,7 +158,7 @@ class WebResource
       env[:deny] = true
       type, content = if ext == 'js' || env[:script]
                         ['application/javascript',
-                         '// TODO deliver modified scripts']
+                         '//']
                       elsif path[-3..-1] == 'css'
                         ['text/css',"body {background: repeating-linear-gradient(#{rand 360}deg, #000, #000 6.5em, #fff 6.5em, #fff 8em)\ndiv, p {background-color: #000; color: #fff}"]
                       elsif env[:GIF]
@@ -272,16 +272,9 @@ class WebResource
             else                                                           # complete body
               body = HTTP.decompress meta, response.read                   # decode body
               format = options[:content_type] || meta['content-type'] && meta['content-type'].split(/;/)[0]
-              format ||= case ext # TODO use RDF->extension mapping table
-                         when 'jpg'
-                           'image/jpeg'
-                         when 'png'
-                           'image/png'
-                         when 'gif'
-                           'image/gif'
-                         else
-                           'text/html'
-                         end
+              format ||= (extension = ext.to_sym
+                RDF::Format.file_extensions[extension] &&
+                RDF::Format.file_extensions[extension][0].content_type[0])
               file = cache(format).write body if !format.match? RDFformats # cache non-RDF
               if reader = RDF::Reader.for(content_type: format)            # RDF reader
                 reader_options = {base_uri: url.R, no_embeds: options[:no_embeds]}

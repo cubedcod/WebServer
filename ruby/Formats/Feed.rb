@@ -79,7 +79,6 @@ module Webize
             # <img>
             content.css('img').map{|i|
               if src = i.attr('src')
-                # TODO find reblogs with relative URIs in content and check RFCish specs on whether relURI base is resource or doc
                 src = subject.join src
                 i.set_attribute 'src', src
                 yield s, Image, src.R

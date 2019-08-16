@@ -74,7 +74,7 @@ class WebResource
 
     # Graph -> HTTP Response
     def graphResponse
-      return notfound if env[:repository].empty?
+      return notfound if !env.has_key?(:repository) || env[:repository].empty?
       format = selectFormat
       dateMeta if local?
       env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin

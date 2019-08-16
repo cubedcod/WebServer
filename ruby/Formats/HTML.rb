@@ -26,7 +26,7 @@ image-src
 
       # strip Javascript and tracker-images
       html.css('a[href^="javascript"]').map{|a| a.remove }
-      %w{quantserve scorecardresearch}.map{|co| # TODO apply nofetch rules
+      %w{quantserve scorecardresearch}.map{|co|
         html.css('img[src*="' + co + '"]').map{|img| img.remove }}
 
       # CSS:background-image → <img>
@@ -242,18 +242,12 @@ class WebResource
       env[:images] ||= {}
       env[:colors] ||= {}
 
-      # title  TODO Canonicalize URIs in graphToTree? lookup all potential combinations here
+      # document title
       titleRes = [
-        '#this', '',
-        path && (path + '#this'), path,
-        host && !path && ('//' + host + '#this'),
-        host && !path && ('//' + host),
-        host && path && ('https://' + host + path + '#this'),
+        '', path,
+        host && path && ('//' + host + path),
         host && path && ('https://' + host + path),
-        host && path && ('//' + host + path + '#this'),
-        host && path && ('//' + host + path)
-      ].compact.find{|u|
-        graph[u] && graph[u][Title]}
+      ].compact.find{|u| graph[u] && graph[u][Title]}
 
       # render HEAD link as HTML
       link = -> key, displayname {
@@ -414,9 +408,7 @@ class WebResource
       elsif Markup[type] # explicit type-arg
         Markup[type][v,env]
       elsif v.class == Hash
-        # RDF type to renderer mapping
-        # TODO just render (potentially N times) for each type with a defined renderer?
-        # could simplify this but we'd still need deduplication and type-merging
+        # RDF=type -> renderer mapping
         types = (v[Type]||[]).map &:R
         if (types.member? Post) || (types.member? SIOC+'BlogPost') || (types.member? SIOC+'MailMessage') || (types.member? Schema+'DiscussionForumPosting') || (types.member? Schema+'Answer') || (types.member? Schema+'Review') || (types.member? 'https://schema.org/Comment') || (types.member? 'http://schema.org/Comment') || (types.member? Schema+'NewsArticle')
           Markup[SIOC+'MailMessage'][v,env]
