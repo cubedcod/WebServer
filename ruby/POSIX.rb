@@ -80,7 +80,7 @@ class WebResource
        end
       else                             # GLOB
         if uri.match /[\*\{\[]/        #  parametric glob
-          env[:grep] = true
+          env[:grep] = true if env[:query].has_key?('q')
           glob
         else                           #  basic glob:
           files = (self + '.*').R.glob #   base + extension

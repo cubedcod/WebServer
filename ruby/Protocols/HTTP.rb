@@ -565,7 +565,9 @@ class WebResource
 
     # querystring - late-binding precedence
     def qs
-      if env && env[:query]
+      if path.index('/_Incapsula') == 0
+        env['QUERY_STRING'].empty? ? '' : ('?' + env['QUERY_STRING'])
+      elsif env && env[:query]
         q = env[:query].dup                # read query
         LocalArgs.map{|arg| q.delete arg } # strip private args
         q.empty? ? '' : HTTP.qs(q)
