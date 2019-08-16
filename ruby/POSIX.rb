@@ -27,8 +27,9 @@ class WebResource
     def write o; dir.mkdir; File.open(relPath,'w'){|f|f << o}; self end
 
     def nodeStat options = {}                                           # STAT(1)
-      graph = env[:repository]
+      return if basename.index('msg.') == 0
       subject = (options[:base_uri] || path.sub(/\.ttl$/,'')).R         # reference abstract generic node
+      graph = env[:repository]
       if node.directory?
         subject = subject.path[-1] == '/' ? subject : (subject + '/')   # enforce trailing slash on container
         graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#Container').R)
