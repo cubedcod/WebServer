@@ -230,12 +230,8 @@ class WebResource
       HTTP.print_header env if verbose?        # inspect request metadata
       head = headers                           # read request metadata
       head[:redirect] = false                  # don't follow redirects
-      qStr = (env[:query] && LocalArgs.find{|arg|env[:query].has_key? arg}) ? (
-        q = env[:query].dup                    # read query
-        LocalArgs.map{|a|q.delete a}           # consume local args
-        q.empty? ? '' : HTTP.qs(q)) : qs       # external query
       suffix = ext.empty? && hostname.match?(/reddit.com$/) && '.rss' # format suffix
-      u = '//' + hostname + path + (suffix || '') + qStr          # base locator
+      u = '//' + hostname + path + (suffix || '') + qs            # base locator
       url      = (options[:scheme] || 'https').to_s    + ':' + u  # primary locator
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u  # fallback locator
       options[:content_type]='application/atom+xml' if FeedURL[u] # fix MIME on feed URLs
@@ -567,9 +563,13 @@ class WebResource
       }.join("&")
     end
 
-    # querystring - late-bound environment takes precedence, dropped '?' if empty
+    # querystring - late-binding precedence
     def qs
-      if env && env['QUERY_STRING'] && !env['QUERY_STRING'].empty?
+      if env && env[:query]
+        q = env[:query].dup                # read query
+        LocalArgs.map{|arg| q.delete arg } # strip private args
+        q.empty? ? '' : HTTP.qs(q)
+      elsif env && env['QUERY_STRING'] && !env['QUERY_STRING'].empty?
         '?' + env['QUERY_STRING']
       elsif query && !query.empty?
         '?' + query
