@@ -256,7 +256,7 @@ class WebResource
            "\n"]
           end}
 
-      htmlGrep graph, env[:query]['q'] if env[:GrepRequest]
+      htmlGrep if env[:grep]
       subbed = subscribed?
       tabular = env[:query]['view'] == 'table' || uri == '//www.w3.org/1999/02/22-rdf-syntax-ns'
       shrunken = env[:query].has_key? 'head'

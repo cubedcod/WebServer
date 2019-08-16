@@ -47,9 +47,8 @@ class WebResource
     end
 
     # GREP(1)
-    def grep q
-      env[:GrepRequest] = true
-      args = POSIX.splitArgs q
+    def grep
+      args = POSIX.splitArgs env[:query]['q']
       case args.size
       when 0
         return []
@@ -74,12 +73,14 @@ class WebResource
        elsif env[:query].has_key?('find') && path != '/' # easymode find
           find '*' + env[:query]['find'] + '*' unless env[:query]['find'].empty?
        elsif env[:query].has_key?('q') && path!='/' # GREP
-         grep env[:query]['q']
+         env[:grep] = true
+         grep
        else
          [self, children]              # LS
        end
       else                             # GLOB
         if uri.match /[\*\{\[]/        #  parametric glob
+          env[:grep] = true
           glob
         else                           #  basic glob:
           files = (self + '.*').R.glob #   base + extension
@@ -92,7 +93,9 @@ class WebResource
   include POSIX
   module HTML
 
-    def htmlGrep graph, q
+    def htmlGrep
+      graph = env[:graph]
+      q = env[:query]['q']
       wordIndex = {}
       args = POSIX.splitArgs q
       args.each_with_index{|arg,i| wordIndex[arg] = i }
