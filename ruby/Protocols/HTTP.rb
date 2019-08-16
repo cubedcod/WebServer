@@ -23,8 +23,8 @@ class WebResource
       end
     end
 
-    def allowCookies?
-      hostname = env['SERVER_NAME'] || host || 'localhost'
+    def allowCookies?; hostname = env['SERVER_NAME'] || host || 'localhost'
+
       ENV.has_key?('COOKIES') ||
         hostname.match?(CookieHost) ||
         hostname.match?(POSThost) ||

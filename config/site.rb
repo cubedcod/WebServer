@@ -140,7 +140,7 @@ class WebResource
     PathGET['/url'] = HostGET['gate.sc'] = HostGET['go.skimresources.com'] = -> r {[301,{'Location' => (r.env[:query]['url'] || r.env[:query]['q'])}, []]}
 
     # Amazon
-    HostGET['www.amazon.com'] = -> r {r.allowHost}
+    HostGET['amazon.com'] = HostGET['www.amazon.com'] = -> r {r.allowHost}
     %w(media-amazon.com ssl-images-amazon.com
        s3.amazonaws.com).map{|n|
       Subdomain[n] = -> r { ENV.has_key?('AWS') ? r.allowHost : r.noexec }}
@@ -175,12 +175,14 @@ class WebResource
     HostGET['proxy.duckduckgo.com'] = -> r {%w{iu}.member?(r.parts[0]) ? [301, {'Location' => r.env[:query]['u']}, []] : r.remote}
 
     # eBay
+    HostGET['ebay.com'] = HostGET['www.ebay.com'] = -> r {r.desktop.allowHost}
     HostGET['i.ebayimg.com'] = -> r {
       if r.basename.match? /s-l(64|96|200|225).jpg/
         [301, {'Location' => r.dirname + '/s-l1600.jpg'}, []]
       else
-        r.fetch
+        r.noexec
       end}
+    HostGET['ir.ebaystatic.com'] = -> r {r.noexec}
     HostGET['rover.ebay.com'] = -> r {r.env[:query].has_key?('mpre') ? [301, {'Location' => r.env[:query]['mpre']}, []] : r.deny}
 
     # Facebook
