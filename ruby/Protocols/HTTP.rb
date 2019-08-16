@@ -534,6 +534,7 @@ class WebResource
       head = headers
       body = env['rack.input'].read
 
+      verbose if parts.member? 'graphql'
       if verbose?
         HTTP.print_header head
         HTTP.print_body head, body
@@ -647,8 +648,13 @@ class WebResource
                   env[:query]['ui'] == 'upstream')
     end
 
+    def verbose
+      env[:verbose] = true
+    end
+
     def verbose?
-      ENV.has_key? 'VERBOSE'
+      (ENV.has_key? 'VERBOSE') || # process environment
+      (env.has_key? :verbose)     # request environment
     end
 
   end
