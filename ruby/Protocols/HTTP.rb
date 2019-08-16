@@ -86,7 +86,7 @@ class WebResource
       return false if env && env['HTTP_PRAGMA'] == 'no-cache'
       loc = cache
       return loc if loc.file?     # direct match
-      (loc+'.*').R.glob.find &:file? # suffix match
+      (loc+'.*').R(env).glob.find &:file? # suffix match
     end
 
     def self.call env

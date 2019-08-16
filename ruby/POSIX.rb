@@ -3,34 +3,34 @@ class WebResource
   module POSIX
     include URIs
 
-    def basename; File.basename ( path || '/' ) end                        # BASENAME(1)
+    def basename; File.basename ( path || '/' ) end                     # BASENAME(1)
     def children; node.children.delete_if{|f|f.basename.to_s.index('.')==0}.map &:toWebResource end
-    def dir; dirname.R if path end                                         # DIRNAME(1)
-    def dirname; File.dirname path if path end                             # DIRNAME(1)
-    def du; `du -s #{shellPath}| cut -f 1`.chomp.to_i end                  # DU(1)
+    def dir; dirname.R if path end                                      # DIRNAME(1)
+    def dirname; File.dirname path if path end                          # DIRNAME(1)
+    def du; `du -s #{shellPath}| cut -f 1`.chomp.to_i end               # DU(1)
     def exist?; node.exist? end
     def ext; File.extname( path || '' )[1..-1] || '' end
     def file?; node.file? end
     def find p; `find #{shellPath} -iname #{Shellwords.escape p}`.lines.map{|p|POSIX.path p} end # FIND(1)
-    def glob; (Pathname.glob relPath).map &:toWebResource end              # GLOB(7)
-    def ln   n; FileUtils.ln   node.expand_path, n.node.expand_path end    # LN(1)
-    def ln_s n; FileUtils.ln_s node.expand_path, n.node.expand_path end    # LN(1)
-    def link n; n.dir.mkdir; send :ln, n unless n.exist? end               # LN(1)
-    def mkdir; FileUtils.mkdir_p relPath unless exist?; self end           # MKDIR(1)
+    def glob; Pathname.glob(relPath).map{|p|p.toWebResource env} end    # GLOB(7)
+    def ln   n; FileUtils.ln   node.expand_path, n.node.expand_path end # LN(1)
+    def ln_s n; FileUtils.ln_s node.expand_path, n.node.expand_path end # LN(1)
+    def link n; n.dir.mkdir; send :ln, n unless n.exist? end            # LN(1)
+    def mkdir; FileUtils.mkdir_p relPath unless exist?; self end        # MKDIR(1)
     def node; @node ||= (Pathname.new relPath) end
     def parts; path ? path.split('/').-(['']) : [] end
     def relPath; URI.unescape(['/','','.',nil].member?(path) ? '.' : (path[0]=='/' ? path[1..-1] : path)) end
     def self.path p; ('/' + p.to_s.chomp.gsub(' ','%20').gsub('#','%23')).R end
     def self.splitArgs args; args.shellsplit rescue args.split /\W/ end
     def shellPath; Shellwords.escape relPath.force_encoding 'UTF-8' end
-    def touch; dir.mkdir; FileUtils.touch relPath end                      # TOUCH(1)
+    def touch; dir.mkdir; FileUtils.touch relPath end                   # TOUCH(1)
     def write o; dir.mkdir; File.open(relPath,'w'){|f|f << o}; self end
 
-    def nodeStat options = {}                                       # STAT(1)
+    def nodeStat options = {}                                           # STAT(1)
       graph = env[:repository]
-      subject = (options[:base_uri] || path.sub(/\.ttl$/,'')).R # point to generic node
+      subject = (options[:base_uri] || path.sub(/\.ttl$/,'')).R         # reference abstract generic node
       if node.directory?
-        subject = subject.path[-1] == '/' ? subject : (subject + '/') # enforce trailing-slash on container
+        subject = subject.path[-1] == '/' ? subject : (subject + '/')   # enforce trailing slash on container
         graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#Container').R)
         children.map{|child|
           graph << (RDF::Statement.new subject, (W3+'ns/ldp#contains').R,
