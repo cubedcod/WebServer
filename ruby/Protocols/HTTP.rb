@@ -565,7 +565,7 @@ class WebResource
 
     # querystring - late-binding precedence
     def qs
-      if path.index('/_Incapsula') == 0
+      if path && path.index('/_Incapsula') == 0
         env['QUERY_STRING'].empty? ? '' : ('?' + env['QUERY_STRING'])
       elsif env && env[:query]
         q = env[:query].dup                # read query
