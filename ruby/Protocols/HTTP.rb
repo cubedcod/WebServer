@@ -247,7 +247,6 @@ class WebResource
                           #x-iinfo x-iejgwucgyu}
       upstream_metas.push 'Set-Cookie' if allowCookies?
 
-      noTransform = false
       code = nil   # response status
       body = nil   # response body
       format = nil # response format
@@ -287,7 +286,6 @@ class WebResource
             upstream_metas.map{|k| # origin metadata
               env[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
             HTTP.print_header env[:resp] if verbose?
-            puts body if ENV['DEBUG']
           end
         rescue Exception => e
           case e.message # response-types handled in normal control-flow
@@ -307,13 +305,9 @@ class WebResource
       begin
         fetchURL[url]       #   try (HTTPS default)
       rescue Exception => e # retry (HTTP)
-        if e.respond_to? :io
-          if verbose?
-            puts e.io.status.join ' '
-            HTTP.print_header e.io.meta
-          end
-          body = e.io.read
-          puts body if ENV['DEBUG']
+        if e.respond_to?(:io) && verbose?
+          puts e.io.status.join ' '
+          HTTP.print_header e.io.meta
         end
         case e.class.to_s
         when 'Errno::ECONNREFUSED'
@@ -329,12 +323,7 @@ class WebResource
         when 'OpenSSL::SSL::SSLError'
           fetchURL[fallback]
         when 'OpenURI::HTTPError'
-          if e.respond_to?(:io) && e.io.status.to_s.match?(/999/)
-            noTransform = true
-            env[:resp] = headers e.io.meta
-          else
-            fetchURL[fallback]
-          end
+          fetchURL[fallback]
         when 'OpenURI::HTTPRedirect'
           location = e.io.meta['location']
           if location == fallback
@@ -362,8 +351,8 @@ class WebResource
         file.fileResponse
       elsif code == 206                                           # partial upstream data
         [206, env[:resp], [body]]
-      elsif body && noTransform || (upstreamUI? || (format && (format.match? PreservedFormat))) # upstream data
-        [200, env[:resp].merge(body.respond_to?(:bytesize) ? {'Content-Length' => body.bytesize} : {}), [body]]
+      elsif body && (upstreamUI? || format&.match?(PreservedFormat)) # upstream data
+        [200, env[:resp].merge({'Content-Length' => body.bytesize}), [body]]
       else                                                         # graph data
         if env[:repository].empty? && !local? && env['REQUEST_PATH'][-1]=='/' # unlistable remote
           index = (CacheDir + hostname + path).R                              # local container
