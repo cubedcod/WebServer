@@ -227,6 +227,9 @@ www.gstatic.com
     # Medium
     #HostGET['medium.com'] = -> r {r.env[:query].has_key?('redirecturl') ? [301, {'Location' => r.env[:query]['redirecturl']}, []] : r.noexec}
 
+    # Meredith Corp
+    HostGET['imagesvc.meredithcorp.io'] = -> r {r.env[:query].has_key?('url') ? [301, {'Location' => r.env[:query]['url']}, []] : r.noexec}
+
     # Mozilla
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
