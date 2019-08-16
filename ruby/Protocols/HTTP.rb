@@ -96,6 +96,7 @@ class WebResource
       path = Pathname.new(env['REQUEST_PATH']).expand_path.to_s          # evaluate path-expression
       path += '/' if env['REQUEST_PATH'][-1] == '/' && path[-1] != '/'   # preserve trailing-slash
       resource = ('//' + env['SERVER_NAME'] + path).R env                # instantiate request
+      resource.verbose if resource.parts.member? 'graphql'
       resource.send(env['REQUEST_METHOD']).yield_self{|status,head,body| # dispatch request
         color = (if resource.env[:deny]                                  # log request
                   '31'                                                    # red -> denied
@@ -262,19 +263,20 @@ class WebResource
           open(url, head) do |response|
             code = response.status.to_s.match(/\d{3}/)[0]
             meta = response.meta
-            if verbose?
-              print ' ', code, ' '
-              HTTP.print_header meta
-            end
             if code == 206
               body = response.read                                         # partial body
               upstream_metas.push 'Content-Encoding'                       # encoding preserved
             else                                                           # complete body
               body = HTTP.decompress meta, response.read                   # decode body
-              format = options[:content_type] || meta['content-type'] && meta['content-type'].split(/;/)[0]
-              format ||= (extension = ext.to_sym
-                RDF::Format.file_extensions[extension] &&
-                RDF::Format.file_extensions[extension][0].content_type[0])
+              if verbose?
+                print ' ', code, ' '
+                HTTP.print_header meta
+                HTTP.print_body head, body
+              end
+              format = options[:content_type] || meta['content-type']&.split(/;/)[0] || (
+                xt = ext.to_sym
+                RDF::Format.file_extensions.has_key?(xt) &&
+                RDF::Format.file_extensions[xt][0].content_type[0])
               file = cache(format).write body if !format.match? RDFformats # cache non-RDF
               if reader = RDF::Reader.for(content_type: format)            # RDF reader
                 reader_options = {base_uri: url.R, no_embeds: options[:no_embeds]}
@@ -527,7 +529,6 @@ class WebResource
       head = headers
       body = env['rack.input'].read
 
-      verbose if parts.member? 'graphql'
       if verbose?
         HTTP.print_header head
         HTTP.print_body head, body
@@ -548,7 +549,6 @@ class WebResource
     end
 
     def HTTP.print_body head, body
-      body = HTTP.decompress head, body
       body = case head['Content-Type']
              when 'application/json'
                json = ::JSON.parse body
