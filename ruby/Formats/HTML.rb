@@ -24,9 +24,9 @@ image-src
       # strip elements
       %w{iframe link[rel='stylesheet'] style link[type='text/javascript'] link[as='script'] script}.map{|s| html.css(s).remove}
 
-      # strip Javascript and tracker-images
+      # strip tracker gunk
       html.css('a[href^="javascript"]').map{|a| a.remove }
-      %w{quantserve scorecardresearch}.map{|co|
+      %w{clickability quantserve scorecardresearch}.map{|co|
         html.css('img[src*="' + co + '"]').map{|img| img.remove }}
 
       # CSS:background-image → <img>
