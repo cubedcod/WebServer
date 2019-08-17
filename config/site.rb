@@ -256,11 +256,11 @@ www.gstatic.com
     # Reddit
     HostGET['reddit.com'] = HostGET['old.reddit.com'] = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path},[]]}
     HostGET['www.reddit.com'] = -> r {
+      r.env[:suffix] = '.rss' if r.ext.empty? && !r.upstreamUI?
       if r.path == '/'
         r.env[:resp]['Refresh'] = 1800
         ('//www.reddit.com/r/' + r.subscriptions.join('+') + '/new').R(r.env).fetch
       else
-        r.env[:suffix] = '.rss' if r.ext.empty? && !r.upstreamUI?
         r.allowHost
       end}
     HostGET['gateway.reddit.com'] = -> r {r.allowHost}

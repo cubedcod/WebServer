@@ -159,8 +159,9 @@ class WebResource
       HTTP.print_header env if verbose?
       env[:deny] = true
       type, content = if ext == 'js' || env[:script]
+                        source = ConfDir.join 'alternatives/' + host + path
                         ['application/javascript',
-                         '//']
+                         source.exist? ? source.read : '//']
                       elsif path[-3..-1] == 'css'
                         ['text/css',"body {background: repeating-linear-gradient(#{rand 360}deg, #000, #000 6.5em, #fff 6.5em, #fff 8em)\ndiv, p {background-color: #000; color: #fff}"]
                       elsif env[:GIF]
@@ -561,20 +562,21 @@ class WebResource
       }.join("&")
     end
 
-    # querystring - late-binding precedence
-    def qs
-      if path && path.index('/_Incapsula') == 0
-        env['QUERY_STRING'].empty? ? '' : ('?' + env['QUERY_STRING'])
-      elsif env && env[:query]
-        q = env[:query].dup                # read query
-        LocalArgs.map{|arg| q.delete arg } # strip private args
-        q.empty? ? '' : HTTP.qs(q)
-      elsif env && env['QUERY_STRING'] && !env['QUERY_STRING'].empty?
-        '?' + env['QUERY_STRING']
-      elsif query && !query.empty?
-        '?' + query
+    def qs # query string
+      if env # request context
+        if path && (path.index('/_Incapsula')==0 || host.match?(/s\d.wp.com/)) # upstream QS
+          env['QUERY_STRING'].empty? ? '' : ('?' + env['QUERY_STRING'])
+        else
+          q = env[:query].dup              # copy query
+          LocalArgs.map{|arg|q.delete arg} # strip private args
+          q.empty? ? '' : HTTP.qs(q)       # external querystring
+        end
       else
-        ''
+        if query && !query.empty?
+          '?' + query
+        else
+          ''
+        end
       end
     end
 
