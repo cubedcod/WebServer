@@ -6,6 +6,7 @@ module Webize
  .ActionBar .ActionBar-items .SocialBar
  .featured-headlines
  .global-audio-components
+ a[href="https://www.bostonmagazine.com/scrapertrap"]
 }
       Triplr = {
         'apnews.com' => :AP,
@@ -258,6 +259,7 @@ www.gstatic.com
         r.env[:resp]['Refresh'] = 1800
         ('//www.reddit.com/r/' + r.subscriptions.join('+') + '/new').R(r.env).fetch
       else
+        r.env[:suffix] = '.rss' if r.ext.empty? && !r.upstreamUI?
         r.allowHost
       end}
 

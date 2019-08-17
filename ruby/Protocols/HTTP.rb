@@ -90,7 +90,8 @@ class WebResource
     end
 
     def self.call env
-      return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']    # allow HTTP methods
+      return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']    # permit HTTP methods
+      env['HTTP_ACCEPT'] ||= '*/*'                                       # Accept default
       env[:resp] = {}; env[:links] = {}                                  # response-header storage
       env[:query] = parseQs env['QUERY_STRING']                          # parse query
       path = Pathname.new(env['REQUEST_PATH']).expand_path.to_s          # evaluate path-expression
@@ -225,13 +226,10 @@ class WebResource
       if this = cached?; return this.fileResponse end
       @env ||= {resp: {}}              # init request-meta for non-HTTP callers
       env[:repository] ||= RDF::Repository.new # RDF storage (in-memory)
-      env['HTTP_ACCEPT'] ||= '*/*'             # default Accept header
       hostname = env['SERVER_NAME'] || host    # hostname
-      HTTP.print_header env if verbose?        # inspect request metadata
       head = headers                           # read request metadata
       head[:redirect] = false                  # don't follow redirects
-      suffix = ext.empty? && hostname.match?(/reddit.com$/) && '.rss' # format suffix
-      u = '//' + hostname + path + (suffix || '') + qs            # base locator
+      u = '//' + hostname + path + (env[:suffix]||'') + qs        # location
       url      = (options[:scheme] || 'https').to_s    + ':' + u  # primary locator
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u  # fallback locator
       options[:content_type]='application/atom+xml' if FeedURL[u] # fix MIME on feed URLs
@@ -611,11 +609,11 @@ class WebResource
 
     def selectFormat default='text/html'
       index = {}
-      (env['HTTP_ACCEPT']||'').split(/,/).map{|e| # split to (MIME,q) pairs
-        format, q = e.split /;/           # split (MIME,q) pair
-        i = q && q.split(/=/)[1].to_f|| 1 # q-value with default
-        index[i] ||= []                   # index location
-        index[i].push format.strip}       # index on q-value
+      env['HTTP_ACCEPT'].split(/,/).map{|e| # split to (MIME,q) pairs
+        format, q = e.split /;/             # split (MIME,q) pair
+        i = q && q.split(/=/)[1].to_f || 1  # q-value with default
+        index[i] ||= []                     # init index
+        index[i].push format.strip}         # index on q-value
 
       index.sort.reverse.map{|q,formats| # formats in descending q-value order
         formats.sort_by{|f|{'text/turtle'=>0}[f]||1}.map{|f|  # tiebreak with turtle-preference
