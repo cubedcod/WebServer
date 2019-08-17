@@ -10,14 +10,14 @@ module Webize
 }
       Triplr = {
         'apnews.com' => :AP,
+        'news.ycombinator.com' => :HackerNews,
+        'twitter.com' => :Twitter,
         'www.apnews.com' => :AP,
         'www.city-data.com' => :CityData,
+        'www.google.com' => :GoogleHTML,
         'www.instagram.com' => :Instagram,
         'www.patriotledger.com' => :GateHouse,
         'www.providencejournal.com' => :GateHouse,
-        'news.ycombinator.com' => :HackerNews,
-        'www.google.com' => :GoogleHTML,
-        'twitter.com' => :Twitter,
         'www.youtube.com' => :YouTube,
       }
 
@@ -25,6 +25,7 @@ module Webize
   end
   module JSON
     Triplr = {
+      'gateway.reddit.com' => :Reddit,
       'outline.com' => :Outline,
       'outlineapi.com' => :Outline,
       'www.youtube.com' => :YouTubeJSON,
@@ -262,6 +263,7 @@ www.gstatic.com
         r.env[:suffix] = '.rss' if r.ext.empty? && !r.upstreamUI?
         r.allowHost
       end}
+    HostGET['gateway.reddit.com'] = -> r {r.allowHost}
 
     # Reuters
     (0..5).map{|i|
@@ -481,6 +483,10 @@ yts
     yield subject, To, ('//' + tree['data']['domain']).R
     yield subject, Content, (Webize::HTML.clean tree['data']['html'])
     yield subject, Image, tree['data']['meta']['og']['og:image'].R
+  end
+
+  def Reddit tree
+    puts tree.keys
   end
 
   def Twitter doc
