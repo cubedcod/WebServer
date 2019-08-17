@@ -270,6 +270,9 @@ www.gstatic.com
           r.noexec
         end}}
 
+    # Shopify
+    HostGET['cdn.shopify.com'] = -> r {r.noexec}
+
     # Soundcloud
     HostGET['api-v2.soundcloud.com'] = -> r {
       re = HTTParty.get ('https://' + r.host + r.path + r.qs), headers: r.headers
