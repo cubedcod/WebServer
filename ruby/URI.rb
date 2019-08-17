@@ -254,6 +254,7 @@ class WebResource < RDF::URI
       'smartbanner:price-suffix-apple' => :drop,
       'smartbanner:price-suffix-google' => :drop,
       'smartbanner:title' => :drop,
+      'https://www.apnews.com/storyHTML' => Content,
       'stylesheet' => :drop,
       'swift-page-name' => :drop,
       'swift-page-section' => :drop,
