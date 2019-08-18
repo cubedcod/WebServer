@@ -1,4 +1,7 @@
-google = {ima: {ImaSdkSettings: {VpaidMode: {ENABLED: 1}},
+google = {ima: {ImaSdkSettings: {VpaidMode: {ENABLED: 1},
+				 setPlayerVersion: function(v){},
+				 setPlayerType: function(t){},
+				},
 		settings: {setVpaidMode: function(bool){
 		    console.log('Welcome to IMA');
 		}},
@@ -11,6 +14,10 @@ google = {ima: {ImaSdkSettings: {VpaidMode: {ENABLED: 1}},
 		    constructor(a) {
 			console.log('..new ad loader');
 		    };
-		}
+		    getSettings() {
+			return google.ima.ImaSdkSettings;
+		    };
+		},
+		version: 1
 	       }};
 
