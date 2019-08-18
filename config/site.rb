@@ -114,12 +114,9 @@ class WebResource
         end
       else
         r.remote
-      end
-    }
+      end}
 
     PathGET['/favicon.ico'] = -> _ {[200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
-
-    PathGET['/mu']   = -> r {[302, {'Location' => '/d/*/*{[Bb]oston{hassle,hiphop,music},artery,cookland,funkyfresh,getfamiliar,graduationm,hipstory,ilovemyfiends,inthesoil,killerb,miixtape,onevan,tmtv,wrbb}*'}, []]}
 
     PathGET['/resizer'] = -> r {
       parts = r.path.split /\/\d+x\d+\/(filter[^\/]+\/)?/
