@@ -186,7 +186,7 @@ class WebResource
         puts env['rack.input'].read
       end
       env[:deny] = true
-      [202,{'Access-Control-Allow-Credentials' => 'true',
+      [202, {'Access-Control-Allow-Credentials' => 'true',
             'Access-Control-Allow-Origin' => allowedOrigin},
        []]
     end
@@ -306,7 +306,7 @@ class WebResource
         if e.respond_to?(:io) && verbose?
           puts e.io.status.join ' '
           HTTP.print_header e.io.meta
-          puts e.io.read
+          #puts e.io.read
         end
         case e.class.to_s
         when 'Errno::ECONNREFUSED'
@@ -483,7 +483,10 @@ class WebResource
         self.OPTIONSthru
       else
         env[:deny] = true
-        [202,{},[]]
+        [204, {'Access-Control-Allow-Credentials' => 'true',
+               'Access-Control-Allow-Headers' => 'authorization, content-type, x-braze-api-key, x-lib-version, x-requested-with',
+               'Access-Control-Allow-Origin' => allowedOrigin},
+         []]
       end
     end
 

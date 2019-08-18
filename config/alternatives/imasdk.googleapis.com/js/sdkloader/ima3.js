@@ -1,10 +1,9 @@
 google = {ima: {ImaSdkSettings: {VpaidMode: {ENABLED: 1},
+				 setAutoPlayAdBreaks: function(a){},
 				 setPlayerVersion: function(v){},
 				 setPlayerType: function(t){},
+				 setVpaidMode: function(b){}
 				},
-		settings: {setVpaidMode: function(bool){
-		    console.log('Welcome to IMA');
-		}},
 	       	AdDisplayContainer: class {
 		    constructor(a,b,c,d) {
 			console.log('..new display container');
@@ -17,6 +16,12 @@ google = {ima: {ImaSdkSettings: {VpaidMode: {ENABLED: 1},
 		    getSettings() {
 			return google.ima.ImaSdkSettings;
 		    };
+		},
+		AdsManagerLoadedEventTypes: class {
+		    ADS_MANAGER_LOADED: any;
+		},
+		AdsManagerLoadedEvent: class {
+		    static Type: AdsManagerLoadedEventTypes;
 		},
 		version: 1
 	       }};
