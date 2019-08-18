@@ -13,16 +13,13 @@ google = {ima: {ImaSdkSettings: {VpaidMode: {ENABLED: 1},
 		    constructor(a) {
 			console.log('..new ad loader');
 		    };
+		    addEventListener(a,b,c) {};
 		    getSettings() {
 			return google.ima.ImaSdkSettings;
 		    };
 		},
-		AdsManagerLoadedEventTypes: class {
-		    ADS_MANAGER_LOADED: any;
-		},
-		AdsManagerLoadedEvent: class {
-		    static Type: AdsManagerLoadedEventTypes;
-		},
+		AdErrorEvent: {Type: {AD_ERROR: 1}},
+		AdsManagerLoadedEvent: {Type: {ADS_MANAGER_LOADED: 1}},
 		version: 1
 	       }};
 
