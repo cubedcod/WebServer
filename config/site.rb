@@ -417,6 +417,21 @@ yts
 
   def GoogleHTML doc
     doc.css('svg').map &:remove
+    doc.css('div.rc').map{|rc|
+      if r = rc.css('div.r > a')[0]
+        subject = r['href']
+        yield subject, Type, Post.R
+        if title = r.css('h3')[0]
+          yield subject, Title, title.inner_text
+        end
+        if cite = r.css('cite')[0]
+          yield subject, Link, cite.inner_text.R
+        end
+        if s = rc.css('div.s')[0]
+          yield subject, Content, s.inner_html
+          rc.remove
+        end
+      end}
   end
 
   def HackerNews doc
