@@ -289,9 +289,14 @@ www.gstatic.com
           no_embeds: true,   # skip HTML+RDF-embed parse
           no_index: true,    # don't index after fetch
           no_response: true} # don't forward HTTP response from fetch
+        r.env[:query_modified] = true
+
         '//twitter.com'.R.subscriptions.shuffle.each_slice(18){|s|
-          r.env[:query] = { vertical: :default, f: :tweets, q: s.map{|u|'from:' + u}.join('+OR+')}
+          r.env[:query] = { vertical: :default,
+                            f: :tweets,
+                            q: s.map{|u|'from:' + u}.join('+OR+')}
           '//twitter.com/search'.R(r.env).fetch fetch_options}
+
         r.index
         r.graphResponse
       else

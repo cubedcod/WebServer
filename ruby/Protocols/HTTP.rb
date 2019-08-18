@@ -299,12 +299,14 @@ class WebResource
           end
         end}
 
+      puts HTTP.print_header env if verbose?
       begin
         fetchURL[url]       #   try (HTTPS default)
       rescue Exception => e # retry (HTTP)
         if e.respond_to?(:io) && verbose?
           puts e.io.status.join ' '
           HTTP.print_header e.io.meta
+          puts e.io.read
         end
         case e.class.to_s
         when 'Errno::ECONNREFUSED'
@@ -399,7 +401,7 @@ class WebResource
         key = key.downcase if underscored
 
         # set output header, strip Rack-internal keys
-        head[key] = v.to_s unless %w{host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr request-method request-path request-uri resp script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)
+        head[key] = v.to_s unless %w{host links path-info query query-modified query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)
       }
 
       # Cookie
@@ -567,13 +569,22 @@ class WebResource
     # querystring
     def qs
       if env # late-bound query from environment
-        return env['QUERY_STRING'].empty? ? '' : ('?' + env['QUERY_STRING']) if path && (path.index('/_Incapsula')==0 || host.match?(/s\d.wp.com/)) # upstream QS
-        return (q = env[:query].dup              # copy query
-                LocalArgs.map{|arg|q.delete arg} # strip private vars
-                q.empty? ? '' : HTTP.qs(q)) if env[:query] # external query
+        if env[:query_modified]
+          HTTP.qs env[:query]
+        elsif env[:query] && LocalArgs.find{|a| env[:query].has_key? a } # local query
+          q = env[:query].dup          # copy query
+          LocalArgs.map{|a|q.delete a} # strip local arguments
+          q.empty? ? '' : HTTP.qs(q)   # external querystring
+        else
+          env['QUERY_STRING'].empty? ? '' : ('?' + env['QUERY_STRING']) # upstream qs
+        end
+      else
+        if query && !query.empty? # static query from URI
+          '?' + query
+        else
+          ''
+        end
       end
-      return '?' + query if query && !query.empty? # static query from URI
-      return ''
     end
 
     # request for remote resource

@@ -410,7 +410,7 @@ class WebResource
       elsif v.class == Hash
         # RDF=type -> renderer mapping
         types = (v[Type]||[]).map &:R
-        if (types.member? Post) || (types.member? SIOC+'BlogPost') || (types.member? SIOC+'MailMessage') || (types.member? Schema+'DiscussionForumPosting') || (types.member? Schema+'Answer') || (types.member? Schema+'Review') || (types.member? 'https://schema.org/Comment') || (types.member? 'http://schema.org/Comment') || (types.member? Schema+'NewsArticle')
+        if (types.member? Post) || (types.member? Schema+'Article') || (types.member? SIOC+'BlogPost') || (types.member? SIOC+'MailMessage') || (types.member? Schema+'DiscussionForumPosting') || (types.member? Schema+'Answer') || (types.member? Schema+'Review') || (types.member? 'https://schema.org/Comment') || (types.member? 'http://schema.org/Comment') || (types.member? Schema+'NewsArticle')
           Markup[SIOC+'MailMessage'][v,env]
         elsif (types.member? Image) || (types.member? Schema+'ImageObject') || (types.member? 'https://schema.org/ImageObject')
           Markup[Image][v,env]
