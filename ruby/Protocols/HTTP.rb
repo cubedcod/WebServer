@@ -186,7 +186,9 @@ class WebResource
         puts env['rack.input'].read
       end
       env[:deny] = true
-      [202,{},[]]
+      [202,{'Access-Control-Allow-Credentials' => 'true',
+            'Access-Control-Allow-Origin' => allowedOrigin},
+       []]
     end
 
     def desktop; env['HTTP_USER_AGENT'] = DesktopUA; self end
@@ -562,22 +564,16 @@ class WebResource
       }.join("&")
     end
 
-    def qs # query string
-      if env # request context
-        if path && (path.index('/_Incapsula')==0 || host.match?(/s\d.wp.com/)) # upstream QS
-          env['QUERY_STRING'].empty? ? '' : ('?' + env['QUERY_STRING'])
-        else
-          q = env[:query].dup              # copy query
-          LocalArgs.map{|arg|q.delete arg} # strip private args
-          q.empty? ? '' : HTTP.qs(q)       # external querystring
-        end
-      else
-        if query && !query.empty?
-          '?' + query
-        else
-          ''
-        end
+    # querystring
+    def qs
+      if env # late-bound query from environment
+        return env['QUERY_STRING'].empty? ? '' : ('?' + env['QUERY_STRING']) if path && (path.index('/_Incapsula')==0 || host.match?(/s\d.wp.com/)) # upstream QS
+        return (q = env[:query].dup              # copy query
+                LocalArgs.map{|arg|q.delete arg} # strip private vars
+                q.empty? ? '' : HTTP.qs(q)) if env[:query] # external query
       end
+      return '?' + query if query && !query.empty? # static query from URI
+      return ''
     end
 
     # request for remote resource
@@ -585,8 +581,8 @@ class WebResource
       if env.has_key? 'HTTP_TYPE' # type-tagged request
         case env['HTTP_TYPE']
         when /drop/
-          if ((host.match? /track/) || (env['REQUEST_URI'].match? /track/)) && (host.match? TrackHost)
-            fetch # music track
+          if host.match? TrackHost
+            fetch # media track
           elsif env[:query]['allow'] == ServerKey
             fetch # drop override
           elsif !env[:query].keys.grep(/^utm/).empty?

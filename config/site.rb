@@ -50,12 +50,12 @@ class WebResource
     # desktop UI hosts
     UIhost = /((apple|anvato|bandcamp|duckduckgo|jwplatform|(mix|sound)cloud|spotify|vimeo|youtube).(com|net)|github.io|.tv)$/
     # allow cookies
-    CookieHost = /(bizjournals|microcenter|twi(tch|tter)|youtube)\.(com|net|tv)$/
+    CookieHost = /(bizjournals|brightcove|microcenter|twi(tch|tter)|youtube)\.(com|net|tv)$/
     # allow POST
     POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|mapbox|microcenter|moovitapp|reddit|(mix|sound)cloud|(music|xp).apple|ttvnw|api.twitter|twitch|weather|youtube)\.(com|gov|im|net|tv)$/
     POSTpath = /\/graphql([\/]|$)/
     # allow paths named 'track'
-    TrackHost = /\.(bandcamp|soundcloud|track-blaster)\.com$/
+    TrackHost = /\.(api.brightcove|bandcamp|soundcloud|track-blaster)\.com$/
 
     def sitePOST
       case host
