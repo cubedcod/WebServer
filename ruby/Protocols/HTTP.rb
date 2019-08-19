@@ -120,7 +120,7 @@ class WebResource
              "\e[" + color + "m "  + status.to_s +
              "\e[0m" + (env['HTTP_REFERER'] ? (" \e[" + color + ";7m" + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m -> ") : ' ') +
              "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] +
-             "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + resource.qs +
+             "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '') +
              "\e[0m " + (head['Location'] ? (" ↝ " + head['Location']) : '') + ' ' +
              (head['Content-Type'] == 'text/turtle; charset=utf-8' ? '🐢' : (head['Content-Type']||''))
 
@@ -354,8 +354,8 @@ class WebResource
         [200, env[:resp].merge({'Content-Length' => body.bytesize}), [body]]
       else                                                         # graph data
         if env[:repository].empty? && !local? && env['REQUEST_PATH'][-1]=='/' # unlistable remote
-          index = (CacheDir + hostname + path).R                              # local container
-          index.children.map{|e|e.nodeStat base_uri: 'https://' + e.relPath} if index.node.directory? # local list
+          index = (CacheDir + hostname + path).R(env)                         # local container
+          index.children.map{|e|e.env(env).nodeStat base_uri: 'https://' + e.relPath} if index.node.directory? # local list
         end
         graphResponse
       end
