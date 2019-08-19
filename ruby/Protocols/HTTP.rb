@@ -601,7 +601,7 @@ class WebResource
             fetch # media track
           elsif env[:query]['allow'] == ServerKey
             fetch # drop override
-          elsif !env[:query].keys.grep(/^utm/).empty?
+          elsif !env[:query].keys.grep(/^(camp|utm)/).empty?
             [301, {'Location' => env['REQUEST_PATH']}, []]
           else
             deny

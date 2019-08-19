@@ -48,7 +48,7 @@ class WebResource
     # desktop UI user-agent
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3869.0 Safari/537.36'
     # desktop UI hosts
-    UIhost = /((apple|anvato|bandcamp|duckduckgo|jwplatform|(mix|sound)cloud|spotify|vimeo|youtube).(com|net)|github.io|.tv)$/
+    UIhost = /((apple|anvato|bandcamp|boston25news|duckduckgo|jwplatform|(mix|sound)cloud|spotify|vimeo|youtube).(com|net)|github.io|.tv)$/
     # allow cookies
     CookieHost = /(bizjournals|brightcove|microcenter|twi(tch|tter)|youtube)\.(com|net|tv)$/
     # allow POST
