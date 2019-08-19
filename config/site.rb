@@ -221,7 +221,7 @@ www.gstatic.com
     %w(storage.googleapis.com gstatic.com).map{|n| Subdomain[n] = Google }
 
     # Linkedin
-    HostGET['www.linkedin.com'] = HostGET['media.licdn.com'] = -> r {r.noexec}
+    HostGET['www.linkedin.com'] = HostGET['media.licdn.com'] = -> r {r.allowHost}
 
     # Medium
     #HostGET['medium.com'] = -> r {r.env[:query].has_key?('redirecturl') ? [301, {'Location' => r.env[:query]['redirecturl']}, []] : r.noexec}

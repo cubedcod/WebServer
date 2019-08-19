@@ -32,7 +32,7 @@ body, td, .post, a.head {background-color: #000; color: #fff}
 img, video {max-width: 100%}
 video {min-width: 40ex}
 .thumb, svg {max-width: 28em}
-p, li, blockquote {max-width: 80ex}
+p, li, blockquote {max-width: 80ex; border-width: 0 0 1px 0; border-style: solid; border-color: #333; border-radius: 0}
 p, h1,h2,h3,h4,h5,h6 {margin: 0}
 h1,h2,h3,h4,h5,h6 {background-color: #ddd; color: #000}
 pre {white-space: pre-wrap}
