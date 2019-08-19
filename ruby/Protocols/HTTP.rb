@@ -569,20 +569,22 @@ class WebResource
       }.join("&")
     end
 
-    # querystring
+    # serialize query to string
     def qs
-      if env # late-bound query from environment
+      if env
         if env[:query_modified]
           HTTP.qs env[:query]
-        elsif env[:query] && LocalArgs.find{|a| env[:query].has_key? a } # local query
+        elsif env[:query] && LocalArgs.find{|a| env[:query].has_key? a } # local query arguments
           q = env[:query].dup          # copy query
           LocalArgs.map{|a|q.delete a} # strip local arguments
           q.empty? ? '' : HTTP.qs(q)   # external querystring
+        elsif env['QUERY_STRING'] && !env['QUERY_STRING'].empty?
+          '?' + env['QUERY_STRING']
         else
-          env['QUERY_STRING'].empty? ? '' : ('?' + env['QUERY_STRING']) # upstream qs
+          ''
         end
       else
-        if query && !query.empty? # static query from URI
+        if query && !query.empty?
           '?' + query
         else
           ''
