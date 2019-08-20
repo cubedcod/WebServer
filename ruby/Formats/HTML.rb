@@ -277,7 +277,7 @@ class WebResource
                         {_: :body,
                          c: [{class: :toolbox,
                               c: [link[:up, '&#9650;'],
-                                  {_: :a, id: :tabular, class: :icon, style: tabular  ? 'color: #fff' : 'color: #555', href: HTTP.qs(tabular  ? env[:query].reject{|k,v|k=='view'} : env[:query].merge({'view' => 'table', 'sort' => 'date'})), c: '↨'},
+                                  {_: :a, id: :tabular, class: :icon, style: tabular  ? 'color: #fff' : 'color: #555', href: HTTP.qs(env[:query].merge({'view' => tabular ? 'default' : 'table', 'sort' => 'date'})), c: '↨'},
                                   {_: :a, id: :shrink,  class: :icon, style: shrunken ? 'color: #fff' : 'color: #555', href: HTTP.qs(shrunken ? env[:query].reject{|k,v|k=='head'} : env[:query].merge({'head' => ''})), c: shrunken ? '&#9661;' : '&#9651;'},
                                   unless local?
                                     [{_: :a, id: :ui, class: :icon, style: 'color: #555', href: HTTP.qs(env[:query].merge({'ui' => 'upstream'})), c: '⚗'},
