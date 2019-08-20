@@ -212,9 +212,9 @@ class WebResource
                title = title.to_s.sub(/\/u\/\S+ on /,'')
                unless env[:title] == title
                  env[:title] = title
-                 [{_: :a, id: 't' + Digest::SHA2.hexdigest(rand.to_s), class: :title, href: uri, c: CGI.escapeHTML(title)}, ' ']
+                 [{_: :a, id: 't' + Digest::SHA2.hexdigest(rand.to_s), class: 'title', type: 'node', href: uri, c: CGI.escapeHTML(title)}, ' ']
                end},
-             {_: :a, id: 'pt' + uri_hash, class: :id, c: '☚', href: uri},
+             {_: :a, id: 'pt' + uri_hash, class: 'id', type: 'node', c: '☚', href: uri},
              ({_: :a, class: :date, id: 'date' + uri_hash, href: ServerAddr + '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date} if date),
              images.map{|i| Markup[Image][i,env]},
              {_: :table, class: :fromTo,

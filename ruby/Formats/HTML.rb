@@ -365,16 +365,13 @@ class WebResource
                      ts.map{|t|
                        title = t.to_s.sub(/\/u\/\S+ on /,'')
                        if titles[title]
-                         {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: :id, c: '☚'}
+                         {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'id', type: 'node', c: '☚'}
                        else
                          titles[title] = true
-                         {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: :title,
-                          c: [(CGI.escapeHTML title), ' ',
-                              #{_: :span, class: :uri, c: CGI.escapeHTML(resource['uri'][0..96])},
-                              ' ']}
+                         {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'title', type: 'node', c: (CGI.escapeHTML title)}
                        end}
                    else
-                     {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: :id, c: '&#x1f517;'}
+                     {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'id', type: 'node', c: '&#x1f517;'}
                    end
                  else
                    (resource[k]||[]).map{|v|value k, v, env }

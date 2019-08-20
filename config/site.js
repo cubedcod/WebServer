@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function(){
 	    var start = cur;
 	    do {
 		cur = document.querySelector("[id='" + (cur.attr('next') || '') + "']");
-	    } while ((cur != start) && (cur.attr('class') != 'title'));
+	    } while ((cur != start) && (cur.attr('type') != 'node'));
 	    window.location.hash = cur.attr('id');
 	    e.preventDefault();
 	};
@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function(){
 	    var start = cur;
 	    do {
 		cur = document.querySelector("[id='" + (cur.attr('prev') || '') + "']");
-	    } while ((cur != start) && (cur.attr('class') != 'title'));
+	    } while ((cur != start) && (cur.attr('type') != 'node'));
 	    window.location.hash = cur.attr('id');
 	    e.preventDefault();
 	};
