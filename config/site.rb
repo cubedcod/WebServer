@@ -12,6 +12,7 @@ module Webize
         'apnews.com' => :AP,
         'news.ycombinator.com' => :HackerNews,
         'twitter.com' => :Twitter,
+        'www.aliexpress.com' => :AX,
         'www.apnews.com' => :AP,
         'www.city-data.com' => :CityData,
         'www.google.com' => :GoogleHTML,
@@ -50,7 +51,7 @@ class WebResource
     # desktop UI hosts
     UIhost = /((apple|anvato|bandcamp|boston25news|duckduckgo|jwplatform|(mix|sound)cloud|spotify|vimeo|youtube).(com|net)|github.io|.tv)$/
     # allow cookies
-    CookieHost = /(bizjournals|brightcove|microcenter|twi(tch|tter)|youtube)\.(com|net|tv)$/
+    CookieHost = /(bizjournals|brightcove|twi(tch|tter)|youtube)\.(com|net|tv)$/
     # allow POST
     POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|mapbox|microcenter|moovitapp|reddit|(mix|sound)cloud|(music|xp).apple|ttvnw|api.twitter|twitch|weather|youtube)\.(com|gov|im|net|tv)$/
     POSTpath = /\/graphql([\/]|$)/
@@ -367,6 +368,13 @@ yts
         data = data[0..-2] if data[-1] == ';'
         json = ::JSON.parse data
         yield self, Content, HTML.render(HTML.keyval (Webize::HTML.webizeHash json), env)}}
+  end
+
+  def AX doc
+    doc.css('script').map{|script|
+      script.inner_text.scan(//){|img|
+        
+      }}
   end
 
   def CityData doc

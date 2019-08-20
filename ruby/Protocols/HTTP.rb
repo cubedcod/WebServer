@@ -168,7 +168,6 @@ class WebResource
                         ['image/gif', SiteGIF]
                       else
                         q = env[:query].dup
-                        q.keys.map{|k|q.delete k if k.match? /^utm_/}
                         q['allow'] = ServerKey
                         ['text/html; charset=utf-8',
                          "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center'><a href='#{HTTP.qs q}' style='color: #fff; font-weight: bold; font-size: 22em; text-decoration: none'>⌘</a></body></html>"]
@@ -601,7 +600,7 @@ class WebResource
             fetch # media track
           elsif env[:query]['allow'] == ServerKey
             fetch # drop override
-          elsif !env[:query].keys.grep(/^(camp|utm)/).empty?
+          elsif !env[:query].keys.grep(/campaign|[iu]tm_/).empty?
             [301, {'Location' => env['REQUEST_PATH']}, []]
           else
             deny
