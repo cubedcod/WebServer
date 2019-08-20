@@ -8,6 +8,7 @@ class WebResource
     include URIs
     HostGET = {}
     Hosts = {}
+    LocalArgs = %w(allow view sort ui)
     Methods = %w(GET HEAD OPTIONS POST)
     OffLine = ENV.has_key? 'OFFLINE'
     PathGET = {}
@@ -23,8 +24,7 @@ class WebResource
       end
     end
 
-    def allowCookies?; hostname = env['SERVER_NAME'] || host || 'localhost'
-
+    def allowCookies?
       ENV.has_key?('COOKIES') ||
         hostname.match?(CookieHost) ||
         hostname.match?(POSThost) ||
@@ -223,26 +223,20 @@ class WebResource
       end
     end
 
-    LocalArgs = %w(allow view sort ui)
     def fetch options = {}
       if this = cached?; return this.fileResponse end
-      @env ||= {resp: {}}              # init request-meta for non-HTTP callers
+      @env ||= {resp: {}}                      # request metadata
       env[:repository] ||= RDF::Repository.new # RDF storage (in-memory)
-      hostname = env['SERVER_NAME'] || host    # hostname
-      head = headers                           # read request metadata
-      head[:redirect] = false                  # don't follow redirects
-      u = '//' + hostname + path + (env[:suffix]||'') + qs        # location
+      head = headers                           # clean/filter request metadata
+      head[:redirect] = false                  # halt on redirect
+      u = '//' + hostname + path + (env[:suffix]||'') + qs        # base locator
       url      = (options[:scheme] || 'https').to_s    + ':' + u  # primary locator
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u  # fallback locator
       options[:content_type]='application/atom+xml' if FeedURL[u] # fix MIME on feed URLs
       upstream_metas = %w{Access-Control-Allow-Origin
                           Access-Control-Allow-Credentials
-                          Content-Type
-                          Content-Length
-                          ETag}
-                          #x-iinfo x-iejgwucgyu}
+                          Content-Type Content-Length ETag}
       upstream_metas.push 'Set-Cookie' if allowCookies?
-
       code = nil   # response status
       body = nil   # response body
       format = nil # response format
@@ -455,6 +449,10 @@ class WebResource
       head.delete 'User-Agent' if host == 't.co'            # redirect via HTTP header rather than Javascript
 
       head
+    end
+
+    def hostname
+      env['SERVER_NAME'] || host || 'localhost'
     end
 
     def local

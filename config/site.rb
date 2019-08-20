@@ -260,18 +260,13 @@ www.gstatic.com
       end}
 
     # Reddit
+    HostGET['gateway.reddit.com'] = -> r {r.allowHost}
     HostGET['reddit.com'] = HostGET['old.reddit.com'] = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path},[]]}
     HostGET['www.reddit.com'] = -> r {
       r.env[:suffix] = '.rss' if r.ext.empty? && !r.upstreamUI?
-      if r.path == '/'
-        r.env[:resp]['Refresh'] = 1800
-        r.env[:query]['sort'] ||= 'date'
-        r.env[:query]['view'] ||= 'table'
-        ('//www.reddit.com/r/' + r.subscriptions.join('+') + '/new').R(r.env).fetch
-      else
-        r.allowHost
-      end}
-    HostGET['gateway.reddit.com'] = -> r {r.allowHost}
+      r.env[:query]['sort'] ||= 'date'
+      r.env[:query]['view'] ||= 'table'
+      r.path == '/' ? ('/r/' + r.subscriptions.join('+') + '/new').R(r.env).fetch : r.allowHost}
 
     # Reuters
     (0..5).map{|i|
