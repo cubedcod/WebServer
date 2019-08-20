@@ -263,16 +263,22 @@ class WebResource
               upstream_metas.push 'Content-Encoding'                       # encoding preserved
             else                                                           # complete body
               body = HTTP.decompress meta, response.read                   # decode body
+
               if verbose?
                 print ' ', code, ' '
                 HTTP.print_header meta
                 HTTP.print_body head, body
               end
-              format = options[:content_type] || meta['content-type']&.split(/;/)[0] || (
-                xt = ext.to_sym
-                RDF::Format.file_extensions.has_key?(xt) &&
-                RDF::Format.file_extensions[xt][0].content_type[0])
+
+              format ||= options[:content_type]
+              format ||= meta['content-type'].split(/;/)[0] if meta['content-type']
+              format ||= (xt = ext.to_sym
+                          RDF::Format.file_extensions.has_key?(xt) &&
+                            RDF::Format.file_extensions[xt][0].content_type[0])
+              format ||= body.bytesize < 2048 ? 'text/plain' : 'application/octet-stream'
+
               file = cache(format).write body if !format.match? RDFformats # cache non-RDF
+
               if reader = RDF::Reader.for(content_type: format)            # RDF reader
                 reader_options = {base_uri: url.R, no_embeds: options[:no_embeds]}
                 reader.new(body, reader_options){|_| env[:repository] << _ } # read RDF
