@@ -373,7 +373,6 @@ class WebResource
           end
          }.reverse
       end
-      titles = {}
       {_: :table, class: :tabular,
        c: [{_: :tr, c: keys.map{|p|
               p = p.R
@@ -386,15 +385,9 @@ class WebResource
                  {_: :td,
                   c: if k == 'uri'
                    ts = resource[Title] || []
-                   if ts.size > 0
+                   if !ts.empty?
                      ts.map{|t|
-                       title = t.to_s.sub(/\/u\/\S+ on /,'')
-                       if titles[title]
-                         {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'id', type: 'node', c: '☚'}
-                       else
-                         titles[title] = true
-                         {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'title', type: 'node', c: (CGI.escapeHTML title)}
-                       end}
+                       {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'title', type: 'node', c: CGI.escapeHTML(t.to_s.sub(/\/u\/\S+ on /,'').sub(/^Re: /,''))}}
                    else
                      {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'id', type: 'node', c: '&#x1f517;'}
                    end
