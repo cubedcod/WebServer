@@ -139,6 +139,11 @@ class WebResource
 
     PathGET['/url'] = HostGET['gate.sc'] = HostGET['go.skimresources.com'] = -> r {[301,{'Location' => (r.env[:query]['url'] || r.env[:query]['q'])}, []]}
 
+    # Alibaba
+    HostGET['www.aliexpress.com'] = -> r {r.allowHost}
+    HostGET['i.alicdn.com'] = -> r {r.allowHost}
+    HostGET['ae01.alicdn.com'] = -> r {r.noexec}
+
     # Amazon
     HostGET['amazon.com'] = HostGET['www.amazon.com'] = -> r {r.allowHost}
     %w(media-amazon.com ssl-images-amazon.com
@@ -372,9 +377,8 @@ yts
 
   def AX doc
     doc.css('script').map{|script|
-      script.inner_text.scan(//){|img|
-        
-      }}
+      script.inner_text.scan(/"(http[^"]+\.(jpg|png|webp)[^"]*)"/){|img| yield self, Image, img[0].R }
+      script.inner_text.scan(/"(http[^"]+\.(mp4|webm)[^"]*)"/){|img| yield self, Video, img[0].R }}
   end
 
   def CityData doc
