@@ -294,6 +294,31 @@ class WebResource
                              link[:down,'&#9660;']]}]}]
     end
 
+    def htmlGrep
+      graph = env[:graph]
+      q = env[:query]['q']
+      wordIndex = {}
+      args = POSIX.splitArgs q
+      args.each_with_index{|arg,i| wordIndex[arg] = i }
+      pattern = /(#{args.join '|'})/i
+
+      # find matches
+      graph.map{|k,v|
+        graph.delete k unless (k.to_s.match pattern) || (v.to_s.match pattern)}
+
+      # highlight matches in exerpt
+      graph.values.map{|r|
+        (r[Content]||r[Abstract]||[]).map{|v|v.respond_to?(:lines) ? v.lines : nil}.flatten.compact.grep(pattern).yield_self{|lines|
+          r[Abstract] = lines[0..5].map{|l|
+            l.gsub(/<[^>]+>/,'')[0..512].gsub(pattern){|g| # matches
+              HTML.render({_: :span, class: "w#{wordIndex[g.downcase]}", c: g}) # wrap in styled node
+            }} if lines.size > 0 }}
+
+      # CSS
+      graph['#abstracts'] = {Abstract => [HTML.render({_: :style, c: wordIndex.values.map{|i|
+                                                        ".w#{i} {background-color: #{'#%06x' % (rand 16777216)}; color: white}\n"}})]}
+    end
+
     # Hash -> Markup
     def self.keyval t, env
       {_: :table, class: :kv,
@@ -405,10 +430,10 @@ class WebResource
       elsif Markup[type] # explicit type-arg
         Markup[type][v,env]
       elsif v.class == Hash
-        # RDF=type -> renderer mapping
+        # RDF-type -> renderer mapping TODO remove this
         types = (v[Type]||[]).map &:R
         if (types.member? Post) || (types.member? Schema+'Article') || (types.member? SIOC+'BlogPost') || (types.member? SIOC+'MailMessage') || (types.member? Schema+'DiscussionForumPosting') || (types.member? Schema+'Answer') || (types.member? Schema+'Review') || (types.member? 'https://schema.org/Comment') || (types.member? 'http://schema.org/Comment') || (types.member? Schema+'NewsArticle')
-          Markup[SIOC+'MailMessage'][v,env]
+          Markup[Post][v,env]
         elsif (types.member? Image) || (types.member? Schema+'ImageObject') || (types.member? 'https://schema.org/ImageObject')
           Markup[Image][v,env]
         elsif types.member? LDP+'Container'
@@ -484,6 +509,57 @@ class WebResource
        },
        " \n"]}
 
+    Markup[Creator] = Markup[To] = -> c, env {
+      if c.class == Hash || c.respond_to?(:uri)
+        u = c.R
+        basename = u.basename
+        host = u.host
+        name = u.fragment ||
+               (basename && !['','/'].member?(basename) && basename) ||
+               (host && host.sub(/\.com$/,'')) ||
+               'user'
+        avatar = Avatars[u.to_s.downcase]
+        [{_: :a, href: u.to_s, id: 'a' + Digest::SHA2.hexdigest(rand.to_s),
+          style: avatar ? '' : (env[:colors][name] ||= HTML.colorize),
+          c: avatar ? {_: :img, class: :avatar, src: avatar} : name}.update(avatar ? {class: :avatar} : {}), ' ']
+      else
+        CGI.escapeHTML (c||'')
+      end}
+
+    Markup[Post] = -> post, env {
+      unless env[:query] && env[:query].has_key?('head') && !post[Title] # hide title-less posts in heading mode
+        post.delete Type
+        uri = post.delete 'uri'
+        titles = (post.delete(Title)||[]).map(&:to_s).map(&:strip).uniq
+        date = (post.delete(Date) || [])[0]
+        from = post.delete(Creator) || []
+        to = post.delete(To) || []
+        images = post.delete(Image) || []
+        content = post.delete(Content) || []
+        uri_hash = 'r' + Digest::SHA2.hexdigest(uri)
+        {class: :post, id: uri_hash,
+         c: [titles.map{|title|
+               title = title.to_s.sub(/\/u\/\S+ on /,'')
+               unless env[:title] == title
+                 env[:title] = title
+                 [{_: :a, id: 't' + Digest::SHA2.hexdigest(rand.to_s), class: 'title', type: 'node', href: uri, c: CGI.escapeHTML(title)}, ' ']
+               end},
+             {_: :a, id: 'pt' + uri_hash, class: 'id', type: 'node', c: '☚', href: uri},
+             ({_: :a, class: :date, id: 'date' + uri_hash, href: ServerAddr + '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date} if date),
+             images.map{|i| Markup[Image][i,env]},
+             {_: :table, class: :fromTo,
+              c: {_: :tr,
+                  c: [{_: :td,
+                       c: from.map{|f|Markup[Creator][f,env]},
+                       class: :from},
+                      {_: :td, c: '&rarr;'},
+                      {_: :td,
+                       c: [to.map{|f|Markup[To][f,env]},
+                           post.delete(SIOC+'reply_of')],
+                       class: :to}]}},
+             content, ((HTML.keyval post, env) unless post.keys.size < 1)]}
+      end}
+
     Markup[Schema+'BreadcrumbList'] = -> list, env {
       {class: :list,
        c: tabular((list[Schema+'itemListElement']||
@@ -500,10 +576,24 @@ class WebResource
                {_: :span, c: '👤'}
               end),
              (HTML.keyval user, env)]}
+
       else
         puts :useraccount, user
       end
     }
+
+    Markup[LDP+'Container'] = -> dir , env {
+      uri = dir.delete 'uri'
+      [Type, Title, W3+'ns/posix/stat#mtime', W3+'ns/posix/stat#size'].map{|p|dir.delete p}
+      {class: :container,
+       c: [{_: :a, class: :label, href: uri, c: uri.R.basename}, '<br>',
+           {class: :body, c: HTML.keyval(dir, env)}]}}
+
+    Markup[Stat+'File'] = -> file, env {
+      uri = file.delete 'uri'
+      {class: :file,
+       c: [{_: :a, href: uri, class: :icon, c: Icons[Stat+'File']},
+           {_: :span, class: :name, c: uri.R.basename}]} if uri}
 
   end
 end

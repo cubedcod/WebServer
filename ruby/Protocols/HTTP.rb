@@ -370,6 +370,12 @@ class WebResource
       end
     end
 
+    def fileResponse
+      env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
+      env[:resp]['ETag'] ||= Digest::SHA2.hexdigest [uri, node.stat.mtime, node.size].join
+      entity
+    end
+
     def GET
       if path.match? /[^\/]204$/
         [204, {}, []] # connect check               lambda lookup:
@@ -384,6 +390,26 @@ class WebResource
       else                                         # default
         local? ? local : remote
       end
+    end
+
+    # Graph -> HTTP Response
+    def graphResponse
+      return notfound if !env.has_key?(:repository) || env[:repository].empty?
+      format = selectFormat
+      dateMeta if local?
+      env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
+      env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
+      env[:resp].update({'Link' => env[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless env[:links].empty?
+      entity ->{
+        case format
+        when /^text\/html/
+          htmlDocument treeFromGraph # HTML
+        when /^application\/atom+xml/
+          renderFeed treeFromGraph   # Atom/RSS-feed
+        else                         # RDF
+          base = ('https://' + env['SERVER_NAME']).R.join env['REQUEST_PATH']
+          env[:repository].dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => base, :standard_prefixes => true
+        end}
     end
 
     def HEAD
@@ -455,9 +481,46 @@ class WebResource
       end
     end
 
+    # WebResource -> HTTP Response
+    def localGraph
+      rdf, nonRDF = nodes.partition &:isRDF?
+      if rdf.size==1 && nonRDF.size==0 && selectFormat == 'text/turtle'
+        rdf[0].fileResponse # response on file
+      else
+        nonRDF.map &:load # load  non-RDF
+        index             # index non-RDF
+        rdf.map &:load    # load  RDF
+        graphResponse     # response
+      end
+    end
+
     LocalAddr = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
 
     def local?; LocalAddr.member?(env['SERVER_NAME']||host) end
+
+    def nodes # URI -> file(s)
+      (if node.directory?
+       if env[:query].has_key?('f') && path != '/'  # FIND
+          find env[:query]['f'] unless env[:query]['f'].empty? # exact
+       elsif env[:query].has_key?('find') && path != '/' # easymode find
+          find '*' + env[:query]['find'] + '*' unless env[:query]['find'].empty?
+       elsif env[:query].has_key?('q') && path!='/' # GREP
+         env[:grep] = true
+         grep
+       else
+         [self, children]              # LS
+       end
+      else                             # GLOB
+        if uri.match /[\*\{\[]/        #  parametric glob
+          env[:grep] = true if env[:query].has_key?('q')
+          glob
+        else                           #  basic glob:
+          files = (self + '.*').R.glob #   base + extension
+          files = (self + '*').R.glob if files.empty? # prefix
+          [self, files]
+        end
+       end).flatten.compact.uniq.select(&:exist?).map{|n|n.env env}
+    end
 
     def noexec
       if %w{gif js}.member? ext.downcase # filter suffix

@@ -2,7 +2,7 @@
 class WebResource
   RDFformats = /^(application|text)\/(atom|html|json|rss|turtle|.*urlencoded|xml)/
 
-  # Repository -> file(s)
+  # Repository -> file(s) (Turtle describing new resources)
   def index
     return unless env[:repository]
     updates = []
@@ -34,7 +34,7 @@ class WebResource
 
   def isRDF?; ext == 'ttl' end
 
-  # WebResource -> Graph (RDF#load with format hints)
+  # WebResource -> Graph (RDF#load wrapper with format hints)
   def load options = {base_uri: (path.R env)}
     env[:repository] ||= RDF::Repository.new
     nodeStat unless isRDF?
@@ -54,7 +54,7 @@ class WebResource
     end
   end
 
-  # Graph -> Hash
+  # Graph -> JSON-compatible URI-indexed Hash (Feed & HTML-renderer input)
   def treeFromGraph
     tree = {}
     head = env[:query].has_key? 'head'
@@ -70,39 +70,25 @@ class WebResource
     env[:graph] = tree
   end
 
-  module HTTP
-
-    # Graph -> HTTP Response
-    def graphResponse
-      return notfound if !env.has_key?(:repository) || env[:repository].empty?
-      format = selectFormat
-      dateMeta if local?
-      env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
-      env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
-      env[:resp].update({'Link' => env[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless env[:links].empty?
-      entity ->{
-        case format
-        when /^text\/html/
-          htmlDocument treeFromGraph # HTML
-        when /^application\/atom+xml/
-          renderFeed treeFromGraph   # Atom/RSS-feed
-        else                         # RDF
-          base = ('https://' + env['SERVER_NAME']).R.join env['REQUEST_PATH']
-          env[:repository].dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => base, :standard_prefixes => true
-        end}
-    end
-
-    # WebResource -> HTTP Response
-    def localGraph
-      rdf, nonRDF = nodes.partition &:isRDF?
-      if rdf.size==1 && nonRDF.size==0 && selectFormat == 'text/turtle'
-        rdf[0].fileResponse # response on file
+  module POSIX
+    def nodeStat options = {}                                           # STAT(1)
+      return if basename.index('msg.') == 0
+      subject = (options[:base_uri] || path.sub(/\.ttl$/,'')).R         # reference abstract generic node
+      graph = env[:repository]
+      if node.directory?
+        subject = subject.path[-1] == '/' ? subject : (subject + '/')   # enforce trailing slash on container
+        graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#Container').R)
+        children.map{|child|
+          graph << (RDF::Statement.new subject, (W3+'ns/ldp#contains').R,
+                                       child.node.directory? ? (child + '/') : child.path.sub(/\.ttl$/,'').R)}
       else
-        nonRDF.map &:load # load  non-RDF
-        index             # index non-RDF
-        rdf.map &:load    # load  RDF
-        graphResponse     # response
+        graph << (RDF::Statement.new subject, Type.R, (W3+'ns/posix/stat#File').R)
       end
+      graph << (RDF::Statement.new subject, Title.R, basename)
+      graph << (RDF::Statement.new subject, (W3+'ns/posix/stat#size').R, node.size)
+      mtime = node.stat.mtime
+      graph << (RDF::Statement.new subject, (W3+'ns/posix/stat#mtime').R, mtime.to_i)
+      graph << (RDF::Statement.new subject, Date.R, mtime.iso8601)
     end
   end
 end
