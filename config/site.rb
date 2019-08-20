@@ -140,9 +140,7 @@ class WebResource
     PathGET['/url'] = HostGET['gate.sc'] = HostGET['go.skimresources.com'] = -> r {[301,{'Location' => (r.env[:query]['url'] || r.env[:query]['q'])}, []]}
 
     # Alibaba
-    HostGET['www.aliexpress.com'] = -> r {r.allowHost}
-    HostGET['i.alicdn.com'] = -> r {r.allowHost}
-    HostGET['ae01.alicdn.com'] = -> r {r.noexec}
+    %w(www.aliexpress.com ae-cn.alicdn.com ae01.alicdn.com i.alicdn.com).map{|h| HostGET[h] = -> r {r.allowHost}}
 
     # Amazon
     HostGET['amazon.com'] = HostGET['www.amazon.com'] = -> r {r.allowHost}
@@ -201,10 +199,10 @@ class WebResource
     HostGET['gitter.im'] = -> req {req.desktop.remote}
 
     # Google
-    Google = -> r { ENV.has_key?('GOOGLE') ? r.desktop.fetch : r.noexec }
+    Google = -> r { ENV.has_key?('GOOGLE') ? r.allowHost : r.noexec }
     HostGET['ajax.googleapis.com'] = -> r {r.fetch}
     HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.deny : r.noexec}
-    HostGET['www.google.com'] = -> r {[nil,*%w(aclk images imgres maps search)].member?(r.parts[0]) ? Google[r] : r.deny}
+    HostGET['www.google.com'] = -> r {a=r.parts[0]; [nil,*%w(aclk images imgres maps search)].member?(a) ? (a=='maps' ? r.desktop.fetch : Google[r]) : r.deny}
     HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
     %w(
 developers.google.com
@@ -330,7 +328,8 @@ www.gstatic.com
     HostGET['www.yelp.com'] = -> r {r.env[:query]['redirect_url'] ? [301, {'Location' => r.env[:query]['redirect_url']},[]] : r.noexec}
 
     # YouTube
-    HostGET['youtu.be'] = -> re {[301, {'Location' => 'https://www.youtube.com/watch?v=' + re.path[1..-1]}, []]}
+    HostGET['s.ytimg.com'] = -> r {r.desktop.noexec}
+    HostGET['youtu.be'] = -> r {[301, {'Location' => 'https://www.youtube.com/watch?v=' + r.path[1..-1]}, []]}
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
       if %w{attribution_link redirect}.member? mode

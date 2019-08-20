@@ -84,6 +84,8 @@ class WebResource < RDF::URI
       'al:web:should_fallback' => :drop,
       'alternate' => DC + 'hasFormat',
       'amphtml' => :drop,
+      'aplus-auto-clk' => :drop,
+      'aplus-auto-exp' => :drop,
       'apple-itunes-app' => :drop,
       'apple-mobile-web-app-capable' => :drop,
       'apple-mobile-web-app-status-bar-style' => :drop,
