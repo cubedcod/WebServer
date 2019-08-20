@@ -265,6 +265,8 @@ www.gstatic.com
       r.env[:suffix] = '.rss' if r.ext.empty? && !r.upstreamUI?
       if r.path == '/'
         r.env[:resp]['Refresh'] = 1800
+        r.env[:query]['sort'] ||= 'date'
+        r.env[:query]['view'] ||= 'table'
         ('//www.reddit.com/r/' + r.subscriptions.join('+') + '/new').R(r.env).fetch
       else
         r.allowHost
