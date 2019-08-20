@@ -290,8 +290,8 @@ www.gstatic.com
         r.env[:resp]['Refresh'] = 1800 # client refresh hint
         fetch_options = {
           no_embeds: true,   # skip HTML+RDF-embed parse
-          no_index: true,    # don't index after fetch
-          no_response: true} # don't forward HTTP response from fetch
+          no_index: true,    # defer indexing
+          no_response: true} # no forwarded HTTP response from fetch
         r.env[:query_modified] = true
 
         '//twitter.com'.R.subscriptions.shuffle.each_slice(18){|s|
