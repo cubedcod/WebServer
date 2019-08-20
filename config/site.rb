@@ -189,7 +189,12 @@ class WebResource
     HostGET['rover.ebay.com'] = -> r {r.env[:query].has_key?('mpre') ? [301, {'Location' => r.env[:query]['mpre']}, []] : r.deny}
 
     # Facebook
-    HostGET['facebook.com'] = HostGET['www.facebook.com'] = -> r {%w{connect pages_reaction_units plugins security tr}.member?(r.parts[0]) ? r.deny : r.noexec}
+    HostGET['facebook.com'] = HostGET['www.facebook.com'] = -> r {
+      if ENV.has_key? 'FB'
+        r.allowHost
+      else
+        %w(connect pages_reaction_units plugins security tr).member?(r.parts[0]) ? r.deny : r.noexec
+      end}
     HostGET['l.instagram.com'] = HostGET['l.facebook.com'] = -> r {[301, {'Location' => r.env[:query]['u']},[]]}
 
     # Forbes
