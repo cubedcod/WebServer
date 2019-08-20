@@ -46,17 +46,14 @@ class WebResource
     SiteJS  = ConfDir.join('site.js').read
   end
   module HTTP
-    # desktop UI user-agent
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3869.0 Safari/537.36'
-    # desktop UI hosts
-    UIhost = /((apple|anvato|bandcamp|boston25news|duckduckgo|iheart|jwplatform|(mix|sound)cloud|spotify|vimeo|youtube).(com|net)|github.io|.tv)$/
-    # allow cookies
-    CookieHost = /(bizjournals|brightcove|twi(tch|tter)|youtube)\.(com|net|tv)$/
-    # allow POST
-    POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|mapbox|microcenter|moovitapp|reddit|(mix|sound)cloud|(music|xp).apple|ttvnw|api.twitter|twitch|weather|youtube)\.(com|gov|im|net|tv)$/
+    CookieHost = /(bandcamp|bizjournals|brightcove|twi(tch|tter)|youtube)\.(com|net|tv)$/
+    POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|(mix|sound)cloud|(music|xp).apple|ttvnw|twitch|youtube)\.(com|gov|im|net|tv)$/
     POSTpath = /\/graphql([\/]|$)/
     # allow paths named 'track'
     TrackHost = /\.(api.brightcove|bandcamp|soundcloud|track-blaster)\.com$/
+    # desktop UI hosts
+    UIhost = /((apple|anvato|bandcamp|boston25news|duckduckgo|iheart|jwplatform|(mix|sound)cloud|spotify|vimeo|youtube).(com|net)|github.io|.tv)$/
 
     def sitePOST
       case host

@@ -25,11 +25,7 @@ class WebResource
     end
 
     def allowCookies?
-      ENV.has_key?('COOKIES') ||
-        hostname.match?(CookieHost) ||
-        hostname.match?(POSThost) ||
-        hostname.match?(TrackHost) ||
-        hostname.match?(UIhost)
+      ENV.has_key?('COOKIES') || hostname.match?(CookieHost)
     end
 
     def allowHost
