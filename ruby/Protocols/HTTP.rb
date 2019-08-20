@@ -301,7 +301,7 @@ class WebResource
             code = 404
           when /999/
             code = 999
-            body = HTTP.decompress e.io.meta, e.io.read 
+            body = HTTP.decompress e.io.meta, e.io.read
             @upstreamUI = true
           else
             raise # exceptional code
