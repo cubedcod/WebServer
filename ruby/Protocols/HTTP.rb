@@ -299,6 +299,10 @@ class WebResource
             code = 403
           when /404/ # not found
             code = 404
+          when /999/
+            code = 999
+            body = HTTP.decompress e.io.meta, e.io.read 
+            @upstreamUI = true
           else
             raise # exceptional code
           end
@@ -644,9 +648,9 @@ class WebResource
     end
 
     def upstreamUI?
-      !local? && (env['HTTP_USER_AGENT'] == DesktopUA ||
-                  env['SERVER_NAME'].match?(UIhost) ||
-                  env[:query]['ui'] == 'upstream')
+      @upstreamUI ||= (!local? && (env['HTTP_USER_AGENT'] == DesktopUA ||
+                                   env['SERVER_NAME'].match?(UIhost) ||
+                                   env[:query]['ui'] == 'upstream'))
     end
 
     def verbose
