@@ -1,3 +1,2 @@
-require_relative '../ruby/index'
-#use Rack::Lint
+require_relative '../index'
 run WebResource::HTTP

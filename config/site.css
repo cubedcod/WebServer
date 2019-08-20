@@ -23,7 +23,7 @@
 .user > img {max-width: 20em}
 .user > span {font-size: 3em}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
-a {text-decoration: none; background-color: #f3f3f3; color: #000; padding: 0 .05em 0 .05em}
+a {text-decoration: none; background-color: #f3f3f3; color: #000; padding: 0 .06em 0 .06em}
 a.date {float: right; background-color: #000; color: #888; font-size: .8em; border-color: #222}
 a.id {float: right; background-color: #000; color: #333; border-color: #222}
 a:visited {border-color: #333; background-color: #111; color: #fff}

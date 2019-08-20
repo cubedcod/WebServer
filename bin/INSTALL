@@ -10,9 +10,7 @@ which pkg && pkg install graphicsmagick git ruby ruby-dev grep file findutils pk
 
 # Python
 pip install --upgrade pip pygments
-
 # Ruby
-cd ~/src/WebServer/ruby
 which bundle || gem install bundler
 bundle install
 

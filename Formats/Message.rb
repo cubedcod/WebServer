@@ -71,19 +71,15 @@ module Webize
           yield mail, Content,
                 WebResource::HTML.render(p.decoded.lines.to_a.map{|l| # split lines
                               l = l.chomp # strip any remaining [\n\r]
-                              if qp = l.match(/^((\s*[>|]\s*)+)(.*)/) # quoted line
-                                depth = (qp[1].scan /[>|]/).size # > count
-                                if qp[3].empty? # drop blank quotes
+                              if qp = l.match(/^(\s*[>|][>|\s]*)(.*)/) # quoted line
+                                if qp[2].empty? # drop blank quotes
                                   nil
-                                else # wrap quotes in <span>
-                                  indent = "<span name='quote#{depth}'>&gt;</span>"
+                                else # quote
                                   {_: :span, class: :quote,
-                                   c: [indent * depth,' ',
-                                       {_: :span, class: :quoted,
-                                        c: qp[3].hrefs{|p,o|
-                                          yield mail, p, o }}]}
+                                   c: [qp[1].gsub('>','&gt;'), qp[2].hrefs{|p,o|
+                                         yield mail, p, o }]}
                                 end
-                              else # unquoted line
+                              else # fresh line
                                 [l.hrefs{|p, o|
                                    yield mail, p, o}]
                               end}.map{|line| [line, '<br>']})}
