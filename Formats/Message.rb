@@ -82,7 +82,7 @@ module Webize
                               else # fresh line
                                 [l.hrefs{|p, o|
                                    yield mail, p, o}]
-                              end}.map{|line| [line, '<br>']})}
+                              end}.map{|line| [line, "<br>\n"]})}
 
         # recursive contained messages: digests, forwards, archives
         parts.select{|p|p.mime_type=='message/rfc822'}.map{|m|

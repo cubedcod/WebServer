@@ -17,6 +17,7 @@
 .post a {border: 1px solid white}
 .post a.avatar {border-width: 0}
 .title {background-color: #eee; color: #000; font-size: 1.1em; white-space: nowrap; max-width: 80ex; overflow: hidden; display: inline-block; font-weight: bold; vertical-align: top; padding: .06em .1em .06em .1em; border-radius: 0 .3em .3em 0}
+.quote {background-color: #ccc; color: #000}
 .toolbox a.icon {font-size: 1.8em; background-color: #000; color: #ccc}
 .toolbox { vertical-align: top }
 .user {background-color: white; color: black; margin: .5em; border-radius: .4em}
