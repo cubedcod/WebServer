@@ -225,9 +225,6 @@ end
 class WebResource
   module HTML
 
-    Avatars = {}
-    'avatars/*png'.R.glob.map{|a|Avatars[Base64.decode64(a.basename.split('.')[0]).downcase] = ServerAddr + a.path}
-
     def avatar link = nil
       location = ('avatars/' + Base64.encode64(uri).gsub("\n",'') + '.png').R
       location.write open(link).read if link

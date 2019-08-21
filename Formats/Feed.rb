@@ -273,39 +273,4 @@ class WebResource
                                     c: d[Content]}}]}}]}]
     end
   end
-  module HTTP
-
-    def subscribe;     subscriptionFile.touch end
-    def unsubscribe; subscriptionFile.exist? && subscriptionFile.node.delete end
-
-    def subscribed?;   subscriptionFile.exist? end
-    def subscriptions; subscriptionFile('*').R.glob.map(&:dir).map &:basename end
-    def subs; puts     subscriptions.sort.join ' ' end
-
-    PathGET['/subscribe'] = -> r {
-      url = (r.env[:query]['u'] || '/').R
-      url.subscribe
-      [302, {'Location' => url.to_s}, []]}
-
-    PathGET['/unsubscribe']  = -> r {
-      url = (r.env[:query]['u'] || '/').R
-      url.unsubscribe
-      [302, {'Location' => url.to_s}, []]}
-
-    def self.getFeeds
-      FeedURL.values.shuffle.map{|feed|
-        begin
-          options = {
-            content_type: 'application/atom+xml',
-            no_response: true,
-          }
-          options[:scheme] = :http if feed.scheme == 'http'
-          feed.fetch options
-          nil
-        rescue Exception => e
-          puts 'https:' + feed.uri, e.class, e.message, e.backtrace
-        end}
-    end
-
-  end
 end

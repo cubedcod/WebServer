@@ -1,6 +1,9 @@
 module Webize
   module HTML
     class Reader
+      Avatars = {}
+      'avatars/*png'.R.glob.map{|a|
+        Avatars[Base64.decode64(a.basename.split('.')[0]).downcase] = ServerAddr + a.path}
 
       Gunk = %w{
  .ActionBar .ActionBar-items .SocialBar
@@ -47,7 +50,7 @@ class WebResource
   end
   module HTTP
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3869.0 Safari/537.36'
-    CookieHost = /(bandcamp|bizjournals|brightcove|twi(tch|tter)|youtube)\.(com|net|tv)$/
+    CookieHost = /(bandcamp|bizjournals|brightcove|google|twi(tch|tter)|youtube)\.(com|net|tv)$/
     POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|(mix|sound)cloud|(music|xp).apple|ttvnw|twitch|youtube)\.(com|gov|im|net|tv)$/
     POSTpath = /\/graphql([\/]|$)/
     # allow paths named 'track'

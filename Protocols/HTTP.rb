@@ -418,6 +418,21 @@ class WebResource
       end
     end
 
+    def self.getFeeds
+      FeedURL.values.shuffle.map{|feed|
+        begin
+          options = {
+            content_type: 'application/atom+xml',
+            no_response: true,
+          }
+          options[:scheme] = :http if feed.scheme == 'http'
+          feed.fetch options
+          nil
+        rescue Exception => e
+          puts 'https:' + feed.uri, e.class, e.message, e.backtrace
+        end}
+    end
+
     # Graph -> HTTP Response
     def graphResponse
       return notfound if !env.has_key?(:repository) || env[:repository].empty?
@@ -739,6 +754,23 @@ class WebResource
 
       default                                                 # HTML via default
     end
+
+    def subscribe;     subscriptionFile.touch end
+    def subscribed?;   subscriptionFile.exist? end
+    def subscriptions; subscriptionFile('*').R.glob.map(&:dir).map &:basename end
+    def subs; puts     subscriptions.sort.join ' ' end
+
+    PathGET['/subscribe'] = -> r {
+      url = (r.env[:query]['u'] || '/').R
+      url.subscribe
+      [302, {'Location' => url.to_s}, []]}
+
+    PathGET['/unsubscribe']  = -> r {
+      url = (r.env[:query]['u'] || '/').R
+      url.unsubscribe
+      [302, {'Location' => url.to_s}, []]}
+
+    def unsubscribe; subscriptionFile.exist? && subscriptionFile.node.delete end
 
     def upstreamUI?
       @upstreamUI ||= (!local? && (env['HTTP_USER_AGENT'] == DesktopUA ||
