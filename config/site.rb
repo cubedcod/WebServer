@@ -1,9 +1,6 @@
 module Webize
   module HTML
     class Reader
-      Avatars = {}
-      'avatars/*png'.R.glob.map{|a|
-        Avatars[Base64.decode64(a.basename.split('.')[0]).downcase] = ServerAddr + a.path}
 
       Gunk = %w{
  .ActionBar .ActionBar-items .SocialBar
@@ -47,6 +44,14 @@ class WebResource
     SiteGIF = ConfDir.join('site.gif').read
     SiteCSS = ConfDir.join('site.css').read
     SiteJS  = ConfDir.join('site.js').read
+  end
+  module HTML
+    Avatars = {}
+    'avatars/*png'.R.glob.map{|a|
+      uri = Base64.decode64(a.basename.split('.')[0]).downcase
+      location = ServerAddr + a.path
+      #puts "Avatar: #{uri} -> #{location}"
+      Avatars[uri] = location}
   end
   module HTTP
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3869.0 Safari/537.36'
