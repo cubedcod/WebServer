@@ -315,7 +315,7 @@ www.gstatic.com
         r.index
         r.graphResponse
       else
-        r.remote
+        r.noexec
       end}
 
     # WGBH
