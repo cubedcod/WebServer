@@ -53,7 +53,7 @@ class WebResource
     # allow paths named 'track'
     TrackHost = /\.(api.brightcove|bandcamp|soundcloud|track-blaster)\.com$/
     # desktop UI hosts
-    UIhost = /((apple|anvato|bandcamp|boston25news|duckduckgo|iheart|jwplatform|(mix|sound)cloud|spotify|vimeo|youtube).(com|net)|github.io|.tv)$/
+    UIhost = /((apple|anvato|bandcamp|books.google|boston25news|duckduckgo|iheart|jwplatform|(mix|sound)cloud|spotify|vimeo|youtube).(com|net)|github.io|.tv)$/
 
     def sitePOST
       case host
@@ -206,7 +206,10 @@ class WebResource
     HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.deny : r.noexec}
     HostGET['www.google.com'] = -> r {a=r.parts[0]; [nil,*%w(aclk images imgres maps search)].member?(a) ? (a=='maps' ? r.desktop.fetch : Google[r]) : r.deny}
     HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
+
     %w(
+apis.google.com
+books.google.com
 developers.google.com
 drive.google.com
 encrypted-tbn0.gstatic.com
@@ -222,9 +225,10 @@ maps.googleapis.com
 maps.gstatic.com
 ssl.gstatic.com
 www.gstatic.com
-).map{|h|
-      HostGET[h] = Google}
-    %w(storage.googleapis.com gstatic.com).map{|n| Subdomain[n] = Google }
+).map{|h| HostGET[h] = Google }
+
+    %w(storage.googleapis.com gstatic.com).map{|n|
+      Subdomain[n] = Google }
 
     # Linkedin
     HostGET['www.linkedin.com'] = HostGET['media.licdn.com'] = -> r {r.allowHost}
