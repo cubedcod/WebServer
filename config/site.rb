@@ -10,6 +10,7 @@ module Webize
 }
       Triplr = {
         'apnews.com' => :AP,
+        'lwn.net' => :LWN,
         'news.ycombinator.com' => :HackerNews,
         'twitter.com' => :Twitter,
         'www.aliexpress.com' => :AX,
@@ -516,6 +517,10 @@ yts
             end rescue nil
           end}
       end}
+  end
+
+  def LWN doc
+    doc.css()
   end
 
   def Outline tree
