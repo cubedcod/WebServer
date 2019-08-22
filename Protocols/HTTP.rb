@@ -774,7 +774,8 @@ class WebResource
 
     def upstreamUI?
       @upstreamUI ||= (!local? && (env['HTTP_USER_AGENT'] == DesktopUA ||
-                                   env['SERVER_NAME'].match?(UIhost) ||
+                                   (env['SERVER_NAME'].match?  UIhost) ||
+                                   (env['REQUEST_PATH'].match? UIpath) ||
                                    env[:query]['ui'] == 'upstream'))
     end
 

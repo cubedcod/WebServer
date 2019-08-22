@@ -61,8 +61,9 @@ class WebResource
     POSTpath = /\/graphql([\/]|$)/
     # allow paths named 'track'
     TrackHost = /\.(api.brightcove|bandcamp|soundcloud|track-blaster)\.com$/
-    # desktop UI hosts
+    # desktop UI patterns
     UIhost = /((apple|anvato|bandcamp|books.google|boston25news|duckduckgo|iheart|jwplatform|(mix|sound)cloud|spotify|vimeo|youtube).(com|net)|github.io|.tv)$/
+    UIpath = /oembed\./
 
     def sitePOST
       case host

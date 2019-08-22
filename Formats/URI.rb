@@ -166,6 +166,7 @@ class WebResource < RDF::URI
       'https://ogp.me/ns#image:width' => :drop,
       'https://ogp.me/ns#title' => Title,
       'https://ogp.me/ns#type' => Type,
+      'http://ogp.me/ns/fb#pages' => :drop,
       'http://ogp.me/ns#image:alt' => Abstract,
       'http://opengraphprotocol.org/schema/description' => Abstract,
       'http://opengraphprotocol.org/schema/image' => Image,
