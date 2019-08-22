@@ -1,9 +1,6 @@
 # coding: utf-8
 %w(brotli cgi httparty open-uri rack).map{|_| require _}
 class WebResource
-  module URIs
-    ServerAddr = 'http://l:8000'
-  end
   module HTTP
     include URIs
     HostGET = {}
@@ -196,6 +193,8 @@ class WebResource
                          source.exist? ? source.read : '//']
                       elsif path[-3..-1] == 'css'
                         ['text/css',"body {background: repeating-linear-gradient(#{rand 360}deg, #000, #000 6.5em, #fff 6.5em, #fff 8em)\ndiv, p {background-color: #000; color: #fff}"]
+                      elsif ext == 'woff' || ext == 'woff2'
+                        ['font/woff2', SiteFont]
                       elsif env[:GIF]
                         ['image/gif', SiteGIF]
                       else
@@ -715,11 +714,11 @@ class WebResource
         case env['HTTP_TYPE']
         when /drop/
           if host.match? TrackHost
-            fetch # media track
+            fetch # media allow
           elsif env[:query]['allow'] == ServerKey
-            fetch # drop override
+            fetch # manual allow
           elsif !env[:query].keys.grep(/campaign|[iu]tm_/).empty?
-            [301, {'Location' => env['REQUEST_PATH']}, []]
+            [301, {'Location' => env['REQUEST_PATH']}, []] # strip qs
           else
             deny
           end

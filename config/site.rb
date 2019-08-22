@@ -42,6 +42,8 @@ class WebResource
     ConfDir.join('feeds/*.u').toWebResource.glob.map{|list|
       (open list.relPath).readlines.map(&:chomp).map{|u|
         FeedURL[u] = u.R }}
+    ServerAddr = 'http://localhost:8000'
+    SiteFont = ConfDir.join('fonts/hack-regular-subset.woff2').read
     SiteGIF = ConfDir.join('site.gif').read
     SiteCSS = ConfDir.join('site.css').read
     SiteJS  = ConfDir.join('site.js').read

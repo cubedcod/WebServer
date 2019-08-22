@@ -1,0 +1,1 @@
+FB = {init: function(opts){}};

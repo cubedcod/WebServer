@@ -119,6 +119,8 @@ class WebResource < RDF::URI
       'csrf-token' => :drop,
       'date' => Date,
       'datePublished' => Date,
+      'DC.description' => Abstract,
+      'DC.creator' => Creator,
       'dc.creator' => Creator,
       'dc.date' => Date,
       'dc.description' => Abstract,
