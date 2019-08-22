@@ -55,7 +55,7 @@ class WebResource
   end
   module HTTP
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3869.0 Safari/537.36'
-    CookieHost = /(bandcamp|bizjournals|brightcove|google|twi(tch|tter)|youtube)\.(com|net|tv)$/
+    CookieHost = /(bandcamp|bizjournals|brightcove|google|reddit|twi(tch|tter)|youtube)\.(com|net|tv)$/
     POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|(mix|sound)cloud|(music|xp).apple|ttvnw|twitch|youtube)\.(com|gov|im|net|tv)$/
     POSTpath = /\/graphql([\/]|$)/
     # allow paths named 'track'
@@ -159,6 +159,9 @@ class WebResource
     # Bing
     HostGET['www.bing.com'] = -> r {
       (%w(fd hamburger Identity notifications secure).member?(r.parts[0]) || r.path.index('/api/ping') == 0) ? r.deny : r.desktop.fetch}
+
+    # Brightspot
+    HostGET['ca-times.brightspotcdn.com'] = -> r {r.env[:query].has_key?('url') ? [301, {'Location' => r.env[:query]['url']}, []] : r.noexec}
 
     # BusinessWire
     HostGET['cts.businesswire.com'] = -> r {
