@@ -257,6 +257,9 @@ www.gstatic.com
     # Mozilla
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
+    # NYTimes
+    HostGET['www.nytimes.com'] = -> r {r.allowHost}
+
     # Outline
     HostGET['outline.com'] = -> r {
       if r.parts[0] == 'favicon.ico'
