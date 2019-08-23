@@ -14,7 +14,9 @@ class WebResource
     Subdomain = {}
 
     def allowedOrigin
-      if referer = env['HTTP_REFERER']
+      if env['HTTP_ORIGIN']
+        env['HTTP_ORIGIN']
+      elsif referer = env['HTTP_REFERER']
         'http' + (env['SERVER_NAME'] == 'localhost' ? '' : 's') + '://' + referer.R.host
       else
         '*'
