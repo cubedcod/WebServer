@@ -166,8 +166,9 @@ class WebResource
       end
       remainder = ps.empty? ? '' : ['', *ps].join('/')
       remainder += '/' if env['REQUEST_PATH'] && env['REQUEST_PATH'][-1] == '/'
-      env[:links][:prev] = p + remainder + qs + '#prev' if p && p.R.exist?
-      env[:links][:next] = n + remainder + qs + '#next' if n && n.R.exist?
+      q = env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || ''
+      env[:links][:prev] = p + remainder + q + '#prev' if p && p.R.exist?
+      env[:links][:next] = n + remainder + q + '#next' if n && n.R.exist?
     end
 
     def HTTP.decompress head, body
@@ -602,7 +603,7 @@ class WebResource
       else
         env[:deny] = true
         [204, {'Access-Control-Allow-Credentials' => 'true',
-               'Access-Control-Allow-Headers' => 'authorization, content-type, x-braze-api-key, x-hostname, x-lib-version, x-locale, x-requested-with',
+               'Access-Control-Allow-Headers' => 'authorization, content-type, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-hostname, x-lib-version, x-locale, x-requested-with',
                'Access-Control-Allow-Origin' => allowedOrigin},
          []]
       end
@@ -692,10 +693,10 @@ class WebResource
       if env
         if env[:query_modified]
           HTTP.qs env[:query]
-        elsif env[:query] && LocalArgs.find{|a| env[:query].has_key? a } # local query arguments
+        elsif env[:query] && LocalArgs.find{|a| env[:query].has_key? a } # local query arguments in use
           q = env[:query].dup          # copy query
-          LocalArgs.map{|a|q.delete a} # strip local arguments
-          q.empty? ? '' : HTTP.qs(q)   # external querystring
+          LocalArgs.map{|a|q.delete a} # strip local args
+          q.empty? ? '' : HTTP.qs(q)   # external query-string
         elsif env['QUERY_STRING'] && !env['QUERY_STRING'].empty?
           '?' + env['QUERY_STRING']
         else
