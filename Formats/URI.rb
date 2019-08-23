@@ -85,6 +85,7 @@ class WebResource < RDF::URI
       'al:iphone:app_store_id' => :drop,
       'al:iphone:url' => :drop,
       'al:web:should_fallback' => :drop,
+      'al:web:url' => Link,
       'alternate' => DC + 'hasFormat',
       'amphtml' => :drop,
       'aplus-auto-clk' => :drop,

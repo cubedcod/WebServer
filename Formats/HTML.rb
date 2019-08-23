@@ -385,7 +385,11 @@ class WebResource
                    ts = resource[Title] || []
                    if !ts.empty?
                      ts.map{|t|
-                       {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'title', type: 'node', c: CGI.escapeHTML(t.to_s.sub(/\/u\/\S+ on /,'').sub(/^Re: /,''))}}
+                       title = t.to_s.sub(/\/u\/\S+ on /, '').sub /^Re: /, ''
+                       unless env[:title] == title
+                         env[:title] = title
+                         {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'title', type: 'node', c: CGI.escapeHTML(title)}
+                       end}
                    else
                      {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'id', type: 'node', c: '&#x1f517;'}
                    end
