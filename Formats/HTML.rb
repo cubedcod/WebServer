@@ -115,7 +115,7 @@ sidebar [class^='side']    [id^='side']
       def initialize(input = $stdin, options = {}, &block)
         @opts = options
         @doc = (input.respond_to?(:read) ? input.read : input).encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ')
-        @base = options[:base_uri].R
+        @base = options[:base_uri]
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -156,7 +156,7 @@ sidebar [class^='side']    [id^='side']
             embeds << (::JSON::LD::API.toRdf ::JSON.parse dataElement.inner_text)} rescue "JSON-LD read failure in #{@base}"
           # RDFa
           RDF::Reader.for(:rdfa).new(@doc, base_uri: @base){|_| embeds << _ } rescue "RDFa read failure in #{@base}"
-          # emit normalized triples
+
           embeds.each_triple{|s,p,o|
             p = MetaMap[p.to_s] || p # predicate map
             puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/
@@ -167,6 +167,8 @@ sidebar [class^='side']    [id^='side']
         n.css('head link[rel]').map{|m|
           if k = m.attr("rel") # predicate
             if v = m.attr("href") # object
+              @base.env[:links][:prev] = v if k=='prev'
+              @base.env[:links][:next] = v if k=='next'
               k = MetaMap[k] || k
               puts [k,v].join "\t" unless k.to_s.match? /^(drop|http)/
               yield subject, k, v.R unless k == :drop

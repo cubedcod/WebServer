@@ -283,7 +283,7 @@ class WebResource
         end
         begin
           open(url, head) do |response|
-            base = url.R
+            base = url.R env
             env[:scheme] = base.scheme
             code = response.status.to_s.match(/\d{3}/)[0]
             meta = response.meta
