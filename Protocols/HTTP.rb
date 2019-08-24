@@ -343,7 +343,6 @@ class WebResource
         if e.respond_to?(:io) && verbose?
           puts e.io.status.join ' '
           HTTP.print_header e.io.meta
-          #puts e.io.read
         end
         case e.class.to_s
         when 'Errno::ECONNREFUSED'
@@ -365,11 +364,9 @@ class WebResource
           if location == fallback
             fetchURL[fallback]
           else
-            if options[:no_response]
-              puts "REDIRECT #{url} -> \e[32;7m" + location + "\e[0m"
-            else
-              return [302, {'Location' => location}, []]
-            end
+            return [302, {'Location' => location}, []] unless options[:no_response]
+            puts "REDIRECT #{url} → \e[32;7m" + location + "\e[0m"
+            fetchURL[location]
           end
         when 'RuntimeError'
           fetchURL[fallback]
@@ -688,7 +685,7 @@ class WebResource
       }.join("&")
     end
 
-    # serialize query to string
+    # serialize querystring
     def qs
       if env
         if env[:query_modified]
@@ -700,14 +697,18 @@ class WebResource
         elsif env['QUERY_STRING'] && !env['QUERY_STRING'].empty?
           '?' + env['QUERY_STRING']
         else
-          ''
+          staticQuery
         end
       else
-        if query && !query.empty?
-          '?' + query
-        else
-          ''
-        end
+        staticQuery
+      end
+    end
+
+    def staticQuery
+      if query && !query.empty?
+        '?' + query
+      else
+        ''
       end
     end
 
