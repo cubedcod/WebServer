@@ -2,12 +2,13 @@ module Webize
   module HTML
     class Reader
 
-      Gunk = %w{
+      Gunk = %w(
  .ActionBar .ActionBar-items .SocialBar
- .featured-headlines
- .global-audio-components
- a[href="https://www.bostonmagazine.com/scrapertrap"]
-}
+ .featured-headlines .global-audio-components)
+
+      SiteGunk = {'www.google.com' => %w(h1 h2),
+                  'www.bostonmagazine.com' => %w(a[href*='scrapertrap'])}
+
       Triplr = {
         'apnews.com' => :AP,
         'lwn.net' => :LWN,

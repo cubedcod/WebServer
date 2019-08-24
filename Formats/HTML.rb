@@ -210,7 +210,7 @@ sidebar [class^='side']    [id^='side']
             if content = body.css('.' + bsel)[0]
               yield subject, Content, HTML.clean(content.inner_html)
             end}
-          [*BasicGunk,*Gunk].map{|selector|
+          [*BasicGunk,*Gunk,*SiteGunk[@base.host]].map{|selector|
             body.css(selector).map{|sel|
               #puts "X"*80,"stripping #{selector}:", sel if ENV['VERBOSE']
               sel.remove }} # strip elements
