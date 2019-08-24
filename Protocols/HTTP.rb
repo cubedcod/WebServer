@@ -259,16 +259,15 @@ class WebResource
 
     def fetch options = {}
       if this = cached?; return this.fileResponse end
-      @env ||= {resp: {}}                      # request metadata
+      @env ||= {resp: {}}                      # response metadata
       env[:repository] ||= RDF::Repository.new # RDF storage (in-memory)
-      head = headers                           # clean/filter request metadata
+      head = headers                           # cleaned request metadata
       head[:redirect] = false                  # halt on redirect
       u = '//' + hostname + path + (env[:suffix]||'') + qs        # base locator
       url      = (options[:scheme] || 'https').to_s    + ':' + u  # primary locator
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u  # fallback locator
       options[:content_type]='application/atom+xml' if FeedURL[u] # fix MIME on feed URLs
-      upstream_metas = %w{Access-Control-Allow-Origin
-                          Access-Control-Allow-Credentials
+      upstream_metas = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials
                           Content-Type Content-Length ETag}
       upstream_metas.push 'Set-Cookie' if allowCookies?
       code = nil   # response status

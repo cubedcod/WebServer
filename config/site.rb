@@ -64,7 +64,7 @@ class WebResource
     # allow paths named 'track'
     TrackHost = /\.(api.brightcove|bandcamp|soundcloud|track-blaster)\.com$/
     # desktop UI patterns
-    UIhost = /((apple|anvato|bandcamp|books.google|boston25news|brightcove|duckduckgo|gannettdigital|iheart|jwplatform|(mix|sound)cloud|spotify|uw-media.thenews-messenger|vimeo|wcvb|youtube).(com|net)|github.io|.tv)$/
+    UIhost = /((apple|anvato|bandcamp|books.google|boston25news|brightcove|duckduckgo|gannettdigital|iheart|jwplatform|(mix|sound)cloud|miixtapechiick|spotify|uw-media.thenews-messenger|vimeo|wcvb|youtube).(com|net)|github.io|.tv)$/
     UIpath = /oembed\./
 
     def sitePOST
