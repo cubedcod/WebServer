@@ -167,8 +167,8 @@ sidebar [class^='side']    [id^='side']
         n.css('head link[rel]').map{|m|
           if k = m.attr("rel") # predicate
             if v = m.attr("href") # object
-              @base.env[:links][:prev] = v if k=='prev'
-              @base.env[:links][:next] = v if k=='next'
+              @base.env[:links][:prev] ||= v if k=='prev'
+              @base.env[:links][:next] ||= v if k=='next'
               k = MetaMap[k] || k
               puts [k,v].join "\t" unless k.to_s.match? /^(drop|http)/
               yield subject, k, v.R unless k == :drop
