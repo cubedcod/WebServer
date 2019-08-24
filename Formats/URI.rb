@@ -374,6 +374,8 @@ class WebResource < RDF::URI
       Schema+'articleBody' => Content,
       Schema+'articleSection' => Abstract,
       Schema+'author' => Creator,
+      Schema+'commentText' => Content,
+      Schema+'commentTime' => Date,
       Schema+'creator' => Creator,
       Schema+'dateCreated' => Date,
       Schema+'dateModified' => Date,

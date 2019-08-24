@@ -6,7 +6,7 @@ module Webize
  .ActionBar .ActionBar-items .SocialBar
  .featured-headlines .global-audio-components)
 
-      SiteGunk = {'www.google.com' => %w(h1 h2),
+      SiteGunk = {'www.google.com' => %w(div.logo h1 h2),
                   'www.bostonmagazine.com' => %w(a[href*='scrapertrap'])}
 
       Triplr = {
