@@ -283,6 +283,8 @@ class WebResource
         end
         begin
           open(url, head) do |response|
+            base = url.R
+            env[:scheme] = base.scheme
             code = response.status.to_s.match(/\d{3}/)[0]
             meta = response.meta
             if code == 206
@@ -297,19 +299,18 @@ class WebResource
                 HTTP.print_body head, body
               end
 
-              format ||= options[:content_type]
-              format ||= meta['content-type'].split(/;/)[0] if meta['content-type']
-              format ||= (xt = ext.to_sym
-                          RDF::Format.file_extensions.has_key?(xt) &&
-                            RDF::Format.file_extensions[xt][0].content_type[0])
-              format ||= body.bytesize < 2048 ? 'text/plain' : 'application/octet-stream'
+              format ||= options[:content_type]                                     # local preference
+              format ||= meta['content-type'].split(/;/)[0] if meta['content-type'] # Content-Type metadata
+              format ||= (xt = ext.to_sym                                           # path extension
+                          RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
+              format ||= body.bytesize < 2048 ? 'text/plain' : 'application/octet-stream' # unspecified
 
               file = cache(format).write body if !format.match? RDFformats # cache non-RDF
 
               if reader = RDF::Reader.for(content_type: format)            # RDF reader
-                reader_options = {base_uri: url.R, no_embeds: options[:no_embeds]}
+                reader_options = {base_uri: base, no_embeds: options[:no_embeds]}
                 reader.new(body, reader_options){|_| env[:repository] << _ } # read RDF
-                index unless options[:no_index]                      # cache+index RDF
+                index unless options[:no_index]                            # cache RDF
               end
             end
             upstream_metas.map{|k| # origin metadata
@@ -388,10 +389,10 @@ class WebResource
         [206, env[:resp], [body]]
       elsif body && (upstreamUI? || format&.match?(PreservedFormat)) # upstream data
         [200, env[:resp].merge({'Content-Length' => body.bytesize}), [body]]
-      else                                                         # graph data
+      else                                                        # graph data
         if env[:repository].empty? && !local? && env['REQUEST_PATH'][-1]=='/' # unlistable remote
           index = (CacheDir + hostname + path).R(env)                         # local container
-          index.children.map{|e|e.env(env).nodeStat base_uri: 'https://' + e.relPath} if index.node.directory? # local list
+          index.children.map{|e|e.env(env).nodeStat base_uri: (env[:scheme] || 'https') + '://' + e.relPath} if index.node.directory? # local list
         end
         graphResponse
       end
@@ -449,7 +450,7 @@ class WebResource
         when /^application\/atom+xml/
           renderFeed treeFromGraph   # Atom/RSS-feed
         else                         # RDF
-          base = ('https://' + env['SERVER_NAME']).R.join env['REQUEST_PATH']
+          base = ((env[:scheme] || 'https') + '://' + env['SERVER_NAME']).R.join env['REQUEST_PATH']
           env[:repository].dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => base, :standard_prefixes => true
         end}
     end
