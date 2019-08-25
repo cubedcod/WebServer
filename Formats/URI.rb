@@ -100,6 +100,7 @@ class WebResource < RDF::URI
       'application-name' => :drop,
       'article:author' => Creator,
       'article:author_name' => Creator,
+      'article:content_tier' => :drop,
       'article:modified' => Date,
       'article:modified_time' => Date,
       'article:published' => Date,

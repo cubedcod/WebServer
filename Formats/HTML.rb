@@ -42,16 +42,14 @@ image-src
         div.add_child "<img src=\"#{div['data-src']}\">"}
 
       html.traverse{|e|
-        e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) if e['href'] && !e['id'] # link identifier
+        e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) if e['href'] && !e['id'] # identify link for traversal
         e.attribute_nodes.map{|a|
-          # normalize @src
           e.set_attribute 'src', a.value if LazySRC.member? a.name
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
 
-          # strip attributes
-          dropa = a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || # script gunk
-                  %w{bgcolor class height http-equiv layout ping role style tabindex target width}.member?(a.name) || # misc attrs
-                  a.name == 'id' && e.name != 'a' # non-anchor elements with id
+          dropa = a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || # strip attributes
+                  %w{bgcolor class height http-equiv layout ping role style tabindex target width}.member?(a.name) ||
+                  a.name == 'id' && e.name != 'a' # remove ID from non-anchor elements
           a.unlink if dropa}}
 
       # output
