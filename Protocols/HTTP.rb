@@ -649,7 +649,7 @@ class WebResource
 
       if verbose?
         HTTP.print_header head
-        HTTP.print_body head, body
+        HTTP.print_body head, (HTTP.decompress head, body)
       end
 
       [code, head, [body]]
