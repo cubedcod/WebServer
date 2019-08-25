@@ -658,7 +658,7 @@ class WebResource
     def HTTP.print_body head, body
       body = case head['Content-Type']
              when 'application/json'
-               json = ::JSON.parse body
+               json = ::JSON.parse body rescue {}
                puts json['query'] if json['query']
                ::JSON.pretty_generate json
              else
