@@ -361,7 +361,7 @@ class WebResource
       keys = graph.select{|r|r.respond_to? :keys}.map{|r|r.keys}.flatten.uniq - [Abstract, Content, DC+'hasFormat', DC+'identifier', Image, Video, SIOC+'reply_of', SIOC+'user_agent', Title, Type]
       if env[:query] && env[:query].has_key?('sort')
         attr = env[:query]['sort']
-        attr = Date if attr == 'date'
+        attr = Date if %w(date new).member? attr
         attr = Content if attr == 'content'
         graph = graph.sort_by{|r|
           if values = r[attr]
@@ -427,7 +427,7 @@ class WebResource
       elsif v.class == Hash
         # RDF-type -> renderer mapping TODO just render everything (w/ groupings by type for collection UI)
         types = (v[Type]||[]).map &:R
-        if (types.member? Post) || (types.member? Schema+'Article') || (types.member? SIOC+'BlogPost') || (types.member? Schema+'UserComments') || (types.member? SIOC+'MailMessage') || (types.member? Schema+'DiscussionForumPosting') || (types.member? Schema+'Answer') || (types.member? Schema+'Review') || (types.member? 'https://schema.org/Comment') || (types.member? 'http://schema.org/Comment') || (types.member? Schema+'NewsArticle')
+        if (types.member? Post) || (types.member? Schema+'Article') || (types.member? SIOC+'BlogPost') || (types.member? Schema+'WebPage') || (types.member? Schema+'UserComments') || (types.member? SIOC+'MailMessage') || (types.member? Schema+'DiscussionForumPosting') || (types.member? Schema+'Answer') || (types.member? Schema+'Review') || (types.member? 'https://schema.org/Comment') || (types.member? 'http://schema.org/Comment') || (types.member? Schema+'NewsArticle')
           Markup[Post][v,env]
         elsif (types.member? Image) || (types.member? Schema+'ImageObject') || (types.member? 'https://schema.org/ImageObject')
           Markup[Image][v,env]
