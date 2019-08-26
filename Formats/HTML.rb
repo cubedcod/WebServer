@@ -427,7 +427,7 @@ class WebResource
       elsif v.class == Hash
         # RDF-type -> renderer mapping TODO just render everything (w/ groupings by type for collection UI)
         types = (v[Type]||[]).map &:R
-        if (types.member? Post) || (types.member? Schema+'Article') || (types.member? SIOC+'BlogPost') || (types.member? Schema+'WebPage') || (types.member? Schema+'UserComments') || (types.member? SIOC+'MailMessage') || (types.member? Schema+'DiscussionForumPosting') || (types.member? Schema+'Answer') || (types.member? Schema+'Review') || (types.member? 'https://schema.org/Comment') || (types.member? 'http://schema.org/Comment') || (types.member? Schema+'NewsArticle')
+        if (types.member? Post) || (types.member? Schema+'Article') || (types.member? SIOC+'BlogPost') || (types.member? Schema+'WebPage') || (types.member? Schema+'UserComments') || (types.member? SIOC+'MailMessage') || (types.member? Schema+'DiscussionForumPosting') || (types.member? Schema+'Answer') || (types.member? 'https://schema.org/NewsArticle') || (types.member? Schema+'Review') || (types.member? 'https://schema.org/Comment') || (types.member? 'http://schema.org/Comment') || (types.member? Schema+'NewsArticle')
           Markup[Post][v,env]
         elsif (types.member? Image) || (types.member? Schema+'ImageObject') || (types.member? 'https://schema.org/ImageObject')
           Markup[Image][v,env]

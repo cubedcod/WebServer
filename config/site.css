@@ -34,7 +34,7 @@ body, td, .post, a.head {background-color: #000; color: #fff}
 h1,h2,h3,h4,h5,h6 {background-color: #ddd; color: #000}
 h1,h2,h3,h4,h5,h6,p {margin: 0}
 img, video {max-width: 100%}
-p, li, blockquote {max-width: 80ex; border-width: 0 0 1px 0; border-style: solid; border-color: #333; border-radius: 0}
+p, li, blockquote {max-width: 84ex; border-width: 0 0 1px 0; border-style: solid; border-color: #333; border-radius: 0}
 pre {white-space: pre-wrap}
 table, div, li, svg {display: inline-block}
 table.fromTo {border-spacing: 0}

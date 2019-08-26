@@ -192,7 +192,7 @@ class WebResource
     HostGET['proxy.duckduckgo.com'] = -> r {%w{iu}.member?(r.parts[0]) ? [301, {'Location' => r.env[:query]['u']}, []] : r.remote}
 
     # eBay
-    HostGET['ebay.com'] = HostGET['www.ebay.com'] = -> r {r.desktop.allowHost}
+    HostGET['ebay.com'] = HostGET['www.ebay.com'] = -> r {r.allowHost}
     HostGET['i.ebayimg.com'] = -> r {
       if r.basename.match? /s-l(64|96|200|225).jpg/
         [301, {'Location' => r.dirname + '/s-l1600.jpg'}, []]
@@ -203,12 +203,15 @@ class WebResource
     HostGET['rover.ebay.com'] = -> r {r.env[:query].has_key?('mpre') ? [301, {'Location' => r.env[:query]['mpre']}, []] : r.deny}
 
     # Facebook
-    HostGET['facebook.com'] = HostGET['www.facebook.com'] = -> r {
-      if ENV.has_key? 'FB'
-        r.allowHost
-      else
-        %w(connect pages_reaction_units plugins security tr).member?(r.parts[0]) ? r.deny : r.noexec
-      end}
+    FBgunk = %w(
+common
+connect
+pages_reaction_units
+plugins
+security
+tr
+)
+    HostGET['facebook.com'] = HostGET['www.facebook.com'] = -> r {FBgunk.member?(r.parts[0]) ? r.deny : r.allowHost}
     HostGET['l.instagram.com'] = HostGET['l.facebook.com'] = -> r {[301, {'Location' => r.env[:query]['u']},[]]}
 
     # Forbes
