@@ -1,0 +1,5 @@
+#!/bin/sh
+cd
+rsync -avz web $DATAPEER:
+rsync -avz $DATAPEER:web .
+
