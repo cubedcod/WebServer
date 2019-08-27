@@ -96,7 +96,6 @@ class WebResource
       path = Pathname.new(env['REQUEST_PATH']).expand_path.to_s          # evaluate path-expression
       path += '/' if env['REQUEST_PATH'][-1] == '/' && path[-1] != '/'   # preserve trailing-slash
       resource = ('//' + env['SERVER_NAME'] + path).R env                # instantiate request
-      resource.verbose if resource.parts.member? 'graphql'
       resource.send(env['REQUEST_METHOD']).yield_self{|status,head,body| # dispatch request
         color = (if resource.env[:deny]                                  # log request
                   '31'                                                    # red -> denied
@@ -193,7 +192,6 @@ class WebResource
 
     def deny status = 200
       return [301,{'Location'=>env['REQUEST_PATH']},[]] if !env[:query].keys.grep(/campaign|[iu]tm_/).empty?
-      HTTP.print_header env if verbose?
       env[:deny] = true
       type, content = if ext == 'js' || env[:script]
                         source = ConfDir.join 'alternatives/' + host + path
@@ -220,7 +218,6 @@ class WebResource
 
     def denyPOST
       if verbose?
-        #HTTP.print_header env
         env['CONTENT_TYPE'] = 'application/json' if host.match? /\.soundcloud.com$/
         HTTP.print_body headers, env['rack.input'].read
       end
@@ -334,7 +331,6 @@ class WebResource
           end
         end}
 
-      puts HTTP.print_header env if verbose?
       begin
         fetchURL[url]       #   try (HTTPS default)
       rescue Exception => e # retry (HTTP)

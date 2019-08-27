@@ -69,7 +69,6 @@ class WebResource
     UIpath = /oembed\./
 
     def sitePOST
-      verbose
       case host
       when 'metrics.brightcove.com'
         denyPOST
