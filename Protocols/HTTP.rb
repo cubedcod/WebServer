@@ -13,6 +13,10 @@ class WebResource
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Subdomain = {}
 
+    def allowed
+      env[:query]['allow'] == ServerKey
+    end
+
     def allowedOrigin
       if env['HTTP_ORIGIN']
         env['HTTP_ORIGIN']
@@ -409,13 +413,21 @@ class WebResource
       elsif handler = Subdomain[host.split('.')[1..-1].join('.')]
         handler[self]                           # subdomains of host
       else
-        return fetch if env[:query]['allow'] == ServerKey
-        return deny if env.has_key?('HTTP_GUNK') || ((env['SERVER_NAME']+env['REQUEST_URI']).match?(GunkURI) && !host.match?(MediaHost))
+        return deny if (gunkHost || gunkURI) && !allowed
         return noexec if env['SERVER_NAME'].match? CDNhost
         fetch
       end
     rescue OpenURI::HTTPRedirect => e
       [302,{'Location' => e.io.meta['location']},[]]
+    end
+
+    def gunkHost
+      env.has_key? 'HTTP_GUNK'
+    end
+
+    def gunkURI
+      (env['SERVER_NAME'] +
+       env['REQUEST_URI']).match?(GunkURI) && !host.match?(MediaHost)
     end
 
     def self.getFeeds
