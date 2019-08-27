@@ -1,5 +1,4 @@
 #!/bin/sh
 uid=$(id -u)
 rules=$(realpath ~/src/WebServer/bin/network.rules)
-# configure network
 su -c "sh $rules $uid"
