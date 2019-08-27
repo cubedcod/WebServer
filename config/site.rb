@@ -589,7 +589,8 @@ yts
             yield s, Video, url[1].sub('pbs','video').sub('_thumb','').sub('jpg','mp4')
           }}}}
 
-    doc.css('body').remove
+    %w(link[rel="alternate"] title body).map{|sel|
+      doc.css(sel).remove}
   end
 
   def YouTube doc
