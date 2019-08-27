@@ -63,7 +63,7 @@ class WebResource
     CookieHost = /(bandcamp|bizjournals|brightcove|google|reddit|twi(tch|tter)|youtube)\.(com|net|tv)$/
     GunkURI = /[-.:_\/?&=~](([Bb]lock|[Pp]age)?[Aa](d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?([Bb]lock(er|ing)?.*|id|[Ww]ords?)?|([Aa]pp)?[Bb](anner|eacon)s?|[Cc](ampaign|edexis|hart[Bb]eat.*|om[Ss]core|ookie([Cc](hoices|onsent)|[Ll]aw|[Nn]otice)?|ount|se)|[Ee](moji.*\.js|nsighten|vidon)|([Ww]eb)?[Ff]onts?|\.gif\?|[Gg]([dD][pP][rR]|eo(ip|locate)|igya|[Pp][Tt]|tag|[Tt][Mm])|.*([Hh]eader|[Pp]re)[-_]?[Bb]id.*|.*[Hh]ub[Ss]pot.*|[hp]b.?js|ima[0-9]?|[Kk]r(ux|xd).*|logger|([Aa]pp|s)?[Mm](e(asurement|t(er|rics?))|ms|tr)|[Nn]ew([Rr]elic|sletter)|[Oo](m(niture|tr)|nboarding|ptanon|utbrain)|[Pp](ay(ments?|[Ww]all)|ersonaliz(ation|e)|i(wik|xel(propagate)?)|op(over|up)|romo(tion)?s?|[vx])|[Qq]uant[Cc]ast|[Rr]eco(mmend(ed)?|rd([Ee]vent|[Ss]tats?)?)|s?[Ss](a(fe[-_]?[Bb]rowsing|ilthru)|ervice[-_]?[Ww]orker|i(ftscience|gnalr|tenotice)|ocial|ponsored|so|tat(istic)?s?|ubscri(ber?|ption)|w.js|ync)|[Tt](aboola|(arget|rack)(ers?|ing)?|bproxy|ea(lium|ser)|rending)|[Uu](rchin|[Tt][Mm])|wp-rum)([-._\/?&=]|$)|\.(otf|ttf|woff2?)/
     MediaHost = /\.(api.brightcove|bandcamp|soundcloud|track-blaster)\.com$/
-    POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|(mix|sound)cloud|(music|xp).apple|ttvnw|twitch|youtube)\.(com|gov|im|net|tv)$/
+    POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|mixcloud|(music|xp).apple|api.soundcloud|ttvnw|twitch|youtube)\.(com|gov|im|net|tv)$/
     POSTpath = /\/graphql([\/]|$)/
     UIhost = /((apple|anvato|bandcamp|books.google|boston25news|brightcove|duckduckgo|gannettdigital|iheart|jwplatform|(mix|sound)cloud|miixtapechiick|spotify|uw-media.thenews-messenger|vimeo|wcvb|youtube).(com|net)|github.io|.tv)$/
     UIpath = /oembed\./
@@ -72,12 +72,6 @@ class WebResource
       case host
       when 'metrics.brightcove.com'
         denyPOST
-      when /\.soundcloud\.com$/
-        if host.match? /^api/
-          self.POSTthru
-        else
-          denyPOST
-        end
       when /\.youtube.com$/
         if parts.member? 'stats'
           denyPOST
@@ -86,18 +80,12 @@ class WebResource
         else
           denyPOST
         end
-      when /amazon/
-        if ENV.has_key?('AMAZON')
-          self.POSTthru
-        else
-          denyPOST
-        end
-      when /google/
-        if ENV.has_key?('GOOGLE')
-          self.POSTthru
-        else
-          denyPOST
-        end
+      when /amazon.com$/
+        ENV.has_key?('AMAZON') ? self.POSTthru : denyPOST
+      when /facebook.(com|net)$/
+        ENV.has_key?('FACEBOOK') ? self.POSTthru : denyPOST
+      when /google.com$/
+        ENV.has_key?('GOOGLE') ? self.POSTthru : denyPOST
       else
         self.POSTthru
       end
@@ -202,15 +190,8 @@ class WebResource
     HostGET['rover.ebay.com'] = -> r {r.env[:query].has_key?('mpre') ? [301, {'Location' => r.env[:query]['mpre']}, []] : r.deny}
 
     # Facebook
-    FBgunk = %w(
-common
-connect
-pages_reaction_units
-plugins
-security
-tr
-)
-    HostGET['facebook.com'] = HostGET['www.facebook.com'] = -> r {FBgunk.member?(r.parts[0]) ? r.deny : r.allowHost}
+    FBgunk = %w(common connect pages_reaction_units plugins security tr)
+    HostGET['facebook.com'] = HostGET['www.facebook.com'] = -> r {ENV.has_key?('FACEBOOK') ? r.fetch : (FBgunk.member? r.parts[0]) ? r.deny : r.noexec}
     HostGET['l.instagram.com'] = HostGET['l.facebook.com'] = -> r {[301, {'Location' => r.env[:query]['u']},[]]}
 
     # Forbes
@@ -220,34 +201,31 @@ tr
     HostGET['gitter.im'] = -> req {req.desktop.fetch}
 
     # Google
-    Google = -> r { ENV.has_key?('GOOGLE') ? r.allowHost : r.noexec }
-    HostGET['ajax.googleapis.com'] = -> r {r.fetch}
-    HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.deny : r.noexec}
-    HostGET['www.google.com'] = -> r {a=r.parts[0]; [nil,*%w(aclk images imgres maps search)].member?(a) ? (a=='maps' ? r.desktop.fetch : Google[r]) : r.deny}
+    Google = -> r {ENV.has_key?('GOOGLE') ? r.fetch : r.noexec}
+    HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.deny : Google[r]}
+    HostGET['www.google.com'] = -> r {([nil, *%w(aclk images imgres maps search)].member? r.parts[0]) ? (r.parts[0] == 'maps' ? r.desktop.fetch : Google[r]) : r.deny}
     HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
-
+    %w(storage.googleapis.com gstatic.com).map{|n| Subdomain[n] = Google }
     %w(
-apis.google.com
-books.google.com
+  ajax.googleapis.com
+      apis.google.com
+     books.google.com
 developers.google.com
-drive.google.com
+     drive.google.com
 encrypted-tbn0.gstatic.com
 encrypted-tbn1.gstatic.com
 encrypted-tbn2.gstatic.com
 encrypted-tbn3.gstatic.com
 feedproxy.google.com
-google.com
-groups.google.com
-kh.google.com
-maps.google.com
-maps.googleapis.com
-maps.gstatic.com
-ssl.gstatic.com
-www.gstatic.com
+          google.com
+   groups.google.com
+       kh.google.com
+     maps.google.com
+ maps.googleapis.com
+    maps.gstatic.com
+     ssl.gstatic.com
+     www.gstatic.com
 ).map{|h| HostGET[h] = Google }
-
-    %w(storage.googleapis.com gstatic.com).map{|n|
-      Subdomain[n] = Google }
 
     # Linkedin
     HostGET['www.linkedin.com'] = HostGET['media.licdn.com'] = -> r {r.allowHost}

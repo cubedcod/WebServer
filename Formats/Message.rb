@@ -123,7 +123,7 @@ module Webize
 
         # Date
         date = m.date || Time.now rescue Time.now
-        timestamp = ([Time, DateTime].member?(date.class) ? date : Time.parse(date.to_s)).utc.iso8601
+        timestamp = ([Time, DateTime].member?(date.class) ? date : Time.parse(date.to_s)).iso8601
         yield mail, Date, timestamp
 
         mailFile = (MailDir + '/cur/' + timestamp.gsub(/\D/,'.') + Digest::SHA2.hexdigest(id) + '.eml').R

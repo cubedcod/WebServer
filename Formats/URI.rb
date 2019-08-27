@@ -453,7 +453,7 @@ class WebResource < RDF::URI
     end
     def mkdir; FileUtils.mkdir_p relPath unless exist?; self end        # MKDIR(1)
     def node; @node ||= (Pathname.new relPath) end
-    def parts; path ? path.split('/').-(['']) : [] end
+    def parts; @parts ||= path ? path.split('/').-(['']) : [] end
     def relPath; URI.unescape(['/','','.',nil].member?(path) ? '.' : (path[0]=='/' ? path[1..-1] : path)) end
     def self.path p; ('/' + p.to_s.chomp.gsub(' ','%20').gsub('#','%23')).R end
     def self.splitArgs args; args.shellsplit rescue args.split /\W/ end
