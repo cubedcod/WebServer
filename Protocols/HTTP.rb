@@ -28,7 +28,7 @@ class WebResource
     end
 
     def allowHost
-      env['HTTP_TYPE'] = env['HTTP_TYPE'].split(',').-(%w(dropDNS)).join(',') if env['HTTP_TYPE']
+      env.delete 'HTTP_GUNK'
       remote
     end
 
@@ -188,6 +188,7 @@ class WebResource
     end
 
     def deny status = 200
+      return [301,{'Location'=>env['REQUEST_PATH']},[]] if !env[:query].keys.grep(/campaign|[iu]tm_/).empty?
       HTTP.print_header env if verbose?
       env[:deny] = true
       type, content = if ext == 'js' || env[:script]
@@ -467,8 +468,8 @@ class WebResource
         }.join(underscored ? '_' : '-')
         key = key.downcase if underscored
 
-        # set output header, strip Rack-internal keys
-        head[key] = v.to_s unless %w{host links path-info query query-modified query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software type unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)
+        # set output header, strip local-use headers
+        head[key] = v.to_s unless %w{gunk host links path-info query query-modified query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)
       }
 
       # Cookie
@@ -706,29 +707,10 @@ class WebResource
 
     # request for remote resource
     def remote
-      if env.has_key? 'HTTP_TYPE' # type-tagged request
-        case env['HTTP_TYPE']
-        when /drop/
-          if host.match? TrackHost
-            fetch # media allow
-          elsif env[:query]['allow'] == ServerKey
-            fetch # manual allow
-          elsif !env[:query].keys.grep(/campaign|[iu]tm_/).empty?
-            [301, {'Location' => env['REQUEST_PATH']}, []] # strip qs
-          else
-            deny
-          end
-        when /noexec/
-          noexec
-        when /direct/
-          r = HTTParty.get ('https://' + host + path + qs), headers: headers
-          [r.code, r.headers, [r.body]]
-        else
-          fetch
-        end
-      else
-        fetch
-      end
+      return fetch if env[:query]['allow'] == ServerKey
+      return deny  if env.has_key?('HTTP_GUNK') || ((env['SERVER_NAME']+env['REQUEST_URI']).match?(GunkURI) && !host.match?(MediaHost))
+      return noexec if env['SERVER_NAME'].match? CDNhost
+      fetch
     rescue OpenURI::HTTPRedirect => e
       [302, {'Location' => e.io.meta['location']}, []]
     end
