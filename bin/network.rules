@@ -1,21 +1,18 @@
 #!/bin/sh
-uid=$1
-
 open_UDP () {
-    echo opening UDP port $1 for $2
     iptables  -A INPUT  -p udp --sport $1 -j ACCEPT
     ip6tables -A INPUT  -p udp --sport $1 -j ACCEPT
     iptables  -A OUTPUT -p udp --dport $1 -j ACCEPT
     ip6tables -A OUTPUT -p udp --dport $1 -j ACCEPT
 }
 open_TCP () {
-    echo opening TCP port $1 for $2
     iptables  -A INPUT  -p tcp --sport $1 -j ACCEPT
     ip6tables -A INPUT  -p tcp --sport $1 -j ACCEPT
     iptables  -A OUTPUT -p tcp --dport $1 -j ACCEPT
     ip6tables -A OUTPUT -p tcp --dport $1 -j ACCEPT
 }
 open_port () {
+    echo opening port $1 $2
     open_UDP $1 $2
     open_TCP $1 $2
 }
@@ -53,7 +50,7 @@ open_port 60002 Mosh
 open_port 60003 Mosh
 
 # route HTTP
-iptables  -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8082 -m owner ! --uid-owner $uid
-ip6tables -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8082 -m owner ! --uid-owner $uid
-iptables  -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $uid
-ip6tables -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $uid
+iptables  -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8082 -m owner ! --uid-owner $1
+ip6tables -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8082 -m owner ! --uid-owner $1
+iptables  -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1
+ip6tables -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1
