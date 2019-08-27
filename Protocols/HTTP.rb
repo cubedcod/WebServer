@@ -216,8 +216,9 @@ class WebResource
 
     def denyPOST
       if verbose?
-        HTTP.print_header env
-        puts env['rack.input'].read
+        #HTTP.print_header env
+        env['CONTENT_TYPE'] = 'application/json' if host.match? /\.soundcloud.com$/
+        HTTP.print_body headers, env['rack.input'].read
       end
       env[:deny] = true
       [202, {'Access-Control-Allow-Credentials' => 'true',
