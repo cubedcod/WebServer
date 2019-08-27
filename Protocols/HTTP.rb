@@ -28,8 +28,8 @@ class WebResource
     end
 
     def allowHost
-      env.delete 'HTTP_GUNK'
-      remote
+      return deny if (env['SERVER_NAME']+env['REQUEST_URI']).match?(GunkURI)
+      fetch
     end
 
     def allowPOST?
@@ -395,19 +395,26 @@ class WebResource
     end
 
     def GET
-      if path.match? /[^\/]204$/
-        [204, {}, []] # connect check               lambda lookup:
-      elsif handler = PathGET['/' + parts[0].to_s] # any host, path-and-children
+      if handler = PathGET['/' + parts[0].to_s] # child paths
         handler[self]
-      elsif handler = PathGET[path]                # any host, exact path
+      elsif handler = PathGET[path]             # exact path
         handler[self]
-      elsif handler = HostGET[host]                # any path, exact host
+      elsif local?                              # local host
+        local
+      elsif path.match? /[^\/]204$/             # connectivity check
+        [204, {}, []]
+      elsif handler = HostGET[host]             # specific host
         handler[self]
       elsif handler = Subdomain[host.split('.')[1..-1].join('.')]
-        handler[self]
-      else                                         # default
-        local? ? local : remote
+        handler[self]                           # subdomains of host
+      else
+        return fetch if env[:query]['allow'] == ServerKey
+        return deny if env.has_key?('HTTP_GUNK') || ((env['SERVER_NAME']+env['REQUEST_URI']).match?(GunkURI) && !host.match?(MediaHost))
+        return noexec if env['SERVER_NAME'].match? CDNhost
+        fetch
       end
+    rescue OpenURI::HTTPRedirect => e
+      [302,{'Location' => e.io.meta['location']},[]]
     end
 
     def self.getFeeds
@@ -703,16 +710,6 @@ class WebResource
       else
         ''
       end
-    end
-
-    # request for remote resource
-    def remote
-      return fetch if env[:query]['allow'] == ServerKey
-      return deny  if env.has_key?('HTTP_GUNK') || ((env['SERVER_NAME']+env['REQUEST_URI']).match?(GunkURI) && !host.match?(MediaHost))
-      return noexec if env['SERVER_NAME'].match? CDNhost
-      fetch
-    rescue OpenURI::HTTPRedirect => e
-      [302, {'Location' => e.io.meta['location']}, []]
     end
 
     def selectFormat default='text/html'

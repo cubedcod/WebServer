@@ -125,7 +125,7 @@ class WebResource
           r.local # default local handling
         end
       else
-        r.remote
+        r.fetch
       end}
 
     PathGET['/favicon.ico'] = -> _ {[200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
@@ -135,7 +135,7 @@ class WebResource
       if parts.size > 1
         [301, {'Location' => 'https://' + parts[-1]}, []]
       else
-        r.remote
+        r.fetch
       end}
 
     PathGET['/storyimage'] = -> r {
@@ -143,7 +143,7 @@ class WebResource
       if parts.size > 1
         [301, {'Location' => 'https://' + r.host + parts[0]}, []]
       else
-        r.remote
+        r.fetch
       end}
 
     PathGET['/thumbnail'] = -> r {r.env[:query].has_key?('url') ? [301, {'Location' => r.env[:query]['url']}, []] : r.noexec}
@@ -188,8 +188,8 @@ class WebResource
     HostGET['clickserve.dartsearch.net'] = -> r {[301,{'Location' => r.env[:query]['ds_dest_url']}, []]}
 
     # DuckDuckGo
-    HostGET['duckduckgo.com'] = -> r {%w{ac}.member?(r.parts[0]) ? r.deny : r.remote}
-    HostGET['proxy.duckduckgo.com'] = -> r {%w{iu}.member?(r.parts[0]) ? [301, {'Location' => r.env[:query]['u']}, []] : r.remote}
+    HostGET['duckduckgo.com'] = -> r {%w{ac}.member?(r.parts[0]) ? r.deny : r.fetch}
+    HostGET['proxy.duckduckgo.com'] = -> r {%w{iu}.member?(r.parts[0]) ? [301, {'Location' => r.env[:query]['u']}, []] : r.fetch}
 
     # eBay
     HostGET['ebay.com'] = HostGET['www.ebay.com'] = -> r {r.allowHost}
@@ -218,7 +218,7 @@ tr
     HostGET['thumbor.forbes.com'] = -> r {[301, {'Location' => URI.unescape(r.parts[-1])}, []]}
 
     # Gitter
-    HostGET['gitter.im'] = -> req {req.desktop.remote}
+    HostGET['gitter.im'] = -> req {req.desktop.fetch}
 
     # Google
     Google = -> r { ENV.has_key?('GOOGLE') ? r.allowHost : r.noexec }
