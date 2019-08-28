@@ -218,6 +218,7 @@ encrypted-tbn2.gstatic.com
 encrypted-tbn3.gstatic.com
 feedproxy.google.com
           google.com
+   images.google.com
    groups.google.com
        kh.google.com
      maps.google.com
