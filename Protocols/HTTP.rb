@@ -9,7 +9,7 @@ class WebResource
     Methods = %w(GET HEAD OPTIONS POST)
     OffLine = ENV.has_key? 'OFFLINE'
     PathGET = {}
-    PreservedFormat = /^(application\/(json|protobuf)|audio|font|video)/
+    PreservedFormat = /^(application\/(json|protobuf|vnd|x-)|audio|font|text\/xml|video)/
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Subdomain = {}
 
