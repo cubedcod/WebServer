@@ -474,7 +474,7 @@ class WebResource
         k = k.to_s
         underscored = k.match? /(_AP_|PASS_SFP)/i
         key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|k| # eat HTTP prefix from Rack
-          if %w{cl id spf utc xsrf}.member? k
+          if %w{cl dfe id spf utc xsrf}.member? k
             k = k.upcase       # acronymize
           else
             k[0] = k[0].upcase # capitalize token
@@ -498,7 +498,7 @@ class WebResource
       head['Referer'] = head['Referer'].sub(/\?ui=upstream$/,'') if head['Referer'] && head['Referer'].match?(/\?ui=upstream$/) # strip local QS TODO remove all local vars
 
       # User-Agent
-      head['User-Agent'] = DesktopUA
+      head['User-Agent'] = DesktopUA unless host.match? UAhost
       head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # redirect via HTTP header rather than Javascript
       head.delete 'User-Agent' if host == 't.co'            # redirect via HTTP header rather than Javascript
 
@@ -636,6 +636,7 @@ class WebResource
       body = env['rack.input'].read
 
       if verbose?
+        HTTP.print_header env; puts "\n"
         HTTP.print_header head
         HTTP.print_body head, body
       end

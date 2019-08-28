@@ -63,6 +63,7 @@ class WebResource
     MediaHost = /\.(api.brightcove|bandcamp|soundcloud|track-blaster|usps)\.com$/
     POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|dailymotion|facebook|google(apis)?|git(lab|ter)|mixcloud|(music|xp).apple|postimages|reddit|api.soundcloud|ttvnw|twitch|youtube)\.(com|gov|im|net|org|tv)$/
     POSTpath = /\/graphql([\/]|$)/
+    UAhost = /android/
     UIhost = /((apple|anvato|bandcamp|books.google|boston25news|brightcove|duckduckgo|gannettdigital|iheart|jwplatform|(mix|sound)cloud|miixtapechiick|postimages|spotify|uw-media.thenews-messenger|vimeo|wcvb|youtube).(com|net|org)|github.io|.tv)$/
     UIpath = /oembed\./
 
@@ -205,6 +206,8 @@ class WebResource
     HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
     %w(storage.googleapis.com gstatic.com).map{|n| Subdomain[n] = Google }
     %w(
+       accounts.google.com
+android.clients.google.com
   ajax.googleapis.com
       apis.google.com
      books.google.com
