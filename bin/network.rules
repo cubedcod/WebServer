@@ -41,8 +41,9 @@ open_TCP    443 HTTPS
 open_port   587 SMTP
 open_port  6789 IRC
 open_port  8022 SSH
-open_port  8081 HTTP
-open_port  8082 HTTPS
+open_port  8081 HTTP-transparent-proxy
+open_port  8082 HTTPS-transparent-proxy
+open_port  8073 SDR
 open_port  8901 SDR
 open_port  9418 Git
 open_port 60001 Mosh

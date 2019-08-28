@@ -186,7 +186,6 @@ class WebResource
         body
       end
     rescue Zlib::DataError
-      puts "Zlib error on #{uri}"
       ''
     end
 
