@@ -63,9 +63,9 @@ class WebResource
     CookieHost = /(bandcamp|bizjournals|brightcove|google|reddit|twi(tch|tter)|youtube)\.(com|net|tv)$/
     GunkURI = /[-.:_\/?&=~](([Bb]lock|[Pp]age)?[Aa](d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?([Bb]lock(er|ing)?.*|id|[Ww]ords?)?|([Aa]pp)?[Bb](anner|eacon)s?|[Cc](ampaign|edexis|hart[Bb]eat.*|om[Ss]core|ookie([Cc](hoices|onsent)|[Ll]aw|[Nn]otice)?|ount|se)|[Ee](moji.*\.js|nsighten|vidon)|([Ww]eb)?[Ff]onts?|\.gif\?|[Gg]([dD][pP][rR]|eo(ip|locate)|igya|[Pp][Tt]|tag|[Tt][Mm])|.*([Hh]eader|[Pp]re)[-_]?[Bb]id.*|.*[Hh]ub[Ss]pot.*|[hp]b.?js|ima[0-9]?|[Kk]r(ux|xd).*|logger|([Aa]pp|s)?[Mm](e(asurement|t(er|rics?))|ms|tr)|[Nn]ew([Rr]elic|sletter)|[Oo](m(niture|tr)|nboarding|ptanon|utbrain)|[Pp](ay(ments?|[Ww]all)|ersonaliz(ation|e)|i(wik|xel(propagate)?)|op(over|up)|romo(tion)?s?|[vx])|[Qq]uant[Cc]ast|[Rr]eco(mmend(ed)?|rd([Ee]vent|[Ss]tats?)?)|s?[Ss](a(fe[-_]?[Bb]rowsing|ilthru)|ervice[-_]?[Ww]orker|i(ftscience|gnalr|tenotice)|ocial|ponsored|so|tat(istic)?s?|ubscri(ber?|ption)|w.js|ync)|[Tt](aboola|(arget|rack)(ers?|ing)?|bproxy|ea(lium|ser)|rending)|[Uu](rchin|[Tt][Mm])|wp-rum)([-._\/?&=]|$)|\.(otf|ttf|woff2?)/
     MediaHost = /\.(api.brightcove|bandcamp|soundcloud|track-blaster)\.com$/
-    POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|google(apis)?|git(lab|ter)|mixcloud|(music|xp).apple|api.soundcloud|ttvnw|twitch|youtube)\.(com|gov|im|net|tv)$/
+    POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|facebook|google(apis)?|git(lab|ter)|mixcloud|(music|xp).apple|postimages|reddit|api.soundcloud|ttvnw|twitch|youtube)\.(com|gov|im|net|org|tv)$/
     POSTpath = /\/graphql([\/]|$)/
-    UIhost = /((apple|anvato|bandcamp|books.google|boston25news|brightcove|duckduckgo|gannettdigital|iheart|jwplatform|(mix|sound)cloud|miixtapechiick|spotify|uw-media.thenews-messenger|vimeo|wcvb|youtube).(com|net)|github.io|.tv)$/
+    UIhost = /((apple|anvato|bandcamp|books.google|boston25news|brightcove|duckduckgo|gannettdigital|iheart|jwplatform|(mix|sound)cloud|miixtapechiick|postimages|spotify|uw-media.thenews-messenger|vimeo|wcvb|youtube).(com|net|org)|github.io|.tv)$/
     UIpath = /oembed\./
 
     def sitePOST
@@ -142,9 +142,9 @@ class WebResource
 
     # Amazon
     HostGET['amazon.com'] = HostGET['www.amazon.com'] = -> r {r.allowHost}
-    %w(media-amazon.com ssl-images-amazon.com
-       s3.amazonaws.com).map{|n|
-      Subdomain[n] = -> r { ENV.has_key?('AWS') ? r.allowHost : r.noexec }}
+    %w(media-amazon.com
+  ssl-images-amazon.com
+       s3.amazonaws.com).map{|n|Subdomain[n] = -> r {ENV.has_key?('AMAZON') ? r.allowHost : r.noexec}}
 
     # AOL
     HostGET['o.aolcdn.com'] = -> r {r.env[:query].has_key?('image_uri') ? [301, {'Location' => r.env[:query]['image_uri']}, []] : r.noexec}
@@ -261,7 +261,6 @@ feedproxy.google.com
       end}
 
     # Reddit
-    HostGET['gateway.reddit.com'] = -> r {r.allowHost}
     HostGET['reddit.com'] = HostGET['old.reddit.com'] = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path},[]]}
     HostGET['www.reddit.com'] = -> r {
       r.env[:suffix] = '.rss' if r.ext.empty? && !r.upstreamUI?
