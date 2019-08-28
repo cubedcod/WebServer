@@ -190,10 +190,10 @@ class WebResource
       ''
     end
 
-    def deny status = 200
+    def deny status=200, type=nil
       return [301,{'Location'=>env['REQUEST_PATH']},[]] if !env[:query].keys.grep(/campaign|[iu]tm_/).empty?
       env[:deny] = true
-      type, content = if ext == 'js' || env[:script]
+      type, content = if ext == 'js' || type == :script
                         source = ConfDir.join 'alternatives/' + host + path
                         ['application/javascript',
                          source.exist? ? source.read : '//']
@@ -201,7 +201,7 @@ class WebResource
                         ['text/css',"body {background: repeating-linear-gradient(#{rand 360}deg, #000, #000 6.5em, #fff 6.5em, #fff 8em)\ndiv, p {background-color: #000; color: #fff}"]
                       elsif ext == 'woff' || ext == 'woff2'
                         ['font/woff2', SiteFont]
-                      elsif env[:GIF]
+                      elsif ext == 'gif' || type == :GIF
                         ['image/gif', SiteGIF]
                       else
                         q = env[:query].dup
@@ -576,26 +576,17 @@ class WebResource
     end
 
     def noexec
-      if %w{gif js}.member? ext.downcase # filter suffix
-        if ext == 'gif' && qs.empty?
-          fetch # allow GIFs without query
-        else
-          deny
-        end
-      else # fetch
-        fetch.yield_self{|status, head, body|
-          if status.to_s.match? /30[1-3]/ # redirected
-            [status, head, body]
-          else # inspect
-            if head['Content-Type'] && !head['Content-Type'].match?(/image.(bmp|gif)|script/)
-              [status, head, body] # allow MIME
-            else                   # filter MIME
-              env[:GIF] = true    if head['Content-Type']&.match? /image\/gif/
-              env[:script] = true if head['Content-Type']&.match? /script/
-              deny status
-            end
-          end}
-      end
+      return deny if %w(gif js map).member? ext.downcase
+      fetch.yield_self{|status, head, body|
+        if status.to_s.match? /30[1-3]/ # redirected
+          [status, head, body]
+        elsif head['Content-Type'] && !head['Content-Type'].match?(/image.(bmp|gif)|script/)
+          [status, head, body] # allowed content
+        else                   # filtered content
+          type = :GIF if head['Content-Type']&.match? /image\/gif/
+          type = :script if head['Content-Type']&.match? /script/
+          deny status, type
+        end}
     end
 
     def notfound
