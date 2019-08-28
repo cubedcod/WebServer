@@ -312,6 +312,13 @@ class WebResource
             HTTP.print_header env[:resp] if verbose?
           end
         rescue Exception => e
+          if verbose? && !e.message.match?(/304/)
+            puts e.message
+            if e.respond_to? :io
+              puts e.io.status.join ' '
+              HTTP.print_header e.io.meta
+            end
+          end
           case e.message # response-types handled in normal control-flow
           when /304/ # no updates
             code = 304
