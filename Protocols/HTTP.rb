@@ -9,7 +9,7 @@ class WebResource
     Methods = %w(GET HEAD OPTIONS POST)
     OffLine = ENV.has_key? 'OFFLINE'
     PathGET = {}
-    PreservedFormat = /^(application\/json|audio|font|video)/
+    PreservedFormat = /^(application\/(json|protobuf)|audio|font|video)/
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Subdomain = {}
 
@@ -498,7 +498,7 @@ class WebResource
       head['Referer'] = head['Referer'].sub(/\?ui=upstream$/,'') if head['Referer'] && head['Referer'].match?(/\?ui=upstream$/) # strip local QS TODO remove all local vars
 
       # User-Agent
-      head['User-Agent'] = DesktopUA unless host.match? UAhost
+      head['User-Agent'] = DesktopUA unless host && (host.match? UAhost)
       head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # redirect via HTTP header rather than Javascript
       head.delete 'User-Agent' if host == 't.co'            # redirect via HTTP header rather than Javascript
 
