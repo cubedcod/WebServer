@@ -746,10 +746,11 @@ class WebResource
     def unsubscribe; subscriptionFile.exist? && subscriptionFile.node.delete end
 
     def upstreamUI?
-      @upstreamUI ||= (!local? && (env['HTTP_USER_AGENT'] == DesktopUA ||
-                                   (env['SERVER_NAME'].match?  UIhost) ||
-                                   (env['REQUEST_PATH'].match? UIpath) ||
-                                   env[:query]['ui'] == 'upstream'))
+      @upstreamUI ||= !local? && (env['HTTP_USER_AGENT'] == DesktopUA ||
+                                  (env['SERVER_NAME'].match?  UIhost) ||
+                                  (env['REQUEST_PATH'].match? UIpath) ||
+                                  env[:query]['ui'] == 'upstream' ||
+                                  ENV.has_key?('DESKTOP'))
     end
 
     def verbose

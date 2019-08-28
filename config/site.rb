@@ -208,6 +208,7 @@ class WebResource
   ajax.googleapis.com
       apis.google.com
      books.google.com
+    chrome.google.com
 developers.google.com
      drive.google.com
 encrypted-tbn0.gstatic.com
