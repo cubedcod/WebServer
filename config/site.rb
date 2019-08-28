@@ -83,7 +83,7 @@ class WebResource
         ENV.has_key?('AMAZON') ? self.POSTthru : denyPOST
       when /facebook.(com|net)$/
         ENV.has_key?('FACEBOOK') ? self.POSTthru : denyPOST
-      when /google.com$/
+      when /google(apis)?.com$/
         ENV.has_key?('GOOGLE') ? self.POSTthru : denyPOST
       else
         self.POSTthru
