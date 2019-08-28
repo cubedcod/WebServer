@@ -576,7 +576,7 @@ class WebResource
     end
 
     def noexec
-      return deny if %w(gif js map).member? ext.downcase
+      return deny if %w(gif js).member? ext.downcase
       fetch.yield_self{|status, head, body|
         if status.to_s.match? /30[1-3]/ # redirected
           [status, head, body]
