@@ -201,6 +201,7 @@ class WebResource
 
     # Google
     Google = -> r {ENV.has_key?('GOOGLE') ? r.fetch : r.noexec}
+    HostGET['ajax.googleapis.com'] = -> r {r.allowHost}
     HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.deny : Google[r]}
     HostGET['www.google.com'] = -> r {([nil, *%w(aclk images imgres maps search)].member? r.parts[0]) ? (r.parts[0] == 'maps' ? r.desktop.fetch : Google[r]) : r.deny}
     HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
@@ -208,7 +209,6 @@ class WebResource
     %w(
        accounts.google.com
 android.clients.google.com
-  ajax.googleapis.com
       apis.google.com
      books.google.com
     chrome.google.com
