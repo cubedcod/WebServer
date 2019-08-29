@@ -426,7 +426,7 @@ class WebResource < RDF::URI
       Schema+'video' => Video,
     }
 
-    CacheDir = (Pathname.new ENV['HOME'] + '/.cache/web').relative_path_from(PWD).to_s + '/'
+    CacheDir = (Pathname.new ENV['HOME'] + '/.cache').relative_path_from(PWD).to_s + '/'
 
   end
 
