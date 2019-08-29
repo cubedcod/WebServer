@@ -14,16 +14,20 @@ iptables  -A OUTPUT -o lo   -j ACCEPT
 ip6tables -A OUTPUT -o lo   -j ACCEPT
 
 open_UDP () {
-    echo UDP $1 $2
     iptables  -A INPUT  -p udp --sport $1 -j ACCEPT
     ip6tables -A INPUT  -p udp --sport $1 -j ACCEPT
+
     iptables  -A OUTPUT -p udp --dport $1 -j ACCEPT
     ip6tables -A OUTPUT -p udp --dport $1 -j ACCEPT
 }
 open_TCP () {
-    echo TCP $1 $2
     iptables  -A INPUT  -p tcp --sport $1 -j ACCEPT
     ip6tables -A INPUT  -p tcp --sport $1 -j ACCEPT
+    iptables  -A INPUT  -p tcp --dport $1 -j ACCEPT
+    ip6tables -A INPUT  -p tcp --dport $1 -j ACCEPT
+
+    iptables  -A OUTPUT -p tcp --sport $1 -j ACCEPT
+    ip6tables -A OUTPUT -p tcp --sport $1 -j ACCEPT
     iptables  -A OUTPUT -p tcp --dport $1 -j ACCEPT
     ip6tables -A OUTPUT -p tcp --dport $1 -j ACCEPT
 }
@@ -32,13 +36,16 @@ open_port () {
     open_TCP $1 $2
 }
 
-# port rules
+# services
 open_TCP     22 SSH
 
 open_port    53 DNS
+#iptables  -t nat -A OUTPUT -p tcp --dport 53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
+#ip6tables -t nat -A OUTPUT -p tcp --dport 53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
+#iptables  -t nat -A OUTPUT -p tcp --dport 53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
+#ip6tables -t nat -A OUTPUT -p tcp --dport 53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
 
 open_port    67 DHCP
-
 open_port    68 DHCP
 
 open_TCP     80 HTTP
@@ -53,12 +60,14 @@ open_TCP    587 SMTP
 
 open_TCP   8022 SSH
 
+open_TCP   8000 HTTP
+open_TCP   8080 HTTP-proxy
 open_TCP   8081 HTTP-transparent
-
 open_TCP   8082 HTTPS-transparent
 
-open_port  8073 SDR
-open_port  8901 SDR
+open_port  8073 SDR-kiwi
+open_port  8443 SDR-HFU
+open_port  8901 SDR-REA
 
 open_TCP   9418 Git
 
