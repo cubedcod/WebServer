@@ -30,6 +30,7 @@ class WebResource < RDF::URI
     Content  = SIOC + 'content'
     Creator  = SIOC + 'has_creator'
     Date     = DC + 'date'
+    DOAP     = 'http://usefulinc.com/ns/doap#'
     Image    = DC + 'Image'
     Link     = DC + 'link'
     LDP      = W3 + 'ns/ldp#'
@@ -225,6 +226,7 @@ class WebResource < RDF::URI
       'js-proxy-site-detection-payload' => :drop,
       'keywords' => Abstract,
       'lastmod' => Date,
+      'license' => DOAP+'license',
       'linkedin:owner' => :drop,
       'manifest' => :drop,
       'mask-icon' => Image,

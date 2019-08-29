@@ -654,6 +654,8 @@ class WebResource
       code = r.code
       head = r.headers
       body = r.body
+      head['content-length'] ||= body.bytesize.to_s
+      head.delete 'transfer-encoding'
 
       if verbose?
         HTTP.print_header head
