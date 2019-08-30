@@ -79,7 +79,7 @@ class WebResource
         else
           denyPOST
         end
-      when /amazon.com$/
+      when /amazon(aws)?.com$/
         ENV.has_key?('AMAZON') ? self.POSTthru : denyPOST
       when /facebook.(com|net)$/
         ENV.has_key?('FACEBOOK') ? self.POSTthru : denyPOST

@@ -644,7 +644,7 @@ class WebResource
       head = headers
       body = env['rack.input'].read
 
-      verbose if uri.match? /graphql/
+      verbose if uri.match? /g(raph)?ql/
       if verbose?
         HTTP.print_header env; puts "\n"
         HTTP.print_header head
