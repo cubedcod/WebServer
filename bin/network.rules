@@ -58,6 +58,9 @@ ip6tables -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m own
 
 open_TCP    587 SMTP
 
+open_TCP   6667 IRC
+open_TCP   6789 IRC-proxy
+
 open_TCP   8022 SSH
 
 open_TCP   8000 HTTP
