@@ -63,7 +63,7 @@ class WebResource
     MediaHost = /\.(api.brightcove|bandcamp|soundcloud|track-blaster|usps)\.com$/
     POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|dailymotion|facebook|google(apis)?|git(lab|ter)|mixcloud|(music|xp).apple|postimages|reddit|shazam|api.soundcloud|ttvnw|twitch|youtube)\.(com|gov|im|net|org|tv)$/
     POSTpath = /\/graphql([\/]|$)/
-    UAhost = /android/
+    UAhost = /android|mozilla/
     UIhost = /((apple|anvato|bandcamp|books.google|boston25news|brightcove|duckduckgo|gannettdigital|iheart|jwplatform|(mix|sound)cloud|miixtapechiick|postimages|spotify|uw-media.thenews-messenger|vimeo|wcvb|youtube).(com|net|org)|github.io|.tv)$/
     UIpath = /oembed\./
 
@@ -85,6 +85,8 @@ class WebResource
         ENV.has_key?('FACEBOOK') ? self.POSTthru : denyPOST
       when /google(apis)?.com$/
         ENV.has_key?('GOOGLE') ? self.POSTthru : denyPOST
+      when /(firefox|mozilla).(com|net|org)$/
+        ENV.has_key?('MOZILLA') ? self.POSTthru : denyPOST
       else
         self.POSTthru
       end
@@ -241,6 +243,11 @@ encrypted-tbn3.gstatic.com
     HostGET['imagesvc.meredithcorp.io'] = -> r {r.env[:query].has_key?('url') ? [301, {'Location' => r.env[:query]['url']}, []] : r.noexec}
 
     # Mozilla
+    Mozilla = -> r {ENV.has_key?('MOZILLA') ? r.fetch : r.deny}
+    %w( addons.mozilla.org
+addons-amo.cdn.mozilla.net
+    addons.cdn.mozilla.net
+).map{|h| HostGET[h] = Mozilla }
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # NYTimes
