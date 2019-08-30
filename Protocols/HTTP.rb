@@ -656,12 +656,12 @@ class WebResource
       code = r.code
       head = r.headers
       body = r.body
-      head['content-length'] ||= body.bytesize.to_s
+      head['content-length'] ||= body.bytesize.to_s if body
       head.delete 'transfer-encoding'
 
       if verbose?
         HTTP.print_header head
-        HTTP.print_body head, (HTTP.decompress head, body)
+        HTTP.print_body head, (HTTP.decompress head, body) if body
       end
 
       [code, head, [body]]
