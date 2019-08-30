@@ -206,28 +206,29 @@ class WebResource
     HostGET['www.google.com'] = -> r {([nil, *%w(aclk images imgres maps search)].member? r.parts[0]) ? (r.parts[0] == 'maps' ? r.desktop.fetch : Google[r]) : r.deny}
     HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
     %w(storage.googleapis.com gstatic.com).map{|n| Subdomain[n] = Google }
-    %w(
-       accounts.google.com
+    %w(accounts.google.com
 android.clients.google.com
-      apis.google.com
-     books.google.com
-    chrome.google.com
-developers.google.com
-     drive.google.com
+           apis.google.com
+          books.google.com
+         chrome.google.com
+     developers.google.com
+          drive.google.com
 encrypted-tbn0.gstatic.com
 encrypted-tbn1.gstatic.com
 encrypted-tbn2.gstatic.com
 encrypted-tbn3.gstatic.com
-feedproxy.google.com
-          google.com
-   images.google.com
-   groups.google.com
-       kh.google.com
-     maps.google.com
- maps.googleapis.com
-    maps.gstatic.com
-     ssl.gstatic.com
-     www.gstatic.com
+      feedproxy.google.com
+                google.com
+         images.google.com
+         groups.google.com
+             kh.google.com
+           maps.google.com
+       maps.googleapis.com
+          maps.gstatic.com
+           ssl.gstatic.com
+ suggestqueries.google.com
+        www.googleapis.com
+           www.gstatic.com
 ).map{|h| HostGET[h] = Google }
 
     # Linkedin
