@@ -280,9 +280,9 @@ class WebResource
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
         if verbose?
-          print url, "\nREQUEST raw:\n"
+          print url, "\nREQUEST raw-meta:\n"
           HTTP.print_header head
-          puts "\nREQUEST cleaned:"
+          puts "REQUEST cleaned-meta:"
         end
         begin
           open(url, head) do |response|
