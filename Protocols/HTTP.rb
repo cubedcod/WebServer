@@ -32,7 +32,7 @@ class WebResource
     end
 
     def allowHost
-      return deny if (env['SERVER_NAME']+env['REQUEST_URI']).match?(GunkURI)
+      return deny if gunkURI
       fetch
     end
 
@@ -429,8 +429,7 @@ class WebResource
     end
 
     def gunkURI
-      (env['SERVER_NAME'] +
-       env['REQUEST_URI']).match?(GunkURI) && !host.match?(MediaHost)
+      ('//'+env['SERVER_NAME']+env['REQUEST_URI']).match?(GunkURI) && !host.match?(MediaHost)
     end
 
     def self.getFeeds
