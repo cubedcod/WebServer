@@ -280,8 +280,9 @@ class WebResource
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
         if verbose?
-          print url, "\n"
+          print url, "\nREQUEST raw:\n"
           HTTP.print_header head
+          puts "\nREQUEST cleaned:"
         end
         begin
           open(url, head) do |response|
@@ -646,8 +647,11 @@ class WebResource
 
       verbose if uri.match? /g(raph)?ql/
       if verbose?
-        HTTP.print_header env; puts "\n"
+        puts "\nREQUEST raw-meta:"
+        HTTP.print_header env
+        puts "REQUEST clean-meta:"
         HTTP.print_header head
+        puts "REQUEST BODY:"
         HTTP.print_body head, body
       end
 
@@ -660,8 +664,12 @@ class WebResource
       head.delete 'transfer-encoding'
 
       if verbose?
+        puts "\nRESPONSE clean meta:"
         HTTP.print_header head
-        HTTP.print_body head, (HTTP.decompress head, body) if body
+        if body
+          puts "RESPONSE body:"
+          HTTP.print_body head, (HTTP.decompress head, body)
+        end
       end
 
       [code, head, [body]]

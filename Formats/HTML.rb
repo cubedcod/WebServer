@@ -27,7 +27,7 @@ image-src
       # strip tracker gunk
       html.css('a[href^="javascript"]').map{|a| a.remove }
 
-      %w{clickability quantserve scorecardresearch}.map{|co| html.css('img[src*="' + co + '"]').map{|img| img.remove }}
+      %w{clickability counter.ru quantserve scorecardresearch}.map{|co| html.css('img[src*="' + co + '"]').map{|img| img.remove }}
 
       # map things to the classic image tag
       # CSS:background-image → <img>
