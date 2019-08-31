@@ -202,6 +202,8 @@ class WebResource
                         ['font/woff2', SiteFont]
                       elsif ext == 'gif' || type == :GIF
                         ['image/gif', SiteGIF]
+                      elsif ext == 'json' || type == :json
+                        ['application/json','{}']
                       else
                         q = env[:query].dup
                         q['allow'] = ServerKey
@@ -588,11 +590,12 @@ class WebResource
       fetch.yield_self{|status, head, body|
         if status.to_s.match? /30[1-3]/ # redirected
           [status, head, body]
-        elsif head['Content-Type'] && !head['Content-Type'].match?(/image.(bmp|gif)|script/)
+        elsif head['Content-Type'] && !head['Content-Type'].match?(/application|image.(bmp|gif)|script/)
           [status, head, body] # allowed content
         else                   # filtered content
           type = :GIF if head['Content-Type']&.match? /image\/gif/
           type = :script if head['Content-Type']&.match? /script/
+          type = :json if head['Content-Type']&.match? /json/
           deny status, type
         end}
     end
