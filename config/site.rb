@@ -303,7 +303,7 @@ addons-amo.cdn.mozilla.net
     HostGET['t.co'] = -> r {r.parts[0] == 'i' ? r.deny : r.noexec}
     HostGET['twitter.com'] = -> r {
       if !r.path || r.path == '/'
-        r.env[:resp]['Refresh'] = 1800 # client refresh hint
+        r.env[:resp]['Refresh'] = 3600 # client refresh hint
         fetch_options = {
           no_embeds: true,   # skip HTML+RDF-embed parse
           no_index: true,    # defer indexing
@@ -311,15 +311,12 @@ addons-amo.cdn.mozilla.net
         r.env[:query_modified] = true
 
         '//twitter.com'.R.subscriptions.shuffle.each_slice(18){|s|
-          r.env[:query] = { vertical: :default,
-                            f: :tweets,
-                            q: s.map{|u|'from:' + u}.join('+OR+')}
+          r.env[:query] = { vertical: :default, f: :tweets, q: s.map{|u|'from:' + u}.join('+OR+')}
           '//twitter.com/search'.R(r.env).fetch fetch_options}
-
         r.index
         r.graphResponse
       else
-        r.noexec
+        r.allowHost
       end}
 
     # WGBH
