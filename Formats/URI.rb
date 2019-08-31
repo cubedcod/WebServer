@@ -223,6 +223,7 @@ class WebResource < RDF::URI
       'image' => Image,
       'image:secure_url' => Image,
       'image_src' => Image,
+      'import' => :drop,
       'js-proxy-site-detection-payload' => :drop,
       'keywords' => Abstract,
       'lastmod' => Date,
