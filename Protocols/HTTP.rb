@@ -654,6 +654,7 @@ class WebResource
         puts "REQUEST BODY:"
         HTTP.print_body head, body
       end
+      print '📝 '
 
       # origin response
       r = HTTParty.post url, :headers => head, :body => body

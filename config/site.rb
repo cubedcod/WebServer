@@ -190,6 +190,9 @@ class WebResource
     HostGET['ir.ebaystatic.com'] = -> r {r.noexec}
     HostGET['rover.ebay.com'] = -> r {r.env[:query].has_key?('mpre') ? [301, {'Location' => r.env[:query]['mpre']}, []] : r.deny}
 
+    # Economist
+    HostGET['www.economist.com'] = -> r {r.allowHost}
+
     # Facebook
     FBgunk = %w(common connect pages_reaction_units plugins security tr)
     HostGET['facebook.com'] = HostGET['www.facebook.com'] = -> r {ENV.has_key?('FACEBOOK') ? r.fetch : (FBgunk.member? r.parts[0]) ? r.deny : r.noexec}
