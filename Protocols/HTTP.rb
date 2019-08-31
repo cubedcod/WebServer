@@ -670,7 +670,7 @@ class WebResource
           HTTP.print_body head, (HTTP.decompress head, body)
         end
       end
-      print '📝 '
+      print '📝'
 
       [code, head, [body]]
     end
