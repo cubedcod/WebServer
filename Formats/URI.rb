@@ -311,6 +311,7 @@ class WebResource < RDF::URI
       'sailthru.verticals' => Abstract,
       'search' => Link,
       'section' => Abstract,
+      'shenma-site-verification' => :drop,
       'shortcut icon' => Image,
       'shortlink' => Link,
       'site_name' => Abstract,

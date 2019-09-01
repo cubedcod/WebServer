@@ -262,7 +262,7 @@ class WebResource
     end
 
     def fetch options = {}
-      if this = cached?; return this.fileResponse end
+      if file = !options[:no_response] && cached?; return file.fileResponse end
       @env ||= {resp: {}}                      # response metadata
       env[:repository] ||= RDF::Repository.new # RDF storage (in-memory)
       head = headers                           # cleaned request metadata
