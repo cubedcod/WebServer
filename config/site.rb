@@ -59,7 +59,7 @@ class WebResource
     CDNhost = /amazon|azure|cloud(flare|front|inary)|digitalocean|fa(cebook|stly)|heroku|jsdelivr|netdna|ra(ckcdn|wgit)|stackpath|usercontent/
     DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3896.4 Safari/537.36'
     CookieHost = /(bandcamp|bizjournals|brightcove|google|reddit|twi(tch|tter)|youtube)\.(com|net|tv)$/
-    GunkURI = /[-.:_\/?&=~](([Bb]lock|[Pp]age)?[Aa](d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?([Bb]lock(er|ing)?.*|id|[Ww]ords?)?|([Aa]pp)?[Bb](anner|eacon)s?|[Cc](ampaign|edexis|hart[Bb]eat.*|om[Ss]core|ookie([Cc](hoice|onsent)|[Ll]aw|[Nn]otice)?s?|ount|se)|[Ee](moji.*\.js|nsighten|vidon)|([Ww]eb)?[Ff]onts?|\.gif\?|[Gg]([dD][pP][rR]|eo(ip|locate)|igya|[Pp][Tt]|tag|[Tt][Mm])|.*([Hh]eader|[Pp]re)[-_]?[Bb]id.*|.*[Hh]ub[Ss]pot.*|[hp]b.?js|ima[0-9]?|[Kk]r(ux|xd).*|logger|([Aa]pp|s)?[Mm](e(asurement|t(er|rics?))|ms|tr)|[Nn]ew([Rr]elic|sletter)|[Oo](m(niture|tr)|nboarding|ptanon|utbrain)|[Pp](ay(ments?|[Ww]all)|ersonaliz(ation|e)|i(wik|xel(propagate)?)|op(over|up)|romo(tion)?s?|[vx])|[Qq]uant[Cc]ast|[Rr]eco(mmend(ed)?|rd([Ee]vent|[Ss]tats?)?)|s?[Ss](a(fe[-_]?[Bb]rowsing|ilthru)|ervice[-_]?[Ww]orker|i(ftscience|gnalr|tenotice)|o(cial|urcepoint)|ponsored|so|tat(istic)?s?|ubscri(ber?|ption)|w.js|ync)|[Tt](aboola|(arget|rack)(ers?|ing)?|bproxy|ea(lium|ser)|rend(ing|s))|[Uu](rchin|[Tt][Mm])|wp-rum)([-._\/?&=]|$)|\.((gif|png)\?|otf|ttf|woff2?)/
+    GunkURI = /[-.:_\/?&=~](([Bb]lock|[Pp]age)?[Aa](d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?([Bb]lock(er|ing)?.*|id|[Ww]ords?)?|([Aa]pp)?[Bb](anner|eacon)s?|[Cc](ampaign|edexis|hart[Bb]eat.*|om[Ss]core|ookie([Cc](hoice|onsent)|[Ll]aw|[Nn]otice)?s?|ount|se)|[Dd]etect|[Ee](moji.*\.js|nsighten|vidon)|([Ww]eb)?[Ff]onts?|\.gif\?|[Gg]([dD][pP][rR]|eo(ip|locate)|igya|[Pp][Tt]|tag|[Tt][Mm])|.*([Hh]eader|[Pp]re)[-_]?[Bb]id.*|.*[Hh]ub[Ss]pot.*|[hp]b.?js|ima[0-9]?|[Kk]r(ux|xd).*|[Ll]ogger|([Aa]pp|s)?[Mm](e(asurement|ssaging|t(er|rics?))|ms|tr)|[Nn]ew([Rr]elic|sletter)|[Oo](m(niture|tr)|nboarding|ptanon|utbrain)|[Pp](ay(ments?|[Ww]all)|ersonaliz(ation|e)|i(wik|xel(propagate)?)|op(over|up)|romo(tion)?s?|ubmatic|[vx])|[Qq]uant[Cc]ast|[Rr]eco(mmend(ed)?|rd([Ee]vent|[Ss]tats?)?)|s?[Ss](a(fe[-_]?[Bb]rowsing|ilthru)|ervice[-_]?[Ww]orker|i(ftscience|gnalr|tenotice)|o(cial|urcepoint)|ponsored|so|tat(istic)?s?|ubscri(ber?|ption)|w.js|ync)|[Tt](aboola|(arget|rack)(ers?|ing)?|bproxy|ea(lium|ser)|rend(ing|s))|[Uu](rchin|[Tt][Mm])|wp-rum)([-._\/?&=]|$)|\.((gif|png)\?|otf|ttf|woff2?)/
     MediaHost = /\.(api.brightcove|bandcamp|soundcloud|track-blaster|usps)\.com$/
     POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|dailymotion|facebook|google(apis)?|git(lab|ter)|mixcloud|(music|xp).apple|postimages|reddit|shazam|api.twitter|api.soundcloud|ttvnw|twitch|youtube)\.(com|gov|im|net|org|tv)$/
     POSTpath = /\/graphql([\/]|$)/
@@ -318,7 +318,7 @@ addons-amo.cdn.mozilla.net
       [re.code, re.headers, [re.body]]}
 
     # Twitter
-    HostGET['mobile.twitter.com'] = -> r {[301,{'Location' => 'https://twitter.com' + r.path },[]]}
+    HostGET['mobile.twitter.com'] = HostGET['www.twitter.com'] = -> r {[301,{'Location' => 'https://twitter.com' + r.path },[]]}
     HostGET['t.co'] = -> r {r.parts[0] == 'i' ? r.deny : r.noexec}
     HostGET['twitter.com'] = -> r {
       if !r.path || r.path == '/'
