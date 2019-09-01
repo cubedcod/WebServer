@@ -82,7 +82,7 @@ class WebResource
     end
 
     def cached?
-      return false if env && env['HTTP_PRAGMA'] == 'no-cache'
+      return false if env && env['HTTP_PRAGMA'] == 'no-cache' && !%w(css png jpg).member?(ext.downcase)
       loc = cache
       return loc if loc.file?     # direct match
       (loc+'.*').R(env).glob.find &:file? # suffix match
