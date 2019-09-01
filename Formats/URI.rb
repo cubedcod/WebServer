@@ -386,6 +386,7 @@ class WebResource < RDF::URI
       'viewport' => :drop,
       'vr:canonical' => Link,
       'wlwmanifest' => :drop,
+      'yandex-verification' => :drop,
       Atom+'content' => Content,
       Atom+'displaycategories' => Abstract,
       Atom+'enclosure' => SIOC+'attachment',
