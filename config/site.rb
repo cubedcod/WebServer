@@ -154,10 +154,6 @@ class WebResource
     # AOL
     HostGET['o.aolcdn.com'] = -> r {r.env[:query].has_key?('image_uri') ? [301, {'Location' => r.env[:query]['image_uri']}, []] : r.noexec}
 
-    # Bing
-    HostGET['www.bing.com'] = -> r {
-      (%w(fd hamburger Identity notifications secure).member?(r.parts[0]) || r.path.index('/api/ping') == 0) ? r.deny : r.desktop.fetch}
-
     # Brightspot
     HostGET['ca-times.brightspotcdn.com'] = -> r {r.env[:query].has_key?('url') ? [301, {'Location' => r.env[:query]['url']}, []] : r.noexec}
 
@@ -258,8 +254,13 @@ encrypted-tbn3.gstatic.com
     # Medium
     #HostGET['medium.com'] = -> r {r.env[:query].has_key?('redirecturl') ? [301, {'Location' => r.env[:query]['redirecturl']}, []] : r.noexec}
 
-    # Meredith Corp
+    # Meredith
     HostGET['imagesvc.meredithcorp.io'] = -> r {r.env[:query].has_key?('url') ? [301, {'Location' => r.env[:query]['url']}, []] : r.noexec}
+
+    # Microsoft
+    HostGET['www.bing.com'] = -> r {
+      (%w(fd hamburger Identity notifications secure).member?(r.parts[0]) || r.path.index('/api/ping') == 0) ? r.deny : r.allowHost}
+    HostGET['www.msn.com'] = -> r {r.allowHost}
 
     # Mozilla
     Mozilla = -> r {ENV.has_key?('MOZILLA') ? r.fetch : r.deny}
