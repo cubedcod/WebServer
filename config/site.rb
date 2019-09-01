@@ -57,7 +57,8 @@ class WebResource
   end
   module HTTP
     CDNhost = /amazon|azure|cloud(flare|front|inary)|digitalocean|fa(cebook|stly)|heroku|jsdelivr|netdna|ra(ckcdn|wgit)|stackpath|usercontent/
-    DesktopUA = ['Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3896.4 Safari/537.36']
+    DesktopUA = ['Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3896.4 Safari/537.36',
+                'Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0']
     CookieHost = /(bandcamp|bizjournals|brightcove|google|reddit|twi(tch|tter)|youtube)\.(com|net|tv)$/
     GunkURI = /[-.:_\/?&=~](([Bb]lock|[Pp]age)?[Aa](d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?([Bb]lock(er|ing)?.*|id|[Ww]ords?)?|([Aa]pp)?[Bb](anner|eacon)s?|[Cc](ampaign|edexis|hart[Bb]eat.*|om[Ss]core|ookie([Cc](hoice|onsent)|[Ll]aw|[Nn]otice)?s?|se)|[Dd]etect|[Ee](moji.*\.js|nsighten|vidon)|([Ww]eb)?[Ff]onts?|[Gg]([dD][pP][rR]|eo(ip|locate)|igya|[Pp][Tt]|tag|[Tt][Mm])|.*([Hh]eader|[Pp]re)[-_]?[Bb]id.*|.*[Hh]ub[Ss]pot.*|[hp]b.?js|ima[0-9]?|[Kk]r(ux|xd).*|[Ll]ogger|([Aa]pp|s)?[Mm](e(asurement|ssaging|t(er|rics?))|ms|tr)|[Nn]ew([Rr]elic|sletter)|[Oo](m(niture|tr)|nboarding|ptanon|utbrain)|[Pp](ay(ments?|[Ww]all)|ersonaliz(ation|e)|i(wik|xel(propagate)?)|op(over|up)|romo(tion)?s?|ubmatic|[vx])|[Qq]uant[Cc]ast|[Rr]eco(mmend(ed)?|rd([Ee]vent|[Ss]tats?)?)|s?[Ss](a(fe[-_]?[Bb]rowsing|ilthru)|ervice[-_]?[Ww]orker|i(ftscience|gnalr|tenotice)|o(cial|urcepoint)|ponsored|so|tat(istic)?s?|ubscri(ber?|ption)|w.js|ync)|[Tt](aboola|(arget|rack)(ers?|ing)?|bproxy|ea(lium|ser)|inypass|rend(ing|s))|[Uu](rchin|[Tt][Mm])|wp-rum)([-._\/?&=]|$)|\.((gif|png)\?|otf|ttf|woff2?)|\/[a-z]\?/
     MediaHost = /\.(api.brightcove|bandcamp|soundcloud|track-blaster|usps)\.com$/
@@ -174,6 +175,9 @@ class WebResource
 
     # DartSearch
     HostGET['clickserve.dartsearch.net'] = -> r {[301,{'Location' => r.env[:query]['ds_dest_url']}, []]}
+
+    # Disney
+    %w(abcnews.go.com).map{|h| HostGET[h] = -> r {r.allowHost}}
 
     # DuckDuckGo
     HostGET['duckduckgo.com'] = -> r {%w{ac}.member?(r.parts[0]) ? r.deny : r.fetch}
