@@ -57,7 +57,7 @@ class WebResource
   end
   module HTTP
     CDNhost = /amazon|azure|cloud(flare|front|inary)|digitalocean|fa(cebook|stly)|heroku|jsdelivr|netdna|ra(ckcdn|wgit)|stackpath|usercontent/
-    DesktopUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3896.4 Safari/537.36'
+    DesktopUA = ['Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3896.4 Safari/537.36']
     CookieHost = /(bandcamp|bizjournals|brightcove|google|reddit|twi(tch|tter)|youtube)\.(com|net|tv)$/
     GunkURI = /[-.:_\/?&=~](([Bb]lock|[Pp]age)?[Aa](d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?([Bb]lock(er|ing)?.*|id|[Ww]ords?)?|([Aa]pp)?[Bb](anner|eacon)s?|[Cc](ampaign|edexis|hart[Bb]eat.*|om[Ss]core|ookie([Cc](hoice|onsent)|[Ll]aw|[Nn]otice)?s?|ount|se)|[Dd]etect|[Ee](moji.*\.js|nsighten|vidon)|([Ww]eb)?[Ff]onts?|\.gif\?|[Gg]([dD][pP][rR]|eo(ip|locate)|igya|[Pp][Tt]|tag|[Tt][Mm])|.*([Hh]eader|[Pp]re)[-_]?[Bb]id.*|.*[Hh]ub[Ss]pot.*|[hp]b.?js|ima[0-9]?|[Kk]r(ux|xd).*|[Ll]ogger|([Aa]pp|s)?[Mm](e(asurement|ssaging|t(er|rics?))|ms|tr)|[Nn]ew([Rr]elic|sletter)|[Oo](m(niture|tr)|nboarding|ptanon|utbrain)|[Pp](ay(ments?|[Ww]all)|ersonaliz(ation|e)|i(wik|xel(propagate)?)|op(over|up)|romo(tion)?s?|ubmatic|[vx])|[Qq]uant[Cc]ast|[Rr]eco(mmend(ed)?|rd([Ee]vent|[Ss]tats?)?)|s?[Ss](a(fe[-_]?[Bb]rowsing|ilthru)|ervice[-_]?[Ww]orker|i(ftscience|gnalr|tenotice)|o(cial|urcepoint)|ponsored|so|tat(istic)?s?|ubscri(ber?|ption)|w.js|ync)|[Tt](aboola|(arget|rack)(ers?|ing)?|bproxy|ea(lium|ser)|rend(ing|s))|[Uu](rchin|[Tt][Mm])|wp-rum)([-._\/?&=]|$)|\.((gif|png)\?|otf|ttf|woff2?)/
     MediaHost = /\.(api.brightcove|bandcamp|soundcloud|track-blaster|usps)\.com$/
@@ -84,7 +84,7 @@ class WebResource
       when /facebook.(com|net)$/
         ENV.has_key?('FACEBOOK') ? self.POSTthru : denyPOST
       when /google(apis)?.com$/
-        if ENV.has_key?('GOOGLE') && host != 'play.google.com'
+        if host == 'groups.google.com' || (ENV.has_key?('GOOGLE') && host != 'play.google.com')
           self.POSTthru
         else
           denyPOST
@@ -212,9 +212,10 @@ class WebResource
     Google = -> r {ENV.has_key?('GOOGLE') ? r.fetch : r.noexec}
     HostGET['ajax.googleapis.com'] = -> r {r.allowHost}
     HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.deny : Google[r]}
+    HostGET['groups.google.com'] = -> r {r.desktop.allowHost}
     HostGET['www.google.com'] = -> r {
       app = r.parts[0]
-      if [nil,*%w(aclk images imgres maps search)].member? app
+      if [nil,*%w(aclk images imgres maps s2 search)].member? app
         if 'maps' == app
           r.desktop.fetch
         elsif 'search' == app && r.env[:query]['q']&.match?(/^https?:\/\//) # why is Chrome on android sending HTTP URLs in URL-bar to google search? is it just a search bar now?
@@ -241,7 +242,6 @@ encrypted-tbn3.gstatic.com
       feedproxy.google.com
                 google.com
          images.google.com
-         groups.google.com
              kh.google.com
            maps.google.com
        maps.googleapis.com

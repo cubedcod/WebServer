@@ -225,7 +225,7 @@ class WebResource
        []]
     end
 
-    def desktop; env['HTTP_USER_AGENT'] = DesktopUA; self end
+    def desktop; env['HTTP_USER_AGENT'] = DesktopUA[0]; self end
 
     def entity generator = nil
       entities = env['HTTP_IF_NONE_MATCH']&.strip&.split /\s*,\s*/ # entities
@@ -518,7 +518,7 @@ x-forwarded-for}.member?(key.downcase)
       head['Referer'] = head['Referer'].sub(/\?ui=upstream$/,'') if head['Referer'] && head['Referer'].match?(/\?ui=upstream$/) # strip local QS TODO remove all local vars
 
       # User-Agent
-      head['User-Agent'] = DesktopUA unless host && (host.match? UAhost)
+      head['User-Agent'] = DesktopUA[0] unless host && (host.match? UAhost)
       head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # redirect via HTTP header rather than Javascript
       head.delete 'User-Agent' if host == 't.co'            # redirect via HTTP header rather than Javascript
 
@@ -779,7 +779,7 @@ x-forwarded-for}.member?(key.downcase)
     def unsubscribe; subscriptionFile.exist? && subscriptionFile.node.delete end
 
     def upstreamUI?
-      @upstreamUI ||= !local? && (env['HTTP_USER_AGENT'] == DesktopUA ||
+      @upstreamUI ||= !local? && ((DesktopUA.member? env['HTTP_USER_AGENT']) ||
                                   (env['SERVER_NAME'].match?  UIhost) ||
                                   (env['REQUEST_PATH'].match? UIpath) ||
                                   env[:query]['ui'] == 'upstream' ||
