@@ -492,8 +492,20 @@ class WebResource
         }.join(underscored ? '_' : '-')
         key = key.downcase if underscored
 
-        # set output header, strip local-use headers
-        head[key] = v.to_s unless %w{gunk host links path-info query query-modified query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)
+        # set output field, strip local headers
+        head[key] = v.to_s unless %w{
+connection
+gunk
+host
+links
+path-info
+query query-modified query-string
+rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version
+remote-addr repository request-method request-path request-uri resp
+script-name server-name server-port server-protocol server-software
+unicorn.socket upgrade-insecure-requests
+version via
+x-forwarded-for}.member?(key.downcase)
       }
 
       head.delete 'Transfer-Encoding'
