@@ -84,7 +84,11 @@ class WebResource
       when /facebook.(com|net)$/
         ENV.has_key?('FACEBOOK') ? self.POSTthru : denyPOST
       when /google(apis)?.com$/
-        ENV.has_key?('GOOGLE') ? self.POSTthru : denyPOST
+        if ENV.has_key?('GOOGLE') && host != 'play.google.com'
+          self.POSTthru
+        else
+          denyPOST
+        end
       when /(firefox|mozilla).(com|net|org)$/
         ENV.has_key?('MOZILLA') ? self.POSTthru : denyPOST
       else
