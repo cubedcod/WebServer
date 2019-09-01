@@ -595,7 +595,7 @@ x-forwarded-for}.member?(key.downcase)
     end
 
     def noexec
-      return deny if %w(gif js png).member? ext.downcase
+      return deny if %w(gif js).member?(ext.downcase) || env['REQUEST_URI'].match?(/\.png\?/)
       fetch.yield_self{|status, head, body|
         if status.to_s.match? /30[1-3]/ # redirected
           [status, head, body]
