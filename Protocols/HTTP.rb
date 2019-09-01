@@ -200,7 +200,7 @@ class WebResource
                         ['text/css',"body {background: repeating-linear-gradient(#{rand 360}deg, #000, #000 6.5em, #fff 6.5em, #fff 8em)\ndiv, p {background-color: #000; color: #fff}"]
                       elsif ext == 'woff' || ext == 'woff2'
                         ['font/woff2', SiteFont]
-                      elsif ext == 'gif' || type == :GIF
+                      elsif %w(gif png).member?(ext) || type == :image
                         ['image/gif', SiteGIF]
                       elsif ext == 'json' || type == :json
                         ['application/json','{}']
@@ -598,14 +598,14 @@ x-forwarded-for}.member?(key.downcase)
     end
 
     def noexec
-      return deny if %w(gif js).member? ext.downcase
+      return deny if %w(gif js png).member? ext.downcase
       fetch.yield_self{|status, head, body|
         if status.to_s.match? /30[1-3]/ # redirected
           [status, head, body]
         elsif head['Content-Type'] && !head['Content-Type'].match?(/application|image.(bmp|gif)|script/)
           [status, head, body] # allowed content
         else                   # filtered content
-          type = :GIF if head['Content-Type']&.match? /image\/gif/
+          type = :image if head['Content-Type']&.match? /image\//
           type = :script if head['Content-Type']&.match? /script/
           type = :json if head['Content-Type']&.match? /json/
           deny status, type
