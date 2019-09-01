@@ -133,6 +133,7 @@ class WebResource < RDF::URI
       'article:published_time' => Date,
       'article:publisher' => To,
       'article:section' => Abstract,
+      'article:suggested-social-copy' => Abstract,
       'article:tag' => Abstract,
       'articleid' => :drop,
       'author' => Creator,
