@@ -251,7 +251,6 @@ encrypted-tbn3.gstatic.com
          images.google.com
              kh.google.com
            ssl.gstatic.com
- suggestqueries.google.com
         www.googleapis.com
            www.gstatic.com
 ).map{|h| HostGET[h] = Google }
