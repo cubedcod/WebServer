@@ -208,7 +208,19 @@ class WebResource
     Google = -> r {ENV.has_key?('GOOGLE') ? r.fetch : r.noexec}
     HostGET['ajax.googleapis.com'] = -> r {r.allowHost}
     HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.deny : Google[r]}
-    HostGET['www.google.com'] = -> r {([nil, *%w(aclk images imgres maps search)].member? r.parts[0]) ? (r.parts[0] == 'maps' ? r.desktop.fetch : Google[r]) : r.deny}
+    HostGET['www.google.com'] = -> r {
+      app = r.parts[0]
+      if [nil,*%w(aclk images imgres maps search)].member? app
+        if 'maps' == app
+          r.desktop.fetch
+        elsif 'search' == app && r.env[:query]['q']&.match?(/^https?:\/\//) # why is Chrome on android sending HTTP URLs in URL-bar to google search? is it just a search bar now?
+          [301, {'Location' => r.env[:query]['q']}, []]
+        else
+          Google[r]
+        end
+      else
+        r.deny
+      end}
     HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
     %w(storage.googleapis.com gstatic.com).map{|n| Subdomain[n] = Google }
     %w(accounts.google.com
