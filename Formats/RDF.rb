@@ -2,7 +2,7 @@
 class WebResource
   RDFformats = /^(application|text)\/(atom|html|json|rss|turtle|.*urlencoded|xml)/
 
-  # Repository -> file(s) (Turtle describing new resources)
+  # Repository -> turtle file(s)
   def index
     return unless env[:repository]
     updates = []
@@ -10,16 +10,16 @@ class WebResource
       if n = graph.name # named graph
         n = n.R
         docs = []
-        unless n.uri.match?(/^(_|data):/) # blank nodes and data-URIs not directly stored, only appear in doc-context
+        unless n.uri.match?(/^(_|data):/) # blank nodes and data-URIs not directly stored, only appearring in doc-context
 
-          # graph in canonical location
+          # canonical location
           if n.host # global graph
             docs.push (CacheDir + n.host + (n.path || '') + '.ttl').R
           else      # local graph
-            docs.push (n.path + '.ttl').R
+            docs.push (n.path + '.ttl').R unless n.exist?
           end
 
-          # graph on timeline
+          # timeline location
           if timestamp = graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value # timestamp query
             docs.push ['/' + timestamp.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/\+?(00.00|Z)$/,''),       # hour-dir location
                        %w{host path query fragment}.map{|a|n.send(a).yield_self{|p|p&&p.split(/[\W_]/)}},'ttl']. # tokenize slugs
