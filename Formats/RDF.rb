@@ -65,7 +65,7 @@ class WebResource
       elsif %w(bash c cpp h hs pl py rb sh).member? ext.downcase
         options[:format] = :sourcecode
       end
-      puts [relPath, options[:format]].join ' '
+      #puts [relPath, options[:format]].join ' '
       env[:repository].load relPath, options
     end
   rescue RDF::FormatError => e

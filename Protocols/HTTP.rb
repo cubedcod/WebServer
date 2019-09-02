@@ -83,9 +83,11 @@ class WebResource
 
     def cached
       return false if env && env['HTTP_PRAGMA'] == 'no-cache'
-      base = cache
-      return base if base.staticMedia            # direct match
-      (base+'.*').R(env).glob.find &:staticMedia # suffix match
+      cache.cached_static
+    end
+
+    def cached_static
+      %w(css gif jpg js png mp3 mp4 opus webm webp).member?(ext.downcase) && file? && self
     end
 
     def self.call env
@@ -734,11 +736,6 @@ x-forwarded-for}.member?(key.downcase)
       else
         staticQuery
       end
-    end
-
-    def staticMedia
-      %w(css gif jpg js png mp3 mp4 opus webm webp).member?(ext.downcase) &&
-      file?
     end
 
     def staticQuery

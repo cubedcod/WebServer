@@ -211,6 +211,7 @@ class WebResource
       'og:section' => Abstract,
       'og:site_name' => To,
       'og:title' => Title,
+      'og:ttl' => :drop,
       'og:type' => Type,
       'og:updated_time' => Date,
       'og:url' => Link,
