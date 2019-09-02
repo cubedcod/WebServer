@@ -1,5 +1,3 @@
 #!/bin/sh
-cd
-rsync -avz web $DATAPEER:
-rsync -avz $DATAPEER:web .
-
+rsync -avz $HOME/web $DATAPEER:
+rsync -avz $DATAPEER:web $HOME

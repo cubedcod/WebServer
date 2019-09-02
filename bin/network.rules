@@ -20,6 +20,7 @@ open_UDP () {
     iptables  -A OUTPUT -p udp --dport $1 -j ACCEPT
     ip6tables -A OUTPUT -p udp --dport $1 -j ACCEPT
 }
+
 open_TCP () {
     iptables  -A INPUT  -p tcp --sport $1 -j ACCEPT
     ip6tables -A INPUT  -p tcp --sport $1 -j ACCEPT
@@ -70,6 +71,7 @@ open_TCP   8082 HTTPS-transparent
 
 open_port  8073 SDR-kiwi
 open_port  8443 SDR-HFU
+open_port  8790
 open_port  8901 SDR-REA
 
 open_TCP   9418 Git
