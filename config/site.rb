@@ -45,7 +45,8 @@ class WebResource
     ServerAddr = 'http://localhost:8000'
     SiteFont = ConfDir.join('fonts/hack-regular-subset.woff2').read
     SiteGIF = ConfDir.join('site.gif').read
-    SiteCSS = ConfDir.join('site.css').read
+    SiteCSS = ConfDir.join('site.css').read +
+              ConfDir.join('code.css').read
     SiteJS  = ConfDir.join('site.js').read
 
   end

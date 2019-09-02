@@ -737,7 +737,7 @@ x-forwarded-for}.member?(key.downcase)
     end
 
     def staticMedia
-      %w(css gif jpg png mp3 mp4 opus webm webp).member?(ext.downcase) &&
+      %w(css gif jpg js png mp3 mp4 opus webm webp).member?(ext.downcase) &&
       file?
     end
 
