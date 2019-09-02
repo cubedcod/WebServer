@@ -205,6 +205,9 @@ class WebResource
     # Forbes
     HostGET['thumbor.forbes.com'] = -> r {[301, {'Location' => URI.unescape(r.parts[-1])}, []]}
 
+    #FSDN
+    HostGET['a.fsdn.com'] = -> r {r.noexec}
+
     # Gitter
     HostGET['gitter.im'] = -> req {req.desktop.fetch}
 
