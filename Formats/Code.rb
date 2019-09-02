@@ -14,6 +14,7 @@ module Webize
       def initialize(input = $stdin, options = {}, &block)
         #@doc = input.respond_to?(:read) ? input.read : input
         @base = options[:base_uri].R
+        @lang = options[:lang]
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -27,16 +28,15 @@ module Webize
 
       def each_statement &fn
         source_tuples{|p,o|
-          fn.call RDF::Statement.new(@base, p,
-                                     (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal o
-                                                                                            l.datatype=RDF.XMLLiteral if p == Content
-                                                                                            l),
-                                     :graph_name => @base)}
+          fn.call RDF::Statement.new(@base, p, o, :graph_name => @base)}
       end
 
       def source_tuples
         yield Type.R, (Schema + 'Code').R
-        yield Content.R, `pygmentize -f html #{@base.shellPath}`
+        lang = "-l #{@lang}" if @lang
+        html = RDF::Literal `pygmentize #{lang} -f html #{@base.shellPath}`
+        html.datatype = RDF.XMLLiteral
+        yield Content.R, html
       end
     end
   end

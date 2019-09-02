@@ -14,7 +14,7 @@ class WebResource
 
           # canonical location
           if n.host # global graph
-            docs.push (CacheDir + n.host + (n.path || '') + '.ttl').R
+            docs.push (CacheDir + n.host + (n.path ? (n.path[-1]=='/' ? (n.path + 'index') : n.path) : '') + '.ttl').R
           else      # local graph
             docs.push (n.path + '.ttl').R unless n.exist?
           end
@@ -28,11 +28,10 @@ class WebResource
         end
 
         docs.map{|doc|
-          unless doc.exist? # new document
+          unless doc.exist?
             doc.dir.mkdir
             RDF::Writer.open(doc.relPath){|f|f << graph}
             updates << doc
-            puts  "\e[32m+\e[0m " + ServerAddr + doc.path.sub(/\.ttl$/,'')
           end}
       end}
     updates # indexed resources
@@ -53,11 +52,20 @@ class WebResource
         options[:format] = :html
       elsif %w(Cookies).member? basename
         options[:format] = :sqlite
-      elsif %w(changelog makefile).member?(basename.downcase) || %w(cls plist sty xinetd).member?(ext)
+      elsif %w(changelog gophermap gophertag license makefile readme todo).member?(basename.downcase) || %w(cls gophermap old plist service socket sty xinetd watchr).member?(ext.downcase)
         options[:format] = :plaintext
+      elsif ext == 'markdown'
+        options[:format] = :markdown
+      elsif %w(install-sh).member?(basename.downcase)
+        options[:format] = :sourcecode
+        options[:lang] = :sh
+      elsif %w(gemfile rakefile).member?(basename.downcase) || %w(gemspec).member?(ext.downcase)
+        options[:format] = :sourcecode
+        options[:lang] = :ruby
       elsif %w(bash c cpp h hs pl py rb sh).member? ext
         options[:format] = :sourcecode
       end
+      puts [relPath, options[:format]].join ' '
       env[:repository].load relPath, options
     end
   rescue RDF::FormatError => e
