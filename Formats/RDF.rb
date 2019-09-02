@@ -10,15 +10,21 @@ class WebResource
       if n = graph.name # named graph
         n = n.R
         docs = []
+        unless n.uri.match?(/^(_|data):/) # blank nodes and data-URIs not directly stored, only appear in doc-context
 
-        # local graph already in canonical location and on timeline (mail/chatlogs in hour-dirs)
-        # link nonlocal-origin graph to canonical location
-        docs.push (n.path + '.ttl').R unless n.host || n.uri.match?(/^(_|data):/) # don't store blank node or data-URI directly, only in doc-context
-        # link nonlocal-origin graph to timeline
-        if n.host && (timestamp=graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value) # find timestamp
-          docs.push ['/' + timestamp.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/\+?(00.00|Z)$/,''),       # hour-dir
-                     %w{host path query fragment}.map{|a|n.send(a).yield_self{|p|p&&p.split(/[\W_]/)}},'ttl']. # slugs
-                      flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.').R                         # skiplist
+          # graph in canonical location
+          if n.host # global graph
+            docs.push (CacheDir + n.host + (n.path || '') + '.ttl').R
+          else      # local graph
+            docs.push (n.path + '.ttl').R
+          end
+
+          # graph on timeline
+          if timestamp = graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value # timestamp query
+            docs.push ['/' + timestamp.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/\+?(00.00|Z)$/,''),       # hour-dir location
+                       %w{host path query fragment}.map{|a|n.send(a).yield_self{|p|p&&p.split(/[\W_]/)}},'ttl']. # tokenize slugs
+                        flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.').R                         # skiplist slugs
+          end
         end
 
         docs.map{|doc|
