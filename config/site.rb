@@ -86,7 +86,7 @@ s?[Ss](a(fe[-_]?[Bb]rowsing|ilthru)|ervice[-_]?[Ww]orker|i(ftscience|gnalr|tenot
 [Tt](aboola|(arget|rack)(ers?|ing)?|bproxy|ea(lium|ser)|inypass|rend(ing|s))|
 [Uu](rchin|[Tt][Mm])|
 wp-rum)([-._\/?&=]|$)|
-\.((gif|png)\?|otf|ttf|woff2?)|\/[a-z]\?)mx
+\.((gif|png)\?|otf|ttf|woff2?)|\/[a-z]\?)x
     MediaHost = /\.(api.brightcove|bandcamp|soundcloud|track-blaster|usps)\.com$/
     POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|dailymotion|facebook|google(apis)?|git(lab|ter)|mixcloud|(music|xp).apple|postimages|pscp|reddit|shazam|api.twitter|api.soundcloud|ttvnw|twitch|youtube)\.(com|gov|im|net|org|tv)$/
     POSTpath = /\/graphql([\/]|$)/
