@@ -79,7 +79,7 @@ class WebResource
 ([Aa]pp|s)?[Mm](e(asurement|ssaging|t(er|rics?))|ms|tr)|
 [Nn]ew([Rr]elic|sletter)|
 [Oo](m(niture|tr)|nboarding|ptanon|utbrain)|
-[Pp](ay(ments?|[Ww]all)|ersonaliz(ation|e)|i(wik|xel(propagate)?)|op(over|up)|romo(tion)?s?|ubmatic|[vx])|
+[Pp](ay(ments?|[Ww]all)|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)|op(over|up)|romo(tion)?s?|ubmatic|[vx])|
 [Qq]uant[Cc]ast|
 [Rr]eco(mmend(ed)?|rd([Ee]vent|[Ss]tats?)?)|
 s?[Ss](a(fe[-_]?[Bb]rowsing|ilthru)|ervice[-_]?[Ww]orker|i(ftscience|gnalr|tenotice)|o(cial|urcepoint)|ponsored|so|tat(istic)?s?|ubscri(ber?|ption)|w.js|ync)|
