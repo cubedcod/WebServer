@@ -52,17 +52,17 @@ class WebResource
         options[:format] = :html
       elsif %w(Cookies).member? basename
         options[:format] = :sqlite
-      elsif %w(changelog gophermap gophertag license makefile readme todo).member?(basename.downcase) || %w(cls gophermap old plist service socket sty xinetd watchr).member?(ext.downcase)
+      elsif %w(changelog gophermap gophertag license makefile readme todo).member?(basename.downcase) || %w(cls gophermap old plist service socket sty textile xinetd watchr).member?(ext.downcase)
         options[:format] = :plaintext
-      elsif ext == 'markdown'
+      elsif %w(markdown).member? ext.downcase
         options[:format] = :markdown
-      elsif %w(install-sh).member?(basename.downcase)
+      elsif %w(install-sh).member? basename.downcase
         options[:format] = :sourcecode
         options[:lang] = :sh
       elsif %w(gemfile rakefile).member?(basename.downcase) || %w(gemspec).member?(ext.downcase)
         options[:format] = :sourcecode
         options[:lang] = :ruby
-      elsif %w(bash c cpp h hs pl py rb sh).member? ext
+      elsif %w(bash c cpp h hs pl py rb sh).member? ext.downcase
         options[:format] = :sourcecode
       end
       puts [relPath, options[:format]].join ' '

@@ -57,7 +57,8 @@ module Webize
 
       def initialize(input = $stdin, options = {}, &block)
         @doc = input.respond_to?(:read) ? input.read : input
-        @subject = (options[:base_uri] || '#textfile').R
+        @base = options[:base_uri].R
+        @body = @base.join '#this'
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -71,18 +72,18 @@ module Webize
 
       def each_statement &fn
         text_triples{|s,p,o|
-          fn.call RDF::Statement.new(@subject, p.R,
+          fn.call RDF::Statement.new(s, p.R,
                                      (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal o
                                                                                             l.datatype=RDF.XMLLiteral if p == Content
                                                                                             l),
-                                     :graph_name => @subject)}
+                                     :graph_name => @base)}
       end
 
       def text_triples
-        yield @subject, Content, WebResource::HTML.render({_: :pre, style: 'white-space: pre-wrap',
+        yield @body, Content, WebResource::HTML.render({_: :pre, style: 'white-space: pre-wrap',
                                               c: @doc.hrefs{|p,o| # hypertextize
                                                 # yield detected links to consumer
-                                                yield @subject, p, o
+                                                yield @body, p, o
                                                 yield o, Type, (W3 + '2000/01/rdf-schema#Resource').R}})
       end
     end
