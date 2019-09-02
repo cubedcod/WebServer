@@ -47,11 +47,15 @@ class WebResource
         options[:format] = :html
       elsif %w(Cookies).member? basename
         options[:format] = :sqlite
-      elsif %w(Makefile).member?(basename) || %w(cls sty).member?(ext)
+      elsif %w(changelog makefile).member?(basename.downcase) || %w(cls plist sty xinetd).member?(ext)
         options[:format] = :plaintext
+      elsif %w(bash c cpp h hs pl py rb sh).member? ext
+        options[:format] = :sourcecode
       end
       env[:repository].load relPath, options
     end
+  rescue RDF::FormatError => e
+    puts [e.class, e.message].join ' '
   end
 
   # Graph -> JSON-compatible URI-indexed Hash (Feed & HTML-renderer input)
