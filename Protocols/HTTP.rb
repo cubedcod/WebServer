@@ -81,11 +81,11 @@ class WebResource
       (hostPart + pathPart + qsPart + suffix).R env
     end
 
-    def cached?
-      return false if env && env['HTTP_PRAGMA'] == 'no-cache' && !%w(css png jpg).member?(ext.downcase)
-      loc = cache
-      return loc if loc.file?     # direct match
-      (loc+'.*').R(env).glob.find &:file? # suffix match
+    def cached
+      return false if env && env['HTTP_PRAGMA'] == 'no-cache'
+      base = cache
+      return base if base.staticMedia            # direct match
+      (base+'.*').R(env).glob.find &:staticMedia # suffix match
     end
 
     def self.call env
@@ -259,7 +259,7 @@ class WebResource
     end
 
     def fetch options = {}
-      if file = !options[:no_response] && cached?; return file.fileResponse end
+      if file = !options[:no_response] && cached; return file.fileResponse end
       @env ||= {resp: {}}                      # response metadata
       env[:repository] ||= RDF::Repository.new # RDF storage (in-memory)
       head = headers                           # cleaned request metadata
@@ -734,6 +734,11 @@ x-forwarded-for}.member?(key.downcase)
       else
         staticQuery
       end
+    end
+
+    def staticMedia
+      %w(gif jpg png mp3 mp4 opus webm webp).member?(ext.downcase) &&
+      file?
     end
 
     def staticQuery

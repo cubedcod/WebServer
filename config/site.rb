@@ -83,7 +83,7 @@ class WebResource
 [Qq]uant[Cc]ast|
 [Rr]eco(mmend(ed)?|rd([Ee]vent|[Ss]tats?)?)|
 s?[Ss](a(fe[-_]?[Bb]rowsing|ilthru)|ervice[-_]?[Ww]orker|i(ftscience|gnalr|tenotice)|o(cial|urcepoint)|ponsored|so|tat(istic)?s?|ubscri(ber?|ption)|w.js|ync)|
-[Tt](aboola|(arget|rack)(ers?|ing)?|bproxy|ea(lium|ser)|inypass|rend(ing|s))|
+[Tt](aboola|(arget|rack)(ers?|ing)?|bproxy|ea(lium|ser)|inypass|rend(ing|s))|autotrack|
 [Uu](rchin|[Tt][Mm])|
 wp-rum)([-._\/?&=]|$)|
 \.((gif|png)\?|otf|ttf|woff2?)|\/[a-z]\?)x
@@ -194,7 +194,7 @@ wp-rum)([-._\/?&=]|$)|
     HostGET['www.buzzfeed.com'] = -> r {r.allowHost}
 
     # Cloudflare
-    HostGET['cdnjs.cloudflare.com'] = -> r {r.fetch}
+    HostGET['cdnjs.cloudflare.com'] = -> r {r.allowHost}
 
     # CNN
     HostGET['dynaimage.cdn.cnn.com'] = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
@@ -225,7 +225,8 @@ wp-rum)([-._\/?&=]|$)|
 
     # Facebook
     FBgunk = %w(common connect pages_reaction_units plugins security tr)
-    HostGET['facebook.com'] = HostGET['www.facebook.com'] = -> r {ENV.has_key?('FACEBOOK') ? r.fetch : (FBgunk.member? r.parts[0]) ? r.deny : r.noexec}
+    HostGET['facebook.com'] = HostGET['business.facebook.com'] = HostGET['www.facebook.com'] = -> r {
+      ENV.has_key?('FACEBOOK') ? r.fetch : (FBgunk.member? r.parts[0]) ? r.deny : r.noexec}
     HostGET['l.instagram.com'] = HostGET['l.facebook.com'] = -> r {[301, {'Location' => r.env[:query]['u']},[]]}
 
     # Forbes
