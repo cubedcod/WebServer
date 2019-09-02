@@ -65,28 +65,28 @@ class WebResource
     DesktopUA = ['Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3896.4 Safari/537.36',
                  'Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0']
     CookieHost = /(bandcamp|bizjournals|brightcove|google|reddit|twi(tch|tter)|youtube)\.(com|net|tv)$/
-    GunkURI = %r([-.:_\/?&=~](([Bb]lock|[Pp]age)?
-[Aa](d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?([Bb]lock(er|ing)?.*|id|[Ww]ords?)?|([Aa]pp)?
-[Bb](anner|eacon)s?|
-[Cc](ampaign|edexis|hart[Bb]eat.*|om[Ss]core|ookie([Cc](hoice|onsent)|[Ll]aw|[Nn]otice)?s?|se)|
-[Dd]etect|
-[Ee](moji.*\.js|nsighten|vidon)|
-([Ww]eb)?[Ff]onts?|
-[Gg]([dD][pP][rR]|eo(ip|locate)|igya|[Pp][Tt]|tag|[Tt][Mm])|
-.*([Hh]eader|[Pp]re)[-_]?[Bb]id.*|.*[Hh]ub[Ss]pot.*|[hp]b.?js|ima[0-9]?|
-[Kk]r(ux|xd).*|
-[Ll]ogger|
-([Aa]pp|s)?[Mm](e(asurement|ssaging|t(er|rics?))|ms|tr)|
-[Nn]ew([Rr]elic|sletter)|
-[Oo](m(niture|tr)|nboarding|ptanon|utbrain)|
-[Pp](ay(ments?|[Ww]all)|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)|op(over|up)|romo(tion)?s?|ubmatic|[vx])|
-[Qq]uant[Cc]ast|
-[Rr]eco(mmend(ed)?|rd([Ee]vent|[Ss]tats?)?)|
-s?[Ss](a(fe[-_]?[Bb]rowsing|ilthru)|ervice[-_]?[Ww]orker|i(ftscience|gnalr|tenotice)|o(cial|urcepoint)|ponsored|so|tat(istic)?s?|ubscri(ber?|ption)|w.js|ync)|
-[Tt](aboola|(arget|rack)(ers?|ing)?|bproxy|ea(lium|ser)|inypass|rend(ing|s))|autotrack|
-[Uu](rchin|[Tt][Mm])|
+    GunkURI = %r([-.:_\/?&=~]((block|page)?
+a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(block(er|ing)?.*|id|words?)?|(app)?
+b(anner|eacon)s?|
+c(ampaign|edexis|hartbeat.*|omscore|ookie(c(hoice|onsent)|law|notice)?s?|se)|
+detect|
+e(moji.*\.js|nsighten|vidon)|(web)?
+fonts?|
+g(dpr|eo(ip|locate)|igya|pt|tag|tm)|.*
+(header|pre)[-_]?bid.*|.*hubspot.*|[hp]b.?js|ima[0-9]?|
+kr(ux|xd).*|
+logger|(app|s)?
+m(e(asurement|ssaging|t(er|rics?))|ms|tr)|
+new(relic|sletter)|
+o(m(niture|tr)|nboarding|ptanon|utbrain)|
+p(ay(ments?|wall)|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)|op(over|up)|romo(tion)?s?|ubmatic|[vx])|
+quantcast|
+reco(mmend(ed)?|rd(event|stats?)?)|
+s?s(a(fe[-_]?browsing|ilthru)|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(cial|urcepoint)|ponsored|so|tat(istic)?s?|ubscri(ber?|ption)|w.js|ync)|
+t(aboola|(arget|rack)(ers?|ing)?|bproxy|ea(lium|ser)|inypass|rend(ing|s))|autotrack|
+u(rchin|tm)|
 wp-rum)([-._\/?&=]|$)|
-\.((gif|png)\?|otf|ttf|woff2?)|\/[a-z]\?)x
+\.((gif|png)\?|otf|ttf|woff2?)|\/[a-z]\?)xi
     MediaHost = /\.(api.brightcove|bandcamp|soundcloud|track-blaster|usps)\.com$/
     POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|dailymotion|facebook|google(apis)?|git(lab|ter)|mixcloud|(music|xp).apple|postimages|pscp|reddit|shazam|api.twitter|api.soundcloud|ttvnw|twitch|youtube)\.(com|gov|im|net|org|tv)$/
     POSTpath = /\/graphql([\/]|$)/
