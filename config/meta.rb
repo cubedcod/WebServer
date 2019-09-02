@@ -107,6 +107,7 @@ class WebResource
       'dcterms.modified' => Date,
       'dcterms.title' => Title,
       'dcterms.type' => Type,
+      'Description' => Abstract,
       'description' => Abstract,
       'dns-prefetch' => :drop,
       'enabled-features' => :drop,

@@ -61,7 +61,7 @@ class WebResource
   end
   module HTTP
 
-    CDNhost = /amazon|azure|cloud(flare|front|inary)|digitalocean|fa(cebook|stly)|heroku|jsdelivr|netdna|ra(ckcdn|wgit)|stackpath|usercontent/
+    CDNhost = /amazon|azure|cloud(flare|front|inary)|digitalocean|fa(cebook|stly)|heroku|netdna|ra(ckcdn|wgit)|stackpath|usercontent/
     DesktopUA = ['Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3896.4 Safari/537.36',
                  'Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0']
     CookieHost = /(bandcamp|bizjournals|brightcove|google|reddit|twi(tch|tter)|youtube)\.(com|net|tv)$/
