@@ -70,6 +70,18 @@ class WebResource
 
     def sitePOST
       case host
+      when /amazon(aws)?.com$/
+        ENV.has_key?('AMAZON') ? self.POSTthru : denyPOST
+      when /facebook.(com|net)$/
+        ENV.has_key?('FACEBOOK') ? self.POSTthru : denyPOST
+      when /google(apis)?.com$/
+        if ENV.has_key?('GOOGLE') || host == 'groups.google.com'
+          self.POSTthru
+        else
+          denyPOST
+        end
+      when /(firefox|mozilla).(com|net|org)$/
+        ENV.has_key?('MOZILLA') ? self.POSTthru : denyPOST
       when 'metrics.brightcove.com'
         denyPOST
       when /\.youtube.com$/
@@ -80,18 +92,6 @@ class WebResource
         else
           denyPOST
         end
-      when /amazon(aws)?.com$/
-        ENV.has_key?('AMAZON') ? self.POSTthru : denyPOST
-      when /facebook.(com|net)$/
-        ENV.has_key?('FACEBOOK') ? self.POSTthru : denyPOST
-      when /google(apis)?.com$/
-        if host == 'groups.google.com' || (ENV.has_key?('GOOGLE') && host != 'play.google.com')
-          self.POSTthru
-        else
-          denyPOST
-        end
-      when /(firefox|mozilla).(com|net|org)$/
-        ENV.has_key?('MOZILLA') ? self.POSTthru : denyPOST
       else
         self.POSTthru
       end
