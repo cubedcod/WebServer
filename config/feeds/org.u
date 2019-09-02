@@ -17,6 +17,7 @@
 //blog.acolyer.org/feed/
 //blog.blo.org/rss.xml
 //blog.digitalcommonwealth.org/?feed=atom
+//blog.savetheharbor.org/feeds/posts/default
 //blogs.massaudubon.org/branchingoutatbroadmoor/feed/
 //blogs.massaudubon.org/distractiondisplays/feed/
 //blogs.massaudubon.org/landprotection/feed/
@@ -44,7 +45,6 @@
 //carmensunion589.org/feed/
 //codmansquarecouncil.org/feed/
 //cogdesign.org/feed/
-//uncornered.org/feed/
 //columbiasavinhillcivic.org/feed/
 //commonwealthmagazine.org/feed/
 //corkscrew.audubon.org/rss.xml
@@ -94,7 +94,6 @@
 //ncaaa.org/feed/
 //neighborhoodview.org/feed/
 //oldwayspt.org/blog/feed
-//www.pine64.org/feed/
 //rimediacoop.org/feed/
 //rimediacoop.org/feed/podcast
 //rss.wbur.org/artery/rss
@@ -110,6 +109,7 @@
 //teenempowerment.org/feed/
 //transitmatters.org/blog/?format=rss
 //tuftsobserver.org/feed/
+//uncornered.org/feed/
 //uphamscorner.org/feed/
 //www.aclum.org/en/rss.xml
 //www.archivespublichistory.org/?feed=rss2
@@ -121,11 +121,9 @@
 //www.bostonharbornow.org/feed/
 //www.bostonhistory.org/kingstreet?format=RSS
 //www.bpl.org/press/feed/
-http://cardinalseansblog.org/feed/
 //www.cctvcambridge.org/rss.xml
 //www.chsne.org/feed/
-http://www.clvu.org/news.rss
-//www.doorsopenri.org/feed/
+//www.doorsopenri.org/feed
 //www.dotpark.org/feed/
 //www.ds4si.org/blog?format=RSS
 //www.emeraldnecklace.org/feed/
@@ -141,7 +139,6 @@ http://www.clvu.org/news.rss
 //www.hydesquare.org/feed/
 //www.legalfoodhub.org/feed/
 //www.mapc.org/feed/
-http://www.mass-creative.org/blog.rss
 //www.massbike.org/news.rss
 //www.masshist.org/beehiveblog/feed/
 //www.masslibsystem.org/feed/
@@ -154,6 +151,7 @@ http://www.mass-creative.org/blog.rss
 //www.neponset.org/feed/
 //www.newhavenindependent.org/index.php/feeds/atom/
 //www.olmsted.org/index.php?format=feed&type=rss
+//www.pine64.org/feed/
 //www.preservationmass.org/feed.xml
 //www.preservationworcester.org/feed/
 //www.projectrightinc.org/blog?format=RSS
@@ -164,6 +162,8 @@ http://www.mass-creative.org/blog.rss
 //www.somervillemedia.org/feed/
 //www.tcproject.org/feed/
 //www.thecharles.org/feed/
+//www.tidemillinstitute.org/comments/feed/
+//www.tidemillinstitute.org/feed/
 //www.urbancultureinstitute.org/blog/feed
 //www.vietaid.org/feed/
 //www.walkuproslindale.org/weblog/feed/
@@ -172,7 +172,7 @@ http://www.mass-creative.org/blog.rss
 //www.writersroomofboston.org/feed/
 //www.zanj.org/feed/
 //wx1box.org/feed/
-//www.tidemillinstitute.org/feed/
-//www.tidemillinstitute.org/comments/feed/
-//blog.savetheharbor.org/feeds/posts/default
+http://cardinalseansblog.org/feed/
+http://www.clvu.org/news.rss
 http://www.dorchesterhistoricalsociety.org/blog/?feed=rss2
+http://www.mass-creative.org/blog.rss
