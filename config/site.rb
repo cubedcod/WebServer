@@ -273,6 +273,9 @@ android.clients.google.com
            apis.google.com
           books.google.com
          chrome.google.com
+       clients1.google.com
+       clients4.google.com
+       clients5.google.com
      developers.google.com
           drive.google.com
 encrypted-tbn0.gstatic.com
