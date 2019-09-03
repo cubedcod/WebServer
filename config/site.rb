@@ -176,10 +176,16 @@ wp-rum)([-._\/?&=]|$)|
     %w(www.aliexpress.com ae-cn.alicdn.com ae01.alicdn.com i.alicdn.com).map{|h| HostGET[h] = -> r {r.allowHost}}
 
     # Amazon
-    HostGET['amazon.com'] = HostGET['www.amazon.com'] = -> r {r.allowHost}
+    Amazon = -> r {ENV.has_key?('AMAZON') ? r.allowHost : r.noexec}
+
+    %w(      amazon.com
+         www.amazon.com).map{|h|
+      HostGET[h] = Amazon }
+
     %w(media-amazon.com
   ssl-images-amazon.com
-       s3.amazonaws.com).map{|n|Subdomain[n] = -> r {ENV.has_key?('AMAZON') ? r.allowHost : r.noexec}}
+       s3.amazonaws.com).map{|n|
+      Subdomain[n] = Amazon }
 
     # AOL
     HostGET['o.aolcdn.com'] = -> r {r.env[:query].has_key?('image_uri') ? [301, {'Location' => r.env[:query]['image_uri']}, []] : r.noexec}
@@ -260,8 +266,6 @@ wp-rum)([-._\/?&=]|$)|
       end}
     HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
 
-    %w(storage.googleapis.com gstatic.com).map{|n| Subdomain[n] = Google }
-
     %w(ajax.googleapis.com
        maps.google.com
        maps.googleapis.com
@@ -291,6 +295,8 @@ encrypted-tbn3.gstatic.com
         www.googleapis.com
            www.gstatic.com
 ).map{|h| HostGET[h] = Google }
+
+    %w(storage.googleapis.com gstatic.com).map{|n| Subdomain[n] = Google }
 
     # Linkedin
     HostGET['www.linkedin.com'] = HostGET['media.licdn.com'] = -> r {r.allowHost}
