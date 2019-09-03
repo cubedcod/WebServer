@@ -142,6 +142,10 @@ class WebResource
                                                             (HTML.keyval (Webize::HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
     end
 
+    def cdnHost
+      env['SERVER_NAME'].match? CDNhost
+    end
+
     def dateMeta
       n = nil # next page
       p = nil # prev page
@@ -420,8 +424,10 @@ class WebResource
       elsif handler = Subdomain[host.split('.')[1..-1].join('.')]
         handler[self]                           # subdomains of host
       else
-        return deny if (gunkHost || gunkURI) && !allowed
-        return noexec if env['SERVER_NAME'].match? CDNhost
+        unless allowed
+          return deny if gunkHost || gunkURI
+          return noexec if cdnHost
+        end
         fetch
       end
     rescue OpenURI::HTTPRedirect => e

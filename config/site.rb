@@ -69,7 +69,7 @@ class WebResource
                  'Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0']
     CookieHost = /(bandcamp|bizjournals|brightcove|google|reddit|twi(tch|tter)|youtube)\.(com|net|tv)$/
     GunkURI = %r([-.:_\/?&=~]((block|page)?
-a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(block(er|ing)?.*|id|words?)?|(app)?
+a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|words?)?|(app)?
 b(anner|eacon)s?|
 c(ampaign|edexis|hartbeat.*|omscore|ookie(c(hoice|onsent)|law|notice)?s?|se)|
 detect|
@@ -176,7 +176,7 @@ wp-rum)([-._\/?&=]|$)|
     %w(www.aliexpress.com ae-cn.alicdn.com ae01.alicdn.com i.alicdn.com).map{|h| HostGET[h] = -> r {r.allowHost}}
 
     # Amazon
-    Amazon = -> r {ENV.has_key?('AMAZON') ? r.allowHost : r.noexec}
+    Amazon = -> r {ENV.has_key?('AMAZON') ? r.fetch : r.allowHost}
 
     %w(      amazon.com
          www.amazon.com).map{|h|
