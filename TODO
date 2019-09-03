@@ -1,4 +1,3 @@
 webvtt https://media.insideedition.com/pd/1749985693001/201908/1749985693001_ab6a19f3-83f0-4446-a798-350351011d28.vtt
-try to store upstream ETAG on media files. otherwise 304 if client has any "version" of immutable
-implicit renderer-mapping in HTML.value
-turtle cache of nonrdf conversions
+implicit renderer-mapping in HTML#value
+turtle cache of nonrdf conversions for RDF#load
