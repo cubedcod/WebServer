@@ -28,7 +28,7 @@ class WebResource
     end
 
     def allowCookies?
-      ENV.has_key?('COOKIES') || hostname.match?(CookieHost)
+      ENV.has_key?('COOKIES') || AllowedHosts.has_key?(host)
     end
 
     # cache location in local storage
@@ -519,7 +519,7 @@ x-forwarded-for}.member?(key.downcase)
       head['Referer'] = head['Referer'].sub(/\?ui=upstream$/,'') if head['Referer'] && head['Referer'].match?(/\?ui=upstream$/) # strip local QS TODO remove all local vars
 
       # User-Agent
-      head['User-Agent'] = DesktopUA[0] unless host && (host.match? UAhost)
+      head['User-Agent'] = DesktopUA[0]
       head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # redirect via HTTP header rather than Javascript
       head.delete 'User-Agent' if host == 't.co'            # redirect via HTTP header rather than Javascript
 
@@ -788,8 +788,6 @@ x-forwarded-for}.member?(key.downcase)
 
     def upstreamUI?
       @upstreamUI ||= !local? && ((DesktopUA.member? env['HTTP_USER_AGENT']) ||
-                                  (env['SERVER_NAME'].match?  UIhost) ||
-                                  (env['REQUEST_PATH'].match? UIpath) ||
                                   env[:query]['ui'] == 'upstream' ||
                                   ENV.has_key?('DESKTOP'))
     end

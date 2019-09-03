@@ -67,7 +67,6 @@ class WebResource
                  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3895.3 Safari/537.36',
                  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36',
                  'Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0']
-    CookieHost = /(bandcamp|bizjournals|brightcove|google|reddit|twi(tch|tter)|youtube)\.(com|net|tv)$/
     GunkURI = %r([-.:_\/?&=~]((block|page)?
 a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|words?)?|(app)?
 b(anner|eacon)s?|
@@ -86,13 +85,10 @@ p(ay(ments?|wall)|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)|op(over|
 quantcast|
 reco(mmend(ed)?|rd(event|stats?)?)|
 s?s(a(fe[-_]?browsing|ilthru)|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(cial|urcepoint)|ponsored|so|tat(istic)?s?|ubscri(ber?|ption)|w.js|ync)|
-t(aboola|(arget|rack)(ers?|ing)?|bproxy|ea(lium|ser)|inypass|rend(ing|s))|autotrack|
+t(aboola|(arget|rack)(ers?|ing)?|ea(lium|ser)|inypass|rend(ing|s))|autotrack|
 u(rchin|tm)|
 wp-rum)([-._\/?&=]|$)|
 \.((gif|png)\?|otf|ttf|woff2?)|\/[a-z]\?)xi
-    UAhost = /android|mozilla/
-    UIhost = /((apple|anvato|bandcamp|books.google|boston25news|brightcove|duckduckgo|gannettdigital|iheart|jwplatform|(mix|sound)cloud|miixtapechiick|postimages|spotify|uw-media.thenews-messenger|vimeo|wcvb|youtube).(com|net|org)|github.io|.tv)$/
-    UIpath = /oembed\./
 
     def subscriptionFile slug=nil
       (case host
