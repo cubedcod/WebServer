@@ -282,6 +282,7 @@ encrypted-tbn3.gstatic.com
                 google.com
          images.google.com
              kh.google.com
+       play.googleapis.com
            ssl.gstatic.com
         www.googleapis.com
            www.gstatic.com
