@@ -2,3 +2,5 @@ webvtt https://media.insideedition.com/pd/1749985693001/201908/1749985693001_ab6
 String#hrefs not getting tail-call optimization
 implicit renderer-mapping via RDF type (viewable-type merging) in HTML#value
 turtle cache of nonrdf-conversions for RDF#load
+move site-HTML triplrs to namespace
+custom slugs for timeline URI
