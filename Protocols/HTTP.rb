@@ -11,10 +11,10 @@ class WebResource
     OffLine = ENV.has_key? 'OFFLINE'
     PathGET = {}
     PreservedFormat = /^(application\/(json|protobuf|vnd|x-)|audio|font|text\/xml|video)/
-    Subdomain = {}
 
-    AllowHost = -> host {
-      AllowedHosts[host] = true }
+    def self.AllowHost host
+      AllowedHosts[host] = true
+    end
 
     def allowedOrigin
       if env['HTTP_ORIGIN']
@@ -403,20 +403,18 @@ class WebResource
     end
 
     def GET
-      if handler = PathGET['/' + parts[0].to_s] # child paths
+      if handler = PathGET['/' + parts[0].to_s] # path handler - all subpaths
         handler[self]
-      elsif handler = PathGET[path]             # exact path
+      elsif handler = PathGET[path]             # path handler - exact
         handler[self]
-      elsif local?                              # local host
+      elsif local?                              # localhost handler
         local
       elsif path.match? /[^\/]204$/             # connectivity check
         [204, {}, []]
-      elsif handler = HostGET[host]             # specific host
+      elsif handler = HostGET[host]             # host handler
         handler[self]
-      elsif handler = Subdomain[host.split('.')[1..-1].join('.')]
-        handler[self]                           # subdomains of host
       else
-        return deny if gunkHost? || gunkURI?
+        return deny   if gunk?
         return noexec if cdnHost
         fetch
       end
@@ -459,14 +457,17 @@ class WebResource
         end}
     end
 
+    def gunk?
+      gunkHost? || gunkURI?
+    end
+
     def gunkHost?
       return false if AllowedHosts.has_key? host
       env.has_key? 'HTTP_GUNK'
     end
 
     def gunkURI?
-      ('//'+env['SERVER_NAME']+
-            env['REQUEST_URI']).match?(GunkURI) && !host.match?(MediaHost)
+      ('//' + env['SERVER_NAME'] + env['REQUEST_URI']).match? GunkURI
     end
 
     def HEAD
@@ -605,9 +606,9 @@ x-forwarded-for}.member?(key.downcase)
         elsif head['Content-Type'] && !head['Content-Type'].match?(/application|image.(bmp|gif)|script/)
           [status, head, body] # allowed content
         else                   # filtered content
-          type = :image if head['Content-Type']&.match? /image\//
+          type = :image  if head['Content-Type']&.match? /image\//
           type = :script if head['Content-Type']&.match? /script/
-          type = :json if head['Content-Type']&.match? /json/
+          type = :json   if head['Content-Type']&.match? /json/
           deny status, type
         end}
     end
