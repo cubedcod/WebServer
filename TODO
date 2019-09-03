@@ -1,3 +1,4 @@
 webvtt https://media.insideedition.com/pd/1749985693001/201908/1749985693001_ab6a19f3-83f0-4446-a798-350351011d28.vtt
-implicit renderer-mapping in HTML#value
-turtle cache of nonrdf conversions for RDF#load
+String#hrefs not getting tail-call optimization
+implicit renderer-mapping via RDF type (viewable-type merging) in HTML#value
+turtle cache of nonrdf-conversions for RDF#load
