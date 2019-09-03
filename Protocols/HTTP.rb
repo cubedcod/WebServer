@@ -41,7 +41,7 @@ class WebResource
       path.match?(POSTpath)
     end
 
-    # cache reference
+    # cache location in local storage
     def cache format=nil
       want_suffix = ext.empty?
       hostPart = CacheDir + (host || 'localhost')
@@ -81,13 +81,16 @@ class WebResource
       (hostPart + pathPart + qsPart + suffix).R env
     end
 
-    def cached
+    # return cache-reference if valid and filled
+    def cached?
       return false if env && env['HTTP_PRAGMA'] == 'no-cache'
-      cache.cached_static
+      cache.cached
     end
 
-    def cached_static
-      %w(css gif jpg js png mp3 mp4 opus webm webp).member?(ext.downcase) && file? && self
+    def cached
+      %w(apk css gif jpg js png mp3 mp4 opus webm webp).member?(ext.downcase) &&
+      file? &&
+      self
     end
 
     def self.call env
@@ -261,7 +264,9 @@ class WebResource
     end
 
     def fetch options = {}
-      if file = !options[:no_response] && cached; return file.fileResponse end
+      if file = !options[:no_response] && cached?
+        return file.fileResponse
+      end
       @env ||= {resp: {}}                      # response metadata
       env[:repository] ||= RDF::Repository.new # RDF storage (in-memory)
       head = headers                           # cleaned request metadata
@@ -277,7 +282,6 @@ class WebResource
       body = nil   # response body
       format = nil # response format
       file = nil   # response fileref
-
       fetchURL = -> url {
         print '🌍🌎🌏'[rand 3] , ' '
         if verbose?
@@ -287,24 +291,23 @@ class WebResource
         end
         begin
           open(url, head) do |response|
-            base = url.R env
-            env[:scheme] = base.scheme
+            baseURI = url.R env
+            env[:scheme] = baseURI.scheme
             code = response.status.to_s.match(/\d{3}/)[0]
-            meta = response.meta
-            HTTP.print_header meta if verbose?
+            meta = response.meta; HTTP.print_header meta if verbose?
             if code == 206
               body = response.read                                         # partial body
               upstream_metas.push 'Content-Encoding'                       # encoding preserved
             else                                                           # complete body
               body = HTTP.decompress meta, response.read                   # decode body
               format ||= options[:content_type]                                     # local format preference
-              format ||= meta['content-type'].split(/;/)[0] if meta['content-type'] # Content-Type metadata
-              format ||= (xt = ext.to_sym                                           # path-ext format hint
+              format ||= meta['content-type'].split(/;/)[0] if meta['content-type'] # Content-Type header
+              format ||= (xt = ext.to_sym                                           # path-extension format
                           RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
               format ||= body.bytesize < 2048 ? 'text/plain' : 'application/octet-stream' # unspecified format
               file = cache(format).write body if !format.match? RDFformats # cache non-RDF
               if reader = RDF::Reader.for(content_type: format)            # RDF reader
-                reader_options = {base_uri: base, no_embeds: options[:no_embeds]}
+                reader_options = {base_uri: baseURI, no_embeds: options[:no_embeds]}
                 reader.new(body, reader_options){|_| env[:repository] << _ } # read RDF
                 index unless options[:no_index]                            # cache RDF
               end
@@ -330,7 +333,7 @@ class WebResource
             code = 403
           when /404/ # not found
             code = 404
-          when /999/
+          when /999/ # nonstandard response codes
             code = 999
             body = HTTP.decompress e.io.meta, e.io.read
             @upstreamUI = true
@@ -380,18 +383,18 @@ class WebResource
       end unless OffLine
 
       return if options[:no_response]
-      if code == 304                                              # no data
-        [304, {}, []]
-      elsif file                                                  # file data
-        file.fileResponse
-      elsif code == 206                                           # partial upstream data
+      if code == 206                                                 # partial upstream file
         [206, env[:resp], [body]]
-      elsif body && (upstreamUI? || format&.match?(PreservedFormat)) # upstream data
+      elsif code == 304                                              # no data
+        [304, {}, []]
+      elsif file                                                     # local file
+        file.fileResponse
+      elsif body && (upstreamUI? || format&.match?(PreservedFormat)) # upstream file
         [200, env[:resp].merge({'Content-Length' => body.bytesize}), [body]]
-      else                                                        # graph data
+      else                                                           # upstream graph
         if env[:repository].empty? && !local? && env['REQUEST_PATH'][-1]=='/' # unlistable remote
-          index = (CacheDir + hostname + path).R(env)                         # local container
-          index.children.map{|e|e.env(env).nodeStat base_uri: (env[:scheme] || 'https') + '://' + e.relPath} if index.node.directory? # local list
+          index = (CacheDir + hostname + path).R(env)                         # local list
+          index.children.map{|e|e.env(env).nodeStat base_uri: (env[:scheme] || 'https') + '://' + e.relPath} if index.node.directory?
         end
         graphResponse
       end
