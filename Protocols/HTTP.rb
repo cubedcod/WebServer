@@ -5,6 +5,7 @@ class WebResource
     include URIs
     AllowedHosts = {}
     HostGET = {}
+    HostPOST = {}
     Hosts = {}
     LocalArgs = %w(allow view sort ui)
     Methods = %w(GET HEAD OPTIONS POST)
@@ -28,11 +29,6 @@ class WebResource
 
     def allowCookies?
       ENV.has_key?('COOKIES') || hostname.match?(CookieHost)
-    end
-
-    def allowPOST?
-      host.match?(POSThost) ||
-      path.match?(POSTpath)
     end
 
     # cache location in local storage
@@ -463,6 +459,7 @@ class WebResource
 
     def gunkHost?
       return false if AllowedHosts.has_key? host
+      return true unless env['REQUEST_METHOD'] == 'GET'
       env.has_key? 'HTTP_GUNK'
     end
 
@@ -619,7 +616,7 @@ x-forwarded-for}.member?(key.downcase)
     end
 
     def OPTIONS
-      if allowPOST?
+      if AllowedHosts.has_key? host
         self.OPTIONSthru
       else
         env[:deny] = true
@@ -652,7 +649,14 @@ x-forwarded-for}.member?(key.downcase)
       end
     end
 
-    def POST; allowPOST? ? sitePOST : denyPOST end
+    def POST
+      if handler = HostPOST[host] # host handler
+        handler[self]
+      else
+        return denyPOST if gunk?
+              self.POSTthru
+      end
+    end
 
     def POSTthru
       # origin request

@@ -90,40 +90,9 @@ t(aboola|(arget|rack)(ers?|ing)?|bproxy|ea(lium|ser)|inypass|rend(ing|s))|autotr
 u(rchin|tm)|
 wp-rum)([-._\/?&=]|$)|
 \.((gif|png)\?|otf|ttf|woff2?)|\/[a-z]\?)xi
-    POSThost = /(^|\.)(amazon(aws)?|anvato|brightcove|dailymotion|facebook|google(apis)?|git(lab|ter)|mixcloud|(music|xp).apple|postimages|pscp|reddit|shazam|api.twitter|api.soundcloud|ttvnw|twitch|youtube)\.(com|gov|im|net|org|tv)$/
-    POSTpath = /\/graphql([\/]|$)/
     UAhost = /android|mozilla/
     UIhost = /((apple|anvato|bandcamp|books.google|boston25news|brightcove|duckduckgo|gannettdigital|iheart|jwplatform|(mix|sound)cloud|miixtapechiick|postimages|spotify|uw-media.thenews-messenger|vimeo|wcvb|youtube).(com|net|org)|github.io|.tv)$/
     UIpath = /oembed\./
-
-    def sitePOST
-      case host
-      when /amazon(aws)?.com$/
-        ENV.has_key?('AMAZON') ? self.POSTthru : denyPOST
-      when /facebook.(com|net)$/
-        ENV.has_key?('FACEBOOK') ? self.POSTthru : denyPOST
-      when /google(apis)?.com$/
-        if ENV.has_key?('GOOGLE') || host == 'groups.google.com'
-          self.POSTthru
-        else
-          denyPOST
-        end
-      when /(firefox|mozilla).(com|net|org)$/
-        ENV.has_key?('MOZILLA') ? self.POSTthru : denyPOST
-      when 'metrics.brightcove.com'
-        denyPOST
-      when /\.youtube.com$/
-        if parts.member? 'stats'
-          denyPOST
-        elsif env['REQUEST_URI'].match? /ACCOUNT_MENU|comment|\/results|subscribe/
-          self.POSTthru
-        else
-          denyPOST
-        end
-      else
-        self.POSTthru
-      end
-    end
 
     def subscriptionFile slug=nil
       (case host
@@ -256,6 +225,14 @@ wp-rum)([-._\/?&=]|$)|
         r.deny
       end}
     HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
+    HostPOST['www.youtube.com'] = -> r {
+        if r.parts.member? 'stats'
+          r.denyPOST
+        elsif r.env['REQUEST_URI'].match? /ACCOUNT_MENU|comment|\/results|subscribe/
+          r.POSTthru
+        else
+          r.denyPOST
+        end}
 
     %w(ajax.googleapis.com
          groups.google.com
