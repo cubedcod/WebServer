@@ -3,6 +3,7 @@
 class WebResource
   module HTTP
     include URIs
+    AllowedHosts = {}
     HostGET = {}
     Hosts = {}
     LocalArgs = %w(allow view sort ui)
@@ -10,12 +11,10 @@ class WebResource
     OffLine = ENV.has_key? 'OFFLINE'
     PathGET = {}
     PreservedFormat = /^(application\/(json|protobuf|vnd|x-)|audio|font|text\/xml|video)/
-    ServerKey = Digest::SHA2.hexdigest([`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Subdomain = {}
 
-    def allowAll?
-      env[:query]['allow'] == ServerKey
-    end
+    AllowHost = -> host {
+      AllowedHosts[host] = true }
 
     def allowedOrigin
       if env['HTTP_ORIGIN']
@@ -29,13 +28,6 @@ class WebResource
 
     def allowCookies?
       ENV.has_key?('COOKIES') || hostname.match?(CookieHost)
-    end
-
-    def allowHost
-      unless allowAll?
-        return deny if gunkURI
-      end
-      fetch
     end
 
     def allowPOST?
@@ -216,10 +208,8 @@ class WebResource
                       elsif ext == 'json' || type == :json
                         ['application/json','{}']
                       else
-                        q = env[:query].dup
-                        q['allow'] = ServerKey
                         ['text/html; charset=utf-8',
-                         "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center'><a href='#{HTTP.qs q}' style='color: #fff; font-size: 22em; text-decoration: none'>⌘</a></body></html>"]
+                         "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center'><a href='#' style='color: #fff; font-size: 22em; text-decoration: none'>⌘</a></body></html>"]
                       end
       [status,
        {'Access-Control-Allow-Credentials' => 'true',
@@ -426,10 +416,8 @@ class WebResource
       elsif handler = Subdomain[host.split('.')[1..-1].join('.')]
         handler[self]                           # subdomains of host
       else
-        unless allowAll?
-          return deny if gunkHost || gunkURI
-          return noexec if cdnHost
-        end
+        return deny if gunkHost? || gunkURI?
+        return noexec if cdnHost
         fetch
       end
     rescue OpenURI::HTTPRedirect => e
@@ -471,12 +459,14 @@ class WebResource
         end}
     end
 
-    def gunkHost
+    def gunkHost?
+      return false if AllowedHosts.has_key? host
       env.has_key? 'HTTP_GUNK'
     end
 
-    def gunkURI
-      ('//'+env['SERVER_NAME']+env['REQUEST_URI']).match?(GunkURI) && !host.match?(MediaHost)
+    def gunkURI?
+      ('//'+env['SERVER_NAME']+
+            env['REQUEST_URI']).match?(GunkURI) && !host.match?(MediaHost)
     end
 
     def HEAD

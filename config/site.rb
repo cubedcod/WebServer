@@ -173,19 +173,13 @@ wp-rum)([-._\/?&=]|$)|
     PathGET['/url'] = HostGET['gate.sc'] = HostGET['go.skimresources.com'] = -> r {[301,{'Location' => (r.env[:query]['url'] || r.env[:query]['q'])}, []]}
 
     # Alibaba
-    %w(www.aliexpress.com ae-cn.alicdn.com ae01.alicdn.com i.alicdn.com).map{|h| HostGET[h] = -> r {r.allowHost}}
+    %w(www.aliexpress.com ae-cn.alicdn.com ae01.alicdn.com i.alicdn.com).map{|h|
+      AllowHost[h]}
 
     # Amazon
-    Amazon = -> r {ENV.has_key?('AMAZON') ? r.fetch : r.allowHost}
-
     %w(      amazon.com
          www.amazon.com).map{|h|
-      HostGET[h] = Amazon }
-
-    %w(media-amazon.com
-  ssl-images-amazon.com
-       s3.amazonaws.com).map{|n|
-      Subdomain[n] = Amazon }
+      AllowHost[h] if ENV.has_key? 'AMAZON'}
 
     # AOL
     HostGET['o.aolcdn.com'] = -> r {r.env[:query].has_key?('image_uri') ? [301, {'Location' => r.env[:query]['image_uri']}, []] : r.noexec}
@@ -199,11 +193,11 @@ wp-rum)([-._\/?&=]|$)|
     }
 
     # BuzzFeed
-    HostGET['img.buzzfeed.com'] = -> r {r.noexec}
-    HostGET['www.buzzfeed.com'] = -> r {r.allowHost}
+    AllowHost['img.buzzfeed.com']
+    AllowHost['www.buzzfeed.com']
 
     # Cloudflare
-    HostGET['cdnjs.cloudflare.com'] = -> r {r.allowHost}
+    AllowHost['cdnjs.cloudflare.com']
 
     # CNN
     HostGET['dynaimage.cdn.cnn.com'] = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
@@ -212,14 +206,15 @@ wp-rum)([-._\/?&=]|$)|
     HostGET['clickserve.dartsearch.net'] = -> r {[301,{'Location' => r.env[:query]['ds_dest_url']}, []]}
 
     # Disney
-    %w(abcnews.go.com).map{|h| HostGET[h] = -> r {r.allowHost}}
+    AllowHost['abcnews.go.com']
 
     # DuckDuckGo
     HostGET['duckduckgo.com'] = -> r {%w{ac}.member?(r.parts[0]) ? r.deny : r.fetch}
     HostGET['proxy.duckduckgo.com'] = -> r {%w{iu}.member?(r.parts[0]) ? [301, {'Location' => r.env[:query]['u']}, []] : r.fetch}
 
     # eBay
-    HostGET['ebay.com'] = HostGET['www.ebay.com'] = -> r {r.allowHost}
+    AllowHost['ebay.com']
+    AllowHost['www.ebay.com']
     HostGET['i.ebayimg.com'] = -> r {
       if r.basename.match? /s-l(64|96|200|225).jpg/
         [301, {'Location' => r.dirname + '/s-l1600.jpg'}, []]
@@ -230,7 +225,7 @@ wp-rum)([-._\/?&=]|$)|
     HostGET['rover.ebay.com'] = -> r {r.env[:query].has_key?('mpre') ? [301, {'Location' => r.env[:query]['mpre']}, []] : r.deny}
 
     # Economist
-    HostGET['www.economist.com'] = -> r {r.allowHost}
+    AllowHost['www.economist.com']
 
     # Facebook
     FBgunk = %w(common connect pages_reaction_units plugins security tr)
@@ -248,9 +243,6 @@ wp-rum)([-._\/?&=]|$)|
     HostGET['gitter.im'] = -> req {req.desktop.fetch}
 
     # Google
-    Google = -> r {ENV.has_key?('GOOGLE') ? r.fetch : r.noexec}
-    HostGET['feeds.feedburner.com'] = -> r {r.path[1] == '~' ? r.deny : Google[r]}
-    HostGET['groups.google.com'] = -> r {r.desktop.allowHost}
     HostGET['www.google.com'] = -> r {
       app = r.parts[0]
       if [nil,*%w(aclk images imgres maps s2 search)].member? app
@@ -259,7 +251,7 @@ wp-rum)([-._\/?&=]|$)|
         elsif 'search' == app && r.env[:query]['q']&.match?(/^https?:\/\//) # why is Chrome on android sending HTTP URLs in URL-bar to google search? is it just a search bar now?
           [301, {'Location' => r.env[:query]['q']}, []]
         else
-          Google[r]
+          r.fetch
         end
       else
         r.deny
@@ -267,10 +259,12 @@ wp-rum)([-._\/?&=]|$)|
     HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
 
     %w(ajax.googleapis.com
-       maps.google.com
+         groups.google.com
+           maps.google.com
        maps.googleapis.com
           maps.gstatic.com
-).map{|h| HostGET[h] = -> r {r.allowHost}}
+).map{|h|
+      AllowHost[h]}
 
     %w(accounts.google.com
 android.clients.google.com
@@ -287,6 +281,7 @@ encrypted-tbn1.gstatic.com
 encrypted-tbn2.gstatic.com
 encrypted-tbn3.gstatic.com
       feedproxy.google.com
+      feeds.feedburner.com
                 google.com
          images.google.com
              kh.google.com
@@ -294,12 +289,12 @@ encrypted-tbn3.gstatic.com
            ssl.gstatic.com
         www.googleapis.com
            www.gstatic.com
-).map{|h| HostGET[h] = Google }
-
-    %w(storage.googleapis.com gstatic.com).map{|n| Subdomain[n] = Google }
+).map{|host|
+      AllowHost[host] if ENV.has_key? 'GOOGLE'}
 
     # Linkedin
-    HostGET['www.linkedin.com'] = HostGET['media.licdn.com'] = -> r {r.allowHost}
+    AllowHost['www.linkedin.com']
+    AllowHost['media.licdn.com']
 
     # Medium
     #HostGET['medium.com'] = -> r {r.env[:query].has_key?('redirecturl') ? [301, {'Location' => r.env[:query]['redirecturl']}, []] : r.noexec}
@@ -309,8 +304,8 @@ encrypted-tbn3.gstatic.com
 
     # Microsoft
     HostGET['www.bing.com'] = -> r {
-      (%w(fd hamburger Identity notifications secure).member?(r.parts[0]) || r.path.index('/api/ping') == 0) ? r.deny : r.allowHost}
-    HostGET['www.msn.com'] = -> r {r.allowHost}
+      (%w(fd hamburger Identity notifications secure).member?(r.parts[0]) || r.path.index('/api/ping') == 0) ? r.deny : r.fetch}
+    AllowHost['www.msn.com']
 
     # Mozilla
     Mozilla = -> r {ENV.has_key?('MOZILLA') ? r.fetch : r.deny}
@@ -323,7 +318,7 @@ addons-amo.cdn.mozilla.net
     # NYTimes
     %w(cooking.nytimes.com
            www.nytimes.com).map{|host|
-      HostGET[host] = -> r {r.allowHost}}
+      AllowHost[host]}
 
     # Outline
     HostGET['outline.com'] = -> r {
@@ -349,7 +344,7 @@ addons-amo.cdn.mozilla.net
       r.env[:suffix] = '.rss' if r.ext.empty? && !r.upstreamUI?
       r.env[:query]['sort'] ||= 'date'
       r.env[:query]['view'] ||= 'table'
-      r.path == '/' ? ('/r/' + r.subscriptions.join('+') + '/new').R(r.env).fetch : r.allowHost}
+      (r.path=='/' ? ('/r/'+r.subscriptions.join('+')+'/new').R(r.env) : r).fetch}
 
     # Reuters
     (0..5).map{|i|
@@ -369,6 +364,7 @@ addons-amo.cdn.mozilla.net
       [re.code, re.headers, [re.body]]}
 
     # Twitter
+    AllowHost['api.twitter.com']
     HostGET['mobile.twitter.com'] = HostGET['www.twitter.com'] = -> r {[301,{'Location' => 'https://twitter.com' + r.path },[]]}
     HostGET['t.co'] = -> r {r.parts[0] == 'i' ? r.deny : r.noexec}
     HostGET['twitter.com'] = -> r {
@@ -388,7 +384,7 @@ addons-amo.cdn.mozilla.net
       else
         r.fetch
       end}
-    HostGET['api.twitter.com'] = -> r {r.allowHost}
+
     # WGBH
     HostGET['wgbh.brightspotcdn.com'] = -> r {r.env[:query].has_key?('url') ? [301, {'Location' => r.env[:query]['url']}, []] : r.noexec}
 
