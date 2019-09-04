@@ -378,7 +378,7 @@ class WebResource
               icon = Icons[p.uri] || slug
               {_: :td, c: (env[:query]||{})['sort'] == p.uri ? icon : {_: :a, class: :head, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}}},
            graph.map{|resource|
-             contentRow = resource[Abstract] || resource[Content] || resource[Image] || resource[Video]
+             has_content_row = [Abstract,Content,Image,Video].find{|k|resource.has_key? k}
              [{_: :tr, c: keys.map{|k|
                  {_: :td,
                   c: if k == 'uri'
@@ -395,12 +395,12 @@ class WebResource
                    end
                  else
                    (resource[k]||[]).map{|v|value k, v, env }
-                  end}}}.update(resource['uri'] && resource['uri'].R.path == env['REQUEST_PATH'] && {id: resource['uri'].R.fragment} || {}),
+                  end}}},
               ({_: :tr, c: {_: :td, colspan: keys.size,
                             c: [resource[Abstract] ? [resource[Abstract], '<br>'] : '',
                                 (resource[Image]||[]).map{|i| {style: 'max-width: 28em', c: Markup[Image][i,env]}},
                                 (resource[Video]||[]).map{|i| {style: 'max-width: 32em', c: Markup[Video][i,env]}},
-                                resource[Content]]}} if contentRow)]}]}
+                                resource[Content]]}} if has_content_row)]}]}
     end
 
     # Hash -> Markup
