@@ -221,7 +221,6 @@ wp-rum)([-.:_\/?&=~]|$)|
            maps.google.com
        maps.googleapis.com
           maps.gstatic.com
-               s.ytimg.com
 ).map{|h| AllowHost h }
 
     if ENV.has_key? 'GOOGLE'
@@ -380,7 +379,8 @@ addons-amo.cdn.mozilla.net
     HostGET['www.yelp.com'] = -> r {r.env[:query]['redirect_url'] ? [301, {'Location' => r.env[:query]['redirect_url']},[]] : r.noexec}
 
     # YouTube
-    HostGET['youtu.be'] = -> r {[301, {'Location' => 'https://www.youtube.com/watch?v=' + r.path[1..-1]}, []]}
+    HostGET['s.ytimg.com'] = -> r {r.desktop.fetch}
+
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
       if %w{attribution_link redirect}.member? mode
@@ -417,6 +417,8 @@ yts
       else
         r.denyPOST
       end}
+
+    HostGET['youtu.be'] = -> r {[301, {'Location' => 'https://www.youtube.com/watch?v=' + r.path[1..-1]}, []]}
 
   end
 
