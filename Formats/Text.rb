@@ -1,6 +1,4 @@
 # coding: utf-8
-require "webvtt"
-
 class String
   # text -> HTML, also yielding found (rel,href) tuples to block
   def hrefs &blk               # leading/trailing <>()[] and trailing ,. not captured in URL
@@ -101,6 +99,7 @@ module Webize
       format Format
 
       def initialize(input = $stdin, options = {}, &block)
+        require "webvtt"
         @doc = input.respond_to?(:read) ? input.read : input
         @base = options[:base_uri].R
         if block_given?
@@ -124,7 +123,7 @@ module Webize
       end
 
       def vtt_triples
-        webvtt = WebVTT.read(@base.relPath)
+        webvtt = @base.host ? WebVTT.from_blob(@doc) : WebVTT.read(@base.relPath)
         webvtt.cues.each do |cue|
           subject = @base.join '#l'+cue.identifier
           yield subject, Type, Post.R

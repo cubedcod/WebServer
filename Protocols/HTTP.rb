@@ -266,7 +266,11 @@ class WebResource
       u = '//' + hostname + path + (env[:suffix]||'') + qs        # base locator
       url      = (options[:scheme] || 'https').to_s    + ':' + u  # primary locator
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u  # fallback locator
-      options[:content_type]='application/atom+xml' if FeedURL[u] # fix MIME on feed URLs
+      options[:content_type] ||= if FeedURL[u] # fix broken/missing upstream content-type
+                                   'application/atom+xml'
+                                 elsif ext == 'vtt'
+                                   'text/vtt'
+                                 end
       upstream_metas = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials
                           Content-Type Content-Length ETag}
       upstream_metas.push 'Set-Cookie' if allowCookies?
@@ -288,9 +292,9 @@ class WebResource
             meta = response.meta; HTTP.print_header meta if verbose?
             if code == 206
               body = response.read                                         # partial body
-              upstream_metas.push 'Content-Encoding'                       # encoding preserved
+              upstream_metas.push 'Content-Encoding'                       # preserve encoding
             else                                                           # complete body
-              body = HTTP.decompress meta, response.read                   # decode body
+              body = HTTP.decompress meta, response.read.force_encoding('UTF-8')    # decode body
               format ||= options[:content_type]                                     # local format preference
               format ||= meta['content-type'].split(/;/)[0] if meta['content-type'] # Content-Type header
               format ||= (xt = ext.to_sym                                           # path-extension format
