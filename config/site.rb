@@ -303,8 +303,11 @@ addons-amo.cdn.mozilla.net
       end}
 
     # Reddit
+    AllowHost 'oauth.reddit.com'
+    AllowHost 'www.reddit.com'
     HostGET['reddit.com'] = HostGET['old.reddit.com'] = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path},[]]}
     HostGET['www.reddit.com'] = -> r {
+      r.desktop if r.parts.member? 'submit'
       r.env[:suffix] = '.rss' if r.ext.empty? && !r.upstreamUI?
       r.env[:query]['sort'] ||= 'date'
       r.env[:query]['view'] ||= 'table'
