@@ -275,7 +275,6 @@ class WebResource
       format = nil # response format
       file = nil   # response fileref
       fetchURL = -> url {
-        print '🌍🌎🌏'[rand 3] , ' '
         if verbose?
           print url, "\nREQUEST raw-meta:\n"
           HTTP.print_header head
@@ -306,9 +305,11 @@ class WebResource
             end
             upstream_metas.map{|k| # origin metadata
               env[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
+            print '🌍🌎🌏'[rand 3] , ' '
             HTTP.print_header env[:resp] if verbose?
           end
         rescue Exception => e
+          print '🛑🚫'[rand 3] , ' '
           if verbose? && !e.message.match?(/304/)
             puts e.message
             if e.respond_to? :io
