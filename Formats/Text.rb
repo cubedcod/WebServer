@@ -124,7 +124,13 @@ module Webize
       end
 
       def vtt_triples
-
+        webvtt = WebVTT.read(@base.relPath)
+        webvtt.cues.each do |cue|
+          subject = @base.join '#l'+cue.identifier
+          yield subject, Type, Post.R
+          yield subject, Date, cue.start
+          yield subject, Content, cue.text
+        end
       end
     end
   end
