@@ -68,7 +68,7 @@ class WebResource
                  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36',
                  'Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0']
     GunkURI = %r([-.:_\/?&=~]((block|page)?
-a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|words?)?|(app)?
+a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|slot|words?)?|(app)?
 b(anner|eacon)s?|
 c(ampaign|edexis|hartbeat.*|omscore|ookie(c(hoice|onsent)|law|notice)?s?|se)|
 detect|
@@ -81,13 +81,13 @@ logger|(app|s)?
 m(e(asurement|ssaging|t(er|rics?))|ms|tr)|
 new(relic|sletter)|
 o(m(niture|tr)|nboarding|ptanon|utbrain)|
-p(ay(ments?|wall)|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)|op(over|up)|romo(tion)?s?|ubmatic|[vx])|
+p(a(idpost|y(ments?|wall))|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)|op(over|up)|romo(tion)?s?|ubmatic|[vx])|
 quantcast|
 reco(mmend(ed)?|rd(event|stats?)?)|
 s?s(a(fe[-_]?browsing|ilthru)|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(cial|urcepoint)|ponsored|so|tat(istic)?s?|ubscri(ber?|ption)|w.js|ync)|
 t(aboola|(arget|rack)(ers?|ing)?|ea(lium|ser)|inypass|rend(ing|s))|autotrack|
 u(rchin|tm)|
-wp-rum)([-._\/?&=]|$)|
+wp-rum)([-.:_\/?&=~]|$)|
 \.((gif|png)\?|otf|ttf|woff2?)|\/[a-z]\?)xi
 
     def subscriptionFile slug=nil
