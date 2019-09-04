@@ -145,6 +145,9 @@ wp-rum)([-.:_\/?&=~]|$)|
     # AOL
     HostGET['o.aolcdn.com'] = -> r {r.env[:query].has_key?('image_uri') ? [301, {'Location' => r.env[:query]['image_uri']}, []] : r.noexec}
 
+    # Boston Globe
+    HostGET['bos.gl'] = -> r {r.fetch scheme: :http}
+
     # Brightcove
     AllowHost 'players.brightcove.net'
     AllowHost 'edge.api.brightcove.com'
