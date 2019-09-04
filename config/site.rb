@@ -187,14 +187,15 @@ wp-rum)([-.:_\/?&=~]|$)|
     # eBay
     AllowHost 'ebay.com'
     AllowHost 'www.ebay.com'
+    AllowHost 'ir.ebaystatic.com'
     HostGET['i.ebayimg.com'] = -> r {
       if r.basename.match? /s-l(64|96|200|225).jpg/
         [301, {'Location' => r.dirname + '/s-l1600.jpg'}, []]
       else
         r.noexec
       end}
-    HostGET['ir.ebaystatic.com'] = -> r {r.noexec}
-    HostGET['rover.ebay.com'] = -> r {r.env[:query].has_key?('mpre') ? [301, {'Location' => r.env[:query]['mpre']}, []] : r.deny}
+    HostGET['rover.ebay.com'] = -> r {
+      r.env[:query].has_key?('mpre') ? [301, {'Location' => r.env[:query]['mpre']}, []] : r.deny}
 
     # Economist
     AllowHost 'www.economist.com'
