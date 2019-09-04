@@ -28,7 +28,8 @@ class WebResource
     end
 
     def allowCookies?
-      ENV.has_key?('COOKIES') || AllowedHosts.has_key?(host) || HostPOST.has_key?(host) #|| upstreamUI?
+      AllowedHosts.has_key?(host) ||
+          HostPOST.has_key?(host)
     end
 
     # cache location in local storage
@@ -278,11 +279,7 @@ class WebResource
       body = nil   # response body
       format = nil # response format
        fetchURL = -> url {
-        if verbose?
-          print url, "\nREQUEST raw-meta:\n"
-          HTTP.print_header head
-          puts "REQUEST cleaned-meta:"
-        end
+         HTTP.print_header head if verbose?
         begin
           open(url, head) do |response|
             baseURI = url.R env
@@ -670,7 +667,6 @@ x-forwarded-for}.member?(key.downcase)
       head = headers
       body = env['rack.input'].read
 
-      verbose if uri.match? /g(raph)?ql/
       if verbose?
         puts "\nREQUEST raw-meta:"
         HTTP.print_header env
@@ -798,13 +794,8 @@ x-forwarded-for}.member?(key.downcase)
                                   ENV.has_key?('DESKTOP'))
     end
 
-    def verbose
-      env[:verbose] = true
-    end
-
     def verbose?
-      (ENV.has_key? 'VERBOSE') || # process environment
-      (env.has_key? :verbose)     # request environment
+      ENV.has_key? 'VERBOSE'
     end
 
   end
