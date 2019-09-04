@@ -1,6 +1,5 @@
 # coding: utf-8
 class WebResource
-  RDFformats = /^(application|text)\/(atom|html|json|rss|turtle|.*urlencoded|xml)/
 
   # Repository -> turtle file(s)
   def index

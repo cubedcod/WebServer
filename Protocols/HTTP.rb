@@ -11,7 +11,7 @@ class WebResource
     Methods = %w(GET HEAD OPTIONS POST)
     OffLine = ENV.has_key? 'OFFLINE'
     PathGET = {}
-    PreservedFormat = /^(application\/(json|protobuf|vnd|x-)|audio|font|text\/xml|video)/
+    NoTransform = /^(application\/(json|protobuf|vnd|x-)|audio|font|image|text\/xml|video)/
 
     def self.AllowHost host
       AllowedHosts[host] = true
@@ -277,8 +277,7 @@ class WebResource
       code = nil   # response status
       body = nil   # response body
       format = nil # response format
-      file = nil   # response fileref
-      fetchURL = -> url {
+       fetchURL = -> url {
         if verbose?
           print url, "\nREQUEST raw-meta:\n"
           HTTP.print_header head
@@ -291,20 +290,20 @@ class WebResource
             code = response.status.to_s.match(/\d{3}/)[0]
             meta = response.meta; HTTP.print_header meta if verbose?
             if code == 206
-              body = response.read                                         # partial body
-              upstream_metas.push 'Content-Encoding'                       # preserve encoding
-            else                                                           # complete body
-              body = HTTP.decompress meta, response.read.force_encoding('UTF-8')    # decode body
+              body = response.read                                           # partial body
+              upstream_metas.push 'Content-Encoding'                         # preserve encoding
+            else                                                             # complete body
+              body = HTTP.decompress meta, response.read                     # decode body
               format ||= options[:content_type]                                     # local format preference
               format ||= meta['content-type'].split(/;/)[0] if meta['content-type'] # Content-Type header
               format ||= (xt = ext.to_sym                                           # path-extension format
                           RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
               format ||= body.bytesize < 2048 ? 'text/plain' : 'application/octet-stream' # unspecified format
-              file = cache(format).write body if !format.match? RDFformats # cache non-RDF
-              if reader = RDF::Reader.for(content_type: format)            # RDF reader
+              cache(format).write body.force_encoding('UTF-8')               # cache body
+              if reader = RDF::Reader.for(content_type: format)              # RDF reader
                 reader_options = {base_uri: baseURI, no_embeds: options[:no_embeds]}
-                reader.new(body, reader_options){|_| env[:repository] << _ } # read RDF
-                index unless options[:no_index]                            # cache RDF
+                reader.new(body, reader_options){|_| env[:repository] << _ } # parse RDF
+                index unless options[:no_index]                              # index RDF
               end
             end
             upstream_metas.map{|k| # origin metadata
@@ -384,15 +383,13 @@ class WebResource
       end unless OffLine
 
       return if options[:no_response]
-      if code == 206                                                 # partial upstream file
+      if code == 206                                             # partial upstream file
         [206, env[:resp], [body]]
-      elsif code == 304                                              # no data
+      elsif code == 304                                          # no data
         [304, {}, []]
-      elsif file                                                     # local file
-        file.fileResponse
-      elsif body && (upstreamUI? || format&.match?(PreservedFormat)) # upstream file
+      elsif body && (upstreamUI? || format&.match?(NoTransform)) # upstream file
         [200, env[:resp].merge({'Content-Length' => body.bytesize}), [body]]
-      else                                                           # upstream graph
+      else                                                       # upstream graph
         if env[:repository].empty? && !local? && env['REQUEST_PATH'][-1]=='/' # unlistable remote
           index = (CacheDir + hostname + path).R(env)                         # local list
           index.children.map{|e|e.env(env).nodeStat base_uri: (env[:scheme] || 'https') + '://' + e.relPath} if index.node.directory?
