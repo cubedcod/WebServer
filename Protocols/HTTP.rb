@@ -78,7 +78,7 @@ class WebResource
     end
 
     def cached
-      %w(apk css gif jpg js png mp3 mp4 opus svg webm webp).member?(ext.downcase) &&
+      %w(apk css gif jpg js pdf png mp3 mp4 opus svg webm webp).member?(ext.downcase) &&
       file? &&
       self
     end
@@ -110,7 +110,7 @@ class WebResource
                 end) + ';1'
 
         puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) +
-             "\e[" + color + "m "  + status.to_s +
+             "\e[" + color + "m"  + status.to_s +
              "\e[0m" + (env['HTTP_REFERER'] ? (" \e[" + color + ";7m" + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m -> ") : ' ') +
              "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] +
              "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '') +

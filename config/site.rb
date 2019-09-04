@@ -152,6 +152,9 @@ wp-rum)([-.:_\/?&=~]|$)|
     # Boston Globe
     HostGET['bos.gl'] = -> r {r.fetch scheme: :http}
 
+    # Brave
+    AllowHost 'brave.com' if ENV.has_key? 'BRAVE'
+
     # Brightcove
     AllowHost 'players.brightcove.net'
     AllowHost 'edge.api.brightcove.com'
@@ -272,11 +275,12 @@ encrypted-tbn3.gstatic.com
     AllowHost 'www.msn.com'
 
     # Mozilla
-    Mozilla = -> r {ENV.has_key?('MOZILLA') ? r.fetch : r.deny}
     %w( addons.mozilla.org
 addons-amo.cdn.mozilla.net
     addons.cdn.mozilla.net
-).map{|h| HostGET[h] = Mozilla }
+         hacks.mozilla.org
+).map{|h| AllowHost h } if ENV.has_key? 'MOZILLA'
+
     HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # NYTimes
