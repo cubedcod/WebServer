@@ -28,7 +28,7 @@ class WebResource
     end
 
     def allowCookies?
-      ENV.has_key?('COOKIES') || AllowedHosts.has_key?(host)
+      ENV.has_key?('COOKIES') || AllowedHosts.has_key?(host) || HostPOST.has_key?(host)
     end
 
     # cache location in local storage

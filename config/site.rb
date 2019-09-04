@@ -207,37 +207,17 @@ wp-rum)([-._\/?&=]|$)|
     HostGET['gitter.im'] = -> req {req.desktop.fetch}
 
     # Google
-    HostGET['www.google.com'] = -> r {
-      app = r.parts[0]
-      if [nil,*%w(aclk images imgres maps s2 search)].member? app
-        if 'maps' == app
-          r.desktop.fetch
-        elsif 'search' == app && r.env[:query]['q']&.match?(/^https?:\/\//) # why is Chrome on android sending HTTP URLs in URL-bar to google search? is it just a search bar now?
-          [301, {'Location' => r.env[:query]['q']}, []]
-        else
-          r.fetch
-        end
-      else
-        r.deny
-      end}
     HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
-    HostPOST['www.youtube.com'] = -> r {
-        if r.parts.member? 'stats'
-          r.denyPOST
-        elsif r.env['REQUEST_URI'].match? /ACCOUNT_MENU|comment|\/results|subscribe/
-          r.POSTthru
-        else
-          r.denyPOST
-        end}
 
     %w(ajax.googleapis.com
          groups.google.com
            maps.google.com
        maps.googleapis.com
           maps.gstatic.com
-).map{|h|
-      AllowHost h}
+               s.ytimg.com
+).map{|h| AllowHost h }
 
+    if ENV.has_key? 'GOOGLE'
     %w(accounts.google.com
 android.clients.google.com
            apis.google.com
@@ -259,10 +239,14 @@ encrypted-tbn3.gstatic.com
              kh.google.com
        play.googleapis.com
            ssl.gstatic.com
+            www.google.com
         www.googleapis.com
            www.gstatic.com
-).map{|host|
-      AllowHost host if ENV.has_key? 'GOOGLE'}
+).map{|host| AllowHost host}
+    else
+      HostGET['www.google.com'] =
+          HostGET['google.com'] = -> r {r.noexec}
+    end
 
     # Linkedin
     AllowHost 'www.linkedin.com'
@@ -378,7 +362,6 @@ addons-amo.cdn.mozilla.net
     HostGET['www.yelp.com'] = -> r {r.env[:query]['redirect_url'] ? [301, {'Location' => r.env[:query]['redirect_url']},[]] : r.noexec}
 
     # YouTube
-    HostGET['s.ytimg.com'] = -> r {r.desktop.noexec}
     HostGET['youtu.be'] = -> r {[301, {'Location' => 'https://www.youtube.com/watch?v=' + r.path[1..-1]}, []]}
     HostGET['www.youtube.com'] = -> r {
       mode = r.parts[0]
@@ -403,9 +386,18 @@ watch
 watch_videos
 yts
 ).member?(mode)
-        r.fetch
+        r.desktop.fetch
       else
         r.deny
+      end}
+
+    HostPOST['www.youtube.com'] = -> r {
+      if r.parts.member? 'stats'
+        r.denyPOST
+      elsif r.env['REQUEST_URI'].match? /ACCOUNT_MENU|comment|\/results|subscribe/
+        r.POSTthru
+      else
+        r.denyPOST
       end}
 
   end
