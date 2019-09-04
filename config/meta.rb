@@ -5,6 +5,7 @@ class WebResource
       'DC.author' => Creator,
       'DC.contributor' => Creator,
       'DC.creator' => Creator,
+      'DC.date' => Date,
       'DC.description' => Abstract,
       'DC.keywords' => Abstract,
       'DC.language' => :drop,

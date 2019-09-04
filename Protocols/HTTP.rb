@@ -305,7 +305,7 @@ class WebResource
             end
             upstream_metas.map{|k| # origin metadata
               env[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
-            print '🌍🌎🌏'[rand 3] , ' '
+            print '🌍🌎🌏'[rand 3]
             HTTP.print_header env[:resp] if verbose?
           end
         rescue Exception => e
@@ -332,7 +332,7 @@ class WebResource
           else
             raise # exceptional code
           end
-          print [304].member?(code) ? '🚫 ' : '🛑 '
+          print [304].member?(code) ? '🚫' : '🛑'
         end}
 
       begin
