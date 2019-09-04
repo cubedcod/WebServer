@@ -327,7 +327,9 @@ addons-amo.cdn.mozilla.net
 
     # Soundcloud
     %w(api-v2.soundcloud.com
+   api-widget.soundcloud.com
               soundcloud.com
+            w.soundcloud.com
 ).map{|h|AllowHost h}
 
     # Static9

@@ -604,7 +604,7 @@ x-forwarded-for}.member?(key.downcase)
     def noexec
       return deny if %w(gif js).member?(ext.downcase) || env['REQUEST_URI'].match?(/\.png\?/)
       fetch.yield_self{|status, head, body|
-        if status.to_s.match? /30[1-3]/ # redirected
+        if status.to_s.match? /30[1-4]/
           [status, head, body]
         elsif head['Content-Type'] && !head['Content-Type'].match?(/application|image.(bmp|gif)|script/)
           [status, head, body] # allowed content
