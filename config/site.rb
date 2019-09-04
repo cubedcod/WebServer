@@ -341,6 +341,8 @@ addons-amo.cdn.mozilla.net
           '//twitter.com/search'.R(r.env).fetch fetch_options}
         r.index
         r.graphResponse
+      elsif r.gunk?
+        r.deny
       else
         r.fetch
       end}
