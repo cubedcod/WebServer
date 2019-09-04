@@ -207,8 +207,6 @@ wp-rum)([-._\/?&=]|$)|
     HostGET['gitter.im'] = -> req {req.desktop.fetch}
 
     # Google
-    HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
-
     %w(ajax.googleapis.com
          groups.google.com
            maps.google.com
@@ -243,9 +241,9 @@ encrypted-tbn3.gstatic.com
         www.googleapis.com
            www.gstatic.com
 ).map{|host| AllowHost host}
+      HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
     else
-      HostGET['www.google.com'] =
-          HostGET['google.com'] = -> r {r.noexec}
+      HostGET['google.com'] = HostGET['www.google.com'] -> r {r.path == '/search' ? r.noexec : r.deny}
     end
 
     # Linkedin
