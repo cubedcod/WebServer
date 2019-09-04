@@ -77,7 +77,7 @@ fonts?|
 g(dpr|eo(ip|locate)|igya|pt|tag|tm)|.*
 (header|pre)[-_]?bid.*|.*hubspot.*|[hp]b.?js|ima[0-9]?|
 kr(ux|xd).*|
-logger|(app|s)?
+log(event|ger)|(app|s)?
 m(e(asurement|ssaging|t(er|rics?))|ms|tr)|
 new(relic|sletter)|
 o(m(niture|tr)|nboarding|ptanon|utbrain)|
