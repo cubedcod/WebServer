@@ -303,20 +303,11 @@ class WebResource
                 index unless options[:no_index]                              # index RDF
               end
             end
-            upstream_metas.map{|k| # origin metadata
-              env[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
+            upstream_metas.map{|k| env[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
             print '🌍🌎🌏'[rand 3]
-            HTTP.print_header env[:resp] if verbose?
           end
         rescue Exception => e
-          if verbose?
-            puts e.message
-            if e.respond_to? :io
-              puts e.io.status.join ' '
-              HTTP.print_header e.io.meta
-            end
-          end
-          case e.message # codes handled in normal control-flow
+          case e.message
           when /304/ # no updates
             code = 304
           when /401/ # unauthorized
@@ -325,23 +316,30 @@ class WebResource
             code = 403
           when /404/ # not found
             code = 404
-          when /999/ # nonstandard
+          when /999/ # (nonstandard)
             code = 999
             body = HTTP.decompress e.io.meta, e.io.read
             @upstreamUI = true
           else
-            raise # exception
+            raise
           end
-          print [304,404].member?(code) ? '🚫' : '🛑'
-        end}
+          print case code
+                when 304
+                  '✅'
+                when 401
+                  '🚫'
+                when 403
+                  '🚫'
+                when 404
+                  '❓'
+                else
+                  ''
+                end
+         end}
 
-      begin
+       begin
         fetchURL[url]       #   try (HTTPS default)
       rescue Exception => e # retry (HTTP)
-        if e.respond_to?(:io) && verbose?
-          puts e.io.status.join ' '
-          HTTP.print_header e.io.meta
-        end
         case e.class.to_s
         when 'Errno::ECONNREFUSED'
           fetchURL[fallback]
