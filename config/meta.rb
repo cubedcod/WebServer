@@ -281,6 +281,8 @@ class WebResource
       'smartbanner:price-suffix-apple' => :drop,
       'smartbanner:price-suffix-google' => :drop,
       'smartbanner:title' => :drop,
+      'soundcloud:follower_count' => :drop,
+      'soundcloud:sound_count' => :drop,
       'stylesheet' => :drop,
       'swift-page-name' => :drop,
       'swift-page-section' => :drop,

@@ -140,7 +140,11 @@ wp-rum)([-.:_\/?&=~]|$)|
     %w(www.aliexpress.com ae-cn.alicdn.com ae01.alicdn.com i.alicdn.com).map{|h|AllowHost h}
 
     # Amazon
-    %w(amazon.com www.amazon.com).map{|h|AllowHost h} if ENV.has_key? 'AMAZON'
+    if ENV.has_key? 'AMAZON'
+      %w(amazon.com www.amazon.com).map{|h|AllowHost h}
+    else
+      HostGET['amazon.com'] = HostGET['www.amazon.com'] = -> r {r.gunkURI? ? r.deny : r.noexec}
+    end
 
     # AOL
     HostGET['o.aolcdn.com'] = -> r {r.env[:query].has_key?('image_uri') ? [301, {'Location' => r.env[:query]['image_uri']}, []] : r.noexec}
@@ -319,9 +323,9 @@ addons-amo.cdn.mozilla.net
     HostGET['cdn.shopify.com'] = -> r {r.noexec}
 
     # Soundcloud
-    HostGET['api-v2.soundcloud.com'] = -> r {
-      re = HTTParty.get ('https://' + r.host + r.path + r.qs), headers: r.headers
-      [re.code, re.headers, [re.body]]}
+    %w(api-v2.soundcloud.com
+              soundcloud.com
+).map{|h|AllowHost h}
 
     # Static9
     HostGET['imageresizer.static9.net.au'] = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}

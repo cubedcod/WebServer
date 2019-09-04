@@ -1,4 +1,5 @@
 # coding: utf-8
+require "webvtt"
 
 class String
   # text -> HTML, also yielding found (rel,href) tuples to block
@@ -85,6 +86,45 @@ module Webize
                                                 # yield detected links to consumer
                                                 yield @body, p, o
                                                 yield o, Type, (W3 + '2000/01/rdf-schema#Resource').R}})
+      end
+    end
+  end
+  module VTT
+    class Format < RDF::Format
+      content_type 'text/vtt', :extension => :vtt
+      content_encoding 'utf-8'
+      reader { Reader }
+    end
+
+    class Reader < RDF::Reader
+      include WebResource::URIs
+      format Format
+
+      def initialize(input = $stdin, options = {}, &block)
+        @doc = input.respond_to?(:read) ? input.read : input
+        @base = options[:base_uri].R
+        if block_given?
+          case block.arity
+          when 0 then instance_eval(&block)
+          else block.call(self)
+          end
+        end
+        nil
+      end
+
+      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
+
+      def each_statement &fn
+        vtt_triples{|s,p,o|
+          fn.call RDF::Statement.new(s, p.R,
+                                     (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal o
+                                                                                            l.datatype=RDF.XMLLiteral if p == Content
+                                                                                            l),
+                                     :graph_name => @base)}
+      end
+
+      def vtt_triples
+
       end
     end
   end

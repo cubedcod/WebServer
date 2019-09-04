@@ -28,7 +28,7 @@ class WebResource
     end
 
     def allowCookies?
-      ENV.has_key?('COOKIES') || AllowedHosts.has_key?(host) || HostPOST.has_key?(host)
+      ENV.has_key?('COOKIES') || AllowedHosts.has_key?(host) || HostPOST.has_key?(host) #|| upstreamUI?
     end
 
     # cache location in local storage
@@ -332,7 +332,7 @@ class WebResource
           else
             raise # exceptional code
           end
-          print [304].member?(code) ? '🚫' : '🛑'
+          print [304,404].member?(code) ? '🚫' : '🛑'
         end}
 
       begin
