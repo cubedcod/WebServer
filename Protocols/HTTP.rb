@@ -113,7 +113,7 @@ class WebResource
         puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) +
              "\e[" + color + "m"  + status.to_s + (env['HTTP_REFERER'] ? (' ' + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m→") : ' ') +
              "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '') +
-             "\e[0m " + (head['Location'] ? ("➡️" + head['Location']) : '') + ' ' +
+             "\e[0m" + (head['Location'] ? ("➡️" + head['Location']) : '') + ' ' +
              (head['Content-Type'] == 'text/turtle; charset=utf-8' ? '🐢' : (head['Content-Type']||''))
 
         [status, head, body]} # response
@@ -359,10 +359,9 @@ class WebResource
             fetchURL[fallback]
           else
             if options[:no_response]
-              puts "➡️ #{url} → \e[32;7m" + location + "\e[0m"
+              puts "#{url} ➡️ \e[32;7m" + location + "\e[0m"
               fetchURL[location]
             else
-              print '➡️ '
               return [302, {'Location' => location}, []]
             end
           end
