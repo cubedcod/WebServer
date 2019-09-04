@@ -246,6 +246,7 @@ encrypted-tbn3.gstatic.com
                 google.com
          images.google.com
              kh.google.com
+           mail.google.com
        play.googleapis.com
            ssl.gstatic.com
             www.google.com

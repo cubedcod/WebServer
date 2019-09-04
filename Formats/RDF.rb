@@ -43,7 +43,7 @@ class WebResource
     env[:repository] ||= RDF::Repository.new
     nodeStat unless isRDF?
     if file?
-      if basename.index('msg.')==0 || path.index('/mail/sent/cur')==0
+      if basename.index('msg.')==0 || path.index('/sent/cur')==0
         # procmail doesnt allow suffix (like .eml), only prefix? email author if you find solution
         # presumably this is due to crazy maildir suffix-rewrites etc
         options[:format] = :mail
