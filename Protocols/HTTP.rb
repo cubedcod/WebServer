@@ -132,7 +132,7 @@ class WebResource
                                                             (HTML.keyval (Webize::HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
     end
 
-    def cdnHost
+    def cdn?
       env['SERVER_NAME'].match? CDNhost
     end
 
@@ -416,7 +416,7 @@ class WebResource
         handler[self]
       else
         return deny   if gunk?
-        return noexec if cdnHost
+        return noexec if cdn?
         fetch
       end
     rescue OpenURI::HTTPRedirect => e
@@ -659,7 +659,7 @@ x-forwarded-for}.member?(key.downcase)
         handler[self]
       else
         return denyPOST if gunk?
-              self.POSTthru
+        self.POSTthru
       end
     end
 
