@@ -145,6 +145,10 @@ wp-rum)([-._\/?&=]|$)|
     # AOL
     HostGET['o.aolcdn.com'] = -> r {r.env[:query].has_key?('image_uri') ? [301, {'Location' => r.env[:query]['image_uri']}, []] : r.noexec}
 
+    # Brightcove
+    AllowHost 'players.brightcove.net'
+    AllowHost 'edge.api.brightcove.com'
+
     # Brightspot
     HostGET['ca-times.brightspotcdn.com'] = -> r {r.env[:query].has_key?('url') ? [301, {'Location' => r.env[:query]['url']}, []] : r.noexec}
 
@@ -244,8 +248,10 @@ encrypted-tbn3.gstatic.com
     end
 
     # Linkedin
-    AllowHost 'www.linkedin.com'
-    AllowHost 'media.licdn.com'
+    if ENV.has_key? 'LINKEDIN'
+      AllowHost 'www.linkedin.com'
+      AllowHost 'media.licdn.com'
+    end
 
     # Medium
     #HostGET['medium.com'] = -> r {r.env[:query].has_key?('redirecturl') ? [301, {'Location' => r.env[:query]['redirecturl']}, []] : r.noexec}
@@ -313,6 +319,9 @@ addons-amo.cdn.mozilla.net
     HostGET['api-v2.soundcloud.com'] = -> r {
       re = HTTParty.get ('https://' + r.host + r.path + r.qs), headers: r.headers
       [re.code, re.headers, [re.body]]}
+
+    # Static9
+    HostGET['imageresizer.static9.net.au'] = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
 
     # Twitter
     AllowHost 'api.twitter.com'

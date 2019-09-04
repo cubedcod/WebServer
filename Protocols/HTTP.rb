@@ -78,7 +78,7 @@ class WebResource
     end
 
     def cached
-      %w(apk css gif jpg js png mp3 mp4 opus webm webp).member?(ext.downcase) &&
+      %w(apk css gif jpg js png mp3 mp4 opus svg webm webp).member?(ext.downcase) &&
       file? &&
       self
     end
