@@ -262,7 +262,7 @@ class WebResource
       @env ||= {resp: {}}                      # response metadata
       env[:repository] ||= RDF::Repository.new # RDF storage (in-memory)
       head = headers                           # cleaned request metadata
-      head[:redirect] = false                  # halt on redirect
+      head[:redirect] = false                  # exit on redirect
       u = '//' + hostname + path + (env[:suffix]||'') + qs        # base locator
       url      = (options[:scheme] || 'https').to_s    + ':' + u  # primary locator
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u  # fallback locator
@@ -312,14 +312,14 @@ class WebResource
             HTTP.print_header env[:resp] if verbose?
           end
         rescue Exception => e
-          if verbose? && !e.message.match?(/304/)
+          if verbose?
             puts e.message
             if e.respond_to? :io
               puts e.io.status.join ' '
               HTTP.print_header e.io.meta
             end
           end
-          case e.message # response-types handled in normal control-flow
+          case e.message # codes handled in normal control-flow
           when /304/ # no updates
             code = 304
           when /401/ # unauthorized
@@ -328,12 +328,12 @@ class WebResource
             code = 403
           when /404/ # not found
             code = 404
-          when /999/ # nonstandard response codes
+          when /999/ # nonstandard
             code = 999
             body = HTTP.decompress e.io.meta, e.io.read
             @upstreamUI = true
           else
-            raise # exceptional code
+            raise # exception
           end
           print [304,404].member?(code) ? '🚫' : '🛑'
         end}
