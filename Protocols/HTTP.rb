@@ -309,7 +309,6 @@ class WebResource
             HTTP.print_header env[:resp] if verbose?
           end
         rescue Exception => e
-          print '🛑🚫'[rand 3] , ' '
           if verbose? && !e.message.match?(/304/)
             puts e.message
             if e.respond_to? :io
@@ -333,6 +332,7 @@ class WebResource
           else
             raise # exceptional code
           end
+          print [304].member?(code) ? '🚫 ' : '🛑 '
         end}
 
       begin
@@ -362,9 +362,13 @@ class WebResource
           if location == fallback
             fetchURL[fallback]
           else
-            return [302, {'Location' => location}, []] unless options[:no_response]
-            puts "REDIRECT #{url} → \e[32;7m" + location + "\e[0m"
-            fetchURL[location]
+            if options[:no_response]
+              puts "➡️ #{url} → \e[32;7m" + location + "\e[0m"
+              fetchURL[location]
+            else
+              print '➡️ '
+              return [302, {'Location' => location}, []]
+            end
           end
         when 'RuntimeError'
           fetchURL[fallback]
