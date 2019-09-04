@@ -137,13 +137,10 @@ wp-rum)([-._\/?&=]|$)|
     PathGET['/url'] = HostGET['gate.sc'] = HostGET['go.skimresources.com'] = -> r {[301,{'Location' => (r.env[:query]['url'] || r.env[:query]['q'])}, []]}
 
     # Alibaba
-    %w(www.aliexpress.com ae-cn.alicdn.com ae01.alicdn.com i.alicdn.com).map{|h|
-      AllowHost h}
+    %w(www.aliexpress.com ae-cn.alicdn.com ae01.alicdn.com i.alicdn.com).map{|h|AllowHost h}
 
     # Amazon
-    %w(      amazon.com
-         www.amazon.com).map{|h|
-      AllowHost h if ENV.has_key? 'AMAZON'}
+    %w(amazon.com www.amazon.com).map{|h|AllowHost h} if ENV.has_key? 'AMAZON'
 
     # AOL
     HostGET['o.aolcdn.com'] = -> r {r.env[:query].has_key?('image_uri') ? [301, {'Location' => r.env[:query]['image_uri']}, []] : r.noexec}
@@ -243,7 +240,7 @@ encrypted-tbn3.gstatic.com
 ).map{|host| AllowHost host}
       HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
     else
-      HostGET['google.com'] = HostGET['www.google.com'] -> r {r.path == '/search' ? r.noexec : r.deny}
+      HostGET['google.com'] = HostGET['www.google.com'] = -> r {r.path == '/search' ? r.noexec : r.deny}
     end
 
     # Linkedin
@@ -348,6 +345,7 @@ addons-amo.cdn.mozilla.net
     }
 
     # Yahoo!
+    AllowHost 'news.yahoo.com'
     HostGET['s.yimg.com'] = -> r {
       parts = r.path.split /https?:\/+/
       if parts.size > 1
