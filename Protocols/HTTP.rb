@@ -221,7 +221,7 @@ class WebResource
       HTTP.print_body headers, env['rack.input'].read unless host.match? /google|youtube/
       env[:deny] = true
       [202, {'Access-Control-Allow-Credentials' => 'true',
-            'Access-Control-Allow-Origin' => allowedOrigin},
+             'Access-Control-Allow-Origin' => allowedOrigin},
        []]
     end
 
@@ -235,13 +235,13 @@ class WebResource
         body = generator ? generator.call : self # generate
         if body.class == WebResource             # resource reference?
           Rack::File.new(nil).serving(Rack::Request.new(env), body.relPath).yield_self{|s,h,b|
-          if s == 304
-            [s, {}, []]                          # unmodified
-          else                                   # Rack handler for reference
-            h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type'] == 'application/javascript'
-            env[:resp]['Content-Length'] = body.node.size.to_s
-            [s, h.update(env[:resp]), b]         # file
-          end}
+            if s == 304
+              [s, {}, []]                          # unmodified
+            else                                   # Rack handler for reference
+              h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type'] == 'application/javascript'
+              env[:resp]['Content-Length'] = body.node.size.to_s
+              [s, h.update(env[:resp]), b]         # file
+            end}
         else
           env[:resp]['Content-Length'] = body.bytesize.to_s
           [env[:status]||200,env[:resp],[body]]  # generated entity
@@ -260,28 +260,26 @@ class WebResource
 
     def fetch options = {}
       if file = !options[:no_response] && cached?
-        return file.fileResponse
+        return file.fileResponse # resource already fetched, exit
       end
       @env ||= {resp: {}}                      # response metadata
       env[:repository] ||= RDF::Repository.new # RDF storage (in-memory)
-      head = headers                           # cleaned request metadata
+      head = headers                           # clean request metadata
       head[:redirect] = false                  # exit on redirect
-      u = '//' + hostname + path + (env[:suffix]||'') + qs        # base locator
+      u = '//' + hostname + path + (options[:suffix]||'') + qs    # schemeless locator
       url      = (options[:scheme] || 'https').to_s    + ':' + u  # primary locator
       fallback = (options[:scheme] ? 'https' : 'http') + ':' + u  # fallback locator
-      options[:content_type] ||= if FeedURL[u] # fix broken/missing upstream content-type
+      options[:content_type] ||= if FeedURL[u] # fix incorrect or missing upstream content-types
                                    'application/atom+xml'
                                  elsif ext == 'vtt'
                                    'text/vtt'
                                  end
-      upstream_metas = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials
-                          Content-Type Content-Length ETag}
+      upstream_metas = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type Content-Length ETag}
       upstream_metas.push 'Set-Cookie' if allowCookies?
-      code = nil   # response status
-      body = nil   # response body
-      format = nil # response format
-       fetchURL = -> url {
-         HTTP.print_header head if verbose?
+      code = nil # response status
+      body = nil # response body
+      fetchURL = -> url {
+        HTTP.print_header head if verbose?
         begin
           open(url, head) do |response|
             baseURI = url.R env
@@ -290,14 +288,14 @@ class WebResource
             meta = response.meta; HTTP.print_header meta if verbose?
             if code == 206
               body = response.read                                           # partial body
-              upstream_metas.push 'Content-Encoding'                         # preserve encoding
+              upstream_metas.push 'Content-Encoding'                         # preserved encoding
             else                                                             # complete body
               body = HTTP.decompress meta, response.read                     # decode body
-              format ||= options[:content_type]                                     # local format preference
-              format ||= meta['content-type'].split(/;/)[0] if meta['content-type'] # Content-Type header
-              format ||= (xt = ext.to_sym                                           # path-extension format
+              format = options[:content_type] || meta['content-type']&.split(/;/)[0] # MIME type
+              format ||= (xt = ext.to_sym                                    # file-extension format fallback
                           RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
               format ||= body.bytesize < 2048 ? 'text/plain' : 'application/octet-stream' # unspecified format
+              options[:transform] ||= !(upstreamFormat? format)              # rewritable?
               cache(format).write body.force_encoding('UTF-8')               # cache body
               if reader = RDF::Reader.for(content_type: format)              # RDF reader
                 reader_options = {base_uri: baseURI, no_embeds: options[:no_embeds]}
@@ -344,9 +342,9 @@ class WebResource
                 else
                   ''
                 end
-         end}
+        end}
 
-       begin
+      begin
         fetchURL[url]       #   try (HTTPS default)
       rescue Exception => e # retry (HTTP)
         case e.class.to_s
@@ -367,7 +365,7 @@ class WebResource
         when 'OpenURI::HTTPRedirect'
           location = e.io.meta['location']
           if location == fallback
-            fetchURL[fallback]
+            fetchURL[fallback] # only transport-scheme changed, follow redirect internally
           else
             if options[:no_response]
               puts "#{url} ➡️ \e[32;7m" + location + "\e[0m"
@@ -385,20 +383,11 @@ class WebResource
         end
       end unless OffLine
 
-      return if options[:no_response]
-      if code == 206                                                # partial upstream file
-        [206, env[:resp], [body]]
-      elsif code == 304                                             # no data
-        [304, {}, []]
-      elsif body && !options[:transform] && upstreamFormat?(format) # upstream file
-        [200, env[:resp].merge({'Content-Length' => body.bytesize}), [body]]
-      else                                                          # upstream graph, transformed to preferred format
-        if env[:repository].empty? && !local? && env['REQUEST_PATH'][-1]=='/' # unlistable remote?
-          index = (CacheDir + hostname + path).R(env)                         # local list
-          index.children.map{|e|e.env(env).nodeStat base_uri: (env[:scheme] || 'https') + '://' + e.relPath} if index.node.directory?
-        end
-        graphResponse
-      end
+      return                            if options[:no_response]
+      return [code, env[:resp], [body]] if code == 206                  # partial upstream file
+      return [code, {}, []]             if code == 304                  # no data
+      return [code, env[:resp], [body]] if body && !options[:transform] # upstream file
+      return graphResponse                                              # upstream graph data
     end
 
     def fileResponse
@@ -458,6 +447,7 @@ class WebResource
       return notfound if !env.has_key?(:repository) || env[:repository].empty?
       format = selectFormat
       dateMeta if local?
+      remoteDirStat unless local?
       env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
       env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
       env[:resp].update({'Link' => env[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !env[:links] || env[:links].empty?

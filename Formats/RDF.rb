@@ -88,6 +88,13 @@ class WebResource
   end
 
   module POSIX
+
+    def remoteDirStat
+      return unless env[:repository].empty? && env['REQUEST_PATH'][-1]=='/' # unlistable remote?
+      index = (CacheDir + hostname + path).R(env)                           # local list
+      index.children.map{|e|e.env(env).nodeStat base_uri: (env[:scheme] || 'https') + '://' + e.relPath} if index.node.directory?
+    end
+
     def nodeStat options = {}                                           # STAT(1)
       return if basename.index('msg.') == 0
       subject = (options[:base_uri] || path.sub(/\.(md|ttl)$/,'')).R    # abstract/generic-node reference
@@ -107,6 +114,7 @@ class WebResource
       graph << (RDF::Statement.new subject, (W3+'ns/posix/stat#mtime').R, mtime.to_i)
       graph << (RDF::Statement.new subject, Date.R, mtime.iso8601)
     end
+
   end
 end
 
