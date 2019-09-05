@@ -228,6 +228,10 @@ wp-rum)([-.:_\/?&=~]|$)|
 
     # Google
     %w(ajax.googleapis.com
+encrypted-tbn0.gstatic.com
+encrypted-tbn1.gstatic.com
+encrypted-tbn2.gstatic.com
+encrypted-tbn3.gstatic.com
          groups.google.com
            maps.google.com
        maps.googleapis.com
@@ -245,10 +249,6 @@ android.clients.google.com
        clients5.google.com
      developers.google.com
           drive.google.com
-encrypted-tbn0.gstatic.com
-encrypted-tbn1.gstatic.com
-encrypted-tbn2.gstatic.com
-encrypted-tbn3.gstatic.com
       feedproxy.google.com
       feeds.feedburner.com
                 google.com
