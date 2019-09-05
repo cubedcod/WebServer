@@ -326,15 +326,16 @@ addons-amo.cdn.mozilla.net
     GET 'old.reddit.com', GotoReddit
     GET 'www.reddit.com', -> r {
       r.desktop if r.parts.member? 'submit'
-      r.env[:suffix] = '.rss' if r.ext.empty? && !r.upstreamUI?
+      r.env[:suffix] = '.rss' if r.ext.empty? && !r.upstreamFormat?
       r.env[:query]['sort'] ||= 'date'
       r.env[:query]['view'] ||= 'table'
+      options = {transform: true}
       if r.path == '/'
-        ('/r/'+r.subscriptions.join('+')+'/new').R(r.env).fetch
+        ('/r/'+r.subscriptions.join('+')+'/new').R(r.env).fetch options
       elsif r.gunkURI?
         r.deny
       else
-        r.fetch
+        r.fetch options
       end}
 
     # Reuters

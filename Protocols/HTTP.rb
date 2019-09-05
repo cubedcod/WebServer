@@ -325,7 +325,6 @@ class WebResource
           when /999/ # (nonstandard)
             code = 999
             body = HTTP.decompress e.io.meta, e.io.read
-            @upstreamUI = true
           else
             raise
           end
@@ -387,14 +386,14 @@ class WebResource
       end unless OffLine
 
       return if options[:no_response]
-      if code == 206                                             # partial upstream file
+      if code == 206                                                # partial upstream file
         [206, env[:resp], [body]]
-      elsif code == 304                                          # no data
+      elsif code == 304                                             # no data
         [304, {}, []]
-      elsif body && (upstreamUI? || format&.match?(NoTransform)) # upstream file
+      elsif body && !options[:transform] && upstreamFormat?(format) # upstream file
         [200, env[:resp].merge({'Content-Length' => body.bytesize}), [body]]
-      else                                                       # upstream graph
-        if env[:repository].empty? && !local? && env['REQUEST_PATH'][-1]=='/' # unlistable remote
+      else                                                          # upstream graph, transformed to preferred format
+        if env[:repository].empty? && !local? && env['REQUEST_PATH'][-1]=='/' # unlistable remote?
           index = (CacheDir + hostname + path).R(env)                         # local list
           index.children.map{|e|e.env(env).nodeStat base_uri: (env[:scheme] || 'https') + '://' + e.relPath} if index.node.directory?
         end
@@ -812,10 +811,9 @@ x-forwarded-for}.member?(key.downcase)
 
     def unsubscribe; subscriptionFile.exist? && subscriptionFile.node.delete end
 
-    def upstreamUI?
-      @upstreamUI ||= !local? && ((DesktopUA.member? env['HTTP_USER_AGENT']) ||
-                                  (env[:query] && env[:query]['ui'] == 'upstream') ||
-                                  ENV.has_key?('DESKTOP'))
+    def upstreamFormat? format=nil
+      return false if local?
+      (format&.match? NoTransform) || (DesktopUA.member? env['HTTP_USER_AGENT'])
     end
 
     def verbose?
