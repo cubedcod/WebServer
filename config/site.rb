@@ -108,7 +108,7 @@ wp-rum)([-.:_\/?&=~]|$)|
         if r.path=='/mail' # inbox
           [302, {'Location' => '/d/*/msg*?head&sort=date&view=table'}, []]
         else
-          r.local # default local handling
+          r.local
         end
       else
         r.fetch

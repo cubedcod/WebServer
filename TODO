@@ -2,5 +2,4 @@ String#hrefs not getting tail-call optimization
 custom slugs for timeline URI
 implicit renderer-mapping via RDF type (viewable-type merging) in HTML#value
 more elegant blank-node handling for Dokieli RDFa
-move site-HTML triplrs to namespace
 turtle cache of nonrdf-conversions for RDF#load
