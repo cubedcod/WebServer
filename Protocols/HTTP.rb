@@ -306,7 +306,7 @@ class WebResource
           end
         rescue Exception => e
           case e.message
-          when /304/ # no updates
+          when /304/ # not modified
             code = 304
           when /401/ # unauthorized
             code = 401
@@ -405,6 +405,8 @@ class WebResource
         local
       elsif path.match? /[^\/]204$/             # connectivity check
         [204, {}, []]
+      elsif ext.downcase == 'ico'
+        Icon[self]
       elsif handler = HostGET[host]             # host handler
         handler[self]
       else

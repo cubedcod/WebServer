@@ -114,7 +114,9 @@ wp-rum)([-.:_\/?&=~]|$)|
         r.fetch
       end}
 
-    PathGET['/favicon.ico'] = -> _ {[200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
+    PathGET['/favicon.ico'] = Icon = -> r {
+      r.env[:deny] = true
+      [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
 
     PathGET['/resizer'] = -> r {
       parts = r.path.split /\/\d+x\d+\/(filter[^\/]+\/)?/
