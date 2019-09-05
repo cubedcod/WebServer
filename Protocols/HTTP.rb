@@ -270,8 +270,8 @@ class WebResource
                                  elsif ext == 'vtt'
                                    'text/vtt'
                                  end
-      upstream_metas = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type Content-Length ETag}
-      upstream_metas.push 'Set-Cookie' if allowCookies?
+      metas = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type Content-Length ETag}
+      metas.push 'Set-Cookie' if allowCookies?
       code = nil # response status
       body = nil # response body
       fetchURL = -> url {
@@ -282,14 +282,15 @@ class WebResource
             env[:scheme] = baseURI.scheme
             code = response.status.to_s.match(/\d{3}/)[0]
             meta = response.meta; HTTP.print_header meta if verbose?
+            metas.map{|k| env[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
             if code == 206
-              body = response.read                                           # partial body
-              upstream_metas.push 'Content-Encoding'                         # preserved encoding
+              body = response.read                                           # partial body,
+              metas.push 'Content-Encoding'                                  # preserved encoding
             else                                                             # complete body
               body = HTTP.decompress meta, response.read                     # decode body
               format = options[:content_type] || meta['content-type']&.split(/;/)[0] # MIME type
               format ||= (xt = ext.to_sym                                    # file-extension format fallback
-                          RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
+                RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
               format ||= body.bytesize < 2048 ? 'text/plain' : 'application/octet-stream' # unspecified format
               options[:transform] ||= !(upstreamFormat? format)              # rewritable?
               cache(format).write body.force_encoding('UTF-8')               # cache body
@@ -299,7 +300,6 @@ class WebResource
                 index unless options[:no_index]                              # index RDF
               end
             end
-            upstream_metas.map{|k| env[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
             print '🌍🌎🌏🌐'[rand 4]
           end
         rescue Exception => e
@@ -525,7 +525,7 @@ x-forwarded-for}.member?(key.downcase)
       head['Referer'] = 'http://drudgereport.com/' if env['SERVER_NAME']&.match? /wsj\.com/
 
       # User-Agent
-      head['User-Agent'] = DesktopUA[0]
+      head['User-Agent'] = DesktopUA[0] unless host.match? /android/
       head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # redirect via HTTP header rather than Javascript
       head.delete 'User-Agent' if host == 't.co'            # redirect via HTTP header rather than Javascript
 
