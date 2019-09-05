@@ -84,10 +84,10 @@ class WebResource
     end
 
     def self.call env
-      verb = {'GET' => :GETresource,
+      verb = {'GET' => :GETrequest,
               'HEAD' => :HEAD,
               'OPTIONS' => :OPTIONS,
-              'POST' => :POSTresource,
+              'POST' => :POSTrequest,
              }[env['REQUEST_METHOD']]
       return [405,{},[]] unless verb                            # permit methods
       env['HTTP_ACCEPT'] ||= '*/*'                              # Accept default
@@ -133,10 +133,6 @@ class WebResource
                                                             {_: :pre, c: trace.hrefs},
                                                             (HTML.keyval (Webize::HTML.webizeHash env), env),
                                                             (HTML.keyval (Webize::HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
-    end
-
-    def cdn?
-      env['SERVER_NAME'].match? CDNhost
     end
 
     def dateMeta
@@ -404,7 +400,7 @@ class WebResource
       end
     end
 
-    def GETresource
+    def GETrequest
       if handler = PathGET['/' + parts[0].to_s] # path binding - all subpaths
         handler[self]
       elsif handler = PathGET[path]             # path binding - exact
@@ -419,8 +415,9 @@ class WebResource
       elsif handler = HostGET[host]             # host binding
         handler[self]
       else                                      # remote host (generic)
+        return noexec if env['SERVER_NAME'].match? CDNsubdomain
         return deny   if gunk?
-        return noexec if cdn?
+        return noexec if env['SERVER_NAME'].match? CDN
         fetch
       end
     rescue OpenURI::HTTPRedirect => e
@@ -478,7 +475,7 @@ class WebResource
     end
 
     def HEAD
-       c,h,b = self.GETresource
+       c,h,b = self.GETrequest
       [c,h,[]]
     end
 
