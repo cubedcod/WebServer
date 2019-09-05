@@ -62,7 +62,7 @@ class WebResource
   end
   module HTTP
     CDN = /amazon|azure|cloud(flare|front|inary)|digitalocean|fa(cebook|stly)|heroku|netdna|ra(ckcdn|wgit)|stackpath|usercontent/
-    CDNsubdomain = /\.(s3\.amazonaws|storage\.googleapis)\.com$/
+    CDNsubdomain = /(s3\.amazonaws|storage\.googleapis)\.com$/
     DesktopUA = ['Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3896.4 Safari/537.36',
                  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3895.3 Safari/537.36',
                  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36',
