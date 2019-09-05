@@ -103,7 +103,7 @@ wp-rum)([-.:_\/?&=~]|$)|
 
     # path handlers
 
-    PathGET['/mail'] = -> r {
+    GET '/mail', -> r {
       if r.local?
         if r.path=='/mail' # inbox
           [302, {'Location' => '/d/*/msg*?head&sort=date&view=table'}, []]
@@ -114,11 +114,18 @@ wp-rum)([-.:_\/?&=~]|$)|
         r.fetch
       end}
 
-    PathGET['/favicon.ico'] = Icon = -> r {
-      r.env[:deny] = true
+    GotoBasename = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
+    GotoU   = -> r {[301, {'Location' =>  r.env[:query]['u']}, []]}
+    GotoURL = -> r {[301, {'Location' => (r.env[:query]['url']||r.env[:query]['q'])}, []]}
+    GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : r.noexec}
+    Icon = -> r { r.env[:deny] = true
       [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
+    StaticNoQS = -> r {
+      r.qs.empty? ? r.noexec : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
 
-    PathGET['/resizer'] = -> r {
+    GET '/favicon.ico', Icon
+
+    GET '/resizer', -> r {
       parts = r.path.split /\/\d+x\d+\/(filter[^\/]+\/)?/
       if parts.size > 1
         [301, {'Location' => 'https://' + parts[-1]}, []]
@@ -126,7 +133,7 @@ wp-rum)([-.:_\/?&=~]|$)|
         r.fetch
       end}
 
-    PathGET['/storyimage'] = -> r {
+    GET '/storyimage', -> r {
       parts = r.path.split '&'
       if parts.size > 1
         [301, {'Location' => 'https://' + r.host + parts[0]}, []]
@@ -134,9 +141,9 @@ wp-rum)([-.:_\/?&=~]|$)|
         r.fetch
       end}
 
-    PathGET['/thumbnail'] = -> r {r.env[:query].has_key?('url') ? [301, {'Location' => r.env[:query]['url']}, []] : r.noexec}
+    GET '/thumbnail', GoIfURL
 
-    PathGET['/url'] = HostGET['gate.sc'] = HostGET['go.skimresources.com'] = -> r {[301,{'Location' => (r.env[:query]['url'] || r.env[:query]['q'])}, []]}
+    GET '/url', GotoURL
 
     # Alibaba
     %w(www.aliexpress.com ae-cn.alicdn.com ae01.alicdn.com i.alicdn.com).map{|h|AllowHost h}
@@ -145,14 +152,15 @@ wp-rum)([-.:_\/?&=~]|$)|
     if ENV.has_key? 'AMAZON'
       %w(amazon.com www.amazon.com).map{|h|AllowHost h}
     else
-      HostGET['amazon.com'] = HostGET['www.amazon.com'] = -> r {r.gunkURI? ? r.deny : r.noexec}
+      GET 'amazon.com', -> r {r.gunkURI? ? r.deny : r.noexec}
+      GET 'www.amazon.com', -> r {r.gunkURI? ? r.deny : r.noexec}
     end
 
     # AOL
-    HostGET['o.aolcdn.com'] = -> r {r.env[:query].has_key?('image_uri') ? [301, {'Location' => r.env[:query]['image_uri']}, []] : r.noexec}
+    GET 'o.aolcdn.com', -> r {r.env[:query].has_key?('image_uri') ? [301, {'Location' => r.env[:query]['image_uri']}, []] : r.noexec}
 
     # Boston Globe
-    HostGET['bos.gl'] = -> r {r.fetch scheme: :http}
+    GET 'bos.gl', -> r {r.fetch scheme: :http}
 
     # Brave
     AllowHost 'brave.com' if ENV.has_key? 'BRAVE'
@@ -162,12 +170,10 @@ wp-rum)([-.:_\/?&=~]|$)|
     AllowHost 'edge.api.brightcove.com'
 
     # Brightspot
-    HostGET['ca-times.brightspotcdn.com'] = -> r {r.env[:query].has_key?('url') ? [301, {'Location' => r.env[:query]['url']}, []] : r.noexec}
+    GET 'ca-times.brightspotcdn.com', GoIfURL
 
     # BusinessWire
-    HostGET['cts.businesswire.com'] = -> r {
-      r.env[:query].has_key?('url') ? [301, {'Location' => r.env[:query]['url']}, []] : r.deny
-    }
+    GET 'cts.businesswire.com', GoIfURL
 
     # BuzzFeed
     AllowHost 'img.buzzfeed.com'
@@ -177,29 +183,29 @@ wp-rum)([-.:_\/?&=~]|$)|
     AllowHost 'cdnjs.cloudflare.com'
 
     # CNN
-    HostGET['dynaimage.cdn.cnn.com'] = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
+    GET 'dynaimage.cdn.cnn.com', GotoBasename
 
     # DartSearch
-    HostGET['clickserve.dartsearch.net'] = -> r {[301,{'Location' => r.env[:query]['ds_dest_url']}, []]}
+    GET 'clickserve.dartsearch.net', -> r {[301,{'Location' => r.env[:query]['ds_dest_url']}, []]}
 
     # Disney
     AllowHost 'abcnews.go.com'
 
     # DuckDuckGo
-    HostGET['duckduckgo.com'] = -> r {%w{ac}.member?(r.parts[0]) ? r.deny : r.fetch}
-    HostGET['proxy.duckduckgo.com'] = -> r {%w{iu}.member?(r.parts[0]) ? [301, {'Location' => r.env[:query]['u']}, []] : r.fetch}
+    GET 'duckduckgo.com', -> r {%w{ac}.member?(r.parts[0]) ? r.deny : r.fetch}
+    GET 'proxy.duckduckgo.com', -> r {%w{iu}.member?(r.parts[0]) ? [301, {'Location' => r.env[:query]['u']}, []] : r.fetch}
 
     # eBay
     AllowHost 'ebay.com'
     AllowHost 'www.ebay.com'
     AllowHost 'ir.ebaystatic.com'
-    HostGET['i.ebayimg.com'] = -> r {
+    GET 'i.ebayimg.com', -> r {
       if r.basename.match? /s-l(64|96|200|225).jpg/
         [301, {'Location' => r.dirname + '/s-l1600.jpg'}, []]
       else
         r.noexec
       end}
-    HostGET['rover.ebay.com'] = -> r {
+    GET 'rover.ebay.com', -> r {
       r.env[:query].has_key?('mpre') ? [301, {'Location' => r.env[:query]['mpre']}, []] : r.deny}
 
     # Economist
@@ -207,18 +213,18 @@ wp-rum)([-.:_\/?&=~]|$)|
 
     # Facebook
     FBgunk = %w(common connect pages_reaction_units plugins security tr)
-    HostGET['facebook.com'] = HostGET['business.facebook.com'] = HostGET['www.facebook.com'] = -> r {
-      ENV.has_key?('FACEBOOK') ? r.fetch : (FBgunk.member? r.parts[0]) ? r.deny : r.noexec}
-    HostGET['l.instagram.com'] = HostGET['l.facebook.com'] = -> r {[301, {'Location' => r.env[:query]['u']},[]]}
+    FBlite = -> r {ENV.has_key?('FACEBOOK') ? r.fetch : FBgunk.member?(r.parts[0]) ? r.deny : r.noexec}
+    %w(facebook.com business.facebook.com www.facebook.com).map{|host|GET host, FBlite}
+    %w(l.instagram.com l.facebook.com).map{|host| GET host, GotoU}
 
     # Forbes
-    HostGET['thumbor.forbes.com'] = -> r {[301, {'Location' => URI.unescape(r.parts[-1])}, []]}
+    GET 'thumbor.forbes.com', -> r {[301, {'Location' => URI.unescape(r.parts[-1])}, []]}
 
     #FSDN
-    HostGET['a.fsdn.com'] = -> r {r.noexec}
+    GET 'a.fsdn.com', -> r {r.noexec}
 
     # Gitter
-    HostGET['gitter.im'] = -> req {req.desktop.fetch}
+    GET 'gitter.im', -> req {req.desktop.fetch}
 
     # Google
     %w(ajax.googleapis.com
@@ -255,9 +261,11 @@ encrypted-tbn3.gstatic.com
         www.googleapis.com
            www.gstatic.com
 ).map{|host| AllowHost host}
-      HostGET['www.googleadservices.com'] = -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
+      GET 'www.googleadservices.com', -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
     else
-      HostGET['google.com'] = HostGET['www.google.com'] = -> r {r.path == '/search' ? r.noexec : r.deny}
+      GoogleSearch = -> r {r.path == '/search' ? r.noexec : r.deny}
+      GET 'google.com', GoogleSearch
+      GET 'www.google.com', GoogleSearch
     end
 
     # Linkedin
@@ -267,13 +275,13 @@ encrypted-tbn3.gstatic.com
     end
 
     # Medium
-    #HostGET['medium.com'] = -> r {r.env[:query].has_key?('redirecturl') ? [301, {'Location' => r.env[:query]['redirecturl']}, []] : r.noexec}
+    #GET 'medium.com', -> r {r.env[:query].has_key?('redirecturl') ? [301, {'Location' => r.env[:query]['redirecturl']}, []] : r.noexec}
 
     # Meredith
-    HostGET['imagesvc.meredithcorp.io'] = -> r {r.env[:query].has_key?('url') ? [301, {'Location' => r.env[:query]['url']}, []] : r.noexec}
+    GET 'imagesvc.meredithcorp.io', GoIfURL
 
     # Microsoft
-    HostGET['www.bing.com'] = -> r {
+    GET 'www.bing.com', -> r {
       (%w(fd hamburger Identity notifications secure).member?(r.parts[0]) || r.path.index('/api/ping') == 0) ? r.deny : r.fetch}
     AllowHost 'www.msn.com'
 
@@ -284,7 +292,7 @@ addons-amo.cdn.mozilla.net
          hacks.mozilla.org
 ).map{|h| AllowHost h } if ENV.has_key? 'MOZILLA'
 
-    HostGET['detectportal.firefox.com'] = -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
+    GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # NYTimes
     %w(cooking.nytimes.com
@@ -292,7 +300,7 @@ addons-amo.cdn.mozilla.net
       AllowHost host}
 
     # Outline
-    HostGET['outline.com'] = -> r {
+    GET 'outline.com', -> r {
       if r.parts[0] == 'favicon.ico'
         r.deny
       else
@@ -312,8 +320,10 @@ addons-amo.cdn.mozilla.net
     # Reddit
     AllowHost 'oauth.reddit.com'
     AllowHost 'www.reddit.com'
-    HostGET['reddit.com'] = HostGET['old.reddit.com'] = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path},[]]}
-    HostGET['www.reddit.com'] = -> r {
+    GotoReddit = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path},[]]}
+    GET 'reddit.com', GotoReddit
+    GET 'old.reddit.com', GotoReddit
+    GET 'www.reddit.com', -> r {
       r.desktop if r.parts.member? 'submit'
       r.env[:suffix] = '.rss' if r.ext.empty? && !r.upstreamUI?
       r.env[:query]['sort'] ||= 'date'
@@ -328,7 +338,7 @@ addons-amo.cdn.mozilla.net
 
     # Reuters
     (0..5).map{|i|
-      HostGET["s#{i}.reutersmedia.net"] = -> r {
+      GET "s#{i}.reutersmedia.net", -> r {
         if r.env[:query].has_key? 'w'
           [301, {'Location' =>  r.env['REQUEST_PATH'] + HTTP.qs(r.env[:query].reject{|k,_|k=='w'})}, []]
         else
@@ -336,9 +346,14 @@ addons-amo.cdn.mozilla.net
         end}}
 
     # Shopify
-    HostGET['cdn.shopify.com'] = -> r {r.noexec}
+    GET 'cdn.shopify.com', -> r {r.noexec}
+
+    # Skimmer
+    GET 'go.skimresources.com', GotoURL
 
     # Soundcloud
+    GET 'gate.sc', GotoURL
+
     %w(api-v2.soundcloud.com
    api-widget.soundcloud.com
               soundcloud.com
@@ -346,13 +361,15 @@ addons-amo.cdn.mozilla.net
 ).map{|h|AllowHost h}
 
     # Static9
-    HostGET['imageresizer.static9.net.au'] = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
+    GET 'imageresizer.static9.net.au', GotoBasename
 
     # Twitter
     AllowHost 'api.twitter.com'
-    HostGET['mobile.twitter.com'] = HostGET['www.twitter.com'] = -> r {[301,{'Location' => 'https://twitter.com' + r.path },[]]}
-    HostGET['t.co'] = -> r {r.parts[0] == 'i' ? r.deny : r.noexec}
-    HostGET['twitter.com'] = -> r {
+    GotoTwitter = -> r {[301,{'Location' => 'https://twitter.com' + r.path },[]]}
+    GET 'mobile.twitter.com', GotoTwitter
+    GET 'www.twitter.com', GotoTwitter
+    GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : r.noexec}
+    GET 'twitter.com', -> r {
       if !r.path || r.path == '/'
         r.env[:resp]['Refresh'] = 3600 # client refresh hint
         fetch_options = {
@@ -373,16 +390,14 @@ addons-amo.cdn.mozilla.net
       end}
 
     # WGBH
-    HostGET['wgbh.brightspotcdn.com'] = -> r {r.env[:query].has_key?('url') ? [301, {'Location' => r.env[:query]['url']}, []] : r.noexec}
+    GET 'wgbh.brightspotcdn.com', GoIfURL
 
     # WordPress
-    HostGET['i0.wp.com'] = HostGET['i1.wp.com'] = HostGET['i2.wp.com'] = -> r {
-      r.qs.empty? ? r.noexec : [301, {'Location' => r.env['REQUEST_PATH']}, []]
-    }
+    (0..7).map{|i| GET "i#{i}.wp.com", StaticNoQS}
 
     # Yahoo!
     AllowHost 'news.yahoo.com'
-    HostGET['s.yimg.com'] = -> r {
+    GET 's.yimg.com', -> r {
       parts = r.path.split /https?:\/+/
       if parts.size > 1
         [301, {'Location' => 'https://' + parts[-1]}, []]
@@ -391,12 +406,12 @@ addons-amo.cdn.mozilla.net
       end}
 
     # Yelp
-    HostGET['www.yelp.com'] = -> r {r.env[:query]['redirect_url'] ? [301, {'Location' => r.env[:query]['redirect_url']},[]] : r.noexec}
+    GET 'www.yelp.com', -> r {r.env[:query]['redirect_url'] ? [301, {'Location' => r.env[:query]['redirect_url']},[]] : r.noexec}
 
     # YouTube
-    HostGET['s.ytimg.com'] = -> r {r.desktop.fetch}
+    GET 's.ytimg.com', -> r {r.desktop.fetch}
 
-    HostGET['www.youtube.com'] = -> r {
+    GET 'www.youtube.com', -> r {
       mode = r.parts[0]
       if %w{attribution_link redirect}.member? mode
         [301, {'Location' =>  r.env[:query]['q'] || r.env[:query]['u']},[]]
@@ -424,7 +439,7 @@ yts
         r.deny
       end}
 
-    HostPOST['www.youtube.com'] = -> r {
+    POST 'www.youtube.com', -> r {
       if r.parts.member? 'stats'
         r.denyPOST
       elsif r.env['REQUEST_URI'].match? /ACCOUNT_MENU|comment|\/results|subscribe/
@@ -433,7 +448,7 @@ yts
         r.denyPOST
       end}
 
-    HostGET['youtu.be'] = -> r {[301, {'Location' => 'https://www.youtube.com/watch?v=' + r.path[1..-1]}, []]}
+    GET 'youtu.be', -> r {[301, {'Location' => 'https://www.youtube.com/watch?v=' + r.path[1..-1]}, []]}
 
   end
 

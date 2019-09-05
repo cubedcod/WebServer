@@ -8,7 +8,6 @@ class WebResource
     HostPOST = {}
     Hosts = {}
     LocalArgs = %w(allow view sort ui)
-    Methods = %w(GET HEAD OPTIONS POST)
     OffLine = ENV.has_key? 'OFFLINE'
     PathGET = {}
     NoTransform = /^(application\/(json|protobuf|vnd|x-)|audio|font|image|text\/xml|video)/
@@ -85,29 +84,34 @@ class WebResource
     end
 
     def self.call env
-      return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']    # permit HTTP methods
-      env['HTTP_ACCEPT'] ||= '*/*'                                       # Accept default
-      env[:resp] = {}; env[:links] = {}                                  # response-header storage
-      env[:query] = parseQs env['QUERY_STRING']                          # parse query
-      path = Pathname.new(env['REQUEST_PATH']).expand_path.to_s          # evaluate path-expression
-      path += '/' if env['REQUEST_PATH'][-1] == '/' && path[-1] != '/'   # preserve trailing-slash
-      resource = ('//' + env['SERVER_NAME'] + path).R env                # instantiate request
-      resource.send(env['REQUEST_METHOD']).yield_self{|status,head,body| # dispatch request
-        color = (if resource.env[:deny]                                  # log request
-                  '31'                                                    # red -> denied
+      verb = {'GET' => :GETresource,
+              'HEAD' => :HEAD,
+              'OPTIONS' => :OPTIONS,
+              'POST' => :POSTresource,
+             }[env['REQUEST_METHOD']]
+      return [405,{},[]] unless verb                            # permit methods
+      env['HTTP_ACCEPT'] ||= '*/*'                              # Accept default
+      env[:resp] = {}; env[:links] = {}                         # response-header storage
+      env[:query] = parseQs env['QUERY_STRING']                 # parse query
+      path = Pathname.new(env['REQUEST_PATH']).expand_path.to_s # evaluate path-expression
+      path+='/' if env['REQUEST_PATH'][-1]=='/'&& path[-1]!='/' # preserve trailing-slash
+      resource = ('//' + env['SERVER_NAME'] + path).R env       # instantiate request
+      resource.send(verb).yield_self{|status,head,body|         # dispatch request
+        color = (if resource.env[:deny]                         # log request
+                  '31'                                          # red -> denied
                 elsif !Hosts.has_key? env['SERVER_NAME']
                   Hosts[env['SERVER_NAME']] = resource
-                  '32'                                                    # green -> new host
+                  '32'                                          # green -> new host
                 elsif env['REQUEST_METHOD'] == 'POST'
-                  '32'                                                    # green -> POST
+                  '32'                                          # green -> POST
                 elsif status == 200
                   if resource.ext=='js' || (head['Content-Type'] && head['Content-Type'].match?(/script/))
-                    '36'                                                  # lightblue -> executable
+                    '36'                                        # lightblue -> executable
                   else
-                    '37'                                                  # white -> basic response
+                    '37'                                        # white -> basic response
                   end
                 else
-                  '30'                                                    # gray -> cache-hit, 304 response
+                  '30'                                          # gray -> cache-hit, 304, NOOP
                 end) + ';1'
 
         puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) +
@@ -396,7 +400,15 @@ class WebResource
       entity
     end
 
-    def GET
+    def self.GET arg, lambda
+      if arg[0] == '/'
+        PathGET[arg] = lambda
+      else
+        HostGET[arg] = lambda
+      end
+    end
+
+    def GETresource
       if handler = PathGET['/' + parts[0].to_s] # path handler - all subpaths
         handler[self]
       elsif handler = PathGET[path]             # path handler - exact
@@ -469,7 +481,7 @@ class WebResource
     end
 
     def HEAD
-       c,h,b = self.GET
+       c,h,b = self.GETresource
       [c,h,[]]
     end
 
@@ -650,7 +662,11 @@ x-forwarded-for}.member?(key.downcase)
       end
     end
 
-    def POST
+    def self.POST host, lambda
+      HostPOST[host] = lambda
+    end
+
+    def POSTresource
       if handler = HostPOST[host] # host handler
         handler[self]
       else
