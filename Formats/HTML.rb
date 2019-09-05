@@ -249,16 +249,16 @@ class WebResource
 
       # render HEAD link as HTML
       link = -> key, displayname {
-        if url = env[:links][key]
+        if url = env[:links] && env[:links][key]
           [{_: :a, href: url, id: key, class: :icon, c: displayname},
            "\n"]
           end}
 
       htmlGrep if env[:graph] && env[:grep]
       subbed = subscribed?
-      tabular = env[:query]['view'] == 'table' || uri == '//www.w3.org/1999/02/22-rdf-syntax-ns'
-      shrunken = env[:query].has_key? 'head'
-      env[:links][:up] = dirname + (dirname[-1] == '/' ? '' : '/') + qs + '#r' + Digest::SHA2.hexdigest(path||'/') unless !path || path == '/'
+      tabular = env[:query] && env[:query]['view']=='table'
+      shrunken = env[:query]&.has_key? 'head'
+      env[:links][:up] = dirname + (dirname[-1] == '/' ? '' : '/') + qs + '#r' + Digest::SHA2.hexdigest(path||'/') unless !env[:links] || !dirname || !path || path == '/'
       env[:links][:down] = path + '/' if env['REQUEST_PATH'] && node.directory? && env['REQUEST_PATH'][-1] != '/'
 
       # Markup -> HTML
@@ -269,17 +269,17 @@ class WebResource
                              ({_: :title, c: CGI.escapeHTML(graph[titleRes][Title].map(&:to_s).join ' ')} if titleRes),
                              {_: :style, c: ["\n", SiteCSS]}, "\n",
                              {_: :script, c: ["\n", SiteJS]}, "\n",
-                             *env[:links].map{|type,uri|
+                             (env[:links] || {}).map{|type,uri|
                                {_: :link, rel: type, href: CGI.escapeHTML(uri.to_s)}}
                             ].map{|e|['  ',e,"\n"]}}, "\n\n",
                         {_: :body,
                          c: [{class: :toolbox,
                               c: [link[:up, '&#9650;'],
-                                  {_: :a, id: :tabular, class: :icon, style: tabular  ? 'color: #fff' : 'color: #555', href: HTTP.qs(env[:query].merge({'view' => tabular ? 'default' : 'table', 'sort' => 'date'})), c: '↨'},
-                                  {_: :a, id: :shrink,  class: :icon, style: shrunken ? 'color: #fff' : 'color: #555', href: HTTP.qs(shrunken ? env[:query].reject{|k,v|k=='head'} : env[:query].merge({'head' => ''})), c: shrunken ? '&#9661;' : '&#9651;'},
+                                  {_: :a, id: :tabular, class: :icon, style: tabular  ? 'color: #fff' : 'color: #555', href: HTTP.qs((env[:query]||{}).merge({'view' => tabular ? 'default' : 'table', 'sort' => 'date'})), c: '↨'},
+                                  {_: :a, id: :shrink,  class: :icon, style: shrunken ? 'color: #fff' : 'color: #555', href: HTTP.qs(shrunken ? env[:query].reject{|k,v|k=='head'} : (env[:query]||{}).merge({'head' => ''})), c: shrunken ? '&#9661;' : '&#9651;'},
                                   unless local?
-                                    [{_: :a, id: :ui, class: :icon, style: 'color: #555', href: HTTP.qs(env[:query].merge({'ui' => 'upstream'})), c: '⚗'},
-                                     {_: :a, id: :subscribe, href: '/' + (subbed ? 'un' : '') + 'subscribe' + HTTP.qs({u: 'https://' + env['SERVER_NAME'] + env['REQUEST_URI']}), class: subbed ? :on : :off, c: 'subscribe' + (subbed ? 'd' : '')}]
+                                    [{_: :a, id: :ui, class: :icon, style: 'color: #555', href: HTTP.qs((env[:query]||{}).merge({'ui' => 'upstream'})), c: '⚗'},
+                                     {_: :a, id: :subscribe, href: '/' + (subbed ? 'un' : '') + 'subscribe' + HTTP.qs({u: 'https://' + (env['SERVER_NAME']||'localhost') + (env['REQUEST_URI']||'/')}), class: subbed ? :on : :off, c: 'subscribe' + (subbed ? 'd' : '')}]
                                   end]},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?

@@ -461,7 +461,7 @@ class WebResource
       dateMeta if local?
       env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
       env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
-      env[:resp].update({'Link' => env[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless env[:links].empty?
+      env[:resp].update({'Link' => env[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !env[:links] || env[:links].empty?
       entity ->{
         case format
         when /^text\/html/
@@ -778,6 +778,7 @@ x-forwarded-for}.member?(key.downcase)
     end
 
     def selectFormat default='text/html'
+      return default unless env && env.has_key?('HTTP_ACCEPT')
       index = {}
       env['HTTP_ACCEPT'].split(/,/).map{|e| # split to (MIME,q) pairs
         format, q = e.split /;/             # split (MIME,q) pair
@@ -813,7 +814,7 @@ x-forwarded-for}.member?(key.downcase)
 
     def upstreamUI?
       @upstreamUI ||= !local? && ((DesktopUA.member? env['HTTP_USER_AGENT']) ||
-                                  env[:query]['ui'] == 'upstream' ||
+                                  (env[:query] && env[:query]['ui'] == 'upstream') ||
                                   ENV.has_key?('DESKTOP'))
     end
 

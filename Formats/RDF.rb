@@ -74,7 +74,7 @@ class WebResource
   # Graph -> JSON-compatible URI-indexed Hash (Feed & HTML-renderer input)
   def treeFromGraph
     tree = {}
-    head = env[:query].has_key? 'head'
+    head = env && env[:query] && env[:query].has_key?('head')
     env[:repository].each_triple{|s,p,o|
       s = s.to_s # subject URI
       p = p.to_s # predicate URI
