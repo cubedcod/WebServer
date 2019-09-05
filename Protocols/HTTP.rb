@@ -417,20 +417,20 @@ class WebResource
     end
 
     def GETresource
-      if handler = PathGET['/' + parts[0].to_s] # path handler - all subpaths
+      if handler = PathGET['/' + parts[0].to_s] # path binding - all subpaths
         handler[self]
-      elsif handler = PathGET[path]             # path handler - exact
+      elsif handler = PathGET[path]             # path binding - exact
         handler[self]
-      elsif local?                              # localhost handler
+      elsif local?                              # local host (generic)
         local
-      elsif path.match? /[^\/]204$/             # connectivity check
+      elsif path.match? /[^\/]204$/             # connectivity-check
         env[:deny] = true
         [204, {}, []]
-      elsif ext.downcase == 'ico'
+      elsif ext.downcase == 'ico'               # Icon handler
         Icon[self]
-      elsif handler = HostGET[host]             # host handler
+      elsif handler = HostGET[host]             # host binding
         handler[self]
-      else
+      else                                      # remote host (generic)
         return deny   if gunk?
         return noexec if cdn?
         fetch
