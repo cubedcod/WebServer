@@ -156,9 +156,9 @@ module Webize
           ::Mail::Encodings.defined?(p.body.encoding)}.map{|p|     # decodability check
           name = p.filename && !p.filename.empty? && p.filename || # attachment name
                  (Digest::SHA2.hexdigest(rand.to_s) + (Rack::Mime::MIME_TYPES.invert[p.mime_type] || '.bin').to_s) # generate name
-          file = (mail.path + '.' + name).R   # attachment location
-          unless file.exist?
-            file.write p.body.decoded         # store attachment
+          file = (mail.path + '.' + name).R   # file location
+          unless file.exist?                  # store file
+            file.write p.body.decoded.force_encoding 'UTF-8'
           end
           yield mail, SIOC+'attachment', file # attachment pointer
           if p.main_type == 'image'           # image attachments
