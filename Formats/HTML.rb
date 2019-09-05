@@ -526,6 +526,7 @@ class WebResource
         post.delete Type
         uri = post.delete 'uri'
         titles = (post.delete(Title)||[]).map(&:to_s).map(&:strip).uniq
+        abstracts = post.delete(Abstract) || []
         date = (post.delete(Date) || [])[0]
         from = post.delete(Creator) || []
         to = post.delete(To) || []
@@ -539,6 +540,7 @@ class WebResource
                  env[:title] = title
                  [{_: :a, id: 't' + Digest::SHA2.hexdigest(rand.to_s), class: 'title', type: 'node', href: uri, c: CGI.escapeHTML(title)}, ' ']
                end},
+             abstracts,
              {_: :a, id: 'pt' + uri_hash, class: 'id', c: '☚', href: uri}.update(titles.empty? ? {type: 'node'} : {}),
              ({_: :a, class: :date, id: 'date' + uri_hash, href: ServerAddr + '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date} if date),
              images.map{|i| Markup[Image][i,env]},
@@ -552,7 +554,7 @@ class WebResource
                        c: [to.map{|f|Markup[To][f,env]},
                            post.delete(SIOC+'reply_of')],
                        class: :to}]}},
-             content, ((HTML.keyval post, env) unless post.keys.size < 1)]}
+             content, (['<br>', HTML.keyval(post,env)] unless post.keys.size < 1)]}
       end}
 
     Markup[Schema+'BreadcrumbList'] = -> list, env {
