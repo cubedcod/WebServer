@@ -69,7 +69,7 @@ class WebResource
                  'Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0']
     GunkURI = %r([-.:_\/?&=~]((block|page)?
 a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|slot|type|words?)?|(app)?
-b(anner|eacon)s?|
+b(anner|eacon|reakingnew)s?|
 c(ampaign|edexis|hartbeat.*|omscore|onversion|ookie(c(hoice|onsent)|law|notice)?s?|se)|
 detect|
 e(moji.*\.js|nsighten|vidon)|(web)?
@@ -318,7 +318,13 @@ addons-amo.cdn.mozilla.net
       r.env[:suffix] = '.rss' if r.ext.empty? && !r.upstreamUI?
       r.env[:query]['sort'] ||= 'date'
       r.env[:query]['view'] ||= 'table'
-      (r.path=='/' ? ('/r/'+r.subscriptions.join('+')+'/new').R(r.env) : r).fetch}
+      if r.path == '/'
+        ('/r/'+r.subscriptions.join('+')+'/new').R(r.env).fetch
+      elsif r.gunkURI?
+        r.deny
+      else
+        r.fetch
+      end}
 
     # Reuters
     (0..5).map{|i|

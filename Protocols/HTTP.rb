@@ -404,6 +404,7 @@ class WebResource
       elsif local?                              # localhost handler
         local
       elsif path.match? /[^\/]204$/             # connectivity check
+        env[:deny] = true
         [204, {}, []]
       elsif ext.downcase == 'ico'
         Icon[self]
