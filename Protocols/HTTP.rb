@@ -116,7 +116,7 @@ class WebResource
 
         puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) +
              "\e[" + color + "m"  + status.to_s + (env['HTTP_REFERER'] ? (' ' + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m→") : ' ') +
-             "\e[" + color + ";7mhttps://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '') +
+             "\e[" + color + ";7m https://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '') +
              "\e[0m" + (head['Location'] ? ("➡️" + head['Location']) : '') + ' ' +
              (head['Content-Type'] == 'text/turtle; charset=utf-8' ? '🐢' : (head['Content-Type']||''))
 
@@ -318,6 +318,10 @@ class WebResource
             code = 403
           when /404/ # not found
             code = 404
+          when /500/ # server error
+            code = 500
+          when /503/ #
+            code = 503
           when /999/ # (nonstandard)
             code = 999
             body = HTTP.decompress e.io.meta, e.io.read
@@ -334,6 +338,10 @@ class WebResource
                   '🚫'
                 when 404
                   '❓'
+                when 500
+                  '🛑'
+                when 503
+                  '🛑'
                 else
                   ''
                 end
@@ -611,15 +619,16 @@ x-forwarded-for}.member?(key.downcase)
     def noexec
       return deny if %w(gif js).member?(ext.downcase) || env['REQUEST_URI'].match?(/\.png\?/)
       fetch.yield_self{|status, head, body|
+        type = head['Content-Type'] || ''
         if status.to_s.match? /30[1-4]/
-          [status, head, body]
-        elsif head['Content-Type'] && !head['Content-Type'].match?(/application|image.(bmp|gif)|script/)
+          [status, head, body] # redirect
+        elsif type.match?(/^application\/pdf/) || !type.match?(/application|image\/(bmp|gif)|script/)
           [status, head, body] # allowed content
         else                   # filtered content
-          type = :image  if head['Content-Type']&.match? /image\//
-          type = :script if head['Content-Type']&.match? /script/
-          type = :json   if head['Content-Type']&.match? /json/
-          deny status, type
+          dtype = :image  if type.match? /image/
+          dtype = :script if type.match? /script/
+          dtype = :json   if type.match? /json/
+          deny status, dtype
         end}
     end
 

@@ -260,7 +260,8 @@ encrypted-tbn3.gstatic.com
             www.google.com
         www.googleapis.com
            www.gstatic.com
-).map{|host| AllowHost host}
+).map{|host|
+      AllowHost host}
       GET 'www.googleadservices.com', -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
     else
       GoogleSearch = -> r {r.path == '/search' ? r.noexec : r.deny}
