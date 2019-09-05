@@ -10,7 +10,7 @@ class WebResource
     LocalArgs = %w(allow view sort ui)
     OffLine = ENV.has_key? 'OFFLINE'
     PathGET = {}
-    NoTransform = /^(application\/(json|protobuf|vnd|x-)|audio|font|image|text\/xml|video)/
+    NoTransform = /^(application|audio|font|image|text\/xml|video)/
 
     def self.AllowHost host
       AllowedHosts[host] = true
@@ -306,7 +306,7 @@ class WebResource
               end
             end
             upstream_metas.map{|k| env[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
-            print '🌍🌎🌏'[rand 3]
+            print '🌍🌎🌏🌐'[rand 4]
           end
         rescue Exception => e
           case e.message
