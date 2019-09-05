@@ -536,7 +536,6 @@ x-forwarded-for}.member?(key.downcase)
 
       # Referer
       head['Referer'] = 'http://drudgereport.com/' if env['SERVER_NAME']&.match? /wsj\.com/
-      head['Referer'] = head['Referer'].sub(/\?ui=upstream$/,'') if head['Referer'] && head['Referer'].match?(/\?ui=upstream$/) # strip local QS TODO remove all local vars
 
       # User-Agent
       head['User-Agent'] = DesktopUA[0]
