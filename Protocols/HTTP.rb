@@ -172,7 +172,7 @@ class WebResource
     end
 
     def HTTP.decompress head, body
-      case head['content-encoding'].to_s
+      case (head['content-encoding']||head['Content-Encoding']).to_s
       when /^br(otli)?$/i
         Brotli.inflate body
       when /gzip/i
@@ -213,7 +213,9 @@ class WebResource
     end
 
     def denyPOST
-      HTTP.print_body headers, (HTTP.decompress headers, env['rack.input'].read) unless host.match? /google|youtube/
+      head = headers
+      puts [head['Content-Encoding'], head['Content-Type']].join ' '
+      HTTP.print_body head, (HTTP.decompress head, env['rack.input'].read) unless host.match? /google|youtube/
       env[:deny] = true
       [202, {'Access-Control-Allow-Credentials' => 'true',
              'Access-Control-Allow-Origin' => allowedOrigin},
