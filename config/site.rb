@@ -263,7 +263,16 @@ android.clients.google.com
       AllowHost host}
       GET 'www.googleadservices.com', -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
     else
-      GoogleSearch = -> r {r.path == '/search' ? r.noexec : r.deny}
+      GoogleSearch = -> r {
+        if r.path == '/search'
+          if r.env[:query]['q']&.match? /^https?:\/\//
+            [301, {'Location' => r.env[:query]['q']}, []]
+          else
+            r.noexec
+          end
+        else
+          r.deny
+        end}
       GET 'google.com', GoogleSearch
       GET 'www.google.com', GoogleSearch
     end
