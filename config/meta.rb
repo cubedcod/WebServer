@@ -337,6 +337,7 @@ class WebResource
       'video:director' => Creator,
       'video:duration' => :drop,
       'video:release_date' => Date,
+      'video:tag' => Abstract,
       'videoUrl' => Video,
       'viewport' => :drop,
       'vr:canonical' => Link,

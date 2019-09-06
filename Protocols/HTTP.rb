@@ -209,9 +209,11 @@ class WebResource
     end
 
     def denyPOST
-      head = headers
-      puts [head['Content-Encoding'], head['Content-Type']].join ' '
-      HTTP.print_body head, (HTTP.decompress head, env['rack.input'].read) unless host.match? /google|youtube/
+      unless host.match? /google|youtube/
+        head = headers
+        puts [head['Content-Encoding'], head['Content-Type']].join ' '
+        HTTP.print_body head, HTTP.decompress(head, env['rack.input'].read)
+      end
       env[:deny] = true
       [202, {'Access-Control-Allow-Credentials' => 'true',
              'Access-Control-Allow-Origin' => allowedOrigin},
