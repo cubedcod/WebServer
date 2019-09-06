@@ -334,7 +334,7 @@ addons-amo.cdn.mozilla.net
     GET 'old.reddit.com', GotoReddit
     GET 'www.reddit.com', -> r {
       options = {}
-      if r.parts.member? 'submit'
+      if r.parts.member?('submit') || r.upstreamFormat?
         r.desktop
       else
         options[:transform] = true
