@@ -225,6 +225,17 @@ wp-rum)([-.:_\/?&=~]|$)|
     GET 'gitter.im', -> req {req.desktop.fetch}
 
     # Google
+    GoogleSearch = -> r {
+      if r.path == '/search'
+        if r.env[:query]['q']&.match? /^https?:\/\//
+          [301, {'Location' => r.env[:query]['q']}, []]
+        else
+          r.noexec
+        end
+      else
+        r.deny
+      end}
+
     %w(ajax.googleapis.com
 encrypted-tbn0.gstatic.com
 encrypted-tbn1.gstatic.com
@@ -263,16 +274,6 @@ android.clients.google.com
       AllowHost host}
       GET 'www.googleadservices.com', -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
     else
-      GoogleSearch = -> r {
-        if r.path == '/search'
-          if r.env[:query]['q']&.match? /^https?:\/\//
-            [301, {'Location' => r.env[:query]['q']}, []]
-          else
-            r.noexec
-          end
-        else
-          r.deny
-        end}
       GET 'google.com', GoogleSearch
       GET 'www.google.com', GoogleSearch
     end
