@@ -686,7 +686,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     # serialize external querystring
     def qs
       if env
-        if env[:query_modified]
+        if env[:intermediate]
           HTTP.qs env[:query]
         elsif env[:query] && LocalArgs.find{|a| env[:query].has_key? a } # local query args found
           q = env[:query].dup          # copy query
