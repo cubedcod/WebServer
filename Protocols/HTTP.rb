@@ -334,7 +334,7 @@ class WebResource
       when /403/ # forbidden
         print '🚫'; notfound
       when /404/ # not found
-        print '❓'; notfound
+        print '❓'; print uri if env[:intermediate]; notfound
       when /500/ # server error
         print '🛑'; notfound
       when /503/ #
