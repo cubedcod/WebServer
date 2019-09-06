@@ -525,7 +525,7 @@ x-forwarded-for}.member?(key.downcase)
       head['Referer'] = 'http://drudgereport.com/' if env['SERVER_NAME']&.match? /wsj\.com/
 
       # User-Agent
-      head['User-Agent'] = DesktopUA[0] unless host.match? /android/
+      head['User-Agent'] = DesktopUA[0]
       head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # redirect via HTTP header rather than Javascript
       head.delete 'User-Agent' if host == 't.co'            # redirect via HTTP header rather than Javascript
 
