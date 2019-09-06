@@ -62,7 +62,7 @@ class WebResource
   end
   module HTTP
     CDN = /amazon|azure|cloud(flare|front|inary)|digitalocean|fa(cebook|stly)|heroku|netdna|ra(ckcdn|wgit)|stackpath|usercontent/
-    CDNsubdomain = /(s3\.amazonaws|storage\.googleapis)\.com$/
+    CDNsubdomain = /(s3.+amazonaws|storage\.googleapis)\.com$/
     DesktopUA = ['Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3903.0 Safari/537.36',
                  'Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0']
     GunkURI = %r([-.:_\/?&=~]((block|page)?

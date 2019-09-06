@@ -75,19 +75,11 @@ class WebResource
       (hostPart + pathPart + qsPart + suffix).R env
     end
 
-    # return cache-reference if valid and filled
     def cached?
-      return false if env && env['HTTP_PRAGMA'] == 'no-cache'
-      cache.cached
+      cache.exist? && %w(apk bin css gif html jpeg jpg js pdf png mp3 mp4 opus svg webm webp).member?(ext.downcase)
     end
 
-    def cached
-      %w(apk bin css gif html jpeg jpg js pdf png mp3 mp4 opus svg webm webp).member?(ext.downcase) &&
-      file? &&
-      self
-    end
-
-    def self.call env; verb=Methods[env['REQUEST_METHOD']]
+    def self.call env; verb = Methods[env['REQUEST_METHOD']]
       return [405,{},[]] unless verb                            # allowed methods
       env['HTTP_ACCEPT'] ||= '*/*'                              # Accept default
       env[:resp] = {}; env[:links] = {}                         # response-header storage
@@ -256,9 +248,7 @@ class WebResource
     end
 
     def fetch options = {}
-      if file = !options[:no_response] && cached?
-        return file.fileResponse # resource already fetched, exit
-      end
+      return cache.fileResponse if cached?     # resource already fetched
       @env ||= {resp: {}}                      # response metadata
       env[:repository] ||= RDF::Repository.new # RDF storage (in-memory)
       head = headers                           # clean request metadata
