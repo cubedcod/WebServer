@@ -304,7 +304,7 @@ class WebResource
         meta = response.meta; HTTP.print_header meta if verbose?
         metas = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type Content-Length ETag}
         metas.push 'Set-Cookie' if allowCookies?
-        metas.map{|k| env[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
+        metas.map{|k| env[:resp][k] ||= meta[k.downcase] if meta[k.downcase]} if !env[:intermediate]
         if status == 206                                                 # partial body
           env[:resp]['Content-Encoding'] = meta['content-encoding']      # preserve encoding
           [status, env[:resp], response.read]                            # return partial body
@@ -386,8 +386,7 @@ class WebResource
 
     def self.getFeeds
       env = {content_type: 'application/atom+xml',
-             intermediate: true,
-             resp: {}}
+             intermediate: true}
       FeedURL.values.shuffle.map{|feed|
         begin
           feed.env(env).fetch(feed.scheme=='http' ? {scheme: :http} : {}) ; nil

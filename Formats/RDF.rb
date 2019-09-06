@@ -4,7 +4,6 @@ class WebResource
   # Repository -> turtle file(s)
   def index
     return unless env[:repository]
-    updates = []
     env[:repository].each_graph.map{|graph|
       if n = graph.name # named graph
         n = n.R
@@ -30,10 +29,9 @@ class WebResource
           unless doc.exist?
             doc.dir.mkdir
             RDF::Writer.open(doc.relPath){|f|f << graph}
-            updates << doc
+            puts doc
           end}
       end}
-    updates # indexed resources
   end
 
   def isRDF?; ext == 'ttl' end
