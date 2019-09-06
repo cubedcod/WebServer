@@ -10,7 +10,7 @@ class WebResource
     LocalArgs = %w(allow view sort ui)
     OffLine = ENV.has_key? 'OFFLINE'
     PathGET = {}
-    NoTransform = /^(application|audio|font|image|text\/((x-)?javascript|proto|xml)|video)/
+    NoTransform = /^(application|audio|font|image|text\/(css|(x-)?javascript|proto|xml)|video)/
 
     def self.AllowHost host
       AllowedHosts[host] = true
@@ -689,7 +689,7 @@ x-forwarded-for}.member?(key.downcase)
       code = r.code
       head = r.headers
       body = r.body
-      head['content-length'] ||= body.bytesize.to_s if body
+      #head['content-length'] ||= body.bytesize.to_s if body
       head.delete 'transfer-encoding'
 
       if verbose?
