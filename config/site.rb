@@ -319,14 +319,13 @@ addons-amo.cdn.mozilla.net
         r.env['HTTP_REFERER'] = r.env['HTTP_ORIGIN'] + r.path
         r.env['SERVER_NAME'] = 'outlineapi.com'
         r.env[:intermediate] = true
-        if r.parts.size == 1
+        (if r.parts.size == 1
           r.env[:query] = {id: r.parts[0]}
           '/v4/get_article'.R(r.env).fetch
         elsif r.env['REQUEST_PATH'][1..5] == 'https'
           r.env[:query] = {source_url: r.env['REQUEST_PATH'][1..-1]}
           '/article'.R(r.env).fetch
-        end
-        r.graphResponse
+         end).index.graphResponse
       end}
 
     # Reddit
@@ -390,14 +389,12 @@ addons-amo.cdn.mozilla.net
     GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : r.noexec}
     GET 'twitter.com', -> r {
       if !r.path || r.path == '/'
-        r.env[:no_RDFa] = true  # skip embedded-RDF parse
-        r.env[:intermediate] = true # defer indexing and HTTP-response crafting on requests
-
+        r.env[:intermediate] = true # defer indexing
+        r.env[:no_RDFa] = true # skip embedded-RDF search
         '//twitter.com'.R.subscriptions.shuffle.each_slice(18){|s|
           r.env[:query] = { vertical: :default, f: :tweets, q: s.map{|u|'from:' + u}.join('+OR+')}
           '//twitter.com/search'.R(r.env).fetch}
-        r.index
-        r.graphResponse
+        r.index.graphResponse
       elsif r.gunkURI?
         r.deny
       else

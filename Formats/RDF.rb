@@ -31,6 +31,7 @@ class WebResource
             puts doc
           end}
       end}
+    self
   end
 
   def isRDF?; ext == 'ttl' end

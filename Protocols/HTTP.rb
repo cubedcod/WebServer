@@ -302,26 +302,25 @@ class WebResource
         env[:scheme] = scheme
         status = response.status.to_s.match(/\d{3}/)[0].to_i
         meta = response.meta; HTTP.print_header meta if verbose?
-        metas = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type Content-Length ETag}
-        metas.push 'Set-Cookie' if allowCookies?
-        metas.map{|k| env[:resp][k] ||= meta[k.downcase] if meta[k.downcase]} if !env[:intermediate]
         if status == 206                                                 # partial body
-          env[:resp]['Content-Encoding'] = meta['content-encoding']      # preserve encoding
-          [status, env[:resp], response.read]                            # return partial body
+          [status, meta, response.read]                                  # return partial body
         else                                                             # body
-          body = HTTP.decompress meta, response.read                     # decode
           format=env[:content_type]||meta['content-type']&.split(/;/)[0] # content-type
           format ||= (xt = ext.to_sym                                    # extension-derived fallback
                       RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
-          format ||= body.bytesize < 2048 ? 'text/plain' : 'application/octet-stream' # unspecified type
-          env[:transform] ||= !(upstreamFormat? format)                  # rewritable?
+          body = HTTP.decompress meta, response.read                     # decode body
+          format ||= body.bytesize < 2048 ? 'text/plain' : 'application/octet-stream' # untyped?
           cache(format).write body.force_encoding('UTF-8') if cachedType # cache body
           env[:repository] ||= RDF::Repository.new                       # RDF storage
           RDF::Reader.for(content_type: format).yield_self{|reader|      # RDF reader
             reader.new(body, {base_uri: self, no_embeds: env[:no_RDFa]}){|rdf|
               env[:repository] << rdf }}                                 # parse RDF
-          return if env[:intermediate]
+          return self if env[:intermediate]                              # no response?
           index                                                          # index RDF
+          ks = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type Content-Length ETag}
+          ks.push 'Set-Cookie' if allowCookies?                          # conditional metadata
+          ks.map{|k|env[:resp][k]||=meta[k.downcase] if meta[k.downcase]}# metadata for HTTP caller
+          env[:transform] ||= !(upstreamFormat? format)                  # rewritable?
           env[:transform] ? graphResponse : [status, env[:resp], [body]] # return RDF or upstream-data
         end
       end
@@ -334,7 +333,7 @@ class WebResource
       when /403/ # forbidden
         print '🚫'; notfound
       when /404/ # not found
-        print '❓'; print uri if env[:intermediate]; notfound
+        print '❓'; env[:intermediate] ? (print uri) : notfound
       when /500/ # server error
         print '🛑'; notfound
       when /503/ #
@@ -385,11 +384,10 @@ class WebResource
     end
 
     def self.getFeeds
-      env = {content_type: 'application/atom+xml',
-             intermediate: true}
       FeedURL.values.shuffle.map{|feed|
         begin
-          feed.env(env).fetch(feed.scheme=='http' ? {scheme: :http} : {}) ; nil
+          feed.env({intermediate: true, content_type: 'application/atom+xml'}).
+            fetch(feed.scheme == 'http' ? {scheme: :http} : {}).index
         rescue Exception => e
           puts 'https:' + feed.uri, e.class, e.message, e.backtrace
         end}
