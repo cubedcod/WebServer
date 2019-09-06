@@ -488,33 +488,20 @@ class WebResource
       (hdr || env).map{|k,v| # each key
         k = k.to_s
         underscored = k.match? /(_AP_|PASS_SFP)/i
-        key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|k| # eat HTTP prefix from Rack
-          if %w{cl dfe id spf utc xsrf}.member? k
+        key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|k| # eat Rack HTTP_ prefix
+          if %w{cl dfe id spf utc xsrf}.member? k # acronyms
             k = k.upcase       # acronymize
           else
-            k[0] = k[0].upcase # capitalize token
+            k[0] = k[0].upcase # capitalize
           end
-          k
-        }.join(underscored ? '_' : '-')
+          k }.join(underscored ? '_' : '-')
         key = key.downcase if underscored
 
-        # set output field, strip local headers
-        head[key] = v.to_s unless %w{
-connection
-gunk
-host
-links
-path-info
-query query-modified query-string
+        # set external headers
+        head[key] = v.to_s unless %w{connection gunk host links path-info query query-modified query-string
 rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version
-remote-addr repository request-method request-path request-uri resp
-script-name server-name server-port server-protocol server-software
-unicorn.socket upgrade-insecure-requests
-version via
-x-forwarded-for}.member?(key.downcase)
-      }
-
-      head.delete 'Transfer-Encoding'
+remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software
+transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
 
       # Cookie
       unless allowCookies?
@@ -799,8 +786,7 @@ x-forwarded-for}.member?(key.downcase)
     def unsubscribe; subscriptionFile.exist? && subscriptionFile.node.delete end
 
     def upstreamFormat? format=nil
-      return false if local?
-      (format&.match? NoTransform) || (DesktopUA.member? env['HTTP_USER_AGENT'])
+      format&.match?(NoTransform) || DesktopUA.member?(env['HTTP_USER_AGENT'])
     end
 
     def verbose?
