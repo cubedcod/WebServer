@@ -217,23 +217,23 @@ class WebResource
     def desktop; env['HTTP_USER_AGENT'] = DesktopUA[0]; self end
 
     def entity generator = nil
-      entities = env['HTTP_IF_NONE_MATCH']&.strip&.split /\s*,\s*/ # entities
+      entities = env['HTTP_IF_NONE_MATCH']&.strip&.split /\s*,\s*/ # client entities
       if entities && entities.include?(env[:resp]['ETag']) # client has entity
         [304, {}, []]                            # unmodified
       else
-        body = generator ? generator.call : self # generate
+        body = generator ? generator.call : self # call generator
         if body.class == WebResource             # resource reference?
           Rack::File.new(nil).serving(Rack::Request.new(env), body.relPath).yield_self{|s,h,b|
             if s == 304
               [s, {}, []]                          # unmodified
-            else                                   # Rack handler for reference
+            else                                   # Rack file-handler
               h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type'] == 'application/javascript'
               env[:resp]['Content-Length'] = body.node.size.to_s
-              [s, h.update(env[:resp]), b]         # file
+              [s, h.update(env[:resp]), b]         # file-backed entity
             end}
         else
           env[:resp]['Content-Length'] = body.bytesize.to_s
-          [env[:status]||200,env[:resp],[body]]  # generated entity
+          [200, env[:resp], [body]] # generated entity
         end
       end
     end
@@ -271,12 +271,12 @@ class WebResource
           open(url, head) do |response|
             baseURI = url.R env
             env[:scheme] = baseURI.scheme
-            code = response.status.to_s.match(/\d{3}/)[0]
+            code = response.status.to_s.match(/\d{3}/)[0].to_i
             meta = response.meta; HTTP.print_header meta if verbose?
             metas.map{|k| env[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
             if code == 206
-              body = response.read                                           # partial body,
-              metas.push 'Content-Encoding'                                  # preserved encoding
+              body = response.read                                           # partial body
+              env[:resp]['Content-Encoding'] = meta['content-encoding']      # preserve encoding
             else                                                             # complete body
               body = HTTP.decompress meta, response.read                     # decode body
               format = options[:content_type] || meta['content-type']&.split(/;/)[0] # MIME type
@@ -368,8 +368,8 @@ class WebResource
         else
           raise
         end
-      end unless OffLine
-
+      end
+      puts "no response-code for #{uri}!" unless code
       return                            if options[:no_response]
       return [code, env[:resp], [body]] if code == 206                  # partial upstream file
       return [code, {}, []]             if code == 304                  # no data
