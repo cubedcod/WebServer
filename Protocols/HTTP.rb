@@ -314,7 +314,7 @@ class WebResource
           env[:repository] ||= RDF::Repository.new                       # RDF storage
           RDF::Reader.for(content_type: format).yield_self{|reader|      # RDF reader
             reader.new(body, {base_uri: self, no_embeds: env[:no_RDFa]}){|rdf|
-              env[:repository] << rdf }}                                 # parse RDF
+              env[:repository] << rdf } if reader}                       # parse RDF
           return self if env[:intermediate]                              # no response?
           index                                                          # index RDF
           ks = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type Content-Length ETag}
