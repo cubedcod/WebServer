@@ -385,17 +385,12 @@ class WebResource
     end
 
     def self.getFeeds
-      # @env ||= {resp: {}}                      # response environment
-      # @env[:intermediate] = true
+      env = {content_type: 'application/atom+xml',
+             intermediate: true,
+             resp: {}}
       FeedURL.values.shuffle.map{|feed|
         begin
-          options = {
-            content_type: 'application/atom+xml',
-            no_response: true,
-          }
-          options[:scheme] = :http if feed.scheme == 'http'
-          feed.fetch options
-          nil
+          feed.env(env).fetch(feed.scheme=='http' ? {scheme: :http} : {}) ; nil
         rescue Exception => e
           puts 'https:' + feed.uri, e.class, e.message, e.backtrace
         end}
@@ -686,7 +681,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     # serialize external querystring
     def qs
       if env
-        if env[:intermediate]
+        if env[:intermediate] && env[:query]
           HTTP.qs env[:query]
         elsif env[:query] && LocalArgs.find{|a| env[:query].has_key? a } # local query args found
           q = env[:query].dup          # copy query
