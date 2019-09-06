@@ -10,7 +10,7 @@ class WebResource
     LocalArgs = %w(allow view sort ui)
     OffLine = ENV.has_key? 'OFFLINE'
     PathGET = {}
-    NoTransform = /^(application|audio|font|image|text\/xml|video)/
+    NoTransform = /^(application|audio|font|image|text\/((x-)?javascript|xml)|video)/
 
     def self.AllowHost host
       AllowedHosts[host] = true
