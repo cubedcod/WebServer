@@ -8,6 +8,10 @@ class WebResource
     HostPOST = {}
     Hosts = {}
     LocalArgs = %w(allow view sort ui)
+    Methods = {'GET' => :GETrequest,
+              'HEAD' => :HEAD,
+              'OPTIONS' => :OPTIONS,
+              'POST' => :POSTrequest}
     OffLine = ENV.has_key? 'OFFLINE'
     PathGET = {}
     NoTransform = /^(application|audio|font|image|text\/(css|(x-)?javascript|proto|xml)|video)/
@@ -83,13 +87,8 @@ class WebResource
       self
     end
 
-    def self.call env
-      verb = {'GET' => :GETrequest,
-              'HEAD' => :HEAD,
-              'OPTIONS' => :OPTIONS,
-              'POST' => :POSTrequest,
-             }[env['REQUEST_METHOD']]
-      return [405,{},[]] unless verb                            # permit methods
+    def self.call env; verb=Methods[env['REQUEST_METHOD']]
+      return [405,{},[]] unless verb                            # allowed methods
       env['HTTP_ACCEPT'] ||= '*/*'                              # Accept default
       env[:resp] = {}; env[:links] = {}                         # response-header storage
       env[:query] = parseQs env['QUERY_STRING']                 # parse query

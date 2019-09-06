@@ -430,16 +430,9 @@ addons-amo.cdn.mozilla.net
       mode = r.parts[0]
       if %w{attribution_link redirect}.member? mode
         [301, {'Location' =>  r.env[:query]['q'] || r.env[:query]['u']},[]]
-      elsif !mode || %w(
-browse_ajax c channel
-embed
-feed get_video_info guide_ajax
-heartbeat iframe_api live_chat
-manifest.json opensearch playlist
-results signin user
-watch watch_videos
-yts
-).member?(mode)
+      elsif !mode || %w(browse_ajax c channel embed feed get_video_info
+guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist
+results signin user watch watch_videos yts).member?(mode)
         r.desktop.fetch
       else
         r.deny
