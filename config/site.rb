@@ -84,7 +84,8 @@ quantcast|
 reco(mmend(ed)?|rd(event|stats?)?)|rpc|
 s?s(a(fe[-_]?browsing|ilthru)|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(cial|urcepoint)|ponsored|so|tat(istic)?s?|ubscri(ber?|ption)|w.js|ync)|
 t(aboola|(arget|rack)(ers?|ing)?|bproxy|ea(lium|ser)|inypass|rend(ing|s))|autotrack|
-u(rchin|tm)|
+u(rchin|serlocation|tm)|
+viral|
 wp-rum)([-.:_\/?&=~]|$)|
 \.((gif|png)\?|otf|ttf|woff2?)|\/[a-z]\?)xi
 

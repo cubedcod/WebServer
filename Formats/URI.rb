@@ -63,7 +63,7 @@ class WebResource < RDF::URI
       SIOC + 'reply_of' => '↩',
       Schema + 'height' => '↕',
       Schema + 'width' => '↔',
-      Stat + 'File' => '🗎',
+      Stat + 'File' => '📄',
       To => '☇',
       Type => '📕',
       Video => '🎞',

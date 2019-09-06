@@ -455,8 +455,7 @@ class WebResource
             rendered_types.push type
             markup[v,env]
           end},
-         (unseen = types - rendered_types
-          puts "#{v['uri']} no renderers defined for: " + unseen.join(' ') unless unseen.empty?),
+         #(unseen = types - rendered_types ; puts "#{v['uri']} no renderers defined for: " + unseen.join(' ') unless unseen.empty?),
          (keyval v, env if rendered_types.empty?)]
       elsif v.class == WebResource # resource (reference only)
         if v.uri.match?(/^_:/) && env[:graph] && env[:graph][v.uri] # blank node
@@ -597,10 +596,10 @@ class WebResource
            {class: :body, c: HTML.keyval(dir, env)}]}}
 
     Markup[Stat+'File'] = -> file, env {
-      uri = file.delete 'uri'
-      {class: :file,
-       c: [{_: :a, href: uri, class: :icon, c: Icons[Stat+'File']},
-           {_: :span, class: :name, c: uri.R.basename}]} if uri}
+      [({class: :file,
+         c: [{_: :a, href: file['uri'], class: :icon, c: Icons[Stat+'File']},
+             {_: :span, class: :name, c: file['uri'].R.basename}]} if file['uri']),
+       (HTML.keyval file, env)]}
 
   end
 end
