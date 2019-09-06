@@ -10,7 +10,7 @@ class WebResource
     LocalArgs = %w(allow view sort ui)
     OffLine = ENV.has_key? 'OFFLINE'
     PathGET = {}
-    NoTransform = /^(application|audio|font|image|text\/((x-)?javascript|xml)|video)/
+    NoTransform = /^(application|audio|font|image|text\/((x-)?javascript|proto|xml)|video)/
 
     def self.AllowHost host
       AllowedHosts[host] = true
@@ -78,7 +78,7 @@ class WebResource
     end
 
     def cached
-      %w(apk css gif jpeg jpg js pdf png mp3 mp4 opus svg webm webp).member?(ext.downcase) &&
+      %w(apk bin css gif html jpeg jpg js pdf png mp3 mp4 opus svg webm webp).member?(ext.downcase) &&
       file? &&
       self
     end
@@ -706,7 +706,7 @@ x-forwarded-for}.member?(key.downcase)
     end
 
     def HTTP.print_body head, body
-      body = case head['Content-Type']
+      body = case (head['Content-Type'] || head['content-type'])
              when 'application/json'
                json = ::JSON.parse body rescue {}
                puts json['query'] if json['query']

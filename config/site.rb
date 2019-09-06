@@ -83,7 +83,7 @@ p(a(idpost|y(ments?|wall))|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)
 quantcast|
 reco(mmend(ed)?|rd(event|stats?)?)|rpc|
 s?s(a(fe[-_]?browsing|ilthru)|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(cial|urcepoint)|ponsored|so|tat(istic)?s?|ubscri(ber?|ption)|w.js|ync)|
-t(aboola|(arget|rack)(ers?|ing)?|ea(lium|ser)|inypass|rend(ing|s))|autotrack|
+t(aboola|(arget|rack)(ers?|ing)?|bproxy|ea(lium|ser)|inypass|rend(ing|s))|autotrack|
 u(rchin|tm)|
 wp-rum)([-.:_\/?&=~]|$)|
 \.((gif|png)\?|otf|ttf|woff2?)|\/[a-z]\?)xi
@@ -255,6 +255,7 @@ android.clients.google.com
            mail.google.com
        play.googleapis.com
            ssl.gstatic.com
+ suggestqueries.google.com
             www.google.com
         www.googleapis.com
            www.gstatic.com
@@ -420,22 +421,13 @@ addons-amo.cdn.mozilla.net
       if %w{attribution_link redirect}.member? mode
         [301, {'Location' =>  r.env[:query]['q'] || r.env[:query]['u']},[]]
       elsif !mode || %w(
-browse_ajax
-c
-channel
+browse_ajax c channel
 embed
-feed
-get_video_info
-guide_ajax
-heartbeat
-iframe_api
-live_chat
-playlist
-results
-signin
-user
-watch
-watch_videos
+feed get_video_info guide_ajax
+heartbeat iframe_api live_chat
+manifest.json opensearch playlist
+results signin user
+watch watch_videos
 yts
 ).member?(mode)
         r.desktop.fetch
