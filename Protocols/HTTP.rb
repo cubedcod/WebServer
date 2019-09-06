@@ -482,10 +482,9 @@ class WebResource
 
     # header keys from lower-case and CGI_ALL_CAPS to canonical formatting
     def headers hdr = nil
-      head = {}
+      head = {} # external headers
 
-      # read raw headers
-      (hdr || env).map{|k,v| # each key
+      (hdr || env).map{|k,v| # raw headers
         k = k.to_s
         underscored = k.match? /(_AP_|PASS_SFP)/i
         key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|k| # eat Rack HTTP_ prefix

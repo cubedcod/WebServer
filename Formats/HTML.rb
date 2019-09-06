@@ -415,34 +415,51 @@ class WebResource
              _name == :RDF ? (value nil, _t, env) : (tree _t, env, _name)}]}.update(css ? css : {})
     end
 
+    MarkupMap = {
+      'http://schema.org/Comment' => Post,
+      'https://schema.org/BreadcrumbList' => List,
+      'https://schema.org/Comment' => Post,
+      'https://schema.org/ImageObject' => Image,
+      'https://schema.org/NewsArticle' => Post,
+      'https://schema.org/Person' => Person,
+      SIOC + 'BlogPost' => Post,
+      SIOC + 'MailMessage' => Post,
+      SIOC + 'UserAccount' => Person,
+      Schema + 'Answer' => Post,
+      Schema + 'Article' => Post,
+      Schema + 'BlogPosting' => Post,
+      Schema + 'BreadcrumbList' => List,
+      Schema + 'Code' => Post,
+      Schema + 'DiscussionForumPosting' => Post,
+      Schema + 'ImageObject' => Image,
+      Schema + 'ItemList' => List,
+      Schema + 'NewsArticle' => Post,
+      Schema + 'Person' => Person,
+      Schema + 'Review' => Post,
+      Schema + 'UserComments' => Post,
+      Schema + 'VideoObject' => Video,
+      Schema + 'WebPage' => Post,
+    }
+
     # Value -> Markup
     def self.value type, v, env
       if Abstract == type || Content == type
         v
       elsif Markup[type] # explicit type-arg
         Markup[type][v,env]
-      elsif v.class == Hash
-        # RDF-type -> renderer mapping TODO just render everything (w/ groupings by type for collection UI)
-        types = (v[Type]||[]).map &:R
-        if (types.member? Post) || (types.member? Schema+'Article') || (types.member? SIOC+'BlogPost') || (types.member? Schema+'BlogPosting') || (types.member? Schema+'WebPage') || (types.member? Schema+'UserComments') || (types.member? SIOC+'MailMessage') || (types.member? Schema+'DiscussionForumPosting') || (types.member? Schema+'Answer') || (types.member? 'https://schema.org/NewsArticle') || (types.member? Schema+'Review') || (types.member? 'https://schema.org/Comment') || (types.member? 'http://schema.org/Comment') || (types.member? Schema+'NewsArticle') || (types.member? Schema+'Code')
-          Markup[Post][v,env]
-        elsif (types.member? Image) || (types.member? Schema+'ImageObject') || (types.member? 'https://schema.org/ImageObject')
-          Markup[Image][v,env]
-        elsif types.member? LDP+'Container'
-          Markup[LDP+'Container'][v,env]
-        elsif types.member? Stat+'File'
-          Markup[Stat+'File'][v,env]
-        elsif (types.member? Schema+'BreadcrumbList') || (types.member? Schema+'ItemList') || (types.member? 'https://schema.org/BreadcrumbList')
-          Markup[Schema+'BreadcrumbList'][v,env]
-        elsif (types.member? SIOC+'UserAccount') || (types.member? Schema+'Person') || (types.member? 'https://schema.org/Person')
-          Markup[SIOC+'UserAccount'][v,env]
-        elsif types.member? Schema+'VideoObject'
-          Markup[Video][v,env]
-        else
-          keyval v, env
-        end
-      elsif v.class == WebResource
-        if v.uri.match?(/^_:/) && env[:graph] && env[:graph][v.uri] # blank-node
+      elsif v.class == Hash # resource (with data)
+        types = (v[Type] || []).map{|t| MarkupMap[t.to_s] || t.to_s }
+        rendered_types = []
+        [types.map{|type|
+          if markup = Markup[type]
+            rendered_types.push type
+            markup[v,env]
+          end},
+         (unseen = types - rendered_types
+          puts "#{v['uri']} no renderers defined for: " + unseen.join(' ') unless unseen.empty?),
+         (keyval v, env if rendered_types.empty?)]
+      elsif v.class == WebResource # resource (reference only)
+        if v.uri.match?(/^_:/) && env[:graph] && env[:graph][v.uri] # blank node
           value nil, env[:graph][v.uri], env
         elsif %w{jpeg jpg JPG png PNG webp}.member? v.ext           # image
           Markup[Image][v, env]
@@ -554,14 +571,14 @@ class WebResource
              content, (['<br>', HTML.keyval(post,env)] unless post.keys.size < 1)]}
       end}
 
-    Markup[Schema+'BreadcrumbList'] = -> list, env {
+    Markup[List] = -> list, env {
       {class: :list,
        c: tabular((list[Schema+'itemListElement']||
                    list['https://schema.org/itemListElement']||[]).map{|l|
                     l.respond_to?(:uri) && env[:graph][l.uri] || (l.class == WebResource ? {'uri' => l.uri,
                                                                                              Title => [l.uri]} : l)}, env)}}
 
-    Markup[SIOC+'UserAccount'] = -> user, env {
+    Markup[Person] = -> user, env {
       if u = user['uri']
         {class: :user,
          c: [(if avatar = Avatars[u.downcase]
@@ -570,11 +587,7 @@ class WebResource
                {_: :span, c: '👤'}
               end),
              (HTML.keyval user, env)]}
-
-      else
-        puts :useraccount, user
-      end
-    }
+      end}
 
     Markup[LDP+'Container'] = -> dir , env {
       uri = dir.delete 'uri'
