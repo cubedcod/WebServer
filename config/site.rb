@@ -318,17 +318,20 @@ addons-amo.cdn.mozilla.net
         r.env['HTTP_ORIGIN'] = 'https://outline.com'
         r.env['HTTP_REFERER'] = r.env['HTTP_ORIGIN'] + r.path
         r.env['SERVER_NAME'] = 'outlineapi.com'
+        r.env[:intermediate] = true
         if r.parts.size == 1
           r.env[:query] = {id: r.parts[0]}
-          '/v4/get_article'.R(r.env).fetch no_response: true
+          '/v4/get_article'.R(r.env).fetch
         elsif r.env['REQUEST_PATH'][1..5] == 'https'
           r.env[:query] = {source_url: r.env['REQUEST_PATH'][1..-1]}
-          '/article'.R(r.env).fetch no_response: true
+          '/article'.R(r.env).fetch
         end
         r.graphResponse
       end}
 
     # Reddit
+    AllowHost 'events.reddit.com'
+    AllowHost 'gateway.reddit.com'
     AllowHost 'oauth.reddit.com'
     AllowHost 'www.reddit.com'
     GotoReddit = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path},[]]}
@@ -339,10 +342,10 @@ addons-amo.cdn.mozilla.net
       if r.parts.member?('submit') || r.upstreamFormat?
         r.desktop
       else
-        options[:transform] = true
-        options[:suffix] = '.rss' if r.ext.empty?
+        r.env[:transform] = true
         r.env[:query]['sort'] ||= 'date'
         r.env[:query]['view'] ||= 'table'
+        options[:suffix] = '.rss' if r.ext.empty?
       end
       if r.path == '/'
         ('/r/'+r.subscriptions.join('+')+'/new').R(r.env).fetch options
@@ -387,16 +390,12 @@ addons-amo.cdn.mozilla.net
     GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : r.noexec}
     GET 'twitter.com', -> r {
       if !r.path || r.path == '/'
-        r.env[:resp]['Refresh'] = 3600 # client refresh hint
-        fetch_options = {
-          no_embeds: true,   # skip HTML+RDF-embed parse
-          no_index: true,    # defer indexing
-          no_response: true} # no forwarded HTTP response from fetch
-        r.env[:query_modified] = true
+        r.env[:no_RDFa] = true  # skip embedded-RDF parse
+        r.env[:intermediate] = true # defer indexing and HTTP-response crafting on requests
 
         '//twitter.com'.R.subscriptions.shuffle.each_slice(18){|s|
           r.env[:query] = { vertical: :default, f: :tweets, q: s.map{|u|'from:' + u}.join('+OR+')}
-          '//twitter.com/search'.R(r.env).fetch fetch_options}
+          '//twitter.com/search'.R(r.env).fetch}
         r.index
         r.graphResponse
       elsif r.gunkURI?

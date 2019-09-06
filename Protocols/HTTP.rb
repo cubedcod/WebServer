@@ -76,7 +76,11 @@ class WebResource
     end
 
     def cached?
-      cache.exist? && %w(apk bin css gif html jpeg jpg js pdf png mp3 mp4 opus svg webm webp).member?(ext.downcase)
+      cachedType && cache.exist?
+    end
+
+    def cachedType # types of files we cache, specified as name-suffix
+      %w(apk bin css gif html jpeg jpg js pdf png mp3 mp4 opus svg webm webp).member? ext.downcase
     end
 
     def self.call env; verb = Methods[env['REQUEST_METHOD']]
@@ -247,134 +251,97 @@ class WebResource
       end
     end
 
+    # fetch remote. potentially non-HTTP transports but HTTPS + HTTP for now
     def fetch options = {}
       return cache.fileResponse if cached?     # resource already fetched
-      @env ||= {resp: {}}                      # response metadata
-      env[:repository] ||= RDF::Repository.new # RDF storage (in-memory)
-      head = headers                           # clean request metadata
-      head[:redirect] = false                  # exit on redirect
-      u = '//' + hostname + path + (options[:suffix]||'') + qs    # schemeless locator
-      url      = (options[:scheme] || 'https').to_s    + ':' + u  # primary locator
-      fallback = (options[:scheme] ? 'https' : 'http') + ':' + u  # fallback locator
-      options[:content_type] ||= if FeedURL[u] # fix incorrect or missing upstream content-types
-                                   'application/atom+xml'
-                                 elsif ext == 'vtt'
-                                   'text/vtt'
-                                 end
-      metas = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type Content-Length ETag}
-      metas.push 'Set-Cookie' if allowCookies?
-      code = nil # response status
-      body = nil # response body
-      fetchURL = -> url {
-        HTTP.print_header head if verbose?
-        begin
-          open(url, head) do |response|
-            baseURI = url.R env
-            env[:scheme] = baseURI.scheme
-            code = response.status.to_s.match(/\d{3}/)[0].to_i
-            meta = response.meta; HTTP.print_header meta if verbose?
-            metas.map{|k| env[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
-            if code == 206
-              body = response.read                                           # partial body
-              env[:resp]['Content-Encoding'] = meta['content-encoding']      # preserve encoding
-            else                                                             # complete body
-              body = HTTP.decompress meta, response.read                     # decode body
-              format = options[:content_type] || meta['content-type']&.split(/;/)[0] # MIME type
-              format ||= (xt = ext.to_sym                                    # file-extension format fallback
-                RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
-              format ||= body.bytesize < 2048 ? 'text/plain' : 'application/octet-stream' # unspecified format
-              options[:transform] ||= !(upstreamFormat? format)              # rewritable?
-              cache(format).write body.force_encoding('UTF-8')               # cache body
-              if reader = RDF::Reader.for(content_type: format)              # RDF reader
-                reader_options = {base_uri: baseURI, no_embeds: options[:no_embeds]}
-                reader.new(body, reader_options){|_| env[:repository] << _ } # parse RDF
-                index unless options[:no_index]                              # index RDF
-              end
-            end
-            print '🌍🌎🌏🌐'[rand 4]
-          end
-        rescue Exception => e
-          case e.message
-          when /304/ # not modified
-            code = 304
-          when /401/ # unauthorized
-            code = 401
-          when /403/ # forbidden
-            code = 403
-          when /404/ # not found
-            code = 404
-          when /500/ # server error
-            code = 500
-          when /503/ #
-            code = 503
-          when /999/ # (nonstandard)
-            code = 999
-            body = HTTP.decompress e.io.meta, e.io.read
-          else
-            raise
-          end
-          print case code
-                when 304
-                  '✅'
-                when 401
-                  '🚫'
-                when 403
-                  '🚫'
-                when 404
-                  '❓'
-                when 500
-                  '🛑'
-                when 503
-                  '🛑'
-                else
-                  ''
-                end
-        end}
+      # TODO return cached if OffLine
+      u = '//' + hostname + path + (options[:suffix]||'') + qs # locator sans scheme
+      primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env    # primary locator
+      fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env # fallback locator
+      primary.fetchHTTP     #   try (HTTPS default)
+    rescue Exception => e # retry (HTTP)
+      case e.class.to_s
+      when 'OpenURI::HTTPRedirect' # redirected
+        if fallback == e.io.meta['location']
+          fallback.fetchHTTP       # only the transport changed, follow redirect
+        elsif env[:intermedate]    # no direct HTTP caller
+          puts "RELOC #{uri} -> #{e.io.meta['location']}"
+          e.io.meta['location'].R(env).fetchHTTP # follow redirect
+        else                       # update caller with new location
+          [302, {'Location' => e.io.meta['location']}, []]
+        end
+      when 'Errno::ECONNREFUSED'
+        fallback.fetchHTTP
+      when 'Errno::ECONNRESET'
+        fallback.fetchHTTP
+      when 'Errno::ENETUNREACH'
+        fallback.fetchHTTP
+      when 'Net::OpenTimeout'
+        fallback.fetchHTTP
+      when 'Net::ReadTimeout'
+        fallback.fetchHTTP
+      when 'OpenSSL::SSL::SSLError'
+        fallback.fetchHTTP
+      when 'OpenURI::HTTPError'
+        fallback.fetchHTTP
+      when 'RuntimeError'
+        fallback.fetchHTTP
+      when 'SocketError'
+        fallback.fetchHTTP
+      else
+        raise
+      end
+    end
 
-      begin
-        fetchURL[url]       #   try (HTTPS default)
-      rescue Exception => e # retry (HTTP)
-        case e.class.to_s
-        when 'Errno::ECONNREFUSED'
-          fetchURL[fallback]
-        when 'Errno::ECONNRESET'
-          fetchURL[fallback]
-        when 'Errno::ENETUNREACH'
-          fetchURL[fallback]
-        when 'Net::OpenTimeout'
-          fetchURL[fallback]
-        when 'Net::ReadTimeout'
-          fetchURL[fallback]
-        when 'OpenSSL::SSL::SSLError'
-          fetchURL[fallback]
-        when 'OpenURI::HTTPError'
-          fetchURL[fallback]
-        when 'OpenURI::HTTPRedirect'
-          location = e.io.meta['location']
-          if location == fallback
-            fetchURL[fallback] # only transport-scheme changed, follow redirect internally
-          else
-            if options[:no_response]
-              puts "#{url} ➡️ \e[32;7m" + location + "\e[0m"
-              fetchURL[location]
-            else
-              return [302, {'Location' => location}, []]
-            end
-          end
-        when 'RuntimeError'
-          fetchURL[fallback]
-        when 'SocketError'
-          fetchURL[fallback]
-        else
-          raise
+    # fetch over HTTP
+    def fetchHTTP
+      open(uri, headers.merge({redirect: false})) do |response|
+        print '🌍🌎🌏🌐'[rand 4]
+        env[:scheme] = scheme
+        status = response.status.to_s.match(/\d{3}/)[0].to_i
+        meta = response.meta; HTTP.print_header meta if verbose?
+        metas = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type Content-Length ETag}
+        metas.push 'Set-Cookie' if allowCookies?
+        metas.map{|k| env[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
+        if status == 206                                                 # partial body
+          env[:resp]['Content-Encoding'] = meta['content-encoding']      # preserve encoding
+          [status, env[:resp], response.read]                            # return partial body
+        else                                                             # body
+          body = HTTP.decompress meta, response.read                     # decode
+          format=env[:content_type]||meta['content-type']&.split(/;/)[0] # content-type
+          format ||= (xt = ext.to_sym                                    # extension-derived fallback
+                      RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
+          format ||= body.bytesize < 2048 ? 'text/plain' : 'application/octet-stream' # unspecified type
+          env[:transform] ||= !(upstreamFormat? format)                  # rewritable?
+          cache(format).write body.force_encoding('UTF-8') if cachedType # cache body
+          env[:repository] ||= RDF::Repository.new                       # RDF storage
+          RDF::Reader.for(content_type: format).yield_self{|reader|      # RDF reader
+            reader.new(body, {base_uri: self, no_embeds: env[:no_RDFa]}){|rdf|
+              env[:repository] << rdf }}                                 # parse RDF
+          return if env[:intermediate]
+          index                                                          # index RDF
+          env[:transform] ? graphResponse : [status, env[:resp], [body]] # return RDF or upstream-data
         end
       end
-      puts "no response-code for #{uri}!" unless code
-      return                            if options[:no_response]
-      return [code, env[:resp], [body]] if code == 206                  # partial upstream file
-      return [code, {}, []]             if code == 304                  # no data
-      return [code, env[:resp], [body]] if body && !options[:transform] # upstream file
-      return graphResponse                                              # upstream graph data
+    rescue Exception => e
+      case e.message
+      when /304/ # not modified
+        print '✅'; [304, {}, []]
+      when /401/ # unauthorized
+        print '🚫'; notfound
+      when /403/ # forbidden
+        print '🚫'; notfound
+      when /404/ # not found
+        print '❓'; notfound
+      when /500/ # server error
+        print '🛑'; notfound
+      when /503/ #
+        print '🛑'; notfound
+      when /999/ # (nonstandard)
+        [999, e.io.meta, [e.io.read]]
+      else
+        raise
+      end
     end
 
     def fileResponse
@@ -416,6 +383,8 @@ class WebResource
     end
 
     def self.getFeeds
+      # @env ||= {resp: {}}                      # response environment
+      # @env[:intermediate] = true
       FeedURL.values.shuffle.map{|feed|
         begin
           options = {

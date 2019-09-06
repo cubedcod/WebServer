@@ -43,6 +43,7 @@ class WebResource
       'al:windows_phone:app_id' => :drop,
       'al:windows_phone:app_name' => :drop,
       'al:windows_phone:url' => :drop,
+      'algolia-public-key' => :drop,
       'alternate' => DC + 'hasFormat',
       'amphtml' => :drop,
       'aplus-auto-clk' => :drop,
