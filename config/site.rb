@@ -329,8 +329,8 @@ addons-amo.cdn.mozilla.net
       end}
 
     # Reddit
-    AllowHost 'events.reddit.com'
-    AllowHost 'gateway.reddit.com'
+   #AllowHost 'events.reddit.com'
+   #AllowHost 'gateway.reddit.com'
     AllowHost 'oauth.reddit.com'
     AllowHost 'www.reddit.com'
     GotoReddit = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path},[]]}
