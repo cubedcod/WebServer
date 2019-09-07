@@ -1,5 +1,32 @@
 class WebResource
   module URIs
+
+    MarkupMap = {
+      'http://schema.org/Comment' => Post,
+      'https://schema.org/BreadcrumbList' => List,
+      'https://schema.org/Comment' => Post,
+      'https://schema.org/ImageObject' => Image,
+      'https://schema.org/NewsArticle' => Post,
+      'https://schema.org/Person' => Person,
+      SIOC + 'BlogPost' => Post,
+      SIOC + 'MailMessage' => Post,
+      SIOC + 'UserAccount' => Person,
+      Schema + 'Answer' => Post,
+      Schema + 'Article' => Post,
+      Schema + 'BlogPosting' => Post,
+      Schema + 'BreadcrumbList' => List,
+      Schema + 'Code' => Post,
+      Schema + 'DiscussionForumPosting' => Post,
+      Schema + 'ImageObject' => Image,
+      Schema + 'ItemList' => List,
+      Schema + 'NewsArticle' => Post,
+      Schema + 'Person' => Person,
+      Schema + 'Review' => Post,
+      Schema + 'UserComments' => Post,
+      Schema + 'VideoObject' => Video,
+      Schema + 'WebPage' => Post,
+    }
+
     # metadata-normalization map
     MetaMap = {
       'Author' => Creator,
