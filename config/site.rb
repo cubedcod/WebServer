@@ -398,6 +398,7 @@ addons-amo.cdn.mozilla.net
       elsif r.gunkURI?
         r.deny
       else
+        r.env[:links][:up] = '/' + r.parts[0] if r.path.match? /\/status\/\d+\/?$/
         r.fetch
       end}
 

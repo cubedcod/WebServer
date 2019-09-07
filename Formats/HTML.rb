@@ -258,8 +258,6 @@ class WebResource
       subbed = subscribed?
       tabular = env[:query] && env[:query]['view']=='table'
       shrunken = env[:query]&.has_key? 'head'
-      env[:links][:up] = dirname + (dirname[-1] == '/' ? '' : '/') + qs + '#r' + Digest::SHA2.hexdigest(path||'/') unless !env[:links] || !dirname || !path || path == '/'
-      env[:links][:down] = path + '/' if env['REQUEST_PATH'] && node.directory? && env['REQUEST_PATH'][-1] != '/'
 
       # Markup -> HTML
       HTML.render ["<!DOCTYPE html>\n\n",
@@ -443,20 +441,20 @@ class WebResource
 
     # Value -> Markup
     def self.value type, v, env
-      if Abstract == type || Content == type
+      if Abstract == type || Content == type # inlined HTML content
         v
-      elsif Markup[type] # explicit type-arg
+      elsif Markup[type] # render-type given as argument
         Markup[type][v,env]
-      elsif v.class == Hash # resource (with data)
+      elsif v.class == Hash        # resource (with data)
         types = (v[Type] || []).map{|t| MarkupMap[t.to_s] || t.to_s }
-        rendered_types = []
+        shown = []
         [types.map{|type|
-          if markup = Markup[type]
-            rendered_types.push type
-            markup[v,env]
+          if markup = Markup[type] # renderer found
+            shown.push type        # mark as shown
+            markup[v,env]          # show
           end},
-         #(unseen = types - rendered_types ; puts "#{v['uri']} no renderers defined for: " + unseen.join(' ') unless unseen.empty?),
-         (keyval v, env if rendered_types.empty?)]
+         (unseen = types - shown ; puts "#{v['uri']} no renderers defined for: " + unseen.join(' ') unless unseen.empty?),
+         (keyval v, env if shown.empty?)] # fallback renderer
       elsif v.class == WebResource # resource (reference only)
         if v.uri.match?(/^_:/) && env[:graph] && env[:graph][v.uri] # blank node
           value nil, env[:graph][v.uri], env
