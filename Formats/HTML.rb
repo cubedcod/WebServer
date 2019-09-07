@@ -544,7 +544,7 @@ class WebResource
 
     Markup[List] = -> list, env {
       {class: :list,
-       c: tabular((list[Schema+'itemListElement']||
+       c: tabular((list[Schema+'itemListElement']||list[Schema+'ListItem']||
                    list['https://schema.org/itemListElement']||[]).map{|l|
                     l.respond_to?(:uri) && env[:graph][l.uri] || (l.class == WebResource ? {'uri' => l.uri,
                                                                                              Title => [l.uri]} : l)}, env)}}
