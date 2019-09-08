@@ -71,6 +71,46 @@ class WebResource < RDF::URI
 
     CacheDir = (Pathname.new ENV['HOME'] + '/.cache').relative_path_from(PWD).to_s + '/'
 
+    # cache location
+    def cache format=nil
+      want_suffix = ext.empty?
+      hostPart = CacheDir + (host || 'localhost')
+      pathPart = if !path || path[-1] == '/'
+                   want_suffix = true
+                   '/index'
+                 elsif path.size > 127
+                   want_suffix = true
+                   hash = Digest::SHA2.hexdigest path
+                   '/' + hash[0..1] + '/' + hash[2..-1]
+                 else
+                   path
+                 end
+      qsPart = if qs.empty?
+                 ''
+               else
+                 want_suffix = true
+                 '.' + Digest::SHA2.hexdigest(qs)
+               end
+      suffix = if want_suffix
+                 if !ext || ext.empty? || ext.size > 11
+                   if format
+                     if xt = Extensions[RDF::Format.content_types[format]]
+                       '.' + xt.to_s # suffix found in format-map
+                     else
+                       '' # content-type unmapped
+                     end
+                   else
+                     '' # content-type unknown
+                   end
+                 else
+                   '.' + ext # restore known suffix
+                 end
+               else
+                 '' # suffix already exists
+               end
+      (hostPart + pathPart + qsPart + suffix).R env
+    end
+
   end
 
   include URIs
