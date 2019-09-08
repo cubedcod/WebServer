@@ -265,9 +265,9 @@ class WebResource
     # fetch over HTTP
     def fetchHTTP
       if verbose?
-        puts  "\e[7mREQUEST HEADER\e[0m IN" 
+        puts  "\e[7mREQUEST HEADER\e[0m IN"
         HTTP.print_header env
-        puts  "\e[7mREQUEST HEADER\e[0m OUT" 
+        puts  "\e[7mREQUEST HEADER\e[0m OUT"
         HTTP.print_header headers
       end
       open(uri, headers.merge({redirect: false})) do |response|          # fetch
@@ -277,7 +277,7 @@ class WebResource
         meta = response.meta                                             # upstream metadata
         if verbose?
           puts "GET #{status} #{uri}\n"
-          puts  "\e[7mRESPONSE HEADER\e[0m IN" 
+          puts  "\e[7mRESPONSE HEADER\e[0m IN"
           HTTP.print_header meta
         end
         if status == 206                                                 # partial body
@@ -299,7 +299,7 @@ class WebResource
           ks.concat %w(Set-Cookie x-iinfo) if allowCookies?                          # conditional metadata
           ks.map{|k|env[:resp][k]||=meta[k.downcase] if meta[k.downcase]}# metadata for HTTP caller
           if verbose?
-            puts  "\e[7mRESPONSE HEADER\e[0m OUT" 
+            puts  "\e[7mRESPONSE HEADER\e[0m OUT"
             HTTP.print_header env[:resp]
           end
           env[:transform] ||= !(upstreamFormat? format)                  # rewritable?
