@@ -398,7 +398,7 @@ class WebResource
     def headers hdr = nil
       head = {} # external headers
 
-      (hdr || env).map{|k,v| # raw headers
+      (hdr || env || {}).map{|k,v| # raw headers
         k = k.to_s
         underscored = k.match? /(_AP_|PASS_SFP)/i
         key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|k| # eat Rack HTTP_ prefix
@@ -423,7 +423,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       end
 
       # Referer
-      head['Referer'] = 'http://drudgereport.com/' if env['SERVER_NAME']&.match? /wsj\.com/
+      head['Referer'] = 'http://drudgereport.com/' if env && env['SERVER_NAME']&.match?(/wsj\.com/)
 
       # User-Agent
       head['User-Agent'] = DesktopUA[0]
@@ -434,7 +434,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     end
 
     def hostname
-      env['SERVER_NAME'] || host || 'localhost'
+      env && env['SERVER_NAME'] || host || 'localhost'
     end
 
     def local

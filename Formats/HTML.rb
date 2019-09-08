@@ -48,7 +48,7 @@ image-src
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
 
           dropa = a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || # strip attributes
-                  %w{bgcolor class height http-equiv layout ping role style tabindex target width}.member?(a.name) ||
+                  %w{bgcolor class height http-equiv layout ping role style tabindex target theme width}.member?(a.name) ||
                   a.name == 'id' && e.name != 'a' # remove ID from non-anchor elements
           a.unlink if dropa}}
 
@@ -142,7 +142,7 @@ sidebar [class^='side']    [id^='side']
         n = Nokogiri::HTML.parse @doc # parse
 
         # host bindings
-        if hostTriples = Triplr[@base.host] || Triplr[@base.respond_to?(:env) && @base.env && @base.env[:query]['host']]
+        if hostTriples = Triplr[@base.host] || Triplr[@base.respond_to?(:env) && @base.env && @base.env[:query] && @base.env[:query]['host']]
           @base.send hostTriples, n, &f
         end
 
@@ -319,7 +319,8 @@ class WebResource
          vs = (vs.class == Array ? vs : [vs]).compact
          type = (k ? k.to_s : '#notype').R
          ([{_: :tr, name: type.fragment || type.basename,
-            c: [{_: :td, class: 'k', c: Markup[Type][type]},
+            c: ["\n",
+                {_: :td, class: 'k', c: Markup[Type][type]}, "\n",
                 {_: :td, class: 'v', c: vs.map{|v|
                    [(value k, v, env), ' ']}}]}, "\n"] unless k=='uri' && vs[0] && vs[0].to_s.match?(/^_:/))}}
     end
@@ -407,10 +408,11 @@ class WebResource
         position = scale * rand(960) / 960.0
         css = {style: "border: .08em solid #{color}; background: repeating-linear-gradient(#{rand 360}deg, #000, #000 #{position}em, #{color} #{position}em, #{color} #{scale}em)"}
       end
-      {class: :tree,
-       c: [({_: :a, href: url, c: CGI.escapeHTML(name.to_s[0..85])} if name && url),
-           t.map{|_name, _t|
-             _name == :RDF ? (value nil, _t, env) : (tree _t, env, _name)}]}.update(css ? css : {})
+      ["\n",
+       {class: :tree,
+        c: [(["\n",{_: :a, href: url, c: CGI.escapeHTML(name.to_s[0..85])},"\n"] if name && url),
+            t.map{|_name, _t|
+              _name == :RDF ? (value nil, _t, env) : (tree _t, env, _name)}]}.update(css ? css : {})]
     end
 
     # Value -> Markup
@@ -519,27 +521,29 @@ class WebResource
         content = post.delete(Content) || []
         uri_hash = 'r' + Digest::SHA2.hexdigest(uri)
         {class: :post, id: uri_hash,
-         c: [titles.map{|title|
+         c: ["\n",
+             titles.map{|title|
                title = title.to_s.sub(/\/u\/\S+ on /,'')
                unless env[:title] == title
                  env[:title] = title
-                 [{_: :a, id: 't' + Digest::SHA2.hexdigest(rand.to_s), class: 'title', type: 'node', href: uri, c: CGI.escapeHTML(title)}, ' ']
+                 [{_: :a, id: 't' + Digest::SHA2.hexdigest(rand.to_s), class: 'title', type: 'node', href: uri, c: CGI.escapeHTML(title)}, " \n"]
                end},
              abstracts,
-             {_: :a, id: 'pt' + uri_hash, class: 'id', c: '☚', href: uri}.update(titles.empty? ? {type: 'node'} : {}),
-             ({_: :a, class: :date, id: 'date' + uri_hash, href: ServerAddr + '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date} if date),
+             {_: :a, id: 'pt' + uri_hash, class: 'id', c: '☚', href: uri}.update(titles.empty? ? {type: 'node'} : {}), "\n",
+             ([{_: :a, class: :date, id: 'date' + uri_hash, href: ServerAddr + '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date}, "\n"] if date),
              images.map{|i| Markup[Image][i,env]},
              {_: :table, class: :fromTo,
               c: {_: :tr,
-                  c: [{_: :td,
+                  c: ["\n",
+                      {_: :td,
                        c: from.map{|f|Markup[Creator][f,env]},
-                       class: :from},
+                       class: :from}, "\n",
                       {_: :td, c: '&rarr;'},
                       {_: :td,
                        c: [to.map{|f|Markup[To][f,env]},
                            post.delete(SIOC+'reply_of')],
-                       class: :to}]}},
-             content, (['<br>', HTML.keyval(post,env)] unless post.keys.size < 1)]}
+                       class: :to}, "\n"]}}, "\n",
+             content, (["<br>\n", HTML.keyval(post,env)] unless post.keys.size < 1)]}
       end}
 
     Markup[List] = -> list, env {
