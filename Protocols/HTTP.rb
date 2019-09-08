@@ -4,6 +4,7 @@ class WebResource
   module HTTP
     include URIs
     AllowedHosts = {}
+    CookieHosts = {}
     HostGET = {}
     HostPOST = {}
     Hosts = {}
@@ -15,6 +16,10 @@ class WebResource
     OffLine = ENV.has_key? 'OFFLINE'
     PathGET = {}
     NoTransform = /^(application|audio|font|image|text\/(css|(x-)?javascript|proto|xml)|video)/
+
+    def self.AllowCookies host
+      CookieHosts[host] = true
+    end
 
     def self.AllowHost host
       AllowedHosts[host] = true
@@ -32,6 +37,7 @@ class WebResource
 
     def allowCookies?
       AllowedHosts.has_key?(host) ||
+        CookieHosts.has_key?(host) ||
           HostPOST.has_key?(host)
     end
 

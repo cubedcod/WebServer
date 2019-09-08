@@ -155,6 +155,9 @@ wp-rum)([-.:_\/?&=~]|$)|
       GET 'www.amazon.com', -> r {r.gunkURI? ? r.deny : r.noexec}
     end
 
+    # AmericanInno
+    AllowCookies 'www.americaninno.com'
+
     # AOL
     GET 'o.aolcdn.com', -> r {r.env[:query].has_key?('image_uri') ? [301, {'Location' => r.env[:query]['image_uri']}, []] : r.noexec}
 
