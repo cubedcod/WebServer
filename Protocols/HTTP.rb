@@ -224,7 +224,7 @@ class WebResource
     def fetch options = {}
       return cache.fileResponse if cached?     # resource already fetched
       # TODO return cached if OffLine
-      u = '//' + hostname + path + (options[:suffix]||'') + qs # locator sans scheme
+      u = '//' + hostname + path + (options[:suffix]||'') + qs           # URI sans scheme
       primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env    # primary locator
       fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env # fallback locator
       primary.fetchHTTP     #   try (HTTPS default)
@@ -264,15 +264,21 @@ class WebResource
 
     # fetch over HTTP
     def fetchHTTP
-      open(uri, headers.merge({redirect: false})) do |response|
+      if verbose?
+        puts  "\e[7mREQUEST HEADER\e[0m IN" 
+        HTTP.print_header env
+        puts  "\e[7mREQUEST HEADER\e[0m OUT" 
+        HTTP.print_header headers
+      end
+      open(uri, headers.merge({redirect: false})) do |response|          # fetch
         print '🌍🌎🌏🌐'[rand 4]
-        env[:scheme] = scheme
-        status = response.status.to_s.match(/\d{3}/)[0].to_i
-        meta = response.meta # upstream metadata
+        env[:scheme] = scheme                                            # request scheme
+        status = response.status.to_s.match(/\d{3}/)[0].to_i             # upstream status
+        meta = response.meta                                             # upstream metadata
         if verbose?
-          puts "GET #{status} #{uri}"
+          puts "GET #{status} #{uri}\n"
+          puts  "\e[7mRESPONSE HEADER\e[0m IN" 
           HTTP.print_header meta
-          puts ""
         end
         if status == 206                                                 # partial body
           [status, meta, response.read]                                  # return partial body
@@ -292,7 +298,10 @@ class WebResource
           ks = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type Content-Length ETag}
           ks.concat %w(Set-Cookie x-iinfo) if allowCookies?                          # conditional metadata
           ks.map{|k|env[:resp][k]||=meta[k.downcase] if meta[k.downcase]}# metadata for HTTP caller
-          HTTP.print_header env[:resp] if verbose?
+          if verbose?
+            puts  "\e[7mRESPONSE HEADER\e[0m OUT" 
+            HTTP.print_header env[:resp]
+          end
           env[:transform] ||= !(upstreamFormat? format)                  # rewritable?
           env[:transform] ? graphResponse : [status, env[:resp], [body]] # return RDF or upstream-data
         end
