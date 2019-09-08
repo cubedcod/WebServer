@@ -519,7 +519,7 @@ class WebResource
         to = post.delete(To) || []
         images = post.delete(Image) || []
         content = post.delete(Content) || []
-        uri_hash = 'r' + Digest::SHA2.hexdigest(uri)
+        uri_hash = 'r' + Digest::SHA2.hexdigest(uri||'')
         {class: :post, id: uri_hash,
          c: ["\n",
              titles.map{|title|
