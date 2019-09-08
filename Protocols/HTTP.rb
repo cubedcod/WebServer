@@ -268,7 +268,12 @@ class WebResource
         print '🌍🌎🌏🌐'[rand 4]
         env[:scheme] = scheme
         status = response.status.to_s.match(/\d{3}/)[0].to_i
-        meta = response.meta; HTTP.print_header meta if verbose?
+        meta = response.meta # upstream metadata
+        if verbose?
+          puts "GET #{status} #{uri}"
+          HTTP.print_header meta
+          puts ""
+        end
         if status == 206                                                 # partial body
           [status, meta, response.read]                                  # return partial body
         else                                                             # body
@@ -285,8 +290,9 @@ class WebResource
           return self if env[:intermediate]                              # no response?
           index                                                          # index RDF
           ks = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type Content-Length ETag}
-          ks.push 'Set-Cookie' if allowCookies?                          # conditional metadata
+          ks.concat %w(Set-Cookie x-iinfo) if allowCookies?                          # conditional metadata
           ks.map{|k|env[:resp][k]||=meta[k.downcase] if meta[k.downcase]}# metadata for HTTP caller
+          HTTP.print_header env[:resp] if verbose?
           env[:transform] ||= !(upstreamFormat? format)                  # rewritable?
           env[:transform] ? graphResponse : [status, env[:resp], [body]] # return RDF or upstream-data
         end
