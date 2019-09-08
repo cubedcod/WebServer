@@ -394,11 +394,13 @@ addons-amo.cdn.mozilla.net
         '//twitter.com'.R.subscriptions.shuffle.each_slice(18){|s|
           r.env[:query] = { vertical: :default, f: :tweets, q: s.map{|u|'from:' + u}.join('+OR+')}
           '//twitter.com/search'.R(r.env).fetch}
+        r.env[:query] = {'sort' => 'date', 'view' => 'table'} # chronological sort
         r.index.graphResponse
       elsif r.gunkURI?
         r.deny
       else
-        r.env[:links][:up] = '/' + r.parts[0] if r.path.match? /\/status\/\d+\/?$/
+        r.env[:links][:up] = '/' + r.parts[0] + '?view=table&sort=date' if r.path.match? /\/status\/\d+\/?$/
+        r.env[:links][:up] = '/' if r.parts.size == 1
         r.fetch
       end}
 
