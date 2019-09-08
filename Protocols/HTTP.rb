@@ -138,7 +138,8 @@ class WebResource
       else
         body
       end
-    rescue Zlib::DataError
+    rescue Exception => e
+      puts [e.class, e.message].join " "
       ''
     end
 
