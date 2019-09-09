@@ -1,8 +1,4 @@
 # coding: utf-8
-ENV['BUNDLE_GEMFILE'] = File.expand_path '../Gemfile', File.dirname(__FILE__)
-require 'bundler'
-Bundler.setup
-require "webvtt"
 
 class String
   # text -> HTML, also yielding found (rel,href) tuples to block
@@ -103,7 +99,12 @@ module Webize
       include WebResource::URIs
       format Format
 
+      ENV['BUNDLE_GEMFILE'] = File.expand_path '../Gemfile', File.dirname(__FILE__)
       def initialize(input = $stdin, options = {}, &block)
+        require 'bundler'
+        Bundler.setup
+        require "webvtt"
+
         @doc = input.respond_to?(:read) ? input.read : input
         @base = options[:base_uri].R
         if block_given?
