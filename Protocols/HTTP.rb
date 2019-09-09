@@ -486,6 +486,39 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       env && env['SERVER_NAME'] || host || 'localhost'
     end
 
+    # WebResource -> Graph - RDF#load wrapper with cached RDFizations and path-derived format hints
+    def load options = {base_uri: (path.R env)}
+      env[:repository] ||= RDF::Repository.new
+      nodeStat unless isRDF?
+      if file?
+        if basename.index('msg.')==0 || path.index('/sent/cur')==0
+          # procmail doesnt allow suffix (like .eml), only prefix? email author if you find solution
+          # presumably this is due to crazy maildir suffix-rewrites etc
+          options[:format] = :mail
+        elsif ext.match? /^html?$/
+          options[:format] = :html
+        elsif %w(Cookies).member? basename
+          options[:format] = :sqlite
+        elsif %w(changelog gophermap gophertag license makefile readme todo).member?(basename.downcase) || %w(cls gophermap old plist service socket sty textile xinetd watchr).member?(ext.downcase)
+          options[:format] = :plaintext
+        elsif %w(markdown).member? ext.downcase
+          options[:format] = :markdown
+        elsif %w(install-sh).member? basename.downcase
+          options[:format] = :sourcecode
+          options[:lang] = :sh
+        elsif %w(gemfile rakefile).member?(basename.downcase) || %w(gemspec).member?(ext.downcase)
+          options[:format] = :sourcecode
+          options[:lang] = :ruby
+        elsif %w(bash c cpp h hs pl py rb sh).member? ext.downcase
+          options[:format] = :sourcecode
+        end
+        #puts [relPath, options[:format]].join ' '
+        env[:repository].load relPath, options
+      end
+    rescue RDF::FormatError => e
+      puts [e.class, e.message].join ' '
+    end
+
     def local
       if %w{y year m month d day h hour}.member? parts[0] # time-based redirect
         time = Time.now

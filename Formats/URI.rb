@@ -111,6 +111,8 @@ class WebResource < RDF::URI
       (hostPart + pathPart + qsPart + suffix).R env
     end
 
+    def isRDF?; ext == 'ttl' end
+
   end
 
   include URIs
