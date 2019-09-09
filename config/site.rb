@@ -251,6 +251,7 @@ encrypted-tbn1.gstatic.com
 encrypted-tbn2.gstatic.com
 encrypted-tbn3.gstatic.com
          groups.google.com
+             kh.google.com
            maps.google.com
        maps.googleapis.com
           maps.gstatic.com
