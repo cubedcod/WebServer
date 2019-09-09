@@ -585,6 +585,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     end
 
     def noexec
+      return fetch if ext=='js' && host.match?(/amazon/) && ENV.has_key?('AMAZON')
       return deny if %w(gif js).member?(ext.downcase) || env['REQUEST_URI'].match?(/\.png\?/)
       fetch.yield_self{|status, head, body|
         type = head['Content-Type'] || ''
