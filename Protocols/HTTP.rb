@@ -52,7 +52,7 @@ class WebResource
     end
 
     def cached?
-      cachedType && cache.exist? && !%w(html js).member?(ext.downcase)
+      cachedType && cache.exist? && !%w(html).member?(ext.downcase)
     end
 
     def cachedType # types of files we cache, specified as name-suffix
