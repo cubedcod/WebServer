@@ -178,7 +178,7 @@ class WebResource
     def denyPOST
       unless host.match? /google|youtube/
         head = headers
-        puts [head['Content-Encoding'], head['Content-Type']].join ' '
+        #puts [head['Content-Encoding'], head['Content-Type']].join ' '
         HTTP.print_body head, HTTP.decompress(head, env['rack.input'].read)
       end
       env[:deny] = true
@@ -281,7 +281,7 @@ class WebResource
           HTTP.print_header meta
         end
         if status == 206                                                 # partial body
-          [status, meta, response.read]                                  # return partial body
+          [status, meta, [response.read]]                                # return partial body
         else                                                             # body
           format=env[:content_type]||meta['content-type']&.split(/;/)[0] # content-type
           format ||= (xt = ext.to_sym                                    # extension-derived fallback
@@ -629,15 +629,21 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     end
 
     def HTTP.print_body head, body
-      body = case (head['Content-Type'] || head['content-type'])
-             when 'application/json'
-               json = ::JSON.parse body rescue {}
-               puts json['query'] if json['query']
-               ::JSON.pretty_generate json
-             else
-               body
-             end
-      puts body
+      puts case (head['Content-Type']||head['content-type'])
+           when 'application/x-www-form-urlencoded'
+             form = parseQs body
+             ::JSON.pretty_generate(if form['message']
+                                     ::JSON.parse form['message']
+                                    else
+                                     form
+                                    end)
+           when 'application/json'
+             json = ::JSON.parse body rescue {}
+             puts json['query'] if json['query']
+             ::JSON.pretty_generate json
+           else
+             body
+           end
     end
 
     def HTTP.print_header header
