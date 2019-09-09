@@ -13,7 +13,7 @@ class WebResource
           # canonical location
           if n.host # global graph
             docs.push (CacheDir + n.host + (n.path ? (n.path[-1]=='/' ? (n.path + 'index') : n.path) : '') + '.ttl').R
-          else      # local graph
+          else # local graph
             docs.push (n.path + '.ttl').R unless n.exist?
           end
           # timeline location
@@ -28,7 +28,7 @@ class WebResource
           unless doc.exist?
             doc.dir.mkdir
             RDF::Writer.open(doc.relPath){|f|f << graph}
-            puts doc
+            puts doc.path[0]=='/' ? (ServerAddr + doc.path.sub(/\.ttl$/,'')) : doc
           end}
       end}
     self
