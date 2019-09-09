@@ -1,6 +1,6 @@
 #!/bin/sh
 # https://www.alpinelinux.org/
-which apk && su -c 'apk add alpine-sdk graphicsmagick ruby ruby-dev python python3-dev py3-cffi py3-pip openssl-dev rsync libexif-dev libxslt-dev tmux squid'
+which apk && su -c 'apk add alpine-sdk iptables ip6tables graphicsmagick ruby ruby-dev python python3-dev py3-cffi py3-pip openssl-dev rsync libexif-dev libxslt-dev tmux squid'
 # https://www.archlinux.org/
 which pacman && su -c 'pacman -S graphicsmagick git base-devel ruby ruby-bundler ruby-rdoc python-pip pkg-config tmux squid make rsync'
 # https://www.debian.org/
