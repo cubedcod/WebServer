@@ -295,9 +295,10 @@ class WebResource
               env[:repository] << rdf } if reader}                       # parse RDF
           return self if env[:intermediate]                              # no response?
           index                                                          # index RDF
-          ks = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type Content-Length ETag}
+          ks = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag}
           ks.concat %w(Set-Cookie x-iinfo) if allowCookies?                          # conditional metadata
           ks.map{|k|env[:resp][k]||=meta[k.downcase] if meta[k.downcase]}# metadata for HTTP caller
+          env[:resp]['Content-Length'] = body.bytesize.to_s
           if verbose?
             puts  "\e[7mRESPONSE HEADER\e[0m OUT"
             HTTP.print_header env[:resp]
@@ -611,7 +612,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       code = r.code
       head = r.headers
       body = r.body
-      #head['content-length'] ||= body.bytesize.to_s if body
+      head.delete 'connection'
       head.delete 'transfer-encoding'
 
       if verbose?
