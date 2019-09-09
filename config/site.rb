@@ -229,13 +229,16 @@ wp-rum)([-.:_\/?&=~]|$)|
     GET 'gitter.im', -> req {req.desktop.fetch}
 
     # Google
-    GoogleSearch = -> r {
-      if r.path == '/search'
+    GoogleLite = -> r {
+      case r.path
+      when '/search'
         if r.env[:query]['q']&.match? /^https?:\/\//
           [301, {'Location' => r.env[:query]['q']}, []]
         else
           r.noexec
         end
+      when /^\/maps/
+        r.desktop.fetch
       else
         r.deny
       end}
@@ -278,8 +281,9 @@ android.clients.google.com
       AllowHost host}
       GET 'www.googleadservices.com', -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
     else
-      GET 'google.com', GoogleSearch
-      GET 'www.google.com', GoogleSearch
+      AllowRefer 'www.google.com'
+      GET 'google.com', GoogleLite
+      GET 'www.google.com', GoogleLite
     end
 
     # Linkedin
