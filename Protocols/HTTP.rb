@@ -5,6 +5,7 @@ class WebResource
     include URIs
     AllowedHosts = {}
     CookieHosts = {}
+    ReferHosts = {}
     HostGET = {}
     HostPOST = {}
     Hosts = {}
@@ -25,6 +26,10 @@ class WebResource
       AllowedHosts[host] = true
     end
 
+    def self.AllowRefer host
+      ReferHosts[host] = true
+    end
+
     def allowedOrigin
       if env['HTTP_ORIGIN']
         env['HTTP_ORIGIN']
@@ -41,8 +46,13 @@ class WebResource
           HostPOST.has_key?(host)
     end
 
+    def allowRefer?
+      AllowedHosts.has_key?(host) ||
+        ReferHosts.has_key?(host)
+    end
+
     def cached?
-      cachedType && cache.exist? && !%w(html js).member?(ext.downcase)
+      cachedType && cache.exist? && !%w(html).member?(ext.downcase)
     end
 
     def cachedType # types of files we cache, specified as name-suffix
@@ -264,45 +274,55 @@ class WebResource
 
     # fetch over HTTP
     def fetchHTTP
-      if verbose?
+
+      if verbose? # logging
         puts  "\e[7mREQUEST HEADER\e[0m IN"
         HTTP.print_header env
         puts  "\e[7mREQUEST HEADER\e[0m OUT"
         HTTP.print_header headers
       end
+
       open(uri, headers.merge({redirect: false})) do |response|          # fetch
         print '🌍🌎🌏🌐'[rand 4]
         env[:scheme] = scheme                                            # request scheme
         status = response.status.to_s.match(/\d{3}/)[0].to_i             # upstream status
         meta = response.meta                                             # upstream metadata
-        if verbose?
-          puts "GET #{status} #{uri}\n"
+
+        if verbose? # logging
+          puts "GET #{status} #{uri}\n\n"
           puts  "\e[7mRESPONSE HEADER\e[0m IN"
           HTTP.print_header meta
         end
+
         if status == 206                                                 # partial body
           [status, meta, [response.read]]                                # return partial body
         else                                                             # body
           format=env[:content_type]||meta['content-type']&.split(/;/)[0] # content-type
           format ||= (xt = ext.to_sym                                    # extension-derived fallback
                       RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
+
           body = HTTP.decompress meta, response.read                     # decode body
           format ||= body.bytesize < 2048 ? 'text/plain' : 'application/octet-stream' # untyped?
           cache(format).write body.force_encoding('UTF-8') if cachedType # cache body
+
           env[:repository] ||= RDF::Repository.new                       # RDF storage
           RDF::Reader.for(content_type: format).yield_self{|reader|      # RDF reader
             reader.new(body, {base_uri: self, no_embeds: env[:no_RDFa]}){|rdf|
               env[:repository] << rdf } if reader}                       # parse RDF
+
           return self if env[:intermediate]                              # no response?
+
           index                                                          # index RDF
           ks = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag}
           ks.concat %w(Set-Cookie x-iinfo) if allowCookies?                          # conditional metadata
           ks.map{|k|env[:resp][k]||=meta[k.downcase] if meta[k.downcase]}# metadata for HTTP caller
           env[:resp]['Content-Length'] = body.bytesize.to_s
-          if verbose?
+
+          if verbose? # logging
             puts  "\e[7mRESPONSE HEADER\e[0m OUT"
             HTTP.print_header env[:resp]
           end
+
           env[:transform] ||= !(upstreamFormat? format)                  # rewritable?
           env[:transform] ? graphResponse : [status, env[:resp], [body]] # return RDF or upstream-data
         end
@@ -445,7 +465,14 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       end
 
       # Referer
-      head['Referer'] = 'http://drudgereport.com/' if env && env['SERVER_NAME']&.match?(/wsj\.com/)
+      head.delete 'Referer' unless allowRefer?
+
+      case env['SERVER_NAME']
+      when /wsj\.com$/
+        head['Referer'] = 'http://drudgereport.com/'
+      when /youtube.com$/
+        head['Referer'] = 'https://www.youtube.com/'
+      end if env && env['SERVER_NAME']
 
       # User-Agent
       head['User-Agent'] = DesktopUA[0]
