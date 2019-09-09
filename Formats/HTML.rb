@@ -519,8 +519,8 @@ class WebResource
         to = post.delete(To) || []
         images = post.delete(Image) || []
         content = post.delete(Content) || []
-        uri_hash = 'r' + Digest::SHA2.hexdigest(uri||'')
-        {class: :post, id: uri_hash,
+        uri_hash = 'r' + Digest::SHA2.hexdigest(uri) if uri
+        {class: :post,
          c: ["\n",
              titles.map{|title|
                title = title.to_s.sub(/\/u\/\S+ on /,'')
@@ -529,7 +529,7 @@ class WebResource
                  [{_: :a, id: 't' + Digest::SHA2.hexdigest(rand.to_s), class: 'title', type: 'node', href: uri, c: CGI.escapeHTML(title)}, " \n"]
                end},
              abstracts,
-             {_: :a, id: 'pt' + uri_hash, class: 'id', c: '☚', href: uri}.update(titles.empty? ? {type: 'node'} : {}), "\n",
+             {_: :a, class: 'id', c: '☚', href: uri}.update(titles.empty? ? {type: 'node'} : {}).update(uri ? {id: 'pt' + uri_hash} : {}), "\n",
              ([{_: :a, class: :date, id: 'date' + uri_hash, href: ServerAddr + '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date}, "\n"] if date),
              images.map{|i| Markup[Image][i,env]},
              {_: :table, class: :fromTo,
@@ -543,7 +543,7 @@ class WebResource
                        c: [to.map{|f|Markup[To][f,env]},
                            post.delete(SIOC+'reply_of')],
                        class: :to}, "\n"]}}, "\n",
-             content, (["<br>\n", HTML.keyval(post,env)] unless post.keys.size < 1)]}
+             content, (["<br>\n", HTML.keyval(post,env)] unless post.keys.size < 1)]}.update(uri ? {id: uri_hash} : {})
       end}
 
     Markup[List] = -> list, env {
