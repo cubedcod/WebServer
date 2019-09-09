@@ -377,7 +377,7 @@ addons-amo.cdn.mozilla.net
         end}}
 
     # Shopify
-    GET 'cdn.shopify.com', -> r {r.noexec}
+    GET 'cdn.shopify.com', -> r {r.qs.empty? ? r.noexec : [301, {'Location' => r.path}, []]}
 
     # Skimmer
     GET 'go.skimresources.com', GotoURL
