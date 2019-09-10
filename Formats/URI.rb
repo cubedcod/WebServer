@@ -1,5 +1,12 @@
 # coding: utf-8
 %w(digest/sha2 fileutils linkeddata pathname shellwords).map{|_| require _}
+class Array
+  def R env=nil; find{|el| el.to_s.match? /^https?:/}.R env end
+end
+
+class NilClass
+  def R env=nil; ''.R env end
+end
 
 class RDF::URI
   def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
@@ -14,7 +21,7 @@ class String
 end
 
 class WebResource < RDF::URI
-  def R; self end
+  def R env_=nil; env_ ? env(env_) : self end
   alias_method :uri, :to_s
   module URIs
     PWD = Pathname.new Dir.pwd

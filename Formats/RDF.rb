@@ -45,7 +45,11 @@ class WebResource
         o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object URI or literal
         tree[s] ||= {'uri' => s}                      # subject
         tree[s][p] ||= []                             # predicate
-        tree[s][p].push o unless tree[s][p].member? o # object
+        if tree[s][p].class == Array
+          tree[s][p].push o unless tree[s][p].member? o # object
+        else
+          tree[s][p] = [tree[s][p],o] unless tree[s][p] == o
+        end
       end}
     env[:graph] = tree
   end
