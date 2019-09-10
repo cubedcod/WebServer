@@ -75,14 +75,15 @@ e(moji.*\.js|nsighten|vidon)|(web)?
 fonts?|
 g(dpr|eo(ip|locate)|igya|pt|tag|tm)|.*
 (header|pre)[-_]?bid.*|.*hubspot.*|[hp]b.?js|ima[0-9]?|
+impression|
 kr(ux|xd).*|
 log(event|ger)|(app|s)?
 m(e(asurement|ssaging|t(er|rics?))|ms|tr)|
 new(relic|sletter)|
 o(m(niture|tr)|nboarding|ptanon|utbrain)|
-p(a(idpost|y(ments?|wall))|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)|op(over|up)|romo(tion)?s?|ubmatic|[vx])|
+p(a(idpost|y(ments?|wall))|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)|lacement|op(over|up)|romo(tion)?s?|ubmatic|[vx])|
 quantcast|
-reco(mmend(ed)?|rd(event|stats?)?)|rpc|
+reco(mmend(ation)?s?|rd(event|stats?)?)|rpc|
 s?s(a(fe[-_]?browsing|ilthru)|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(cial|urcepoint)|ponsored|so|tat(istic)?s?|ubscri(ber?|ption)|w.js|ync)|
 t(aboola|(arget|rack)(ers?|ing)?|bproxy|ea(lium|ser)|inypass|rend(ing|s))|autotrack|
 u(rchin|serlocation|tm)|
@@ -354,8 +355,6 @@ addons-amo.cdn.mozilla.net
       end}
 
     # Reddit
-   #AllowHost 'events.reddit.com'
-   #AllowHost 'gateway.reddit.com'
     AllowHost 'oauth.reddit.com'
     AllowHost 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
     AllowHost 'www.reddit.com'
@@ -379,6 +378,9 @@ addons-amo.cdn.mozilla.net
       else
         r.fetch options
       end}
+
+    # Redfin
+    AllowCookies 'www.redfin.com'
 
     # Reuters
     (0..5).map{|i|
@@ -476,8 +478,8 @@ results signin user watch watch_videos yts).member?(mode)
     GET 'youtu.be', -> r {[301, {'Location' => 'https://www.youtube.com/watch?v=' + r.path[1..-1]}, []]}
 
     # Zillow
-    #AllowHost 'www.zillow.com'
-    AllowCookies 'www.zillow.com'
+    AllowHost 'www.zillow.com'
+    #AllowCookies 'www.zillow.com'
 
   end
 
