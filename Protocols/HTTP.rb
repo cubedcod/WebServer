@@ -297,9 +297,10 @@ class WebResource
         if status == 206                                                 # partial body
           [status, meta, [response.read]]                                # return partial body
         else                                                             # body
-          format=env[:content_type]||meta['content-type']&.split(/;/)[0] # content-type
-          format ||= (xt = ext.to_sym                                    # extension-derived fallback
-                      RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
+          format = env && env[:content_type]                             # explicit format-argument
+          format ||= meta['content-type'].split(/;/)[0] if meta['content-type'] # format specified in header
+          format ||= (xt = ext.to_sym                                    # path-extension -> format map
+            RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
 
           body = HTTP.decompress meta, response.read                     # decode body
           format ||= body.bytesize < 2048 ? 'text/plain' : 'application/octet-stream' # untyped?

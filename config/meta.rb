@@ -416,6 +416,7 @@ class WebResource
       Schema + 'creator' => Creator,
       Schema + 'dateCreated' => Date,
       Schema + 'dateModified' => Date,
+      Schema + 'datePosted' => Date,
       Schema + 'datePublished' => Date,
       Schema + 'description' => Abstract,
       Schema + 'headline' => Title,
