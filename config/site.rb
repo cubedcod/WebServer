@@ -288,6 +288,7 @@ android.clients.google.com
          images.google.com
              kh.google.com
            mail.google.com
+           play.google.com
        play.googleapis.com
            ssl.gstatic.com
  suggestqueries.google.com
