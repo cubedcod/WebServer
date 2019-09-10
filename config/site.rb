@@ -155,9 +155,11 @@ wp-rum)([-.:_\/?&=~]|$)|
 images-na.ssl-images-amazon.com
                  www.amazon.com).map{|h|AllowHost h}
     else
+      AmznMedia = -> r {%w(css jpg png).member?(r.ext) && r.env['HTTP_REFERER']&.match(/amazon\.com/) && r.noexec || r.deny}
       GET 'amazon.com', Lite
       GET 'www.amazon.com', Lite
-      GET 'images-na.ssl-images-amazon.com', -> r {%w(css jpg png).member?(r.ext) && r.env['HTTP_REFERER']&.match(/amazon\.com/) && r.noexec || r.deny}
+      GET 'images-na.ssl-images-amazon.com', AmznMedia
+      GET 'm.media-amazon.com', AmznMedia
     end
 
     # AmericanInno
