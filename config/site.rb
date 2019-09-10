@@ -475,6 +475,9 @@ results signin user watch watch_videos yts).member?(mode)
 
     GET 'youtu.be', -> r {[301, {'Location' => 'https://www.youtube.com/watch?v=' + r.path[1..-1]}, []]}
 
+    # Zillow
+    AllowHost 'www.zillow.com'
+
   end
 
   def HTTP.twits
