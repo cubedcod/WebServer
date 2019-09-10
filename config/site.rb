@@ -69,7 +69,7 @@ class WebResource
     GunkURI = %r([-.:_\/?&=~]((block|page)?
 a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|slot|type|words?)?|(app)?
 b(anner|eacon|reakingnew)s?|
-c(ampaign|edexis|hartbeat.*|omscore|onversion|ookie(c(hoice|onsent)|law|notice)?s?|se)|
+c(ampaign|edexis|hartbeat.*|ollector|omscore|onversion|ookie(c(hoice|onsent)|law|notice)?s?|se)|
 detect|
 e(moji.*\.js|nsighten|vidon)|(web)?
 fonts?|
@@ -476,7 +476,8 @@ results signin user watch watch_videos yts).member?(mode)
     GET 'youtu.be', -> r {[301, {'Location' => 'https://www.youtube.com/watch?v=' + r.path[1..-1]}, []]}
 
     # Zillow
-    AllowHost 'www.zillow.com'
+    #AllowHost 'www.zillow.com'
+    AllowCookies 'www.zillow.com'
 
   end
 
