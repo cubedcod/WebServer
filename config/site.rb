@@ -351,6 +351,7 @@ addons-amo.cdn.mozilla.net
    #AllowHost 'events.reddit.com'
    #AllowHost 'gateway.reddit.com'
     AllowHost 'oauth.reddit.com'
+    AllowHost 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
     AllowHost 'www.reddit.com'
     GotoReddit = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path},[]]}
     GET 'reddit.com', GotoReddit
