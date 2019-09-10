@@ -162,6 +162,12 @@ wp-rum)([-.:_\/?&=~]|$)|
     # AOL
     GET 'o.aolcdn.com', -> r {r.env[:query].has_key?('image_uri') ? [301, {'Location' => r.env[:query]['image_uri']}, []] : r.noexec}
 
+    # Bizjournals
+    AllowCookies 'www.bizjournals.com'
+
+    # Bloomberg
+    AllowCookies 'www.bloomberg.com'
+
     # Boston Globe
     GET 'bos.gl', -> r {r.fetch scheme: :http}
 
