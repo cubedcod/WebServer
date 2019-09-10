@@ -120,6 +120,7 @@ wp-rum)([-.:_\/?&=~]|$)|
     GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : r.noexec}
     Icon = -> r { r.env[:deny] = true
       [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
+    Lite =  -> r {r.gunkURI? ? r.deny : r.noexec}
     StaticNoQS = -> r {
       r.qs.empty? ? r.noexec : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
 
@@ -150,10 +151,13 @@ wp-rum)([-.:_\/?&=~]|$)|
 
     # Amazon
     if ENV.has_key? 'AMAZON'
-      %w(amazon.com www.amazon.com).map{|h|AllowHost h}
+      %w(            amazon.com
+images-na.ssl-images-amazon.com
+                 www.amazon.com).map{|h|AllowHost h}
     else
-      GET 'amazon.com', -> r {r.gunkURI? ? r.deny : r.noexec}
-      GET 'www.amazon.com', -> r {r.gunkURI? ? r.deny : r.noexec}
+      GET 'amazon.com', Lite
+      GET 'www.amazon.com', Lite
+      GET 'images-na.ssl-images-amazon.com', -> r {%w(css jpg png).member?(r.ext) && r.env['HTTP_REFERER']&.match(/amazon\.com/) && r.noexec || r.deny}
     end
 
     # AmericanInno
@@ -293,7 +297,6 @@ android.clients.google.com
       GET 'www.googleadservices.com', -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
     else
       AllowCookies 'www.google.com'
-      AllowHost 'www.gstatic.com'
       AllowRefer 'www.google.com'
       GET 'google.com', GoogleLite
       GET 'www.google.com', GoogleLite
