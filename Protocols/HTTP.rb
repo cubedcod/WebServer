@@ -160,7 +160,8 @@ class WebResource
     end
 
     def deny status=200, type=nil
-      return [301,{'Location'=>env['REQUEST_PATH']},[]] if !env[:query].keys.grep(/campaign|[iu]tm_/).empty?
+      return [301,{'Location'=>env['REQUEST_PATH']},[]] if env['REQUEST_URI'].match?(/\.png\?/) || !env[:query].keys.grep(/campaign|[iu]tm_/).empty?
+
       env[:deny] = true
       type, content = if ext == 'js' || type == :script
                         source = ConfDir.join 'alternatives/' + host + path
