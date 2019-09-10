@@ -187,15 +187,13 @@ class WebResource
     end
 
     def denyPOST
-      unless host.match? /google|youtube/
+      unless host.match? /youtube/
         head = headers
-        #puts [head['Content-Encoding'], head['Content-Type']].join ' '
-        HTTP.print_body head, HTTP.decompress(head, env['rack.input'].read)
+        HTTP.print_body head, HTTP.decompress(head, env['rack.input'].read.force_encoding('UTF-8'))
       end
       env[:deny] = true
       [202, {'Access-Control-Allow-Credentials' => 'true',
-             'Access-Control-Allow-Origin' => allowedOrigin},
-       []]
+             'Access-Control-Allow-Origin' => allowedOrigin}, []]
     end
 
     def desktop; env['HTTP_USER_AGENT'] = DesktopUA[0]; self end
@@ -695,7 +693,9 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     end
 
     def HTTP.print_body head, body
-      puts case (head['Content-Type']||head['content-type'])
+      type = head['Content-Type'] || head['content-type']
+      puts type
+      puts case type
            when 'application/x-www-form-urlencoded'
              form = parseQs body
              ::JSON.pretty_generate(if form['message']
