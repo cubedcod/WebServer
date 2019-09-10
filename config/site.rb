@@ -287,6 +287,7 @@ android.clients.google.com
             www.google.com
         www.googleapis.com
            www.gstatic.com
+         www.recaptcha.net
 ).map{|host|
       AllowHost host}
       GET 'www.googleadservices.com', -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
