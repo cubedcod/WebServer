@@ -454,7 +454,7 @@ addons-amo.cdn.mozilla.net
 
     # YouTube
     GET 's.ytimg.com', -> r {r.desktop.fetch}
-
+    GET 'youtube.com', -> r {[301, {'Location' => 'https://www.youtube.com' + r.env['REQUEST_URI']}, []]}
     GET 'www.youtube.com', -> r {
       mode = r.parts[0]
       if %w{attribution_link redirect}.member? mode
