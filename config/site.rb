@@ -86,22 +86,11 @@ wp-rum)([-.:_\/?&=~]|$)|
                  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3906.0 Safari/537.36',
                  'Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0']
 
-    def subscriptionFile slug=nil
-      (case host
-       when /reddit.com$/
-         '/www.reddit.com/r/' + (slug || parts[1] || '') + '/.sub'
-       when /^twitter.com$/
-         '/twitter.com/' + (slug || parts[0] || '') + '/.following'
-       else
-         '/feed/' + [host, *parts].join('.')
-       end).R
-    end
-
     # path handlers
 
     GET '/mail', -> r {
       if r.local?
-        if r.path=='/mail' # inbox
+        if r.path == '/mail' # inbox redirect
           [302, {'Location' => '/d/*/msg*?head&sort=date&view=table'}, []]
         else
           r.local
@@ -142,6 +131,8 @@ wp-rum)([-.:_\/?&=~]|$)|
 
     GET '/url', GotoURL
 
+    # site handlers
+
     # Alibaba
     %w(www.aliexpress.com ae-cn.alicdn.com ae01.alicdn.com i.alicdn.com).map{|h|AllowHost h}
 
@@ -151,11 +142,11 @@ wp-rum)([-.:_\/?&=~]|$)|
 images-na.ssl-images-amazon.com
                  www.amazon.com).map{|h|AllowHost h}
     else
-      AmznMedia = -> r {%w(css jpg png).member?(r.ext) && r.env['HTTP_REFERER']&.match(/amazon\.com/) && r.noexec || r.deny}
+      AmazonMedia = -> r {%w(css jpg mp4 png webm webp).member?(r.ext.downcase) && r.env['HTTP_REFERER']&.match(/amazon\.com/) && r.noexec || r.deny}
       GET 'amazon.com', Lite
       GET 'www.amazon.com', Lite
-      GET 'images-na.ssl-images-amazon.com', AmznMedia
-      GET 'm.media-amazon.com', AmznMedia
+      GET 'images-na.ssl-images-amazon.com', AmazonMedia
+      GET 'm.media-amazon.com', AmazonMedia
     end
 
     # AmericanInno
@@ -296,8 +287,8 @@ android.clients.google.com
       GET 'www.googleadservices.com', -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
     else
       AllowCookies 'www.google.com'
-      AllowRefer 'www.google.com'
-      GET 'google.com', GoogleLite
+      AllowRefer   'www.google.com'
+      GET     'google.com', GoogleLite
       GET 'www.google.com', GoogleLite
     end
 
@@ -308,7 +299,7 @@ android.clients.google.com
     end
 
     # Medium
-    #GET 'medium.com', -> r {r.env[:query].has_key?('redirecturl') ? [301, {'Location' => r.env[:query]['redirecturl']}, []] : r.noexec}
+    GET 'medium.com', -> r {r.env[:query].has_key?('redirecturl') ? [301, {'Location' => r.env[:query]['redirecturl']}, []] : r.noexec}
 
     # Meredith
     GET 'imagesvc.meredithcorp.io', GoIfURL
@@ -476,6 +467,17 @@ results signin user watch watch_videos yts).member?(mode)
     # Zillow
     AllowHost 'www.zillow.com'
     #AllowCookies 'www.zillow.com'
+
+    def subscriptionFile slug=nil
+      (case host
+       when /reddit.com$/
+         '/www.reddit.com/r/' + (slug || parts[1] || '') + '/.sub'
+       when /^twitter.com$/
+         '/twitter.com/' + (slug || parts[0] || '') + '/.following'
+       else
+         '/feed/' + [host, *parts].join('.')
+       end).R
+    end
 
   end
 
