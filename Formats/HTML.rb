@@ -18,18 +18,14 @@ image-src
 )
 
     def self.clean body
-      # parse input
       html = Nokogiri::HTML.fragment body
 
       # strip elements
       %w{iframe link[rel='stylesheet'] style link[type='text/javascript'] link[as='script'] script}.map{|s| html.css(s).remove}
-
-      # strip tracker gunk
       html.css('a[href^="javascript"]').map{|a| a.remove }
-
       %w{clickability counter.ru quantserve scorecardresearch}.map{|co| html.css('img[src*="' + co + '"]').map{|img| img.remove }}
 
-      # map things to the classic image tag
+      # image elements
       # CSS:background-image → <img>
       html.css('[style^="background-image"]').map{|node|
         node['style'].match(/url\('([^']+)'/).yield_self{|url|
@@ -38,21 +34,22 @@ image-src
       html.css('amp-img').map{|amp|amp.add_child "<img src=\"#{amp['src']}\">"}
       # <div> → <img>
       html.css("div[class*='image'][data-src]").map{|div|
-        puts "WONKY div-image #{div['data-src']}"
         div.add_child "<img src=\"#{div['data-src']}\">"}
 
       html.traverse{|e|
-        e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) if e['href'] && !e['id'] # identify link for traversal
+
+        # local identifiers for links
+        e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) if e['href'] && !e['id']
+
+        # normalize src-attribute naming
         e.attribute_nodes.map{|a|
           e.set_attribute 'src', a.value if LazySRC.member? a.name
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
 
-          dropa = a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || # strip attributes
-                  %w{bgcolor class height http-equiv layout ping role style tabindex target theme width}.member?(a.name) ||
-                  a.name == 'id' && e.name != 'a' # remove ID from non-anchor elements
-          a.unlink if dropa}}
+          # strip attributes
+          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor class height http-equiv layout ping role style tabindex target theme width}.member?(a.name)}}
 
-      # output
+
       html.to_xhtml(:indent => 0)
     end
 
