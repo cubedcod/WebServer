@@ -28,7 +28,7 @@ class WebResource
           unless doc.exist?
             doc.dir.mkdir
             RDF::Writer.open(doc.relPath){|f|f << graph}
-            puts doc.path[0]=='/' ? (ServerAddr + doc.path.sub(/\.ttl$/,'')) : doc
+            print ServerAddr + doc.path.sub(/\.ttl$/,'') + ' '
           end}
       end}
     self

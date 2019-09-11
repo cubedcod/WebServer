@@ -1,3 +1,0 @@
-#!/bin/sh
-rsync -e 'ssh -p 8022' -av $TERMUXPEER:web $HOME
-rsync -e 'ssh -p 8022' -av $HOME/web $TERMUXPEER:
