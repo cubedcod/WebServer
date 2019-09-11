@@ -187,11 +187,8 @@ class WebResource
     end
 
     def denyPOST
-      unless host.match? /youtube/
-        head = headers
-        HTTP.print_body head, HTTP.decompress(head, env['rack.input'].read.force_encoding('UTF-8'))
-      end
       env[:deny] = true
+      HTTP.print_body head, HTTP.decompress(head, env['rack.input'].read.force_encoding('UTF-8')) if verbose?
       [202, {'Access-Control-Allow-Credentials' => 'true',
              'Access-Control-Allow-Origin' => allowedOrigin}, []]
     end
