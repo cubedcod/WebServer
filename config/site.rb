@@ -137,12 +137,12 @@ wp-rum)([-.:_\/?&=~]|$)|
     %w(www.aliexpress.com ae-cn.alicdn.com ae01.alicdn.com i.alicdn.com).map{|h|AllowHost h}
 
     # Amazon
+    AmazonMedia = -> r {%w(css jpg mp4 png webm webp).member?(r.ext.downcase) && r.env['HTTP_REFERER']&.match(/amazon\.com/) && r.noexec || r.deny}
     if ENV.has_key? 'AMAZON'
       %w(            amazon.com
 images-na.ssl-images-amazon.com
                  www.amazon.com).map{|h|AllowHost h}
     else
-      AmazonMedia = -> r {%w(css jpg mp4 png webm webp).member?(r.ext.downcase) && r.env['HTTP_REFERER']&.match(/amazon\.com/) && r.noexec || r.deny}
       GET 'amazon.com', Lite
       GET 'www.amazon.com', Lite
       GET 'images-na.ssl-images-amazon.com', AmazonMedia
@@ -441,6 +441,7 @@ addons-amo.cdn.mozilla.net
     # YouTube
     GET 's.ytimg.com', -> r {r.desktop.fetch}
     GET 'youtube.com', -> r {[301, {'Location' => 'https://www.youtube.com' + r.env['REQUEST_URI']}, []]}
+    GET 'm.youtube.com', -> r {[301, {'Location' => 'https://www.youtube.com' + r.env['REQUEST_URI']}, []]}
     GET 'www.youtube.com', -> r {
       mode = r.parts[0]
       if %w{attribution_link redirect}.member? mode
