@@ -6,7 +6,7 @@ module Webize
 
       SiteGunk = {'www.google.com' => %w(div.logo h1 h2),
                   'www.bostonmagazine.com' => %w(a[href*='scrapertrap'])}
-
+      # HTML to RDF method map
       Triplr = {
         'apnews.com' => :AP,
         'lwn.net' => :LWN,
@@ -25,6 +25,7 @@ module Webize
     end
   end
   module JSON
+    # JSON to RDF method map
     Triplr = {
       'gateway.reddit.com' => :Reddit,
       'outline.com' => :Outline,
@@ -103,9 +104,8 @@ wp-rum)([-.:_\/?&=~]|$)|
     GotoU   = -> r {[301, {'Location' =>  r.env[:query]['u']}, []]}
     GotoURL = -> r {[301, {'Location' => (r.env[:query]['url']||r.env[:query]['q'])}, []]}
     GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : r.noexec}
-    Icon = -> r { r.env[:deny] = true
-      [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
-    Lite =  -> r {r.gunkURI? ? r.deny : r.noexec}
+    Icon    = -> r {r.env[:deny] = true; [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
+    Lite    = -> r {r.gunkURI? ? r.deny : r.noexec}
     NoQuery = -> r {r.qs.empty? ? r.noexec : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
 
     GET '/favicon.ico', Icon
