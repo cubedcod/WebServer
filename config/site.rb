@@ -284,13 +284,13 @@ android.clients.google.com
          www.recaptcha.net
 ).map{|host|
       AllowHost host}
-      GET 'www.googleadservices.com', -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
     else
       AllowCookies 'www.google.com'
       AllowRefer   'www.google.com'
       GET     'google.com', GoogleLite
       GET 'www.google.com', GoogleLite
     end
+    GET 'www.googleadservices.com', -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
 
     # Linkedin
     if ENV.has_key? 'LINKEDIN'
@@ -363,6 +363,14 @@ addons-amo.cdn.mozilla.net
       elsif r.gunkURI?
         r.deny
       else
+        depth = r.parts.size
+        r.env[:links][:up] = if [3,6].member? depth
+                               r.dirname
+                             elsif 5 == depth
+                               '/' + r.parts[0..1].join('/')
+                             else
+                               '/'
+                             end
         r.fetch options
       end}
 
