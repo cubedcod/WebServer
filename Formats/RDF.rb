@@ -5,10 +5,13 @@ class WebResource
   def index
     return unless env[:repository]
     env[:repository].each_graph.map{|graph|
-      if n = graph.name # named graph
-        n = n.R
-        docs = []
-        unless n.uri.match?(/^(_|data):/) # blank nodes and data-URIs not directly stored, only appearring in doc-context
+
+      # calculate storage location
+      if n = graph.name
+        n = n.R   # graph pointer
+        docs = [] # storage pointers
+
+        unless n.uri.match?(/^(_|data):/) # blank nodes & data-URIs appear in a doc-context rather than directly stored
 
           # canonical location
           if n.host # global graph
@@ -16,19 +19,20 @@ class WebResource
           else # local graph
             docs.push (n.path + '.ttl').R unless n.exist?
           end
+
           # timeline location
-          if timestamp = graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value # timestamp query
+          if timestamp = graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value           # timestamp query
             docs.push ['/' + timestamp.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/\+?(00.00|Z)$/,''),       # hour-dir location
                        %w{host path query fragment}.map{|a|n.send(a).yield_self{|p|p&&p.split(/[\W_]/)}},'ttl']. # tokenize slugs
                         flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.').R                         # skiplist slugs
           end
         end
 
+        # store RDF
         docs.map{|doc|
           unless doc.exist?
             doc.dir.mkdir
-            RDF::Writer.open(doc.relPath){|f|f << graph}
-            print ServerAddr + doc.path.sub(/\.ttl$/,'') + ' '
+            RDF::Writer.open(doc.relPath){|f|f << graph}; puts ServerAddr + doc.path.sub(/\.ttl$/,'')
           end}
       end}
     self
