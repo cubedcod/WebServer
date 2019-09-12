@@ -1,0 +1,2 @@
+#!/bin/sh
+sync_ $(date +web/%Y)

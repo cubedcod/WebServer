@@ -1,5 +1,2 @@
 #!/bin/sh
-cd
-month=$(date +web/%Y/%m)
-rsync -e 'ssh -p 8022' -avR $DATAPEER:$month .
-rsync -e 'ssh -p 8022' -avR $month $DATAPEER:
+sync_ $(date +web/%Y/%m)
