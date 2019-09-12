@@ -53,7 +53,7 @@ g(dpr|eo(ip|locate)|igya|pt|tag|tm)|.*
 (header|pre)[-_]?bid.*|.*hubspot.*|[hp]b.?js|ima[0-9]?|
 impression|
 kr(ux|xd).*|
-log(event|ger)|(app|s)?
+log(event|g(er|ing))?|(app|s)?
 m(e(asurement|ssaging|t(er|rics?))|ms|tr)|
 new(relic|sletter)|
 o(m(niture|tr)|nboarding|ptanon|utbrain)|
@@ -106,8 +106,7 @@ wp-rum)([-.:_\/?&=~]|$)|
     Icon = -> r { r.env[:deny] = true
       [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
     Lite =  -> r {r.gunkURI? ? r.deny : r.noexec}
-    StaticNoQS = -> r {
-      r.qs.empty? ? r.noexec : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
+    NoQuery = -> r {r.qs.empty? ? r.noexec : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
 
     GET '/favicon.ico', Icon
 
@@ -431,7 +430,7 @@ addons-amo.cdn.mozilla.net
     GET 'wgbh.brightspotcdn.com', GoIfURL
 
     # WordPress
-    (0..7).map{|i| GET "i#{i}.wp.com", StaticNoQS}
+    (0..7).map{|i| GET "i#{i}.wp.com", NoQuery}
 
     # Yahoo!
     AllowHost 'news.yahoo.com'
