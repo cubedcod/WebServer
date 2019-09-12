@@ -465,7 +465,7 @@ results signin user watch watch_videos yts).member?(mode)
     POST 'www.youtube.com', -> r {
       if r.parts.member? 'stats'
         r.denyPOST
-      elsif r.env['REQUEST_URI'].match? /ACCOUNT_MENU|comment|\/results|subscribe/
+      elsif r.env['REQUEST_URI'].match? /ACCOUNT_MENU|comment|\/results|subscribe/i
         r.POSTthru
       else
         r.denyPOST

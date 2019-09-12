@@ -479,10 +479,6 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       head
     end
 
-    def hostname
-      env && env['SERVER_NAME'] || host || 'localhost'
-    end
-
     # WebResource -> Graph - RDF#load wrapper with cached RDFizations and path-derived format hints
     def load options = {base_uri: (path.R env)}
       env[:repository] ||= RDF::Repository.new

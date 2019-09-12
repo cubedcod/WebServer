@@ -15,7 +15,7 @@ class WebResource
 
           # canonical location
           if n.host # global graph
-            docs.push (CacheDir + n.host + (n.path ? (n.path[-1]=='/' ? (n.path + 'index') : n.path) : '') + '.ttl').R
+            docs.push (n.hostpath + (n.path ? (n.path[-1]=='/' ? (n.path + 'index') : n.path) : '') + '.ttl').R
           else # local graph
             docs.push (n.path + '.ttl').R unless n.exist?
           end
@@ -62,7 +62,7 @@ class WebResource
 
     def remoteDirStat
       return unless env[:repository].empty? && env['REQUEST_PATH'][-1]=='/' # unlistable remote?
-      index = (CacheDir + hostname + path).R(env)                           # local list
+      index = (hostpath + path).R(env)   # local list
       index.children.map{|e|e.env(env).nodeStat base_uri: (env[:scheme] || 'https') + '://' + e.relPath} if index.node.directory?
     end
 

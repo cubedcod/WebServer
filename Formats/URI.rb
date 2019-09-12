@@ -76,12 +76,9 @@ class WebResource < RDF::URI
       Video => '🎞',
     }
 
-    CacheDir = (Pathname.new ENV['HOME'] + '/.cache').relative_path_from(PWD).to_s + '/'
-
     # cache location
     def cache format=nil
       want_suffix = ext.empty?
-      hostPart = CacheDir + (host || 'localhost')
       pathPart = if !path || path[-1] == '/'
                    want_suffix = true
                    '/index'
@@ -115,9 +112,11 @@ class WebResource < RDF::URI
                else
                  '' # suffix already exists
                end
-      (hostPart + pathPart + qsPart + suffix).R env
+      (hostpath + pathPart + qsPart + suffix).R env
     end
 
+    def hostname; env && env['SERVER_NAME'] || host || 'localhost' end
+    def hostpath; '/' + hostname.split('.').reverse.join('/') end
     def isRDF?; ext == 'ttl' end
 
   end
