@@ -37,12 +37,15 @@ end
 class WebResource
   module URIs
     ConfDir  = (Pathname.new __dir__).relative_path_from Pathname.new Dir.pwd
+
     Extensions = RDF::Format.file_extensions.invert
+
     FeedURL = {}
+    'feeds/*.u'.R.glob.map{|list|(open list.relPath).readlines.map(&:chomp).map{|u| FeedURL[u] = u.R }}
+
     CDN = /amazon|azure|cloud(flare|front|inary)|digitalocean|fa(cebook|stly)|heroku|netdna|ra(ckcdn|wgit)|stackpath|usercontent/
     CDNsubdomain = /(s3.+amazonaws|storage\.googleapis)\.com$/
-    ConfDir.join('feeds/*.u').toWebResource.glob.map{|list|
-      (open list.relPath).readlines.map(&:chomp).map{|u| FeedURL[u] = u.R }}
+
     GunkURI = %r([-.:_\/?&=~]((block|page)?
 a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|slot|type|words?)?|(app)?
 b(anner|eacon|reakingnew)s?|
@@ -67,7 +70,9 @@ u(rchin|serlocation|tm)|
 viral|
 wp-rum)([-.:_\/?&=~]|$)|
 \.((gif|png)\?|otf|ttf|woff2?)|\/[a-z]\?)xi
+
     ServerAddr = 'http://localhost:8000'
+
     SiteFont = ConfDir.join('fonts/hack-regular-subset.woff2').read
     SiteGIF = ConfDir.join('site.gif').read
     SiteCSS = ConfDir.join('site.css').read + ConfDir.join('code.css').read
