@@ -38,7 +38,7 @@ class WebResource
     self
   end
 
-  # WebResource -> Graph - RDF#load wrapper with cached RDFizations and path-derived format hints
+  # WebResource -> Graph (RDF#load wrapper with cached-RDFization refswap and pathname-derived format hints)
   def load options = {base_uri: (path.R env)}
     env[:repository] ||= RDF::Repository.new
     nodeStat unless isRDF?
@@ -64,9 +64,9 @@ class WebResource
       elsif %w(bash c cpp h hs pl py rb sh).member? ext.downcase
         options[:format] = :sourcecode
       end
-      #puts [relPath, options[:format]].join ' '
-      env[:repository].load relPath, options
-    end
+      doc = self
+      env[:repository].load doc.relPath, options
+      end
   rescue RDF::FormatError => e
     puts [e.class, e.message].join ' '
   end
