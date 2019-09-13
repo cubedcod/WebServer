@@ -133,6 +133,7 @@ wp-rum)([-.:_\/?&=~]|$)|
 
     GET '/thumbnail', GoIfURL
 
+    GET '/clicks/track', GotoURL
     GET '/url', GotoURL
 
     # site handlers
