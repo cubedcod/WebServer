@@ -3,7 +3,7 @@ class WebResource
 
   # Repository -> turtle file(s)
   def index
-    return unless env[:repository]
+    return self unless env[:repository]
     env[:repository].each_graph.map{|graph|
 
       # calculate storage location
