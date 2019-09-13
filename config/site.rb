@@ -212,6 +212,9 @@ images-na.ssl-images-amazon.com
     # Economist
     AllowHost 'www.economist.com'
 
+    # Eventbrite
+    #GET 'img.evbuc.com', GotoBasename
+
     # Facebook
     FBgunk = %w(common connect pages_reaction_units plugins security tr)
     FBlite = -> r {ENV.has_key?('FACEBOOK') ? r.fetch : FBgunk.member?(r.parts[0]) ? r.deny : r.noexec}
