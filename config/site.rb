@@ -138,6 +138,10 @@ wp-rum)([-.:_\/?&=~]|$)|
 
     # site handlers
 
+    # Air
+    AllowHost 'events.air.tv'
+    AllowHost 'event-listener.air.tv'
+
     # Alibaba
     %w(www.aliexpress.com ae-cn.alicdn.com ae01.alicdn.com i.alicdn.com).map{|h|AllowHost h}
 
@@ -299,6 +303,9 @@ android.clients.google.com
       GET 'www.google.com', GoogleLite
     end
     GET 'www.googleadservices.com', -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
+
+    # Grabien
+    AllowHost 'news.grabien.com'
 
     # Linkedin
     if ENV.has_key? 'LINKEDIN'
