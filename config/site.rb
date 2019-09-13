@@ -51,9 +51,9 @@ a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|slot|ty
 b(anner|eacon|reakingnew)s?|
 c(ampaign|edexis|hartbeat.*|ollector|omscore|onversion|ookie(c(hoice|onsent)|law|notice)?s?|se)|
 detect|
-e(moji.*\.js|nsighten|vidon)|(web)?
+e(moji.*\.js|nsighten|scenic|vidon)|(web)?
 fonts?|
-g(dpr|eo(ip|locate)|igya|pt|tag|tm)|.*
+g(dpr|eo(ip|locate)|igya|pt|tag|tm|uid)|.*
 (header|pre)[-_]?bid.*|.*hubspot.*|[hp]b.?js|ima[0-9]?|
 impression|
 kr(ux|xd).*|
