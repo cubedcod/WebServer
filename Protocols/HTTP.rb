@@ -756,9 +756,8 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     def unsubscribe; subscriptionFile.exist? && subscriptionFile.node.delete end
 
     def upstreamFormat? format = nil
-      return true if DesktopUA.member? env['HTTP_USER_AGENT']
-      return false unless format
-      return false if format.match? /\/(atom|rss)/i
+      return true if DesktopUA.member?(env['HTTP_USER_AGENT']) || parts.member?(embed)
+      return false if !format || (format.match? /\/(atom|rss)/i)
       format.match? NoTransform
     end
 

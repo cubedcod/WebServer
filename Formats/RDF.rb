@@ -32,7 +32,7 @@ class WebResource
         docs.map{|doc|
           unless doc.exist?
             doc.dir.mkdir
-            RDF::Writer.open(doc.relPath){|f|f << graph}; puts ServerAddr + doc.path.sub(/\.ttl$/,'')
+            RDF::Writer.open(doc.relPath){|f|f << graph}; puts ' ' + ServerAddr + doc.path.sub(/\.ttl$/,'')
           end}
       end}
     self
