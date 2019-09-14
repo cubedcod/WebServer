@@ -47,7 +47,7 @@ class WebResource
     CDNsubdomain = /(s3.+amazonaws|storage\.googleapis)\.com$/
 
     GunkURI = %r([-.:_\/?&=~]((block|page)?
-a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|slot|type|words?)?|(app)?
+a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|slot|type|unit|words?)?|(app)?
 b(anner|eacon|reakingnew)s?|
 c(ampaign|edexis|hartbeat.*|ollector|omscore|onversion|ookie(c(hoice|onsent)|law|notice)?s?|se)|
 detect|
@@ -474,7 +474,9 @@ addons-amo.cdn.mozilla.net
       mode = r.parts[0]
       if %w{attribution_link redirect}.member? mode
         [301, {'Location' =>  r.env[:query]['q'] || r.env[:query]['u']},[]]
-      elsif !mode || %w(browse_ajax c channel embed feed get_video_info
+      elsif !mode
+        r.fetch
+      elsif !r.gunkURI? && %w(browse_ajax c channel embed feed get_video_info
 guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist
 results signin user watch watch_videos yts).member?(mode)
         r.desktop.fetch
