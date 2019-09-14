@@ -50,7 +50,7 @@ class WebResource
 a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|slot|type|unit|words?)?|(app)?
 b(anner|eacon|reakingnew)s?|
 c(ampaign|edexis|hartbeat.*|ollector|omscore|onversion|ookie(c(hoice|onsent)|law|notice)?s?|se)|
-detect|
+de(als|tect)|
 e(moji.*\.js|nsighten|scenic|vidon)|(web)?
 fonts?|
 g(dpr|eo(ip|locate)|igya|pt|tag|tm|uid)|.*
@@ -425,6 +425,9 @@ addons-amo.cdn.mozilla.net
 
     # Static9
     GET 'imageresizer.static9.net.au', GotoBasename
+
+    # TechnologyReview
+    GET 'cdn.technologyreview.com', NoQuery
 
     # Twitter
     AllowHost 'api.twitter.com'
