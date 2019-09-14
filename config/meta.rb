@@ -211,6 +211,7 @@ class WebResource
       'lastmod' => Date,
       'license' => DOAP+'license',
       'linkedin:owner' => :drop,
+      'lnkd:url' => Link,
       'manifest' => :drop,
       'mask-icon' => Image,
       'metered_paywall:json' => :drop,
