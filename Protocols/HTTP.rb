@@ -365,14 +365,14 @@ class WebResource
     def GETrequest
       if handler = PathGET['/' + parts[0].to_s] # path binding - all subpaths
         handler[self]
-      elsif handler = PathGET[path]             # path binding - exact
+      elsif handler = PathGET[path]             # path binding - exact path
         handler[self]
-      elsif local?                              # local host (generic)
+      elsif local?                              # localhost (generic)
         local
       elsif path.match? /[^\/]204$/             # connectivity-check
         env[:deny] = true
         [204, {}, []]
-      elsif ext.downcase == 'ico'               # Icon handler
+      elsif ext.downcase == 'ico'               # Favicon - any path
         Icon[self]
       elsif handler = HostGET[host]             # host binding
         handler[self]
