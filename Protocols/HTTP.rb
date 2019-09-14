@@ -17,6 +17,7 @@ class WebResource
     OffLine = ENV.has_key? 'OFFLINE'
     PathGET = {}
     NoTransform = /^(application|audio|font|image|text\/(css|(x-)?javascript|proto|xml)|video)/
+    ServerKey = Digest::SHA2.hexdigest([`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
 
     def self.AllowCookies host
       CookieHosts[host] = true
@@ -176,8 +177,10 @@ class WebResource
                       elsif ext == 'json' || type == :json
                         ['application/json','{}']
                       else
+                        q = env[:query].dup
+                        q['allow'] = ServerKey
                         ['text/html; charset=utf-8',
-                         "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center'><a href='#' style='color: #fff; font-size: 22em; text-decoration: none'>⌘</a></body></html>"]
+                         "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center'><a href='#{HTTP.qs q}' style='color: #fff; font-size: 22em; text-decoration: none'>⌘</a></body></html>"]
                       end
       [status,
        {'Access-Control-Allow-Credentials' => 'true',
@@ -415,7 +418,6 @@ class WebResource
     end
 
     def gunk?
-      #return false if ENV['ALLOW'] == host
       gunkHost? || gunkURI?
     end
 
@@ -426,6 +428,7 @@ class WebResource
     end
 
     def gunkURI?
+      return false if env[:query]['allow'] == ServerKey # explicit allow
       ('//' + env['SERVER_NAME'] + env['REQUEST_URI']).match? GunkURI
     end
 
