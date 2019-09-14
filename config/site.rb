@@ -190,6 +190,9 @@ images-na.ssl-images-amazon.com
     AllowHost 'img.buzzfeed.com'
     AllowHost 'www.buzzfeed.com'
 
+    # CircleCI
+    GET 'circleci.com', -> r {r.parts[0] == 'blog' ? r.noexec : r.deny}
+
     # Cloudflare
     AllowHost 'cdnjs.cloudflare.com'
 
@@ -246,7 +249,7 @@ images-na.ssl-images-amazon.com
       when '/'
         r.noexec
       when '/search'
-        if r.env[:query]['q']&.match? /^(https?:\/\/|l(\/|:8000)|localhost)/
+        if r.env[:query]['q']&.match? /^(https?:\/\/|l(:8000|\/)|localhost)/ # why is Chrome sending HTTP URLs typed into URLbar to Google search?
           [301, {'Location' => r.env[:query]['q'].sub(/^l/,'http://l')}, []]
         else
           r.noexec
@@ -409,7 +412,7 @@ addons-amo.cdn.mozilla.net
 
     # Soundcloud
     GET 'gate.sc', GotoURL
-
+    GET 'soundcloud.com', -> r {r.gunkURI? ? r.deny : r.desktop.fetch}
     %w(api-v2.soundcloud.com
    api-widget.soundcloud.com
               soundcloud.com
