@@ -248,6 +248,8 @@ images-na.ssl-images-amazon.com
       case r.path
       when '/'
         r.noexec
+      when '/imgres'
+        r.env[:query]['imgurl'] ? [301, {'Location' =>  r.env[:query]['imgurl']}, []] : r.noexec
       when '/search'
         if r.env[:query]['q']&.match? /^(https?:\/\/|l(:8000|\/)|localhost|view-source)/ # why is Chrome sending HTTP URLs typed into URLbar to Google search?
           [301, {'Location' => r.env[:query]['q'].sub(/^l/,'http://l')}, []]
