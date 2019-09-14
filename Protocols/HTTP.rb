@@ -374,7 +374,7 @@ class WebResource
         [204, {}, []]
       elsif ext.downcase == 'ico'               # Favicon - any path
         Icon[self]
-      elsif handler = HostGET[host]             # host binding
+      elsif handler = HostGET[host]             # remote host (custom)
         handler[self]
       else                                      # remote host (generic)
         return noexec if env['SERVER_NAME'].match? CDNsubdomain
