@@ -65,7 +65,7 @@ p(a(idpost|y(ments?|wall))|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)
 quantcast|
 reco(mmend(ation)?s?|rd(event|stats?))|re?t(ar)?ge?t(ing)?|rpc|
 s?s(a(fe[-_]?browsing|ilthru)|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(cial|urcepoint)|ponsored|so|tat(istic)?s?|ubscri(ber?|ption)|w.js|ync)|
-t(aboola|(arget|rack)(ers?|ing)|bproxy|ea(lium|ser)|inypass|rend(ing|s))|autotrack|
+t(aboola|(arget|rack)(ers?|ing)|bproxy|ea(lium|ser)|inypass|racing|rend(ing|s))|autotrack|
 u(rchin|serlocation|tm)|
 viral|
 wp-rum)([-.:_\/?&=~]|$)|

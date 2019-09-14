@@ -1,10 +1,5 @@
 #!/bin/sh
 cd ~/web
 conf=../src/WebServer/config
-
-# HTTP tagging+routing
 squid -f $conf/squid.conf
-
-# local service
-# thin -a 127.0.0.1 -p 8000 -R $conf/rack.ru --threaded start
 unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c $conf/unicorn.rb $conf/rack.ru
