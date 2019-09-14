@@ -58,7 +58,7 @@ g(dpr|eo(ip|locate)|igya|pt|tag|tm|uid)|.*
 impression|
 kr(ux|xd).*|
 log(event|g(er|ing))?|(app|s)?
-m(e(asurement|ssaging|t(er|rics?))|ms|tr)|
+m(e(asurement|t(er|rics?))|ms|tr)|
 new(relic|sletter)|
 o(m(niture|tr)|nboarding|ptanon|utbrain)|
 p(a(idpost|y(ments?|wall))|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)|lacement|op(over|up)|romo(tion)?s?|ubmatic|[vx])|

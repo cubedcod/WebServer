@@ -101,6 +101,7 @@ class WebResource
       'article:published_time' => Date,
       'article:publisher' => To,
       'article:section' => Abstract,
+      'article:section_url' => Link,
       'article:suggested-social-copy' => Abstract,
       'article:tag' => Abstract,
       'articleid' => :drop,
