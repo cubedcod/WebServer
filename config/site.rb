@@ -485,6 +485,8 @@ addons-amo.cdn.mozilla.net
 guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist
 results signin user watch watch_videos yts).member?(mode)
         r.desktop.fetch
+      elsif r.env[:query]['allow'] == ServerKey
+        r.fetch
       else
         r.deny
       end}

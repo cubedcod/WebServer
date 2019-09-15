@@ -422,14 +422,14 @@ class WebResource
     end
 
     def gunkHost?
-      return false if AllowedHosts.has_key? host
-      return false if env[:query]['allow'] == ServerKey # explicit allow
-      return true unless env['REQUEST_METHOD'] == 'GET' # write methods must be allowed
+      return false if AllowedHosts.has_key? host        # host allow
+      return false if env[:query]['allow'] == ServerKey # temporary allow
+      return true unless env['REQUEST_METHOD'] == 'GET' # write methods default to deny
       env.has_key? 'HTTP_GUNK'
     end
 
     def gunkURI?
-      return false if env[:query]['allow'] == ServerKey # explicit allow
+      return false if env[:query]['allow'] == ServerKey # temporary allow
       ('//' + env['SERVER_NAME'] + env['REQUEST_URI']).match? GunkURI
     end
 
