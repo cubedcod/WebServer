@@ -43,8 +43,7 @@ class WebResource
 
     def allowCookies?
       AllowedHosts.has_key?(host) ||
-        CookieHosts.has_key?(host) ||
-          HostPOST.has_key?(host)
+        CookieHosts.has_key?(host)
     end
 
     def allowRefer?

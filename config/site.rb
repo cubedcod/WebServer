@@ -318,7 +318,7 @@ android.clients.google.com
       AllowHost 'www.linkedin.com'
     else
       GET 'media.licdn.com', Lite
-      GET 'www.linkedin.com', -> r {%w(jobs posts).member?(r.parts[0]) ? r.noexec : r.deny}
+      GET 'www.linkedin.com', -> r {%w(in jobs posts).member?(r.parts[0]) ? r.noexec : r.deny}
     end
 
     # Medium
