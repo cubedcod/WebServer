@@ -314,10 +314,11 @@ android.clients.google.com
 
     # Linkedin
     if ENV.has_key? 'LINKEDIN'
-      AllowHost 'www.linkedin.com'
       AllowHost 'media.licdn.com'
+      AllowHost 'www.linkedin.com'
     else
-      GET 'www.linkedin.com', -> r {r.parts[0] == 'posts' ? r.noexec : r.deny}
+      GET 'media.licdn.com', Lite
+      GET 'www.linkedin.com', -> r {%w(jobs posts).member?(r.parts[0]) ? r.noexec : r.deny}
     end
 
     # Medium
