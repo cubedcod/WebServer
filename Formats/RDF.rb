@@ -71,13 +71,11 @@ class WebResource
     puts [e.class, e.message].join ' '
   end
 
-  # Graph -> JSON-compatible URI-indexed Hash (Feed & HTML-renderer input)
+  # Graph -> JSON tree
   def treeFromGraph
     tree = {}
     head = env && env[:query] && env[:query].has_key?('head')
-    env[:repository].each_triple{|s,p,o|
-      s = s.to_s # subject URI
-      p = p.to_s # predicate URI
+    env[:repository].each_triple{|s,p,o| s = s.to_s;  p = p.to_s
       unless p == 'http://www.w3.org/1999/xhtml/vocab#role' || (head && p == Content)
         o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object URI or literal
         tree[s] ||= {'uri' => s}                      # subject
@@ -95,7 +93,7 @@ class WebResource
 
     def nodeStat options = {}                                           # STAT(1)
       return if basename.index('msg.') == 0
-      subject = (options[:base_uri] || path.sub(/\.(md|ttl)$/,'')).R    # abstract/generic-node reference
+      subject = (options[:base_uri] || path.sub(/\.(md|ttl)$/,'')).R    # abstract-node reference
       graph = env[:repository]
       if node.directory?
         subject = subject.path[-1] == '/' ? subject : (subject + '/')   # enforce trailing slash on container
