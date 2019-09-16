@@ -246,7 +246,6 @@ class WebResource
           end}
 
       htmlGrep if env[:graph] && env[:grep]
-      subbed = subscribed?
       tabular = env[:query] && env[:query]['view']=='table'
       shrunken = env[:query]&.has_key? 'head'
 
@@ -266,7 +265,7 @@ class WebResource
                               c: [link[:up, '&#9650;'],
                                   {_: :a, id: :tabular, class: :icon, style: tabular  ? 'color: #fff' : 'color: #555', href: HTTP.qs((env[:query]||{}).merge({'view' => tabular ? 'default' : 'table', 'sort' => 'date'})), c: '↨'},
                                   {_: :a, id: :shrink,  class: :icon, style: shrunken ? 'color: #fff' : 'color: #555', href: HTTP.qs(shrunken ? env[:query].reject{|k,v|k=='head'} : (env[:query]||{}).merge({'head' => ''})), c: shrunken ? '&#9661;' : '&#9651;'},
-                                  ({_: :a, id: :subscribe, href: '/'+(subbed ? 'un' : '')+'subscribe'+HTTP.qs({u: 'https://'+(env['SERVER_NAME']||'localhost')+(env['REQUEST_URI']||'/')}), class: subbed ? :on : :off, c: 'subscribe'+(subbed ? 'd' : '')} unless local?)]},
+                                 ]},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?
                                HTML.keyval (Webize::HTML.webizeHash env), env # 404

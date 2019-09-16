@@ -376,17 +376,17 @@ heartbeat iframe_api live_chat manifest.json opensearch playlist results signin 
 
     GET 'youtu.be', -> r {[301, {'Location' => 'https://www.youtube.com/watch?v=' + r.path[1..-1]}, []]}
 
-    def subscriptionFile slug=nil
-      (case host
-       when /reddit.com$/
-         '/www.reddit.com/r/' + (slug || parts[1] || '') + '/.sub'
-       when /^twitter.com$/
-         '/twitter.com/' + (slug || parts[0] || '') + '/.following'
-       else
-         '/feed/' + [host, *parts].join('.')
-       end).R
-    end
+  end
 
+  def subscriptions
+    (case host
+     when /reddit.com$/
+       '/www.reddit.com/r/*/.sub'
+     when /twitter.com$/
+       '/twitter.com/*/.following'
+     else
+       '/feed/'+[host, *parts].join('.')
+     end).R.glob.map(&:dir).map(&:basename)
   end
 
   def AP doc
