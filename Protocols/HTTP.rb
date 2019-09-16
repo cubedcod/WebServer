@@ -41,15 +41,8 @@ class WebResource
       end
     end
 
-    def allowCookies?
-      AllowedHosts.has_key?(host) ||
-        CookieHosts.has_key?(host)
-    end
-
-    def allowRefer?
-      AllowedHosts.has_key?(host) ||
-        ReferHosts.has_key?(host)
-    end
+    def allowCookies?; AllowedHosts.has_key?(host) || CookieHosts.has_key?(host) end
+    def allowRefer?; AllowedHosts.has_key?(host) || ReferHosts.has_key?(host) end
 
     def cached?
       cachedType && cache.exist? && !%w(html).member?(ext.downcase)
@@ -301,7 +294,8 @@ class WebResource
             RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
 
           body = HTTP.decompress meta, response.read                     # decode body
-          format ||= body.bytesize < 2048 ? 'text/plain' : 'application/octet-stream' # untyped?
+          #format ||= body.bytesize < 2048 ? 'text/plain' : 'application/octet-stream' # untyped?
+
           cache(format).write body.force_encoding('UTF-8') if cachedType # cache body
 
           env[:repository] ||= RDF::Repository.new                       # RDF storage
@@ -467,13 +461,14 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
 
       # Referer
       head.delete 'Referer' unless allowRefer?
-
-      case env['SERVER_NAME']
-      when /wsj\.com$/
-        head['Referer'] = 'http://drudgereport.com/'
-      when /youtube.com$/
-        head['Referer'] = 'https://www.youtube.com/'
-      end if env && env['SERVER_NAME']
+      if env && env['SERVER_NAME']
+        case env['SERVER_NAME']
+        when /wsj\.com$/
+          head['Referer'] = 'http://drudgereport.com/'
+        when /youtube.com$/
+          head['Referer'] = 'https://www.youtube.com/'
+        end
+      end
 
       # User-Agent
       head['User-Agent'] = DesktopUA[0]
