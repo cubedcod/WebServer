@@ -31,14 +31,6 @@ class WebResource
       end
     end
 
-    def cached?
-      cachedType && cache.exist? && !%w(html).member?(ext.downcase)
-    end
-
-    def cachedType # types of files we cache, specified as name-suffix
-      %w(apk bin css gif html jpeg jpg js pdf png mp3 mp4 opus svg webm webp).member? ext.downcase
-    end
-
     def self.call env
       return [405,{},[]] unless m=Methods[env['REQUEST_METHOD']] # find method handler
       path = Pathname.new(env['REQUEST_PATH']).expand_path.to_s  # evaluate path expression
@@ -205,8 +197,6 @@ class WebResource
 
     # fetch remote. potentially non-HTTP transports but HTTPS + HTTP for now
     def fetch options = {}
-      return cache.fileResponse if cached?     # resource already fetched
-      # TODO return cached if OffLine
       u = '//' + hostname + path + (options[:suffix]||'') + qs           # URI sans scheme
       primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env    # primary locator
       fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env # fallback locator
@@ -276,8 +266,6 @@ class WebResource
             RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
 
           body = HTTP.decompress meta, response.read                     # decode body
-
-          cache(format).write body.force_encoding('UTF-8') if cachedType # cache body
 
           env[:repository] ||= RDF::Repository.new                       # RDF storage
           RDF::Reader.for(content_type: format).yield_self{|reader|      # RDF reader

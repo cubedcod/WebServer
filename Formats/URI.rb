@@ -76,45 +76,6 @@ class WebResource < RDF::URI
       Video => '🎞',
     }
 
-    # cache location
-    def cache format=nil
-      want_suffix = ext.empty?
-      pathPart = if !path || path[-1] == '/'
-                   want_suffix = true
-                   '/index'
-                 elsif path.size > 127
-                   want_suffix = true
-                   hash = Digest::SHA2.hexdigest path
-                   '/' + hash[0..1] + '/' + hash[2..-1]
-                 else
-                   path
-                 end
-      qsPart = if qs.empty?
-                 ''
-               else
-                 want_suffix = true
-                 '.' + Digest::SHA2.hexdigest(qs)
-               end
-      suffix = if want_suffix
-                 if !ext || ext.empty? || ext.size > 11
-                   if format
-                     if xt = RDF::Format.file_extensions.invert[RDF::Format.content_types[format]]
-                       '.' + xt.to_s # suffix found in format-map
-                     else
-                       '' # content-type unmapped
-                     end
-                   else
-                     '' # content-type unknown
-                   end
-                 else
-                   '.' + ext # restore known suffix
-                 end
-               else
-                 '' # suffix already exists
-               end
-      (hostpath + pathPart + qsPart + suffix).R env
-    end
-
     def hostname; env && env['SERVER_NAME'] || host || 'localhost' end
     def hostpath; '/' + hostname.split('.').reverse.join('/') end
     def isRDF?; ext == 'ttl' end
