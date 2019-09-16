@@ -38,9 +38,8 @@ class WebResource
   module URIs
     ConfDir  = (Pathname.new __dir__).relative_path_from Pathname.new Dir.pwd
 
-    Extensions = RDF::Format.file_extensions.invert
-
-    GunkURI = %r([-.:_\/?&=~]
+    GunkURI = %r(
+[-.:_\/?&=~]
 ((block|page)?a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|slot|type|unit|words?)?|appnexus|(app)?
 b(anner|eacon|reakingnew)s?|
 c(ampaign|edexis|hartbeat.*|ollector|omscore|onversion|ookie(c(hoice|onsent)|law|notice)?s?|se)|

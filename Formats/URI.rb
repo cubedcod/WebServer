@@ -98,7 +98,7 @@ class WebResource < RDF::URI
       suffix = if want_suffix
                  if !ext || ext.empty? || ext.size > 11
                    if format
-                     if xt = Extensions[RDF::Format.content_types[format]]
+                     if xt = RDF::Format.file_extensions.invert[RDF::Format.content_types[format]]
                        '.' + xt.to_s # suffix found in format-map
                      else
                        '' # content-type unmapped
