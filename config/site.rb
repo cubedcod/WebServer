@@ -204,9 +204,6 @@ android.clients.google.com
       GET 'www.google.com', GoogleSearch
     end
 
-    # Grabien
-    AllowHost 'news.grabien.com'
-
     # Linkedin
     if ENV.has_key? 'LINKEDIN'
       AllowHost 'media.licdn.com'
@@ -221,11 +218,6 @@ android.clients.google.com
 
     # Meredith
     GET 'imagesvc.meredithcorp.io', GoIfURL
-
-    # Microsoft
-    GET 'www.bing.com', -> r {
-      (%w(fd hamburger Identity notifications secure).member?(r.parts[0]) || r.path.index('/api/ping') == 0) ? r.deny : r.fetch}
-    AllowHost 'www.msn.com'
 
     # Mozilla
     %w( addons.mozilla.org
@@ -260,12 +252,8 @@ addons-amo.cdn.mozilla.net
       end}
 
     # Reddit
-    AllowHost 'oauth.reddit.com'
-    AllowHost 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
-    AllowHost 'www.reddit.com'
-    GotoReddit = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path},[]]}
-    GET 'reddit.com', GotoReddit
-    GET 'old.reddit.com', GotoReddit
+    GET 'old.reddit.com', -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path}, []]}
+    GET 'reddit.com',     -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path}, []]}
     GET 'www.reddit.com', -> r {
       options = {}
       if r.parts.member?('submit') || r.upstreamFormat?
