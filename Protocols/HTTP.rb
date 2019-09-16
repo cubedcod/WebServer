@@ -379,16 +379,6 @@ class WebResource
       [302,{'Location' => e.io.meta['location']},[]]
     end
 
-    def self.getFeeds
-      FeedURL.values.shuffle.map{|feed|
-        begin
-          feed.env({intermediate: true, content_type: 'application/atom+xml'}).
-            fetch(feed.scheme == 'http' ? {scheme: :http} : {}).index
-        rescue Exception => e
-          puts 'https:' + feed.uri, e.class, e.message, e.backtrace
-        end}
-    end
-
     # Graph -> HTTP Response
     def graphResponse
       return notfound if !env.has_key?(:repository) || env[:repository].empty?

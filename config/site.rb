@@ -40,9 +40,6 @@ class WebResource
 
     Extensions = RDF::Format.file_extensions.invert
 
-    FeedURL = {}
-    'feeds/*.u'.R.glob.map{|list|(open list.relPath).readlines.map(&:chomp).map{|u| FeedURL[u] = u.R }}
-
     CDN = /amazon|azure|cloud(flare|front|inary)|digitalocean|fa(cebook|stly)|heroku|netdna|ra(ckcdn|wgit)|stackpath|usercontent/
     CDNsubdomain = /(s3.+amazonaws|storage\.googleapis)\.com$/
 
