@@ -36,7 +36,6 @@ module Webize
 end
 class WebResource
   module URIs
-    ConfDir  = (Pathname.new __dir__).relative_path_from Pathname.new Dir.pwd
 
     GunkURI = %r(
 [-.:_\/?&=~]
@@ -64,11 +63,10 @@ viral|
 wp-rum)
 ([-.:_\/?&=~]|$))xi
 
-    ServerAddr = 'http://localhost:8000'
-
-    SiteGIF = ConfDir.join('site.gif').read
-    SiteCSS = ConfDir.join('site.css').read + ConfDir.join('code.css').read
-    SiteJS  = ConfDir.join('site.js').read
+    SiteDir  = (Pathname.new __dir__).relative_path_from Pathname.new Dir.pwd
+    SiteGIF = SiteDir.join('site.gif').read
+    SiteCSS = SiteDir.join('site.css').read + SiteDir.join('code.css').read
+    SiteJS  = SiteDir.join('site.js').read
   end
   module HTML
     Avatars = {}
@@ -87,13 +85,13 @@ wp-rum)
     GotoBasename = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
     GotoU   = -> r {[301, {'Location' =>  r.env[:query]['u']}, []]}
     GotoURL = -> r {[301, {'Location' => (r.env[:query]['url']||r.env[:query]['q'])}, []]}
-    GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : r.noexec}
+    GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : r.deny}
     Icon    = -> r {r.env[:deny] = true; [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
-    Lite    = -> r {r.gunkURI? ? r.deny : r.noexec}
-    NoQuery = -> r {r.qs.empty? ? r.noexec : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
+    Lite    = -> r {r.gunkURI? ? r.deny : r.fetch}
+    NoQuery = -> r {r.qs.empty? ? r.fetch : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
 
     # Amazon
-    AmazonMedia = -> r {%w(css jpg mp4 png webm webp).member?(r.ext.downcase) && r.env['HTTP_REFERER']&.match(/amazon\.com/) && r.noexec || r.deny}
+    AmazonMedia = -> r {%w(css jpg mp4 png webm webp).member?(r.ext.downcase) && r.env['HTTP_REFERER']&.match(/amazon\.com/) && r.fetch || r.deny}
     if ENV.has_key? 'AMAZON'
       %w(            amazon.com
 images-na.ssl-images-amazon.com
@@ -123,7 +121,7 @@ images-na.ssl-images-amazon.com
     AllowHost 'www.buzzfeed.com'
 
     # CircleCI
-    GET 'circleci.com', -> r {r.parts[0] == 'blog' ? r.noexec : r.deny}
+    GET 'circleci.com', -> r {r.parts[0] == 'blog' ? r.fetch : r.deny}
 
     # Cloudflare
     AllowHost 'cdnjs.cloudflare.com'
@@ -149,7 +147,7 @@ images-na.ssl-images-amazon.com
       if r.basename.match? /s-l(64|96|200|225).jpg/
         [301, {'Location' => r.dirname + '/s-l1600.jpg'}, []]
       else
-        r.noexec
+        r.fetch
       end}
     GET 'rover.ebay.com', -> r {
       r.env[:query].has_key?('mpre') ? [301, {'Location' => r.env[:query]['mpre']}, []] : r.deny}
@@ -159,31 +157,25 @@ images-na.ssl-images-amazon.com
 
     # Facebook
     FBgunk = %w(common connect pages_reaction_units plugins security tr)
-    FBlite = -> r {ENV.has_key?('FACEBOOK') ? r.fetch : FBgunk.member?(r.parts[0]) ? r.deny : r.noexec}
+    FBlite = -> r {ENV.has_key?('FACEBOOK') ? r.fetch : FBgunk.member?(r.parts[0]) ? r.deny : r.fetch}
     %w(facebook.com business.facebook.com www.facebook.com).map{|host|GET host, FBlite}
     %w(l.instagram.com l.facebook.com).map{|host| GET host, GotoU}
 
     # Forbes
     GET 'thumbor.forbes.com', -> r {[301, {'Location' => URI.unescape(r.parts[-1])}, []]}
 
-    #FSDN
-    GET 'a.fsdn.com', -> r {r.noexec}
-
-    # Gitter
-    GET 'gitter.im', -> req {req.desktop.fetch}
-
     # Google
     GoogleLite = -> r {
       case r.path
       when '/'
-        r.noexec
+        r.fetch
       when '/imgres'
-        r.env[:query]['imgurl'] ? [301, {'Location' =>  r.env[:query]['imgurl']}, []] : r.noexec
+        r.env[:query]['imgurl'] ? [301, {'Location' =>  r.env[:query]['imgurl']}, []] : r.fetch
       when '/search'
         if r.env[:query]['q']&.match? /^(https?:\/\/|l(:8000|\/)|localhost|view-source)/ # why is Chrome sending HTTP URLs typed into URLbar to Google search?
           [301, {'Location' => r.env[:query]['q'].sub(/^l/,'http://l')}, []]
         else
-          r.noexec
+          r.fetch
         end
       when /^\/maps/
         r.desktop.fetch
@@ -247,11 +239,11 @@ android.clients.google.com
       AllowHost 'www.linkedin.com'
     else
       GET 'media.licdn.com', Lite
-      GET 'www.linkedin.com', -> r {%w(in jobs posts).member?(r.parts[0]) ? r.noexec : r.deny}
+      GET 'www.linkedin.com', -> r {%w(in jobs posts).member?(r.parts[0]) ? r.fetch : r.deny}
     end
 
     # Medium
-    GET 'medium.com', -> r {r.env[:query].has_key?('redirecturl') ? [301, {'Location' => r.env[:query]['redirecturl']}, []] : r.noexec}
+    GET 'medium.com', -> r {r.env[:query].has_key?('redirecturl') ? [301, {'Location' => r.env[:query]['redirecturl']}, []] : r.fetch}
 
     # Meredith
     GET 'imagesvc.meredithcorp.io', GoIfURL
@@ -332,7 +324,7 @@ addons-amo.cdn.mozilla.net
         if r.env[:query].has_key? 'w'
           [301, {'Location' =>  r.env['REQUEST_PATH'] + HTTP.qs(r.env[:query].reject{|k,_|k=='w'})}, []]
         else
-          r.noexec
+          r.fetch
         end}}
 
     # Skimmer
@@ -355,7 +347,7 @@ addons-amo.cdn.mozilla.net
     GotoTwitter = -> r {[301,{'Location' => 'https://twitter.com' + r.path },[]]}
     GET 'mobile.twitter.com', GotoTwitter
     GET 'www.twitter.com', GotoTwitter
-    GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : r.noexec}
+    GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : r.fetch}
     GET 'twitter.com', -> r {
       if !r.path || r.path == '/'
         r.env[:intermediate] = true # defer indexing
@@ -386,11 +378,11 @@ addons-amo.cdn.mozilla.net
       if parts.size > 1
         [301, {'Location' => 'https://' + parts[-1]}, []]
       else
-        r.noexec
+        r.fetch
       end}
 
     # Yelp
-    GET 'www.yelp.com', -> r {r.env[:query]['redirect_url'] ? [301, {'Location' => r.env[:query]['redirect_url']},[]] : r.noexec}
+    GET 'www.yelp.com', -> r {r.env[:query]['redirect_url'] ? [301, {'Location' => r.env[:query]['redirect_url']},[]] : r.fetch}
 
     # YouTube
     GET 's.ytimg.com', -> r {r.desktop.fetch}

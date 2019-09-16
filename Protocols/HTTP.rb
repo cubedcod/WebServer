@@ -157,7 +157,7 @@ class WebResource
 
       env[:deny] = true
       type, content = if ext == 'js' || type == :script
-                        source = ConfDir.join 'alternatives/' + host + path
+                        source = SiteDir.join 'alternatives/' + host + path
                         ['application/javascript', source.exist? ? source.read : '//']
                       elsif %w(gif png).member?(ext) || type == :image
                         ['image/gif', SiteGIF]
@@ -515,26 +515,6 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
           [self, files]
         end
        end).flatten.compact.uniq.select(&:exist?).map{|n|n.env env}
-    end
-
-    def noexec
-      if ext == 'js'
-        return fetch if ENV.has_key?('AMAZON') && (host.match? /AMAZON/i)
-        return fetch if ENV.has_key? 'JAVASCRIPT'
-      end
-      return deny if %w(gif js).member?(ext.downcase) || env['REQUEST_URI'].match?(/\.png\?/)
-      fetch.yield_self{|status, head, body|
-        type = head['Content-Type'] || ''
-        if status.to_s.match? /30[1-4]/
-          [status, head, body] # redirect
-        elsif type.match?(/^application\/pdf/) || !type.match?(/application|image\/(bmp|gif)|script/)
-          [status, head, body] # allowed content
-        else                   # filtered content
-          dtype = :image  if type.match? /image/
-          dtype = :script if type.match? /script/
-          dtype = :json   if type.match? /json/
-          deny status, dtype
-        end}
     end
 
     def notfound
