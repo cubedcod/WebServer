@@ -86,19 +86,6 @@ wp-rum)([-.:_\/?&=~]|$)|
                  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3906.0 Safari/537.36',
                  'Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0']
 
-    # path handlers
-
-    GET '/mail', -> r {
-      if r.local?
-        if r.path == '/mail' # inbox redirect
-          [302, {'Location' => '/d/*/msg*?head&sort=date&view=table'}, []]
-        else
-          r.local
-        end
-      else
-        r.fetch
-      end}
-
     GotoBasename = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
     GotoU   = -> r {[301, {'Location' =>  r.env[:query]['u']}, []]}
     GotoURL = -> r {[301, {'Location' => (r.env[:query]['url']||r.env[:query]['q'])}, []]}
@@ -106,38 +93,6 @@ wp-rum)([-.:_\/?&=~]|$)|
     Icon    = -> r {r.env[:deny] = true; [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
     Lite    = -> r {r.gunkURI? ? r.deny : r.noexec}
     NoQuery = -> r {r.qs.empty? ? r.noexec : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
-
-    GET '/favicon.ico', Icon
-
-    GET '/resizer', -> r {
-      parts = r.path.split /\/\d+x\d+\/(filter[^\/]+\/)?/
-      if parts.size > 1
-        [301, {'Location' => 'https://' + parts[-1]}, []]
-      else
-        r.fetch
-      end}
-
-    GET '/storyimage', -> r {
-      parts = r.path.split '&'
-      if parts.size > 1
-        [301, {'Location' => 'https://' + r.host + parts[0]}, []]
-      else
-        r.fetch
-      end}
-
-    GET '/thumbnail', GoIfURL
-
-    GET '/clicks/track', GotoURL
-    GET '/url', GotoURL
-
-    # site handlers
-
-    # Air
-    AllowHost 'events.air.tv'
-    AllowHost 'event-listener.air.tv'
-
-    # Alibaba
-    %w(www.aliexpress.com ae-cn.alicdn.com ae01.alicdn.com i.alicdn.com).map{|h|AllowHost h}
 
     # Amazon
     AmazonMedia = -> r {%w(css jpg mp4 png webm webp).member?(r.ext.downcase) && r.env['HTTP_REFERER']&.match(/amazon\.com/) && r.noexec || r.deny}
@@ -152,23 +107,8 @@ images-na.ssl-images-amazon.com
       GET 'm.media-amazon.com', AmazonMedia
     end
 
-    # AmericanInno
-    AllowCookies 'www.americaninno.com'
-
-    # AOL
-    GET 'o.aolcdn.com', -> r {r.env[:query].has_key?('image_uri') ? [301, {'Location' => r.env[:query]['image_uri']}, []] : r.noexec}
-
-    # Bizjournals
-    AllowCookies 'www.bizjournals.com'
-
-    # Bloomberg
-    AllowCookies 'www.bloomberg.com'
-
     # Boston Globe
     GET 'bos.gl', -> r {r.fetch scheme: :http}
-
-    # Brave
-    AllowHost 'brave.com' if ENV.has_key? 'BRAVE'
 
     # Brightcove
     AllowHost 'players.brightcove.net'
@@ -218,9 +158,6 @@ images-na.ssl-images-amazon.com
 
     # Economist
     AllowHost 'www.economist.com'
-
-    # Eventbrite
-    #GET 'img.evbuc.com', GotoBasename
 
     # Facebook
     FBgunk = %w(common connect pages_reaction_units plugins security tr)
@@ -391,9 +328,6 @@ addons-amo.cdn.mozilla.net
         r.fetch options
       end}
 
-    # Redfin
-    AllowCookies 'www.redfin.com'
-
     # Reuters
     (0..5).map{|i|
       GET "s#{i}.reutersmedia.net", -> r {
@@ -402,9 +336,6 @@ addons-amo.cdn.mozilla.net
         else
           r.noexec
         end}}
-
-    # Shopify
-    GET 'cdn.shopify.com', -> r {r.qs.empty? ? r.noexec : [301, {'Location' => r.path}, []]}
 
     # Skimmer
     GET 'go.skimresources.com', GotoURL
@@ -418,10 +349,7 @@ addons-amo.cdn.mozilla.net
             w.soundcloud.com
 ).map{|h|AllowHost h}
 
-    # Static9
-    GET 'imageresizer.static9.net.au', GotoBasename
-
-    # TechnologyReview
+    # Technology Review
     GET 'cdn.technologyreview.com', NoQuery
 
     # Twitter
@@ -468,17 +396,16 @@ addons-amo.cdn.mozilla.net
 
     # YouTube
     GET 's.ytimg.com', -> r {r.desktop.fetch}
-    GET 'youtube.com', -> r {[301, {'Location' => 'https://www.youtube.com' + r.env['REQUEST_URI']}, []]}
+    GET 'youtube.com',   -> r {[301, {'Location' => 'https://www.youtube.com' + r.env['REQUEST_URI']}, []]}
     GET 'm.youtube.com', -> r {[301, {'Location' => 'https://www.youtube.com' + r.env['REQUEST_URI']}, []]}
     GET 'www.youtube.com', -> r {
       mode = r.parts[0]
       if %w{attribution_link redirect}.member? mode
         [301, {'Location' =>  r.env[:query]['q'] || r.env[:query]['u']},[]]
       elsif !mode
-        r.fetch
-      elsif !r.gunkURI? && %w(browse_ajax c channel embed feed get_video_info
-guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist
-results signin user watch watch_videos yts).member?(mode)
+        r.deny
+      elsif !r.gunkURI? && %w(browse_ajax c channel embed feed get_video_info guide_ajax
+heartbeat iframe_api live_chat manifest.json opensearch playlist results signin user watch watch_videos yts).member?(mode)
         r.desktop.fetch
       elsif r.env[:query]['allow'] == ServerKey
         r.fetch
@@ -497,10 +424,6 @@ results signin user watch watch_videos yts).member?(mode)
 
     GET 'youtu.be', -> r {[301, {'Location' => 'https://www.youtube.com/watch?v=' + r.path[1..-1]}, []]}
 
-    # Zillow
-    AllowHost 'www.zillow.com'
-    #AllowCookies 'www.zillow.com'
-
     def subscriptionFile slug=nil
       (case host
        when /reddit.com$/
@@ -512,11 +435,6 @@ results signin user watch watch_videos yts).member?(mode)
        end).R
     end
 
-  end
-
-  def HTTP.twits
-    `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|twit|
-      ('https://twitter.com/' + twit).R.subscribe}
   end
 
   def AP doc
