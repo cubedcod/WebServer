@@ -255,6 +255,7 @@ module Webize
 end
 class WebResource
   module HTML
+
     def renderFeed graph
       HTML.render ['<?xml version="1.0" encoding="utf-8"?>',
                    {_: :feed,xmlns: 'http://www.w3.org/2005/Atom',
@@ -272,5 +273,16 @@ class WebResource
                                 c: {xmlns:"http://www.w3.org/1999/xhtml",
                                     c: d[Content]}}]}}]}]
     end
+
   end
+
+  module HTTP
+
+    def subscribe;     subscriptionFile.touch end
+    def subscribed?;   subscriptionFile.exist? end
+    def subscriptions; subscriptionFile('*').R.glob.map(&:dir).map &:basename end
+    def unsubscribe;   subscriptionFile.exist? && subscriptionFile.node.delete end
+
+  end
+
 end

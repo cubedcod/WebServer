@@ -348,32 +348,21 @@ class WebResource
     end
 
     def self.GET arg, lambda
-      if arg[0] == '/'
-        PathGET[arg] = lambda
-      else
-        HostGET[arg] = lambda
-      end
+      HostGET[arg] = lambda
     end
 
     def GETrequest
-      if handler = PathGET['/' + parts[0].to_s] # path binding - all subpaths
-        handler[self]
-      elsif handler = PathGET[path]             # path binding - exact path
-        handler[self]
-      elsif local?                              # localhost (generic)
-        local
-      elsif path.match? /[^\/]204$/             # connectivity-check
+      if path.match? /[^\/]204$/                   # connectivity-check
         env[:deny] = true
         [204, {}, []]
-      elsif ext.downcase == 'ico'               # Favicon - any path
-        Icon[self]
-      elsif handler = HostGET[host]             # remote host (custom)
+      elsif handler = HostGET[host]                # host binding
         handler[self]
-      else    
-        return deny   if gunk?                  # dropped request
-                                                # remote storage pool
-        return noexec if env['SERVER_NAME'].match? /amazon|azure|cloud(flare|front|inary)|digitalocean|fa(cebook|stly)|git(hub|lab)|google|heroku|netdna|ra(ckcdn|wgit)|st(ackpath|orage)|usercontent/
-        fetch                                   # remote host (generic)
+      elsif gunk?
+        deny
+      elsif local?                                 # local resource
+        local
+      else                                         # global resource
+        fetch
       end
     rescue OpenURI::HTTPRedirect => e
       [302,{'Location' => e.io.meta['location']},[]]
@@ -384,7 +373,7 @@ class WebResource
       return notfound if !env.has_key?(:repository) || env[:repository].empty?
       format = selectFormat
       dateMeta if local?
-      remoteDirStat unless local?
+      #remoteDirStat unless local?
       env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
       env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
       env[:resp].update({'Link' => env[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !env[:links] || env[:links].empty?
@@ -726,23 +715,6 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
 
       default                                                 # HTML via default
     end
-
-    def subscribe;     subscriptionFile.touch end
-    def subscribed?;   subscriptionFile.exist? end
-    def subscriptions; subscriptionFile('*').R.glob.map(&:dir).map &:basename end
-    def subs; puts     subscriptions.sort.join ' ' end
-
-    PathGET['/subscribe'] = -> r {
-      url = (r.env[:query]['u'] || '/').R
-      url.subscribe
-      [302, {'Location' => url.to_s}, []]}
-
-    PathGET['/unsubscribe']  = -> r {
-      url = (r.env[:query]['u'] || '/').R
-      url.unsubscribe
-      [302, {'Location' => url.to_s}, []]}
-
-    def unsubscribe; subscriptionFile.exist? && subscriptionFile.node.delete end
 
     def upstreamFormat? format = nil
       return true if DesktopUA.member?(env['HTTP_USER_AGENT']) || parts.member?('embed') || host.split('.').member?('oembed')
