@@ -490,7 +490,7 @@ class WebResource
                (basename && !['','/'].member?(basename) && basename) ||
                (host && host.sub(/\.com$/,'')) ||
                'user'
-        avatar = Avatars[u.to_s.downcase]
+        avatar = nil
         [{_: :a, href: u.to_s, id: 'a' + Digest::SHA2.hexdigest(rand.to_s),
           style: avatar ? '' : (env[:colors][name] ||= HTML.colorize),
           c: avatar ? {_: :img, class: :avatar, src: avatar} : name}.update(avatar ? {class: :avatar} : {}), ' ']
@@ -546,7 +546,7 @@ class WebResource
     Markup[Person] = -> user, env {
       if u = user['uri']
         {class: :user,
-         c: [(if avatar = Avatars[u.downcase]
+         c: [(if avatar = nil
               {_: :img, src: avatar}
              else
                {_: :span, c: '👤'}
