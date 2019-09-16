@@ -40,9 +40,6 @@ class WebResource
 
     Extensions = RDF::Format.file_extensions.invert
 
-    CDN = /amazon|azure|cloud(flare|front|inary)|digitalocean|fa(cebook|stly)|heroku|netdna|ra(ckcdn|wgit)|stackpath|usercontent/
-    CDNsubdomain = /(s3.+amazonaws|storage\.googleapis)\.com$/
-
     GunkURI = %r([-.:_\/?&=~]((block|page)?
 a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|slot|type|unit|words?)?|appnexus|(app)?
 b(anner|eacon|reakingnew)s?|

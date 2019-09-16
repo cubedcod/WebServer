@@ -369,11 +369,11 @@ class WebResource
         Icon[self]
       elsif handler = HostGET[host]             # remote host (custom)
         handler[self]
-      else                                      # remote host (generic)
-        return noexec if env['SERVER_NAME'].match? CDNsubdomain
-        return deny   if gunk?
-        return noexec if env['SERVER_NAME'].match? CDN
-        fetch
+      else    
+        return deny   if gunk?                  # dropped request
+                                                # remote storage pool
+        return noexec if env['SERVER_NAME'].match? /amazon|azure|cloud(flare|front|inary)|digitalocean|fa(cebook|stly)|git(hub|lab)|google|heroku|netdna|ra(ckcdn|wgit)|st(ackpath|orage)|usercontent/
+        fetch                                   # remote host (generic)
       end
     rescue OpenURI::HTTPRedirect => e
       [302,{'Location' => e.io.meta['location']},[]]
