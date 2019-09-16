@@ -4,8 +4,6 @@ class WebResource
   module HTTP
     include URIs
     AllowedHosts = {}
-    CookieHosts = {}
-    ReferHosts = {}
     HostGET = {}
     HostPOST = {}
     Hosts = {}
@@ -19,16 +17,8 @@ class WebResource
     NoTransform = /^(application|audio|font|image|text\/(css|(x-)?javascript|proto)|video)/
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
 
-    def self.AllowCookies host
-      CookieHosts[host] = true
-    end
-
     def self.AllowHost host
       AllowedHosts[host] = true
-    end
-
-    def self.AllowRefer host
-      ReferHosts[host] = true
     end
 
     def allowedOrigin
@@ -40,9 +30,6 @@ class WebResource
         '*'
       end
     end
-
-    def allowCookies?; AllowedHosts.has_key?(host) || CookieHosts.has_key?(host) end
-    def allowRefer?; AllowedHosts.has_key?(host) || ReferHosts.has_key?(host) end
 
     def cached?
       cachedType && cache.exist? && !%w(html).member?(ext.downcase)
@@ -289,7 +276,6 @@ class WebResource
             RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
 
           body = HTTP.decompress meta, response.read                     # decode body
-          #format ||= body.bytesize < 2048 ? 'text/plain' : 'application/octet-stream' # untyped?
 
           cache(format).write body.force_encoding('UTF-8') if cachedType # cache body
 
@@ -301,15 +287,16 @@ class WebResource
           return self if env[:intermediate]                              # no response?
 
           index                                                          # index RDF
-          ks = %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag}
-          ks.concat %w(Set-Cookie x-iinfo) if allowCookies?                          # conditional metadata
-          ks.map{|k|env[:resp][k]||=meta[k.downcase] if meta[k.downcase]}# metadata for HTTP caller
-          env[:resp]['Content-Length'] = body.bytesize.to_s
 
           if verbose? # logging
             puts  "\e[7mRESPONSE HEADER\e[0m OUT"
             HTTP.print_header env[:resp]
           end
+
+          # metadata for HTTP caller
+          %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie}.map{|k|
+            env[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
+          env[:resp]['Content-Length'] = body.bytesize.to_s
 
           env[:transform] ||= !(upstreamFormat? format)                  # rewritable?
           env[:transform] ? graphResponse : [status, env[:resp], [body]] # return RDF or upstream-data
@@ -427,13 +414,13 @@ remote-addr repository request-method request-path request-uri resp script-name 
 transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
 
       # Cookie
-      unless allowCookies?
+      unless AllowedHosts.has_key? host
         head.delete 'Cookie'
         head.delete 'Set-Cookie'
       end
 
       # Referer
-      head.delete 'Referer' unless allowRefer?
+      head.delete 'Referer' unless AllowedHosts.has_key? host
       if env && env['SERVER_NAME']
         case env['SERVER_NAME']
         when /wsj\.com$/
