@@ -107,10 +107,6 @@ images-na.ssl-images-amazon.com
     # BusinessWire
     GET 'cts.businesswire.com', GoIfURL
 
-    # BuzzFeed
-    AllowHost 'img.buzzfeed.com'
-    AllowHost 'www.buzzfeed.com'
-
     # CircleCI
     GET 'circleci.com', -> r {r.parts[0] == 'blog' ? r.fetch : r.deny}
 
@@ -122,9 +118,6 @@ images-na.ssl-images-amazon.com
 
     # DartSearch
     GET 'clickserve.dartsearch.net', -> r {[301,{'Location' => r.env[:query]['ds_dest_url']}, []]}
-
-    # Disney
-    AllowHost 'abcnews.go.com'
 
     # DuckDuckGo
     GET 'duckduckgo.com', -> r {%w{ac}.member?(r.parts[0]) ? r.deny : r.fetch}
@@ -142,9 +135,6 @@ images-na.ssl-images-amazon.com
       end}
     GET 'rover.ebay.com', -> r {
       r.env[:query].has_key?('mpre') ? [301, {'Location' => r.env[:query]['mpre']}, []] : r.deny}
-
-    # Economist
-    AllowHost 'www.economist.com'
 
     # Facebook
     FBgunk = %w(common connect pages_reaction_units plugins security tr)
