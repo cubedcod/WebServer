@@ -367,18 +367,17 @@ class WebResource
     def graphResponse
       return notfound if !env.has_key?(:repository) || env[:repository].empty?
       format = selectFormat
-      dateMeta if local?
-      #remoteDirStat unless local?
       env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
       env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
       env[:resp].update({'Link' => env[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !env[:links] || env[:links].empty?
+
       entity ->{
         case format
         when /^text\/html/
-          htmlDocument treeFromGraph # HTML
+          htmlDocument treeFromGraph
         when /^application\/atom+xml/
-          renderFeed treeFromGraph   # Atom/RSS-feed
-        else                         # RDF
+          feedDocument treeFromGraph
+        else
           base = ((env[:scheme] || 'https') + '://' + env['SERVER_NAME']).R.join env['REQUEST_PATH']
           env[:repository].dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => base, :standard_prefixes => true
         end}
@@ -483,8 +482,9 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
         rdf[0].fileResponse # response on file
       else
         nonRDF.map &:load # load  non-RDF
-        index             # index non-RDF
+#        index             # index non-RDF
         rdf.map &:load    # load  RDF
+        dateMeta
         graphResponse     # response
       end
     end
