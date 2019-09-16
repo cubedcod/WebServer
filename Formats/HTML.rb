@@ -468,7 +468,7 @@ class WebResource
         CGI.escapeHTML t.to_s
       end}
 
-    Markup[Date] = -> date, env=nil {{_: :a, class: :date, href: ServerAddr + '/' + date[0..13].gsub(/[-T:]/,'/'), c: date}}
+    Markup[Date] = -> date, env=nil {{_: :a, class: :date, href: '/' + date[0..13].gsub(/[-T:]/,'/'), c: date}}
 
     Markup[Link] = -> ref, env=nil {
       u = ref.to_s
@@ -519,7 +519,7 @@ class WebResource
              end},
            abstracts,
            {_: :a, class: 'id', c: '☚', href: uri}.update(titles.empty? ? {type: 'node'} : {}).update(uri ? {id: 'pt' + uri_hash} : {}), "\n",
-           ([{_: :a, class: :date, id: 'date' + uri_hash, href: ServerAddr + '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date}, "\n"] if date),
+           ([{_: :a, class: :date, id: 'date' + uri_hash, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date}, "\n"] if date),
            images.map{|i| Markup[Image][i,env]},
            {_: :table, class: :fromTo,
             c: {_: :tr,
