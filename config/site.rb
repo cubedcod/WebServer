@@ -6,7 +6,7 @@ module Webize
 
       SiteGunk = {'www.google.com' => %w(div.logo h1 h2),
                   'www.bostonmagazine.com' => %w(a[href*='scrapertrap'])}
-      # HTML to RDF method map
+
       Triplr = {
         'apnews.com' => :AP,
         'lwn.net' => :LWN,
@@ -25,7 +25,6 @@ module Webize
     end
   end
   module JSON
-    # JSON to RDF method map
     Triplr = {
       'gateway.reddit.com' => :Reddit,
       'outline.com' => :Outline,
@@ -67,14 +66,6 @@ wp-rum)
     SiteGIF = SiteDir.join('site.gif').read
     SiteCSS = SiteDir.join('site.css').read + SiteDir.join('code.css').read
     SiteJS  = SiteDir.join('site.js').read
-  end
-  module HTML
-    Avatars = {}
-    'avatars/*png'.R.glob.map{|a|
-      uri = Base64.decode64(a.basename.split('.')[0]).downcase
-      location = ServerAddr + a.path
-      #puts "Avatar: #{uri} -> #{location}"
-      Avatars[uri] = location}
   end
   module HTTP
 
@@ -228,7 +219,6 @@ android.clients.google.com
       GET     'google.com', GoogleLite
       GET 'www.google.com', GoogleLite
     end
-    GET 'www.googleadservices.com', -> r {r.env[:query]['adurl'] ? [301, {'Location' => r.env[:query]['adurl']},[]] : r.deny}
 
     # Grabien
     AllowHost 'news.grabien.com'

@@ -222,12 +222,6 @@ end
 class WebResource
   module HTML
 
-    def avatar link = nil
-      location = ('avatars/' + Base64.encode64(uri).gsub("\n",'') + '.png').R
-      location.write open(link).read if link
-      location
-    end
-
     def self.colorize color = '#%06x' % (rand 16777216)
       "color: black; background-color: #{color}; border-color: #{color}"
     end
@@ -478,12 +472,11 @@ class WebResource
 
     Markup[Link] = -> ref, env=nil {
       u = ref.to_s
-      avatar = Avatars[u.downcase.gsub(/\/$/,'')]
       [{_: :a,
-        c: avatar ? {_: :img, class: :avatar, src: avatar} : u.sub(/^https?.../,'')[0..79],
+        c: u.sub(/^https?.../,'')[0..79],
         href: u,
         id: 'l' + Digest::SHA2.hexdigest(rand.to_s),
-        style: avatar ? 'background-color: #000' : (env[:colors][u.R.host] ||= HTML.colorize),
+        style: env[:colors][u.R.host] ||= HTML.colorize,
         title: u,
        },
        " \n"]}
