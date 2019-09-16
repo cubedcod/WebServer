@@ -40,8 +40,8 @@ class WebResource
 
     Extensions = RDF::Format.file_extensions.invert
 
-    GunkURI = %r([-.:_\/?&=~]((block|page)?
-a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|slot|type|unit|words?)?|appnexus|(app)?
+    GunkURI = %r([-.:_\/?&=~]
+((block|page)?a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|slot|type|unit|words?)?|appnexus|(app)?
 b(anner|eacon|reakingnew)s?|
 c(ampaign|edexis|hartbeat.*|ollector|omscore|onversion|ookie(c(hoice|onsent)|law|notice)?s?|se)|
 de(als|tect)|
@@ -62,12 +62,11 @@ s?s(a(fe[-_]?browsing|ilthru)|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(ci
 t(aboola|(arget|rack)(ers?|ing)|bproxy|ea(lium|ser)|hirdparty|inypass|racing|rend(ing|s))|autotrack|
 u(rchin|serlocation|tm)|
 viral|
-wp-rum)([-.:_\/?&=~]|$)|
-\.((gif|png)\?|otf|ttf|woff2?)|\/[a-z]\?)xi
+wp-rum)
+([-.:_\/?&=~]|$))xi
 
     ServerAddr = 'http://localhost:8000'
 
-    SiteFont = ConfDir.join('fonts/hack-regular-subset.woff2').read
     SiteGIF = ConfDir.join('site.gif').read
     SiteCSS = ConfDir.join('site.css').read + ConfDir.join('code.css').read
     SiteJS  = ConfDir.join('site.js').read

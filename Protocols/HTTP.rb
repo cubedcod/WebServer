@@ -158,12 +158,7 @@ class WebResource
       env[:deny] = true
       type, content = if ext == 'js' || type == :script
                         source = ConfDir.join 'alternatives/' + host + path
-                        ['application/javascript',
-                         source.exist? ? source.read : '//']
-                      elsif path[-3..-1] == 'css'
-                        ['text/css',"body {background: repeating-linear-gradient(#{rand 360}deg, #000, #000 6.5em, #fff 6.5em, #fff 8em)\ndiv, p {background-color: #000; color: #fff}"]
-                      elsif ext == 'woff' || ext == 'woff2'
-                        ['font/woff2', SiteFont]
+                        ['application/javascript', source.exist? ? source.read : '//']
                       elsif %w(gif png).member?(ext) || type == :image
                         ['image/gif', SiteGIF]
                       elsif ext == 'json' || type == :json
