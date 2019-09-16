@@ -156,20 +156,16 @@ images-na.ssl-images-amazon.com
     GET 'thumbor.forbes.com', -> r {[301, {'Location' => URI.unescape(r.parts[-1])}, []]}
 
     # Google
-    GoogleLite = -> r {
+    GoogleSearch = -> r {
       case r.path
       when '/'
         r.fetch
-      when '/imgres'
-        r.env[:query]['imgurl'] ? [301, {'Location' =>  r.env[:query]['imgurl']}, []] : r.fetch
       when '/search'
-        if r.env[:query]['q']&.match? /^(https?:\/\/|l(:8000|\/)|localhost|view-source)/ # why is Chrome sending HTTP URLs typed into URLbar to Google search?
+        if r.env[:query]['q']&.match? /^(https?:\/\/|l(:8000|\/)|localhost|view-source)/
           [301, {'Location' => r.env[:query]['q'].sub(/^l/,'http://l')}, []]
         else
           r.fetch
         end
-      when /^\/maps/
-        r.desktop.fetch
       else
         r.deny
       end}
@@ -214,10 +210,8 @@ android.clients.google.com
 ).map{|host|
       AllowHost host}
     else
-      AllowCookies 'www.google.com'
-      AllowRefer   'www.google.com'
-      GET     'google.com', GoogleLite
-      GET 'www.google.com', GoogleLite
+      GET     'google.com', GoogleSearch
+      GET 'www.google.com', GoogleSearch
     end
 
     # Grabien
