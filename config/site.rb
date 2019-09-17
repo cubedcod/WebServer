@@ -286,6 +286,9 @@ reddit-uploaded-media.s3-accelerate.amazonaws.com).map{|host|
         r.fetch options
       end}
 
+    # Responsys
+    GET 'static.cdn.responsys.net', Lite
+
     # Reuters
     (0..5).map{|i|
       GET "s#{i}.reutersmedia.net", -> r {
