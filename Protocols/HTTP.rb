@@ -207,8 +207,8 @@ class WebResource
       u = '//' + hostname + path + (options[:suffix]||'') + qs           # URI sans scheme
       primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env    # primary locator
       fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env # fallback locator
-      primary.fetchHTTP     #   try (HTTPS default)
-    rescue Exception => e # retry (HTTP)
+      primary.fetchHTTP   #   try HTTPS
+    rescue Exception => e # retry HTTP
       case e.class.to_s
       when 'OpenURI::HTTPRedirect' # redirected
         if fallback == e.io.meta['location']
@@ -448,6 +448,8 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
                             else
                             end)
         [303, env[:resp].update({'Location' => loc + parts[1..-1].join('/') + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '')}), []]
+      elsif path == '/mail' # inbox redirect
+        [302, {'Location' => '/d/*/msg*?head&sort=date&view=table'}, []]
       elsif file? # local file
         fileResponse
       elsif node.directory? && qs.empty? && (index = (self+'index.html').R.env env).exist? && selectFormat == 'text/html'
