@@ -67,6 +67,8 @@ class WebResource
           print '🖼️'
         elsif %w(png svg webp).member?(ext) || mime.match?(/^image/)
           print '🖌'
+        elsif %w(aac flac m4a mp3 ogg opus).member?(ext) || mime.match?(/^audio/)
+          print '🔉'
         elsif %w(mp4 webm).member?(ext) || mime.match?(/^video/)
           print '🎬'
         else
