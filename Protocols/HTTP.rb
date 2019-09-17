@@ -70,6 +70,7 @@ class WebResource
         elsif %w(mp4 webm).member?(ext) || mime.match?(/^video/)
           print '🎬'
         else
+          print '🌍🌎🌏🌐'[rand 4] if !resource.local?
           puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) +
                "\e[" + color + "m"  + (status == 200 ? '' : status.to_s) + (env['HTTP_REFERER'] ? (' ' + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m→") : ' ') +
                "\e[" + color + ";7m https://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '') +
@@ -262,7 +263,6 @@ class WebResource
       end
 
       open(uri, headers.merge({redirect: false})) do |response|          # fetch
-        print '🌍🌎🌏🌐'[rand 4]
         env[:scheme] = scheme                                            # request scheme
         status = response.status.to_s.match(/\d{3}/)[0].to_i             # upstream status
         meta = response.meta                                             # upstream metadata
