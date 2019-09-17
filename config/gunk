@@ -199,7 +199,6 @@
 .api.foursquare.com
 .api.gannett-cdn.com
 .api.iheart.com
-.api.pinterest.com
 .apility.net
 .app-measurement.com
 .app-us1.com
@@ -224,7 +223,6 @@
 .artibot.ai
 .askmediagroup.com
 .aspnetcdn.com
-.assets.pinterest.com
 .associates-amazon.com
 .atdmt.com
 .atgsvcs.com
@@ -544,7 +542,6 @@
 .crwdcntrl.net
 .cryptocompare.com
 .cssrvsync.com
-.ct.pinterest.com
 .ctctcdn.com
 .ctnsnet.com
 .cubchannel.com
@@ -1125,7 +1122,6 @@
 .location.bloomberg.com
 .lockerdome.com
 .lockerdomecdn.com
-.log.pinterest.com
 .logentries.com
 .loggly.com
 .login.bloomberg.com
@@ -1434,6 +1430,7 @@
 .picreel.com
 .piguiqproxy.com
 .pingdom.net
+.pinterest.com
 .pippa.io
 .pippio.com
 .pixel.watch
