@@ -59,6 +59,12 @@ class WebResource
           print '🛑'
         elsif status == 304
           print '✅'
+        elsif resource.ext == 'css'
+          print '🎨🖍️'[rand 2]
+        elsif resource.ext == 'jpg'
+          print '📸'
+        elsif resource.ext == 'png'
+          print '🖼️'
         else
           puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) +
                "\e[" + color + "m"  + (status == 200 ? '' : status.to_s) + (env['HTTP_REFERER'] ? (' ' + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m→") : ' ') +
