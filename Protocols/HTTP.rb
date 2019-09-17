@@ -473,7 +473,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
 
     LocalAddr = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
 
-    def local?; LocalAddr.member?(env['SERVER_NAME']||host) end
+    def local?; LocalAddr.member?(env['SERVER_NAME']) || ENV['SERVER_NAME'] == env['SERVER_NAME'] end
 
     def nodes # URI -> file(s)
       (if node.directory?
