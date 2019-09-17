@@ -57,6 +57,8 @@ class WebResource
 
         if resource.env[:deny]
           print '🛑'
+        elsif status == 304
+          print '✅'
         else
           puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) +
                "\e[" + color + "m"  + status.to_s + (env['HTTP_REFERER'] ? (' ' + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m→") : ' ') +
@@ -201,6 +203,7 @@ class WebResource
 
     # fetch remote. potentially non-HTTP transports but HTTPS + HTTP for now
     def fetch options = {}
+      return [304, {}, []] if env.has_key?('HTTP_IF_NONE_MATCH') && (%w(css gif jpeg jpg js mp3 mp4 png svg webm webp).member?(ext.downcase)||host.match?(/ggpht.com$/))
       u = '//' + hostname + path + (options[:suffix]||'') + qs           # URI sans scheme
       primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env    # primary locator
       fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env # fallback locator
