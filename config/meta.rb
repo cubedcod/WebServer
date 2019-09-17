@@ -242,6 +242,7 @@ class WebResource
       'og:image:title' => Abstract,
       'og:image:type' => :drop,
       'og:image:url' => Image,
+      'og:image:user_generated' => :drop,
       'og:image:width' => :drop,
       'og:last_name' => Creator,
       'og:locale' => :drop,
