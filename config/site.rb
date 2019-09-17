@@ -311,13 +311,15 @@ addons-amo.cdn.mozilla.net
     GET 'www.twitter.com', GotoTwitter
     GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : r.fetch}
     GET 'twitter.com', -> r {
+      r.env[:no_RDFa] = true # skip embedded-RDF search
       if !r.path || r.path == '/'
         r.env[:intermediate] = true # defer indexing
-        r.env[:no_RDFa] = true # skip embedded-RDF search
         '//twitter.com'.R.subscriptions.shuffle.each_slice(18){|s|
-          r.env[:query] = { vertical: :default, f: :tweets, q: s.map{|u|'from:' + u}.join('+OR+')}
+          r.env[:query] = { vertical: :default, f: :tweets,
+                            q: s.map{|u|'from:' + u}.join('+OR+')}
           '//twitter.com/search'.R(r.env).fetch}
-        r.env[:query] = {'sort' => 'date', 'view' => 'table'} # chronological sort
+        r.env[:query] = {'sort' => 'date', # chronological sort
+                         'view' => 'table'}
         r.index.graphResponse
       elsif r.gunkURI?
         r.deny
