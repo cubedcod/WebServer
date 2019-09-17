@@ -42,7 +42,7 @@ class WebResource
 b(anner|eacon|reakingnew)s?|
 c(ampaign|edexis|hartbeat.*|ollector|omscore|onversion|ookie(c(hoice|onsent)|law|notice)?s?|se)|
 de(als|tect)|
-e(moji.*\.js|nsighten|scenic|vidon)|(web)?
+e(moji.*\.js|ndscreen|nsighten|scenic|vidon)|(web)?
 fonts?|
 g(dpr|eo(ip|locate)|igya|pt|tag|tm|uid)|.*
 (header|pre)[-_]?bid.*|.*hubspot.*|[hp]b.?js|ima[0-9]?|

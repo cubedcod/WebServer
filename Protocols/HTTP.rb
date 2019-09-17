@@ -38,45 +38,44 @@ class WebResource
       resource = ('//' + env['SERVER_NAME'] + path).R env.merge( # instantiate request w/ blank response fields
        {resp:{}, links:{}, query: parseQs(env['QUERY_STRING'])}) # parse query
       resource.send(m).yield_self{|status, head, body|           # dispatch request
-        color = (if resource.env[:deny]                          # log request
-                  '31'                                           # red -> denied
-                elsif !Hosts.has_key? env['SERVER_NAME']
-                  Hosts[env['SERVER_NAME']] = resource
-                  '32'                                           # green -> new host
-                elsif env['REQUEST_METHOD'] == 'POST'
-                  '32'                                           # green -> POST
-                elsif status == 200
-                  if resource.ext=='js' || (head['Content-Type'] && head['Content-Type'].match?(/script/))
-                    '36'                                         # lightblue -> executable
-                  else
-                    '37'                                         # white -> basic response
-                  end
-                else
-                  '30'                                           # gray -> cache-hit, 304, NOOP
-                end) + ';1'
-        ext = resource.ext.downcase
+        ext = resource.ext.downcase                              # log request
         mime = head['Content-Type'] || ''
-
         if resource.env[:deny]
-          print '🛑'
+          print '🛑'                                             # denied
         elsif status == 304
-          print '✅'
+          print '✅'                                             # up-to-date
         elsif ext == 'css'
-          print '🎨🖍️'[rand 2]
+          print '🎨🖍️'[rand 2]                                    # stylesheet
         elsif %w(gif jpeg jpg).member? ext
-          print '🖼️'
+          print '🖼️'                                              # picture
         elsif %w(png svg webp).member?(ext) || mime.match?(/^image/)
-          print '🖌'
+          print '🖌'                                              # image
         elsif %w(aac flac m4a mp3 ogg opus).member?(ext) || mime.match?(/^audio/)
-          print '🔉'
+          print '🔉'                                             # audio
         elsif %w(mp4 webm).member?(ext) || mime.match?(/^video/)
-          print '🎬'
+          print '🎬'                                             # video
         else
-          print '🌍🌎🌏🌐'[rand 4] if !resource.local?
+          color = (if resource.env[:deny]
+                   '31'                                          # red -> denied
+                  elsif !Hosts.has_key? env['SERVER_NAME']
+                    Hosts[env['SERVER_NAME']] = resource
+                    '32'                                         # green -> new host
+                  elsif env['REQUEST_METHOD'] == 'POST'
+                    '32'                                         # green -> POST
+                  elsif status == 200
+                    if ext == 'js' || mime.match?(/script/)
+                      '36'                                       # lightblue -> executable
+                    else
+                      '37'                                       # white -> basic response
+                    end
+                  else
+                    '30'                                         # gray -> other
+                   end) + ';1'
+          print '🌍🌎🌏🌐'[rand 4] unless resource.local?        # global request
           puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) +
                "\e[" + color + "m"  + (status == 200 ? '' : status.to_s) + (env['HTTP_REFERER'] ? (' ' + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m→") : ' ') +
                "\e[" + color + ";7m https://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '') +
-               "\e[0m" + (head['Location'] ? ("➡️" + head['Location']) : '') + ' ' + (head['Content-Type'] == 'text/turtle; charset=utf-8' ? '🐢' : mime)
+               "\e[0m" + (head['Location'] ? ("➡️" + head['Location']) : '') + ' ' + (mime == 'text/turtle; charset=utf-8' ? '🐢' : mime)
         end
 
         [status, head, body]} # response
