@@ -86,7 +86,7 @@ wp-rum)
     if ENV.has_key? 'AMAZON'
       %w(            amazon.com
 images-na.ssl-images-amazon.com
-                 www.amazon.com).map{|h|AllowHost h}
+                 www.amazon.com).map{|h|Allow h}
     else
       GET 'amazon.com', Lite
       GET 'www.amazon.com', Lite
@@ -98,8 +98,8 @@ images-na.ssl-images-amazon.com
     GET 'bos.gl', -> r {r.fetch scheme: :http}
 
     # Brightcove
-    AllowHost 'players.brightcove.net'
-    AllowHost 'edge.api.brightcove.com'
+    Allow 'players.brightcove.net'
+    Allow 'edge.api.brightcove.com'
 
     # Brightspot
     GET 'ca-times.brightspotcdn.com', GoIfURL
@@ -111,7 +111,7 @@ images-na.ssl-images-amazon.com
     GET 'circleci.com', -> r {r.parts[0] == 'blog' ? r.fetch : r.deny}
 
     # Cloudflare
-    AllowHost 'cdnjs.cloudflare.com'
+    Allow 'cdnjs.cloudflare.com'
 
     # CNN
     GET 'dynaimage.cdn.cnn.com', GotoBasename
@@ -124,9 +124,9 @@ images-na.ssl-images-amazon.com
     GET 'proxy.duckduckgo.com', -> r {%w{iu}.member?(r.parts[0]) ? [301, {'Location' => r.env[:query]['u']}, []] : r.fetch}
 
     # eBay
-    AllowHost 'ebay.com'
-    AllowHost 'www.ebay.com'
-    AllowHost 'ir.ebaystatic.com'
+    Allow 'ebay.com'
+    Allow 'www.ebay.com'
+    Allow 'ir.ebaystatic.com'
     GET 'i.ebayimg.com', -> r {
       if r.basename.match? /s-l(64|96|200|225).jpg/
         [301, {'Location' => r.dirname + '/s-l1600.jpg'}, []]
@@ -170,7 +170,7 @@ encrypted-tbn3.gstatic.com
            maps.google.com
        maps.googleapis.com
           maps.gstatic.com
-).map{|h| AllowHost h }
+).map{|h| Allow h }
 
     if ENV.has_key? 'GOOGLE'
     %w(accounts.google.com
@@ -198,7 +198,7 @@ android.clients.google.com
            www.gstatic.com
          www.recaptcha.net
 ).map{|host|
-      AllowHost host}
+      Allow host}
     else
       GET     'google.com', GoogleSearch
       GET 'www.google.com', GoogleSearch
@@ -206,8 +206,8 @@ android.clients.google.com
 
     # Linkedin
     if ENV.has_key? 'LINKEDIN'
-      AllowHost 'media.licdn.com'
-      AllowHost 'www.linkedin.com'
+      Allow 'media.licdn.com'
+      Allow 'www.linkedin.com'
     else
       GET 'media.licdn.com', Lite
       GET 'www.linkedin.com', -> r {%w(in jobs posts).member?(r.parts[0]) ? r.fetch : r.deny}
@@ -220,21 +220,21 @@ android.clients.google.com
     GET 'imagesvc.meredithcorp.io', GoIfURL
 
     # Mixcloud
-    AllowHost 'www.mixcloud.com'
+    Allow 'www.mixcloud.com'
 
     # Mozilla
     %w( addons.mozilla.org
 addons-amo.cdn.mozilla.net
     addons.cdn.mozilla.net
          hacks.mozilla.org
-).map{|h| AllowHost h } if ENV.has_key? 'MOZILLA'
+).map{|h| Allow h } if ENV.has_key? 'MOZILLA'
 
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # NYTimes
     %w(cooking.nytimes.com
            www.nytimes.com).map{|host|
-      AllowHost host}
+      Allow host}
 
     # Outline
     GET 'outline.com', -> r {
@@ -302,13 +302,13 @@ addons-amo.cdn.mozilla.net
    api-widget.soundcloud.com
               soundcloud.com
             w.soundcloud.com
-).map{|h|AllowHost h}
+).map{|h|Allow h}
 
     # Technology Review
     GET 'cdn.technologyreview.com', NoQuery
 
     # Twitter
-    AllowHost 'api.twitter.com'
+    Allow 'api.twitter.com'
     GotoTwitter = -> r {[301,{'Location' => 'https://twitter.com' + r.path },[]]}
     GET 'mobile.twitter.com', GotoTwitter
     GET 'www.twitter.com', GotoTwitter
@@ -339,7 +339,7 @@ addons-amo.cdn.mozilla.net
     (0..7).map{|i| GET "i#{i}.wp.com", NoQuery}
 
     # Yahoo!
-    AllowHost 'news.yahoo.com'
+    Allow 'news.yahoo.com'
     GET 's.yimg.com', -> r {
       parts = r.path.split /https?:\/+/
       if parts.size > 1
@@ -352,7 +352,7 @@ addons-amo.cdn.mozilla.net
     GET 'www.yelp.com', -> r {r.env[:query]['redirect_url'] ? [301, {'Location' => r.env[:query]['redirect_url']},[]] : r.fetch}
 
     # YouTube
-    AllowHost 'www.youtube.com'
+    Allow 'www.youtube.com'
     GET 's.ytimg.com', -> r {r.desktop.fetch}
     GET 'youtube.com',   -> r {[301, {'Location' => 'https://www.youtube.com' + r.env['REQUEST_URI']}, []]}
     GET 'm.youtube.com', -> r {[301, {'Location' => 'https://www.youtube.com' + r.env['REQUEST_URI']}, []]}
