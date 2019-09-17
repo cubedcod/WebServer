@@ -55,24 +55,25 @@ class WebResource
                   '30'                                           # gray -> cache-hit, 304, NOOP
                 end) + ';1'
         ext = resource.ext.downcase
+        mime = head['Content-Type'] || ''
+
         if resource.env[:deny]
           print '🛑'
         elsif status == 304
           print '✅'
         elsif ext == 'css'
           print '🎨🖍️'[rand 2]
-        elsif %w(jpeg jpg).member? ext
+        elsif %w(gif jpeg jpg).member? ext
           print '🖼️'
-        elsif %w(png svg webp).member? ext
+        elsif %w(png svg webp).member?(ext) || mime.match?(/^image/)
           print '🖌'
-        elsif %w(mp4 webm).member? ext
+        elsif %w(mp4 webm).member?(ext) || mime.match?(/^video/)
           print '🎬'
         else
           puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) +
                "\e[" + color + "m"  + (status == 200 ? '' : status.to_s) + (env['HTTP_REFERER'] ? (' ' + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m→") : ' ') +
                "\e[" + color + ";7m https://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '') +
-               "\e[0m" + (head['Location'] ? ("➡️" + head['Location']) : '') + ' ' +
-               (head['Content-Type'] == 'text/turtle; charset=utf-8' ? '🐢' : (head['Content-Type']||''))
+               "\e[0m" + (head['Location'] ? ("➡️" + head['Location']) : '') + ' ' + (head['Content-Type'] == 'text/turtle; charset=utf-8' ? '🐢' : mime)
         end
 
         [status, head, body]} # response
