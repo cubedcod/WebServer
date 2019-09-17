@@ -40,13 +40,14 @@ class WebResource
       resource.send(m).yield_self{|status, head, body|           # dispatch request
         ext = resource.ext.downcase                              # log request
         mime = head['Content-Type'] || ''
-        if resource.env[:deny]
+        verbose = resource.verbose?
+        if resource.env[:deny] && !verbose
           print '🛑'                                             # denied
         elsif status == 304
           print '✅'                                             # up-to-date
         elsif ext == 'css'
           print '🎨🖍️'[rand 2]                                    # stylesheet
-        elsif %w(gif jpeg jpg).member? ext
+        elsif %w(gif jpeg jpg).member?(ext) && !verbose
           print '🖼️'                                              # picture
         elsif %w(png svg webp).member?(ext) || mime.match?(/^image/)
           print '🖌'                                              # image
@@ -255,25 +256,12 @@ class WebResource
 
     # fetch over HTTP
     def fetchHTTP
-
-      if verbose? # logging
-        puts  "\e[7mREQUEST HEADER\e[0m IN"
-        HTTP.print_header env
-        puts  "\e[7mREQUEST HEADER\e[0m OUT"
-        HTTP.print_header headers
-      end
-
+      #puts "\e[7mREQUEST HEADER\e[0m"; HTTP.print_header headers
       open(uri, headers.merge({redirect: false})) do |response|          # fetch
         env[:scheme] = scheme                                            # request scheme
         status = response.status.to_s.match(/\d{3}/)[0].to_i             # upstream status
         meta = response.meta                                             # upstream metadata
-
-        if verbose? # logging
-          puts "GET #{status} #{uri}\n\n"
-          puts  "\e[7mRESPONSE HEADER\e[0m IN"
-          HTTP.print_header meta
-        end
-
+        #puts "\e[7mRESPONSE HEADER\e[0m"; HTTP.print_header meta
         if status == 206                                                 # partial body
           [status, meta, [response.read]]                                # return partial body
         else                                                             # body
@@ -281,28 +269,16 @@ class WebResource
           format ||= meta['content-type'].split(/;/)[0] if meta['content-type'] # format specified in header
           format ||= (xt = ext.to_sym                                    # path-extension -> format map
             RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
-
           body = HTTP.decompress meta, response.read                     # decode body
-
           env[:repository] ||= RDF::Repository.new                       # RDF storage
-          RDF::Reader.for(content_type: format).yield_self{|reader|      # RDF reader
-            reader.new(body, {base_uri: self, no_embeds: env[:no_RDFa]}){|rdf|
+          RDF::Reader.for(content_type: format).yield_self{|rdr|         # RDF reader
+            rdr.new(body, {base_uri: self, noRDF: env[:noRDF]}){|rdf|
               env[:repository] << rdf } if reader}                       # parse RDF
-
-          return self if env[:intermediate]                              # no response?
-
+          return self if env[:intermediate]                              # just fetch, no response
           index                                                          # index RDF
-
-          if verbose? # logging
-            puts  "\e[7mRESPONSE HEADER\e[0m OUT"
-            HTTP.print_header env[:resp]
-          end
-
-          # metadata for HTTP caller
           %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie}.map{|k|
-            env[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}
-          env[:resp]['Content-Length'] = body.bytesize.to_s
-
+            env[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}      # HTTP response metadata
+          env[:resp]['Content-Length'] = body.bytesize.to_s              # content length
           env[:transform] ||= !(upstreamFormat? format)                  # rewritable?
           env[:transform] ? graphResponse : [status, env[:resp], [body]] # return RDF or upstream-data
         end

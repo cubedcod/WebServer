@@ -317,7 +317,7 @@ reddit-uploaded-media.s3-accelerate.amazonaws.com).map{|host|
     GET 'www.twitter.com', GotoTwitter
     GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : r.fetch}
     GET 'twitter.com', -> r {
-      r.env[:no_RDFa] = true # skip embedded-RDF search
+      r.env[:noRDF] = true # skip embedded-RDF search
       if !r.path || r.path == '/'
         r.env[:intermediate] = true # defer indexing
         '//twitter.com'.R.subscriptions.shuffle.each_slice(18){|s|

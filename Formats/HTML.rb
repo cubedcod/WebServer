@@ -143,8 +143,8 @@ sidebar [class^='side']    [id^='side']
           @base.send hostTriples, n, &f
         end
 
-        # embedded graph-data in RDFa, JSON-LD
-        unless @opts[:no_embeds]
+        # embedded RDF in RDFa and JSON-LD
+        unless @opts[:noRDF]
           embeds = RDF::Graph.new
           # JSON-LD
           n.css('script[type="application/ld+json"]').map{|dataElement|
