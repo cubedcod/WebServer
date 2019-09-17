@@ -219,6 +219,9 @@ android.clients.google.com
     # Meredith
     GET 'imagesvc.meredithcorp.io', GoIfURL
 
+    # Mixcloud
+    AllowHost 'www.mixcloud.com'
+
     # Mozilla
     %w( addons.mozilla.org
 addons-amo.cdn.mozilla.net
