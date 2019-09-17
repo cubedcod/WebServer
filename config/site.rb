@@ -347,6 +347,7 @@ addons-amo.cdn.mozilla.net
     GET 'www.yelp.com', -> r {r.env[:query]['redirect_url'] ? [301, {'Location' => r.env[:query]['redirect_url']},[]] : r.fetch}
 
     # YouTube
+    AllowHost 'www.youtube.com'
     GET 's.ytimg.com', -> r {r.desktop.fetch}
     GET 'youtube.com',   -> r {[301, {'Location' => 'https://www.youtube.com' + r.env['REQUEST_URI']}, []]}
     GET 'm.youtube.com', -> r {[301, {'Location' => 'https://www.youtube.com' + r.env['REQUEST_URI']}, []]}
