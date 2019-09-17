@@ -54,17 +54,19 @@ class WebResource
                 else
                   '30'                                           # gray -> cache-hit, 304, NOOP
                 end) + ';1'
-
+        ext = resource.ext.downcase
         if resource.env[:deny]
           print '🛑'
         elsif status == 304
           print '✅'
-        elsif resource.ext == 'css'
+        elsif ext == 'css'
           print '🎨🖍️'[rand 2]
-        elsif resource.ext == 'jpg'
-          print '📸'
-        elsif resource.ext == 'png'
+        elsif %w(jpeg jpg).member? ext
           print '🖼️'
+        elsif %w(png svg webp).member? ext
+          print '🖌'
+        elsif %w(mp4 webm).member? ext
+          print '🎬'
         else
           puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) +
                "\e[" + color + "m"  + (status == 200 ? '' : status.to_s) + (env['HTTP_REFERER'] ? (' ' + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m→") : ' ') +
