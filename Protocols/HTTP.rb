@@ -231,9 +231,9 @@ class WebResource
           fallback.fetchHTTP       # redirected to fallback transit, follow
         elsif env[:intermedate]    # non-HTTP caller?
           puts "RELOC #{uri} -> #{e.io.meta['location']}" # alert caller of updated location
-          e.io.meta['location'].R(env).fetchHTTP # internally follow redirection
-        else                       # alert caller of updated location (HTTP)
-          [302, {'Location' => e.io.meta['location']}, []] # client can follow redirection at discretion
+          e.io.meta['location'].R(env).fetchHTTP          # follow redirect
+        else                                              # alert caller of updated location (HTTP)
+          [302, {'Location' => e.io.meta['location']},[]] # client can follow redirection at discretion
         end
       when 'Errno::ECONNREFUSED'
         fallback.fetchHTTP
