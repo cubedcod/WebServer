@@ -36,9 +36,8 @@ end
 class WebResource
   module URIs
 
-    GunkURI = %r(
-[-.:_\/?&=~]
-((block|page)?a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|slot|type|unit|words?)?|appnexus|(app)?
+    GunkURI = %r([-.:_\/?&=~]
+((block|page)?a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|slots?|tools?|types?|units?|words?)?|appnexus|(app)?
 b(anner|eacon|reakingnew)s?|
 c(ampaign|edexis|hartbeat.*|ollector|omscore|onversion|ookie(c(hoice|onsent)|law|notice)?s?|se)|
 de(als|tect)|
@@ -60,7 +59,8 @@ t(aboola|(arget|rack)(ers?|ing)|bproxy|ea(lium|ser)|hirdparty|inypass|racing|ren
 u(rchin|serlocation|tm)|
 viral|
 wp-rum)
-([-.:_\/?&=~]|$))xi
+([-.:_\/?&=~]|$)|
+\.(gif|json)\?)xi
 
     SiteDir  = (Pathname.new __dir__).relative_path_from Pathname.new Dir.pwd
     SiteGIF = SiteDir.join('site.gif').read
