@@ -294,7 +294,7 @@ class WebResource
       when /403/ # forbidden
         print '🚫'; notfound
       when /404/ # not found
-        print '❓ ' + uri; env[:intermediate] ? self : notfound
+        print '❓' + uri; env[:intermediate] ? self : notfound
       when /500/ # error
         print '🛑'; notfound
       when /503/ #

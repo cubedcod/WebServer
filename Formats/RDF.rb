@@ -23,6 +23,7 @@ class WebResource
       docs.map{|doc|
         unless doc.exist?
           doc.dir.mkdir
+          puts 'doc ' + doc.relPath
           RDF::Writer.open(doc.relPath + '.ttl'){|f|
             f << graph}
         end}}

@@ -101,7 +101,7 @@ class WebResource < RDF::URI
     def exist?; node.exist? end
     def ext; File.extname( path || '' )[1..-1] || '' end
     def file?; node.file? end
-    def find p; `find #{shellPath} -iname #{Shellwords.escape p}`.lines.map{|p|POSIX.path p} end # FIND(1)
+    def find p; `find #{shellPath} -iname #{Shellwords.escape p}`.lines.map{|p|('/'+p.chomp).R} end # FIND(1)
     def glob; Pathname.glob(relPath).map{|p|p.toWebResource env} end    # GLOB(7)
     def grep # URI -> file(s)                                           # GREP(1)
       args = POSIX.splitArgs env[:query]['q']
@@ -118,13 +118,12 @@ class WebResource < RDF::URI
         pattern = args.join '.*'
         cmd = "grep -ril #{Shellwords.escape pattern} #{shellPath}"
       end
-      `#{cmd} | head -n 1024`.lines.map{|path|POSIX.path path}
+      `#{cmd} | head -n 1024`.lines.map{|path|('/'+path.chomp).R}
     end
     def mkdir; FileUtils.mkdir_p relPath unless exist?; self end        # MKDIR(1)
     def node; @node ||= (Pathname.new relPath) end
     def parts; @parts ||= path ? path.split('/').-(['']) : [] end
     def relPath; URI.unescape(['/','','.',nil].member?(path) ? '.' : (path[0]=='/' ? path[1..-1] : path)) end
-    def self.path p; ('/' + p.to_s.chomp.gsub(' ','%20').gsub('#','%23')).R end
     def self.splitArgs args; args.shellsplit rescue args.split /\W/ end
     def shellPath; Shellwords.escape relPath.force_encoding 'UTF-8' end
     def touch; dir.mkdir; FileUtils.touch relPath end                   # TOUCH(1)
@@ -135,11 +134,7 @@ class WebResource < RDF::URI
 
 end
 class Pathname
-  def toWebResource env = nil
-    if env
-     (WebResource::POSIX.path self).env env
-    else
-      WebResource::POSIX.path self
-    end
+  def toWebResource env=nil
+    ('/' + to_s).R env
   end
 end
