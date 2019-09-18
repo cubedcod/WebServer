@@ -12,8 +12,6 @@ class WebResource
               'HEAD' => :HEAD,
               'OPTIONS' => :OPTIONS,
               'POST' => :POSTrequest}
-    OffLine = ENV.has_key? 'OFFLINE'
-    PathGET = {}
     NoTransform = /^(application|audio|font|image|text\/(css|(x-)?javascript|proto)|video)/
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
 
