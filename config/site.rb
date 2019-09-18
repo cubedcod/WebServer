@@ -55,7 +55,7 @@ o(m(niture|tr)|nboarding|ptanon|utbrain)|
 p(a(idpost|y(ments?|wall))|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)|lacement|op(over|up)|romo(tion)?s?|ubmatic|[vx])|
 quantcast|
 reco(mmend(ation)?s?|rd(event|stats?))|re?t(ar)?ge?t(ing)?|remote[-_]?(control)?|rpc|
-s?s(a(fe[-_]?browsing|ilthru)|cheduler|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(cial|urcepoint)|ponsored|so|tat(istic)?s?|ubscri(ber?|ption)|w.js|ync)|
+s?s(a(fe[-_]?browsing|ilthru)|cheduler|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(cial|urcepoint)|ponsored|so|tat(istic)?s?|ubscri(ber?|ption)|w.js|yn(c|dicat(ed|ion)))|
 t(aboola|(arget|rack)(ers?|ing)|bproxy|ea(lium|ser)|hirdparty|inypass|racing|rend(ing|s))|autotrack|
 u(rchin|serlocation|tm)|
 viral|
