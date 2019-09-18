@@ -38,10 +38,11 @@ class WebResource
       resource = ('//' + env['SERVER_NAME'] + path).R env.merge( # instantiate request w/ blank response fields
        {resp:{}, links:{}, query: parseQs(env['QUERY_STRING'])}) # parse query
       resource.send(m).yield_self{|status, head, body|           # dispatch request
-        ext = resource.ext.downcase                              # log request
+        denied = resource.env[:deny]
+        ext = resource.ext.downcase
         mime = head['Content-Type'] || ''
         verbose = resource.verbose?
-        if resource.env[:deny] && !verbose
+        if denied && !verbose
           print '🛑'                                             # denied
         elsif status == 304
           print '✅'                                             # up-to-date
@@ -72,7 +73,7 @@ class WebResource
                   else
                     '30'                                         # gray -> other
                    end) + ';1'
-          print '🌍🌎🌏🌐'[rand 4] unless resource.local?        # global request
+         print '🌍🌎🌏🌐'[rand 4] unless denied||resource.local? # log request
           puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) +
                "\e[" + color + "m"  + (status == 200 ? '' : status.to_s) + (env['HTTP_REFERER'] ? (' ' + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m→") : ' ') +
                "\e[" + color + ";7m https://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '') +
