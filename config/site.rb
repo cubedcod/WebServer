@@ -173,6 +173,7 @@ encrypted-tbn3.gstatic.com
            maps.google.com
        maps.googleapis.com
           maps.gstatic.com
+    storage.googleapis.com
 ).map{|h| Allow h }
 
     if ENV.has_key? 'GOOGLE'
