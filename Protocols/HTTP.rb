@@ -57,7 +57,7 @@ class WebResource
         elsif %w(mp4 webm).member?(ext) || mime.match?(/^video/)
           print '🎬'                                             # video
         else
-          color = (if resource.env[:deny]
+          color = (if denied
                    '31'                                          # red -> denied
                   elsif !Hosts.has_key? env['SERVER_NAME']
                     Hosts[env['SERVER_NAME']] = resource
@@ -294,13 +294,11 @@ class WebResource
       when /403/ # forbidden
         print '🚫'; notfound
       when /404/ # not found
-        print '❓'; env[:intermediate] ? (print uri) : notfound
-      when /500/ # server error
+        print '❓ ' + uri; env[:intermediate] ? self : notfound
+      when /500/ # error
         print '🛑'; notfound
       when /503/ #
         print '🛑'; notfound
-      when /999/ # (nonstandard)
-        [999, e.io.meta, [e.io.read]]
       else
         raise
       end
