@@ -93,16 +93,16 @@ class WebResource < RDF::URI
 
   module POSIX
     include URIs
-    def basename; File.basename ( path || '/' ) end                     # BASENAME(1)
-    def children; node.children.delete_if{|f|f.basename.to_s.index('.')==0}.map &:toWebResource end
-    def dir; dirname.R if path end                                      # DIRNAME(1)
-    def dirname; File.dirname path if path end                          # DIRNAME(1)
-    def du; `du -s #{shellPath}| cut -f 1`.chomp.to_i end               # DU(1)
+    def basename; File.basename ( path || '/' ) end                 # BASENAME(1)
+    def children; node.children.map{|c|('/'+c.to_s).R env} end      # LS(1)
+    def dir; dirname.R if path end                                  # DIRNAME(1)
+    def dirname; File.dirname path if path end                      # DIRNAME(1)
+    def du; `du -s #{shellPath}| cut -f 1`.chomp.to_i end           # DU(1)
     def exist?; node.exist? end
     def ext; File.extname( path || '' )[1..-1] || '' end
     def find p; `find #{shellPath} -iname #{Shellwords.escape p}`.lines.map{|p|('/'+p.chomp).R} end # FIND(1)
-    def glob; Pathname.glob(relPath).map{|p|p.toWebResource env} end    # GLOB(7)
-    def grep # URI -> file(s)                                           # GREP(1)
+    def glob; Pathname.glob(relPath).map{|p|('/'+p.to_s).R env} end # GLOB(7)
+    def grep # URI -> file(s)                                       # GREP(1)
       args = POSIX.splitArgs env[:query]['q']
       case args.size
       when 0
@@ -119,7 +119,7 @@ class WebResource < RDF::URI
       end
       `#{cmd} | head -n 1024`.lines.map{|path|('/'+path.chomp).R}
     end
-    def mkdir; FileUtils.mkdir_p relPath unless exist?; self end        # MKDIR(1)
+    def mkdir; FileUtils.mkdir_p relPath unless exist?; self end    # MKDIR(1)
     def node; @node ||= (Pathname.new relPath) end
     def parts; @parts ||= path ? path.split('/').-(['']) : [] end
     def relPath; ['/','',nil].member?(path) ? '.' : (path[0]=='/' ? path[1..-1] : path) end
@@ -127,12 +127,5 @@ class WebResource < RDF::URI
     def shellPath; Shellwords.escape relPath.force_encoding 'UTF-8' end
     def write o; dir.mkdir; File.open(relPath,'w'){|f|f << o}; self end
   end
-
   include POSIX
-
-end
-class Pathname
-  def toWebResource env=nil
-    ('/' + to_s).R env
-  end
 end
