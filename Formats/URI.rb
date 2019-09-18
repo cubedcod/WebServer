@@ -100,7 +100,6 @@ class WebResource < RDF::URI
     def du; `du -s #{shellPath}| cut -f 1`.chomp.to_i end               # DU(1)
     def exist?; node.exist? end
     def ext; File.extname( path || '' )[1..-1] || '' end
-    def file?; node.file? end
     def find p; `find #{shellPath} -iname #{Shellwords.escape p}`.lines.map{|p|('/'+p.chomp).R} end # FIND(1)
     def glob; Pathname.glob(relPath).map{|p|p.toWebResource env} end    # GLOB(7)
     def grep # URI -> file(s)                                           # GREP(1)
@@ -123,10 +122,9 @@ class WebResource < RDF::URI
     def mkdir; FileUtils.mkdir_p relPath unless exist?; self end        # MKDIR(1)
     def node; @node ||= (Pathname.new relPath) end
     def parts; @parts ||= path ? path.split('/').-(['']) : [] end
-    def relPath; URI.unescape(['/','','.',nil].member?(path) ? '.' : (path[0]=='/' ? path[1..-1] : path)) end
+    def relPath; ['/','',nil].member?(path) ? '.' : (path[0]=='/' ? path[1..-1] : path) end
     def self.splitArgs args; args.shellsplit rescue args.split /\W/ end
     def shellPath; Shellwords.escape relPath.force_encoding 'UTF-8' end
-    def touch; dir.mkdir; FileUtils.touch relPath end                   # TOUCH(1)
     def write o; dir.mkdir; File.open(relPath,'w'){|f|f << o}; self end
   end
 
