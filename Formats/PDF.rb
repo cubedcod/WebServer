@@ -12,7 +12,11 @@ module Webize
       def initialize(input = $stdin, options = {}, &block)
         require 'pdf/reader'
         @subject = (options[:base_uri] || '#image').R
-        @doc = ::PDF::Reader.new input
+        @doc = begin
+                 ::PDF::Reader.new input
+               rescue Exception => e
+                 puts e.class, e.message
+               end
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -32,6 +36,7 @@ module Webize
       end
 
       def pdf_tuples
+        return unless @doc
         @doc.info.map{|k,v|
           k = {
             Author: Creator,
@@ -40,7 +45,6 @@ module Webize
           }[k] || ('#' + k.to_s.gsub(' ','_'))
           yield k, v
         }
-        puts @doc.metadata
         @doc.pages.each do |page|
           yield Content, page.text.hrefs
         end
