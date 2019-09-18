@@ -547,9 +547,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       body = env['rack.input'].read
 
       if verbose?
-        puts "\nREQUEST raw-meta:"
-        HTTP.print_header env
-        puts "REQUEST clean-meta:"
+        puts "REQUEST HEAD:"
         HTTP.print_header head
         puts "REQUEST BODY:"
         HTTP.print_body head, body
@@ -564,10 +562,10 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       head.delete 'transfer-encoding'
 
       if verbose?
-        puts "\nRESPONSE clean meta:"
+        puts "RESPONSE HEAD:"
         HTTP.print_header head
         if body
-          puts "RESPONSE body:"
+          puts "RESPONSE BODY:"
           HTTP.print_body head, (HTTP.decompress head, body)
         end
       end
