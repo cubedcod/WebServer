@@ -355,7 +355,7 @@ reddit-uploaded-media.s3-accelerate.amazonaws.com).map{|host|
       if parts.size > 1
         [301, {'Location' => 'https://' + parts[-1]}, []]
       else
-        r.fetch
+        Lite[r]
       end}
 
     # Yelp
