@@ -45,8 +45,8 @@ class WebResource
         elsif status == 304
           print '✅'                                             # up-to-date
         elsif ext == 'css'
-          print '🎨🖍️'[rand 2]                                    # stylesheet
-        elsif %w(gif jpeg jpg).member?(ext) && !verbose
+          print '🎨'                                             # stylesheet
+        elsif %w(gif jpeg jpg).member?(ext)
           print '🖼️'                                              # picture
         elsif %w(png svg webp).member?(ext) || mime.match?(/^image/)
           print '🖌'                                              # image
