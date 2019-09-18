@@ -111,6 +111,7 @@ sidebar [class^='side']    [id^='side']
         @opts = options
         @doc = (input.respond_to?(:read) ? input.read : input).encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ')
         @base = options[:base_uri]
+        @opts[:noRDF] = true if @base.to_s.match? /polymer.*html$/ # don't look for RDF in templates
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)

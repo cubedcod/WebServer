@@ -668,7 +668,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     end
 
     def verbose?
-      return false if host.match? /google|gstatic|youtube/
+      return false if host.match? /doubleclick|google|gstatic|youtube/
       ENV.has_key? 'VERBOSE'
     end
 
