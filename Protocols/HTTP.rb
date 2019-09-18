@@ -36,12 +36,16 @@ class WebResource
       resource = ('//' + env['SERVER_NAME'] + path).R env.merge( # instantiate request w/ blank response fields
        {resp:{}, links:{}, query: parseQs(env['QUERY_STRING'])}) # parse query
       resource.send(m).yield_self{|status, head, body|           # dispatch request
-        denied = resource.env[:deny]
         ext = resource.ext.downcase
         mime = head['Content-Type'] || ''
-        verbose = resource.verbose?
-        if denied && !verbose
-          print '🛑'                                             # denied
+        if resource.env[:deny]
+          if resource.verbose?
+            print "\n🛑\e[7;31m"+resource.host+resource.path+"\e[0m"
+            resource.env[:query].map{|k,v|
+              print "\n\e[7m" + k + "\e[0m\t" + v}
+          else
+            print '🛑'                                           # blocked
+          end
         elsif status == 304
           print '✅'                                             # up-to-date
         elsif ext == 'css'
@@ -54,12 +58,12 @@ class WebResource
           print '🔉'                                             # audio
         elsif %w(mp4 webm).member?(ext) || mime.match?(/^video/)
           print '🎬'                                             # video
+        elsif ext == 'ttl'
+          print '🐢'                                             # Turtle
         else
-          color = (if denied
-                   '31'                                          # red -> denied
-                  elsif !Hosts.has_key? env['SERVER_NAME']
-                    Hosts[env['SERVER_NAME']] = resource
-                    '32'                                         # green -> new host
+          color = (if !Hosts.has_key? env['SERVER_NAME']
+                    Hosts[env['SERVER_NAME']] = true
+                    '32'                                         # green -> first appearance of host
                   elsif env['REQUEST_METHOD'] == 'POST'
                     '32'                                         # green -> POST
                   elsif status == 200
@@ -71,11 +75,11 @@ class WebResource
                   else
                     '30'                                         # gray -> other
                    end) + ';1'
-         print '🌍🌎🌏🌐'[rand 4] unless denied||resource.local? # log request
-          puts "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) +
-               "\e[" + color + "m"  + (status == 200 ? '' : status.to_s) + (env['HTTP_REFERER'] ? (' ' + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m→") : ' ') +
-               "\e[" + color + ";7m https://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '') +
-               "\e[0m" + (head['Location'] ? ("➡️" + head['Location']) : '') + ' ' + (mime == 'text/turtle; charset=utf-8' ? '🐢' : mime)
+          print "\n",'🌍🌎🌏🌐'[rand 4] unless resource.local?   # log request
+          print "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) +
+                "\e[" + color + "m"  + (status == 200 ? '' : status.to_s) + (env['HTTP_REFERER'] ? (' ' + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m→") : ' ') +
+                "\e[" + color + ";7m https://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '') +
+                "\e[0m" + (head['Location'] ? ("➡️" + head['Location']) : '') + ' ' + (mime == 'text/turtle; charset=utf-8' ? '🐢' : mime)
         end
 
         [status, head, body]} # response
@@ -224,12 +228,12 @@ class WebResource
       case e.class.to_s
       when 'OpenURI::HTTPRedirect' # redirected
         if fallback == e.io.meta['location']
-          fallback.fetchHTTP       # only the transport changed, follow redirect
-        elsif env[:intermedate]    # no HTTP-response finisher
-          puts "RELOC #{uri} -> #{e.io.meta['location']}" # alert caller for updated locatiin
-          e.io.meta['location'].R(env).fetchHTTP # follow redirection
-        else                       # update caller with new location via HTTP
-          [302, {'Location' => e.io.meta['location']}, []]
+          fallback.fetchHTTP       # redirected to fallback transit, follow
+        elsif env[:intermedate]    # non-HTTP caller?
+          puts "RELOC #{uri} -> #{e.io.meta['location']}" # alert caller of updated location
+          e.io.meta['location'].R(env).fetchHTTP # internally follow redirection
+        else                       # alert caller of updated location (HTTP)
+          [302, {'Location' => e.io.meta['location']}, []] # client can follow redirection at discretion
         end
       when 'Errno::ECONNREFUSED'
         fallback.fetchHTTP
