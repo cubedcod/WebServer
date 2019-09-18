@@ -277,6 +277,7 @@ reddit-uploaded-media.s3-accelerate.amazonaws.com).map{|host|
       if r.path == '/'
         ('/r/'+r.subscriptions.join('+')+'/new').R(r.env).fetch options
       elsif r.gunkURI?
+        r.env.delete :query
         r.deny
       else
         depth = r.parts.size

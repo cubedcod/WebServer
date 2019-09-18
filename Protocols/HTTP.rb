@@ -41,8 +41,8 @@ class WebResource
         if resource.env[:deny]
           if resource.verbose?
             print "\n🛑\e[7;31m"+resource.host+resource.path+"\e[0m"
-            resource.env[:query].map{|k,v|
-              print "\n\e[7m" + k + "\e[0m\t" + v}
+            resource.env[:query]&.map{|k,v|
+              print "\n\e[7m#{k}\e[0m\t#{v}"}
           else
             print '🛑'                                           # blocked
           end
@@ -662,12 +662,13 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     end
 
     def upstreamFormat? format = nil
-      return true if DesktopUA.member?(env['HTTP_USER_AGENT']) || parts.member?('embed') || host.split('.').member?('oembed')
+      return true if DesktopUA.member?(env['HTTP_USER_AGENT']) || path.match?(/embed/) || host.match?(/embed|video/)
       return false if !format || (format.match? /\/(atom|rss)/i)
       format.match? NoTransform
     end
 
     def verbose?
+      return false if host.match? /google|gstatic|youtube/
       ENV.has_key? 'VERBOSE'
     end
 
