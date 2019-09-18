@@ -43,7 +43,7 @@ b(anner|eacon|reakingnew)s?|
 c(ampaign|edexis|hartbeat.*|ollector|omscore|onversion|ookie(c(hoice|onsent)|law|notice)?s?|se)|
 de(als|tect)|
 e(moji.*\.js|ndscreen|nsighten|scenic|vidon)|(web)?
-fonts?|
+fonts?|footer|
 g(dpr|eo(ip|locate)|igya|pt|tag|tm|uid)|.*
 (header|pre)[-_]?bid.*|.*hubspot.*|[hp]b.?js|ima[0-9]?|
 impression|
@@ -52,9 +52,9 @@ log(event|g(er|ing))?|(app|s)?
 m(e(asurement|t(er|rics?))|ms|tr)|
 new(relic|sletter)|
 o(m(niture|tr)|nboarding|ptanon|utbrain)|
-p(a(idpost|y(ments?|wall))|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)|lacement|op(over|up)|romo(tion)?s?|ubmatic|[vx])|
+p(a(idpost|rtner|y(ments?|wall))|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)|lacement|op(over|up)|romo(tion)?s?|ubmatic|[vx])|
 quantcast|
-reco(mmend(ation)?s?|rd(event|stats?))|re?t(ar)?ge?t(ing)?|remote[-_]?(control)?|rpc|
+reco(mmend(ation|er)?s?|rd(event|stats?))|re?t(ar)?ge?t(ing)?|remote[-_]?(control)?|rpc|
 s?s(a(fe[-_]?browsing|ilthru)|cheduler|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(cial(shar(e|ing))?|urcepoint)|ponsored|so|tat(istic)?s?|ubscri(ber?|ption)|w.js|yn(c|dicat(ed|ion)))|
 t(aboola|(arget|rack)(ers?|ing)|bproxy|ea(lium|ser)|hirdparty|inypass|racing|rend(ing|s))|autotrack|
 u(rchin|serlocation|tm)|
