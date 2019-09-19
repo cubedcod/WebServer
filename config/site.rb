@@ -174,11 +174,15 @@ images-na.ssl-images-amazon.com
       end}
 
     %w(ajax.googleapis.com
+          books.google.com
+     developers.google.com
+          drive.google.com
 encrypted-tbn0.gstatic.com
 encrypted-tbn1.gstatic.com
 encrypted-tbn2.gstatic.com
 encrypted-tbn3.gstatic.com
          groups.google.com
+         images.google.com
              kh.google.com
            maps.google.com
        maps.googleapis.com
@@ -190,17 +194,13 @@ encrypted-tbn3.gstatic.com
     %w(accounts.google.com
 android.clients.google.com
            apis.google.com
-          books.google.com
          chrome.google.com
        clients1.google.com
        clients4.google.com
        clients5.google.com
-     developers.google.com
-          drive.google.com
       feedproxy.google.com
       feeds.feedburner.com
                 google.com
-         images.google.com
              kh.google.com
            mail.google.com
            play.google.com
@@ -275,9 +275,10 @@ addons-amo.cdn.mozilla.net
       end}
 
     # Reddit
-    %w(gateway.reddit.com gql.reddit.com oauth.reddit.com s.reddit.com www.reddit.com
-reddit-uploaded-media.s3-accelerate.amazonaws.com).map{|host|
-    Allow host} if ENV.has_key? 'REDDIT'
+    if ENV.has_key? 'REDDIT'
+      %w(gateway gql oauth s www).map{|host| Allow host + '.reddit.com'}
+      Allow 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
+    end
     GET 'old.reddit.com', -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path}, []]}
     GET 'reddit.com',     -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path}, []]}
     GET 'www.reddit.com', -> r {
@@ -290,11 +291,11 @@ reddit-uploaded-media.s3-accelerate.amazonaws.com).map{|host|
         r.env[:query]['view'] ||= 'table'
         options[:suffix] = '.rss' if r.ext.empty?
       end
-      if r.path == '/'
-        ('/r/'+r.subscriptions.join('+')+'/new').R(r.env).fetch options
-      elsif r.gunkURI?
+      if r.gunkURI?
         r.env.delete :query
         r.deny
+      elsif r.path == '/'
+        ('/r/'+r.subscriptions.join('+')+'/new').R(r.env).fetch options
       else
         depth = r.parts.size
         r.env[:links][:up] = if [3,6].member? depth
