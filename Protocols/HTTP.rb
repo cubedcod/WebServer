@@ -324,9 +324,9 @@ class WebResource
       if path.match? /\D204$/     # connectivity-check
         env[:deny] = true
         [204, {}, []]
-      elsif handler=HostGET[host] # host binding
+      elsif handler=HostGET[host] # host handler
         handler[self]
-      elsif gunk?
+      elsif gunk?                 # dropped request
         deny
       elsif local?                # local resource
         local

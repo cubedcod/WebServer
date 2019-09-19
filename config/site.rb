@@ -80,6 +80,13 @@ wp-rum)
     Icon    = -> r {r.env[:deny] = true; [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
     Lite    = -> r {r.gunkURI? ? r.deny : r.fetch}
     NoQuery = -> r {r.qs.empty? ? r.fetch : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
+    Resizer = -> r {
+      if r.parts[0] == 'resizer'
+        parts = r.path.split /\/\d+x\d+\/(filter[^\/]+\/)?/
+        parts.size > 1 ? [302, {'Location' => 'https://' + parts[-1] + '?allow='+ServerKey}, []] : Lite[r]
+      else
+        Lite[r]
+      end}
 
     # Amazon
     AmazonMedia = -> r {%w(css jpg mp4 png webm webp).member?(r.ext.downcase) && r.env['HTTP_REFERER']&.match(/amazon\.com/) && r.fetch || r.deny}
@@ -96,6 +103,7 @@ images-na.ssl-images-amazon.com
 
     # Boston Globe
     GET 'bos.gl', -> r {r.fetch scheme: :http}
+    GET 'bostonglobe-prod.cdn.arcpublishing.com', Resizer
 
     # Brightcove
     Allow 'players.brightcove.net'
