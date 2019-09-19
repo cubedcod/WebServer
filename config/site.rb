@@ -275,7 +275,7 @@ addons-amo.cdn.mozilla.net
       end}
 
     # Reddit
-    %w(oauth.reddit.com www.reddit.com
+    %w(gateway.reddit.com gql.reddit.com oauth.reddit.com s.reddit.com www.reddit.com
 reddit-uploaded-media.s3-accelerate.amazonaws.com).map{|host|
     Allow host} if ENV.has_key? 'REDDIT'
     GET 'old.reddit.com', -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path}, []]}
