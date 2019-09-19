@@ -315,16 +315,16 @@ class WebResource
     end
 
     def GETrequest
-      if path.match? /\D204$/                   # connectivity-check
+      if path.match? /\D204$/     # connectivity-check
         env[:deny] = true
         [204, {}, []]
-      elsif handler = HostGET[host]                # host binding
+      elsif handler=HostGET[host] # host binding
         handler[self]
       elsif gunk?
         deny
-      elsif local?                                 # local resource
+      elsif local?                # local resource
         local
-      else                                         # global resource
+      else                        # global resource
         fetch
       end
     rescue OpenURI::HTTPRedirect => e
@@ -358,7 +358,7 @@ class WebResource
     def gunkHost?
       return false if AllowedHosts.has_key? host        # host allow
       return false if env[:query]['allow'] == ServerKey # temporary allow
-      return true unless %w(GET HEAD).member? env['REQUEST_METHOD'] # disallow global-writes gunk
+      return true unless %w(GET HEAD).member? env['REQUEST_METHOD'] # disallow global-write gunk
       env.has_key? 'HTTP_GUNK'
     end
 
@@ -369,10 +369,10 @@ class WebResource
 
     def HEAD
       send(Methods['GET']).yield_self{|s,h,_|
-        [s,h,[]]} # return status & header only
+        [s,h,[]]} # return status & header
     end
 
-    # header keys from lower-case and CGI_ALL_CAPS to canonical formatting
+    # header-key canonical formatting
     def headers hdr = nil
       head = {} # external headers
 
@@ -388,7 +388,7 @@ class WebResource
           k }.join(underscored ? '_' : '-')
         key = key.downcase if underscored
 
-        # set external headers
+        # set external values
         head[key] = v.to_s unless %w{connection gunk host links path-info query query-modified query-string
 rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version
 remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software
@@ -451,9 +451,9 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       if rdf.size==1 && nonRDF.size==0 && selectFormat == 'text/turtle'
         rdf[0].fileResponse # response on file
       else
-        nonRDF.map &:load # load  non-RDF
-#        index             # index non-RDF
-        rdf.map &:load    # load  RDF
+        nonRDF.map &:load # load nonRDF
+       #index             # index RDF-ized nodes
+        rdf.map &:load    # load RDF
         dateMeta
         graphResponse     # response
       end
