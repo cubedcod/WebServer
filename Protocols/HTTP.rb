@@ -231,7 +231,7 @@ class WebResource
           puts "RELOC #{uri} -> #{e.io.meta['location']}" # alert caller of updated location
           e.io.meta['location'].R(env).fetchHTTP          # follow redirect
         else                                              # alert caller of updated location (HTTP)
-          [302, {'Location' => e.io.meta['location']},[]] # client can follow redirection at discretion
+          redirect e.io.meta['location']                  # client can follow redirection at discretion
         end
       when 'Errno::ECONNREFUSED'
         fallback.fetchHTTP
@@ -328,7 +328,7 @@ class WebResource
         fetch
       end
     rescue OpenURI::HTTPRedirect => e
-      [302,{'Location' => e.io.meta['location']},[]]
+      redirect e.io.meta['location']
     end
 
     # Graph -> HTTP Response
@@ -631,6 +631,14 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       else
         staticQuery
       end
+    end
+
+    def redirect location
+      if location.match? /campaign|[iu]tm_/
+        l = location.R
+        location = (l.host ? ('https://' + l.host) : '') + l.path # strip query
+      end
+      [302, {'Location' => location}, []]
     end
 
     def staticQuery
