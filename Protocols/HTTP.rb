@@ -675,7 +675,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
 
     def upstreamFormat? format = nil
       return true if DesktopUA.member?(env['HTTP_USER_AGENT']) || path.match?(/embed/) || host.match?(/embed|video/)
-      return false if !format || (format.match? /\/(atom|rss)/i)
+      return false if !format || (format.match? /\/(atom|rss|xml)/i) # allow feed rewriting
       format.match? NoTransform
     end
 

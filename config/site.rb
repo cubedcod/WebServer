@@ -184,7 +184,6 @@ encrypted-tbn3.gstatic.com
        maps.googleapis.com
           maps.gstatic.com
     storage.googleapis.com
-           www.gstatic.com
 ).map{|h| Allow h }
 
     if ENV.has_key? 'GOOGLE'
@@ -218,6 +217,9 @@ android.clients.google.com
       GET     'google.com', GoogleSearch
       GET 'www.google.com', GoogleSearch
     end
+
+    # Inrupt
+    Allow 'dev.inrupt.net'
 
     # Linkedin
     if ENV.has_key? 'LINKEDIN'
