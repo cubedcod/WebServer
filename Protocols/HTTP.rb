@@ -258,7 +258,13 @@ class WebResource
 
     # fetch over HTTP
     def fetchHTTP
-      #puts "\e[7mREQUEST HEADER\e[0m"; HTTP.print_header headers
+      if false && verbose?
+        HTTP.print_header env
+        puts "FETCH #{uri}"
+        puts ' ' * (13 + host.size) + env['REQUEST_URI']
+        puts "\e[7mREQUEST HEADER\e[0m"
+        HTTP.print_header headers
+      end
       open(uri, headers.merge({redirect: false})) do |response|          # fetch
         env[:scheme] = scheme                                            # request scheme
         status = response.status.to_s.match(/\d{3}/)[0].to_i             # upstream status
