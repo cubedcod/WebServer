@@ -592,7 +592,6 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
                                     end)
            when 'application/json'
              json = ::JSON.parse body rescue {}
-             puts json['query'] if json['query']
              ::JSON.pretty_generate json
            when /^text\/plain/
              json = ::JSON.parse body rescue nil
