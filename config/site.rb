@@ -161,7 +161,7 @@ images-na.ssl-images-amazon.com
       case r.path
       when '/'
         r.fetch
-      when '/maps'
+      when /^.maps/
         r.desktop.fetch
       when '/search'
         if r.env[:query]['q']&.match? /^(https?:\/\/|l(:8000|\/)|localhost|view-source)/
@@ -184,6 +184,7 @@ encrypted-tbn3.gstatic.com
        maps.googleapis.com
           maps.gstatic.com
     storage.googleapis.com
+           www.gstatic.com
 ).map{|h| Allow h }
 
     if ENV.has_key? 'GOOGLE'
