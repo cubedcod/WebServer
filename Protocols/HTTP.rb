@@ -315,7 +315,7 @@ class WebResource
     end
 
     def GETrequest
-      if path.match? /[^\/]204$/                   # connectivity-check
+      if path.match? /\D204$/                   # connectivity-check
         env[:deny] = true
         [204, {}, []]
       elsif handler = HostGET[host]                # host binding
@@ -358,7 +358,7 @@ class WebResource
     def gunkHost?
       return false if AllowedHosts.has_key? host        # host allow
       return false if env[:query]['allow'] == ServerKey # temporary allow
-      return true unless env['REQUEST_METHOD'] == 'GET' # write methods default to deny
+      return true unless %w(GET HEAD).member? env['REQUEST_METHOD'] # disallow global-writes gunk
       env.has_key? 'HTTP_GUNK'
     end
 
@@ -368,8 +368,8 @@ class WebResource
     end
 
     def HEAD
-       c,h,b = self.GETrequest
-      [c,h,[]]
+      send(Methods['GET']).yield_self{|s,h,_|
+        [s,h,[]]} # return status & header only
     end
 
     # header keys from lower-case and CGI_ALL_CAPS to canonical formatting
