@@ -161,6 +161,8 @@ images-na.ssl-images-amazon.com
       case r.path
       when '/'
         r.fetch
+      when '/maps'
+        r.desktop.fetch
       when '/search'
         if r.env[:query]['q']&.match? /^(https?:\/\/|l(:8000|\/)|localhost|view-source)/
           [301, {'Location' => r.env[:query]['q'].sub(/^l/,'http://l')}, []]

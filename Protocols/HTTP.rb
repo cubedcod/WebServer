@@ -679,10 +679,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       format.match? NoTransform
     end
 
-    def verbose?
-      return false if host.match? /doubleclick|google|gravatar|gstatic|youtube/
-      ENV.has_key? 'VERBOSE'
-    end
+    def verbose?; ENV.has_key? 'VERBOSE' end
 
   end
   include HTTP
