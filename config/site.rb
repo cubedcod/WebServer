@@ -508,9 +508,10 @@ heartbeat iframe_api live_chat manifest.json opensearch playlist results signin 
       subject = base + date['href']
       yield subject, Type, Post.R
       yield subject, Content, comment.inner_html
-      user = post.css('.hnuser')[0]
-      yield subject, Creator, (base + user['href']).R
-      yield subject, Creator, user.inner_text
+      if user = post.css('.hnuser')[0]
+        yield subject, Creator, (base + user['href']).R
+        yield subject, Creator, user.inner_text
+      end
       yield subject, To, self
       if parent = post.css('.par > a')[0]
         yield subject, To, (base + parent['href']).R
