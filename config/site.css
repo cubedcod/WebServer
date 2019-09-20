@@ -19,7 +19,7 @@
 .quote {background-color: #ccc; color: #000}
 .thumb, svg {max-width: 28em}
 .title {background-color: #fff; color: #000; font-size: 1.1em; vertical-align: top; padding: .06em .1em .06em .1em; border-radius: 0 .3em .3em 0; display: inline-block; min-width: 16em}
-.toolbox a.icon {font-size: 1.8em; background-color: #000; color: #ccc}
+.toolbox a.icon {font-size: 1.8em; font-weight: normal; background-color: #000; color: #ccc}
 .toolbox { vertical-align: top }
 .user > img {max-width: 20em}
 .user > span {font-size: 3em}

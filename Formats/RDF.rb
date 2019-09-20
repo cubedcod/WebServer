@@ -84,7 +84,7 @@ class WebResource
     def nodeStat options = {}                                           # STAT(1)
       return if basename.index('msg.') == 0
       subject = (options[:base_uri] || path.sub(/\.(md|ttl)$/,'')).R    # abstract-node reference
-      graph = env[:repository]
+      graph = env[:repository] ||= RDF::Repository.new
       if node.directory?
         subject = subject.path[-1] == '/' ? subject : (subject + '/')   # enforce trailing slash on container
         graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#Container').R)
