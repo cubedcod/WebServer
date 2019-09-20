@@ -53,7 +53,7 @@ p(a(idpost|rtner|y(ments?|wall))|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propag
 quantcast|
 reco(mmend(ation|er)?s?|rd(event|stats?))|re?t(ar)?ge?t(ing)?|remote[-_]?(control)?|rpc|
 s?s(a(fe[-_]?browsing|ilthru)|cheduler|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(cial(shar(e|ing))?|urcepoint)|ponsored|so|tat(istic)?s?|ubscri(ber?|ption)|w.js|yn(c|dicat(ed|ion)))|
-t(aboola|(arget|rack)(ers?|ing)|bproxy|ea(lium|ser)|hirdparty|inypass|racing|rend(ing|s))|autotrack|
+t(aboola|(arget|rack)(ers?|ing)|bproxy|ea(lium|ser)|elemetry|hirdparty|inypass|racing|rend(ing|s))|autotrack|
 u(rchin|serlocation|tm)|
 viral|
 wp-rum)
@@ -288,10 +288,7 @@ addons-amo.cdn.mozilla.net
         r.env[:query]['view'] ||= 'table'
         options[:suffix] = '.rss' if r.ext.empty?
       end
-      if r.gunkURI
-        r.env.delete :query
-        r.deny
-      elsif r.path == '/'
+      if r.path == '/'
         ('/r/'+r.subscriptions.join('+')+'/new').R(r.env).fetch options
       else
         depth = r.parts.size
