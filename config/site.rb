@@ -275,11 +275,9 @@ addons-amo.cdn.mozilla.net
     # Reddit
     GET 'old.reddit.com', -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path}, []]}
     GET 'reddit.com',     -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path}, []]}
-    if ENV.has_key? 'REDDIT'
-      %w(gateway gql oauth s www).map{|host|
-      Allow host + '.reddit.com'}
-      Allow 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
-    end
+    %w(gateway gql s).map{|host| Allow host + '.reddit.com'} if ENV.has_key? 'REDDIT'
+    %w(oauth www).map{|host| Allow host + '.reddit.com'}
+    Allow 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
     GET 'www.reddit.com', -> r {
       options = {}
       if r.parts.member?('submit') || r.upstreamFormat?
