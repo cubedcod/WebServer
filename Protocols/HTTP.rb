@@ -40,7 +40,7 @@ class WebResource
         mime = head['Content-Type'] || ''
         if resource.env[:deny]
           if resource.verbose?
-            print "\n🛑\e[7;31m"+resource.host+resource.path+"\e[0m"
+            print "\n🛑\e[7;31m https://" + resource.host + resource.path + "\e[0m"
             resource.env[:query]&.map{|k,v|
               print "\n\e[7m#{k}\e[0m\t#{v}"}
           else
@@ -162,10 +162,8 @@ class WebResource
                       elsif ext == 'json' || type == :json
                         ['application/json','{}']
                       else
-                        q = env[:query].dup
-                        q['allow'] = ServerKey
                         ['text/html; charset=utf-8',
-                         "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center'><a href='#{HTTP.qs q}' style='color: #fff; font-size: 22em; text-decoration: none'>⌘</a></body></html>"]
+                         "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center'><a href='?allow=#{ServerKey}' style='color: #fff; font-size: 22em; text-decoration: none'>⌘</a></body></html>"]
                       end
       [status,
        {'Access-Control-Allow-Credentials' => 'true',
