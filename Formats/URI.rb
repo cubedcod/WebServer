@@ -76,7 +76,9 @@ class WebResource < RDF::URI
       Video => '🎞',
     }
 
-    def cachepath; (hostpath + path).R env end
+    StaticFormats = %w(css gif jpeg jpg js mp3 mp4 png svg webm webp)
+
+    def cache; (hostpath + path).R env end
     def hostname; env && env['SERVER_NAME'] || host || 'localhost' end
     def hostpath; '/' + hostname.split('.').reverse.join('/') end
     def isRDF?; ext == 'ttl' end

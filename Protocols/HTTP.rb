@@ -36,11 +36,11 @@ class WebResource
       resource.send(m).yield_self{|status, head, body|           # dispatch request
         ext = resource.ext.downcase
         mime = head['Content-Type'] || ''
-        if resource.env[:deny]
+        if resource.env[:deny]                                   # log request
           if resource.verbose?
             print "\n🛑\e[7;31m https://" + resource.host + resource.path + "\e[0m"
             resource.env[:query]&.map{|k,v|
-              print "\n\e[7m#{k}\e[0m\t#{v}"}
+              print "\n\e[7m#{k}\e[0m\t#{v}"}                    # blocked - verbose
           else
             print '🛑'                                           # blocked
           end
@@ -73,7 +73,6 @@ class WebResource
                   else
                     '30'                                         # gray -> other
                    end) + ';1'
-          print "\n",'🌍🌎🌏🌐'[rand 4] unless resource.local?   # log request
           print "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) +
                 "\e[" + color + "m"  + (status == 200 ? '' : status.to_s) + (env['HTTP_REFERER'] ? (' ' + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m→") : ' ') +
                 "\e[" + color + ";7m https://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '') +
@@ -213,7 +212,10 @@ class WebResource
 
     # fetch remote resource
     def fetch options = {}
-      return [304, {}, []] if env.has_key?('HTTP_IF_NONE_MATCH') && (%w(css gif jpeg jpg js mp3 mp4 png svg webm webp).member?(ext.downcase)||host.match?(/ggpht.com$/))
+      if StaticFormats.member? ext.downcase
+        return [304, {}, []] if env.has_key? 'HTTP_IF_NONE_MATCH' # client has resource
+        return cache.fileResponse if cache.exist?                 # server has resource
+      end
       u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? (HTTP.qs options[:query]) : qs) # base locator w/o scheme
       primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env    # primary locator
       fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env # fallback locator
@@ -253,23 +255,24 @@ class WebResource
     end
 
     # fetch over HTTP
-    def fetchHTTP options = {}
+    def fetchHTTP options = {}; print "\n",'🌍🌎🌏🌐'[rand 4],uri,"\n"
       open(uri, headers.merge({redirect: false})) do |response|           # fetch
         h = response.meta                                                 # upstream metadata
         if response.status.to_s.match? /206/                              # partial body
-          [206, h, [response.read]]                                       # return partial body
+          [206, h, [response.read]]                                       # return part
         else
           body = HTTP.decompress h, response.read                         # decode body
+          cache.write body if StaticFormats.member? ext.downcase          # store body
           format = h['content-type'].split(/;/)[0] if h['content-type']   # format
           format ||= (xt=ext.to_sym                                       # extension -> format
             RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
-          reader = RDF::Reader.for content_type: format                   # find reader
-          reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|  # RDF reader
+          reader = RDF::Reader.for content_type: format                   # find RDF reader
+          reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|  # instantiate RDF reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader   # read RDF
-          options[:intermediate] ? (return self) : index                  # return if fetch-only
+          options[:intermediate] ? (return self) : index                  # return if load-only
           BaseMeta.map{|k|env[:resp][k]||=h[k.downcase] if h[k.downcase]} # downstream metadata
           env[:resp]['Content-Length'] = body.bytesize.to_s               # content-length
-          (fixedFormat? format) ? [200,env[:resp],[body]] : graphResponse # downstream response
+          (fixedFormat? format) ? [200,env[:resp],[body]] : graphResponse # HTTP response
         end
       end
     rescue Exception => e
@@ -277,7 +280,7 @@ class WebResource
       when /300/ # multiple choices
         [300, e.io.meta, [e.io.read]]
       when /304/ # not modified
-        print '✅'; [304, {}, []]
+        print '✅ '+uri; [304, {}, []]
       when /401/ # unauthorized
         print '🚫 '+uri; notfound
       when /403/ # forbidden
@@ -327,7 +330,7 @@ class WebResource
     end
 
     def graphResponse
-      cachepath.nodeStat base_uri: self unless local? || !cachepath.exist?
+      cache.nodeStat base_uri: self unless local? || !cache.exist?
       return notfound if !env.has_key?(:repository) || env[:repository].empty?
 
       format = selectFormat
