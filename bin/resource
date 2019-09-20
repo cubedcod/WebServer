@@ -1,3 +1,0 @@
-#!/usr/bin/env ruby
-require_relative '../index'
-puts ARGV[1].R({resp: {}, transform: true}).send ARGV[0]

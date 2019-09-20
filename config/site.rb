@@ -262,13 +262,13 @@ addons-amo.cdn.mozilla.net
         r.env['HTTP_ORIGIN'] = 'https://outline.com'
         r.env['HTTP_REFERER'] = r.env['HTTP_ORIGIN'] + r.path
         r.env['SERVER_NAME'] = 'outlineapi.com'
-        r.env[:intermediate] = true
+        options = {intermediate: true}
         (if r.parts.size == 1
-          r.env[:query] = {id: r.parts[0]}
-          '/v4/get_article'.R(r.env).fetch
+          options[:query] = {id: r.parts[0]}
+          '/v4/get_article'.R(r.env).fetch optionss
         elsif r.env['REQUEST_PATH'][1..5] == 'https'
-          r.env[:query] = {source_url: r.env['REQUEST_PATH'][1..-1]}
-          '/article'.R(r.env).fetch
+          options[:query] = {source_url: r.env['REQUEST_PATH'][1..-1]}
+          '/article'.R(r.env).fetch options
          end).index.graphResponse
       end}
 
@@ -280,13 +280,12 @@ addons-amo.cdn.mozilla.net
     Allow 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
     GET 'www.reddit.com', -> r {
       options = {}
-      if r.parts.member?('submit') || r.upstreamFormat?
+      if r.parts.member? 'submit'
         r.desktop
       else
-        r.env[:transform] = true
+        options[:suffix] = '.rss' if r.ext.empty?
         r.env[:query]['sort'] ||= 'date'
         r.env[:query]['view'] ||= 'table'
-        options[:suffix] = '.rss' if r.ext.empty?
       end
       if r.path == '/'
         ('/r/'+r.subscriptions.join('+')+'/new').R(r.env).fetch options
@@ -336,22 +335,16 @@ addons-amo.cdn.mozilla.net
     GET 'www.twitter.com', GotoTwitter
     GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : r.fetch}
     GET 'twitter.com', -> r {
-      r.env[:noRDF] = true # skip embedded-RDF search
       if !r.path || r.path == '/'
-        r.env[:intermediate] = true # defer indexing
         '//twitter.com'.R.subscriptions.shuffle.each_slice(18){|s|
-          r.env[:query] = { vertical: :default, f: :tweets,
-                            q: s.map{|u|'from:' + u}.join('+OR+')}
-          '//twitter.com/search'.R(r.env).fetch}
-        r.env[:query] = {'sort' => 'date', # chronological sort
-                         'view' => 'table'}
+          '//twitter.com/search'.R(r.env).fetch intermediate: true, noRDF: true, query: {vertical: :default, f: :tweets, q: s.map{|u|'from:'+u}.join('+OR+')}}
         r.index.graphResponse
       elsif r.gunkURI
         r.deny
       else
-        r.env[:links][:up] = '/' + r.parts[0] + '?view=table&sort=date' if r.path.match? /\/status\/\d+\/?$/
+        r.env[:links][:up] = '/' + r.parts[0] if r.path.match? /\/status\/\d+\/?$/
         r.env[:links][:up] = '/' if r.parts.size == 1
-        r.fetch
+        r.fetch noRDF: true
       end}
 
     # WGBH

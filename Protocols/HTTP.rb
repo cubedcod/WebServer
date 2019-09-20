@@ -4,14 +4,12 @@ class WebResource
   module HTTP
     include URIs
     AllowedHosts = {}
+    BaseMeta = %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie)
     HostGET = {}
     HostPOST = {}
     Hosts = {}
     LocalArgs = %w(allow view sort ui)
-    Methods = {'GET' => :GETrequest,
-              'HEAD' => :HEAD,
-              'OPTIONS' => :OPTIONS,
-              'POST' => :POSTrequest}
+    Methods = {'GET' => :GETresource, 'HEAD' => :HEAD, 'OPTIONS' => :OPTIONS, 'POST' => :POSTresource}
     NoTransform = /^(application|audio|font|image|text\/(css|(x-)?javascript|proto)|video)/
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
 
@@ -213,80 +211,65 @@ class WebResource
       end
     end
 
-    # fetch remote. potentially non-HTTP transports but HTTPS + HTTP for now
+    # fetch remote resource
     def fetch options = {}
       return [304, {}, []] if env.has_key?('HTTP_IF_NONE_MATCH') && (%w(css gif jpeg jpg js mp3 mp4 png svg webm webp).member?(ext.downcase)||host.match?(/ggpht.com$/))
-      u = '//' + hostname + path + (options[:suffix]||'') + qs           # URI sans scheme
+      u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? (HTTP.qs options[:query]) : qs) # base locator w/o scheme
       primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env    # primary locator
       fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env # fallback locator
-      primary.fetchHTTP   #   try HTTPS
-    rescue Exception => e # retry HTTP
+      primary.fetchHTTP options
+    rescue Exception => e # fallback transit
       case e.class.to_s
       when 'OpenURI::HTTPRedirect' # redirected
         if fallback == e.io.meta['location']
-          fallback.fetchHTTP       # redirected to fallback transit, follow
-        elsif env[:intermedate]    # non-HTTP caller?
+          fallback.fetchHTTP options # redirected to fallback transit
+        elsif options[:intermedate]  # non-HTTP caller?
           puts "RELOC #{uri} -> #{e.io.meta['location']}" # alert caller of updated location
-          e.io.meta['location'].R(env).fetchHTTP          # follow redirect
-        else                                              # alert caller of updated location (HTTP)
+          e.io.meta['location'].R(env).fetchHTTP options  # follow redirect
+        else                                              # alert HTTP caller of updated location
           redirect e.io.meta['location']                  # client can follow redirection at discretion
         end
       when 'Errno::ECONNREFUSED'
-        fallback.fetchHTTP
+        fallback.fetchHTTP options
       when 'Errno::ECONNRESET'
-        fallback.fetchHTTP
+        fallback.fetchHTTP options
       when 'Errno::ENETUNREACH'
-        fallback.fetchHTTP
+        fallback.fetchHTTP options
       when 'Net::OpenTimeout'
-        fallback.fetchHTTP
+        fallback.fetchHTTP options
       when 'Net::ReadTimeout'
-        fallback.fetchHTTP
+        fallback.fetchHTTP options
       when 'OpenSSL::SSL::SSLError'
-        fallback.fetchHTTP
+        fallback.fetchHTTP options
       when 'OpenURI::HTTPError'
-        fallback.fetchHTTP
+        fallback.fetchHTTP options
       when 'RuntimeError'
-        fallback.fetchHTTP
+        fallback.fetchHTTP options
       when 'SocketError'
-        fallback.fetchHTTP
+        fallback.fetchHTTP options
       else
         raise
       end
     end
 
     # fetch over HTTP
-    def fetchHTTP
-      if false && verbose?
-        HTTP.print_header env
-        puts "FETCH #{uri}"
-        puts ' ' * (13 + host.size) + env['REQUEST_URI']
-        puts "\e[7mREQUEST HEADER\e[0m"
-        HTTP.print_header headers
-      end
-      open(uri, headers.merge({redirect: false})) do |response|          # fetch
-        env[:scheme] = scheme                                            # request scheme
-        status = response.status.to_s.match(/\d{3}/)[0].to_i             # upstream status
-        meta = response.meta                                             # upstream metadata
-        #puts "\e[7mRESPONSE HEADER\e[0m"; HTTP.print_header meta
-        if status == 206                                                 # partial body
-          [status, meta, [response.read]]                                # return partial body
-        else                                                             # body
-          format = env && env[:content_type]                             # explicit format-argument
-          format ||= meta['content-type'].split(/;/)[0] if meta['content-type'] # format specified in header
-          format ||= (xt = ext.to_sym                                    # path-extension -> format map
+    def fetchHTTP options = {}
+      open(uri, headers.merge({redirect: false})) do |response|           # fetch
+        h = response.meta                                                 # upstream metadata
+        if response.status.to_s.match? /206/                              # partial body
+          [206, h, [response.read]]                                       # return partial body
+        else
+          body = HTTP.decompress h, response.read                         # decode body
+          format = h['content-type'].split(/;/)[0] if h['content-type']   # format
+          format ||= (xt=ext.to_sym                                       # extension -> format
             RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
-          body = HTTP.decompress meta, response.read                     # decode body
-          env[:repository] ||= RDF::Repository.new                       # RDF storage
-          RDF::Reader.for(content_type: format).yield_self{|rdr|         # RDF reader
-            rdr.new(body, {base_uri: self, noRDF: env[:noRDF]}){|rdf|    # read RDF
-              env[:repository] << rdf } if rdr}
-          return self if env[:intermediate]                              # just fetch, no response
-          index                                                          # index RDF
-          %w{Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie}.map{|k|
-            env[:resp][k] ||= meta[k.downcase] if meta[k.downcase]}      # HTTP response metadata
-          env[:resp]['Content-Length'] = body.bytesize.to_s              # content length
-          env[:transform] ||= !(upstreamFormat? format)                  # rewritable?
-          env[:transform] ? graphResponse : [status, env[:resp], [body]] # return RDF or upstream-data
+          reader = RDF::Reader.for content_type: format                   # find reader
+          reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|  # RDF reader
+            (env[:repository] ||= RDF::Repository.new) << _ } if reader   # read RDF
+          options[:intermediate] ? (return self) : index                  # return if fetch-only
+          BaseMeta.map{|k|env[:resp][k]||=h[k.downcase] if h[k.downcase]} # downstream metadata
+          env[:resp]['Content-Length'] = body.bytesize.to_s               # content-length
+          (fixedFormat? format) ? [200,env[:resp],[body]] : graphResponse # downstream response
         end
       end
     rescue Exception => e
@@ -296,20 +279,20 @@ class WebResource
       when /304/ # not modified
         print '✅'; [304, {}, []]
       when /401/ # unauthorized
-        print '🚫'; notfound
+        print '🚫 '+uri; notfound
       when /403/ # forbidden
-        print '🚫'; notfound
+        print '🚫 '+uri; notfound
       when /404/ # not found
-        print '❓' + uri
-        if env[:intermediate]
+        print '❓ '+uri
+        if options[:intermediate]
           self
-        else # cached graph-data may exist, skip immediate 404
+        else # cache may exist, bypass immediate 404
           graphResponse
         end
-      when /500/ # error
-        print '🛑'; notfound
-      when /503/ #
-        print '🛑'; notfound
+      when /500/ # upstream error
+        [500, e.io.meta, [e.io.read]]
+      when /503/
+        [503, e.io.meta, [e.io.read]]
       else
         raise
       end
@@ -325,7 +308,7 @@ class WebResource
       HostGET[arg] = lambda
     end
 
-    def GETrequest
+    def GETresource
       if path.match? /\D204$/     # connectivity-check
         env[:deny] = true
         [204, {}, []]
@@ -359,8 +342,7 @@ class WebResource
         when /^application\/atom+xml/
           feedDocument treeFromGraph
         else
-          base = ((env[:scheme] || 'https') + '://' + env['SERVER_NAME']).R.join env['REQUEST_PATH']
-          env[:repository].dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => base, :standard_prefixes => true
+          env[:repository].dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true
         end}
     end
 
@@ -531,7 +513,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       HostPOST[host] = lambda
     end
 
-    def POSTrequest
+    def POSTresource
       if handler = HostPOST[host]
         handler[self]
       elsif AllowedHosts.has_key? host
@@ -615,18 +597,16 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       }.join("&")
     end
 
-    # serialize external querystring
+    # external query-string
     def qs
       if env
-        if env[:intermediate] && env[:query]
-          HTTP.qs env[:query]
-        elsif env[:query] && LocalArgs.find{|a| env[:query].has_key? a } # local query args found
+        if env[:query] && LocalArgs.find{|a|env[:query].has_key? a} # dynamic w/ local args in use
           q = env[:query].dup          # copy query
           LocalArgs.map{|a|q.delete a} # strip local args
-          q.empty? ? '' : HTTP.qs(q)
-        elsif env['QUERY_STRING'] && !env['QUERY_STRING'].empty?
+          q.empty? ? '' : HTTP.qs(q)   # serialize
+        elsif env['QUERY_STRING'] && !env['QUERY_STRING'].empty?    # dynamic
           '?' + env['QUERY_STRING']
-        else
+        else                                                        # static
           staticQuery
         end
       else
@@ -668,7 +648,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       default                                                 # HTML via default
     end
 
-    def upstreamFormat? format = nil
+    def fixedFormat? format = nil
       return true if DesktopUA.member?(env['HTTP_USER_AGENT']) || path.match?(/embed/) || host.match?(/embed|video/)
       return false if !format || (format.match? /\/(atom|rss|xml)/i) # allow feed rewriting
       format.match? NoTransform
