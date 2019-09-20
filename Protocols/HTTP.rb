@@ -324,7 +324,7 @@ class WebResource
         [204, {}, []]
       elsif handler=HostGET[host] # host handler
         handler[self]
-      elsif gunk?                 # dropped request
+      elsif gunk? && ServerKey != env[:query]['allow']
         deny
       elsif local?                # local resource
         local
@@ -355,28 +355,16 @@ class WebResource
         end}
     end
 
-    def gunk?
-      gunkHost? || gunkURI?
-    end
-
-    def gunkHost?
-      return false if AllowedHosts.has_key? host        # host allow
-      return false if env[:query]['allow'] == ServerKey # temporary allow
-      return true unless %w(GET HEAD).member? env['REQUEST_METHOD'] # disallow global-write gunk
-      env.has_key? 'HTTP_GUNK'
-    end
-
-    def gunkURI?
-      return false if env[:query]['allow'] == ServerKey # temporary allow
-      ('//' + env['SERVER_NAME'] + env['REQUEST_URI']).match? GunkURI
-    end
+    def gunk?; gunkHost || gunkURI end # match by host or URI regular-expression
+    def gunkHost; !AllowedHosts.has_key?(host) && env.has_key?('HTTP_GHOST') end
+    def gunkURI; ('/' + env['SERVER_NAME'] + env['REQUEST_URI']).match? Gunk end
 
     def HEAD
       send(Methods['GET']).yield_self{|s,h,_|
         [s,h,[]]} # return status & header
     end
 
-    # header-key canonical formatting
+    # header formatted and filtered
     def headers hdr = nil
       head = {} # external headers
 
@@ -392,7 +380,7 @@ class WebResource
           k }.join(underscored ? '_' : '-')
         key = key.downcase if underscored
 
-        # set external values
+        # set external header keys & values
         head[key] = v.to_s unless %w{connection gunk host links path-info query query-modified query-string
 rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version
 remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software
@@ -420,7 +408,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       head['User-Agent'] = 'curl/7.65.1' if host == 'po.st'
       head.delete 'User-Agent' if host == 't.co'
 
-      head
+      head # massaged header
     end
 
     def local
@@ -535,11 +523,12 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     end
 
     def POSTrequest
-      if handler = HostPOST[host] # host handler
+      if handler = HostPOST[host]
         handler[self]
-      else
-        return denyPOST if gunk?
+      elsif AllowedHosts.has_key? host
         self.POSTthru
+      else
+        denyPOST
       end
     end
 

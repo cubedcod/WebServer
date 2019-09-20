@@ -2,8 +2,6 @@ module Webize
   module HTML
     class Reader
 
-      Gunk = %w( .ActionBar .SocialBar )
-
       SiteGunk = {'www.google.com' => %w(div.logo h1 h2),
                   'www.bostonmagazine.com' => %w(a[href*='scrapertrap'])}
 
@@ -36,7 +34,7 @@ end
 class WebResource
   module URIs
 
-    GunkURI = %r([-.:_\/?&=~]
+    Gunk = %r([-.:_\/?&=~]
 ((block|page)?a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|slots?|tools?|types?|units?|words?)?|appnexus|(app)?
 b(anner|eacon|reakingnew)s?|
 c(ampaign|edexis|hartbeat.*|ollector|omscore|onversion|ookie(c(hoice|onsent)|law|notice)?s?|se)|
@@ -78,7 +76,7 @@ wp-rum)
     GotoURL = -> r {[301, {'Location' => (r.env[:query]['url']||r.env[:query]['q'])}, []]}
     GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : r.deny}
     Icon    = -> r {r.env[:deny] = true; [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
-    Lite    = -> r {r.gunkURI? ? r.deny : r.fetch}
+    Lite    = -> r {r.gunkURI ? r.deny : r.fetch}
     NoQuery = -> r {r.qs.empty? ? r.fetch : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
     Resizer = -> r {
       if r.parts[0] == 'resizer'
@@ -292,7 +290,7 @@ addons-amo.cdn.mozilla.net
         r.env[:query]['view'] ||= 'table'
         options[:suffix] = '.rss' if r.ext.empty?
       end
-      if r.gunkURI?
+      if r.gunkURI
         r.env.delete :query
         r.deny
       elsif r.path == '/'
@@ -353,7 +351,7 @@ addons-amo.cdn.mozilla.net
         r.env[:query] = {'sort' => 'date', # chronological sort
                          'view' => 'table'}
         r.index.graphResponse
-      elsif r.gunkURI?
+      elsif r.gunkURI
         r.deny
       else
         r.env[:links][:up] = '/' + r.parts[0] + '?view=table&sort=date' if r.path.match? /\/status\/\d+\/?$/
@@ -389,7 +387,7 @@ addons-amo.cdn.mozilla.net
       mode = r.parts[0]
       if %w{attribution_link redirect}.member? mode
         [301, {'Location' =>  r.env[:query]['q'] || r.env[:query]['u']},[]]
-      elsif !r.gunkURI? && %w(browse_ajax c channel embed feed get_video_info guide_ajax
+      elsif !r.gunkURI && %w(browse_ajax c channel embed feed get_video_info guide_ajax
 heartbeat iframe_api live_chat manifest.json opensearch playlist results signin user watch watch_videos yts).member?(mode)
         r.desktop.fetch
       elsif r.env[:query]['allow'] == ServerKey
