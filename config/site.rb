@@ -322,7 +322,7 @@ addons-amo.cdn.mozilla.net
 
     # Soundcloud
     GET 'gate.sc', GotoURL
-    GET 'soundcloud.com', -> r {r.gunkURI? ? r.deny : r.desktop.fetch}
+    GET 'soundcloud.com', -> r {r.gunkURI ? r.deny : r.desktop.fetch}
     %w(api-v2.soundcloud.com
    api-widget.soundcloud.com
               soundcloud.com
