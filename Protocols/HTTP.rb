@@ -291,6 +291,8 @@ class WebResource
       end
     rescue Exception => e
       case e.message
+      when /300/ # multiple choices
+        [300, e.io.meta, [e.io.read]]
       when /304/ # not modified
         print '✅'; [304, {}, []]
       when /401/ # unauthorized
