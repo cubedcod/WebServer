@@ -83,14 +83,16 @@ class WebResource
 
     def nodeStat options = {}                                           # STAT(1)
       return if basename.index('msg.') == 0
-      subject = (options[:base_uri] || path.sub(/\.(md|ttl)$/,'')).R    # abstract-node reference
+      subject = (options[:base_uri] || path.sub(/\.(md|ttl)$/,'')).R    # abstract-node
       graph = env[:repository] ||= RDF::Repository.new
       if node.directory?
-        subject = subject.path[-1] == '/' ? subject : (subject + '/')   # enforce trailing slash on container
+        subject = subject.path[-1] == '/' ? subject : (subject + '/')   # trailing slash on container URI
         graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#Container').R)
-        children.map{|child|
-          graph << (RDF::Statement.new subject, (W3+'ns/ldp#contains').R,
-                                       child.node.directory? ? (child + '/') : child.path.sub(/\.ttl$/,'').R)}
+        node.children.map{|n|
+          name = n.basename.to_s
+          name = n.directory? ? (name + '/') : name.sub(/\.ttl$/, '') # abstract child-node
+          child = subject.join name
+          graph << (RDF::Statement.new subject, (W3+'ns/ldp#contains').R, child)} # containment triple
       else
         graph << (RDF::Statement.new subject, Type.R, (W3+'ns/posix/stat#File').R)
       end
@@ -99,6 +101,7 @@ class WebResource
       mtime = node.stat.mtime
       graph << (RDF::Statement.new subject, (W3+'ns/posix/stat#mtime').R, mtime.to_i)
       graph << (RDF::Statement.new subject, Date.R, mtime.iso8601)
+      self
     end
 
   end

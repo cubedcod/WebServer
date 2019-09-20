@@ -302,7 +302,7 @@ class WebResource
         if env[:intermediate]
           self
         elsif cachepath.exist?
-          cachepath.nodeStat
+          cachepath.nodeStat base_uri: self
           graphResponse
         else
           notfound
@@ -472,7 +472,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
          env[:grep] = true
          grep
        else
-         [self, children]              # LS
+         [self,node.children.map{|c|('/'+c.to_s).R env}] # LS
        end
       else                             # GLOB
         if uri.match /[\*\{\[]/        #  parametric glob
