@@ -7,7 +7,7 @@
 * {border-radius: .2em}
 .avatar {max-height: 2em; background-color: #000; border-color: #000}
 .container > .body {border-radius: 0 .2em .2em .2em; background-color: #fff; color: #000; width: 100%}
-.container > .label {border-radius: .5em .5em 0 0; display: inline-block; font-weight: bold; font-size: 1.2em; padding: .1em; background-color: #fff; color: #000}
+.container > .label {border-radius: .5em .5em 0 0; display: inline-block; font-size: 1.2em; padding: .1em; background-color: #fff; color: #000}
 .container {margin: .3em}
 .file > .icon {font-size: 4.2em; background-color: #000; color: #fff}
 .file > .name {font-size: .8em; position: absolute; top: 4.8em; left: .4em}
@@ -18,14 +18,14 @@
 .post {border-radius: .38em; max-width: 87ex; overflow: hidden; margin: 1px; border: 1px solid #333}
 .quote {background-color: #ccc; color: #000}
 .thumb, svg {max-width: 28em}
-.title {background-color: #fff; color: #000; font-size: 1.1em; font-weight: bold; vertical-align: top; padding: .06em .1em .06em .1em; border-radius: 0 .3em .3em 0; display: inline-block; min-width: 16em}
+.title {background-color: #fff; color: #000; font-size: 1.1em; vertical-align: top; padding: .06em .1em .06em .1em; border-radius: 0 .3em .3em 0; display: inline-block; min-width: 16em}
 .toolbox a.icon {font-size: 1.8em; background-color: #000; color: #ccc}
 .toolbox { vertical-align: top }
 .user > img {max-width: 20em}
 .user > span {font-size: 3em}
 .user {background-color: white; color: black; margin: .5em; border-radius: .4em}
 :target, :target * {background-color:#0f0 !important; color: #000 !important}
-a {text-decoration: none; background-color: #eee; color: #000; padding: 0 .06em 0 .06em}
+a {text-decoration: none; font-weight: bold; background-color: #eee; color: #000; padding: 0 .06em 0 .06em}
 a.date {float: right; background-color: #000; color: #888; font-size: .8em; border-color: #222}
 a.id {float: right; background-color: #000; color: #333; border-color: #222}
 a:visited {border-color: #333; background-color: #111; color: #fff}
@@ -40,7 +40,7 @@ pre {white-space: pre-wrap}
 table, div, li, svg {display: inline-block}
 table.fromTo {border-spacing: 0}
 td {border-color: #333; border-width: 0 1px 1px 0; border-style: dotted}
-td.k a {background-color: #000; color: #eee; border-color: #111}
+td.k a, .hostname {background-color: #000; color: #eee; border-color: #111}
 td.k {max-width: 28ex; overflow: hidden; text-align: right}
 tr[name="title"] > td.v {max-width: 86ex; overflow: hidden}
 video {min-width: 40ex}

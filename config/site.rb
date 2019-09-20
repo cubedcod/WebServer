@@ -76,7 +76,7 @@ wp-rum)
     GotoURL = -> r {[301, {'Location' => (r.env[:query]['url']||r.env[:query]['q'])}, []]}
     GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : r.deny}
     Icon    = -> r {r.env[:deny] = true; [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
-    Lite    = -> r {r.gunkURI ? r.deny : r.fetch}
+    Lite    = -> r {(r.gunkURI || r.ext=='js') ? r.deny : r.fetch}
     NoQuery = -> r {r.qs.empty? ? r.fetch : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
     Resizer = -> r {
       if r.parts[0] == 'resizer'
@@ -401,6 +401,9 @@ heartbeat iframe_api live_chat manifest.json opensearch playlist results signin 
       end}
 
     GET 'youtu.be', -> r {[301, {'Location' => 'https://www.youtube.com/watch?v=' + r.path[1..-1]}, []]}
+
+    # Zillow
+    Allow 'www.zillow.com'
 
   end
 
