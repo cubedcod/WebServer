@@ -231,16 +231,13 @@ class WebResource
     def htmlDocument graph = {}
       env[:images] ||= {}
       env[:colors] ||= {}
-
-      # document title
-      titleRes = [
+      titleRes = [ # title resource
         '', path,
         host && path && ('//' + host + path),
         host && path && ('https://' + host + path),
       ].compact.find{|u| graph[u] && graph[u][Title]}
-
-      # render HEAD link as HTML
-      link = -> key, displayname {
+      bc = '' # path breadcrumbs
+      link = -> key, displayname { # render Link reference
         if url = env[:links] && env[:links][key]
           [{_: :a, href: url, id: key, class: :icon, c: displayname},
            "\n"]
@@ -264,6 +261,8 @@ class WebResource
                         {_: :body,
                          c: [{class: :toolbox,
                               c: [{_: :a, class: :hostname, href: '/', c: host},
+                                  parts.map{|p|
+                                    ['/',{_: :a, href: bc += '/' + p, c: p, id: 'r'+Digest::SHA2.hexdigest(rand.to_s)}]},
                                   link[:up, '&#9650;'],
                                   {_: :a, id: :tabular, class: :icon, style: tabular  ? 'color: #fff' : 'color: #555', href: HTTP.qs((env[:query]||{}).merge({'view' => tabular ? 'default' : 'table', 'sort' => 'date'})), c: '↨'},
                                   {_: :a, id: :shrink,  class: :icon, style: shrunken ? 'color: #fff' : 'color: #555', href: HTTP.qs(shrunken ? env[:query].reject{|k,v|k=='head'} : (env[:query]||{}).merge({'head' => ''})), c: shrunken ? '&#9661;' : '&#9651;'},
