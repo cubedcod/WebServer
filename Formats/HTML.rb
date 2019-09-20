@@ -519,7 +519,7 @@ class WebResource
              end},
            abstracts,
            {_: :a, class: 'id', c: '☚', href: uri}.update(titles.empty? ? {type: 'node'} : {}).update(uri ? {id: 'pt' + uri_hash} : {}), "\n",
-           ([{_: :a, class: :date, id: 'date' + uri_hash, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date}, "\n"] if date),
+           ([{_: :a, class: :date, id: 'date' + uri_hash, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date}, "\n"] if date && uri_hash),
            images.map{|i| Markup[Image][i,env]},
            {_: :table, class: :fromTo,
             c: {_: :tr,

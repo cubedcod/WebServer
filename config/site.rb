@@ -367,7 +367,7 @@ addons-amo.cdn.mozilla.net
       if parts.size > 1
         [301, {'Location' => 'https://' + parts[-1]}, []]
       else
-        Lite[r]
+        r.fetch
       end}
 
     # Yelp

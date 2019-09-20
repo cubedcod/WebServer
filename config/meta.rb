@@ -211,6 +211,8 @@ class WebResource
       'image:secure_url' => Image,
       'image_src' => Image,
       'import' => :drop,
+      'instapp:hashtags' => Abstract,
+      'instapp:owner_user_id' => :drop,
       'js-proxy-site-detection-payload' => :drop,
       'keywords' => Abstract,
       'lastmod' => Date,
