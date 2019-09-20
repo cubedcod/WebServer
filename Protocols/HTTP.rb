@@ -97,6 +97,8 @@ class WebResource
                                                             (HTML.keyval (Webize::HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
     end
 
+    def CDN?; host.match? /\.cloud(f(lare|ront)|inary)\.(com|net)$/ end
+
     def dateMeta
       n = nil # next page
       p = nil # prev page
@@ -329,6 +331,8 @@ class WebResource
         [204, {}, []]
       elsif handler=HostGET[host] # host handler
         handler[self]
+      elsif self.CDN? && %w(mp3 jpg png).member?(ext.downcase)
+        fetch
       elsif gunk? && ServerKey != env[:query]['allow']
         deny
       else
