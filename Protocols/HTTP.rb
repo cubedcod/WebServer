@@ -301,11 +301,8 @@ class WebResource
         print '❓' + uri
         if env[:intermediate]
           self
-        elsif cachepath.exist?
-          cachepath.nodeStat base_uri: self
+        else # cached graph-data may exist, skip immediate 404
           graphResponse
-        else
-          notfound
         end
       when /500/ # error
         print '🛑'; notfound
@@ -342,9 +339,10 @@ class WebResource
       redirect e.io.meta['location']
     end
 
-    # Graph -> HTTP Response
     def graphResponse
+      cachepath.nodeStat base_uri: self unless local? || !cachepath.exist?
       return notfound if !env.has_key?(:repository) || env[:repository].empty?
+
       format = selectFormat
       env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
       env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})

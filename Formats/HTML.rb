@@ -262,7 +262,7 @@ class WebResource
                          c: [{class: :toolbox,
                               c: [{_: :a, class: :hostname, href: '/', c: host},
                                   parts.map{|p|
-                                    ['/',{_: :a, href: bc += '/' + p, c: p, id: 'r'+Digest::SHA2.hexdigest(rand.to_s)}]},
+                                    ['/',{_: :a, class: :breadcrumb, href: bc += '/' + p, c: p, id: 'r'+Digest::SHA2.hexdigest(rand.to_s)}]},
                                   link[:up, '&#9650;'],
                                   {_: :a, id: :tabular, class: :icon, style: tabular  ? 'color: #fff' : 'color: #555', href: HTTP.qs((env[:query]||{}).merge({'view' => tabular ? 'default' : 'table', 'sort' => 'date'})), c: '↨'},
                                   {_: :a, id: :shrink,  class: :icon, style: shrunken ? 'color: #fff' : 'color: #555', href: HTTP.qs(shrunken ? env[:query].reject{|k,v|k=='head'} : (env[:query]||{}).merge({'head' => ''})), c: shrunken ? '&#9661;' : '&#9651;'},
