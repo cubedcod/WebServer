@@ -39,7 +39,7 @@ class WebResource
         parts = resource.parts
         verbose = resource.verbose?
         if resource.env[:deny]                                   # log request
-          if verbose
+          if true || verbose
             print "\n🛑\e[7;31m https://" + resource.host + resource.path + "\e[0m"
             resource.env[:query]&.map{|k,v|
               print "\n\e[7m#{k}\e[0m\t#{v}"}                    # blocked - verbose
