@@ -148,8 +148,15 @@ images-na.ssl-images-amazon.com
     # Facebook
     FBgunk = %w(common connect pages_reaction_units plugins security tr)
     FBlite = -> r {ENV.has_key?('FACEBOOK') ? r.fetch : FBgunk.member?(r.parts[0]) ? r.deny : r.fetch}
-    %w(facebook.com business.facebook.com www.facebook.com).map{|host|GET host, FBlite}
-    %w(l.instagram.com l.facebook.com).map{|host| GET host, GotoU}
+
+    %w(  facebook.com
+business.facebook.com
+    www.facebook.com).map{|host|
+      GET host, FBlite}
+
+    %w(l.instagram.com
+       l.facebook.com).map{|host|
+      GET host, GotoU}
 
     # Forbes
     GET 'thumbor.forbes.com', -> r {[301, {'Location' => URI.unescape(r.parts[-1])}, []]}
