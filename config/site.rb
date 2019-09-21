@@ -345,9 +345,10 @@ addons-amo.cdn.mozilla.net
     GET 'cdn.technologyreview.com', NoQuery
 
     # Twitch
-    if ENV.has_key? 'AMAZON'
+    if ENV.has_key? 'TWITCH'
       %w(api.twitch.tv
          gql.twitch.tv
+       spade.twitch.tv
          www.twitch.tv
 ).map{|h|Allow h}
     end

@@ -39,7 +39,7 @@ class WebResource
         parts = resource.parts
         verbose = resource.verbose?
         if resource.env[:deny]                                   # log request
-          print "\n🛑\e[7;31m https://" + resource.host + resource.path + "\e[0m"
+          print "\n🛑\e[7;31m https://" + resource.host + resource.path + "\e[0m "
           resource.env[:query]&.map{|k,v|
             print "\n\e[7m#{k}\e[0m\t#{v}"} if verbose           # blocked
         elsif [301, 302, 303].member? status
@@ -49,7 +49,7 @@ class WebResource
         elsif ext == 'css'
           print '🎨'                                             # stylesheet
         elsif ext == 'js' || mime.match?(/script/)
-          print "\n📜\e[36m https://" + resource.host + resource.path + "\e[0m"
+          print "\n📜\e[36m https://" + resource.host + resource.path + "\e[0m "
         elsif %w(gif jpeg jpg).member?(ext)
           print '🖼️'                                              # picture
         elsif %w(png svg webp).member?(ext) || mime.match?(/^image/)
@@ -72,7 +72,7 @@ class WebResource
                    end) + ';1'
           print "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) +
                 "\e[" + color + "m"  + (status == 200 ? '' : status.to_s) + (env['HTTP_REFERER'] ? (' ' + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m→") : ' ') +
-                "\e[" + color + ";7m https://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '') + "\e[0m"
+                "\e[" + color + ";7m https://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '') + "\e[0m "
         end
         [status, head, body]} # response
     rescue Exception => e
@@ -215,7 +215,7 @@ class WebResource
 
       if !Hosts.has_key? host
         Hosts[host] = true
-        puts "\n🚨\e[7;35m https://" + host + path + "\e[0m"
+        puts "\n🚨\e[7;35m https://" + host + path + "\e[0m "
       end
 
       # locators
@@ -532,7 +532,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     def POSTresource
       if handler = HostPOST[host]
         handler[self]
-      elsif AllowedHosts.has_key? host
+      elsif AllowedHosts.has_key?(host) || (ENV.has_key?('TWITCH')&&host.match?(/\.ttvnw\.net$/))
         self.POSTthru
       else
         denyPOST
