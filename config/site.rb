@@ -345,7 +345,7 @@ addons-amo.cdn.mozilla.net
     GET 'cdn.technologyreview.com', NoQuery
 
     # Twitch
-    GET 'www.twitch.com', DesktopMode
+    GET 'www.twitch.tv', DesktopMode
     if ENV.has_key? 'TWITCH'
       %w(api.twitch.tv
          gql.twitch.tv
