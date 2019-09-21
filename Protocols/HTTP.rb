@@ -78,10 +78,6 @@ class WebResource
                 "\e[" + color + "m"  + (status == 200 ? '' : status.to_s) + (env['HTTP_REFERER'] ? (' ' + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m→") : ' ') +
                 "\e[" + color + ";7m https://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '') + "\e[0m"
         end
-        if !Hosts.has_key? env['SERVER_NAME']
-          Hosts[env['SERVER_NAME']] = true
-          puts "\n🚨\e[7;33m https://" + resource.host + resource.path + "\e[0m"
-        end
         [status, head, body]} # response
     rescue Exception => e
       uri = 'https://' + env['SERVER_NAME'] + (env['REQUEST_URI']||'')
@@ -215,20 +211,28 @@ class WebResource
 
     # fetch resource
     def fetch options = {}
-     if StaticFormats.member? ext.downcase
-      return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has file
-      return cache.fileResponse if cache.node.file?                                                    # server has file
-     end
-      return graphResponse if offline?
-      u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? (HTTP.qs options[:query]) : qs) # base locator
+      if StaticFormats.member? ext.downcase # immutable-cache formats
+        return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has resource
+        return cache.fileResponse if cache.node.file?                                                    # server has resource
+      end
+      return graphResponse if offline?      # can't fetch if offline, return graph-cache
+
+      if !Hosts.has_key? host
+        Hosts[host] = true
+        puts "\n🚨\e[7;35m https://" + host + path + "\e[0m"
+      end
+
+      # locators
+      u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? (HTTP.qs options[:query]) : qs) # base, sans scheme
       primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env    # primary locator
       fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env # fallback locator
-      primary.fetchHTTP options # try primary
-    rescue Exception => e # primary failed
+
+      primary.fetchHTTP options # fetch
+    rescue Exception => e       # fetch failed
       case e.class.to_s
       when 'OpenURI::HTTPRedirect'   # redirected
         if fallback == e.io.meta['location']
-          fallback.fetchHTTP options # redirected to fallback transit, follow
+          fallback.fetchHTTP options # follow to fallback transit
         elsif options[:intermedate]                       # non-HTTP caller
           puts "RELOC #{uri} -> #{e.io.meta['location']}" # alert caller of new location
           e.io.meta['location'].R(env).fetchHTTP options  # follow redirect
