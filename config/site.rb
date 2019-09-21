@@ -53,7 +53,7 @@ p(a(idpost|rtner|y(ments?|wall))|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propag
 quantcast|
 reco(mmend(ation|er)?s?|rd(event|stats?))|re?t(ar)?ge?t(ing)?|remote[-_]?(control)?|rpc|
 s?s(a(fe[-_]?browsing|ilthru)|cheduler|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(cial(shar(e|ing))?|urcepoint)|ponsor(ed)?|so|tat(istic)?s?|ubscri(ber?|ption)|w.js|yn(c|dicat(ed|ion)))|
-t(aboola|(arget|rack)(ers?|ing)|bproxy|ea(lium|ser)|elemetry|hirdparty|inypass|racing|rend(ing|s))|autotrack|
+t(aboola|(arget|rack)(ers?|ing)|bproxy|ea(lium|ser)|elemetry|hirdparty|inypass|racing|rend(ing|s)|ypeface)|autotrack|
 u(rchin|serlocation|tm)|
 viral|
 wp-rum)

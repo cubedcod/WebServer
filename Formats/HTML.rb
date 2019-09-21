@@ -237,6 +237,7 @@ class WebResource
         host && path && ('https://' + host + path),
       ].compact.find{|u| graph[u] && graph[u][Title]}
       bc = '' # path breadcrumbs
+      icon = ('//' + host + '/favicon.ico').R # site icon
       link = -> key, displayname { # render Link reference
         if url = env[:links] && env[:links][key]
           [{_: :a, href: url, id: key, class: :icon, c: displayname},
@@ -260,7 +261,9 @@ class WebResource
                             ].map{|e|['  ',e,"\n"]}}, "\n\n",
                         {_: :body,
                          c: [{class: :toolbox,
-                              c: [{_: :a, class: :hostname, href: '/', c: host},
+                              c: [{_: :a, class: :hostname, href: '/',
+                                   c: [({_: :img, src: icon.uri} if icon.cached?),
+                                       host]},
                                   parts.map{|p|
                                     ['/',{_: :a, class: :breadcrumb, href: bc += '/' + p, c: p, id: 'r'+Digest::SHA2.hexdigest(rand.to_s)}]},
                                   link[:up, '&#9650;'],

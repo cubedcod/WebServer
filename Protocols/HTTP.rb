@@ -39,7 +39,7 @@ class WebResource
         parts = resource.parts
         verbose = resource.verbose?
         if resource.env[:deny]                                   # log request
-          print "\n🛑\e[31m" + resource.host + "\e[2m" + resource.path + "\e[0m "
+          print "\n🛑\e[31;1m" + resource.host + "\e[7m" + resource.path + "\e[0m "
           resource.env[:query]&.map{|k,v|
             print "\n\e[7m#{k}\e[0m\t#{v}"} if verbose           # blocked
         elsif [301, 302, 303].member? status
@@ -217,7 +217,7 @@ class WebResource
 
       if !Hosts.has_key? host
         Hosts[host] = true
-        print "\n➕\e[33;1mhttps://" + hostname + "\e[2m" + (path || '/') + "\e[0m "
+        print "\n➕\e[32;1mhttps://" + hostname + "\e[2m" + (path || '/') + "\e[0m "
       end
 
       # locators
@@ -301,7 +301,7 @@ class WebResource
       when /500/ # upstream error
         [500, e.io.meta, [e.io.read]]
       when /503/
-        [503, e.io.meta, [e.io.read]]
+        [200, e.io.meta, [e.io.read]]
       else
         raise
       end
