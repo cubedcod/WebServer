@@ -83,16 +83,22 @@ class WebResource
 
     def nodeStat options = {}                                           # STAT(1)
       return if basename.index('msg.') == 0
-      subject = (options[:base_uri] || path.sub(/\.(md|ttl)$/,'')).R    # abstract-node
+      subject = (options[:base_uri] || path.sub(/\.(md|ttl)$/,'')).R    # abstract node subject
       graph = env[:repository] ||= RDF::Repository.new
       if node.directory?
         subject = subject.path[-1] == '/' ? subject : (subject + '/')   # trailing slash on container URI
         graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#Container').R)
         node.children.map{|n|
           name = n.basename.to_s
-          name = n.directory? ? (name + '/') : name.sub(/\.ttl$/, '') # abstract child-node
-          child = subject.join name
-          graph << (RDF::Statement.new subject, (W3+'ns/ldp#contains').R, child)} # containment triple
+          name = n.directory? ? (name + '/') : name.sub(/\.ttl$/, '')
+          child = subject.join name                                              # child node
+          graph << (RDF::Statement.new subject, (W3+'ns/ldp#contains').R, child) # containment triple
+          if env[:query].has_key? 'cache'
+            graph << (RDF::Statement.new child, Title.R, name)
+            graph << (RDF::Statement.new child, (W3+'ns/posix/stat#size').R, n.size)
+            graph << (RDF::Statement.new child, Date.R, n.stat.mtime.iso8601)
+          end
+        }
       else
         graph << (RDF::Statement.new subject, Type.R, (W3+'ns/posix/stat#File').R)
       end

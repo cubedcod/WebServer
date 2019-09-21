@@ -350,13 +350,8 @@ class WebResource
         attr = env[:query]['sort']
         attr = Date if %w(date new).member? attr
         attr = Content if attr == 'content'
-        graph = graph.sort_by{|r|
-          if values = r[attr]
-            values[0].to_s
-          else
-            ''
-          end
-         }.reverse
+        #attr = Title if attr == 'uri'
+        graph = graph.sort_by{|r| (r[attr]||'').to_s}.reverse
       end
       {_: :table, class: :tabular,
        c: [{_: :tr, c: keys.map{|p|
