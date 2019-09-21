@@ -257,10 +257,17 @@ android.clients.google.com
     Allow 'www.mixcloud.com'
 
     # Mozilla
-    %w( addons.mozilla.org
-addons-amo.cdn.mozilla.net
-    addons.cdn.mozilla.net
-         hacks.mozilla.org
+    %w(                app.adjust.com
+                   addons.mozilla.org
+           addons-amo.cdn.mozilla.net
+               addons.cdn.mozilla.net
+                     aus5.mozilla.org
+firefox.settings.services.mozilla.com
+            getpocket.cdn.mozilla.net
+                    hacks.mozilla.org
+       incoming.telemetry.mozilla.org
+        location.services.mozilla.com
+          shavar.services.mozilla.com
 ).map{|h| Allow h } if ENV.has_key? 'MOZILLA'
 
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
@@ -345,7 +352,6 @@ addons-amo.cdn.mozilla.net
     if ENV.has_key? 'TWITCH'
       %w(api.twitch.tv
          gql.twitch.tv
-       spade.twitch.tv
          www.twitch.tv
 ).map{|h|Allow h}
     end
