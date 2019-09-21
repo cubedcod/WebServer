@@ -36,14 +36,18 @@ class WebResource
       resource.send(m).yield_self{|status, head, body|           # dispatch request
         ext = resource.ext.downcase
         mime = head['Content-Type'] || ''
+        parts = resource.parts
+        verbose = resource.verbose?
         if resource.env[:deny]                                   # log request
-          if resource.verbose?
+          if verbose
             print "\n🛑\e[7;31m https://" + resource.host + resource.path + "\e[0m"
             resource.env[:query]&.map{|k,v|
               print "\n\e[7m#{k}\e[0m\t#{v}"}                    # blocked - verbose
           else
             print '🛑'                                           # blocked
           end
+        elsif [301, 302, 303].member? status
+          print '➡️'; print head['Location'] if verbose
         elsif status == 304
           print '✅'                                             # up-to-date
         elsif ext == 'css'
@@ -58,13 +62,12 @@ class WebResource
           print '🔉'                                             # audio
         elsif %w(mp4 webm).member?(ext) || mime.match?(/^video/)
           print '🎬'                                             # video
-        elsif ext == 'ttl'
+        elsif ext == 'ttl' || mime == 'text/turtle; charset=utf-8'
           print '🐢'                                             # Turtle
+        elsif parts.member?('graphql')||parts.member?('query')||parts.member?('search')
+          print '🔍'
         else
-          color = (if !Hosts.has_key? env['SERVER_NAME']
-                    Hosts[env['SERVER_NAME']] = true
-                    '32'                                         # green -> new host
-                  elsif env['REQUEST_METHOD'] == 'POST'
+          color = (if env['REQUEST_METHOD'] == 'POST'
                     '32'                                         # green -> POST
                   elsif status == 200
                     '37'                                         # white -> basic
@@ -73,10 +76,12 @@ class WebResource
                    end) + ';1'
           print "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) +
                 "\e[" + color + "m"  + (status == 200 ? '' : status.to_s) + (env['HTTP_REFERER'] ? (' ' + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m→") : ' ') +
-                "\e[" + color + ";7m https://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '') +
-                "\e[0m" + (head['Location'] ? ("➡️" + head['Location']) : '') + ' ' + (mime == 'text/turtle; charset=utf-8' ? '🐢' : mime)
+                "\e[" + color + ";7m https://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '') + "\e[0m"
         end
-
+        if !Hosts.has_key? env['SERVER_NAME']
+          Hosts[env['SERVER_NAME']] = true
+          puts "\n🚨\e[7;36m https://" + resource.host + resource.path + "\e[0m"
+        end
         [status, head, body]} # response
     rescue Exception => e
       uri = 'https://' + env['SERVER_NAME'] + (env['REQUEST_URI']||'')
@@ -210,24 +215,25 @@ class WebResource
 
     # fetch resource
     def fetch options = {}
-      if StaticFormats.member? ext.downcase
-        return [304, {}, []] if env.has_key? 'HTTP_IF_NONE_MATCH' # client has resource
-        return cache.fileResponse if cache.exist?                 # server has resource
-      end
-      u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? (HTTP.qs options[:query]) : qs) # base locator sans scheme
+     if StaticFormats.member? ext.downcase
+      return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has file
+      return cache.fileResponse if cache.node.file?                                                    # server has file
+     end
+      return graphResponse if ENV.has_key? 'OFFLINE'
+      u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? (HTTP.qs options[:query]) : qs) # base locator
       primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env    # primary locator
       fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env # fallback locator
-      primary.fetchHTTP options
+      primary.fetchHTTP options # try primary
     rescue Exception => e # primary failed
       case e.class.to_s
-      when 'OpenURI::HTTPRedirect' # redirected
+      when 'OpenURI::HTTPRedirect'   # redirected
         if fallback == e.io.meta['location']
           fallback.fetchHTTP options # redirected to fallback transit, follow
         elsif options[:intermedate]                       # non-HTTP caller
-          puts "RELOC #{uri} -> #{e.io.meta['location']}" # alert caller of updated location
+          puts "RELOC #{uri} -> #{e.io.meta['location']}" # alert caller of new location
           e.io.meta['location'].R(env).fetchHTTP options  # follow redirect
-        else                                              # alert HTTP caller of updated location
-          redirect e.io.meta['location']                  # client can follow redirection at discretion
+        else                                              # alert HTTP caller of new location
+          redirect e.io.meta['location']                  # client can follow at discretion
         end
       when 'Errno::ECONNREFUSED'
         fallback.fetchHTTP options
