@@ -296,26 +296,22 @@ addons-amo.cdn.mozilla.net
     Allow 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
     GET 'www.reddit.com', -> r {
       options = {}
-      if r.parts.member? 'submit'
-        r.desktop
-      else
+      r.desktop if r.parts.member? 'submit'
+      unless r.desktop?
         options[:suffix] = '.rss' if r.ext.empty?
         r.env[:query]['sort'] ||= 'date'
         r.env[:query]['view'] ||= 'table'
       end
-      if r.path == '/'
-        ('/r/'+r.subscriptions.join('+')+'/new').R(r.env).fetch options
-      else
-        depth = r.parts.size
-        r.env[:links][:up] = if [3,6].member? depth
-                               r.dirname
-                             elsif 5 == depth
-                               '/' + r.parts[0..1].join('/')
-                             else
-                               '/'
-                             end
-        r.fetch options
-      end}
+      depth = r.parts.size
+      r.env[:links][:up] = if [3,6].member? depth
+                             r.dirname
+                           elsif 5 == depth
+                             '/' + r.parts[0..1].join('/')
+                           else
+                             '/'
+                           end
+      r = ('/r/' + r.subscriptions.join('+') + '/new').R r.env if r.path == '/'
+      r.fetch options }
 
     # Responsys
     GET 'static.cdn.responsys.net', Lite

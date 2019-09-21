@@ -39,7 +39,7 @@ class WebResource
         parts = resource.parts
         verbose = resource.verbose?
         if resource.env[:deny]                                   # log request
-          print "\n🛑\e[7;31m https://" + resource.host + resource.path + "\e[0m "
+          print "\n🛑\e[7;31m" + resource.host + resource.path + "\e[0m "
           resource.env[:query]&.map{|k,v|
             print "\n\e[7m#{k}\e[0m\t#{v}"} if verbose           # blocked
         elsif [301, 302, 303].member? status
@@ -89,7 +89,7 @@ class WebResource
                                                             (HTML.keyval (Webize::HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
     end
 
-    def CDN?; host.match? /\.cloud(f(lare|ront)|inary)\.(com|net)$/ end
+    def CDN?; host.match? /\.(amazonaws|cloud(f(lare|ront)|inary))\.(com|net)$/ end
 
     def dateMeta
       n = nil # next page
@@ -174,6 +174,8 @@ class WebResource
 
     def desktop; env['HTTP_USER_AGENT'] = DesktopUA[0]; self end
 
+    def desktop?; DesktopUA.member? env['HTTP_USER_AGENT'] end
+
     def entity generator = nil
       entities = env['HTTP_IF_NONE_MATCH']&.strip&.split /\s*,\s*/ # client entities
       if entities && entities.include?(env[:resp]['ETag']) # client has entity
@@ -215,7 +217,7 @@ class WebResource
 
       if !Hosts.has_key? host
         Hosts[host] = true
-        puts "\n🚨\e[7;35m https://" + host + path + "\e[0m "
+        print "\n➕\e[33;1m https://" + hostname + "\e[2m" + (path || '/') + "\e[0m "
       end
 
       # locators
@@ -290,7 +292,7 @@ class WebResource
       when /403/ # forbidden
         print '🚫 '+uri; notfound
       when /404/ # not found
-        print '❓ '+uri
+        print '❓ '+uri+' '
         if options[:intermediate]
           self
         else # cache may exist, bypass immediate 404
@@ -309,6 +311,12 @@ class WebResource
       env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
       env[:resp]['ETag'] ||= Digest::SHA2.hexdigest [uri, node.stat.mtime, node.size].join
       entity
+    end
+
+    def fixedFormat? format = nil
+      return true if desktop? || path.match?(/embed/) || host.match?(/embed|video/)
+      return false if !format || (format.match? /\/(atom|rss|xml)/i) # allow feed rewriting
+      format.match? NoTransform # MIME-regex. application/media fixed, graph-data + text transformable
     end
 
     def self.GET arg, lambda
@@ -662,12 +670,6 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
             ['application/atom+xml','text/html'].member?(f)}} # non-RDF
 
       default                                                 # HTML via default
-    end
-
-    def fixedFormat? format = nil
-      return true if DesktopUA.member?(env['HTTP_USER_AGENT']) || path.match?(/embed/) || host.match?(/embed|video/)
-      return false if !format || (format.match? /\/(atom|rss|xml)/i) # allow feed rewriting
-      format.match? NoTransform
     end
 
     def verbose?; ENV.has_key? 'VERBOSE' end
