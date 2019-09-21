@@ -39,15 +39,11 @@ class WebResource
         parts = resource.parts
         verbose = resource.verbose?
         if resource.env[:deny]                                   # log request
-          if true || verbose
-            print "\n🛑\e[7;31m https://" + resource.host + resource.path + "\e[0m"
-            resource.env[:query]&.map{|k,v|
-              print "\n\e[7m#{k}\e[0m\t#{v}"}                    # blocked - verbose
-          else
-            print '🛑'                                           # blocked
-          end
+          print "\n🛑\e[7;31m https://" + resource.host + resource.path + "\e[0m"
+          resource.env[:query]&.map{|k,v|
+            print "\n\e[7m#{k}\e[0m\t#{v}"} if verbose           # blocked
         elsif [301, 302, 303].member? status
-          print '➡️'; print head['Location'] if verbose
+          print '➡️'; print head['Location'] if verbose           # redirected
         elsif status == 304
           print '✅'                                             # up-to-date
         elsif ext == 'css'
@@ -63,7 +59,7 @@ class WebResource
         elsif %w(mp4 webm).member?(ext) || mime.match?(/^video/)
           print '🎬'                                             # video
         elsif ext == 'ttl' || mime == 'text/turtle; charset=utf-8'
-          print '🐢'                                             # Turtle
+          print '🐢'                                             # turtle
         elsif parts.member?('gql')||parts.member?('graphql')||parts.member?('query')||parts.member?('search')
           print '🔍'
         else
