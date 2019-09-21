@@ -219,6 +219,15 @@ android.clients.google.com
     # Inrupt
     Allow 'dev.inrupt.net'
 
+    # Instagram
+    GET 'www.instagram.com', -> r {
+      if r.path == '/'
+        r.env[:query]['view'] ||= 'table'
+        r.offline.graphResponse
+      else
+        r.fetch
+      end}
+
     # Linkedin
     if ENV.has_key? 'LINKEDIN'
       Allow 'media.licdn.com'

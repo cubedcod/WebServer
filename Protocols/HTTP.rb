@@ -219,7 +219,7 @@ class WebResource
       return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has file
       return cache.fileResponse if cache.node.file?                                                    # server has file
      end
-      return graphResponse if ENV.has_key?('OFFLINE') || env[:query].has_key?('cache')
+      return graphResponse if offline?
       u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? (HTTP.qs options[:query]) : qs) # base locator
       primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env    # primary locator
       fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env # fallback locator
@@ -480,6 +480,15 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     def notfound
       dateMeta # nearby nodes may exist, search for pointers
       [404, {'Content-Type' => 'text/html'}, [htmlDocument]]
+    end
+
+    def offline
+      env[:query]['offline'] = true
+      self
+    end
+
+    def offline?
+      ENV.has_key?('OFFLINE') || env[:query].has_key?('offline')
     end
 
     def OPTIONS

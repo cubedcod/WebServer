@@ -76,7 +76,7 @@ class WebResource < RDF::URI
       Video => '🎞',
     }
 
-    StaticFormats = %w(css gif jpeg jpg js mp3 mp4 png svg webm webp)
+    StaticFormats = %w(css gif ico jpeg jpg js mp3 mp4 png svg webm webp)
 
     def cache; (hostpath + path).R env end
     def hostname; env && env['SERVER_NAME'] || host || 'localhost' end
