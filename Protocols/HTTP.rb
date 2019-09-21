@@ -174,6 +174,7 @@ class WebResource
 
     def desktop; env['HTTP_USER_AGENT'] = DesktopUA[0]; self end
     def desktopUI?; DesktopUA.member? env['HTTP_USER_AGENT'] end
+    alias_method :desktopUA?, :desktopUI?
 
     def entity generator = nil
       entities = env['HTTP_IF_NONE_MATCH']&.strip&.split /\s*,\s*/ # client entities
@@ -409,7 +410,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       end
 
       # User-Agent
-      head['User-Agent'] = DesktopUA[0]
+      head['User-Agent'] = DesktopUA[0] unless desktopUA? || mobileUA?
       head['User-Agent'] = 'curl/7.65.1' if host == 'po.st'
       head.delete 'User-Agent' if host == 't.co'
 
@@ -461,7 +462,8 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     def local?; LocalAddr.member?(env['SERVER_NAME']) || ENV['SERVER_NAME'] == env['SERVER_NAME'] end
 
     def mobile; env['HTTP_USER_AGENT'] = MobileUA[0]; self end
-    def mobileUI?; MobileUA[0] == env['HTTP_USER_AGENT'] end
+    def mobileUI?; MobileUA.member? env['HTTP_USER_AGENT'] end
+    alias_method :mobileUA?, :mobileUI?
 
     def nodes # URI -> file(s)
       (if node.directory?

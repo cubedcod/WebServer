@@ -69,13 +69,12 @@ wp-rum)
 
     DesktopUA = [
       'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3903.0 Safari/537.36',
-      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3906.0 Safari/537.36',
       'Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0',
     ]
 
     MobileUA = [
       'Mozilla/5.0 (Android 8.1.0; Tablet; rv:68.0) Gecko/68.0 Firefox/68.0',
-      'Mozilla/5.0 (Linux; Android 8.1.0; Inspiron 5421) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3903.0 Safari/537.36',
+      # 'Mozilla/5.0 (Linux; Android 8.1.0; Inspiron 5421) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3903.0 Safari/537.36', # comment for local-UI selection for UA
     ]
 
     DesktopMode = -> r {r.desktop.fetch}
