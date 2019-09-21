@@ -48,6 +48,8 @@ class WebResource
           print '✅'                                             # up-to-date
         elsif ext == 'css'
           print '🎨'                                             # stylesheet
+        elsif ext == 'js' || mime.match?(/script/)
+          print "\n📜\e[36m https://" + resource.host + resource.path + "\e[0m"
         elsif %w(gif jpeg jpg).member?(ext)
           print '🖼️'                                              # picture
         elsif %w(png svg webp).member?(ext) || mime.match?(/^image/)
@@ -61,15 +63,11 @@ class WebResource
         else
           color = (if !Hosts.has_key? env['SERVER_NAME']
                     Hosts[env['SERVER_NAME']] = true
-                    '32'                                         # green -> first appearance of host
+                    '32'                                         # green -> new host
                   elsif env['REQUEST_METHOD'] == 'POST'
                     '32'                                         # green -> POST
                   elsif status == 200
-                    if ext == 'js' || mime.match?(/script/)
-                      '36'                                       # lightblue -> executable
-                    else
-                      '37'                                       # white -> basic response
-                    end
+                    '37'                                         # white -> basic
                   else
                     '30'                                         # gray -> other
                    end) + ';1'
@@ -210,22 +208,22 @@ class WebResource
       end
     end
 
-    # fetch remote resource
+    # fetch resource
     def fetch options = {}
       if StaticFormats.member? ext.downcase
         return [304, {}, []] if env.has_key? 'HTTP_IF_NONE_MATCH' # client has resource
         return cache.fileResponse if cache.exist?                 # server has resource
       end
-      u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? (HTTP.qs options[:query]) : qs) # base locator w/o scheme
+      u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? (HTTP.qs options[:query]) : qs) # base locator sans scheme
       primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env    # primary locator
       fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env # fallback locator
       primary.fetchHTTP options
-    rescue Exception => e # fallback transit
+    rescue Exception => e # primary failed
       case e.class.to_s
       when 'OpenURI::HTTPRedirect' # redirected
         if fallback == e.io.meta['location']
-          fallback.fetchHTTP options # redirected to fallback transit
-        elsif options[:intermedate]  # non-HTTP caller?
+          fallback.fetchHTTP options # redirected to fallback transit, follow
+        elsif options[:intermedate]                       # non-HTTP caller
           puts "RELOC #{uri} -> #{e.io.meta['location']}" # alert caller of updated location
           e.io.meta['location'].R(env).fetchHTTP options  # follow redirect
         else                                              # alert HTTP caller of updated location
@@ -255,12 +253,12 @@ class WebResource
     end
 
     # fetch over HTTP
-    def fetchHTTP options = {}; print "\n",'🌍🌎🌏🌐'[rand 4],uri,"\n"
+    def fetchHTTP options = {}
       open(uri, headers.merge({redirect: false})) do |response|           # fetch
         h = response.meta                                                 # upstream metadata
         if response.status.to_s.match? /206/                              # partial body
           [206, h, [response.read]]                                       # return part
-        else
+        else print '🌍🌎🌏🌐'[rand 4]; print uri if verbose?              # complete body
           body = HTTP.decompress h, response.read                         # decode body
           cache.write body if StaticFormats.member? ext.downcase          # store body
           format = h['content-type'].split(/;/)[0] if h['content-type']   # format
