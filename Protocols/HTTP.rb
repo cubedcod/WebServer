@@ -173,7 +173,6 @@ class WebResource
     end
 
     def desktop; env['HTTP_USER_AGENT'] = DesktopUA[0]; self end
-
     def desktop?; DesktopUA.member? env['HTTP_USER_AGENT'] end
 
     def entity generator = nil
@@ -461,6 +460,9 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
 
     def local?; LocalAddr.member?(env['SERVER_NAME']) || ENV['SERVER_NAME'] == env['SERVER_NAME'] end
 
+    def mobile; env['HTTP_USER_AGENT'] = MobileUA[0]; self end
+    def mobile?; MobileUA.member? env['HTTP_USER_AGENT'] end
+
     def nodes # URI -> file(s)
       (if node.directory?
        if env[:query].has_key?('f') && path != '/'  # FIND
@@ -474,11 +476,11 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
          [self,node.children.map{|c|('/'+c.to_s).R env}] # LS
        end
       else                             # GLOB
-        if uri.match /[\*\{\[]/        #  parametric glob
+        if uri.match /[\*\{\[]/        # parametric glob
           env[:grep] = true if env[:query].has_key?('q')
           glob
-        else                           #  basic glob:
-          files = (self + '.*').R.glob #   base + extension
+        else                           # basic glob:
+          files = (self + '.*').R.glob #  base + extension
           files = (self + '*').R.glob if files.empty? # prefix
           [self, files]
         end
