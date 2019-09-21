@@ -64,7 +64,7 @@ class WebResource
           print '🎬'                                             # video
         elsif ext == 'ttl' || mime == 'text/turtle; charset=utf-8'
           print '🐢'                                             # Turtle
-        elsif parts.member?('graphql')||parts.member?('query')||parts.member?('search')
+        elsif parts.member?('gql')||parts.member?('graphql')||parts.member?('query')||parts.member?('search')
           print '🔍'
         else
           color = (if env['REQUEST_METHOD'] == 'POST'
@@ -325,7 +325,7 @@ class WebResource
         [204, {}, []]
       elsif handler=HostGET[host] # host handler
         handler[self]
-      elsif self.CDN? && %w(mp3 jpg png).member?(ext.downcase)
+      elsif self.CDN? && %w(mp3 jpg png).member?(ext.downcase) && !gunkURI
         fetch
       elsif gunk? && ServerKey != env[:query]['allow']
         deny
