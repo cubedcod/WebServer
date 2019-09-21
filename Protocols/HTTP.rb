@@ -49,7 +49,7 @@ class WebResource
         elsif ext == 'css'
           print '🎨'                                             # stylesheet
         elsif ext == 'js' || mime.match?(/script/)
-          print "\n📜\e[36m https://" + resource.host + resource.path + "\e[0m "
+          print "\n📜\e[36m https://" + resource.host + "\e[1m" + resource.path + "\e[0m "
         elsif %w(gif jpeg jpg).member?(ext)
           print '🖼️'                                              # picture
         elsif %w(png svg webp).member?(ext) || mime.match?(/^image/)
