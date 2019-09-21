@@ -80,7 +80,7 @@ class WebResource
         end
         if !Hosts.has_key? env['SERVER_NAME']
           Hosts[env['SERVER_NAME']] = true
-          puts "\n🚨\e[7;36m https://" + resource.host + resource.path + "\e[0m"
+          puts "\n🚨\e[7;33m https://" + resource.host + resource.path + "\e[0m"
         end
         [status, head, body]} # response
     rescue Exception => e
@@ -219,7 +219,7 @@ class WebResource
       return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has file
       return cache.fileResponse if cache.node.file?                                                    # server has file
      end
-      return graphResponse if ENV.has_key? 'OFFLINE'
+      return graphResponse if ENV.has_key?('OFFLINE') || env[:query].has_key?('cache')
       u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? (HTTP.qs options[:query]) : qs) # base locator
       primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env    # primary locator
       fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env # fallback locator
