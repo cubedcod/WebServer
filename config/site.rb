@@ -276,6 +276,7 @@ firefox.settings.services.mozilla.com
        incoming.telemetry.mozilla.org
         location.services.mozilla.com
           shavar.services.mozilla.com
+  tracking-protection.cdn.mozilla.net
 ).map{|h| Allow h } if ENV.has_key? 'MOZILLA'
 
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
@@ -312,7 +313,7 @@ firefox.settings.services.mozilla.com
     GET 'www.reddit.com', -> r {
       options = {}
       r.desktop if r.parts.member? 'submit'
-      unless r.desktop?
+      unless r.desktopUI?
         options[:suffix] = '.rss' if r.ext.empty?
         r.env[:query]['sort'] ||= 'date'
         r.env[:query]['view'] ||= 'table'

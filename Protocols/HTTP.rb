@@ -173,7 +173,7 @@ class WebResource
     end
 
     def desktop; env['HTTP_USER_AGENT'] = DesktopUA[0]; self end
-    def desktop?; DesktopUA.member? env['HTTP_USER_AGENT'] end
+    def desktopUI?; DesktopUA.member? env['HTTP_USER_AGENT'] end
 
     def entity generator = nil
       entities = env['HTTP_IF_NONE_MATCH']&.strip&.split /\s*,\s*/ # client entities
@@ -313,7 +313,7 @@ class WebResource
     end
 
     def fixedFormat? format = nil
-      return true if desktop? || path.match?(/embed/) || host.match?(/embed|video/)
+      return true if desktopUI? || mobileUI? || path.match?(/embed/) || host.match?(/embed|video/)
       return false if !format || (format.match? /\/(atom|rss|xml)/i) # allow feed rewriting
       format.match? NoTransform # MIME-regex. application/media fixed, graph-data + text transformable
     end
@@ -461,7 +461,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     def local?; LocalAddr.member?(env['SERVER_NAME']) || ENV['SERVER_NAME'] == env['SERVER_NAME'] end
 
     def mobile; env['HTTP_USER_AGENT'] = MobileUA[0]; self end
-    def mobile?; MobileUA.member? env['HTTP_USER_AGENT'] end
+    def mobileUI?; MobileUA[0] == env['HTTP_USER_AGENT'] end
 
     def nodes # URI -> file(s)
       (if node.directory?
