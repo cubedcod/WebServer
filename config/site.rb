@@ -70,7 +70,7 @@ wp-rum)
     DesktopUA = ['Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3903.0 Safari/537.36',
                  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3906.0 Safari/537.36',
                  'Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0']
-
+    DesktopMode = -> r {r.desktop.fetch}
     GotoBasename = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
     GotoU   = -> r {[301, {'Location' =>  r.env[:query]['u']}, []]}
     GotoURL = -> r {[301, {'Location' => (r.env[:query]['url']||r.env[:query]['q'])}, []]}
@@ -345,6 +345,7 @@ addons-amo.cdn.mozilla.net
     GET 'cdn.technologyreview.com', NoQuery
 
     # Twitch
+    GET 'www.twitch.com', DesktopMode
     if ENV.has_key? 'TWITCH'
       %w(api.twitch.tv
          gql.twitch.tv
@@ -393,7 +394,7 @@ addons-amo.cdn.mozilla.net
 
     # YouTube
     Allow 'www.youtube.com'
-    GET 's.ytimg.com', -> r {r.desktop.fetch}
+    GET 's.ytimg.com', DesktopMode
     GET 'youtube.com',   -> r {[301, {'Location' => 'https://www.youtube.com' + r.env['REQUEST_URI']}, []]}
     GET 'm.youtube.com', -> r {[301, {'Location' => 'https://www.youtube.com' + r.env['REQUEST_URI']}, []]}
     GET 'www.youtube.com', -> r {
