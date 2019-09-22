@@ -66,24 +66,15 @@ wp-rum)
     SiteJS  = SiteDir.join('site.js').read
   end
   module HTTP
-
-    DesktopUA = [
-      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3903.0 Safari/537.36',
-      'Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0',
-    ]
-
-    MobileUA = [
-      'Mozilla/5.0 (Android 8.1.0; Tablet; rv:68.0) Gecko/68.0 Firefox/68.0',
-      # 'Mozilla/5.0 (Linux; Android 8.1.0; Inspiron 5421) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3903.0 Safari/537.36', # comment for local-UI selection for UA
-    ]
-
     DesktopMode = -> r {r.desktop.fetch}
+    DesktopUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
+    GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : r.deny}
     GotoBasename = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
     GotoU   = -> r {[301, {'Location' =>  r.env[:query]['u']}, []]}
     GotoURL = -> r {[301, {'Location' => (r.env[:query]['url']||r.env[:query]['q'])}, []]}
-    GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : r.deny}
     Icon    = -> r {r.env[:deny] = true; [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
     Lite    = -> r {(r.gunkURI || r.ext=='js') ? r.deny : r.fetch}
+    MobileUA = ''
     NoQuery = -> r {r.qs.empty? ? r.fetch : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
     Resizer = -> r {
       if r.parts[0] == 'resizer'
@@ -346,10 +337,13 @@ firefox.settings.services.mozilla.com
     # Soundcloud
     GET 'gate.sc', GotoURL
     GET 'soundcloud.com', -> r {r.gunkURI ? r.deny : r.desktop.fetch}
-    %w(api-v2.soundcloud.com
-   api-widget.soundcloud.com
-              soundcloud.com
-            w.soundcloud.com
+    %w(api-auth.soundcloud.com
+     api-mobile.soundcloud.com
+         api-v2.soundcloud.com
+     api-widget.soundcloud.com
+                soundcloud.com
+         secure.soundcloud.com
+              w.soundcloud.com
 ).map{|h|Allow h}
 
     # Technology Review

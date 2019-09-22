@@ -172,8 +172,11 @@ class WebResource
              'Access-Control-Allow-Origin' => allowedOrigin}, []]
     end
 
-    def desktop; env['HTTP_USER_AGENT'] = DesktopUA[0]; self end
-    def desktopUI?; DesktopUA.member? env['HTTP_USER_AGENT'] end
+    def desktop; env['HTTP_USER_AGENT'] = DesktopUA; self end
+    def desktopUI?
+      env['HTTP_USER_AGENT']&.match?(/Mozilla\/5.0 \((Windows NT 10.0; Win64; x64|X11; Linux x86_64)\) AppleWebKit\/\d+.\d+ \(KHTML, like Gecko\) Chrome\/\d+.\d+.\d+.\d+ Safari\/\d+.\d+/) ||
+      env['HTTP_USER_AGENT']&.match?(/Mozilla\/5.0 \(X11; Linux x86_64; rv:\d+.\d+\) Gecko\/\d+ Firefox\/\d+.\d+/)
+    end
     alias_method :desktopUA?, :desktopUI?
 
     def entity generator = nil
@@ -410,11 +413,11 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       end
 
       # User-Agent
-      head['User-Agent'] = DesktopUA[0] unless desktopUA? || mobileUA?
+      head['User-Agent'] = DesktopUA if desktopUA?
       head['User-Agent'] = 'curl/7.65.1' if host == 'po.st'
       head.delete 'User-Agent' if host == 't.co'
 
-      head # massaged header
+      head # output header
     end
 
     def local
@@ -461,8 +464,8 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
 
     def local?; LocalAddr.member?(env['SERVER_NAME']) || ENV['SERVER_NAME'] == env['SERVER_NAME'] end
 
-    def mobile; env['HTTP_USER_AGENT'] = MobileUA[0]; self end
-    def mobileUI?; MobileUA.member? env['HTTP_USER_AGENT'] end
+    def mobile; env['HTTP_USER_AGENT'] = MobileUA; self end
+    def mobileUI?; env['HTTP_USER_AGENT'] == MobileUA end
     alias_method :mobileUA?, :mobileUI?
 
     def nodes # URI -> file(s)
