@@ -209,11 +209,11 @@ class WebResource
 
     # fetch resource
     def fetch options = {}
-      if StaticFormats.member? ext.downcase # immutable-cache formats
+      if StaticFormats.member? ext.downcase # immutable cache types
         return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has resource
         return cache.fileResponse if cache.node.file?                                                    # server has resource
       end
-      return graphResponse if offline?      # can't fetch if offline, return graph-cache
+      return graphResponse if offline?      # can't fetch if offline, return cached graph
 
       if !Hosts.has_key? host
         Hosts[host] = true
@@ -372,7 +372,7 @@ class WebResource
 
     # header formatted and filtered
     def headers hdr = nil
-      head = {} # external headers
+      head = {} # header storage
 
       (hdr || env || {}).map{|k,v| # raw headers
         k = k.to_s

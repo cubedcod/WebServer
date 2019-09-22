@@ -373,7 +373,7 @@ firefox.settings.services.mozilla.com
     GET 'twitter.com', -> r {
       if !r.path || r.path == '/'
         '//twitter.com'.R.subscriptions.shuffle.each_slice(18){|s|
-          '//twitter.com/search'.R(r.env).fetch intermediate: true, noRDF: true, query: {vertical: :default, f: :tweets, q: s.map{|u|'from:'+u}.join('+OR+')}}
+          '/search'.R(r.env).fetch intermediate: true, noRDF: true, query: {vertical: :default, f: :tweets, q: s.map{|u|'from:'+u}.join('+OR+')}}
         r.index.graphResponse
       elsif r.gunkURI
         r.deny
