@@ -318,6 +318,9 @@ firefox.settings.services.mozilla.com
       r = ('/r/' + r.subscriptions.join('+') + '/new').R r.env if r.path == '/'
       r.fetch options }
 
+    # Redfin
+    GET 'www.redfin.com', Desktop
+
     # Responsys
     GET 'static.cdn.responsys.net', Lite
 
@@ -427,6 +430,7 @@ heartbeat iframe_api live_chat manifest.json opensearch playlist results signin 
 
     # Zillow
     Allow 'www.zillow.com'
+    GET 'www.zillow.com', Desktop
 
   end
 
