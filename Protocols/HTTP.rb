@@ -44,7 +44,7 @@ class WebResource
           else
             print "\n🛑 \e[31;1m" + resource.host.sub(/^www\./,'').sub(/\.com$/,'') + " \e[7m" + resource.path + "\e[0m "
             resource.env[:query]&.map{|k,v|
-              print "\n\e[7m#{k}\e[0m\t#{v}"} if verbose           # blocked
+              print "\n\e[7m#{k}\e[0m\t#{v}"} if verbose         # blocked
           end
         elsif [301, 302, 303].member? status
           print '➡️ ',head['Location']                            # redirected
@@ -53,7 +53,7 @@ class WebResource
         elsif ext == 'css'
           print '🎨'                                             # stylesheet
         elsif ext == 'js' || mime.match?(/script/)
-          print "\n📜\e[36m https://" + resource.host + "\e[1m" + resource.path + "\e[0m "
+          print "\n📜\e[36;1m https://" + resource.host + "\e[7m" + resource.path + "\e[0m "
         elsif %w(gif jpeg jpg).member?(ext)
           print '🖼️'                                              # picture
         elsif %w(png svg webp).member?(ext) || mime.match?(/^image/)
@@ -66,7 +66,7 @@ class WebResource
           print '🐢'                                             # turtle
         elsif parts.member?('gql')||parts.member?('graphql')||parts.member?('query')||parts.member?('search')
           print '🔍'
-        elsif env['REQUEST_METHOD'] == 'POST'
+        elsif env['REQUEST_METHOD'] == 'POST'                    # POST
           print "\n\e[32;1;7mPOST #{resource.uri}\e[0m "
         else
           print "\n" + (env[:fetch] ? '🌍🌎🌏🌐'[rand 4] : '') + "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + (status == 200 ? '' : status.to_s) +
