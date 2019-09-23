@@ -346,7 +346,7 @@ firefox.settings.services.mozilla.com
                 soundcloud.com
          secure.soundcloud.com
               w.soundcloud.com
-).map{|h|Allow h} if ENV['SOUNDCLOUD']
+).map{|h|Allow h}
 
     # Technology Review
     GET 'cdn.technologyreview.com', NoQuery

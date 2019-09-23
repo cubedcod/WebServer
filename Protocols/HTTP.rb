@@ -47,7 +47,7 @@ class WebResource
               print "\n\e[7m#{k}\e[0m\t#{v}"} if verbose         # blocked
           end
         elsif [301, 302, 303].member? status
-          print '➡️ ',head['Location']                            # redirected
+          print "\n➡️ ",head['Location']                            # redirected
         elsif status == 304
           print '✅'                                             # up-to-date
         elsif ext == 'css'
@@ -70,8 +70,8 @@ class WebResource
           print "\n📝 \e[32;1;7mPOST #{resource.uri}\e[0m "
         else
           print "\n" + (env[:remote] ? '🌍🌎🌏🌐'[rand 4] : '') + "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + (status == 200 ? '' : status.to_s) +
-                (env['HTTP_REFERER'] ? (' ' + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m→") : ' ') +
-                "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + resource.qs + ' '
+                (env['HTTP_REFERER'] ? (' ' + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + '→') : ' ') +
+                "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + resource.qs + "\e[0m "
         end
         [status, head, body]} # response
     rescue Exception => e
@@ -289,17 +289,16 @@ class WebResource
         [300, e.io.meta, [e.io.read]]
       when /304/ # not modified
         print "\n✅ " + uri; [304, {}, []]
-      when /401/ # unauthorized
+      when /401/ # Unauthorized
         print "\n🚫 401 " + uri; notfound
-      when /403/ # forbidden
+      when /403/ # Forbidden
         print "\n🚫 403 " + uri; notfound
       when /404/ # not found
         print "\n❓ " + uri + ' '
-        if options[:intermediate]
-          self
-        else # cache may exist, bypass immediate 404
-          graphResponse
-        end
+        options[:intermediate] ? self : graphResponse
+      when /410/ # Gone
+        print "\n❌ " + uri + ' '
+        options[:intermediate] ? self : graphResponse
       when /500/ # upstream error
         [500, e.io.meta, [e.io.read]]
       when /503/
