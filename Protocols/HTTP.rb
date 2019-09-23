@@ -50,6 +50,8 @@ class WebResource
           print "\n➡️ ",head['Location']                          # redirected
         elsif status == 304
           print '✅'                                             # up-to-date
+        elsif status == 404
+          print "\n❓ " + resource.uri + ' '                     # not found
         elsif ext == 'css'
           print '🎨'                                             # stylesheet
         elsif ext == 'js' || mime.match?(/script/)
@@ -288,13 +290,12 @@ class WebResource
       when /300/ # multiple choices
         [300, e.io.meta, [e.io.read]]
       when /304/ # not modified
-        print "\n✅ " + uri; [304, {}, []]
+        [304, {}, []]
       when /401/ # Unauthorized
         print "\n🚫 401 " + uri; notfound
       when /403/ # Forbidden
         print "\n🚫 403 " + uri; notfound
       when /404/ # not found
-        print "\n❓ " + uri + ' '
         options[:intermediate] ? self : graphResponse
       when /410/ # Gone
         print "\n❌ " + uri + ' '
@@ -315,9 +316,9 @@ class WebResource
     end
 
     def fixedFormat? format = nil
-      return true if env[:upstreamUI] || path.match?(/embed/) || host.match?(/embed|video/)
+      return true if env[:upstreamUI] || (ENV.has_key? 'UX')
       return false if !format || (format.match? /\/(atom|rss|xml)/i) # allow feed rewriting
-      format.match? NoTransform # MIME-regex. application/media fixed, graph-data + text transformable
+      format.match? NoTransform # MIME-regex, application/ + media formats are fixed, graph + text formats transformable
     end
 
     def self.GET arg, lambda
