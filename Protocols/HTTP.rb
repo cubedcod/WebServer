@@ -344,7 +344,10 @@ class WebResource
     end
 
     def graphResponse
-      cache.nodeStat base_uri: self unless local? || !cache.exist?
+      unless local?
+        cache.nodes.map &:load
+        #cache.nodeStat base_uri: self if cache.exist?
+      end
       return notfound if !env.has_key?(:repository) || env[:repository].empty?
 
       format = selectFormat
