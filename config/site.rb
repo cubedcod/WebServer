@@ -40,7 +40,7 @@ b(anner|eacon|reakingnew)s?|
 c(ampaign|edexis|hartbeat.*|ollector|omscore|onversion|ookie(c(hoice|onsent)|law|notice)?s?|se)|
 de(als|tect)|
 e(moji.*\.js|ndscreen|nsighten|scenic|vidon)|
-facebook|(web)?fonts?|footer|
+facebook|(web)?fonts?|
 g(dpr|eo(ip|locate)|igya|pt|tag|tm|uid)|.*
 (header|pre)[-_]?bid.*|.*hubspot.*|[hp]b.?js|ima[0-9]?|
 impression|
@@ -151,7 +151,8 @@ images-na.ssl-images-amazon.com
 
     %w(  facebook.com
 business.facebook.com
-    www.facebook.com).map{|host|
+       m.facebook.com
+     www.facebook.com).map{|host|
       GET host, FBlite}
 
     %w(l.instagram.com
@@ -174,6 +175,8 @@ business.facebook.com
         else
           r.fetch
         end
+      when '/url'
+        GotoURL[r]
       else
         r.deny
       end}
