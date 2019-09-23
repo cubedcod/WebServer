@@ -29,8 +29,8 @@ class WebResource
 
     def self.call env
       return [405,{},[]] unless m=Methods[env['REQUEST_METHOD']] # find method handler
-      path = Pathname.new(env['REQUEST_PATH']).expand_path.to_s  # evaluate path expression
-      path+='/' if env['REQUEST_PATH'][-1]=='/' && path[-1]!='/' # preserve trailing slash
+      path = Pathname.new(env['REQUEST_PATH']).expand_path.to_s  # evaluate path expression,
+      path+='/' if env['REQUEST_PATH'][-1]=='/' && path[-1]!='/' # preserving trailing slash
       resource = ('//' + env['SERVER_NAME'] + path).R env.merge( # instantiate request w/ blank response fields
        {resp:{}, links:{}, query: parseQs(env['QUERY_STRING'])}) # parse query
       resource.send(m).yield_self{|status, head, body|           # dispatch request
@@ -42,12 +42,12 @@ class WebResource
           if path.match? /204$/
             print "🛑"
           else
-            print "\n🛑 \e[31;1m" + resource.host.sub(/^www\./,'').sub(/\.com$/,'') + " \e[7m" + resource.path + "\e[0m "
+            print "\n🛑 \e[31;1m" + resource.host.sub(/^www\./,'').sub(/\.com$/,'') + " \e[7m" + resource.path + "\e[0m\e[31;1m" + resource.qs + "\e[0m "
             resource.env[:query]&.map{|k,v|
               print "\n\e[7m#{k}\e[0m\t#{v}"} if verbose         # blocked
           end
         elsif [301, 302, 303].member? status
-          print "\n➡️ ",head['Location']                            # redirected
+          print "\n➡️ ",head['Location']                          # redirected
         elsif status == 304
           print '✅'                                             # up-to-date
         elsif ext == 'css'
