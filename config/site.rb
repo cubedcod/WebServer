@@ -338,6 +338,7 @@ firefox.settings.services.mozilla.com
 
     # Soundcloud
     GET 'gate.sc', GotoURL
+    GET 'soundcloud.com', Desktop
     %w(api-auth.soundcloud.com
      api-mobile.soundcloud.com
          api-v2.soundcloud.com
@@ -345,7 +346,7 @@ firefox.settings.services.mozilla.com
                 soundcloud.com
          secure.soundcloud.com
               w.soundcloud.com
-).map{|h|Allow h}
+).map{|h|Allow h} if ENV['SOUNDCLOUD']
 
     # Technology Review
     GET 'cdn.technologyreview.com', NoQuery
