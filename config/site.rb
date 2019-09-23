@@ -49,10 +49,10 @@ log(event|g(er|ing))?|(app|s)?
 m(e(asurement|t(er|rics?))|ms|tr)|
 new(relic|sletter)|
 o(m(niture|tr)|nboarding|ptanon|utbrain)|
-p(a(idpost|rtner|y(ments?|wall))|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)|lacement|op(over|up)|romo(tion)?s?|ubmatic|[vx])|
+p(a(idpost|rtner|ywall)|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)|lacement|op(over|up)|romo(tion)?s?|ubmatic|[vx])|
 quantcast|
 reco(mmend(ation|er)?s?|rd(event|stats?))|re?t(ar)?ge?t(ing)?|remote[-_]?(control)?|rpc|
-s?s(a(fe[-_]?browsing|ilthru)|cheduler|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(cial(shar(e|ing))?|urcepoint)|ponsor(ed)?|so|tat(istic)?s?|ubscri(ber?|ption)|w.js|yn(c|dicat(ed|ion)))|
+s?s(a(fe[-_]?browsing|ilthru)|cheduler|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(cial(shar(e|ing))?|urcepoint)|ponsor(ed)?|so|tat(istic)?s?|ubscriber|w.js|yn(c|dicat(ed|ion)))|
 t(aboola|(arget|rack)(ers?|ing)|bproxy|ea(lium|ser)|elemetry|hirdparty|inypass|racing|rend(ing|s)|ypeface)|autotrack|
 u(rchin|serlocation|tm)|
 viral|
@@ -343,6 +343,7 @@ firefox.settings.services.mozilla.com
      api-mobile.soundcloud.com
          api-v2.soundcloud.com
      api-widget.soundcloud.com
+            api.soundcloud.com
                 soundcloud.com
          secure.soundcloud.com
               w.soundcloud.com

@@ -42,7 +42,7 @@ class WebResource
           if path.match? /204$/
             print "🛑"
           else
-            print "\n🛑 \e[31;1m" + resource.host.sub(/^www\./,'').sub(/\.com$/,'') + " \e[7m" + resource.path + "\e[0m\e[31;1m" + resource.qs + "\e[0m "
+            print "\n🛑 \e[31;1m" + resource.host.sub(/^www\./,'').sub(/\.com$/,'') + " \e[7m" + resource.path + "\e[0m\e[31m" + resource.qs + "\e[0m "
             resource.env[:query]&.map{|k,v|
               print "\n\e[7m#{k}\e[0m\t#{v}"} if verbose         # blocked
           end
@@ -69,8 +69,8 @@ class WebResource
         elsif env['REQUEST_METHOD'] == 'POST'                    # POST
           print "\n📝 \e[32;1;7mPOST #{resource.uri}\e[0m "
         else
-          print "\n" + (env[:remote] ? '🌍🌎🌏🌐'[rand 4] : '') + "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + (status == 200 ? '' : status.to_s) +
-                (env['HTTP_REFERER'] ? (' ' + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + '→') : ' ') +
+          print "\n" + (env[:remote] ? '🌍🌎🌏🌐'[rand 4] : '') + "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : (env['REQUEST_METHOD']+' ')) + (status == 200 ? '' : (status.to_s+' ')) +
+                (env['HTTP_REFERER'] ? ((env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + '→') : '') +
                 "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + resource.qs + "\e[0m "
         end
         [status, head, body]} # response
