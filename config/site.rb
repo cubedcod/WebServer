@@ -294,11 +294,11 @@ firefox.settings.services.mozilla.com
       end}
 
     # Reddit
+    Allow 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
+    %w(oauth www).map{|host| Allow host + '.reddit.com'}
+    %w(gateway gql s).map{|host| Allow host + '.reddit.com'} if ENV.has_key? 'REDDIT'
     GET 'old.reddit.com', -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path}, []]}
     GET 'reddit.com',     -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path}, []]}
-    %w(gateway gql s).map{|host| Allow host + '.reddit.com'} if ENV.has_key? 'REDDIT'
-    %w(oauth www).map{|host| Allow host + '.reddit.com'}
-    Allow 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
     GET 'www.reddit.com', -> r {
       options = {}
       r.desktopUI if r.desktopUA? || r.parts.member?('submit')
@@ -364,6 +364,7 @@ firefox.settings.services.mozilla.com
     GET 'www.twitter.com', GotoTwitter
     GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : r.fetch}
     GET 'twitter.com', -> r {
+      r.desktopUA
       if !r.path || r.path == '/'
         '//twitter.com'.R.subscriptions.shuffle.each_slice(18){|s|
           '/search'.R(r.env).fetch intermediate: true, noRDF: true, query: {vertical: :default, f: :tweets, q: s.map{|u|'from:'+u}.join('+OR+')}}
