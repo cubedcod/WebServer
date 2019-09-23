@@ -83,6 +83,9 @@ wp-rum)
         Lite[r]
       end}
 
+    # ABC
+    Allow 'abcnews.go.com'
+
     # Amazon
     AmazonMedia = -> r {%w(css jpg mp4 png webm webp).member?(r.ext.downcase) && r.env['HTTP_REFERER']&.match(/amazon\.com/) && r.fetch || r.deny}
     if ENV.has_key? 'AMAZON'
