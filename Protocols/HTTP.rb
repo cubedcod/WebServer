@@ -67,7 +67,7 @@ class WebResource
         elsif parts.member?('gql')||parts.member?('graphql')||parts.member?('query')||parts.member?('search')
           print '🔍'
         elsif env['REQUEST_METHOD'] == 'POST'                    # POST
-          print "\n\e[32;1;7mPOST #{resource.uri}\e[0m "
+          print "\n📝 \e[32;1;7mPOST #{resource.uri}\e[0m "
         else
           print "\n" + (env[:fetch] ? '🌍🌎🌏🌐'[rand 4] : '') + "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + (status == 200 ? '' : status.to_s) +
                 (env['HTTP_REFERER'] ? (' ' + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m→") : ' ') +
@@ -577,8 +577,6 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
           HTTP.print_body head, (HTTP.decompress head, body)
         end
       end
-      print '📝'
-
       [code, head, [body]]
     end
 
