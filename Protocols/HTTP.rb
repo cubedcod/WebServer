@@ -39,11 +39,15 @@ class WebResource
         parts = resource.parts
         verbose = resource.verbose?
         if resource.env[:deny]                                   # log request
-          print "\n🛑\e[31;1m" + resource.host + "\e[7m" + resource.path + "\e[0m "
-          resource.env[:query]&.map{|k,v|
-            print "\n\e[7m#{k}\e[0m\t#{v}"} if verbose           # blocked
+          if path.match? /204$/
+            print "🛑"
+          else
+            print "\n🛑 \e[31;1m" + resource.host.sub(/^www\./,'').sub(/\.com$/,'') + " \e[7m" + resource.path + "\e[0m "
+            resource.env[:query]&.map{|k,v|
+              print "\n\e[7m#{k}\e[0m\t#{v}"} if verbose           # blocked
+          end
         elsif [301, 302, 303].member? status
-          print '➡️'; print head['Location'] if verbose           # redirected
+          print '➡️ ',head['Location']                            # redirected
         elsif status == 304
           print '✅'                                             # up-to-date
         elsif ext == 'css'
@@ -62,17 +66,12 @@ class WebResource
           print '🐢'                                             # turtle
         elsif parts.member?('gql')||parts.member?('graphql')||parts.member?('query')||parts.member?('search')
           print '🔍'
+        elsif env['REQUEST_METHOD'] == 'POST'
+          print "\n\e[32;1;7mPOST #{resource.uri}\e[0m "
         else
-          color = (if env['REQUEST_METHOD'] == 'POST'
-                    '32'                                         # green -> POST
-                  elsif status == 200
-                    '37'                                         # white -> basic
-                  else
-                    '30'                                         # gray -> other
-                   end) + ';1'
-          print "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) +
-                "\e[" + color + "m"  + (status == 200 ? '' : status.to_s) + (env['HTTP_REFERER'] ? (' ' + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m→") : ' ') +
-                "\e[" + color + ";7m https://" + env['SERVER_NAME'] + "\e[0m\e[" + color + "m" + env['REQUEST_PATH'] + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '') + "\e[0m "
+          print "\n" + (env[:fetch] ? '🌍🌎🌏🌐'[rand 4] : '') + "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + (status == 200 ? '' : status.to_s) +
+                (env['HTTP_REFERER'] ? (' ' + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m→") : ' ') +
+                "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + resource.qs + ' '
         end
         [status, head, body]} # response
     rescue Exception => e
@@ -220,7 +219,7 @@ class WebResource
 
       if !Hosts.has_key? host
         Hosts[host] = true
-        print "\n➕\e[32;1mhttps://" + hostname + "\e[2m" + (path || '/') + "\e[0m "
+        print "\n➕ \e[33;1mhttps://" + hostname + "\e[0m "
       end
 
       # locators
@@ -266,10 +265,10 @@ class WebResource
     # fetch over HTTP
     def fetchHTTP options = {}
       open(uri, headers.merge({redirect: false})) do |response|           # fetch
-        h = response.meta                                                 # upstream metadata
+        h = response.meta; env[:fetch] = true                             # metadata
         if response.status.to_s.match? /206/                              # partial body
           [206, h, [response.read]]                                       # return part
-        else print '🌍🌎🌏🌐'[rand 4]; print uri if verbose?              # complete body
+        else                                                              # complete body
           body = HTTP.decompress h, response.read                         # decode body
           cache.write body if StaticFormats.member? ext.downcase          # store body
           format = h['content-type'].split(/;/)[0] if h['content-type']   # format

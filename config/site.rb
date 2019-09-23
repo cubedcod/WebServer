@@ -360,6 +360,7 @@ firefox.settings.services.mozilla.com
 
     # Twitter
     Allow 'api.twitter.com'
+    Allow 'proxsee.pscp.tv'
     GotoTwitter = -> r {[301,{'Location' => 'https://twitter.com' + r.path },[]]}
     GET 'mobile.twitter.com', GotoTwitter
     GET 'www.twitter.com', GotoTwitter
