@@ -156,7 +156,9 @@ business.facebook.com
       GET host, FBlite}
 
     %w(l.instagram.com
-       l.facebook.com).map{|host|
+       l.facebook.com
+      lm.facebook.com
+).map{|host|
       GET host, GotoU}
 
     # Forbes
