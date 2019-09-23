@@ -66,7 +66,7 @@ wp-rum)
     SiteJS  = SiteDir.join('site.js').read
   end
   module HTTP
-    DesktopMode = -> r {r.desktop.fetch}
+    Desktop = -> r {r.desktopUI.fetch}
     DesktopUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
     GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : r.deny}
     GotoBasename = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
@@ -74,7 +74,6 @@ wp-rum)
     GotoURL = -> r {[301, {'Location' => (r.env[:query]['url']||r.env[:query]['q'])}, []]}
     Icon    = -> r {r.env[:deny] = true; [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
     Lite    = -> r {(r.gunkURI || r.ext=='js') ? r.deny : r.fetch}
-    MobileUA = ''
     NoQuery = -> r {r.qs.empty? ? r.fetch : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
     Resizer = -> r {
       if r.parts[0] == 'resizer'
@@ -165,7 +164,7 @@ business.facebook.com
       when '/'
         r.fetch
       when /^.maps/
-        r.desktop.fetch
+        Desktop[r]
       when '/search'
         if r.env[:query]['q']&.match? /^(https?:\/\/|l(:8000|\/)|localhost|view-source)/
           [301, {'Location' => r.env[:query]['q'].sub(/^l/,'http://l')}, []]
@@ -302,8 +301,8 @@ firefox.settings.services.mozilla.com
     Allow 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
     GET 'www.reddit.com', -> r {
       options = {}
-      r.desktop if r.parts.member? 'submit'
-      unless r.desktopUI?
+      r.desktopUI if r.parts.member? 'submit'
+      unless r.env[:upstreamUI]
         options[:suffix] = '.rss' if r.ext.empty?
         r.env[:query]['sort'] ||= 'date'
         r.env[:query]['view'] ||= 'table'
@@ -336,7 +335,6 @@ firefox.settings.services.mozilla.com
 
     # Soundcloud
     GET 'gate.sc', GotoURL
-    GET 'soundcloud.com', -> r {r.gunkURI ? r.deny : r.desktop.fetch}
     %w(api-auth.soundcloud.com
      api-mobile.soundcloud.com
          api-v2.soundcloud.com
@@ -350,7 +348,7 @@ firefox.settings.services.mozilla.com
     GET 'cdn.technologyreview.com', NoQuery
 
     # Twitch
-    GET 'www.twitch.tv', DesktopMode
+    GET 'www.twitch.tv', Desktop
     if ENV.has_key? 'TWITCH'
       %w(api.twitch.tv
          gql.twitch.tv
@@ -399,7 +397,7 @@ firefox.settings.services.mozilla.com
 
     # YouTube
     Allow 'www.youtube.com'
-    GET 's.ytimg.com', DesktopMode
+    GET 's.ytimg.com', Desktop
     GET 'youtube.com',   -> r {[301, {'Location' => 'https://www.youtube.com' + r.env['REQUEST_URI']}, []]}
     GET 'm.youtube.com', -> r {[301, {'Location' => 'https://www.youtube.com' + r.env['REQUEST_URI']}, []]}
     GET 'www.youtube.com', -> r {
@@ -408,7 +406,7 @@ firefox.settings.services.mozilla.com
         [301, {'Location' =>  r.env[:query]['q'] || r.env[:query]['u']},[]]
       elsif !r.gunkURI && %w(browse_ajax c channel embed feed get_video_info guide_ajax
 heartbeat iframe_api live_chat manifest.json opensearch playlist results signin user watch watch_videos yts).member?(mode)
-        r.desktop.fetch
+        Desktop[r]
       elsif r.env[:query]['allow'] == ServerKey
         r.fetch
       else

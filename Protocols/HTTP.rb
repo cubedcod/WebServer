@@ -171,12 +171,8 @@ class WebResource
              'Access-Control-Allow-Origin' => allowedOrigin}, []]
     end
 
-    def desktop; env['HTTP_USER_AGENT'] = DesktopUA; self end
-    def desktopUI?
-      env['HTTP_USER_AGENT']&.match?(/Mozilla\/5.0 \((Windows NT 10.0; Win64; x64|X11; Linux x86_64)\) AppleWebKit\/\d+.\d+ \(KHTML, like Gecko\) Chrome\/\d+.\d+.\d+.\d+ Safari\/\d+.\d+/) ||
-      env['HTTP_USER_AGENT']&.match?(/Mozilla\/5.0 \(X11; Linux x86_64; rv:\d+.\d+\) Gecko\/\d+ Firefox\/\d+.\d+/)
-    end
-    alias_method :desktopUA?, :desktopUI?
+    def desktopUI; env[:upstreamUI] = true; desktopUA end
+    def desktopUA; env['HTTP_USER_AGENT'] = DesktopUA; self end
 
     def entity generator = nil
       entities = env['HTTP_IF_NONE_MATCH']&.strip&.split /\s*,\s*/ # client entities
@@ -316,7 +312,7 @@ class WebResource
     end
 
     def fixedFormat? format = nil
-      return true if desktopUI? || mobileUI? || path.match?(/embed/) || host.match?(/embed|video/)
+      return true if env[:upstreamUI] || path.match?(/embed/) || host.match?(/embed|video/)
       return false if !format || (format.match? /\/(atom|rss|xml)/i) # allow feed rewriting
       format.match? NoTransform # MIME-regex. application/media fixed, graph-data + text transformable
     end
@@ -412,7 +408,6 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       end
 
       # User-Agent
-      head['User-Agent'] = DesktopUA if desktopUA?
       head['User-Agent'] = 'curl/7.65.1' if host == 'po.st'
       head.delete 'User-Agent' if host == 't.co'
 
@@ -462,10 +457,6 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     LocalAddr = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
 
     def local?; LocalAddr.member?(env['SERVER_NAME']) || ENV['SERVER_NAME'] == env['SERVER_NAME'] end
-
-    def mobile; env['HTTP_USER_AGENT'] = MobileUA; self end
-    def mobileUI?; env['HTTP_USER_AGENT'] == MobileUA end
-    alias_method :mobileUA?, :mobileUI?
 
     def nodes # URI -> file(s)
       (if node.directory?
