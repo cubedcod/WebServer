@@ -173,6 +173,10 @@ class WebResource
 
     def desktopUI; env[:upstreamUI] = true; desktopUA end
     def desktopUA; env['HTTP_USER_AGENT'] = DesktopUA; self end
+    def desktopUA?
+      env['HTTP_USER_AGENT']&.match?(/Mozilla\/5.0 \((Windows NT 10.0; Win64; x64|X11; Linux x86_64)\) AppleWebKit\/\d+.\d+ \(KHTML, like Gecko\) Chrome\/\d+.\d+.\d+.\d+ Safari\/\d+.\d+/) ||
+      env['HTTP_USER_AGENT']&.match?(/Mozilla\/5.0 \(X11; Linux x86_64; rv:\d+.\d+\) Gecko\/\d+ Firefox\/\d+.\d+/)
+    end
 
     def entity generator = nil
       entities = env['HTTP_IF_NONE_MATCH']&.strip&.split /\s*,\s*/ # client entities

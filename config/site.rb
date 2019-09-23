@@ -301,7 +301,7 @@ firefox.settings.services.mozilla.com
     Allow 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
     GET 'www.reddit.com', -> r {
       options = {}
-      r.desktopUI if r.parts.member? 'submit'
+      r.desktopUI if r.desktopUA? || r.parts.member?('submit')
       unless r.env[:upstreamUI]
         options[:suffix] = '.rss' if r.ext.empty?
         r.env[:query]['sort'] ||= 'date'
