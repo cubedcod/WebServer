@@ -288,13 +288,13 @@ class WebResource
       when /300/ # multiple choices
         [300, e.io.meta, [e.io.read]]
       when /304/ # not modified
-        print '✅ '+uri; [304, {}, []]
+        print "\n✅ " + uri; [304, {}, []]
       when /401/ # unauthorized
-        print '🚫 '+uri; notfound
+        print "\n🚫 401 " + uri; notfound
       when /403/ # forbidden
-        print '🚫 '+uri; notfound
+        print "\n🚫 403 " + uri; notfound
       when /404/ # not found
-        print '❓ '+uri+' '
+        print "\n❓ " + uri + ' '
         if options[:intermediate]
           self
         else # cache may exist, bypass immediate 404
