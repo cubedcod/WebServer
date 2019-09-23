@@ -69,7 +69,7 @@ class WebResource
         elsif env['REQUEST_METHOD'] == 'POST'                    # POST
           print "\n📝 \e[32;1;7mPOST #{resource.uri}\e[0m "
         else
-          print "\n" + (env[:fetch] ? '🌍🌎🌏🌐'[rand 4] : '') + "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + (status == 200 ? '' : status.to_s) +
+          print "\n" + (env[:remote] ? '🌍🌎🌏🌐'[rand 4] : '') + "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : env['REQUEST_METHOD']) + (status == 200 ? '' : status.to_s) +
                 (env['HTTP_REFERER'] ? (' ' + (env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + "\e[0m→") : ' ') +
                 "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + resource.qs + ' '
         end
@@ -265,7 +265,7 @@ class WebResource
     # fetch over HTTP
     def fetchHTTP options = {}
       open(uri, headers.merge({redirect: false})) do |response|           # fetch
-        h = response.meta; env[:fetch] = true                             # metadata
+        h = response.meta; env[:remote] = true                            # metadata
         if response.status.to_s.match? /206/                              # partial body
           [206, h, [response.read]]                                       # return part
         else                                                              # complete body
