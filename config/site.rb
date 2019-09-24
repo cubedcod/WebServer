@@ -41,7 +41,7 @@ c(ampaign|edexis|hartbeat.*|ollector|omscore|onversion|ookie(c(hoice|onsent)|law
 de(als|tect)|
 e(moji.*\.js|ndscreen|nsighten|scenic|vidon)|
 facebook|(web)?fonts?|
-g(dpr|eo(ip|locate)|igya|pt|tag|tm|uid)|.*
+g(dpr|eo(ip|locate)|igya|pt|tag|tm)|.*
 (header|pre)[-_]?bid.*|.*hubspot.*|[hp]b.?js|ima[0-9]?|
 impression|
 kr(ux|xd).*|
@@ -51,14 +51,14 @@ new(relic|sletter)|
 o(m(niture|tr)|nboarding|ptanon|utbrain)|
 p(a(idpost|rtner|ywall)|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)|lacement|op(over|up)|romo(tion)?s?|ubmatic|[vx])|
 quantcast|
-reco(mmend(ation|er)?s?|rd(event|stats?))|re?t(ar)?ge?t(ing)?|remote[-_]?(control)?|rpc|
+record(event|stats?)|re?t(ar)?ge?t(ing)?|remote[-_]?(control)?|rpc|
 s?s(a(fe[-_]?browsing|ilthru)|cheduler|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(cial(shar(e|ing))?|urcepoint)|ponsor(ed)?|so|tat(istic)?s?|ubscriber|w.js|yn(c|dicat(ed|ion)))|
 t(aboola|(arget|rack)(ers?|ing)|bproxy|ea(lium|ser)|elemetry|hirdparty|inypass|racing|rend(ing|s)|ypeface)|autotrack|
 u(rchin|serlocation|tm)|
 viral|
 wp-rum)
 ([-.:_\/?&=~]|$)|
-\.(gif|json)\?)xi
+\.gif\?)xi
 
     SiteDir  = (Pathname.new __dir__).relative_path_from Pathname.new Dir.pwd
     SiteGIF = SiteDir.join('site.gif').read
@@ -267,8 +267,7 @@ android.clients.google.com
     Allow 'www.mixcloud.com'
 
     # Mozilla
-    %w(                app.adjust.com
-                   addons.mozilla.org
+    %w(            addons.mozilla.org
            addons-amo.cdn.mozilla.net
                addons.cdn.mozilla.net
                      aus5.mozilla.org
@@ -277,6 +276,7 @@ firefox.settings.services.mozilla.com
                     hacks.mozilla.org
        incoming.telemetry.mozilla.org
         location.services.mozilla.com
+          services.addons.mozilla.org
           shavar.services.mozilla.com
   tracking-protection.cdn.mozilla.net
 ).map{|h| Allow h } if ENV.has_key? 'MOZILLA'
