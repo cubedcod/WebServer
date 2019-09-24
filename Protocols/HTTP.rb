@@ -27,6 +27,9 @@ class WebResource
       end
     end
 
+    def cache; (hostpath + path).R env end
+    def cached?; cache.exist? end
+
     def cachedResource; cache.node.file? ? cache.fileResponse : cachedGraph end
 
     def cachedGraph
