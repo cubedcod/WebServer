@@ -27,15 +27,10 @@ class WebResource
       end
     end
 
-    def cachedResource
-      if cache.node.file?
-        cache.fileResponse
-      else
-        cachedGraph
-      end
-    end
+    def cachedResource; cache.node.file? ? cache.fileResponse : cachedGraph end
 
     def cachedGraph
+      notfound
     end
 
     def self.call env
@@ -224,7 +219,7 @@ class WebResource
 
     # fetch resource
     def fetch options = {}
-      if StaticFormats.member? ext.downcase # if immutable-cache type
+      if StaticFormats.member? ext.downcase # immutable-cache check
         return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has resource
         return cache.fileResponse if cache.node.file?                                                    # server has resource
       end
@@ -499,13 +494,8 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       [404, {'Content-Type' => 'text/html'}, [htmlDocument]]
     end
 
-    def offline
-      env[:query]['offline'] = true
-      self
-    end
-
     def offline?
-      ENV.has_key?('OFFLINE') || env[:query].has_key?('offline')
+      ENV.has_key? 'OFFLINE'
     end
 
     def OPTIONS

@@ -240,7 +240,7 @@ android.clients.google.com
     GET 'www.instagram.com', -> r {
       if r.path == '/'
         r.env[:query]['view'] ||= 'table'
-        r.offline.graphResponse
+        r.cachedGraph
       else
         r.fetch
       end}
