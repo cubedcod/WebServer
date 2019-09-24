@@ -296,15 +296,17 @@ class WebResource
       end
     rescue Exception => e
       case e.message
-      when /300/ # multiple choices
+      when /300/ # Multiple Choices
         [300, e.io.meta, [e.io.read]]
-      when /304/ # not modified
+      when /304/ # Not Modified
         [304, {}, []]
       when /401/ # Unauthorized
-        print "\n🚫 401 " + uri; cachedGraph
+        print "\n🚫 " + uri + ' '
+        options[:intermediate] ? self : cachedGraph
       when /403/ # Forbidden
-        print "\n🚫 403 " + uri; cachedGraph
-      when /404/ # not found
+        print "\n🚫 " + uri + ' '
+        options[:intermediate] ? self : cachedGraph
+      when /404/ # Not Found
         options[:intermediate] ? self : cachedGraph
       when /410/ # Gone
         print "\n❌ " + uri + ' '
