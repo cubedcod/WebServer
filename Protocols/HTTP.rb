@@ -301,14 +301,14 @@ class WebResource
       when /304/ # not modified
         [304, {}, []]
       when /401/ # Unauthorized
-        print "\n🚫 401 " + uri; notfound
+        print "\n🚫 401 " + uri; cachedGraph
       when /403/ # Forbidden
-        print "\n🚫 403 " + uri; notfound
+        print "\n🚫 403 " + uri; cachedGraph
       when /404/ # not found
-        options[:intermediate] ? self : graphResponse
+        options[:intermediate] ? self : cachedGraph
       when /410/ # Gone
         print "\n❌ " + uri + ' '
-        options[:intermediate] ? self : graphResponse
+        options[:intermediate] ? self : cachedGraph
       when /500/ # upstream error
         [500, e.io.meta, [e.io.read]]
       when /503/
@@ -457,7 +457,6 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
         rdf[0].fileResponse # response on file
       else
         nonRDF.map &:load # load nonRDF
-       #index             # index RDF-ized nodes
         rdf.map &:load    # load RDF
         dateMeta
         graphResponse     # response
