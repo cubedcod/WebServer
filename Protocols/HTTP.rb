@@ -27,6 +27,17 @@ class WebResource
       end
     end
 
+    def cachedResource
+      if cache.node.file?
+        cache.fileResponse
+      else
+        cachedGraph
+      end
+    end
+
+    def cachedGraph
+    end
+
     def self.call env
       return [405,{},[]] unless m=Methods[env['REQUEST_METHOD']] # find method handler
       path = Pathname.new(env['REQUEST_PATH']).expand_path.to_s  # evaluate path expression,
@@ -213,11 +224,11 @@ class WebResource
 
     # fetch resource
     def fetch options = {}
-      if StaticFormats.member? ext.downcase # immutable cache types
+      if StaticFormats.member? ext.downcase # if immutable-cache type
         return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has resource
         return cache.fileResponse if cache.node.file?                                                    # server has resource
       end
-      return graphResponse if offline?      # can't fetch if offline, return cached graph
+      return cachedResource if offline?     # can't fetch if offline
 
       if !Hosts.has_key? host
         Hosts[host] = true
@@ -344,14 +355,11 @@ class WebResource
     end
 
     def graphResponse
-      cache.nodes.map &:load unless local?
       return notfound if !env.has_key?(:repository) || env[:repository].empty?
-
       format = selectFormat
       env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
       env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
       env[:resp].update({'Link' => env[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !env[:links] || env[:links].empty?
-
       entity ->{
         case format
         when /^text\/html/
