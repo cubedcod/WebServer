@@ -28,7 +28,6 @@ class WebResource
     end
 
     def cache; (hostpath + path).R env end
-    def cached?; cache.exist? end
 
     def cachedResource; cache.node.file? ? cache.fileResponse : cachedGraph end
 
@@ -57,7 +56,7 @@ class WebResource
           end
         elsif [301, 302, 303].member? status
           print "\n➡️ ",head['Location']                          # redirected
-        elsif status == 304
+        elsif [204, 304].member? status
           print '✅'                                             # up-to-date
         elsif status == 404
           print "\n❓ " + resource.uri + ' '                     # not found
@@ -338,7 +337,6 @@ class WebResource
 
     def GETresource
       if path.match? /\D204$/     # connectivity-check
-        env[:deny] = true
         [204, {}, []]
       elsif handler=HostGET[host] # host handler
         handler[self]

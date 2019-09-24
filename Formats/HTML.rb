@@ -262,7 +262,7 @@ class WebResource
                         {_: :body,
                          c: [{class: :toolbox,
                               c: [{_: :a, class: :hostname, href: '/',
-                                   c: icon.cached? ? {_: :img, src: icon.uri} : host},
+                                   c: icon.cache.exist? ? {_: :img, src: icon.uri} : host},
                                   parts.map{|p|
                                     ['/',{_: :a, class: :breadcrumb, href: bc += '/' + p, c: p, id: 'r'+Digest::SHA2.hexdigest(rand.to_s)}]},
                                   link[:up, '&#9650;'],
