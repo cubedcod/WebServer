@@ -366,17 +366,14 @@ class WebResource
              [{_: :tr, c: keys.map{|k|
                  {_: :td,
                   c: if k == 'uri'
-                   ts = resource[Title] || []
-                   if !ts.empty?
-                     ts.map{|t|
-                       title = t.to_s.sub(/\/u\/\S+ on /, '').sub /^Re: /, ''
-                       unless env[:title] == title
-                         env[:title] = title
-                         {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'title', type: 'node', c: CGI.escapeHTML(title)}
-                       end}
-                   else
-                     {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'id', type: 'node', c: '&#x1f517;'}
-                   end
+                   tCount = 0
+                   [(resource[Title]||[]).map{|title|
+                      title = title.to_s.sub(/\/u\/\S+ on /, '').sub /^Re: /, ''
+                      unless env[:title] == title # show topic if changed from prior post
+                        env[:title] = title; tCount += 1
+                        {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'title', type: 'node', c: CGI.escapeHTML(title)}
+                      end},
+                    ({_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'id', type: 'node', c: '&#x1f517;'} if tCount == 0)]
                  else
                    (resource[k]||[]).map{|v|value k, v, env }
                   end}}},

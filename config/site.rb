@@ -308,8 +308,8 @@ firefox.settings.services.mozilla.com
 
     # Reddit
     Allow 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
-    %w(oauth www).map{|host| Allow host + '.reddit.com'}
-    %w(gateway gql s).map{|host| Allow host + '.reddit.com'} if ENV.has_key? 'REDDIT'
+    %w(oauth www).map{|host| Allow host + '.reddit.com'} if ENV.has_key? 'REDDIT' # required to post 
+    %w(gateway gql s).map{|host| Allow host + '.reddit.com'} if ENV.has_key? 'REDDITGUNK' # messaging / notification / API hosts
     GET 'old.reddit.com', -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path}, []]}
     GET 'reddit.com',     -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path}, []]}
     GET 'www.reddit.com', -> r {
