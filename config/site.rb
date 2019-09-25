@@ -251,7 +251,7 @@ android.clients.google.com
       Allow 'www.linkedin.com'
     else
       GET 'media.licdn.com', Lite
-      GET 'www.linkedin.com', -> r {%w(in jobs posts).member?(r.parts[0]) ? r.fetch : r.deny}
+      GET 'www.linkedin.com', Lite
     end
 
     # Medium
