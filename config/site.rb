@@ -191,6 +191,7 @@ business.facebook.com
     %w(ajax.googleapis.com
           books.google.com
      developers.google.com
+           docs.google.com
           drive.google.com
 encrypted-tbn0.gstatic.com
 encrypted-tbn1.gstatic.com
@@ -345,6 +346,9 @@ firefox.settings.services.mozilla.com
         else
           r.fetch
         end}}
+
+    # Shopify
+    Allow 'cdn.shopify.com' if ENV['SHOPIFY']
 
     # Skimmer
     GET 'go.skimresources.com', GotoURL
