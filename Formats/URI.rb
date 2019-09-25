@@ -78,6 +78,26 @@ class WebResource < RDF::URI
 
     StaticFormats = %w(css gif ico jpeg jpg js mp3 mp4 png svg wasm webm webp)
 
+    def formatHint
+      if basename.index('msg.')==0 || path.index('/sent/cur')==0
+        # procmail doesnt allow suffix (like .eml), only prefix? email author if you find solution
+        # presumably this is due to crazy maildir suffix-rewrites etc
+        :mail
+      elsif ext.match? /^html?$/
+        :html
+      elsif %w(Cookies).member? basename
+        :sqlite
+      elsif %w(changelog gophermap gophertag license makefile readme todo).member?(basename.downcase) || %w(cls gophermap old plist service socket sty textile xinetd watchr).member?(ext.downcase)
+        :plaintext
+      elsif %w(markdown).member? ext.downcase
+        :markdown
+      elsif %w(gemfile rakefile).member?(basename.downcase) || %w(gemspec).member?(ext.downcase)
+        :sourcecode
+      elsif %w(bash c cpp h hs pl py rb sh).member? ext.downcase
+        :sourcecode
+      end
+    end
+
     def hostname; env && env['SERVER_NAME'] || host || 'localhost' end
     def hostpath; '/' + hostname.split('.').reverse.join('/') end
     def isRDF?; ext == 'ttl' end

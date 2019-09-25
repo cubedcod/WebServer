@@ -348,7 +348,7 @@ class WebResource
         deny
       else
         env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
-        local? ? local : fetch
+        local? ? localResource : fetch
       end
     rescue OpenURI::HTTPRedirect => e
       redirect e.io.meta['location']
@@ -426,40 +426,8 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       head # output header
     end
 
-    def load options = {base_uri: (path.R env)}
-      env[:repository] ||= RDF::Repository.new
-      nodeStat unless isRDF?
-      if node.file?
-        if basename.index('msg.')==0 || path.index('/sent/cur')==0
-          # procmail doesnt allow suffix (like .eml), only prefix? email author if you find solution
-          # presumably this is due to crazy maildir suffix-rewrites etc
-          options[:format] = :mail
-        elsif ext.match? /^html?$/
-          options[:format] = :html
-        elsif %w(Cookies).member? basename
-          options[:format] = :sqlite
-        elsif %w(changelog gophermap gophertag license makefile readme todo).member?(basename.downcase) || %w(cls gophermap old plist service socket sty textile xinetd watchr).member?(ext.downcase)
-          options[:format] = :plaintext
-        elsif %w(markdown).member? ext.downcase
-          options[:format] = :markdown
-        elsif %w(install-sh).member? basename.downcase
-          options[:format] = :sourcecode
-          options[:lang] = :sh
-        elsif %w(gemfile rakefile).member?(basename.downcase) || %w(gemspec).member?(ext.downcase)
-          options[:format] = :sourcecode
-          options[:lang] = :ruby
-        elsif %w(bash c cpp h hs pl py rb sh).member? ext.downcase
-          options[:format] = :sourcecode
-        end
-        doc = self
-        env[:repository].load doc.relPath, options
-      end
-    rescue RDF::FormatError => e
-      puts [e.class, e.message].join ' '
-    end
-
-    def local
-      if %w{y year m month d day h hour}.member? parts[0] # time-based redirect
+    def localResource
+      if %w{y year m month d day h hour}.member? parts[0] # time-seg redirect
         time = Time.now
         loc = time.strftime(case parts[0][0].downcase
                             when 'y'
@@ -479,51 +447,27 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
         fileResponse
       elsif node.directory? && qs.empty? && (index = (self+'index.html').R.env env).exist? && selectFormat == 'text/html'
         index.fileResponse
-      else
-        localGraph
-      end
-    end
-
-    # WebResource -> HTTP Response
-    def localGraph
-      rdf, nonRDF = nodes.partition &:isRDF?
-      if rdf.size==1 && nonRDF.size==0 && selectFormat == 'text/turtle'
-        rdf[0].fileResponse # response on file
-      else
-        nonRDF.map &:load # load nonRDF
-        rdf.map &:load    # load RDF
+      else # local graph-data
         dateMeta
-        graphResponse     # response
+        nodes = selectNodes
+        if nodes.size==1 && nodes[0].ext=='ttl' && selectFormat=='text/turtle'
+          nodes[0].fileResponse # nothing to transcode, deliver turtle file
+        else
+          env[:repository] ||= RDF::Repository.new
+          nodes.map{|node|
+            options = {}
+            if format = node.formatHint
+              options[:format] = format
+            end
+            env[:repository].load node.relPath, options}
+          graphResponse
+        end
       end
     end
 
     LocalAddr = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
 
     def local?; LocalAddr.member?(env['SERVER_NAME']) || ENV['SERVER_NAME'] == env['SERVER_NAME'] end
-
-    def nodes # URI -> file(s)
-      (if node.directory?
-       if env[:query].has_key?('f') && path != '/'  # FIND
-          find env[:query]['f'] unless env[:query]['f'].empty? # exact
-       elsif env[:query].has_key?('find') && path != '/' # easymode find
-          find '*' + env[:query]['find'] + '*' unless env[:query]['find'].empty?
-       elsif env[:query].has_key?('q') && path!='/' # GREP
-         env[:grep] = true
-         grep
-       else
-         [self,node.children.map{|c|('/'+c.to_s).R env}] # LS
-       end
-      else                             # GLOB
-        if uri.match /[\*\{\[]/        # parametric glob
-          env[:grep] = true if env[:query].has_key?('q')
-          glob
-        else                           # basic glob:
-          files = (self + '.*').R.glob #  base + extension
-          files = (self + '*').R.glob if files.empty? # prefix
-          [self, files]
-        end
-       end).flatten.compact.uniq.select(&:exist?).map{|n|n.env env}
-    end
 
     def notfound
       dateMeta # nearby nodes may exist, search for pointers
@@ -703,6 +647,30 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
             ['application/atom+xml','text/html'].member?(f)}} # non-RDF
 
       default                                                 # HTML via default
+    end
+
+    def selectNodes
+      (if node.directory?
+       if env[:query].has_key?('f') && path != '/'  # FIND
+          find env[:query]['f'] unless env[:query]['f'].empty? # exact
+       elsif env[:query].has_key?('find') && path != '/' # easymode find
+          find '*' + env[:query]['find'] + '*' unless env[:query]['find'].empty?
+       elsif env[:query].has_key?('q') && path!='/' # GREP
+         env[:grep] = true
+         grep
+       else
+         [self,node.children.map{|c|('/'+c.to_s).R env}] # LS
+       end
+      else                             # GLOB
+        if uri.match /[\*\{\[]/        # parametric glob
+          env[:grep] = true if env[:query].has_key?('q')
+          glob
+        else                           # basic glob:
+          files = (self + '.*').R.glob #  base + extension
+          files = (self + '*').R.glob if files.empty? # prefix
+          [self, files]
+        end
+       end).flatten.compact.uniq.select(&:exist?).map{|n|n.env env}
     end
 
     def verbose?; ENV.has_key? 'VERBOSE' end
