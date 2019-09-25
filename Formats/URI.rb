@@ -117,10 +117,12 @@ class WebResource < RDF::URI
     include URIs
     def basename; File.basename ( path || '/' ) end                 # BASENAME(1)
     def dir; dirname.R if path end                                  # DIRNAME(1)
+    def directory?; node.directory? end
     def dirname; File.dirname path if path end                      # DIRNAME(1)
     def du; `du -s #{shellPath}| cut -f 1`.chomp.to_i end           # DU(1)
     def exist?; node.exist? end
     def ext; File.extname( path || '' )[1..-1] || '' end
+    def file?; node.file? end
     def find p; `find #{shellPath} -iname #{Shellwords.escape p}`.lines.map{|p|('/'+p.chomp).R} end # FIND(1)
     def glob; Pathname.glob(relPath).map{|p|('/'+p.to_s).R env} end # GLOB(7)
     def grep # URI -> file(s)                                       # GREP(1)

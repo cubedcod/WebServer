@@ -29,12 +29,14 @@ class WebResource
 
     def cache; (hostpath + path).R env end
 
-    def cachedResource; cache.node.file? ? cache.fileResponse : cachedGraph end
+    def cachedResource; cache.file? ? cache.fileResponse : cachedGraph end
 
     def cachedGraph
       env[:repository] ||= RDF::Repository.new
       cache.selectNodes(false).map{|node|
-        env[:repository].load node.relPath, base_uri: self}
+        node.nodeStat base_uri: self
+        env[:repository].load node.relPath, base_uri: self if node.file?}
+      graphResponse
     end
 
     def self.call env
@@ -227,7 +229,7 @@ class WebResource
     def fetch options = {}
       if StaticFormats.member? ext.downcase # immutable-cache check
         return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has resource
-        return cache.fileResponse if cache.node.file?                                                    # server has resource
+        return cache.fileResponse if cache.file?                                                         # server has resource
       end
       return cachedResource if offline?     # can't fetch if offline
 
@@ -445,9 +447,9 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
         [303, env[:resp].update({'Location' => loc + parts[1..-1].join('/') + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '')}), []]
       elsif path == '/mail' # inbox redirect
         [302, {'Location' => '/d/*/msg*?head&sort=date&view=table'}, []]
-      elsif node.file?
+      elsif file?
         fileResponse
-      elsif node.directory? && qs.empty? && (index = (self+'index.html').R.env env).exist? && selectFormat == 'text/html'
+      elsif directory? && qs.empty? && (index = (self+'index.html').R.env env).exist? && selectFormat == 'text/html'
         index.fileResponse
       else # local graph-data
         dateMeta
@@ -457,11 +459,12 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
         else
           env[:repository] ||= RDF::Repository.new
           nodes.map{|node|
+            node.nodeStat
             options = {base_uri: self}
             if format = node.formatHint
               options[:format] = format
             end
-            env[:repository].load node.relPath, options
+            env[:repository].load node.relPath, options if node.file?
           }
           graphResponse
         end
@@ -653,7 +656,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     end
 
     def selectNodes contained=true
-      (if node.directory?
+      (if directory?
        if env[:query].has_key?('f') && path != '/'             # FIND
           find env[:query]['f'] unless env[:query]['f'].empty? # exact
        elsif env[:query].has_key?('find') && path != '/'       # easy-mode
