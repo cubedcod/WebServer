@@ -32,7 +32,9 @@ class WebResource
     def cachedResource; cache.node.file? ? cache.fileResponse : cachedGraph end
 
     def cachedGraph
-      notfound
+      env[:repository] ||= RDF::Repository.new
+      cache.selectNodes(false).map{|node|
+        env[:repository].load node.relPath, base_uri: self}
     end
 
     def self.call env
@@ -455,11 +457,12 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
         else
           env[:repository] ||= RDF::Repository.new
           nodes.map{|node|
-            options = {}
+            options = {base_uri: self}
             if format = node.formatHint
               options[:format] = format
             end
-            env[:repository].load node.relPath, options}
+            env[:repository].load node.relPath, options
+          }
           graphResponse
         end
       end
@@ -649,17 +652,17 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       default                                                 # HTML via default
     end
 
-    def selectNodes
+    def selectNodes contained=true
       (if node.directory?
-       if env[:query].has_key?('f') && path != '/'  # FIND
+       if env[:query].has_key?('f') && path != '/'             # FIND
           find env[:query]['f'] unless env[:query]['f'].empty? # exact
-       elsif env[:query].has_key?('find') && path != '/' # easymode find
+       elsif env[:query].has_key?('find') && path != '/'       # easy-mode
           find '*' + env[:query]['find'] + '*' unless env[:query]['find'].empty?
-       elsif env[:query].has_key?('q') && path!='/' # GREP
+       elsif env[:query].has_key?('q') && path!='/'            # GREP
          env[:grep] = true
          grep
-       else
-         [self,node.children.map{|c|('/'+c.to_s).R env}] # LS
+       else                                                    # LS
+         [self,contained ? node.children.map{|c|('/'+c.to_s).R env} : []]
        end
       else                             # GLOB
         if uri.match /[\*\{\[]/        # parametric glob
