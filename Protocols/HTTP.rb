@@ -45,15 +45,19 @@ class WebResource
         ext = resource.ext.downcase
         mime = head['Content-Type'] || ''
         parts = resource.parts
-        verbose = resource.verbose?
-        if resource.env[:deny]                                   # log request
+        verbose = resource.verbose?                              # log request
+        if resource.env[:deny]
           if path.match? /204$/
-            print "🛑"
+            print "🛑"                                           # blocked
           else
             print "\n🛑 \e[31;1m" + resource.host.sub(/^www\./,'').sub(/\.com$/,'') + " \e[7m" + resource.path + "\e[0m\e[31m" + resource.qs + "\e[0m "
             resource.env[:query]&.map{|k,v|
-              print "\n\e[7m#{k}\e[0m\t#{v}"} if verbose         # blocked
+              print "\n\e[7m#{k}\e[0m\t#{v}"} if verbose
           end
+        elsif env['REQUEST_METHOD'] == 'OPTIONS'
+          print "\n🔧 \e[32;1;7m #{resource.uri}\e[0m "          # OPTIONS
+        elsif env['REQUEST_METHOD'] == 'POST'
+          print "\n📝 \e[32;1;7m #{resource.uri}\e[0m "          # POST
         elsif [301, 302, 303].member? status
           print "\n➡️ ",head['Location']                          # redirected
         elsif [204, 304].member? status
@@ -76,8 +80,6 @@ class WebResource
           print '🐢'                                             # turtle
         elsif parts.member?('gql')||parts.member?('graphql')||parts.member?('query')||parts.member?('search')
           print '🔍'
-        elsif env['REQUEST_METHOD'] == 'POST'                    # POST
-          print "\n📝 \e[32;1;7mPOST #{resource.uri}\e[0m "
         else
           print "\n" + (env[:remote] ? '🌍🌎🌏🌐'[rand 4] : '') + "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : (env['REQUEST_METHOD']+' ')) + (status == 200 ? '' : (status.to_s+' ')) +
                 (env['HTTP_REFERER'] ? ((env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + '→') : '') +
