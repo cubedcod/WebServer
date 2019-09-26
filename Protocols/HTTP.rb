@@ -187,7 +187,7 @@ class WebResource
              'Access-Control-Allow-Origin' => allowedOrigin}, []]
     end
 
-    def desktopUI; env[:upstreamUI] = true; desktopUA end
+    def desktopUI; env[:UX] = true; desktopUA end
     def desktopUA; env['HTTP_USER_AGENT'] = DesktopUA; self end
     def desktopUA?
       env['HTTP_USER_AGENT']&.match?(/Mozilla\/5.0 \((Windows NT 10.0; Win64; x64|X11; Linux x86_64)\) AppleWebKit\/\d+.\d+ \(KHTML, like Gecko\) Chrome\/\d+.\d+.\d+.\d+ Safari\/\d+.\d+/) ||
@@ -332,7 +332,7 @@ class WebResource
     end
 
     def fixedFormat? format = nil
-      return true if env[:upstreamUI] || (ENV.has_key? 'UX')
+      return true if ENV.has_key?('UX') || env.has_key?(:UX) || env[:query].has_key?('ux') # upstream user-experience
       return false if !format || (format.match? /\/(atom|rss|xml)/i) # allow feed rewriting
       format.match? NoTransform # MIME-regex, application/ + media formats are fixed, graph + text formats transformable
     end

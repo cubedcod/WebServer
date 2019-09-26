@@ -267,7 +267,8 @@ class WebResource
                                     ['/',{_: :a, class: :breadcrumb, href: bc += '/' + p, c: p, id: 'r'+Digest::SHA2.hexdigest(rand.to_s)}]},
                                   link[:up, '&#9650;'],
                                   {_: :a, id: :tabular, class: :icon, style: tabular  ? 'color: #fff' : 'color: #555', href: HTTP.qs((env[:query]||{}).merge({'view' => tabular ? 'default' : 'table', 'sort' => 'date'})), c: '↨'},
-                                  {_: :a, id: :shrink,  class: :icon, style: shrunken ? 'color: #fff' : 'color: #555', href: HTTP.qs(shrunken ? env[:query].reject{|k,v|k=='head'} : (env[:query]||{}).merge({'head' => ''})), c: shrunken ? '&#9661;' : '&#9651;'},
+                                  {_: :a, id: :shrink, class: :icon, style: shrunken ? 'color: #fff' : 'color: #555', href: HTTP.qs(shrunken ? env[:query].reject{|k,v|k=='head'} : (env[:query]||{}).merge({'head' => ''})), c: shrunken ? '&#9661;' : '&#9651;'},
+                                  ({_: :a, id: :UX, class: :icon, style: 'color: #555', href: HTTP.qs(env[:query].merge({'UX' => 'upstream'})), c: '⚗️'} unless local?) # ⚗
                                  ]},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?

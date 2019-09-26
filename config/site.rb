@@ -309,14 +309,14 @@ firefox.settings.services.mozilla.com
 
     # Reddit
     Allow 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
-    %w(oauth www).map{|host| Allow host + '.reddit.com'} if ENV.has_key? 'REDDIT' # required to post 
-    %w(gateway gql s).map{|host| Allow host + '.reddit.com'} if ENV.has_key? 'REDDITGUNK' # messaging / notification / API hosts
+    %w(oauth www).map{|host| Allow host + '.reddit.com'}                      # required to post
+    %w(gateway gql s).map{|host| Allow host + '.reddit.com'} if ENV['REDDIT'] # messaging / notification / JSON-API hosts
     GET 'old.reddit.com', -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path}, []]}
     GET 'reddit.com',     -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path}, []]}
     GET 'www.reddit.com', -> r {
       options = {}
       r.desktopUI if r.desktopUA? || r.parts.member?('submit')
-      unless r.env[:upstreamUI]
+      unless r.env[:UX]
         options[:suffix] = '.rss' if r.ext.empty?
         r.env[:query]['sort'] ||= 'date'
         r.env[:query]['view'] ||= 'table'
@@ -398,9 +398,9 @@ firefox.settings.services.mozilla.com
         r.env[:links][:up] = '/' if r.parts.size == 1
         r.fetch noRDF: true
       end}
-    
+
     GET 'redirect.viglink.com', GotoU
-    
+
     # WGBH
     GET 'wgbh.brightspotcdn.com', GoIfURL
 
@@ -426,11 +426,11 @@ firefox.settings.services.mozilla.com
     GET 'youtube.com',   -> r {[301, {'Location' => 'https://www.youtube.com' + r.env['REQUEST_URI']}, []]}
     GET 'm.youtube.com', -> r {[301, {'Location' => 'https://www.youtube.com' + r.env['REQUEST_URI']}, []]}
     GET 'www.youtube.com', -> r {
-      mode = r.parts[0]
-      if %w{attribution_link redirect}.member? mode
+      fn = r.parts[0]
+      if %w{attribution_link redirect}.member? fn
         [301, {'Location' =>  r.env[:query]['q'] || r.env[:query]['u']},[]]
-      elsif !r.gunkURI && %w(browse_ajax c channel embed feed get_video_info guide_ajax
-heartbeat iframe_api live_chat manifest.json opensearch playlist results signin user watch watch_videos yts).member?(mode)
+      elsif !r.gunkURI && (!fn || %w(browse_ajax c channel embed feed get_video_info guide_ajax
+heartbeat iframe_api live_chat manifest.json opensearch playlist results signin user watch watch_videos yts).member?(fn))
         Desktop[r]
       elsif r.env[:query]['allow'] == ServerKey
         r.fetch
