@@ -289,7 +289,8 @@ class WebResource
           cache.write body if StaticFormats.member? ext.downcase          # store body
           format = h['content-type'].split(/;/)[0] if h['content-type']   # format
           format ||= (xt=ext.to_sym                                       # extension -> format
-            RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
+                      RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
+          format = 'text/nfo' if ext=='nfo' && format.match?(/^text.plain/)
           reader = RDF::Reader.for content_type: format                   # find RDF reader
           reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|  # instantiate RDF reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader   # read RDF
