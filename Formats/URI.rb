@@ -85,6 +85,8 @@ class WebResource < RDF::URI
         :mail
       elsif ext.match? /^html?$/
         :html
+      elsif ext == 'nfo'
+        :nfo
       elsif %w(Cookies).member? basename
         :sqlite
       elsif %w(changelog gophermap gophertag license makefile readme todo).member?(basename.downcase) || %w(cls gophermap old plist service socket sty textile xinetd watchr).member?(ext.downcase)
