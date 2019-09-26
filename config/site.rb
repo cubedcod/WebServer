@@ -398,7 +398,9 @@ firefox.settings.services.mozilla.com
         r.env[:links][:up] = '/' if r.parts.size == 1
         r.fetch noRDF: true
       end}
-
+    
+    GET 'redirect.viglink.com', GotoU
+    
     # WGBH
     GET 'wgbh.brightspotcdn.com', GoIfURL
 
