@@ -368,6 +368,9 @@ firefox.settings.services.mozilla.com
          secure.soundcloud.com
               w.soundcloud.com
 ).map{|h|Allow h}
+    GET 'm.soundcloud.com', -> r {  r.upstreamUX.get }
+    GET 'soundcloud.com',   -> r {  r.upstreamUX
+      r.path=='/' ? r.cachedGraph : r.fetch }
 
     # Technology Review
     GET 'cdn.technologyreview.com', NoQuery

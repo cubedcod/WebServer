@@ -187,7 +187,7 @@ class WebResource
              'Access-Control-Allow-Origin' => allowedOrigin}, []]
     end
 
-    def desktopUI; env[:UX] = true; desktopUA end
+    def desktopUI; upstreamUI; desktopUA end
     def desktopUA; env['HTTP_USER_AGENT'] = DesktopUA; self end
     def desktopUA?
       env['HTTP_USER_AGENT']&.match?(/Mozilla\/5.0 \((Windows NT 10.0; Win64; x64|X11; Linux x86_64)\) AppleWebKit\/\d+.\d+ \(KHTML, like Gecko\) Chrome\/\d+.\d+.\d+.\d+ Safari\/\d+.\d+/) ||
@@ -341,6 +341,7 @@ class WebResource
     def self.GET arg, lambda
       HostGET[arg] = lambda
     end
+    alias_method :get, :fetch
 
     def GETresource
       if path.match? /\D204$/     # connectivity-check
@@ -376,7 +377,7 @@ class WebResource
         end}
     end
 
-    def gunk?; gunkHost || gunkURI end # match by host or URI regular-expression
+    def gunk?; gunkHost || gunkURI end
     def gunkHost; !AllowedHosts.has_key?(host) && env.has_key?('HTTP_GHOST') end
     def gunkURI; ('/' + env['SERVER_NAME'] + env['REQUEST_URI']).match? Gunk end
 
@@ -679,6 +680,9 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
         end
        end).flatten.compact.uniq.select(&:exist?).map{|n|n.env env}
     end
+
+    def upstreamUI; env[:UX] = true; self end
+    alias_method :upstreamUX, :upstreamUI
 
     def verbose?; ENV.has_key? 'VERBOSE' end
 
