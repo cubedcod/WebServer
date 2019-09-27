@@ -7,10 +7,10 @@ class WebResource
     BaseMeta = %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie)
     HostGET = {}
     HostPOST = {}
-    Hosts = {}
     LocalArgs = %w(allow view sort ux)
     Methods = {'GET' => :GETresource, 'HEAD' => :HEAD, 'OPTIONS' => :OPTIONS, 'POST' => :POSTresource}
     NoTransform = /^(application|audio|font|image|text\/(css|(x-)?javascript|proto)|video)/
+    Servers = {}
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
 
     def self.Allow host
@@ -68,6 +68,9 @@ class WebResource
           print '✅'                                             # up-to-date
         elsif status == 404
           print "\n❓ " + resource.uri + ' '                     # not found
+        elsif !Servers.has_key? env['SERVER_NAME']
+          Servers[env['SERVER_NAME']] = true                     # new host
+          print "\n➕ \e[1;32mhttps://" + env['SERVER_NAME'] + "\e[7m" + resource.path + "\e[0m "
         elsif ext == 'css'
           print '🎨'                                             # stylesheet
         elsif ext == 'js' || mime.match?(/script/)
@@ -86,7 +89,7 @@ class WebResource
           print '🔍'
         else
           print "\n" + (env[:remote] ? '🌍🌎🌏🌐'[rand 4] : '') + "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : (env['REQUEST_METHOD']+' ')) + (status == 200 ? '' : (status.to_s+' ')) +
-                (env['HTTP_REFERER'] ? ((env['HTTP_REFERER'].R.host || '').sub(/^www\./,'').sub(/\.com$/,'') + '→') : '') +
+                (env['HTTP_REFERER'] ? ((env['HTTP_REFERER'].R.host||'') + ' → ') : '') +
                 "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + resource.qs + "\e[0m "
         end
         [status, head, body]} # response
@@ -227,19 +230,13 @@ class WebResource
 
     # fetch resource
     def fetch options = {}
-      if StaticFormats.member? ext.downcase # immutable-cache check
+      if StaticFormats.member? ext.downcase # immutable-cache?
         return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has resource
         return cache.fileResponse if cache.file?                                                         # server has resource
       end
       return cachedResource if offline?     # can't fetch if offline
-
-      if !Hosts.has_key? host
-        Hosts[host] = true
-        print "\n➕ \e[1;32;7mhttps://" + hostname + "\e[0m "
-      end
-
       # locators
-      u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? (HTTP.qs options[:query]) : qs) # base, sans scheme
+      u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? (HTTP.qs options[:query]) : qs) # base locator sans scheme
       primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env    # primary locator
       fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env # fallback locator
 
