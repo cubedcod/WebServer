@@ -7,6 +7,7 @@ class WebResource
     BaseMeta = %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie)
     HostGET = {}
     HostPOST = {}
+    LocalAddr = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
     LocalArgs = %w(allow view sort ux)
     Methods = {'GET' => :GETresource, 'HEAD' => :HEAD, 'OPTIONS' => :OPTIONS, 'POST' => :POSTresource}
     NoTransform = /^(application|audio|font|image|text\/(css|(x-)?javascript|proto)|video)/
@@ -33,7 +34,7 @@ class WebResource
 
     def cachedGraph
       env[:repository] ||= RDF::Repository.new
-      cache.selectNodes(false).map{|node|
+      cache.nodes.map{|node|
         node.nodeStat base_uri: self
         env[:repository].load node.relPath, base_uri: self if node.file?}
       graphResponse
@@ -426,6 +427,8 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       head # output header
     end
 
+    def local?; LocalAddr.member?(env['SERVER_NAME']) || ENV['SERVER_NAME'] == env['SERVER_NAME'] end
+
     def localResource
       if %w{y year m month d day h hour}.member? parts[0] # time-seg redirect
         time = Time.now
@@ -449,28 +452,46 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
         index.fileResponse
       else # local graph-data
         dateMeta
-        nodes = selectNodes
-        puts :nodes, nodes
-        if nodes.size==1 && nodes[0].ext=='ttl' && selectFormat=='text/turtle'
-          nodes[0].fileResponse # nothing to transcode, deliver turtle file
+        ns = nodes
+        if ns.size==1 && ns[0].ext=='ttl' && selectFormat=='text/turtle'
+          ns[0].fileResponse # nothing to transform, deliver graph data
         else
           env[:repository] ||= RDF::Repository.new
-          nodes.map{|node|
+          ns.map{|node|
             node.nodeStat
             options = {base_uri: self}
             if format = node.formatHint
               options[:format] = format
             end
-            env[:repository].load node.relPath, options if node.file?
-          }
+            env[:repository].load node.relPath, options if node.file?}
           graphResponse
         end
       end
     end
 
-    LocalAddr = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
-
-    def local?; LocalAddr.member?(env['SERVER_NAME']) || ENV['SERVER_NAME'] == env['SERVER_NAME'] end
+    def nodes
+      (if directory?
+       if env[:query].has_key?('f') && path != '/'             # FIND
+          find env[:query]['f'] unless env[:query]['f'].empty? # exact
+       elsif env[:query].has_key?('find') && path != '/'       # easy-mode
+          find '*' + env[:query]['find'] + '*' unless env[:query]['find'].empty?
+       elsif env[:query].has_key?('q') && path!='/'            # GREP
+         env[:grep] = true
+         grep
+       else                                                    # LS
+         [self]
+       end
+      else                             # GLOB
+        if uri.match /[\*\{\[]/        # parametric glob
+          env[:grep] = true if env[:query].has_key?('q')
+          glob
+        else                           # basic glob:
+          files = (self + '.*').R.glob #  base + extension
+          files = (self + '*').R.glob if files.empty? # prefix
+          [self, files]
+        end
+       end).flatten.compact.uniq.select(&:exist?).map{|n|n.env env}
+    end
 
     def notfound
       dateMeta # nearby nodes may exist, search for pointers
@@ -651,30 +672,6 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
             ['application/atom+xml','text/html'].member?(f)}} # non-RDF
 
       default                                                 # HTML via default
-    end
-
-    def selectNodes
-      (if directory?
-       if env[:query].has_key?('f') && path != '/'             # FIND
-          find env[:query]['f'] unless env[:query]['f'].empty? # exact
-       elsif env[:query].has_key?('find') && path != '/'       # easy-mode
-          find '*' + env[:query]['find'] + '*' unless env[:query]['find'].empty?
-       elsif env[:query].has_key?('q') && path!='/'            # GREP
-         env[:grep] = true
-         grep
-       else                                                    # LS
-         [self]
-       end
-      else                             # GLOB
-        if uri.match /[\*\{\[]/        # parametric glob
-          env[:grep] = true if env[:query].has_key?('q')
-          glob
-        else                           # basic glob:
-          files = (self + '.*').R.glob #  base + extension
-          files = (self + '*').R.glob if files.empty? # prefix
-          [self, files]
-        end
-       end).flatten.compact.uniq.select(&:exist?).map{|n|n.env env}
     end
 
     def upstreamUI; env[:UX] = true; self end
