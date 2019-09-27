@@ -234,6 +234,9 @@ android.clients.google.com
       GET 'www.google.com', GoogleSearch
     end
 
+    # Imgur
+    GET 'i.imgur.com', Desktop
+
     # Inrupt
     Allow 'dev.inrupt.net'
 
