@@ -451,6 +451,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       else # local graph-data
         dateMeta
         nodes = selectNodes
+        puts :nodes, nodes
         if nodes.size==1 && nodes[0].ext=='ttl' && selectFormat=='text/turtle'
           nodes[0].fileResponse # nothing to transcode, deliver turtle file
         else

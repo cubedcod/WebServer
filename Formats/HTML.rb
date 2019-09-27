@@ -243,10 +243,8 @@ class WebResource
           [{_: :a, href: url, id: key, class: :icon, c: displayname},
            "\n"]
           end}
-
       htmlGrep if env[:graph] && env[:grep]
-      tabular = env[:query] && env[:query]['view']=='table'
-
+ 
       # Markup -> HTML
       HTML.render ["<!DOCTYPE html>\n\n",
                    {_: :html,
@@ -262,22 +260,16 @@ class WebResource
                          c: [{class: :toolbox,
                               c: [{_: :a, class: :hostname, href: '/',
                                    c: icon.cache.exist? ? {_: :img, src: icon.uri} : host},
-                                  parts.map{|p|
-                                    ['/',{_: :a, class: :breadcrumb, href: bc += '/' + p, c: p, id: 'r'+Digest::SHA2.hexdigest(rand.to_s)}]},
+                                  parts.map{|p| [{_: :a, class: :breadcrumb, href: bc += '/' + p, c: p, id: 'r'+Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
                                   link[:up, '&#9650;'],
-                                  {_: :a, id: :tabular, class: :icon, style: tabular  ? 'color: #fff' : 'color: #555',
-                                   href: HTTP.qs((env[:query]||{}).merge({'view' => tabular ? 'default' : 'table', 'sort' => 'date'})), c: '↨'},
                                   ({_: :a, id: :UX, class: :icon, style: 'color: #555', href: HTTP.qs(env[:query]&.merge({'UX' => 'upstream'})), c: '⚗️'} unless local?)
                                  ]},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?
-                               HTML.keyval (Webize::HTML.webizeHash env), env # 404
-                             elsif tabular
-                               HTML.tabular graph, env       # table
+                               HTML.keyval (Webize::HTML.webizeHash env), env
                              else
-                               HTML.tree Treeize[graph], env # tree
-                             end,
-                             link[:down,'&#9660;']]}]}]
+                               HTML.tree Treeize[graph], env
+                             end, link[:down,'&#9660;']]}]}]
     end
 
     def htmlGrep
