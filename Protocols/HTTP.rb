@@ -8,7 +8,7 @@ class WebResource
     HostGET = {}
     HostPOST = {}
     Hosts = {}
-    LocalArgs = %w(allow view sort ui)
+    LocalArgs = %w(allow view sort ux)
     Methods = {'GET' => :GETresource, 'HEAD' => :HEAD, 'OPTIONS' => :OPTIONS, 'POST' => :POSTresource}
     NoTransform = /^(application|audio|font|image|text\/(css|(x-)?javascript|proto)|video)/
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
@@ -606,16 +606,16 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       }.join("&")
     end
 
-    # external query-string
+    # latest query-string
     def qs
       if env
-        if env[:query] && LocalArgs.find{|a|env[:query].has_key? a} # dynamic w/ local args in use
+        if env[:query] && LocalArgs.find{|a|env[:query].has_key? a} # parsed query w/ local args in use
           q = env[:query].dup          # copy query
           LocalArgs.map{|a|q.delete a} # strip local args
           q.empty? ? '' : HTTP.qs(q)   # serialize
-        elsif env['QUERY_STRING'] && !env['QUERY_STRING'].empty?    # dynamic
+        elsif env['QUERY_STRING'] && !env['QUERY_STRING'].empty?    # query-string from environment
           '?' + env['QUERY_STRING']
-        else                                                        # static
+        else                                                        # query-string from URI
           staticQuery
         end
       else
