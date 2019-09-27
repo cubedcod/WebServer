@@ -22,11 +22,13 @@
 .title {background-color: #fff; color: #000; font-size: 1.1em; vertical-align: top; padding: .06em .1em .06em .1em; border-radius: 0 .3em .3em 0; display: inline-block; min-width: 16em}
 .toolbox a.icon {font-size: 1.8em; font-weight: normal; color: #ccc}
 .toolbox { position: fixed; top: 0; z-index: 2 }
+.toolbox a {text-shadow: 2px 2px #000000}
+.toolbox a:target {text-shadow: 0px 0px #000000}
 .user > img {max-width: 20em}
 .user > span {font-size: 3em}
 .user {background-color: white; color: black; margin: .5em; border-radius: .4em}
 :target, :target * {background-color: #0f0 !important; color: #000 !important}
-a {text-decoration: none; font-weight: bold}
+a {text-decoration: none; font-weight: bold; color: #ddd}
 a.date {float: right; background-color: #000; color: #888; font-size: .8em; border-color: #222}
 a.id {float: right; background-color: #000; color: #333; border-color: #222}
 a:visited {border-color: #333; background-color: #111; color: #fff}
