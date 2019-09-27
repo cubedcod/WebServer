@@ -235,7 +235,7 @@ class WebResource
 
       if !Hosts.has_key? host
         Hosts[host] = true
-        print "\n➕ \e[33;1mhttps://" + hostname + "\e[0m "
+        print "\n➕ \e[1;32;7mhttps://" + hostname + "\e[0m "
       end
 
       # locators
