@@ -228,22 +228,21 @@ class WebResource
 
     # fetch resource
     def fetch options = {}
-      if StaticFormats.member? ext.downcase # immutable-cache?
+      if StaticFormats.member? ext.downcase                                                              # immutable-cache
         return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has resource
         return cache.fileResponse if cache.file?                                                         # server has resource
       end
-      return cachedResource if offline?     # can't fetch if offline
-      # locators
-      u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? (HTTP.qs options[:query]) : qs) # base locator sans scheme
-      primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env    # primary locator
-      fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env # fallback locator
+      return cachedResource if offline?                                                                  # offline, no fetching
+      u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? (HTTP.qs options[:query]) : qs)   # base locator sans scheme
+      primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env                                    # primary locator
+      fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env                                 # fallback locator
 
-      primary.fetchHTTP options # fetch
-    rescue Exception => e       # fetch failed
+      primary.fetchHTTP options                                                                          # fetch
+    rescue Exception => e                                 # fetch failed
       case e.class.to_s
-      when 'OpenURI::HTTPRedirect'   # redirected
+      when 'OpenURI::HTTPRedirect'                        # redirected
         if fallback == e.io.meta['location']
-          fallback.fetchHTTP options # follow to fallback transit
+          fallback.fetchHTTP options                      # follow to fallback transit
         elsif options[:intermedate]                       # non-HTTP caller
           puts "RELOC #{uri} -> #{e.io.meta['location']}" # alert caller of new location
           e.io.meta['location'].R(env).fetchHTTP options  # follow redirect
