@@ -205,6 +205,7 @@ encrypted-tbn3.gstatic.com
            maps.google.com
        maps.googleapis.com
           maps.gstatic.com
+        scholar.google.com
     storage.googleapis.com
 ).map{|h| Allow h }
 
@@ -219,6 +220,7 @@ android.clients.google.com
       feedproxy.google.com
       feeds.feedburner.com
                 google.com
+             id.google.com
              kh.google.com
            mail.google.com
            play.google.com
@@ -356,7 +358,7 @@ firefox.settings.services.mozilla.com
         end}}
 
     # Shopify
-    Allow 'cdn.shopify.com' if ENV['SHOPIFY']
+    GET 'cdn.shopify.com', NoJS
 
     # Skimmer
     GET 'go.skimresources.com', GotoURL
