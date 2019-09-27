@@ -73,14 +73,14 @@ wp-rum)
     GotoU   = -> r {[301, {'Location' =>  r.env[:query]['u']}, []]}
     GotoURL = -> r {[301, {'Location' => (r.env[:query]['url']||r.env[:query]['q'])}, []]}
     Icon    = -> r {r.env[:deny] = true; [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
-    Lite    = -> r {(r.gunkURI || r.ext=='js') ? r.deny : r.fetch}
+    NoJS    = -> r {(r.gunkURI || r.ext=='js') ? r.deny : r.fetch}
     NoQuery = -> r {r.qs.empty? ? r.fetch : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
     Resizer = -> r {
       if r.parts[0] == 'resizer'
         parts = r.path.split /\/\d+x\d+\/(filter[^\/]+\/)?/
-        parts.size > 1 ? [302, {'Location' => 'https://' + parts[-1] + '?allow='+ServerKey}, []] : Lite[r]
+        parts.size > 1 ? [302, {'Location' => 'https://' + parts[-1] + '?allow='+ServerKey}, []] : NoJS[r]
       else
-        Lite[r]
+        NoJS[r]
       end}
 
     # ABC
@@ -93,8 +93,8 @@ wp-rum)
 images-na.ssl-images-amazon.com
                  www.amazon.com).map{|h|Allow h}
     else
-      GET 'amazon.com', Lite
-      GET 'www.amazon.com', Lite
+      GET 'amazon.com', NoJS
+      GET 'www.amazon.com', NoJS
       GET 'images-na.ssl-images-amazon.com', AmazonMedia
       GET 'm.media-amazon.com', AmazonMedia
     end
@@ -123,6 +123,8 @@ images-na.ssl-images-amazon.com
     Allow 'www.costco.com'
 
     # CNN
+    %w(cdn www).map{|host|
+      Allow host + '.cnn.com'}
     GET 'dynaimage.cdn.cnn.com', GotoBasename
 
     # DartSearch
@@ -254,8 +256,8 @@ android.clients.google.com
       Allow 'media.licdn.com'
       Allow 'www.linkedin.com'
     else
-      GET 'media.licdn.com', Lite
-      GET 'www.linkedin.com', Lite
+      GET 'media.licdn.com', NoJS
+      GET 'www.linkedin.com', NoJS
     end
 
     # Medium
@@ -339,7 +341,7 @@ firefox.settings.services.mozilla.com
     GET 'www.redfin.com', Desktop
 
     # Responsys
-    GET 'static.cdn.responsys.net', Lite
+    GET 'static.cdn.responsys.net', NoJS
 
     # Resy
     Allow 'api.resy.com'
