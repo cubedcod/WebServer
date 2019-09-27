@@ -85,8 +85,6 @@ class WebResource
           print '🎬'                                             # video
         elsif ext == 'ttl' || mime == 'text/turtle; charset=utf-8'
           print '🐢'                                             # turtle
-        elsif parts.member?('gql')||parts.member?('graphql')||parts.member?('query')||parts.member?('search')
-          print '🔍'
         else
           print "\n" + (env[:remote] ? '🌍🌎🌏🌐'[rand 4] : '') + "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : (env['REQUEST_METHOD']+' ')) + (status == 200 ? '' : (status.to_s+' ')) +
                 (env['HTTP_REFERER'] ? ((env['HTTP_REFERER'].R.host||'') + ' → ') : '') +
@@ -654,7 +652,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       default                                                 # HTML via default
     end
 
-    def selectNodes contained=true
+    def selectNodes
       (if directory?
        if env[:query].has_key?('f') && path != '/'             # FIND
           find env[:query]['f'] unless env[:query]['f'].empty? # exact
@@ -664,7 +662,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
          env[:grep] = true
          grep
        else                                                    # LS
-         [self,contained ? node.children.map{|c|('/'+c.to_s).R env} : []]
+         [self]
        end
       else                             # GLOB
         if uri.match /[\*\{\[]/        # parametric glob

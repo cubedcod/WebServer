@@ -20,17 +20,17 @@
 .quote {background-color: #ccc; color: #000}
 .thumb, svg {max-width: 28em}
 .title {background-color: #fff; color: #000; font-size: 1.1em; vertical-align: top; padding: .06em .1em .06em .1em; border-radius: 0 .3em .3em 0; display: inline-block; min-width: 16em}
-.toolbox a.icon {font-size: 1.8em; font-weight: normal; background-color: #000; color: #ccc}
-.toolbox { position: fixed; top: 0; left:0; z-index: 2 }
+.toolbox a.icon {font-size: 1.8em; font-weight: normal; color: #ccc}
+.toolbox { position: fixed; top: 0; z-index: 2 }
 .user > img {max-width: 20em}
 .user > span {font-size: 3em}
 .user {background-color: white; color: black; margin: .5em; border-radius: .4em}
-:target, :target * {background-color:#0f0 !important; color: #000 !important}
+:target, :target * {background-color: #0f0 !important; color: #000 !important}
 a {text-decoration: none; font-weight: bold}
 a.date {float: right; background-color: #000; color: #888; font-size: .8em; border-color: #222}
 a.id {float: right; background-color: #000; color: #333; border-color: #222}
 a:visited {border-color: #333; background-color: #111; color: #fff}
-body {font-family: sans-serif; margin: 0 2em 0 2em}
+body {font-family: sans-serif; margin: 2em}
 body, td, .post, a.head {background-color: #000; color: #fff}
 code {background-color: #ccc; color: #000}
 h1,h2,h3,h4,h5,h6 {background-color: #ddd; color: #000}
