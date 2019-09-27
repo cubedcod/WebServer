@@ -54,7 +54,7 @@ class WebResource
           if path.match? /204$/
             print "🛑"                                           # blocked
           else
-            print "\n🛑 \e[31;1m" + resource.host.sub(/^www\./,'').sub(/\.com$/,'') + " \e[7m" + resource.path + "\e[0m\e[31m" + resource.qs + "\e[0m "
+            print "\n🛑 \e[31;1m" + resource.host + "\e[7m" + resource.path + "\e[0m\e[31m" + resource.qs + "\e[0m "
             resource.env[:query]&.map{|k,v|
               print "\n\e[7m#{k}\e[0m\t#{v}"} if verbose
           end
@@ -597,6 +597,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
 
     # Hash -> querystring
     def HTTP.qs h
+      return '' unless h
       '?' + h.map{|k,v|
         k.to_s + '=' + (v ? (CGI.escape [*v][0].to_s) : '')
       }.join("&")

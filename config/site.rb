@@ -341,6 +341,9 @@ firefox.settings.services.mozilla.com
     # Responsys
     GET 'static.cdn.responsys.net', Lite
 
+    # Resy
+    Allow 'api.resy.com'
+
     # Reuters
     (0..5).map{|i|
       GET "s#{i}.reutersmedia.net", -> r {
