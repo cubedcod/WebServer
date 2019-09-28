@@ -150,7 +150,6 @@ images-na.ssl-images-amazon.com
     # Facebook
     FBgunk = %w(common connect pages_reaction_units plugins security tr)
     FBlite = -> r {FBgunk.member?(r.parts[0]) ? r.deny : r.fetch}
-
     %w(  facebook.com
 business.facebook.com
        m.facebook.com
@@ -161,12 +160,12 @@ business.facebook.com
       else
         GET host, FBlite unless host.match /insta/
       end}
-
     %w(l.instagram.com
        l.facebook.com
       lm.facebook.com
 ).map{|host|
       GET host, GotoU}
+    GET 'www.pictame.com', -> r {r.parts[1] ? [301, {'Location' => 'https://www.instagram.com/'+r.parts[1]}, []] : r.deny}
 
     # Forbes
     GET 'thumbor.forbes.com', -> r {[301, {'Location' => URI.unescape(r.parts[-1])}, []]}
@@ -344,9 +343,6 @@ firefox.settings.services.mozilla.com
 
     # Responsys
     GET 'static.cdn.responsys.net', NoJS
-
-    # Resy
-    Allow 'api.resy.com'
 
     # Reuters
     (0..5).map{|i|

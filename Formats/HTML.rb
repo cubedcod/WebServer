@@ -408,13 +408,11 @@ class WebResource
           end},
          (unseen = types - shown ; puts "#{v['uri']} no renderers defined for: " + unseen.join(' ') unless unseen.empty?),
          (keyval v, env if shown.empty?)] # fallback renderer
-      elsif v.class == WebResource # resource (reference only)
-        if v.uri.match?(/^_:/) && env[:graph] && env[:graph][v.uri] # blank node
-          value nil, env[:graph][v.uri], env
-        elsif %w{jpeg jpg JPG png PNG webp}.member? v.ext           # image
-          Markup[Image][v, env]
+      elsif v.class == WebResource # resource reference
+        if %w{jpeg jpg JPG png PNG webp}.member? v.ext
+          Markup[Image][v, env]    # image reference
         else
-          v
+          v                        # generic reference
         end
       else # undefined
         CGI.escapeHTML v.to_s
