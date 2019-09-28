@@ -251,8 +251,7 @@ class WebResource
                     c: [{_: :head,
                          c: [{_: :meta, charset: 'utf-8'},
                              ({_: :title, c: CGI.escapeHTML(graph[titleRes][Title].map(&:to_s).join ' ')} if titleRes),
-                             {_: :style, c: ["\n", SiteCSS]}, "\n",
-                             {_: :script, c: ["\n", SiteJS]}, "\n",
+                             {_: :style, c: ["\n", SiteCSS]}, "\n", {_: :script, c: ["\n", SiteJS]}, "\n",
                              (env[:links] || {}).map{|type,uri|
                                {_: :link, rel: type, href: CGI.escapeHTML(uri.to_s)}}
                             ].map{|e|['  ',e,"\n"]}}, "\n\n",

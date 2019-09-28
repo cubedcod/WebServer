@@ -244,13 +244,7 @@ android.clients.google.com
     Allow 'dev.inrupt.net'
 
     # Instagram
-    GET 'www.instagram.com', -> r {
-      if r.path == '/'
-        r.env[:query]['view'] ||= 'table'
-        r.cachedGraph
-      else
-        r.fetch
-      end}
+    GET 'www.instagram.com', -> r {r.path=='/' ? r.cachedGraph : r.fetch}
 
     # Linkedin
     if ENV.has_key? 'LINKEDIN'
@@ -321,12 +315,9 @@ firefox.settings.services.mozilla.com
     GET 'reddit.com',     -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path}, []]}
     GET 'www.reddit.com', -> r {
       options = {}
+      r = ('/r/' + r.subscriptions.join('+') + '/new').R r.env if r.path == '/'
       r.desktopUI if r.desktopUA? || r.parts.member?('submit')
-      unless r.env[:UX]
-        options[:suffix] = '.rss' if r.ext.empty?
-        r.env[:query]['sort'] ||= 'date'
-        r.env[:query]['view'] ||= 'table'
-      end
+      options[:suffix] = '.rss' if r.ext.empty? && !r.env.has_key?(:UX)
       depth = r.parts.size
       r.env[:links][:up] = if [3,6].member? depth
                              r.dirname
@@ -335,8 +326,7 @@ firefox.settings.services.mozilla.com
                            else
                              '/'
                            end
-      r = ('/r/' + r.subscriptions.join('+') + '/new').R r.env if r.path == '/'
-      r.fetch options }
+      r.fetch options}
 
     # Redfin
     GET 'www.redfin.com', Desktop
