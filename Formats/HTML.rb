@@ -266,6 +266,8 @@ class WebResource
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?
                                HTML.keyval (Webize::HTML.webizeHash env), env
+                             elsif env[:query] && env[:query]['view']=='table'
+                               HTML.tabular graph, env
                              else
                                HTML.tree Treeize[graph], env
                              end, link[:down,'&#9660;']]}]}]
