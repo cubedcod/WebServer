@@ -1,7 +1,7 @@
 # coding: utf-8
 class WebResource
 
-  # Repository -> turtle files
+  # Graph -> files
   def index
     return self unless env[:repository]
 
@@ -31,6 +31,7 @@ class WebResource
 
   module POSIX
 
+    # filesystem metadata -> Graph
     def nodeStat options = {}                                           # STAT(1)
       return if basename.index('msg.') == 0
       subject = (options[:base_uri] || path.sub(/\.(md|ttl)$/,'')).R    # abstract node subject
