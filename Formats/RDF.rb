@@ -29,24 +29,6 @@ class WebResource
     self
   end
 
-  # Graph -> JSON tree
-  def treeFromGraph
-    tree = {}
-    head = env && env[:query] && env[:query].has_key?('head')
-    env[:repository].each_triple{|s,p,o| s = s.to_s;  p = p.to_s
-      unless p == 'http://www.w3.org/1999/xhtml/vocab#role' || (head && p == Content)
-        o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object URI or literal
-        tree[s] ||= {'uri' => s}                      # subject
-        tree[s][p] ||= []                             # predicate
-        if tree[s][p].class == Array
-          tree[s][p].push o unless tree[s][p].member? o # object
-        else
-          tree[s][p] = [tree[s][p],o] unless tree[s][p] == o
-        end
-      end}
-    env[:graph] = tree
-  end
-
   module POSIX
 
     def nodeStat options = {}                                           # STAT(1)
@@ -81,17 +63,13 @@ class WebResource
 end
 
 module Webize
-
   module URIlist
-
     class Format < RDF::Format
       content_type 'text/uri-list',
                    extension: :u
       content_encoding 'utf-8'
-
       reader { Reader }
     end
-
     class Reader < RDF::Reader
       include WebResource::URIs
       format Format
