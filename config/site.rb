@@ -35,7 +35,7 @@ class WebResource
   module URIs
 
     Gunk = %r([-.:_\/?&=~]
-((block|page)?a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|slots?|tools?|types?|units?|words?)?|appnexus|(app)?
+((block|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|slots?|tools?|types?|units?|words?)?|appnexus|(app)?
 b(anner|eacon|reakingnew)s?|
 c(ampaign|edexis|hartbeat.*|loudflare|ollector|omscore|onversion|ookie(c(hoice|onsent)|law|notice)?s?|se)|
 de(als|tect)|
@@ -73,12 +73,15 @@ wp-rum)
     GotoU   = -> r {[301, {'Location' =>  r.env[:query]['u']}, []]}
     GotoURL = -> r {[301, {'Location' => (r.env[:query]['url']||r.env[:query]['q'])}, []]}
     Icon    = -> r {r.env[:deny] = true; [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
+    NoGunk  = -> r {r.gunkURI ? r.deny : r.fetch}
     NoJS    = -> r {(r.gunkURI || r.ext=='js') ? r.deny : r.fetch}
     NoQuery = -> r {r.qs.empty? ? r.fetch : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
     Resizer = -> r {
       if r.parts[0] == 'resizer'
         parts = r.path.split /\/\d+x\d+\/(filter[^\/]+\/)?/
-        parts.size > 1 ? [302, {'Location' => 'https://' + parts[-1] + '?allow='+ServerKey}, []] : NoJS[r]
+        parts.size > 1 ? [302,
+                          {'Location' => 'https://' + parts[-1] + '?allow='+ServerKey
+                          }, []] : NoJS[r]
       else
         NoJS[r]
       end}
@@ -397,7 +400,11 @@ firefox.settings.services.mozilla.com
         r.fetch noRDF: true
       end}
 
+    # Viglink
     GET 'redirect.viglink.com', GotoU
+
+    # WaPo
+    GET 'www.washingtonpost.com', -> r {(r.parts[0]=='resizer' ? Resizer : NoGunk)[r]}
 
     # WGBH
     GET 'wgbh.brightspotcdn.com', GoIfURL
