@@ -49,11 +49,11 @@ log(event|g(er|ing))?|(app|s)?
 m(e(asurement|t(er|rics?))|ms|tr)|
 new(relic|sletter)|
 o(m(niture|tr)|nboarding|ptanon|utbrain)|
-p(a(idpost|rtner|ywall)|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)|lacement|op(over|up)|romo(tion)?s?|ubmatic|[vx])|
+p(a(idpost|rtner|ywall)|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)|lacement|op(over|up)|repopulator|romo(tion)?s?|ubmatic|[vx])|
 quantcast|
 record(event|stats?)|re?t(ar)?ge?t(ing)?|remote[-_]?(control)?|rpc|
 s?s(a(fe[-_]?browsing|ilthru)|cheduler|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(cial(shar(e|ing))?|urcepoint)|ponsor(ed)?|so|tat(istic)?s?|ubscriber|w.js|yn(c|dicat(ed|ion)))|
-t(aboola|(arget|rack)(ers?|ing)|bproxy|ea(lium|ser)|elemetry|hirdparty|inypass|racing|rend(ing|s)|ypeface)|autotrack|
+t(aboola|(arget|rack)(ers?|ing)|ampering|bproxy|ea(lium|ser)|elemetry|hirdparty|inypass|racing|rend(ing|s)|ypeface)|autotrack|
 u(rchin|serlocation|tm)|
 viral|
 wp-rum)
@@ -405,7 +405,8 @@ firefox.settings.services.mozilla.com
     GET 'wgbh.brightspotcdn.com', GoIfURL
 
     # WordPress
-    (0..7).map{|i| GET "i#{i}.wp.com", NoQuery}
+    (0..7).map{|i|
+      GET "i#{i}.wp.com", NoQuery}
 
     # Yahoo!
     Allow 'news.yahoo.com'
