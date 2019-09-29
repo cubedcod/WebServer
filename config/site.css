@@ -20,6 +20,7 @@
 .thumb, svg {max-width: 28em}
 .title {background-color: #fff; color: #000; font-size: 1.1em; vertical-align: top; padding: .06em .1em .06em .1em; border-radius: 0 .3em .3em 0; display: inline-block; min-width: 16em}
 .toolbox a {text-shadow: 1.5px 1.5px #000000}
+.toolbox a.hostname img {max-height: 4.2em}
 .toolbox a.icon {font-size: 1.6em; font-weight: normal}
 .toolbox a:target {text-shadow: 0px 0px #000000}
 .toolbox { position: fixed; top: 0; z-index: 2 }

@@ -37,7 +37,7 @@ class WebResource
     Gunk = %r([-.:_\/?&=~]
 ((block|page)?a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|slots?|tools?|types?|units?|words?)?|appnexus|(app)?
 b(anner|eacon|reakingnew)s?|
-c(ampaign|edexis|hartbeat.*|ollector|omscore|onversion|ookie(c(hoice|onsent)|law|notice)?s?|se)|
+c(ampaign|edexis|hartbeat.*|loudflare|ollector|omscore|onversion|ookie(c(hoice|onsent)|law|notice)?s?|se)|
 de(als|tect)|
 e(moji.*\.js|ndscreen|nsighten|scenic|vidon)|
 facebook|(web)?fonts?|

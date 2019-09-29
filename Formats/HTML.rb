@@ -175,8 +175,8 @@ sidebar [class^='side']    [id^='side']
         n.css('head meta').map{|m|
           if k = (m.attr("name") || m.attr("property")) # predicate
             if v = m.attr("content")                    # object
-              k = MetaMap[k] || k                  # normalize predicates
-              case k                           # per-predicate custom processing
+              k = MetaMap[k] || k                       # normalize predicate
+              case k
               when /lytics/
                 k = :drop
               when 'https://twitter.com'
@@ -188,7 +188,7 @@ sidebar [class^='side']    [id^='side']
                 v = @base.join v if v.class == WebResource || v.class == RDF::URI
               end
               puts [k,v].join "\t" unless k.to_s.match? /^(drop|http)/
-              yield subject, k, v unless k == :drop # meta-tag RDF
+              yield subject, k, v unless k == :drop
             end
           end}
 
