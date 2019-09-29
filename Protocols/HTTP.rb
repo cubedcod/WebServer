@@ -675,6 +675,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     end
 
     def upstreamUI; env[:UX] = true; self end
+    def upstreamUI?; env.has_key?(:UX) || ENV.has_key?('UX') end
     alias_method :upstreamUX, :upstreamUI
 
     def verbose?; ENV.has_key? 'VERBOSE' end

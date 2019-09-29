@@ -317,7 +317,7 @@ firefox.settings.services.mozilla.com
       options = {}
       r = ('/r/' + r.subscriptions.join('+') + '/new').R r.env if r.path == '/'
       r.desktopUI if r.desktopUA? || r.parts.member?('submit')
-      options[:suffix] = '.rss' if r.ext.empty? && !r.env.has_key?(:UX)
+      options[:suffix] = '.rss' if r.ext.empty? && !r.upstreamUI?
       depth = r.parts.size
       r.env[:links][:up] = if [3,6].member? depth
                              r.dirname
