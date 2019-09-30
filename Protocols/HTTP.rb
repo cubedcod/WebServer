@@ -328,7 +328,7 @@ class WebResource
     end
 
     def fixedFormat? format = nil
-      return true if ENV.has_key?('UX') || env.has_key?(:UX) || env[:query].has_key?('ux') # upstream user-experience
+      return true if ENV.has_key?('UX') || env.has_key?(:UX) || env[:query].has_key?('UX') # upstream user-experience
       return false if !format || (format.match? /\/(atom|rss|xml)/i) # allow feed rewriting
       format.match? NoTransform # MIME-regex, application/ + media formats are fixed, graph + text formats transformable
     end
@@ -524,13 +524,13 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     end
 
     # String -> Hash
-    def HTTP.parseQs qs
-      if qs
-        h = {}
-        qs.split(/&/).map{|e|
+    def HTTP.parseQs querystring
+      if querystring
+        table = {}
+        querystring.split(/&/).map{|e|
           k, v = e.split(/=/,2).map{|x|CGI.unescape x}
-          h[(k||'').downcase] = v}
-        h
+          table[k] = v if k}
+        table
       else
         {}
       end
