@@ -94,8 +94,7 @@ wp-rum)
           i.alicdn.com
     www.aliexpress.com
 ).map{|host|
-      GET host, NoJS
-    }
+      GET host, NoGunk}
 
     # Amazon
     AmazonMedia = -> r {%w(css jpg mp4 png webm webp).member?(r.ext.downcase) && r.env['HTTP_REFERER']&.match(/amazon\.com/) && r.fetch || r.deny}
