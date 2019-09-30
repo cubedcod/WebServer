@@ -78,7 +78,7 @@ wp-rum)
     NoQuery = -> r {r.qs.empty? ? r.fetch : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
     Resizer = -> r {
       if r.parts[0] == 'resizer'
-        parts = r.path.split /\/\d+x\d+\/(filter[^\/]+\/)?/
+        parts = r.path.split /\/\d+x\d+\/((filter|smart)[^\/]+\/)?/
         parts.size > 1 ? [302,
                           {'Location' => 'https://' + parts[-1] + '?allow='+ServerKey
                           }, []] : NoJS[r]
