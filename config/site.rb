@@ -89,6 +89,14 @@ wp-rum)
     # ABC
     Allow 'abcnews.go.com'
 
+    # AliBaba
+    %w(ae01.alicdn.com
+          i.alicdn.com
+    www.aliexpress.com
+).map{|host|
+      GET host, NoJS
+    }
+
     # Amazon
     AmazonMedia = -> r {%w(css jpg mp4 png webm webp).member?(r.ext.downcase) && r.env['HTTP_REFERER']&.match(/amazon\.com/) && r.fetch || r.deny}
     if ENV.has_key? 'AMAZON'
@@ -207,6 +215,7 @@ encrypted-tbn3.gstatic.com
            maps.google.com
        maps.googleapis.com
           maps.gstatic.com
+           news.google.com
         scholar.google.com
     storage.googleapis.com
 ).map{|h| Allow h }
