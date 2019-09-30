@@ -266,6 +266,9 @@ android.clients.google.com
       GET 'www.linkedin.com', NoJS
     end
 
+    # Mastodon
+    GET 'files.mastodon.social', -> r {r.fetch}
+
     # Medium
     GET 'medium.com', -> r {r.env[:query].has_key?('redirecturl') ? [301, {'Location' => r.env[:query]['redirecturl']}, []] : r.fetch}
 
