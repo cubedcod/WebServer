@@ -262,7 +262,7 @@ android.clients.google.com
     GET 'medium.com', -> r {r.env[:query].has_key?('redirecturl') ? [301, {'Location' => r.env[:query]['redirecturl']}, []] : r.fetch}
 
     # Meetup
-    GET 'www.meetup.com', -> r {r.fetch}
+    Allow 'www.meetup.com'
 
     # Meredith
     GET 'imagesvc.meredithcorp.io', GoIfURL
