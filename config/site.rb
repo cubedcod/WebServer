@@ -409,6 +409,10 @@ firefox.settings.services.mozilla.com
     # WGBH
     GET 'wgbh.brightspotcdn.com', GoIfURL
 
+    # Wix
+    GET 'static.parastorage.com', NoGunk
+    GET 'static.wixstatic.com', NoGunk
+
     # WordPress
     (0..7).map{|i|
       GET "i#{i}.wp.com", NoQuery}
