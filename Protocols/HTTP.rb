@@ -237,9 +237,8 @@ class WebResource
       u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? (HTTP.qs options[:query]) : qs)   # base locator sans scheme
       primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env                                    # primary locator
       fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env                                 # fallback locator
-
-      primary.fetchHTTP options                                                                          # fetch
-    rescue Exception => e                                 # fetch failed
+      primary.fetchHTTP options                           # fetch
+    rescue Exception => e                                 # fetch failure:
       case e.class.to_s
       when 'OpenURI::HTTPRedirect'                        # redirected
         if fallback == e.io.meta['location']
