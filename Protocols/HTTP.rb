@@ -243,11 +243,11 @@ class WebResource
       when 'OpenURI::HTTPRedirect'                        # redirected
         if fallback == e.io.meta['location']
           fallback.fetchHTTP options                      # follow to fallback transit
-        elsif options[:intermedate]                       # non-HTTP caller
+        elsif options[:intermedate]                       # non-HTTP caller?
           puts "RELOC #{uri} -> #{e.io.meta['location']}" # alert caller of new location
-          e.io.meta['location'].R(env).fetchHTTP options  # follow redirect
-        else                                              # alert HTTP caller of new location
-          redirect e.io.meta['location']                  # client can follow at discretion
+          e.io.meta['location'].R(env).fetchHTTP options  # follow redirect for caller
+        else
+          redirect e.io.meta['location']                  # HTTP caller can follow at discretion
         end
       when 'Errno::ECONNREFUSED'
         fallback.fetchHTTP options
