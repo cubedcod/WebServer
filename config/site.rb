@@ -35,7 +35,7 @@ class WebResource
   module URIs
 
     Gunk = %r([-.:_\/?&=~]
-((block|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|slots?|tools?|types?|units?|words?)?|appnexus|(app)?
+((block|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|slots?|tools?|types?|units?|words?)?|appnexus|audience|(app)?
 b(anner|eacon|reakingnew)s?|
 c(ampaign|edexis|hartbeat.*|loudflare|ollector|omscore|onversion|ookie(c(hoice|onsent)|law|notice)?s?|se)|
 de(als|tect)|
@@ -184,12 +184,15 @@ business.facebook.com
     GET 'assets.gitlab-static.net', -> r {r.fetch}
 
     # Google
-    GoogleSearch = -> r {
+    GET 'groups.google.com', Desktop
+    Google = -> r {
       case r.path
       when '/'
         r.fetch
       when /^.maps/
         Desktop[r]
+      when /^.s2.photos/
+        NoJS[r]
       when '/search'
         if r.env[:query]['q']&.match? /^(https?:\/\/|l(:8000|\/)|localhost|view-source)/
           [301, {'Location' => r.env[:query]['q'].sub(/^l/,'http://l')}, []]
@@ -247,8 +250,8 @@ android.clients.google.com
 ).map{|host|
       Allow host}
     else
-      GET     'google.com', GoogleSearch
-      GET 'www.google.com', GoogleSearch
+      GET     'google.com', Google
+      GET 'www.google.com', Google
     end
 
     # Imgur
