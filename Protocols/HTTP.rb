@@ -76,6 +76,8 @@ class WebResource
           print '🎨'                                             # stylesheet
         elsif ext == 'js' || mime.match?(/script/)
           print "\n📜\e[36;1m https://" + resource.host + "\e[7m" + resource.path + "\e[0m "
+        elsif ext == 'json' || mime.match?(/json/)
+          print "\n🗒 https://" + resource.host + resource.path + ' '
         elsif %w(gif jpeg jpg).member?(ext)
           print '🖼️'                                              # picture
         elsif %w(png svg webp).member?(ext) || mime.match?(/^image/)
@@ -241,8 +243,8 @@ class WebResource
     rescue Exception => e                                 # fetch failure:
       case e.class.to_s
       when 'OpenURI::HTTPRedirect'                        # redirected
-        if fallback == e.io.meta['location']
-          fallback.fetchHTTP options                      # follow to fallback transit
+        if (fallback.uri.index e.io.meta['location']) == 0
+          fallback.fetchHTTP options                      # follow to fallback
         elsif options[:intermedate]                       # non-HTTP caller?
           puts "RELOC #{uri} -> #{e.io.meta['location']}" # alert caller of new location
           e.io.meta['location'].R(env).fetchHTTP options  # follow redirect for caller

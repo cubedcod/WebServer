@@ -381,6 +381,9 @@ firefox.settings.services.mozilla.com
 ).map{|h|Allow h}
     GET 'soundcloud.com', -> r { r.desktopUI.get }
 
+    # StarTribune
+    Allow 'comments.startribune.com'
+
     # Technology Review
     GET 'cdn.technologyreview.com', NoQuery
 
