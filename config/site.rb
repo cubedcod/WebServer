@@ -298,6 +298,7 @@ android.clients.google.com
     GET 'imagesvc.meredithcorp.io', GoIfURL
 
     # Mixcloud
+    Allow 'm.mixcloud.com'
     Allow 'www.mixcloud.com'
 
     # Mozilla
