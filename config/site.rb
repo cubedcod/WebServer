@@ -109,6 +109,9 @@ images-na.ssl-images-amazon.com
       GET 'm.media-amazon.com', AmazonMedia
     end
 
+    # Ars Technica
+    GET 'cdn.arstechnica.net', NoJS
+
     # Boston Globe
     GET 'bos.gl', -> r {r.fetch scheme: :http}
     GET 'bostonglobe-prod.cdn.arcpublishing.com', Resizer
