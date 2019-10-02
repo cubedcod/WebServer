@@ -180,6 +180,10 @@ business.facebook.com
     # Forbes
     GET 'thumbor.forbes.com', -> r {[301, {'Location' => URI.unescape(r.parts[-1])}, []]}
 
+    # Gfycat
+    GET 'gfycat.com', NoGunk
+    GET 'thumbs.gfycat.com', NoGunk
+
     # GitLab
     GET 'assets.gitlab-static.net', -> r {r.fetch}
 
