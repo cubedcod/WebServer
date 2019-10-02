@@ -279,6 +279,12 @@ android.clients.google.com
       GET 'www.linkedin.com', NoJS
     end
 
+    # Mail.ru
+    GET 'cloud.mail.ru', NoGunk
+    GET 'img.imgsmail.ru', NoGunk
+    GET 's.mail.ru', NoGunk
+    GET 'thumb.cloud.mail.ru', NoJS
+
     # Mastodon
     GET 'files.mastodon.social', -> r {r.fetch}
 
