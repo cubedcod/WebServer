@@ -261,6 +261,10 @@ android.clients.google.com
       GET 'www.google.com', Google
     end
 
+    # Guardian
+    GET 'i.guim.co.uk', NoQuery
+    GET 'www.theguardian.com', NoJS
+
     # Imgur
     GET 'i.imgur.com', Desktop
 
