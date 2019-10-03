@@ -8,7 +8,7 @@ class WebResource
     HostGET = {}
     HostPOST = {}
     LocalAddr = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
-    LocalArgs = %w(allow view sort ux)
+    LocalArgs = %w(allow view sort UX)
     Methods = {'GET' => :GETresource, 'HEAD' => :HEAD, 'OPTIONS' => :OPTIONS, 'POST' => :POSTresource}
     NoTransform = /^(application|audio|font|image|text\/(css|(x-)?javascript|proto)|video)/
     Servers = {}
@@ -55,7 +55,7 @@ class WebResource
           if path.match? /204$/
             print "🛑"                                           # blocked
           else
-            print "\n🛑 \e[31;1m" + resource.host + "\e[7m" + resource.path + "\e[0m\e[31m" + resource.qs + "\e[0m "
+            print "\n🛑 \e[31;1m" + (env['HTTP_REFERER'] ? ("\e[7m" + (env['HTTP_REFERER'].R.host||'') + ' → ') : '') + resource.host + "\e[7m" + resource.path + "\e[0m\e[31m" + resource.qs + "\e[0m "
             resource.env[:query]&.map{|k,v|
               print "\n\e[7m#{k}\e[0m\t#{v}"} if verbose
           end
