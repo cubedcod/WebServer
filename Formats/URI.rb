@@ -128,7 +128,7 @@ class WebResource < RDF::URI
     def find p; `find #{shellPath} -iname #{Shellwords.escape p}`.lines.map{|p|('/'+p.chomp).R} end # FIND(1)
     def glob; Pathname.glob(relPath).map{|p|('/'+p.to_s).R env} end # GLOB(7)
     def grep # URI -> file(s)                                       # GREP(1)
-      args = POSIX.splitArgs env[:query]['q']
+      args = POSIX.splitArgs (env[:query]['Q'] || env[:query]['q'])
       case args.size
       when 0
         return []

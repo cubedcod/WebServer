@@ -476,8 +476,8 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
           find env[:query]['f'] unless env[:query]['f'].empty? # exact
        elsif env[:query].has_key?('find') && path != '/'       # easy-mode
           find '*' + env[:query]['find'] + '*' unless env[:query]['find'].empty?
-       elsif env[:query].has_key?('q') && path!='/'            # GREP
-         env[:grep] = true
+       elsif (env[:query].has_key?('Q') || env[:query].has_key?('q')) && path != '/'
+         env[:grep] = true                                     # GREP
          grep
        else                                                    # LS
          [self]
