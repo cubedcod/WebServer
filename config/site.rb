@@ -67,7 +67,7 @@ wp-rum)
   end
   module HTTP
     Desktop = -> r {r.desktopUI.fetch}
-    DesktopUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
+    DesktopUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
     GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : r.deny}
     GotoBasename = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
     GotoU   = -> r {[301, {'Location' =>  r.env[:query]['u']}, []]}
@@ -78,7 +78,7 @@ wp-rum)
     NoQuery = -> r {r.qs.empty? ? r.fetch : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
     Resizer = -> r {
       if r.parts[0] == 'resizer'
-        parts = r.path.split /\/\d+x\d+\/((filter|smart)[^\/]+\/)?/
+        parts = r.path.split /\/\d+x\d+\/((filter|smart)[^\/]*\/)?/
         parts.size > 1 ? [302,
                           {'Location' => 'https://' + parts[-1] + '?allow='+ServerKey
                           }, []] : NoJS[r]
