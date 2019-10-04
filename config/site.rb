@@ -285,7 +285,7 @@ android.clients.google.com
     end
 
     # Little Free Library
-    GET 'littlefreelibrary.secure.force.com', Desktop
+    Allow 'littlefreelibrary.secure.force.com'
 
     # Mail.ru
     GET 'cloud.mail.ru', NoGunk
