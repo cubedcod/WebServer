@@ -52,10 +52,13 @@ class WebResource
         parts = resource.parts
         verbose = resource.verbose?                              # log request
         if resource.env[:deny]
-          if path.match? /204$/
+          if %w(ttf woff woff2).member? resource.ext
+            print "\n🀄",resource.uri if verbose
+          elsif path.match? /204$/
             print "🛑"                                           # blocked
           else
-            print "\n🛑 \e[31;1m" + (env['HTTP_REFERER'] ? ("\e[7m" + (env['HTTP_REFERER'].R.host||'') + ' → ') : '') + resource.host + "\e[7m" + resource.path + "\e[0m\e[31m" + resource.qs + "\e[0m "
+            referer_host = env['HTTP_REFERER']&.R.host
+            print "\n🛑 \e[31;1m" + (referer_host ? ("\e[7m" + referer_host + "\e[0m\e[31;1m → ") : '') + (referer_host == resource.host ? '' : resource.host) + "\e[7m" + resource.path + "\e[0m\e[31m" + resource.qs + "\e[0m "
             resource.env[:query]&.map{|k,v|
               print "\n\e[7m#{k}\e[0m\t#{v}"} if verbose
           end

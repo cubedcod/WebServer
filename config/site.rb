@@ -58,7 +58,7 @@ u(rchin|serlocation|tm)|
 viral|
 wp-rum)
 ([-.:_\/?&=~]|$)|
-\.gif\?)xi
+\.(gif\?|ttf|woff2?))xi
 
     SiteDir  = (Pathname.new __dir__).relative_path_from Pathname.new Dir.pwd
     SiteGIF = SiteDir.join('site.gif').read
