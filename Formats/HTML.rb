@@ -228,7 +228,8 @@ class WebResource
     end
 
     # JSON-graph -> HTML
-    def htmlDocument graph = {}
+    def htmlDocument graph=nil
+      graph ||= treeFromGraph
       env[:images] ||= {}
       env[:colors] ||= {}
       titleRes = [ # title resource

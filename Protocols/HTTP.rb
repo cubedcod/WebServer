@@ -80,7 +80,7 @@ class WebResource
         elsif ext == 'js' || mime.match?(/script/)
           print "\n📜\e[36;1m https://" + resource.host + "\e[7m" + resource.path + "\e[0m "
         elsif ext == 'json' || mime.match?(/json/)
-          print "\n🗒 https://" + resource.host + resource.path + ' '
+          print "\n🗒 https://" + resource.host + resource.path + resource.qs + ' '
         elsif %w(gif jpeg jpg).member?(ext)
           print '🖼️'                                              # picture
         elsif %w(png svg webp).member?(ext) || mime.match?(/^image/)
@@ -368,9 +368,9 @@ class WebResource
       entity ->{
         case format
         when /^text\/html/
-          htmlDocument treeFromGraph
+          htmlDocument
         when /^application\/atom+xml/
-          feedDocument treeFromGraph
+          feedDocument
         else
           env[:repository].dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true
         end}

@@ -43,7 +43,7 @@ e(moji.*\.js|ndscreen|nsighten|scenic|vidon)|
 (web)?fonts?|
 g(dpr|eo(ip|locate)|igya|pt|tag|tm)|.*
 (header|pre)[-_]?bid.*|.*hubspot.*|[hp]b.?js|ima[0-9]?|
-impression|
+identity|impression|
 kr(ux|xd).*|
 log(event|g(er|ing))?|(app|s)?
 m(e(asurement|t(er|rics?))|ms|tr)|

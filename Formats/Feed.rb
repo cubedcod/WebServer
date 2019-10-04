@@ -256,14 +256,14 @@ end
 class WebResource
   module HTML
 
-    def feedDocument graph
+    def feedDocument
       HTML.render ['<?xml version="1.0" encoding="utf-8"?>',
                    {_: :feed,xmlns: 'http://www.w3.org/2005/Atom',
                     c: [{_: :id, c: uri},
                         {_: :title, c: uri},
                         {_: :link, rel: :self, href: uri},
                         {_: :updated, c: Time.now.iso8601},
-                        graph.map{|u,d|
+                        treeFromGraph.map{|u,d|
                           {_: :entry,
                            c: [{_: :id, c: u}, {_: :link, href: u},
                                d[Date] ? {_: :updated, c: d[Date][0]} : nil,
