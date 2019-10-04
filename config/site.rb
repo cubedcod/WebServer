@@ -194,7 +194,7 @@ business.facebook.com
     GET 'groups.google.com', Desktop
     Google = -> r {
       case r.path
-      when '/'
+      when /^.(aclk)?$/
         r.fetch
       when /^.maps/
         Desktop[r]
@@ -257,8 +257,9 @@ android.clients.google.com
 ).map{|host|
       Allow host}
     else
-      GET     'google.com', Google
+      GET 'google.com', Google
       GET 'www.google.com', Google
+      GET 'www.googleadservices.com', -> r {r.path=='/pagead/aclk' && r.env[:query].has_key?('adurl') && [301, {'Location' =>  r.env[:query]['adurl']}, []] || r.deny}
     end
 
     # Guardian

@@ -57,7 +57,7 @@ class WebResource
           elsif path.match? /204$/
             print "🛑"                                           # blocked
           else
-            referer_host = env['HTTP_REFERER']&.R.host
+            referer_host = env['HTTP_REFERER'] && env['HTTP_REFERER'].R.host
             print "\n🛑 \e[31;1m" + (referer_host ? ("\e[7m" + referer_host + "\e[0m\e[31;1m → ") : '') + (referer_host == resource.host ? '' : resource.host) + "\e[7m" + resource.path + "\e[0m\e[31m" + resource.qs + "\e[0m "
             resource.env[:query]&.map{|k,v|
               print "\n\e[7m#{k}\e[0m\t#{v}"} if verbose
