@@ -442,6 +442,10 @@ firefox.settings.services.mozilla.com
     # Viglink
     GET 'redirect.viglink.com', GotoU
 
+    # Vimeo
+    GET 'player.vimeo.com', Desktop
+    GET 'vimeo.com', Desktop
+
     # WaPo
     GET 'www.washingtonpost.com', -> r {(r.parts[0]=='resizer' ? Resizer : NoGunk)[r]}
 
