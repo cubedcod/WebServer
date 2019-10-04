@@ -284,6 +284,9 @@ android.clients.google.com
       GET 'www.linkedin.com', NoJS
     end
 
+    # Little Free Library
+    GET 'littlefreelibrary.secure.force.com', Desktop
+
     # Mail.ru
     GET 'cloud.mail.ru', NoGunk
     GET 'img.imgsmail.ru', NoGunk
