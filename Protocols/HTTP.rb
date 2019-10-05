@@ -378,7 +378,7 @@ class WebResource
 
     def gunk?; gunkHost || gunkURI end
     def gunkHost; !AllowedHosts.has_key?(host) && env.has_key?('HTTP_GHOST') end
-    def gunkURI; ('/' + env['SERVER_NAME'] + env['REQUEST_URI']).match? Gunk end
+    def gunkURI; ('/' + (env && env['SERVER_NAME'] || host || '') + (env && env['REQUEST_URI'] || path || '')).match? Gunk end
 
     def HEAD
       send(Methods['GET']).yield_self{|s,h,_|
