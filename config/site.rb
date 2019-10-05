@@ -101,6 +101,7 @@ wp-rum)
     if ENV.has_key? 'AMAZON'
       %w(            amazon.com
 images-na.ssl-images-amazon.com
+               s3.amazonaws.com
                  www.amazon.com).map{|h|Allow h}
     else
       GET 'amazon.com', NoJS
@@ -263,7 +264,7 @@ android.clients.google.com
     end
 
     # Guardian
-    GET 'i.guim.co.uk', NoQuery
+    GET 'i.guim.co.uk', NoJS
     GET 'www.theguardian.com', NoJS
 
     # Imgur
