@@ -46,13 +46,13 @@ g(dpr|eo(ip|locate)|igya|pt|tag|tm)|.*
 identity|impression|
 kr(ux|xd).*|
 log(event|g(er|ing))?|(app|s)?
-m(e(asurement|t(er|rics?))|ms|tr)|
+m(e(asurement|t(er|rics?))|ms|odal|tr)|
 new(relic|sletter)|
 o(m(niture|tr)|nboarding|ptanon|utbrain)|
 p(a(idpost|rtner|ywall)|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)|lacement|op(over|up)|repopulator|romo(tion)?s?|ubmatic|[vx])|
 quantcast|
 record(event|stats?)|re?t(ar)?ge?t(ing)?|remote[-_]?(control)?|rpc|
-s?s(a(fe[-_]?browsing|ilthru)|cheduler|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(cial(shar(e|ing))?|urcepoint)|ponsor(ed)?|so|tat(istic)?s?|ubscriber|w.js|yn(c|dicat(ed|ion)))|
+s?s(a(fe[-_]?browsing|ilthru)|cheduler|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(cial(shar(e|ing))?|urcepoint)|ponsor(ed)?|so|tat(istic)?s?|ubscriber|urvey|w.js|yn(c|dicat(ed|ion)))|
 t(aboola|(arget|rack)(ers?|ing)|ampering|bproxy|ea(lium|ser)|elemetry|hirdparty|inypass|racing|rend(ing|s)|ypeface)|autotrack|
 u(rchin|serlocation|tm)|
 viral|
