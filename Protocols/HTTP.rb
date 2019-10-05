@@ -111,7 +111,7 @@ class WebResource
                                                             (HTML.keyval (Webize::HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
     end
 
-    def CDN?; host.match? /\.(amazonaws|cloud(f(lare|ront)|inary))\.(com|net)$/ end
+    def CDN?; host.match? /\.(amazonaws|cloud(f(lare|ront)|inary)|netdna.*)\.(com|net)$/ end
 
     def dateMeta
       n = nil # next page
