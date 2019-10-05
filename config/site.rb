@@ -184,6 +184,13 @@ business.facebook.com
     # Forbes
     GET 'thumbor.forbes.com', -> r {[301, {'Location' => URI.unescape(r.parts[-1])}, []]}
 
+    # FSDN
+    if ENV.has_key?('FSDN')
+      GET 'a.fsdn.com', NoGunk
+    else
+      GET 'a.fsdn.com', NoJS
+    end
+
     # Gfycat
     GET 'gfycat.com', NoGunk
     GET 'thumbs.gfycat.com', NoGunk
