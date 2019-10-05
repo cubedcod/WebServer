@@ -49,11 +49,10 @@ class WebResource
       resource.send(m).yield_self{|status, head, body|           # dispatch request
         ext = resource.ext.downcase
         mime = head['Content-Type'] || ''
-        parts = resource.parts
         verbose = resource.verbose?                              # log request
         if resource.env[:deny]
-          if %w(css ttf woff woff2).member?(resource.ext) || %w(css id log_event).member?(resource.basename)
-            print "\n🀄",resource.uri if verbose
+          if %w(css ttf woff woff2).member?(ext) || %w(attribution css ddljson id log log_event qoe serviceworker session).member?(resource.basename) || resource.parts.member?('stats')
+            print "🛑" if verbose
           elsif path.match? /204$/
             print "🛑"                                           # blocked
           else
