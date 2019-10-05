@@ -52,7 +52,7 @@ class WebResource
         parts = resource.parts
         verbose = resource.verbose?                              # log request
         if resource.env[:deny]
-          if %w(css ttf woff woff2).member? resource.ext
+          if %w(css ttf woff woff2).member?(resource.ext) || %w(css id log_event).member?(resource.basename)
             print "\n🀄",resource.uri if verbose
           elsif path.match? /204$/
             print "🛑"                                           # blocked
