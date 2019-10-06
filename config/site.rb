@@ -48,7 +48,7 @@ kr(ux|xd).*|
 log(event|g(er|ing))?|(app|s)?
 m(e(asurement|t(er|rics?))|ms|odal|tr)|
 new(relic|sletter)|
-o(m(niture|tr)|nboarding|ptanon|utbrain)|
+o(m(niture|tr)|nboarding|nesignal|ptanon|utbrain)|
 p(a(rtner|ywall)|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)|lacement|op(over|up)|repopulator|romo(tion)?s?|ubmatic|[vx])|
 quantcast|
 record(event|stats?)|re?t(ar)?ge?t(ing)?|remote[-_]?(control)?|rpc|
