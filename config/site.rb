@@ -249,6 +249,7 @@ encrypted-tbn3.gstatic.com
     if ENV.has_key? 'GOOGLE'
     %w(accounts.google.com
 android.clients.google.com
+    android.googleapis.com
            apis.google.com
          chrome.google.com
        clients1.google.com
@@ -265,6 +266,7 @@ android.clients.google.com
            ssl.gstatic.com
  suggestqueries.google.com
             www.google.com
+  www.googleadservices.com
         www.googleapis.com
            www.gstatic.com
          www.recaptcha.net
