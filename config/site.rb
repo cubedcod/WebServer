@@ -92,6 +92,8 @@ wp-rum)
     # AliBaba
     %w(ae01.alicdn.com
           i.alicdn.com
+  chuwi.aliexpress.com
+s.click.aliexpress.com
     www.aliexpress.com
 ).map{|host|
       GET host, NoGunk}

@@ -51,7 +51,7 @@ class WebResource
         mime = head['Content-Type'] || ''
         verbose = resource.verbose?                              # log request
         if resource.env[:deny]
-          if %w(css eot otf ttf woff woff2).member?(ext) || %w(activeview addthis_widget.js ads ad_status.js analytics.js api.js apstag.js attribution beacon.js cast_sender.js conv css ddljson endscreen.js events fbevents.js FeedQuery id gpt.js gtm.js ima3.js js ListAccounts load log log_event lvz p.js pay pixel ptracking qoe quant.js query remote.js rtm rundown search seed serviceworker service-worker.js sdk.js session sw.js sync track tracker uc.js utag.js view widgets.js).member?(resource.basename) || resource.parts.member?('stats')
+          if %w(css eot otf ttf woff woff2).member?(ext) || %w(activeview addthis_widget.js ads ad_status.js analytics.js api.js apstag.js attribution beacon.js bullseye cast_sender.js conv css ddljson endscreen.js events fbevents.js FeedQuery id inflowcomponent gpt.js gtm.js ima3.js js ListAccounts load log log_event lvz p.js pay pixel ptracking qoe quant.js query remote.js rtm rundown search seed serviceworker service-worker.js sdk.js session sw.js sync track tracker uc.js utag.js view widgets.js).member?(resource.basename) || resource.parts.member?('stats')
             print "🛑" if verbose
           elsif path.match? /204$/
             print "🛑"                                           # blocked
