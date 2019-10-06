@@ -91,6 +91,7 @@ wp-rum)
 
     # AliBaba
     %w(ae01.alicdn.com
+     assets.alicdn.com
           i.alicdn.com
   chuwi.aliexpress.com
 s.click.aliexpress.com
