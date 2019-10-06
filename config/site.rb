@@ -136,6 +136,9 @@ images-na.ssl-images-amazon.com
     # Costco
     Allow 'www.costco.com'
 
+    # CNet
+    GET 'www.cnet.com', NoJS
+
     # CNN
     %w(cdn www).map{|host|
       Allow host + '.cnn.com'}
