@@ -155,7 +155,7 @@ sidebar [class^='side']    [id^='side']
 
           embeds.each_triple{|s,p,o|
             p = MetaMap[p.to_s] || p # predicate map
-            puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/
+            puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/ # show unbound predicates
             yield s, p, o unless p == :drop}
         end
 
@@ -166,7 +166,7 @@ sidebar [class^='side']    [id^='side']
               @base.env[:links][:prev] ||= v if k=='prev'
               @base.env[:links][:next] ||= v if k=='next'
               k = MetaMap[k] || k
-              puts [k,v].join "\t" unless k.to_s.match? /^(drop|http)/
+              puts [k, v].join "\t" unless k.to_s.match? /^(drop|http)/
               yield subject, k, v.R unless k == :drop
             end
           end}

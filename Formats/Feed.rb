@@ -103,7 +103,9 @@ module Webize
 
       def normalizePredicates *f
         send(*f){|s,p,o|
-          yield s, MetaMap[p]||p, o }
+          p = MetaMap[p] || p
+          puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/
+          yield s, p, o unless p == :drop}
       end
 
       def normalizeDates *f
