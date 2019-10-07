@@ -461,6 +461,7 @@ firefox.settings.services.mozilla.com
         r.env[:links][:up] = '/' if r.parts.size == 1
         r.fetch noRDF: true
       end}
+
     # Ubuntu
     GET 'us.archive.ubuntu.com', Desktop
 
