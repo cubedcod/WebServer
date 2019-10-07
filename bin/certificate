@@ -1,13 +1,16 @@
 #!/bin/sh
+
+# create
 certdir=$(realpath ~/.ssl)
 cert=$certdir/CA.pem
-
-# create cert
 [ -e $certdir ] || mkdir $certdir
 [ -e $cert ] || openssl req -new -newkey rsa:2048 -sha256 -days 365 -nodes -x509 -extensions v3_ca -keyout $certdir/myCA.pem -out $cert
-
-# install cert (Android)
 hash=$(openssl x509 -inform PEM -subject_hash_old -in $cert -noout)
+
+# install (Android)
 su -c "mount -o rw,remount /system"
 su -c "cp $cert /system/etc/security/cacerts/$hash.0"
 su -c "chmod 644 /system/etc/security/cacerts/$hash.0"
+
+# install (Debian)
+su -c "cp $cert /usr/local/share/ca-certificates/CA.crt && update-ca-certificates"
