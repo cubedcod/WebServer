@@ -185,7 +185,6 @@ business.facebook.com
       lm.facebook.com
 ).map{|host|
       GET host, GotoU}
-    GET 'www.pictame.com', -> r {r.parts[1] ? [301, {'Location' => 'https://www.instagram.com/'+r.parts[1]}, []] : r.deny}
 
     # Forbes
     GET 'thumbor.forbes.com', -> r {[301, {'Location' => URI.unescape(r.parts[-1])}, []]}
@@ -290,6 +289,7 @@ android.clients.google.com
 
     # Instagram
     GET 'www.instagram.com', -> r {r.path=='/' ? r.cachedGraph : r.fetch}
+    GET 'www.pictame.com',   -> r {r.parts[1] ? [301, {'Location' => 'https://www.instagram.com/'+r.parts[1]}, []] : r.deny}
 
     # Linkedin
     if ENV.has_key? 'LINKEDIN'
