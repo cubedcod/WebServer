@@ -374,7 +374,7 @@ firefox.settings.services.mozilla.com
     GET 'www.reddit.com', -> r {
       options = {}
       r = ('/r/' + r.subscriptions.join('+') + '/new').R r.env if r.path == '/'
-      r.desktopUI if r.desktopUA? || r.parts.member?('submit')
+      r.desktopUI if r.parts[-1] == 'submit'
       options[:suffix] = '.rss' if r.ext.empty? && !r.upstreamUI?
       depth = r.parts.size
       r.env[:links][:up] = if [3,6].member? depth

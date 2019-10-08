@@ -51,7 +51,7 @@ class WebResource
         mime = head['Content-Type'] || ''
         verbose = resource.verbose?                              # log request
         if resource.env[:deny]
-          if %w(css eot otf ttf woff woff2).member?(ext) || %w(activeview addthis_widget.js ads ad_status.js analytics.js api.js apstag.js attribution beacon.js bullseye cast_sender.js conv css ddljson endscreen.js events favicon.ico fbevents.js FeedQuery id inflowcomponent gpt.js gtm.js ima3.js js json ListAccounts load log log_event lvz newtab_ogb newtab_promos p.js pay pixel ptracking qoe quant.js query remote.js rtm rundown scheduler.js search seed serviceworker service-worker.js sdk.js session sw.js sync track tracker uc.js utag.js view widgets.js).member?(resource.basename) || resource.parts.member?('stats')
+          if %w(css eot otf ttf woff woff2).member?(ext) || %w(activeview addthis_widget.js ads ad_status.js analytics.js api.js apstag.js attribution beacon.js bullseye buttons.js cast_sender.js collect conv css crx download ddljson endscreen.js events experimentstatus favicon.ico fbevents.js FeedQuery g.gif id inflowcomponent gpt.js gtm.js ima3.js js json ListAccounts load log log_event lvz newtab_ogb newtab_promos p p.js page_view pay ping.gif pixel ptracking push_service_worker.js qoe quant.js query remote.js rtm rundown scheduler.js search seed serviceworker service-worker.js sdk.js session sw.js sync threatListUpdates:fetch track tracker uc.js utag.js view widgets.js yql).member?(resource.basename) || resource.parts.member?('stats')
             print "🛑" if verbose
           elsif path.match? /204$/
             print "🛑"                                           # blocked
@@ -195,10 +195,6 @@ class WebResource
 
     def desktopUI; upstreamUI; desktopUA end
     def desktopUA; env['HTTP_USER_AGENT'] = DesktopUA; self end
-    def desktopUA?
-      env['HTTP_USER_AGENT']&.match?(/Mozilla\/5.0 \((Windows NT 10.0; Win64; x64|X11; Linux x86_64)\) AppleWebKit\/\d+.\d+ \(KHTML, like Gecko\) Chrome\/\d+.\d+.\d+.\d+ Safari\/\d+.\d+/) ||
-      env['HTTP_USER_AGENT']&.match?(/Mozilla\/5.0 \(X11; Linux x86_64; rv:\d+.\d+\) Gecko\/\d+ Firefox\/\d+.\d+/)
-    end
 
     def entity generator = nil
       entities = env['HTTP_IF_NONE_MATCH']&.strip&.split /\s*,\s*/ # client entities
