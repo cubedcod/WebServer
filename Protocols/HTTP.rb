@@ -51,7 +51,7 @@ class WebResource
         mime = head['Content-Type'] || ''
         verbose = resource.verbose?                              # log request
         if resource.env[:deny]
-          if %w(css eot otf ttf woff woff2).member?(ext) || %w(activeview addthis_widget.js ads ad_status.js analytics.js api.js apstag.js attribution beacon.js bullseye buttons.js cast_sender.js collect conv css crx download ddljson endscreen.js events experimentstatus favicon.ico fbevents.js FeedQuery g.gif id inflowcomponent gpt.js gtm.js ima3.js js json ListAccounts load log log_event lvz newtab_ogb newtab_promos p p.js page_view pay ping.gif pixel ptracking push_service_worker.js qoe quant.js query remote.js rtm rundown scheduler.js search seed serviceworker service-worker.js sdk.js session sw.js sync threatListUpdates:fetch track tracker uc.js utag.js view widgets.js yql).member?(resource.basename) || resource.parts.member?('stats')
+          if %w(css eot otf ttf woff woff2).member?(ext) || %w(activeview addthis_widget.js ads ad_status.js all.js analytics.js api.js apstag.js attribution beacon.js bullseye buttons.js cast_sender.js collect conv css crx download ddljson endscreen.js events experimentstatus favicon.ico fbevents.js FeedQuery g.gif id inflowcomponent gpt.js gtm.js ima3.js js json ListAccounts load log log_event lvz newtab_ogb newtab_promos p p.js page_view pay ping.gif pixel ptracking push_service_worker.js qoe quant.js query remote.js rtm rundown scheduler.js search seed serviceworker service-worker.js sdk.js session sw.js sync threatListUpdates:fetch track tracker uc.js utag.js view widgets.js yql).member?(resource.basename) || resource.parts.member?('stats')
             print "🛑" if verbose
           elsif path.match? /204$/
             print "🛑"                                           # blocked
@@ -675,7 +675,6 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
 
     def upstreamUI; env[:UX] = true; self end
     def upstreamUI?; ENV.has_key?('UX') || env.has_key?(:UX) || env[:query].has_key?('UX') end
-    alias_method :upstreamUX, :upstreamUI
 
     def verbose?; ENV.has_key? 'VERBOSE' end
 
