@@ -155,7 +155,7 @@ sidebar [class^='side']    [id^='side']
 
           embeds.each_triple{|s,p,o|
             p = MetaMap[p.to_s] || p # predicate map
-            puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/ # show unbound predicates
+            puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/ # show predicates not bound to a URI or dropped
             yield s, p, o unless p == :drop}
         end
 
@@ -208,7 +208,7 @@ sidebar [class^='side']    [id^='side']
             end}
           [*BasicGunk,*Gunk,*SiteGunk[@base.host]].map{|selector|
             body.css(selector).map{|sel|
-              #puts "X"*80,"stripping #{selector}:", sel if ENV['VERBOSE']
+              #puts "X"*80,"stripping #{selector}:", sel
               sel.remove }} # strip elements
           yield subject, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
         else # body element missing
@@ -262,7 +262,7 @@ class WebResource
                                    c: icon.cache.exist? ? {_: :img, src: icon.uri} : host},
                                   ({_: :a, id: :tabular, class: :icon, style: 'color: #555', c: '↨',
                                     href: HTTP.qs((env[:query]||{}).merge({'view' => 'table', 'sort' => 'date'}))} unless env[:query] && env[:query]['view']=='table'),
-                                  parts.map{|p| [{_: :a, class: :breadcrumb, href: bc += '/' + p, c: p, id: 'r'+Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
+                                  parts.map{|p| [{_: :a, class: :breadcrumb, href: bc += '/' + p, c: (CGI.escapeHTML URI.unescape p), id: 'r'+Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
                                   link[:media, '🖼️'],
                                   ({_: :a, id: :UX, class: :icon, style: 'color: #555', c: '⚗️', href: HTTP.qs((env[:query]||{}).merge({'UX' => 'upstream'}))} unless local?)
                                  ]},
