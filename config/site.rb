@@ -457,8 +457,9 @@ firefox.settings.services.mozilla.com
       elsif r.gunkURI
         r.deny
       else
-        r.env[:links][:up] = '/' + r.parts[0] if r.path.match? /\/status\/\d+\/?$/
-        r.env[:links][:up] = '/' if r.parts.size == 1
+        r.env[:links][:up]    = '/' if r.parts.size == 1
+        r.env[:links][:up]    = '/' + r.parts[0] if r.path.match? /\/status\/\d+\/?$/
+        r.env[:links][:media] = '/' + r.parts[0] + '/media' unless r.parts[1] == 'media'
         r.fetch noRDF: true
       end}
 

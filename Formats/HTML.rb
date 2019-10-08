@@ -243,7 +243,7 @@ class WebResource
         if url = env[:links] && env[:links][key]
           [{_: :a, href: url, id: key, class: :icon, c: displayname},
            "\n"]
-          end}
+        end}
       htmlGrep if env[:graph] && env[:grep]
  
       # Markup -> HTML
@@ -263,7 +263,7 @@ class WebResource
                                   ({_: :a, id: :tabular, class: :icon, style: 'color: #555', c: '↨',
                                     href: HTTP.qs((env[:query]||{}).merge({'view' => 'table', 'sort' => 'date'}))} unless env[:query] && env[:query]['view']=='table'),
                                   parts.map{|p| [{_: :a, class: :breadcrumb, href: bc += '/' + p, c: p, id: 'r'+Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
-                                  #link[:up, '&#9650;'],
+                                  link[:media, '🖼️'],
                                   ({_: :a, id: :UX, class: :icon, style: 'color: #555', c: '⚗️', href: HTTP.qs((env[:query]||{}).merge({'UX' => 'upstream'}))} unless local?)
                                  ]},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
