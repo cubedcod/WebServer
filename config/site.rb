@@ -204,27 +204,6 @@ business.facebook.com
     GET 'assets.gitlab-static.net', -> r {r.fetch}
 
     # Google
-    GET 'groups.google.com', Desktop
-    Google = -> r {
-      case r.path
-      when /^.(aclk)?$/
-        r.fetch
-      when /^.maps/
-        Desktop[r]
-      when /^.s2.photos/
-        NoJS[r]
-      when '/search'
-        if r.env[:query]['q']&.match? /^(https?:\/\/|l(:8000|\/)|localhost|view-source)/
-          [301, {'Location' => r.env[:query]['q'].sub(/^l/,'http://l')}, []]
-        else
-          r.fetch
-        end
-      when '/url'
-        GotoURL[r]
-      else
-        r.deny
-      end}
-
     %w(ajax.googleapis.com
           books.google.com
      developers.google.com
@@ -272,8 +251,26 @@ android.clients.google.com
 ).map{|host|
       Allow host}
     else
-      GET 'google.com', Google
-      GET 'www.google.com', Google
+      GET 'google.com', -> r {[301,{'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] },[]]}
+      GET 'www.google.com', -> r {
+        case r.path
+        when /^.(aclk)?$/
+          r.fetch
+        when /^.maps/
+          Desktop[r]
+        when '/search'
+          if r.env[:query]['q']&.match? /^(https?:\/\/|l(:8000|\/)|localhost|view-source)/
+            [301, {'Location' => r.env[:query]['q'].sub(/^l/,'http://l')}, []]
+          else
+            r.fetch
+          end
+        when /^.(images|.*photos)/
+          NoJS[r]
+        when '/url'
+          GotoURL[r]
+        else
+          r.deny
+        end}
       GET 'www.googleadservices.com', -> r {r.path=='/pagead/aclk' && r.env[:query].has_key?('adurl') && [301, {'Location' =>  r.env[:query]['adurl']}, []] || r.deny}
     end
 
