@@ -421,7 +421,6 @@ firefox.settings.services.mozilla.com
          secure.soundcloud.com
               w.soundcloud.com
 ).map{|h|Allow h}
-    GET 'soundcloud.com', -> r { r.desktopUI.get }
 
     # StarTribune
     Allow 'comments.startribune.com'

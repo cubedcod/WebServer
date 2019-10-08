@@ -238,6 +238,7 @@ class WebResource
       'msapplication-TileColor' => :drop,
       'msapplication-TileImage' => Image,
       'msapplication-config' => :drop,
+      'msapplication-starturl' => :drop,
       'msapplication-tap-highlight' => :drop,
       'msapplication-task' => :drop,
       'msapplication-tooltip' => :drop,
