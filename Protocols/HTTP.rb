@@ -41,7 +41,7 @@ class WebResource
     end
 
     def self.call env
-      return [405,{},[]] unless m=Methods[env['REQUEST_METHOD']] # find method handler
+      return [405,{},[]] unless m=Methods[env['REQUEST_METHOD']] # look up method handler
       path = Pathname.new(env['REQUEST_PATH']).expand_path.to_s  # evaluate path expression,
       path+='/' if env['REQUEST_PATH'][-1]=='/' && path[-1]!='/' # preserving trailing slash
       resource = ('//' + env['SERVER_NAME'] + path).R env.merge( # instantiate request w/ blank response fields
@@ -51,7 +51,7 @@ class WebResource
         mime = head['Content-Type'] || ''
         verbose = resource.verbose?                              # log request
         if resource.env[:deny]
-          if %w(css eot otf ttf woff woff2).member?(ext) || %w(activeview addthis_widget.js ads ad_status.js all.js analytics.js api.js apstag.js attribution beacon.js bullseye buttons.js cast_sender.js collect conv css crx download ddljson endscreen.js events experimentstatus favicon.ico fbevents.js FeedQuery g.gif id inflowcomponent gpt.js gtm.js ima3.js js json ListAccounts load log log_event lvz m newtab_ogb newtab_promos p p.js page_view pay ping.gif pixel ptracking push_service_worker.js qoe quant.js query remote.js rtm rundown scheduler.js search seed serviceworker service-worker.js sdk.js session sw.js sync threatListUpdates:fetch tr track tracker uc.js utag.js view widgets.js yql).member?(resource.basename) || resource.parts.member?('stats')
+          if %w(css eot otf ttf woff woff2).member?(ext) || %w(activeview activity-stream addthis_widget.js ads ad_status.js all.js analytics.js annotations_invideo api.js apstag.js attribution beacon.js bullseye buttons.js cast_sender.js collect conv css crx download ddljson endscreen.js events experimentstatus favicon.ico fbevents.js FeedQuery g.gif id inflowcomponent get_endscreen get_midroll_info gpt.js gtm.js ima3.js js json ListAccounts load log log_event lvz m newtab_ogb newtab_promos p p.js page_view pay ping.gif pixel ptracking push_service_worker.js qoe quant.js query remote.js rtm rundown scheduler.js search seed serviceworker service-worker.js sdk.js service_ajax session sw.js sync threatListUpdates:fetch tr track tracker uc.js utag.js view widgets.js yql).member?(resource.basename) || resource.parts.member?('stats')
             print "🛑" if verbose
           elsif path.match? /204$/
             print "🛑"                                           # blocked
@@ -674,6 +674,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     end
 
     def upstreamUI; env[:UX] = true; self end
+
     def upstreamUI?; ENV.has_key?('UX') || env.has_key?(:UX) || env[:query].has_key?('UX') end
 
     def verbose?; ENV.has_key? 'VERBOSE' end
