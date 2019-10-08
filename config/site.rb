@@ -410,7 +410,7 @@ firefox.settings.services.mozilla.com
 
     # Soundcloud
     GET 'gate.sc', GotoURL
-    GET 'soundcloud.com', Desktop
+    GET 'w.soundcloud.com', Desktop
     %w(api-auth.soundcloud.com
        api-mobi.soundcloud.com
      api-mobile.soundcloud.com
