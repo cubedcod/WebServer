@@ -225,7 +225,9 @@ encrypted-tbn3.gstatic.com
 ).map{|h| Allow h }
 
     if ENV.has_key? 'GOOGLE'
-    %w(accounts.google.com
+    %w(
+      adservice.google.com
+       accounts.google.com
 android.clients.google.com
     android.googleapis.com
            apis.google.com
@@ -239,10 +241,12 @@ android.clients.google.com
              id.google.com
              kh.google.com
            mail.google.com
+            ogs.google.com
            play.google.com
        play.googleapis.com
            ssl.gstatic.com
  suggestqueries.google.com
+ tpc.googlesyndication.com
             www.google.com
   www.googleadservices.com
         www.googleapis.com
