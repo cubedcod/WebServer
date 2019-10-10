@@ -66,7 +66,7 @@ wp-rum)
     SiteJS  = SiteDir.join('site.js').read
   end
   module HTTP
-    Desktop = -> r {r.desktopUI.fetch}
+    Desktop = -> r {r.gunkURI ? r.deny : r.desktopUI.fetch}
     DesktopUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
     GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : r.deny}
     GotoBasename = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
@@ -390,9 +390,6 @@ firefox.settings.services.mozilla.com
                            end
       r.fetch options}
 
-    # Redfin
-    GET 'www.redfin.com', Desktop
-
     # Responsys
     GET 'static.cdn.responsys.net', NoJS
 
@@ -536,7 +533,6 @@ heartbeat iframe_api live_chat manifest.json opensearch playlist results signin 
 
     # Zillow
     Allow 'www.zillow.com'
-    GET 'www.zillow.com', Desktop
 
   end
 
