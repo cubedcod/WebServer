@@ -130,6 +130,9 @@ images-na.ssl-images-amazon.com
     # BusinessWire
     GET 'cts.businesswire.com', GoIfURL
 
+    # BuzzFeed
+    GET 'img.buzzfeed.com', NoJS
+
     # CircleCI
     GET 'circleci.com', -> r {r.parts[0] == 'blog' ? r.fetch : r.deny}
 
@@ -349,6 +352,8 @@ firefox.settings.services.mozilla.com
       Allow host}
 
     # Outline
+    Allow 'outline.com'
+    Allow 'outlineapi.com'
     GET 'outline.com', -> r {
       if r.parts[0] == 'favicon.ico'
         r.deny
@@ -359,7 +364,7 @@ firefox.settings.services.mozilla.com
         options = {intermediate: true}
         (if r.parts.size == 1
           options[:query] = {id: r.parts[0]}
-          '/v4/get_article'.R(r.env).fetch optionss
+          '/v4/get_article'.R(r.env).fetch options
         elsif r.env['REQUEST_PATH'][1..5] == 'https'
           options[:query] = {source_url: r.env['REQUEST_PATH'][1..-1]}
           '/article'.R(r.env).fetch options
