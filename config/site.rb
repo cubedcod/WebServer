@@ -352,8 +352,6 @@ firefox.settings.services.mozilla.com
       Allow host}
 
     # Outline
-    Allow 'outline.com'
-    Allow 'outlineapi.com'
     GET 'outline.com', -> r {
       if r.parts[0] == 'favicon.ico'
         r.deny
@@ -361,7 +359,7 @@ firefox.settings.services.mozilla.com
         r.env['HTTP_ORIGIN'] = 'https://outline.com'
         r.env['HTTP_REFERER'] = r.env['HTTP_ORIGIN'] + r.path
         r.env['SERVER_NAME'] = 'outlineapi.com'
-        options = {intermediate: true}
+        options = {cookies: true, intermediate: true}
         (if r.parts.size == 1
           options[:query] = {id: r.parts[0]}
           '/v4/get_article'.R(r.env).fetch options
