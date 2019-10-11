@@ -76,6 +76,7 @@ wp-rum)
     NoGunk  = -> r {r.gunkURI ? r.deny : r.fetch}
     NoJS    = -> r {(r.gunkURI || r.ext=='js') ? r.deny : r.fetch}
     NoQuery = -> r {r.qs.empty? ? r.fetch : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
+    RootIndex = -> r {r.path=='/' ? r.cachedGraph : NoGunk[r]}
     Resizer = -> r {
       if r.parts[0] == 'resizer'
         parts = r.path.split /\/\d+x\d+\/((filter|smart)[^\/]*\/)?/
@@ -292,7 +293,7 @@ android.clients.google.com
     Allow 'dev.inrupt.net'
 
     # Instagram
-    GET 'www.instagram.com', -> r {r.path=='/' ? r.cachedGraph : r.fetch}
+    GET 'www.instagram.com', RootIndex
     GET 'www.pictame.com',   -> r {r.parts[1] ? [301, {'Location' => 'https://www.instagram.com/'+r.parts[1]}, []] : r.deny}
 
     # Linkedin
@@ -414,6 +415,7 @@ firefox.settings.services.mozilla.com
 
     # Soundcloud
     GET 'gate.sc', GotoURL
+    GET 'soundcloud.com', RootIndex
     GET 'w.soundcloud.com', Desktop
     %w(api-auth.soundcloud.com
        api-mobi.soundcloud.com
