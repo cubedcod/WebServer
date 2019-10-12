@@ -384,7 +384,7 @@ firefox.settings.services.mozilla.com
     GET 'reddit.com',     -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path}, []]}
     GET 'www.reddit.com', -> r {
       options = {}
-      r = ('/r/' + r.subscriptions.join('+') + '/new').R r.env if r.path == '/'
+      r = ('/r/' + 'com/reddit/www/r/*/.sub*'.R.glob.map(&:dir).map(&:basename).join('+') + '/new').R r.env if r.path == '/'
       r.desktopUI if r.parts[-1] == 'submit'
       options[:suffix] = '.rss' if r.ext.empty? && !r.upstreamUI?
       depth = r.parts.size
@@ -459,7 +459,7 @@ firefox.settings.services.mozilla.com
     GET 'twitter.com', -> r {
       r.desktopUA
       if !r.path || r.path == '/'
-        '//twitter.com'.R.subscriptions.shuffle.each_slice(18){|s|
+        'com/twitter/*/.follow*'.R.glob.map(&:dir).map(&:basename).shuffle.each_slice(18){|s|
           '/search'.R(r.env).fetch intermediate: true, noRDF: true, query: {vertical: :default, f: :tweets, q: s.map{|u|'from:'+u}.join('+OR+')}}
         r.index.graphResponse
       elsif r.gunkURI
@@ -542,17 +542,6 @@ heartbeat iframe_api live_chat manifest.json opensearch playlist results signin 
     # Zillow
     Allow 'www.zillow.com'
 
-  end
-
-  def subscriptions
-    (case host
-     when /reddit.com$/
-       '/www.reddit.com/r/*/.sub'
-     when /twitter.com$/
-       '/twitter.com/*/.following'
-     else
-       '/feed/'+[host, *parts].join('.')
-     end).R.glob.map(&:dir).map(&:basename)
   end
 
   def AP doc
