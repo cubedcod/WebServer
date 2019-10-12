@@ -68,6 +68,7 @@ wp-rum)
   module HTTP
     Desktop = -> r {r.gunkURI ? r.deny : r.desktopUI.fetch}
     DesktopUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
+    Fetch = -> r {r.fetch}
     GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : r.deny}
     GotoBasename = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
     GotoU   = -> r {[301, {'Location' =>  r.env[:query]['u']}, []]}
@@ -173,21 +174,22 @@ images-na.ssl-images-amazon.com
 
     # Facebook
     FBgunk = %w(common connect pages_reaction_units plugins security tr)
-    FBlite = -> r {FBgunk.member?(r.parts[0]) ? r.deny : r.fetch}
+    FBlite = -> r {FBgunk.member?(r.parts[0]) ? r.deny : NoGunk[r]}
+
     %w(  facebook.com
 business.facebook.com
        m.facebook.com
      www.facebook.com
-    www.instagram.com).map{|host|
+).map{|host|
       if ENV.has_key?('FACEBOOK')
         Allow host
+        GET host, Fetch
       else
-        GET host, FBlite unless host.match /insta/
+        GET host, FBlite
       end}
-    %w(l.instagram.com
-       l.facebook.com
-      lm.facebook.com
-).map{|host|
+
+    %w(l.facebook.com
+      lm.facebook.com).map{|host|
       GET host, GotoU}
 
     # Forbes
@@ -205,7 +207,7 @@ business.facebook.com
     GET 'thumbs.gfycat.com', NoGunk
 
     # GitLab
-    GET 'assets.gitlab-static.net', -> r {r.fetch}
+    GET 'assets.gitlab-static.net', Fetch
 
     # Google
     %w(ajax.googleapis.com
@@ -293,6 +295,7 @@ android.clients.google.com
     Allow 'dev.inrupt.net'
 
     # Instagram
+    GET 'l.instagram.com', GotoU
     GET 'www.instagram.com', RootIndex
     GET 'www.pictame.com',   -> r {r.parts[1] ? [301, {'Location' => 'https://www.instagram.com/'+r.parts[1]}, []] : r.deny}
 
@@ -315,7 +318,7 @@ android.clients.google.com
     GET 'thumb.cloud.mail.ru', NoJS
 
     # Mastodon
-    GET 'files.mastodon.social', -> r {r.fetch}
+    GET 'files.mastodon.social', Fetch
 
     # Medium
     GET 'medium.com', -> r {r.env[:query].has_key?('redirecturl') ? [301, {'Location' => r.env[:query]['redirecturl']}, []] : r.fetch}
