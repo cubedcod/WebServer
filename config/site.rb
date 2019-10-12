@@ -225,7 +225,6 @@ encrypted-tbn3.gstatic.com
            maps.google.com
        maps.googleapis.com
           maps.gstatic.com
-           news.google.com
         scholar.google.com
     storage.googleapis.com
 ).map{|h| Allow h }
@@ -247,6 +246,7 @@ android.clients.google.com
              id.google.com
              kh.google.com
            mail.google.com
+           news.google.com
             ogs.google.com
            play.google.com
        play.googleapis.com
@@ -372,6 +372,9 @@ firefox.settings.services.mozilla.com
           '/article'.R(r.env).fetch options
          end).index.graphResponse
       end}
+
+    # Patch
+    GET 'patch.com', NoQuery
 
     # Reddit
     Allow 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
