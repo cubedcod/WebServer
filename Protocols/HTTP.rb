@@ -51,13 +51,13 @@ class WebResource
         mime = head['Content-Type'] || ''
         verbose = resource.verbose?                              # log request
         if resource.env[:deny]
-          if %w(css eot otf ttf woff woff2).member?(ext) || %w(activeview activity-stream addthis_widget.js ads ad_status.js all.js analytics.js annotations_invideo api.js apstag.js atrk.js attribution b.gif beacon.js bullseye buttons.js cast_sender.js collect conv config.js count.js count.json css crx download ddljson embed.js endscreen.js events experimentstatus favicon.ico fbevents.js FeedQuery fullHashes:find g.gif id inflowcomponent get_endscreen get_midroll_info gpt.js gtm.js ima3.js js json ListAccounts load log log_event lvz m newtab_ogb newtab_promos p p.js page_view pay ping.gif platform.js pixel ptracking push_service_worker.js qoe quant.js query remote.js remote-login.php rtm rundown scheduler.js search seed serviceworker service-worker.js sdk.js service_ajax session sw.js sync threatListUpdates:fetch tr track tracker uc.js utag.js view widgets.js yql).member?(resource.basename) || resource.parts.member?('stats')
+          if %w(css eot otf ttf woff woff2).member?(ext) || %w(activeview activity-stream addthis_widget.js ads ad_status.js all.js analytics.js annotations_invideo api.js apstag.js atrk.js attribution b.gif beacon.js bullseye buttons.js c.gif cast_sender.js collect conv config.js count.js count.json css crx download downloads ddljson embed.js endscreen.js events experimentstatus favicon.ico fbevents.js FeedQuery fonts fullHashes:find g.gif id inflowcomponent get_endscreen get_midroll_info gpt.js gtm.js ima3.js in.js js json ListAccounts load loader.js log log_event lvz m newtab_ogb newtab_promos p p.js page_view pay ping ping.gif platform.js pixel ptracking push_service_worker.js qoe quant.js query remote.js remote-login.php rtm rundown scheduler.js search seed serviceworker service-worker.js sdk.js service_ajax session sw.js sync threatListUpdates:fetch tr track tracker uc.js utag.js view w.js widgets.js yql).member?(resource.basename) || resource.parts.member?('stats')
             print "🛑"
           elsif path.match? /204$/
             print "🛑"                                           # blocked
           else
             referer_host = env['HTTP_REFERER'] && env['HTTP_REFERER'].R.host
-            print "\n🛑 \e[31;1m" + (referer_host ? ("\e[7m" + referer_host + "\e[0m\e[31;1m → ") : '') + (referer_host == resource.host ? '' : resource.host) + "\e[7m" + resource.path + "\e[0m\e[31m" + resource.qs + "\e[0m "
+            print "\n" + (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "🛑 \e[31;1m") + (referer_host ? ("\e[7m" + referer_host + "\e[0m\e[31;1m → ") : '') + (referer_host == resource.host ? '' : resource.host) + "\e[7m" + resource.path + "\e[0m\e[31m" + resource.qs + "\e[0m "
             resource.env[:query]&.map{|k,v|
               print "\n\e[7m#{k}\e[0m\t#{v}"} if verbose
           end
@@ -327,9 +327,9 @@ class WebResource
     end
 
     def fixedFormat? format = nil
-      return true if ENV.has_key?('UX') || env.has_key?(:UX) || env[:query].has_key?('UX') # upstream user-experience
-      return false if !format || (format.match? /\/(atom|rss|xml)/i) # allow feed rewriting
-      format.match? NoTransform # MIME-regex, application/ + media formats are fixed, graph + text formats transformable
+      return true if upstreamUI?
+      return false if !format || (format.match? /\/(atom|rss|xml)/i) # feeds are rewritable
+      format.match? NoTransform # MIME-regex, application & media categories fixed, graph + text formats transformable
     end
 
     def self.GET arg, lambda
@@ -673,9 +673,8 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       default                                                 # HTML via default
     end
 
-    def upstreamUI; env[:UX] = true; self end
-
-    def upstreamUI?; ENV.has_key?('UX') || env.has_key?(:UX) || env[:query].has_key?('UX') end
+    def upstreamUI;  env[:UX] = true; self end
+    def upstreamUI?; env.has_key?(:UX) || ENV.has_key?('UX') || env[:query].has_key?('UX') || env['HTTP_REFERER']&.match?(/UX=upstream/) end
 
     def verbose?; ENV.has_key? 'VERBOSE' end
 
