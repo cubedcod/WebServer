@@ -125,6 +125,7 @@ images-na.ssl-images-amazon.com
     # Brightcove
     Allow 'players.brightcove.net'
     Allow 'edge.api.brightcove.com'
+    Allow 'secure.brightcove.com'
 
     # Brightspot
     GET 'ca-times.brightspotcdn.com', GoIfURL
