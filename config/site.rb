@@ -411,11 +411,7 @@ firefox.settings.services.mozilla.com
         end}}
 
     # Shopify
-    if ENV.has_key? 'SHOPIFY'
-      Allow 'cdn.shopify.com'
-    else
-      GET 'cdn.shopify.com', NoJS
-    end
+    GET 'cdn.shopify.com', NoGunk
 
     # Skimmer
     GET 'go.skimresources.com', GotoURL

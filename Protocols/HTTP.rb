@@ -80,10 +80,8 @@ class WebResource
           print "\n📜\e[36;1m https://" + resource.host + "\e[7m" + resource.path + "\e[0m "
         elsif ext == 'json' || mime.match?(/json/)
           print "\n🗒 https://" + resource.host + resource.path + resource.qs + ' '
-        elsif %w(gif jpeg jpg).member?(ext)
-          print '🖼️'                                              # picture
-        elsif %w(png svg webp).member?(ext) || mime.match?(/^image/)
-          print '🖌'                                              # image
+        elsif %w(gif jpeg jpg png svg webp).member?(ext) || mime.match?(/^image/)
+          print '🖼️'                                              # image
         elsif %w(aac flac m4a mp3 ogg opus).member?(ext) || mime.match?(/^audio/)
           print '🔉'                                             # audio
         elsif %w(mp4 webm).member?(ext) || mime.match?(/^video/)
