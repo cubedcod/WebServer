@@ -33,13 +33,13 @@ class WebResource
 
     # filesystem metadata -> Graph
     def nodeStat options = {}
-      return if basename.index('msg.') == 0 || ext=='ttl'           # hide native graph-storage
+      return if basename.index('msg.') == 0 || ext=='ttl'           # hide native graph-storage files
       subject = (options[:base_uri] || path.sub(/\.(md|ttl)$/,'')).R
       graph = env[:repository] ||= RDF::Repository.new
       if node.directory?
-        subject = subject.path[-1] == '/' ? subject : (subject+'/') # trailing slash on container URI
+        subject = subject.path[-1] == '/' ? subject : (subject+'/') # enforce trailing slash on container URIs
         graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#Container').R)
-        node.children.map{|n|                                       # contained nodes
+        node.children.map{|n|                                       # point to contained nodes
           name = n.basename.to_s
           name = n.directory? ? (name + '/') : name.sub(/\.ttl$/, '')
           child = subject.join name
