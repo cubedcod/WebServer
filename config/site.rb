@@ -177,7 +177,7 @@ images-na.ssl-images-amazon.com
       r.env[:query].has_key?('mpre') ? [301, {'Location' => r.env[:query]['mpre']}, []] : r.deny}
 
     # Facebook
-    FBgunk = %w(common connect pages_reaction_units plugins security tr)
+    FBgunk = %w(common connect pages_reaction_units security tr)
 
     if ENV.has_key?('FACEBOOK')
       %w(facebook.com
@@ -227,7 +227,9 @@ encrypted-tbn3.gstatic.com
        maps.googleapis.com
           maps.gstatic.com
         scholar.google.com
+           ssl.gstatic.com
     storage.googleapis.com
+           www.gstatic.com
 ).map{|h| Allow h }
 
     if ENV.has_key? 'GOOGLE'
@@ -251,13 +253,11 @@ android.clients.google.com
             ogs.google.com
            play.google.com
        play.googleapis.com
-           ssl.gstatic.com
  suggestqueries.google.com
  tpc.googlesyndication.com
             www.google.com
   www.googleadservices.com
         www.googleapis.com
-           www.gstatic.com
          www.recaptcha.net
 ).map{|host|
       Allow host}
