@@ -314,10 +314,15 @@ android.clients.google.com
     GET 'l.instagram.com', GotoU
     GET 'www.instagram.com', RootIndex
 
-    IG3 =  -> r {r.parts[1] ? [301, {'Location' => 'https://www.instagram.com/'+r.parts[1]}, []] : r.deny}
+    IG0 =  -> r {r.parts[0] ? [301, {'Location' => 'https://www.instagram.com/'+r.parts[0]}, []] : r.deny}
+    IG1 =  -> r {r.parts[1] ? [301, {'Location' => 'https://www.instagram.com/'+r.parts[1]}, []] : r.deny}
+
+    %w(saveig.org).map{|host|
+      GET host, IG0}
+
     %w(pikdo.net
  www.pictame.com).map{|host|
-      GET host, IG3}
+      GET host, IG1}
 
     # Linkedin
     if ENV.has_key? 'LINKEDIN'
@@ -470,6 +475,7 @@ firefox.settings.services.mozilla.com
     Allow 'proxsee.pscp.tv'
     GotoTwitter = -> r {[301,{'Location' => 'https://twitter.com' + r.path },[]]}
     GET 'mobile.twitter.com', GotoTwitter
+    GET 'tweettunnel.com', GotoTwitter
     GET 'www.twitter.com', GotoTwitter
     GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : r.fetch}
     GET 'twitter.com', -> r {
