@@ -506,10 +506,11 @@ firefox.settings.services.mozilla.com
       GET "i#{i}.wp.com", NoQuery}
 
     # Yahoo!
-    %w(
-    finance.yahoo.com
-       news.yahoo.com
-    sg.news.yahoo.com).map{|host|
+    %w(finance.yahoo.com
+          news.yahoo.com
+       sg.news.yahoo.com
+media-mbst-pub-ue1.s3.amazonaws.com
+).map{|host|
       GET host, NoJS}
 
     GET 's.yimg.com', -> r {
