@@ -8,6 +8,7 @@ module Webize
       Triplr = {
         'apnews.com' => :AP,
         'boards.4channel.org' => :FourChannel,
+        'github.com' => :GitHub,
         'lwn.net' => :LWN,
         'news.ycombinator.com' => :HackerNews,
         'twitter.com' => :Twitter,
@@ -646,6 +647,9 @@ heartbeat iframe_api live_chat manifest.json opensearch playlist results signin 
             }
           end}
       end}
+  end
+
+  def GitHub doc
   end
 
   def GoogleHTML doc
