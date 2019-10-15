@@ -7,6 +7,7 @@ module Webize
 
       Triplr = {
         'apnews.com' => :AP,
+        'boards.4channel.org' => :FourChannel,
         'lwn.net' => :LWN,
         'news.ycombinator.com' => :HackerNews,
         'twitter.com' => :Twitter,
@@ -599,7 +600,10 @@ heartbeat iframe_api live_chat manifest.json opensearch playlist results signin 
         end
       end
       post.remove }
-    %w{#fixed_sidebar}.map{|s|doc.css(s).map &:remove}
+    ['#fixed_sidebar'].map{|s|doc.css(s).map &:remove}
+  end
+
+  def FourChannel doc
   end
 
   GHgraph = /__gh__coreData.content=(.*?)\s*__gh__coreData.content.bylineFormat/m
