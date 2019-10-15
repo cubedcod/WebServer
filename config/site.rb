@@ -155,7 +155,7 @@ images-na.ssl-images-amazon.com
     GET 'www.cnet.com', NoJS
 
     # CNN
-    %w(cdn www).map{|host|
+    %w(cdn edition www).map{|host|
       Allow host + '.cnn.com'}
     GET 'dynaimage.cdn.cnn.com', GotoBasename
 
@@ -762,7 +762,7 @@ heartbeat iframe_api live_chat manifest.json opensearch playlist results signin 
   def Twitter doc
     %w{grid-tweet tweet}.map{|tweetclass|
       doc.css('.' + tweetclass).map{|tweet|
-        s = 'https://twitter.com' + (tweet.css('.js-permalink').attr('href') || tweet.attr('data-permalink-path'))
+        s = 'https://twitter.com' + (tweet.css('.js-permalink').attr('href') || tweet.attr('data-permalink-path') || '')
         yield s, Type, Post.R
         yield s, To, 'https://twitter.com'.R
 
