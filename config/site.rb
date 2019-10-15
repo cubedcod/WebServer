@@ -313,7 +313,11 @@ android.clients.google.com
     # Instagram
     GET 'l.instagram.com', GotoU
     GET 'www.instagram.com', RootIndex
-    GET 'www.pictame.com',   -> r {r.parts[1] ? [301, {'Location' => 'https://www.instagram.com/'+r.parts[1]}, []] : r.deny}
+
+    IG3 =  -> r {r.parts[1] ? [301, {'Location' => 'https://www.instagram.com/'+r.parts[1]}, []] : r.deny}
+    %w(pikdo.net
+ www.pictame.com).map{|host|
+      GET host, IG3}
 
     # Linkedin
     if ENV.has_key? 'LINKEDIN'
