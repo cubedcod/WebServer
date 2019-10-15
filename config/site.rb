@@ -175,19 +175,16 @@ images-na.ssl-images-amazon.com
 
     # Facebook
     FBgunk = %w(common connect pages_reaction_units plugins security tr)
-    FBlite = -> r {FBgunk.member?(r.parts[0]) ? r.deny : NoGunk[r]}
 
-    %w(  facebook.com
+    if ENV.has_key?('FACEBOOK')
+      %w(facebook.com
 business.facebook.com
        m.facebook.com
      www.facebook.com
 ).map{|host|
-      if ENV.has_key?('FACEBOOK')
         Allow host
-        GET host, Fetch
-      else
-        GET host, FBlite
-      end}
+        GET host, -> r {FBgunk.member?(r.parts[0]) ? r.deny : NoGunk[r]}}
+    end
 
     %w(l.facebook.com
       lm.facebook.com).map{|host|
