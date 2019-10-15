@@ -5,6 +5,7 @@ class WebResource
     include URIs
     AllowedHosts = {}
     BaseMeta = %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie)
+    CookieHost = {}
     HostGET = {}
     HostPOST = {}
     LocalAddr = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
@@ -109,6 +110,10 @@ class WebResource
     end
 
     def CDN?; host.match? /\.(amazonaws|cloud(f(lare|ront)|inary)|netdna.*)\.(com|net)$/ end
+
+    def self.Cookies host
+      CookieHost[host] = true
+    end
 
     def dateMeta
       n = nil # next page
@@ -401,7 +406,7 @@ remote-addr repository request-method request-path request-uri resp script-name 
 transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
 
       # Cookie
-      unless AllowedHosts.has_key? host
+      unless AllowedHosts.has_key?(host) || CookieHost.has_key?(host)
         head.delete 'Cookie'
         head.delete 'Set-Cookie'
       end

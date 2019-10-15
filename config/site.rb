@@ -295,6 +295,8 @@ android.clients.google.com
 ).map{|host|
       GET host, NoGunk}
 
+    Cookies 'imgur.com'
+
     POST 'imgur.com', -> r {
       if r.path == '/signin'
         r.POSTthru
