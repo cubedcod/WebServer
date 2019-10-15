@@ -650,6 +650,22 @@ heartbeat iframe_api live_chat manifest.json opensearch playlist results signin 
   end
 
   def GitHub doc
+    base = 'https://github.com'
+    doc.css('div.comment').map{|comment|
+      subject = uri + comment.css('.js-timestamp')[0]['href']
+      yield subject, Type, Post.R
+      if body = comment.css('.comment-body')[0]
+        yield subject, Content, body.inner_html
+      end
+      if time = comment.css('[datetime]')[0]
+        yield subject, Date, time['datetime']
+      end
+      if author = comment.css('.author')[0]
+        yield subject, Creator, (base + author['href']).R
+        yield subject, Creator, author.inner_text
+      end
+      yield subject, To, self
+    }
   end
 
   def GoogleHTML doc
