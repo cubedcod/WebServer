@@ -51,7 +51,7 @@ class WebResource
         mime = head['Content-Type'] || ''
         verbose = resource.verbose?                              # log request
         if resource.env[:deny]
-          if path=='/' || %w(css eot otf ttf woff woff2).member?(ext) || %w(activeview activity-stream addthis_widget.js ads ad_status.js all.js analytics.js annotations_invideo api.js apstag.js atrk.js attribution b.gif beacon.js blank.gif bullseye buttons.js c.gif cast_sender.js chartbeat.js collect conv config.js count.js count.json css crx download downloads ddljson embed.js embeds.js endscreen.js events experimentstatus favicon.ico fbevents.js FeedQuery fonts fullHashes:find g.gif id inflowcomponent get_endscreen get_midroll_info gpt.js gtm.js ima3.js in.js js json ListAccounts load load.js loader.js log log_event lvz m newtab_ogb newtab_promos outbrain.js p p.js page_view pay ping ping.gif ping-centre platform.js pixel ptracking push_service_worker.js qoe quant.js query remote.js remote-login.php rtm rundown scheduler.js search seed serviceworker service-worker.js sdk.js service_ajax session sw.js sync threatListUpdates:fetch tr track tracker uc.js utag.js view w.js widgets.js yql).member?(resource.basename) || resource.parts.member?('stats')
+          if path=='/' || %w(css eot otf ttf woff woff2).member?(ext) || QuietGunk.member?(resource.basename) || resource.parts.member?('stats')
             print "🛑"
           elsif path.match? /204$/
             print "🛑"                                           # blocked
