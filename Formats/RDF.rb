@@ -43,10 +43,12 @@ class WebResource
           name = n.basename.to_s
           name = n.directory? ? (name + '/') : name.sub(/\.ttl$/, '')
           child = subject.join name
+          graph << (RDF::Statement.new subject, (W3+'ns/ldp#contains').R, child)
           graph << (RDF::Statement.new child, Title.R, name)
-          graph << (RDF::Statement.new child, Date.R, n.stat.mtime.iso8601)
-          graph << (RDF::Statement.new child, (W3+'ns/posix/stat#size').R, n.size) if n.file?
-          graph << (RDF::Statement.new subject, (W3+'ns/ldp#contains').R, child)}
+          if n.file?
+            graph << (RDF::Statement.new child, Date.R, n.stat.mtime.iso8601)
+            graph << (RDF::Statement.new child, (W3+'ns/posix/stat#size').R, n.size)
+          end}
       else
         graph << (RDF::Statement.new subject, Type.R, (W3+'ns/posix/stat#File').R)
       end
