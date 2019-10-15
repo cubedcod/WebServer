@@ -40,14 +40,23 @@ class WebResource
         subject = subject.path[-1] == '/' ? subject : (subject+'/') # enforce trailing slash on container URIs
         graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#Container').R)
         node.children.map{|n|                                       # point to contained nodes
+          directory = n.directory?
+          file = n.file?
           name = n.basename.to_s
-          name = n.directory? ? (name + '/') : name.sub(GraphExt, '')
+          name = directory ? (name + '/') : name.sub(GraphExt, '')
           child = subject.join name
           graph << (RDF::Statement.new subject, (W3+'ns/ldp#contains').R, child)
           graph << (RDF::Statement.new child, Title.R, name)
-          if n.file?
-            graph << (RDF::Statement.new child, Date.R, n.stat.mtime.iso8601)
+          if directory
+            graph << (RDF::Statement.new child, Type.R, (W3+'ns/ldp#Container').R)
+          elsif file
+            graph << (RDF::Statement.new child, Type.R, (W3+'ns/posix/stat#File').R)
             graph << (RDF::Statement.new child, (W3+'ns/posix/stat#size').R, n.size)
+          end
+          if file || directory
+            mtime = n.stat.mtime
+            graph << (RDF::Statement.new child, Date.R, mtime.iso8601)
+            graph << (RDF::Statement.new child, (W3+'ns/posix/stat#mtime').R, mtime.to_i)
           end}
       else
         graph << (RDF::Statement.new subject, Type.R, (W3+'ns/posix/stat#File').R)
