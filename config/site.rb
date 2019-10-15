@@ -75,7 +75,7 @@ wp-rum)
     Desktop = -> r {r.gunkURI ? r.deny : r.desktopUI.fetch}
     DesktopUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
     Fetch = -> r {r.fetch}
-    GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : r.deny}
+    GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : NoGunk[r]}
     GotoBasename = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
     GotoU   = -> r {[301, {'Location' =>  r.env[:query]['u']}, []]}
     GotoURL = -> r {[301, {'Location' => (r.env[:query]['url']||r.env[:query]['q'])}, []]}

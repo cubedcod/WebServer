@@ -165,6 +165,7 @@ sidebar [class^='side']    [id^='side']
             if v = m.attr("href") # object
               @base.env[:links][:prev] ||= v if k=='prev'
               @base.env[:links][:next] ||= v if k=='next'
+              @base.env[:links][:feed] ||= v if k=='alternate' && v.R.path.match?(/^\/feed\/?$/)
               k = MetaMap[k] || k
               puts [k, v].join "\t" unless k.to_s.match? /^(drop|http)/
               yield subject, k, v.R unless k == :drop
