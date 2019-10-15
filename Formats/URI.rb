@@ -46,6 +46,7 @@ class WebResource < RDF::URI
     Person   = FOAF + 'Person'
     Podcast  = 'http://www.itunes.com/dtds/podcast-1.0.dtd#'
     Post     = SIOC + 'Post'
+    RDFs     = W3 + '2000/01/rdf-schema#'
     RSS      = 'http://purl.org/rss/1.0/'
     Schema   = 'http://schema.org/'
     Stat     = W3 + 'ns/posix/stat#'
