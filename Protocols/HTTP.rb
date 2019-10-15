@@ -90,7 +90,7 @@ class WebResource
         elsif ext == 'ttl' || mime == 'text/turtle; charset=utf-8'
           print '🐢'                                             # turtle
         else
-          print "\n" + (env[:remote] ? '🌍🌎🌏🌐'[rand 4] : '') + "\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : (env['REQUEST_METHOD']+' ')) + (status == 200 ? '' : (status.to_s+' ')) +
+          print "\n\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : (env['REQUEST_METHOD']+' ')) + (status == 200 ? '' : (status.to_s+' ')) +
                 (env['HTTP_REFERER'] ? ((env['HTTP_REFERER'].R.host||'') + ' → ') : '') +
                 "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + resource.qs + "\e[0m "
         end
@@ -278,7 +278,7 @@ class WebResource
     # fetch over HTTP
     def fetchHTTP options = {}
       open(uri, headers.merge({redirect: false})) do |response|           # fetch
-        h = response.meta; env[:remote] = true                            # metadata
+        h = response.meta; print '🌍🌎🌏🌐'[rand 4]                       # metadata
         if response.status.to_s.match? /206/                              # partial body
           [206, h, [response.read]]                                       # return part
         else                                                              # complete body
