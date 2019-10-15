@@ -506,14 +506,18 @@ firefox.settings.services.mozilla.com
       GET "i#{i}.wp.com", NoQuery}
 
     # Yahoo!
-    Allow 'news.yahoo.com'
-    Allow 'sg.news.yahoo.com'
+    %w(
+    finance.yahoo.com
+       news.yahoo.com
+    sg.news.yahoo.com).map{|host|
+      GET host, NoJS}
+
     GET 's.yimg.com', -> r {
       parts = r.path.split /https?:\/+/
       if parts.size > 1
         [301, {'Location' => 'https://' + parts[-1]}, []]
       else
-        r.fetch
+        NoJS[r]
       end}
 
     # Yelp
