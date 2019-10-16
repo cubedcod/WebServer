@@ -118,6 +118,7 @@ class WebResource < RDF::URI
 
   module POSIX
     include URIs
+    GlobChars = /[\*\{\[]/
     def basename; File.basename ( path || '/' ) end                 # BASENAME(1)
     def dir; dirname.R if path end                                  # DIRNAME(1)
     def directory?; node.directory? end

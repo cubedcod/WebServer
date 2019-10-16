@@ -69,9 +69,9 @@ activeview activity-stream addthis_widget.js admin-ajax.php ads ad_status.js all
  download downloads ddljson embed.js embeds.js endscreen.js events experimentstatus
  falco favicon.ico fbevents.js FeedQuery fonts fullHashes:find
  g.gif id inflowcomponent get_endscreen get_midroll_info gpt.js gtm.js ima3.js i.js in.js
- jot js json ListAccounts load load.js loader.js log log_event logging_client_events lvz
+ jot js json like.php ListAccounts load load.js loader.js log log_event logging_client_events lvz
  m newtab_ogb newtab_promos outbrain.js
- p p.js page_view pay ping ping.gif ping-centre pinit.js platform.js pixel pixel.gif pixelpropagate.js ptracking push_service_worker.js
+ p p.js page_view pay ping ping.gif ping-centre pinit.js platform.js pixel pixel.gif pixelpropagate.js ptracking push_service_worker.js px.gif px.js
  qoe quant.js query remote.js remote-login.php rtm rundown
  scheduler.js script.js search seed serviceworker service-worker.js sdk.js service_ajax session sw.js sync
  threatListUpdates:fetch tr track tracker trends uc.js utag.js v3 view w.js widgets.js yql)
@@ -95,7 +95,7 @@ activeview activity-stream addthis_widget.js admin-ajax.php ads ad_status.js all
     NoGunk  = -> r {r.gunkURI ? r.deny : r.fetch}
     NoJS    = -> r {(r.gunkURI || r.ext=='js') ? r.deny : r.fetch}
     NoQuery = -> r {r.qs.empty? ? r.fetch : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
-    RootIndex = -> r {r.path=='/' ? r.cachedGraph : NoGunk[r]}
+
     Resizer = -> r {
       if r.parts[0] == 'resizer'
         parts = r.path.split /\/\d+x\d+\/((filter|smart)[^\/]*\/)?/
@@ -105,6 +105,8 @@ activeview activity-stream addthis_widget.js admin-ajax.php ads ad_status.js all
       else
         NoJS[r]
       end}
+
+    RootIndex = -> r {r.path=='/' ? r.cachedGraph : NoGunk[r]}
 
     # ABC
     Allow 'abcnews.go.com'
@@ -454,7 +456,7 @@ firefox.settings.services.mozilla.com
     # Shopify
     GET 'cdn.shopify.com', NoGunk
 
-    # Skimmer
+    # SkimResources
     GET 'go.skimresources.com', GotoURL
 
     # Soundcloud

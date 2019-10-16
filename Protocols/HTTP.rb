@@ -292,7 +292,7 @@ class WebResource
           reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|  # instantiate RDF reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader   # read RDF
           options[:intermediate] ? (return self) : index                  # return if load-only
-          BaseMeta.map{|k|env[:resp][k]||=h[k.downcase] if h[k.downcase]} # downstream metadata
+          BaseMeta.map{|k|env[:resp][k]||=h[k.downcase] if h[k.downcase]} # ustream metadata
           env[:resp]['Content-Length'] = body.bytesize.to_s               # content-length
           (fixedFormat? format) ? [200,env[:resp],[body]] : graphResponse # HTTP response
         end
@@ -484,7 +484,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
          [self]
        end
       else                             # GLOB
-        if uri.match /[\*\{\[]/        # parametric glob
+        if uri.match GlobChars         # parametric glob
           env[:grep] = true if env[:query].has_key?('q')
           glob
         else                           # basic glob:
