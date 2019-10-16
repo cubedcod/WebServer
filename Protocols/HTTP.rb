@@ -2,6 +2,7 @@
 %w(brotli cgi httparty open-uri rack).map{|_| require _}
 class WebResource
   module HTTP
+    include POSIX
     include URIs
     AllowedHosts = {}
     BaseMeta = %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie)
@@ -29,13 +30,14 @@ class WebResource
       end
     end
 
-    def cache; (hostpath + path).R env end
+    def cachePath; (hostpath + path).R env end
+    alias_method :cache, :cachePath
 
     def cachedResource; cache.file? ? cache.fileResponse : cachedGraph end
 
     def cachedGraph
       env[:repository] ||= RDF::Repository.new
-      cache.nodes.map{|node|
+      cachePath.localNodes.map{|node| puts "cache #{node}"
         node.nodeStat base_uri: self
         env[:repository].load node.relPath, base_uri: self if node.file?}
       graphResponse
@@ -431,6 +433,30 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
 
     def local?; LocalAddr.member?(env['SERVER_NAME']) || ENV['SERVER_NAME'] == env['SERVER_NAME'] end
 
+    def localNodes
+      (if directory?
+       if env[:query].has_key?('f') && path != '/'             # FIND
+          find env[:query]['f'] unless env[:query]['f'].empty? # exact
+       elsif env[:query].has_key?('find') && path != '/'       # easy-mode
+          find '*' + env[:query]['find'] + '*' unless env[:query]['find'].empty?
+       elsif (env[:query].has_key?('Q') || env[:query].has_key?('q')) && path != '/'
+         env[:grep] = true                                     # GREP
+         grep
+       else                                                    # LS
+         [self]
+       end
+      else                             # GLOB
+        if uri.match GlobChars         # parametric glob
+          env[:grep] = true if env[:query].has_key?('q')
+          glob
+        else                           # basic glob:
+          files = (self + '.*').R.glob #  base + extension
+          files = (self + '*').R.glob if files.empty? # prefix
+          [self, files]
+        end
+       end).flatten.compact.uniq.select(&:exist?).map{|n|n.env env}
+    end
+
     def localResource
       if %w{y year m month d day h hour}.member? parts[0] # time-seg redirect
         time = Time.now
@@ -454,7 +480,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
         index.fileResponse
       else # local graph-data
         dateMeta
-        ns = nodes
+        ns = localNodes
         if ns.size==1 && ns[0].ext=='ttl' && selectFormat=='text/turtle'
           ns[0].fileResponse # nothing to transform, deliver graph data
         else
@@ -469,30 +495,6 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
           graphResponse
         end
       end
-    end
-
-    def nodes
-      (if directory?
-       if env[:query].has_key?('f') && path != '/'             # FIND
-          find env[:query]['f'] unless env[:query]['f'].empty? # exact
-       elsif env[:query].has_key?('find') && path != '/'       # easy-mode
-          find '*' + env[:query]['find'] + '*' unless env[:query]['find'].empty?
-       elsif (env[:query].has_key?('Q') || env[:query].has_key?('q')) && path != '/'
-         env[:grep] = true                                     # GREP
-         grep
-       else                                                    # LS
-         [self]
-       end
-      else                             # GLOB
-        if uri.match GlobChars         # parametric glob
-          env[:grep] = true if env[:query].has_key?('q')
-          glob
-        else                           # basic glob:
-          files = (self + '.*').R.glob #  base + extension
-          files = (self + '*').R.glob if files.empty? # prefix
-          [self, files]
-        end
-       end).flatten.compact.uniq.select(&:exist?).map{|n|n.env env}
     end
 
     def notfound
