@@ -51,7 +51,7 @@ log(event|g(er|ing))?|(app|s)?
 m(e(asurement|t(er|rics?))|ms|odal|tr)|
 new(relic|sletter)|
 o(m(niture|tr)|nboarding|nesignal|ptanon|utbrain)|
-p(a(idpost|rtner|ywall)|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)|lacement|op(over|up)|repopulator|romo(tion)?s?|ubmatic|[vx])|
+p(a(idpost|rtner|ywall)|er(imeter-?x|sonaliz(ation|e))|i(wik|xel(propagate)?)|lacement|op(down|over|up)|repopulator|romo(tion)?s?|ubmatic|[vx])|
 quantcast|
 record(event|stats?)|re?t(ar)?ge?t(ing)?|remote[-_]?(control)?|rpc|
 s?s(a(fe[-_]?browsing|ilthru)|cheduler|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(cial(shar(e|ing))?|urcepoint)|ponsor(ed)?|so|tat(istic)?s?|ubscriber|urvey|w.js|yn(c|dicat(ed|ion)))|
@@ -64,14 +64,17 @@ wp-rum)
 
     QuietGunk = %w(
 activeview activity-stream addthis_widget.js admin-ajax.php ads ad_status.js all.js analytics.js annotations_invideo api.js apstag.js arwing atrk.js attribution avatar
- b.gif beacon.js blank.gif bullseye buttons.js bz c.gif cast_sender.js chartbeat.js collect conv config.js count.js counter.js count.json css crx
+ b.gif beacon.js blank.gif bullseye buttons.js bz
+ c.gif cast_sender.js chartbeat.js collect conv collector config.js count.js counter.js count.json css crx
  download downloads ddljson embed.js embeds.js endscreen.js events experimentstatus
- falco favicon.ico fbevents.js FeedQuery fonts fullHashes:find g.gif id inflowcomponent get_endscreen get_midroll_info gpt.js gtm.js ima3.js i.js in.js
- jot js json ListAccounts load load.js loader.js log log_event logging_client_events lvz m newtab_ogb newtab_promos outbrain.js
- p p.js page_view pay ping ping.gif ping-centre platform.js pixel pixel.gif pixelpropagate.js ptracking push_service_worker.js
+ falco favicon.ico fbevents.js FeedQuery fonts fullHashes:find
+ g.gif id inflowcomponent get_endscreen get_midroll_info gpt.js gtm.js ima3.js i.js in.js
+ jot js json ListAccounts load load.js loader.js log log_event logging_client_events lvz
+ m newtab_ogb newtab_promos outbrain.js
+ p p.js page_view pay ping ping.gif ping-centre pinit.js platform.js pixel pixel.gif pixelpropagate.js ptracking push_service_worker.js
  qoe quant.js query remote.js remote-login.php rtm rundown
  scheduler.js script.js search seed serviceworker service-worker.js sdk.js service_ajax session sw.js sync
- threatListUpdates:fetch tr track tracker trends uc.js utag.js view w.js widgets.js yql)
+ threatListUpdates:fetch tr track tracker trends uc.js utag.js v3 view w.js widgets.js yql)
 
     SiteDir  = (Pathname.new __dir__).relative_path_from Pathname.new Dir.pwd
 
@@ -355,7 +358,9 @@ android.clients.google.com
     GET 'thumb.cloud.mail.ru', NoJS
 
     # Mastodon
+    Allow 'nya.social'
     GET 'files.mastodon.social', Fetch
+    GET 'nya.social', Fetch
 
     # Medium
     GET 'medium.com', -> r {r.env[:query].has_key?('redirecturl') ? [301, {'Location' => r.env[:query]['redirecturl']}, []] : r.fetch}
