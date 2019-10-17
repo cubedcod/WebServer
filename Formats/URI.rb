@@ -55,6 +55,8 @@ class WebResource < RDF::URI
     Type     = W3 + '1999/02/22-rdf-syntax-ns#type'
     Video    = DC + 'Video'
 
+    GraphExt = /\.(md|ttl|u)$/ # extensions of native graph-formats
+
     Icons = { # single-character representation of URI
       'https://twitter.com' => '🐦',
       Abstract => '✍',

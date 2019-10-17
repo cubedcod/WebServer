@@ -30,16 +30,15 @@ class WebResource
   end
 
   module POSIX
-    GraphExt = /\.(md|ttl|u)$/
+
     # filesystem metadata -> Graph
     def nodeStat options = {}
-      return if basename.index('msg.') == 0 || ext=='ttl'           # hide native graph-storage files
-      puts "nodeStat #{uri}"
-      puts options
-      subject = (options[:base_uri] || path.sub(GraphExt,'')).R
+      return if basename.index('msg.') == 0 || ext=='ttl'           # hide graph-storage
       graph = env[:repository] ||= RDF::Repository.new
+      options[:base_uri] ||= path
+      subject = options[:base_uri].R.join basename
       if node.directory?
-        subject = subject.path[-1] == '/' ? subject : (subject+'/') # enforce trailing slash on container URIs
+        subject = subject.to_s[-1] == '/' ? subject : (subject+'/') # enforce trailing slash on container URI
         graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#Container').R)
         node.children.map{|n|                                       # point to contained nodes TODO recursion w/ stop-recursion flag?
           directory = n.directory?
