@@ -37,8 +37,8 @@ class WebResource
 
     def cachedGraph
       cachePath.localNodes.map{|node|
-puts "node #{node} #{self}"
-        node.load base_uri: self}
+puts "node #{node} #{node}"
+        self.load base_uri: self}
       graphResponse
     end
 
@@ -397,7 +397,7 @@ puts "node #{node} #{self}"
 
     def HEAD
       send(Methods['GET']).yield_self{|s,h,_|
-        [s,h,[]]} # return status & header
+        [s,h,[]]} # status & header only
     end
 
     # header formatted and filtered
@@ -447,13 +447,13 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     end
 
     def load options = {}
-      env[:repository] ||= RDF::Repository.new
-      stat options
-      return unless file?
-      options[:base_uri] ||= env['REQUEST_URI']
-      options[:format] ||= formatHint
-      env[:repository].load relPath, options
-      self
+      env[:repository] ||= RDF::Repository.new # graph storage (in-memory)
+      stat options                             # node metadata
+      return self unless file?                 # directories are metadata-only
+      options[:base_uri]||=env['REQUEST_PATH'] # set base-URI
+      options[:format]  ||=formatHint          # path-derived format heuristic
+      env[:repository].load relPath, options   # load node
+      self                                     # node
     end
 
     def local?; LocalAddr.member?(env['SERVER_NAME']) || ENV['SERVER_NAME'] == env['SERVER_NAME'] end
