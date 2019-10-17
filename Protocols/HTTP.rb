@@ -36,10 +36,8 @@ class WebResource
     def cachedResource; cache.file? ? cache.fileResponse : cachedGraph end
 
     def cachedGraph
-      env[:repository] ||= RDF::Repository.new
-      cachePath.localNodes.map{|node| puts "cache #{node}"
-        node.nodeStat base_uri: self
-        env[:repository].load node.relPath, base_uri: self if node.file?}
+      cachePath.localNodes.map{|node|
+        node.load base_uri: self}
       graphResponse
     end
 
@@ -447,6 +445,15 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       head # output header
     end
 
+    def load options = {}
+      env[:repository] ||= RDF::Repository.new
+      stat options
+      return unless file?
+      options[:format] ||= formatHint
+      env[:repository].load relPath, options
+      self
+    end
+
     def local?; LocalAddr.member?(env['SERVER_NAME']) || ENV['SERVER_NAME'] == env['SERVER_NAME'] end
 
     def localGraph
@@ -455,14 +462,8 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       if nodes.size==1 && nodes[0].ext=='ttl' && selectFormat=='text/turtle'
         nodes[0].fileResponse # nothing to transform, deliver graph-data
       else
-        env[:repository] ||= RDF::Repository.new
         nodes.map{|node|
-          node.nodeStat
-          options = {base_uri: self}
-          if format = node.formatHint
-            options[:format] = format
-          end
-          env[:repository].load node.relPath, options if node.file?}
+          node.load base_uri: self}
         graphResponse
       end
     end

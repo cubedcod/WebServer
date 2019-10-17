@@ -30,9 +30,7 @@ class WebResource
   end
 
   module POSIX
-
-    # filesystem metadata -> Graph
-    def nodeStat options = {}
+    def stat options = {}
       return if basename.index('msg.') == 0 || ext=='ttl'           # hide graph-storage
       graph = env[:repository] ||= RDF::Repository.new
       options[:base_uri] ||= path
@@ -69,7 +67,6 @@ class WebResource
       graph << (RDF::Statement.new subject, Date.R, mtime.iso8601)
       self
     end
-
   end
 end
 
