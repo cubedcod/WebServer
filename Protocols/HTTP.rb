@@ -494,11 +494,11 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     def localResource
       if %w{y year m month d day h hour}.member? parts[0]
         dateDir
-      elsif path == '/mail' # inbox
+      elsif path == '/mail' # mail inbox
         [302, {'Location' => '/d/*/msg*?head&sort=date&view=table'}, []]
       elsif file?
         fileResponse
-      elsif directory? && qs.empty? && (index = (self+'index.html').R.env env).exist? && selectFormat == 'text/html'
+      elsif directory? && qs.empty? && (index = (self + 'index.html').R env).exist? && selectFormat == 'text/html'
         index.fileResponse
       else
         localGraph
