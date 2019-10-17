@@ -37,6 +37,7 @@ class WebResource
 
     def cachedGraph
       cachePath.localNodes.map{|node|
+puts "node #{node} #{self}"
         node.load base_uri: self}
       graphResponse
     end
@@ -449,6 +450,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       env[:repository] ||= RDF::Repository.new
       stat options
       return unless file?
+      options[:base_uri] ||= env['REQUEST_URI']
       options[:format] ||= formatHint
       env[:repository].load relPath, options
       self
@@ -460,10 +462,9 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       dateMeta
       nodes = localNodes
       if nodes.size==1 && nodes[0].ext=='ttl' && selectFormat=='text/turtle'
-        nodes[0].fileResponse # nothing to transform, deliver graph-data
+        nodes[0].fileResponse # nothing to transform or merge. deliver file
       else
-        nodes.map{|node|
-          node.load base_uri: self}
+        nodes.map &:load
         graphResponse
       end
     end
