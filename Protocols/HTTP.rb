@@ -117,6 +117,22 @@ class WebResource
       CookieHost[host] = true
     end
 
+    def dateDir
+      time = Time.now
+      loc = time.strftime(case parts[0][0].downcase
+                          when 'y'
+                            '/%Y/'
+                          when 'm'
+                            '/%Y/%m/'
+                          when 'd'
+                            '/%Y/%m/%d/'
+                          when 'h'
+                            '/%Y/%m/%d/%H/'
+                          else
+                          end)
+      [303, env[:resp].update({'Location' => loc + parts[1..-1].join('/') + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '')}), []]
+    end
+
     def dateMeta
       n = nil # next page
       p = nil # prev page
@@ -433,6 +449,24 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
 
     def local?; LocalAddr.member?(env['SERVER_NAME']) || ENV['SERVER_NAME'] == env['SERVER_NAME'] end
 
+    def localGraph
+      dateMeta
+      nodes = localNodes
+      if nodes.size==1 && nodes[0].ext=='ttl' && selectFormat=='text/turtle'
+        nodes[0].fileResponse # nothing to transform, deliver graph-data
+      else
+        env[:repository] ||= RDF::Repository.new
+        nodes.map{|node|
+          node.nodeStat
+          options = {base_uri: self}
+          if format = node.formatHint
+            options[:format] = format
+          end
+          env[:repository].load node.relPath, options if node.file?}
+        graphResponse
+      end
+    end
+
     def localNodes
       (if directory?
        if env[:query].has_key?('f') && path != '/'             # FIND
@@ -458,42 +492,16 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     end
 
     def localResource
-      if %w{y year m month d day h hour}.member? parts[0] # time-seg redirect
-        time = Time.now
-        loc = time.strftime(case parts[0][0].downcase
-                            when 'y'
-                              '/%Y/'
-                            when 'm'
-                              '/%Y/%m/'
-                            when 'd'
-                              '/%Y/%m/%d/'
-                            when 'h'
-                              '/%Y/%m/%d/%H/'
-                            else
-                            end)
-        [303, env[:resp].update({'Location' => loc + parts[1..-1].join('/') + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '')}), []]
-      elsif path == '/mail' # inbox redirect
+      if %w{y year m month d day h hour}.member? parts[0]
+        dateDir
+      elsif path == '/mail' # inbox
         [302, {'Location' => '/d/*/msg*?head&sort=date&view=table'}, []]
       elsif file?
         fileResponse
       elsif directory? && qs.empty? && (index = (self+'index.html').R.env env).exist? && selectFormat == 'text/html'
         index.fileResponse
-      else # local graph-data
-        dateMeta
-        ns = localNodes
-        if ns.size==1 && ns[0].ext=='ttl' && selectFormat=='text/turtle'
-          ns[0].fileResponse # nothing to transform, deliver graph data
-        else
-          env[:repository] ||= RDF::Repository.new
-          ns.map{|node|
-            node.nodeStat
-            options = {base_uri: self}
-            if format = node.formatHint
-              options[:format] = format
-            end
-            env[:repository].load node.relPath, options if node.file?}
-          graphResponse
-        end
+      else
+        localGraph
       end
     end
 
