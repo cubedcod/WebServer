@@ -30,15 +30,19 @@ class WebResource
       end
     end
 
-    def cachePath; (hostpath + path).R env end
-    alias_method :cache, :cachePath
+    def bindEnv e
+      @env = e
+      self
+    end
 
-    def cachedResource; cache.file? ? cache.fileResponse : cachedGraph end
+    def cachePath; (hostpath + path).R env end
+
+    def cachedResource; cachePath.file? ? cachePath.fileResponse : cachedGraph end
 
     def cachedGraph
-      cachePath.localNodes.map{|node|
-puts "node #{node} #{node}"
-        self.load base_uri: self}
+      base = cachePath
+      base.localNodes.map{|node|
+        node.load base_uri: join(node.relFrom base)}
       graphResponse
     end
 
@@ -251,7 +255,7 @@ puts "node #{node} #{node}"
     def fetch options = {}
       if StaticFormats.member? ext.downcase                                                              # immutable-cache
         return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has resource
-        return cache.fileResponse if cache.file?                                                         # server has resource
+        return cachePath.fileResponse if cachePath.file?                                                 # server has resource
       end
       return cachedResource if offline?                                                                  # offline, no fetching
       u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? (HTTP.qs options[:query]) : qs)   # base locator sans scheme
@@ -300,7 +304,7 @@ puts "node #{node} #{node}"
           [206, h, [response.read]]                                       # return part
         else                                                              # complete body
           body = HTTP.decompress h, response.read                         # decode body
-          cache.write body if StaticFormats.member? ext.downcase          # store body
+          cachePath.write body if StaticFormats.member? ext.downcase      # store body
           format = h['content-type'].split(/;/)[0] if h['content-type']   # format
           format ||= (xt=ext.to_sym                                       # extension -> format
                       RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
@@ -446,13 +450,14 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       head # output header
     end
 
+    # load node-metadata and serialized RDF to graph
     def load options = {}
-      env[:repository] ||= RDF::Repository.new # graph storage (in-memory)
-      stat options                             # node metadata
+      env[:repository] ||= RDF::Repository.new # graph
+      stat options                             # load node-metadata
       return self unless file?                 # directories are metadata-only
-      options[:base_uri]||=env['REQUEST_PATH'] # set base-URI
-      options[:format]  ||=formatHint          # path-derived format heuristic
-      env[:repository].load relPath, options   # load node
+      options[:base_uri] ||= self              # base-URI
+      options[:format]  ||= formatHint         # path-derived format hint
+      env[:repository].load relPath, options   # load RDF
       self                                     # node
     end
 
@@ -483,14 +488,14 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
        end
       else                             # GLOB
         if uri.match GlobChars         # parametric glob
-          env[:grep] = true if env[:query].has_key?('q')
+          env[:grep] = true if env && env[:query].has_key?('q')
           glob
         else                           # basic glob:
           files = (self + '.*').R.glob #  base + extension
           files = (self + '*').R.glob if files.empty? # prefix
           [self, files]
         end
-       end).flatten.compact.uniq.select(&:exist?).map{|n|n.env env}
+       end).flatten.compact.uniq.select(&:exist?).map{|n|n.bindEnv env}
     end
 
     def localResource
@@ -663,9 +668,9 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     end
 
     def stat options = {}
-      return if basename.index('msg.') == 0 || ext=='ttl'           # hide graph-storage
+      return if basename.index('msg.') == 0 || ext=='ttl'           # hide internal graph-storage nodes
       graph = env[:repository] ||= RDF::Repository.new
-      options[:base_uri] ||= path
+      options[:base_uri] ||= self
       subject = options[:base_uri].R
       if node.directory?
         subject = subject.to_s[-1] == '/' ? subject : (subject+'/') # enforce trailing slash on container URI

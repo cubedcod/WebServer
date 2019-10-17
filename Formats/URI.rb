@@ -151,6 +151,7 @@ class WebResource < RDF::URI
     def mkdir; FileUtils.mkdir_p relPath unless exist?; self end    # MKDIR(1)
     def node; @node ||= (Pathname.new relPath) end
     def parts; @parts ||= path ? path.split('/').-(['']) : [] end
+    def relFrom n; node.relative_path_from n.node end
     def relPath; ['/','',nil].member?(path) ? '.' : (path[0]=='/' ? path[1..-1] : path) end
     def self.splitArgs args; args.shellsplit rescue args.split /\W/ end
     def shellPath; Shellwords.escape relPath.force_encoding 'UTF-8' end
