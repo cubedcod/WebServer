@@ -661,6 +661,44 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       [302, {'Location' => location}, []]
     end
 
+    def stat options = {}
+      return if basename.index('msg.') == 0 || ext=='ttl'           # hide graph-storage
+      graph = env[:repository] ||= RDF::Repository.new
+      options[:base_uri] ||= path
+      subject = options[:base_uri].R
+      if node.directory?
+        subject = subject.to_s[-1] == '/' ? subject : (subject+'/') # enforce trailing slash on container URI
+        graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#Container').R)
+        node.children.map{|n|                                       # point to contained nodes TODO recursion w/ stop-recursion flag?
+          directory = n.directory?
+          file = n.file?
+          name = n.basename.to_s
+          name = directory ? (name + '/') : name.sub(GraphExt, '')
+          child = subject.join name
+          graph << (RDF::Statement.new subject, (W3+'ns/ldp#contains').R, child)
+          graph << (RDF::Statement.new child, Title.R, name)
+          if directory
+            graph << (RDF::Statement.new child, Type.R, (W3+'ns/ldp#Container').R)
+          elsif file
+            graph << (RDF::Statement.new child, Type.R, (W3+'ns/posix/stat#File').R)
+            graph << (RDF::Statement.new child, (W3+'ns/posix/stat#size').R, n.size)
+          end
+          if file || directory
+            mtime = n.stat.mtime
+            graph << (RDF::Statement.new child, Date.R, mtime.iso8601)
+            graph << (RDF::Statement.new child, (W3+'ns/posix/stat#mtime').R, mtime.to_i)
+          end}
+      else
+        graph << (RDF::Statement.new subject, Type.R, (W3+'ns/posix/stat#File').R)
+      end
+      graph << (RDF::Statement.new subject, Title.R, basename)
+      graph << (RDF::Statement.new subject, (W3+'ns/posix/stat#size').R, node.size)
+      mtime = node.stat.mtime
+      graph << (RDF::Statement.new subject, (W3+'ns/posix/stat#mtime').R, mtime.to_i)
+      graph << (RDF::Statement.new subject, Date.R, mtime.iso8601)
+      self
+    end
+
     def staticQuery
       if query && !query.empty?
         '?' + query
