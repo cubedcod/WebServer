@@ -564,9 +564,10 @@ media-mbst-pub-ue1.s3.amazonaws.com
     # YouTube
     Allow 'youtubei.googleapis.com'
     Allow 'www.youtube.com'
+    GotoYoutube = -> r {[301, {'Location' => 'https://www.youtube.com' + r.env['REQUEST_URI']}, []]}
     GET 's.ytimg.com', Desktop
-    GET 'youtube.com',   -> r {[301, {'Location' => 'https://www.youtube.com' + r.env['REQUEST_URI']}, []]}
-    GET 'm.youtube.com', -> r {[301, {'Location' => 'https://www.youtube.com' + r.env['REQUEST_URI']}, []]}
+    GET 'youtube.com', GotoYoutube
+    GET 'm.youtube.com', GotoYoutube
     GET 'www.youtube.com', -> r {
       fn = r.parts[0]
       if %w{attribution_link redirect}.member? fn
@@ -579,6 +580,7 @@ heartbeat iframe_api live_chat manifest.json opensearch playlist results signin 
       else
         r.deny
       end}
+    GET 'www.invidio.us', GotoYoutube
 
     POST 'www.youtube.com', -> r {
       if r.parts.member? 'stats'
