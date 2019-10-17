@@ -79,7 +79,7 @@ class WebResource < RDF::URI
       Video => '🎞',
     }
 
-    StaticFormats = %w(apk css gif ico jpeg jpg js mp3 mp4 png svg wasm webm webp)
+    StaticFormats = %w(apk css gif ico jpeg jpg js m4a mp3 mp4 png svg wasm webm webp)
 
     def formatHint
       if basename.index('msg.')==0 || path.index('/sent/cur')==0

@@ -70,11 +70,11 @@ activeview activity-stream addthis_widget.js admin-ajax.php ads ad_status.js all
  falco favicon.ico fbevents.js FeedQuery fonts fullHashes:find
  g.gif id inflowcomponent get_endscreen get_midroll_info gpt.js gtm.js ima3.js i.js in.js
  jot js json like.php ListAccounts load load.js loader.js log log_event logging_client_events lvz
- m newtab_ogb newtab_promos outbrain.js
+ m newtab_ogb newtab_promos onejs outbrain.js
  p p.js page_view pay ping ping.gif ping-centre pinit.js platform.js pixel pixel.gif pixelpropagate.js ptracking push_service_worker.js px.gif px.js
  qoe quant.js query remote.js remote-login.php rtm rundown
  scheduler.js script.js search seed serviceworker service-worker.js sdk.js service_ajax session sw.js sync
- threatListUpdates:fetch tr track tracker trends uc.js utag.js v3 view w.js widgets.js yql)
+ threatListUpdates:fetch tag.js tr track tracker trends uc.js utag.js v3 view w.js widgets.js yql)
 
     SiteDir  = (Pathname.new __dir__).relative_path_from Pathname.new Dir.pwd
 
@@ -473,6 +473,10 @@ firefox.settings.services.mozilla.com
          secure.soundcloud.com
               w.soundcloud.com
 ).map{|h|Allow h}
+
+    # Spotify
+    %w(embed open).map{|host|
+      Allow host+'.spotify.com'}
 
     # StarTribune
     Allow 'comments.startribune.com'
