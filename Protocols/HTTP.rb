@@ -42,7 +42,7 @@ class WebResource
     def cachedGraph
       base = cachePath
       base.localNodes.map{|node|
-        node.load base_uri: join(node.relFrom base)}
+        node.load base_uri: (join node.relFrom base)}
       graphResponse
     end
 
@@ -60,12 +60,12 @@ class WebResource
           if path=='/' || %w(css eot otf ttf woff woff2).member?(ext) || QuietGunk.member?(resource.basename) || resource.parts.member?('stats')
             print "🛑"
           elsif path.match? /204$/
-            print "🛑"                                           # blocked
+            print "🛑"                                           # no content
           else
             referer_host = env['HTTP_REFERER'] && env['HTTP_REFERER'].R.host
             print "\n" + (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "🛑 \e[31;1m") + (referer_host ? ("\e[7m" + referer_host + "\e[0m\e[31;1m → ") : '') + (referer_host == resource.host ? '' : resource.host) + "\e[7m" + resource.path + "\e[0m\e[31m" + resource.qs + "\e[0m "
             resource.env[:query]&.map{|k,v|
-              print "\n\e[7m#{k}\e[0m\t#{v}"} if verbose
+              print "\n\e[7m#{k}\e[0m\t#{v}"} if verbose         # deny
           end
         elsif env['REQUEST_METHOD'] == 'OPTIONS'
           print "\n🔧 \e[32;1;7m #{resource.uri}\e[0m "          # OPTIONS
