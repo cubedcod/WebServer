@@ -194,8 +194,7 @@ images-na.ssl-images-amazon.com
       r.env[:query].has_key?('mpre') ? [301, {'Location' => r.env[:query]['mpre']}, []] : r.deny}
 
     # Engadget
-    #Cookies 'www.engadget.com'
-    #GET 'guce.engadget.com', -> r {r.env[:query].has_key?('done') ? [301, {'Location' => r.env[:query]['done']}, []] : NoGunk[r]}
+    GET 'guce.engadget.com', -> r {r.env[:query].has_key?('done') ? [301, {'Location' => r.env[:query]['done']}, []] : NoGunk[r]}
 
     # Facebook
     FBgunk = %w(common connect pages_reaction_units security tr)
