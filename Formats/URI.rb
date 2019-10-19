@@ -122,7 +122,7 @@ class WebResource < RDF::URI
     include URIs
     GlobChars = /[\*\{\[]/
     def basename; File.basename ( path || '/' ) end                 # BASENAME(1)
-    def dir; dirname.R if path end                                  # DIRNAME(1)
+    def dir; dirname.R env if path end                              # DIRNAME(1)
     def directory?; node.directory? end
     def dirname; File.dirname path if path end                      # DIRNAME(1)
     def du; `du -s #{shellPath}| cut -f 1`.chomp.to_i end           # DU(1)
@@ -149,6 +149,7 @@ class WebResource < RDF::URI
       `#{cmd} | head -n 1024`.lines.map{|path|('/'+path.chomp).R}
     end
     def mkdir; FileUtils.mkdir_p relPath unless exist?; self end    # MKDIR(1)
+    def name; basename.sub GraphExt, '' end
     def node; @node ||= (Pathname.new relPath) end
     def parts; @parts ||= path ? path.split('/').-(['']) : [] end
     def relFrom n; node.relative_path_from n.node end

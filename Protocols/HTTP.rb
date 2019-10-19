@@ -475,10 +475,11 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     end
 
     def localNodes
-      (if directory?
+      return dir.localNodes if name == 'index'
+      (if directory?                                           # directory:
        if env[:query].has_key?('f') && path != '/'             # FIND
-          find env[:query]['f'] unless env[:query]['f'].empty? # exact
-       elsif env[:query].has_key?('find') && path != '/'       # easy-mode
+          find env[:query]['f'] unless env[:query]['f'].empty? # exact find
+       elsif env[:query].has_key?('find') && path != '/'       # easy find
           find '*' + env[:query]['find'] + '*' unless env[:query]['find'].empty?
        elsif (env[:query].has_key?('Q') || env[:query].has_key?('q')) && path != '/'
          env[:grep] = true                                     # GREP
@@ -486,11 +487,11 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
        else                                                    # LS
          [self]
        end
-      else                             # GLOB
-        if uri.match GlobChars         # parametric glob
+      else                                                     # file(s):
+        if uri.match GlobChars         # parametric GLOB
           env[:grep] = true if env && env[:query].has_key?('q')
           glob
-        else                           # basic glob:
+        else                           # default GLOB
           files = (self + '.*').R.glob #  base + extension
           files = (self + '*').R.glob if files.empty? # prefix
           [self, files]
@@ -714,6 +715,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     end
 
     def selectFormat default='text/html'
+      return 'text/turtle' if ext == 'ttl'
       return default unless env && env.has_key?('HTTP_ACCEPT')
       index = {}
       env['HTTP_ACCEPT'].split(/,/).map{|e| # split to (MIME,q) pairs
