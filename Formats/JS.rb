@@ -85,10 +85,19 @@ module Webize
                                      :graph_name => s.R)}
       end
       def scanContent &f
-        # triplr host-binding
+
+        ## JSON triplrs
+
+        # host binding
         if hostTriples = Triplr[@base.host]
           @base.send hostTriples, @json, &f
         end
+
+        # path-heuristic binding
+        if @base.parts.map{|part| part.split '.'}.flatten.member? 'feed'
+          puts :JSONfeed
+        end
+
       end
     end
   end

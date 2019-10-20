@@ -426,8 +426,7 @@ firefox.settings.services.mozilla.com
 
     # Reddit
     Allow 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
-    %w(oauth www).map{|host| Allow host + '.reddit.com'}                      # required to post
-    %w(gateway gql s).map{|host| Allow host + '.reddit.com'} if ENV['REDDIT'] # messaging / notification / JSON-API hosts
+    %w(gateway gql oauth www).map{|host| Allow host + '.reddit.com'}
     GET 'old.reddit.com', -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path}, []]}
     GET 'reddit.com',     -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path}, []]}
     GET 'www.reddit.com', -> r {
