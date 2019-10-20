@@ -352,8 +352,8 @@ class WebResource
 
     def fixedFormat? format = nil
       return true if upstreamUI?
-      return false if !format || (format.match? /\/(atom|rss|xml)/i) # feeds are rewritable
-      format.match? NoTransform # MIME-regex, application & media categories fixed, graph + text formats transformable
+      return false if env[:transformable] || !format || format.match?(/\/(atom|rss|xml)/i)
+      format.match? NoTransform # MIME pattern: application/* and media/* fixed, graph + text formats transformable
     end
 
     def self.GET arg, lambda

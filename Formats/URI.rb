@@ -60,6 +60,7 @@ class WebResource < RDF::URI
     Icons = { # single-character representation of URI
       'https://twitter.com' => '🐦',
       Abstract => '✍',
+      Audio => '🔊',
       Content => '✏',
       Creator => '👤',
       DC + 'hasFormat' => '≈',

@@ -84,6 +84,35 @@ module Webize
                                                                   l),
                                      :graph_name => s.R)}
       end
+
+      def JSONfeed
+        @json['items'].map{|item|
+          s = @base.join(item['url'] || item['id'])
+          yield s, Type, Post.R
+          item.map{|p, o|
+            case p
+            when 'attachments'
+              p = :drop
+              o.map{|a|
+                attachment = @base.join(a['url']).R
+                type = case attachment.ext.downcase
+                       when /m4a|mp3|ogg|opus/
+                         Audio
+                       when /mkv|mp4|webm/
+                         Video
+                       else
+                         Link
+                       end
+                yield s, type, attachment}
+            when 'content_text'
+              p = Content
+              o = CGI.escapeHTML o
+            end
+            p = MetaMap[p] || p
+            puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/
+            yield s, p, o unless [:drop,'id','url'].member? p}}
+      end
+
       def scanContent &f
 
         ## JSON triplrs
@@ -95,7 +124,8 @@ module Webize
 
         # path-heuristic binding
         if @base.parts.map{|part| part.split '.'}.flatten.member? 'feed'
-          puts :JSONfeed
+          @base.env[:transformable] = true
+          self.JSONfeed &f
         end
 
       end
