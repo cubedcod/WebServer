@@ -67,13 +67,13 @@ activeview activity-stream addthis_widget.js admin-ajax.php ads ad_status.js all
  b.gif beacon.js blank.gif bullseye buttons.js bz
  c.gif cast_sender.js chartbeat.js collect conv collector config.js count.js counter.js count.json css crx
  download downloads ddljson embed.js embeds.js endscreen.js events experimentstatus
- falco favicon.ico fbevents.js FeedQuery fonts fullHashes:find
- g.gif id inflowcomponent get_endscreen get_midroll_info gpt.js gtm.js ima3.js i.js in.js
+ falco favicon.ico fbds.js fbevents.js FeedQuery fonts fullHashes:find
+ g.gif id inflowcomponent get_endscreen get_midroll_info gpt.js gtm.js icon ima3.js i.js in.js
  jot js json like.php ListAccounts load load.js loader.js log log_event logging_client_events lvz
  m newtab_ogb newtab_promos onejs outbrain.js
- p p.js page_view pay ping ping.gif ping-centre pinit.js platform.js pixel pixel.gif pixelpropagate.js ptracking push_service_worker.js pv px.gif px.js
+ p p.js page_view pay ping ping.gif ping-centre pinit.js platform.js pixel pixel.gif pixel.js pixelpropagate.js ptracking push_service_worker.js pv px.gif px.js
  qoe quant.js query remote.js remote-login.php rtm rundown
- scheduler.js script.js search seed serviceworker service-worker.js sdk.js service_ajax session sw.js sync
+ scheduler.js script.js search seed ServiceLogin serviceworker service-worker.js sdk.js service_ajax session sso sw.js sync
  threatListUpdates:fetch tag.js tr track tracker trends uc.js utag.js v3 view w.js widgets.js yql)
 
     SiteDir  = (Pathname.new __dir__).relative_path_from Pathname.new Dir.pwd
@@ -261,6 +261,7 @@ android.clients.google.com
            apis.google.com
          chrome.google.com
        clients1.google.com
+       clients2.google.com
        clients4.google.com
        clients5.google.com
       feedproxy.google.com
