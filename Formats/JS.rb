@@ -75,12 +75,8 @@ module Webize
           fn.call RDF::Statement.new(s.class == String ? s.R : s,
                                      p.class == String ? p.R : p,
                                      (o.class == WebResource || o.class == RDF::Node ||
-                                      o.class == RDF::URI) ? o : (l = RDF::Literal (if [Abstract,Content].member? p
-                                                                                    HTML.clean o
-                                                                                   else
-                                                                                     o
-                                                                                    end)
-                                                                  l.datatype=RDF.XMLLiteral if p == Content
+                                      o.class == RDF::URI) ? o : (l = RDF::Literal o
+                                                                  l.datatype = RDF.XMLLiteral if p == Content
                                                                   l),
                                      :graph_name => s.R)}
       end
@@ -92,7 +88,6 @@ module Webize
           item.map{|p, o|
             case p
             when 'attachments'
-              p = :drop
               o.map{|a|
                 attachment = @base.join(a['url']).R
                 type = case attachment.ext.downcase
@@ -104,9 +99,17 @@ module Webize
                          Link
                        end
                 yield s, type, attachment}
+              p = :drop
+            when 'author'
+              yield s, Creator, o['name']
+              yield s, Creator, o['url'].R
+              p = :drop
             when 'content_text'
               p = Content
               o = CGI.escapeHTML o
+            when 'tags'
+              o.map{|tag| yield s, Abstract, tag }
+              p = :drop
             end
             p = MetaMap[p] || p
             puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/
