@@ -70,7 +70,7 @@ class WebResource
         mime = head['Content-Type'] || ''
         verbose = resource.verbose?                              # log request
         if resource.env[:deny]
-          if path=='/' || %w(css eot otf ttf woff woff2).member?(ext) || resource.parts.member?('stats') #|| QuietGunk.member?(resource.basename)
+          if %w(css eot otf ttf woff woff2).member?(ext) #|| QuietGunk.member?(resource.basename)
             print "🛑"
           elsif path.match? /204$/
             print "🛑"                                           # no content

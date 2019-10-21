@@ -160,6 +160,9 @@ business.facebook.com
       lm.facebook.com).map{|host|
       GET host, GotoU}
 
+    # Flickr
+    GET 'combo.staticflickr.com', -> r {r.path=='/zz/combo' ? r.fetch : NoGunk[r]}
+
     # Forbes
     GET 'thumbor.forbes.com', -> r {[301, {'Location' => URI.unescape(r.parts[-1])}, []]}
 
