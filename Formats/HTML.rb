@@ -20,12 +20,12 @@ image-src
     def self.clean body
       html = Nokogiri::HTML.fragment body
 
-      # strip elements
+      # stripped elements
       %w{iframe link[rel='stylesheet'] style link[type='text/javascript'] link[as='script'] script}.map{|s| html.css(s).remove}
       html.css('a[href^="javascript"]').map{|a| a.remove }
       %w{clickability counter.ru quantserve scorecardresearch}.map{|co| html.css('img[src*="' + co + '"]').map{|img| img.remove }}
 
-      # image elements
+      # images
       # CSS:background-image → <img>
       html.css('[style^="background-image"]').map{|node|
         node['style'].match(/url\('([^']+)'/).yield_self{|url|
@@ -41,13 +41,21 @@ image-src
         # link-identifiers
         e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) if e['href'] && !e['id']
 
-        # @src
+        # @src normalization
         e.attribute_nodes.map{|a|
-          e.set_attribute 'src', a.value if LazySRC.member? a.name
+          if LazySRC.member? a.name
+            puts ['mapsrc', a.name, a.value, '--', e['src']].join ' '
+            e.set_attribute 'src', a.value
+          end
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
 
           # stripped attrs
-          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor class height http-equiv layout ping role style tabindex target theme width}.member?(a.name)}}
+          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor class height http-equiv layout ping role style tabindex target theme width}.member?(a.name)
+        }
+        if e['src'] && e['src'][0] == '/'
+          puts e['src']
+        end
+      }
 
 
       html.to_xhtml(:indent => 0)
@@ -140,8 +148,9 @@ sidebar [class^='side']    [id^='side']
         n = Nokogiri::HTML.parse @doc # parse
 
         # host bindings
-        if hostTriples = Triplr[@base.host] || Triplr[@base.respond_to?(:env) && @base.env && @base.env[:query] && @base.env[:query]['host']]
-          @base.send hostTriples, n, &f
+        if hostTriplr = Triplr[@base.host] ||
+                        Triplr[@base.respond_to?(:env) && @base.env && @base.env[:query] && @base.env[:query]['host']]
+          @base.send hostTriplr, n, &f
         end
 
         # embedded RDF in RDFa and JSON-LD
@@ -150,9 +159,11 @@ sidebar [class^='side']    [id^='side']
           # JSON-LD
           n.css('script[type="application/ld+json"]').map{|dataElement|
             embeds << (::JSON::LD::API.toRdf ::JSON.parse dataElement.inner_text)} rescue "JSON-LD read failure in #{@base}"
+
           # RDFa
           RDF::Reader.for(:rdfa).new(@doc, base_uri: @base){|_| embeds << _ } rescue "RDFa read failure in #{@base}"
 
+          # emit triples
           embeds.each_triple{|s,p,o|
             p = MetaMap[p.to_s] || p # predicate map
             puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/ # show predicates not bound to a URI or dropped
