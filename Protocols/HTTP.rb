@@ -16,6 +16,19 @@ class WebResource
     Servers = {}
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
 
+    # handler lambdas
+    Desktop = -> r {r.gunkURI ? r.deny : r.desktopUI.fetch}
+    Fetch = -> r {r.fetch}
+    GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : NoGunk[r]}
+    GotoBasename = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
+    GotoU   = -> r {[301, {'Location' =>  r.env[:query]['u']}, []]}
+    GotoURL = -> r {[301, {'Location' => (r.env[:query]['url']||r.env[:query]['q'])}, []]}
+    Icon    = -> r {r.env[:deny] = true; [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
+    NoGunk  = -> r {r.gunkURI ? r.deny : r.fetch}
+    NoJS    = -> r {(r.gunkURI || r.ext=='js') ? r.deny : r.fetch}
+    NoQuery = -> r {r.qs.empty? ? r.fetch : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
+    RootIndex = -> r {r.path=='/' ? r.cachedGraph : NoGunk[r]}
+
     def self.Allow host
       AllowedHosts[host] = true
     end
@@ -57,7 +70,7 @@ class WebResource
         mime = head['Content-Type'] || ''
         verbose = resource.verbose?                              # log request
         if resource.env[:deny]
-          if path=='/' || %w(css eot otf ttf woff woff2).member?(ext) || QuietGunk.member?(resource.basename) || resource.parts.member?('stats')
+          if path=='/' || %w(css eot otf ttf woff woff2).member?(ext) || resource.parts.member?('stats') #|| QuietGunk.member?(resource.basename)
             print "🛑"
           elsif path.match? /204$/
             print "🛑"                                           # no content
