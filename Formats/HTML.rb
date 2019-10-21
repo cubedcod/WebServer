@@ -38,15 +38,15 @@ image-src
 
       html.traverse{|e|
 
-        # local identifiers for links
+        # link-identifiers
         e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) if e['href'] && !e['id']
 
-        # normalize src-attribute naming
+        # @src
         e.attribute_nodes.map{|a|
           e.set_attribute 'src', a.value if LazySRC.member? a.name
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
 
-          # strip attributes
+          # stripped attrs
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor class height http-equiv layout ping role style tabindex target theme width}.member?(a.name)}}
 
 
