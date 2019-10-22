@@ -264,6 +264,7 @@ android.clients.google.com
     # Imgur
     %w(imgur.com
      i.imgur.com
+     m.imgur.com
      s.imgur.com
 ).map{|host|
       GET host, NoGunk}
