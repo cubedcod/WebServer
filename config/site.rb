@@ -316,9 +316,13 @@ android.clients.google.com
 
     # Mastodon
     Allow 'nya.social'
-    GET 'files.mastodon.social', Fetch
-    GET 'nya.social', Fetch
-    GET 'drive.nya.social', Fetch
+    %w(
+     drive.nya.social
+files.mastodon.social
+      mastodon.social
+           nya.social
+).map{|host|
+      GET host, Fetch}
 
     # Medium
     GET 'medium.com', -> r {r.env[:query].has_key?('redirecturl') ? [301, {'Location' => r.env[:query]['redirecturl']}, []] : r.fetch}
