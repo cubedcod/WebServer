@@ -317,10 +317,12 @@ android.clients.google.com
     # Mastodon
     Allow 'nya.social'
     %w(
+assets.octodon.social
      drive.nya.social
 files.mastodon.social
       mastodon.social
            nya.social
+       octodon.social
 ).map{|host|
       GET host, Fetch}
 
