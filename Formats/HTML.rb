@@ -249,7 +249,7 @@ class WebResource
         host && path && ('//' + host + path),
         host && path && ('https://' + host + path),
       ].compact.find{|u| graph[u] && graph[u][Title]}
-      bc = '' # path breadcrumbs
+      bc = '/' # breadcrumb path
       icon = ('//' + host + '/favicon.ico').R # site icon
       link = -> key, content { # render Link reference
         if url = env[:links] && env[:links][key]
@@ -274,7 +274,11 @@ class WebResource
                                    c: icon.cachePath.exist? ? {_: :img, src: icon.uri} : host},
                                   ({_: :a, id: :tabular, class: :icon, style: 'color: #555', c: '↨',
                                     href: HTTP.qs((env[:query]||{}).merge({'view' => 'table', 'sort' => 'date'}))} unless env[:query] && env[:query]['view']=='table'),
-                                  parts.map{|p| [{_: :a, class: :breadcrumb, href: bc += '/' + p, c: (CGI.escapeHTML URI.unescape p), id: 'r'+Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
+                                  dir.parts.map{|p|
+                                    [{_: :a, class: :breadcrumb,
+                                      href: bc += p + '/', c: (CGI.escapeHTML URI.unescape p),
+                                      id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
+                                  {_: :a, class: :breadcrumb, href: path, c: (CGI.escapeHTML URI.unescape basename)},
                                   link[:media, '🖼️'], link[:feed, FeedIcon],
                                   ({_: :a, id: :UX, class: :icon, style: 'color: #555', c: '⚗️', href: HTTP.qs((env[:query]||{}).merge({'UX' => 'upstream'}))} unless local?)
                                  ]},

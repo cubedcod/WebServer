@@ -19,6 +19,7 @@ module Webize
         'www.instagram.com' => :Instagram,
         'www.patriotledger.com' => :GateHouse,
         'www.providencejournal.com' => :GateHouse,
+        'www.universalhub.com' => :UHub,
         'www.youtube.com' => :YouTube,
       }
 
@@ -782,6 +783,11 @@ heartbeat iframe_api live_chat manifest.json opensearch playlist results signin 
 
     %w(link[rel="alternate"] meta[name="description"] title body).map{|sel|
       doc.css(sel).remove}
+  end
+
+  def UHub doc
+    doc.css('.pager-next > a[href]').map{|n| env[:links][:next] ||= n['href'] }
+    doc.css('.pager-previous > a[href]').map{|p| env[:links][:prev] ||= p['href'] }
   end
 
   def YouTube doc
