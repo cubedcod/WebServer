@@ -1,7 +1,9 @@
 google = {ima: {ImaSdkSettings: {VpaidMode: {ENABLED: 1},
 				 setAutoPlayAdBreaks: function(a){},
-				 setPlayerVersion: function(v){},
+				 setDisableCustomPlaybackForIOS10Plus: function(a){},
+				 setLocale: function(a){},
 				 setPlayerType: function(t){},
+				 setPlayerVersion: function(v){},
 				 setVpaidMode: function(b){}
 				},
 	       	AdDisplayContainer: class {
@@ -24,8 +26,7 @@ google = {ima: {ImaSdkSettings: {VpaidMode: {ENABLED: 1},
 		},
 		AdErrorEvent: {Type: {AD_ERROR: 1}},
 		AdsManagerLoadedEvent: {Type: {ADS_MANAGER_LOADED: 1}},
-		settings: {setDisableCustomPlaybackForIOS10Plus: function(a){},
-			   setLocale: function(a){}},
 		version: 1
 	       }};
 
+google.ima.settings = google.ima.ImaSdkSettings;
