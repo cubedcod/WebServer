@@ -2,7 +2,7 @@ class WebResource
   module URIs
 
     Gunk = %r([-.:_\/?&=~]
-((block|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate|nalytic)s?(bl(oc)?k(er|ing)?.*|id|rotat[eo]r?|slots?|tools?|types?|units?|words?)?|appnexus|audience|(app)?
+((block|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|id|rotat[eo]r?|slots?|tools?|types?|units?|words?)?|.*analytics.*|appnexus|audience|(app)?
 b(anner|eacon|reakingnew)s?|
 c(ampaign|edexis|hartbeat.*|ollector|omscore|onversion|ookie(c(hoice|onsent)|law|notice)?s?|se)|
 de(als|tect)|
@@ -10,7 +10,7 @@ e(moji.*\.js|ndscreen|nsighten|scenic|vidon)|
 (web)?fonts?|
 g(dpr|eo(ip|locate)|igya|pt|tag|tm)|.*
 (header|pre)[-_]?bid.*|.*hubspot.*|[hp]b.?js|ima[0-9]?|
-identity|impression|
+impression|
 kr(ux|xd).*|
 log(event|g(er|ing))?|(app|s)?
 m(e(asurement|t(er|rics?))|ms|odal|tr)|
