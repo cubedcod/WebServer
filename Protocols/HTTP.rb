@@ -266,9 +266,9 @@ class WebResource
 
     # fetch resource
     def fetch options = {}
-      if StaticFormats.member? ext.downcase                                                              # immutable-cache
-        return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has resource
-        return cachePath.fileResponse if cachePath.file?                                                 # server has resource
+      if AV.member? ext.downcase
+        return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has static-media
+        return cachePath.fileResponse if cachePath.file?                                                 # server has static-media
       end
       return cachedResource if offline?                                                                  # offline, no fetching
       u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? (HTTP.qs options[:query]) : qs)   # base locator sans scheme
@@ -317,15 +317,18 @@ class WebResource
           [206, h, [response.read]]                                       # return part
         else                                                              # complete body
           body = HTTP.decompress h, response.read                         # decode body
-          cachePath.write body if StaticFormats.member? ext.downcase      # store body
+
           format = h['content-type'].split(/;/)[0] if h['content-type']   # format
-          format ||= (xt=ext.to_sym                                       # extension -> format
+          format ||= (xt=ext.to_sym; puts "WARNING no MIME for #{uri}"    # extension -> format
                       RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
           format = 'text/nfo' if ext=='nfo' && format.match?(/^text.plain/)
+
           reader = RDF::Reader.for content_type: format                   # find RDF reader
-          reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|  # instantiate RDF reader
-            (env[:repository] ||= RDF::Repository.new) << _ } if reader   # read RDF
-          options[:intermediate] ? (return self) : index                  # return if load-only
+          reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|  # instantiate reader
+            (env[:repository] ||= RDF::Repository.new) << _ } if reader   # extract RDF
+          cachePath.write body if AV.member? ext.downcase                 # cache if static-media
+          options[:intermediate] ? (return self) : index                  # return if intermediate fetch
+
           BaseMeta.map{|k|env[:resp][k]||=h[k.downcase] if h[k.downcase]} # ustream metadata
           env[:resp]['Content-Length'] = body.bytesize.to_s               # content-length
           (fixedFormat? format) ? [200,env[:resp],[body]] : graphResponse # HTTP response
@@ -366,7 +369,7 @@ class WebResource
     def fixedFormat? format = nil
       return true if upstreamUI?
       return false if env[:transformable] || !format || format.match?(/\/(atom|rss|xml)/i)
-      format.match? NoTransform # MIME pattern: application/* and media/* fixed, graph + text formats transformable
+      format.match? NoTransform # MIME-pattern: application/* and media/* fixed, graph + text formats transformable
     end
 
     def self.GET arg, lambda
@@ -379,7 +382,7 @@ class WebResource
         [204, {}, []]
       elsif handler=HostGET[host] # host handler
         handler[self]
-      elsif self.CDN? && %w(mp3 jpg png).member?(ext.downcase) && !gunkURI
+      elsif self.CDN? && AV.member?(ext.downcase) && !gunkURI
         fetch
       elsif gunk? && ServerKey != env[:query]['allow']
         deny
