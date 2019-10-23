@@ -134,7 +134,7 @@ class WebResource
                                                             (HTML.keyval (Webize::HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
     end
 
-    def CDN?; host.match? /\.(amazonaws|cloud(f(lare|ront)|inary)|netdna.*)\.(com|net)$/ end
+    def CDN?; host.match? /\.(amazonaws|.*cdn|cloud(f(lare|ront)|inary)|netdna.*)\.(com|net)$/ end
 
     def self.Cookies host
       CookieHost[host] = true
@@ -391,7 +391,7 @@ class WebResource
         handler[self]
       elsif self.CDN? && allowCDN?
         fetch
-      elsif gunk? && ServerKey != env[:query]['allow']
+      elsif gunk?
         deny
       else
         env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
@@ -418,20 +418,20 @@ class WebResource
         when /^application\/atom+xml/
           feedDocument
         else
-          env[:repository].dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true
+          rdfDocument format
         end}
     end
 
     def gunk?
-      return false if ENV.has_key? 'GUNK'                                      # environment override of all flagging
-      return true if env.has_key?('HTTP_GUNK') && !AllowedHosts.has_key?(host) # local override or upstream flag
-      return gunkURI                                                           # local flag
+      return false if ENV.has_key?('GUNK') || env[:query]['allow'] == ServerKey # environment override of all tags
+      return true  if env.has_key?('HTTP_GUNK') && !AllowedHosts.has_key?(host) # local override or upstream tag
+      return gunkURI                                                            # local tag
     end
+
     def gunkURI; ('/' + hostname + (env && env['REQUEST_URI'] || path || '/')).match? Gunk end
 
     def HEAD
-      send(Methods['GET']).yield_self{|s,h,_|
-        [s,h,[]]} # status & header only
+      send(Methods['GET']).yield_self{|s,h,_| [s,h,[]] } # status-code & header
     end
 
     # header formatted and filtered

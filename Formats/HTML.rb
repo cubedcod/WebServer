@@ -44,7 +44,6 @@ image-src
         # @src normalization
         e.attribute_nodes.map{|a|
           if LazySRC.member? a.name
-            puts ['mapsrc', a.name, a.value, '--', e['src']].join ' '
             e.set_attribute 'src', a.value
           end
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
