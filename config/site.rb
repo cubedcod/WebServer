@@ -88,6 +88,7 @@ images-na.ssl-images-amazon.com
 
     # Boston Globe
     GET 'bos.gl', -> r {r.fetch scheme: :http}
+    GET 'www3.bostonglobe.com', Fetch
     GET 'bostonglobe-prod.cdn.arcpublishing.com', Resizer
 
     # Brightcove
@@ -505,8 +506,14 @@ firefox.settings.services.mozilla.com
     GET 'static.wixstatic.com', NoGunk
 
     # WordPress
-    (0..7).map{|i|
-      GET "i#{i}.wp.com", NoQuery}
+    #Allow 'public-api.wordpress.com'
+    %w(
+public-api.wordpress.com
+videos.files.wordpress.com
+).map{|host|
+      GET host, Fetch}
+
+    (0..7).map{|i| GET "i#{i}.wp.com", NoQuery}
 
     # Yahoo!
     %w(finance.yahoo.com
