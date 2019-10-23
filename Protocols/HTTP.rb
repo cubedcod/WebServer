@@ -33,6 +33,13 @@ class WebResource
       AllowedHosts[host] = true
     end
 
+    def allowCDN?
+      return false if gunkURI
+      return true if AV.member? ext.downcase           # media file
+      return true if ext == 'js' && ENV.has_key?('JS') # executable
+      false
+    end
+
     def allowedOrigin
       if env['HTTP_ORIGIN']
         env['HTTP_ORIGIN']
@@ -382,13 +389,17 @@ class WebResource
         [204, {}, []]
       elsif handler=HostGET[host] # host handler
         handler[self]
-      elsif self.CDN? && AV.member?(ext.downcase) && !gunkURI
+      elsif self.CDN? && allowCDN?
         fetch
       elsif gunk? && ServerKey != env[:query]['allow']
         deny
       else
         env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
-        local? ? localResource : fetch
+        if local?
+          local
+        else
+          fetch
+        end
       end
     rescue OpenURI::HTTPRedirect => e
       redirect e.io.meta['location']
@@ -411,9 +422,12 @@ class WebResource
         end}
     end
 
-    def gunk?; gunkHost || gunkURI end
-    def gunkHost; !AllowedHosts.has_key?(host) && env.has_key?('HTTP_GHOST') end
-    def gunkURI; ('/' + (env && env['SERVER_NAME'] || host || '') + (env && env['REQUEST_URI'] || path || '')).match? Gunk end
+    def gunk?
+      return false if ENV.has_key? 'GUNK'                                      # environment override of all flagging
+      return true if env.has_key?('HTTP_GUNK') && !AllowedHosts.has_key?(host) # local override or upstream flag
+      return gunkURI                                                           # local flag
+    end
+    def gunkURI; ('/' + hostname + (env && env['REQUEST_URI'] || path || '/')).match? Gunk end
 
     def HEAD
       send(Methods['GET']).yield_self{|s,h,_|
@@ -477,14 +491,28 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       self                                     # node
     end
 
+    def local
+      if %w{y year m month d day h hour}.member? parts[0]              # timeseg redirect
+        dateDir
+      elsif path == '/mail'                                            # inbox redirect
+        [302,{'Location' => '/d/*/msg*?head&sort=date&view=table'},[]]
+      elsif file?                                                      # local file
+        fileResponse
+      elsif directory? && qs.empty? && (index = (self + 'index.html').R env).exist? && selectFormat == 'text/html'
+        index.fileResponse                                             # directory-index file
+      else
+        localGraph                                                     # local graph node(s)
+      end
+    end
+
     def local?; LocalAddr.member?(env['SERVER_NAME']) || ENV['SERVER_NAME'] == env['SERVER_NAME'] end
 
     def localGraph
       dateMeta
       nodes = localNodes
       if nodes.size==1 && nodes[0].ext=='ttl' && selectFormat=='text/turtle'
-        nodes[0].fileResponse # nothing to transform or merge. deliver file
-      else
+        nodes[0].fileResponse # nothing to transform or merge. return file
+      else                    # merge and transform
         nodes.map &:load
         graphResponse
       end
@@ -513,20 +541,6 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
           [self, files]
         end
        end).flatten.compact.uniq.select(&:exist?).map{|n|n.bindEnv env}
-    end
-
-    def localResource
-      if %w{y year m month d day h hour}.member? parts[0]
-        dateDir
-      elsif path == '/mail' # mail inbox
-        [302, {'Location' => '/d/*/msg*?head&sort=date&view=table'}, []]
-      elsif file?
-        fileResponse
-      elsif directory? && qs.empty? && (index = (self + 'index.html').R env).exist? && selectFormat == 'text/html'
-        index.fileResponse
-      else
-        localGraph
-      end
     end
 
     def notfound
