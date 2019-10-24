@@ -80,7 +80,7 @@ class WebResource < RDF::URI
       Video => '🎞',
     }
 
-    AV = %w(css gif ico jpeg jpg m3u8 m4a mp3 mp4 opus png svg webm webp)
+    AV = %w(css gif ico jpeg jpg m3u8 m4a mp3 mp4 opus png svg ts webm webp)
 
     def formatHint
       if basename.index('msg.')==0 || path.index('/sent/cur')==0

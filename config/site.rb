@@ -50,7 +50,7 @@ class WebResource
       if r.parts[0] == 'resizer'
         parts = r.path.split /\/\d+x\d+\/((filter|smart)[^\/]*\/)?/
         parts.size > 1 ? [302,
-                          {'Location' => 'https://' + parts[-1] + '?allow='+ServerKey
+                          {'Location' => 'https://' + parts[-1] #+ '?allow='+ServerKey
                           }, []] : NoJS[r]
       else
         NoJS[r]
@@ -58,6 +58,9 @@ class WebResource
 
     # ABC
     Allow 'abcnews.go.com'
+
+    # ACM
+    Cookies 'dl.acm.org'
 
     # AliBaba
     %w(ae01.alicdn.com
@@ -315,6 +318,9 @@ android.clients.google.com
     GET 'img.imgsmail.ru', NoGunk
     GET 's.mail.ru', NoGunk
     GET 'thumb.cloud.mail.ru', NoJS
+
+    # MassLive
+    GET 'i.masslive.com', Resizer
 
     # Mastodon
     Allow 'nya.social'
