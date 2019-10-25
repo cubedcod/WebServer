@@ -528,7 +528,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
         nodes[0].fileResponse # nothing to transform or merge. return file
       else                    # merge and transform
         nodes.map{|node|
-          options = local ? {} : {base_uri: (join node.relFrom base)}
+          options = location==self ? {} : {base_uri: (join node.relFrom base)}
           node.load options}
         graphResponse
       end
