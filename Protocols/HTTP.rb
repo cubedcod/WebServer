@@ -522,13 +522,13 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
 
     def local?; LocalAddr.member?(env['SERVER_NAME']) || ENV['SERVER_NAME'] == env['SERVER_NAME'] end
 
-    def nodeResponse location=self
-      nodes = location.findNodes
+    def nodeResponse fs_base=self
+      nodes = fs_base.findNodes
       if nodes.size==1 && nodes[0].ext=='ttl' && selectFormat=='text/turtle'
         nodes[0].fileResponse # nothing to transform or merge. return file
       else                    # merge and transform
         nodes.map{|node|
-          options = location==self ? {} : {base_uri: (join node.relFrom base)}
+          options = fs_base == self ? {} : {base_uri: (join node.relFrom fs_base)}
           node.load options}
         graphResponse
       end

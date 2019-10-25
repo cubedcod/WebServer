@@ -1,4 +1,7 @@
 String#hrefs not getting tail-call optimization?
-custom slugs for timeline URI
+custom slugs for timeline URI - IG user, reddit/mail post author
 more elegant blank-node handling for Dokieli RDFa
 turtle cache of nonrdf-conversions for RDF#load
+bsb image-resolution
+daydirs on remote hostnames (or figure out non-localhost name from header for local request-target)
+POST logging / rdfication (index in sent folder)
