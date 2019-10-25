@@ -57,9 +57,7 @@ class WebResource
 
     def cachePath; (hostpath + path).R env end
 
-    def cachedResource; cachePath.file? ? cachePath.fileResponse : cachedGraph end
-
-    def cachedGraph; nodeResponse false end
+    def cachedGraph; nodeResponse cachePath end
 
     def self.call env
       return [405,{},[]] unless m=Methods[env['REQUEST_METHOD']] # look up method handler
@@ -269,15 +267,15 @@ class WebResource
     # fetch resource
     def fetch options = {}
       if AV.member? ext.downcase
-        return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has static-media
-        return cachePath.fileResponse if cachePath.file?                                                 # server has static-media
+        return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has static-media, return 304
+        return cachePath.fileResponse if cachePath.file?                                                 # server has static-media, respond with it
       end
-      return cachedResource if offline?                                                                  # offline, no fetching
-      u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? (HTTP.qs options[:query]) : qs)   # base locator sans scheme
-      primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env                                    # primary locator
-      fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env                                 # fallback locator
+      return cachedGraph if offline?                                                                     # offline, cache of prior fetch
+      u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? (HTTP.qs options[:query]) : qs)   # base locator
+      primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env                                    # primary-scheme locator
+      fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env                                 # fallback-scheme locator
       primary.fetchHTTP options                           # fetch
-    rescue Exception => e                                 # fetch failure:
+    rescue Exception => e                                 # fetch failure
       case e.class.to_s
       when 'OpenURI::HTTPRedirect'                        # redirected
         if (fallback.uri.index e.io.meta['location']) == 0
@@ -524,8 +522,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
 
     def local?; LocalAddr.member?(env['SERVER_NAME']) || ENV['SERVER_NAME'] == env['SERVER_NAME'] end
 
-    def nodeResponse local=true
-      location = local ? self : cachePath
+    def nodeResponse location=self
       nodes = location.findNodes
       if nodes.size==1 && nodes[0].ext=='ttl' && selectFormat=='text/turtle'
         nodes[0].fileResponse # nothing to transform or merge. return file
