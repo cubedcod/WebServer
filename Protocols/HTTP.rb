@@ -59,12 +59,7 @@ class WebResource
 
     def cachedResource; cachePath.file? ? cachePath.fileResponse : cachedGraph end
 
-    def cachedGraph
-      base = cachePath
-      base.localNodes.map{|node|
-        node.load base_uri: (join node.relFrom base)}
-      graphResponse
-    end
+    def cachedGraph; nodeResponse false end
 
     def self.call env
       return [405,{},[]] unless m=Methods[env['REQUEST_METHOD']] # look up method handler
@@ -373,6 +368,31 @@ class WebResource
       entity
     end
 
+    def findNodes
+      return dir.findNodes if name == 'index'
+      (if directory?                                           # directory:
+       if env[:query].has_key?('f') && path != '/'             # FIND
+          find env[:query]['f'] unless env[:query]['f'].empty? # exact find
+       elsif env[:query].has_key?('find') && path != '/'       # easy find
+          find '*' + env[:query]['find'] + '*' unless env[:query]['find'].empty?
+       elsif (env[:query].has_key?('Q') || env[:query].has_key?('q')) && path != '/'
+         env[:grep] = true                                     # GREP
+         grep
+       else                                                    # LS
+         [self]
+       end
+      else                                                     # file(s):
+        if uri.match GlobChars         # parametric GLOB
+          env[:grep] = true if env && env[:query].has_key?('q')
+          glob
+        else                           # default GLOB
+          files = (self + '.*').R.glob #  base + extension
+          files = (self + '*').R.glob if files.empty? # prefix
+          [self, files]
+        end
+       end).flatten.compact.uniq.select(&:exist?).map{|n|n.bindEnv env}
+    end
+
     def fixedFormat? format = nil
       return true if upstreamUI?
       return false if env[:transformable] || !format || format.match?(/\/(atom|rss|xml)/i)
@@ -396,7 +416,18 @@ class WebResource
       else
         env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
         if local?
-          local
+          if %w{y year m month d day h hour}.member? parts[0]              # timeseg redirect
+            dateDir
+          elsif path == '/mail'                                            # inbox redirect
+            [302,{'Location' => '/d/*/msg*?head&sort=date&view=table'},[]]
+          elsif file?                                                      # local file
+            fileResponse
+          elsif directory? && qs.empty? && (index = (self + 'index.html').R env).exist? && selectFormat == 'text/html'
+            index.fileResponse                                             # directory-index file
+          else
+            dateMeta
+            nodeResponse
+          end
         else
           fetch
         end
@@ -480,7 +511,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       head # output header
     end
 
-    # load node-metadata and serialized RDF to graph
+    # load node metadata/RDF to RDF::Repository
     def load options = {}
       env[:repository] ||= RDF::Repository.new # graph
       stat options                             # load node-metadata
@@ -491,56 +522,19 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       self                                     # node
     end
 
-    def local
-      if %w{y year m month d day h hour}.member? parts[0]              # timeseg redirect
-        dateDir
-      elsif path == '/mail'                                            # inbox redirect
-        [302,{'Location' => '/d/*/msg*?head&sort=date&view=table'},[]]
-      elsif file?                                                      # local file
-        fileResponse
-      elsif directory? && qs.empty? && (index = (self + 'index.html').R env).exist? && selectFormat == 'text/html'
-        index.fileResponse                                             # directory-index file
-      else
-        localGraph                                                     # local graph node(s)
-      end
-    end
-
     def local?; LocalAddr.member?(env['SERVER_NAME']) || ENV['SERVER_NAME'] == env['SERVER_NAME'] end
 
-    def localGraph
-      dateMeta
-      nodes = localNodes
+    def nodeResponse local=true
+      location = local ? self : cachePath
+      nodes = location.findNodes
       if nodes.size==1 && nodes[0].ext=='ttl' && selectFormat=='text/turtle'
         nodes[0].fileResponse # nothing to transform or merge. return file
       else                    # merge and transform
-        nodes.map &:load
+        nodes.map{|node|
+          options = local ? {} : {base_uri: (join node.relFrom base)}
+          node.load options}
         graphResponse
       end
-    end
-
-    def localNodes
-      return dir.localNodes if name == 'index'
-      (if directory?                                           # directory:
-       if env[:query].has_key?('f') && path != '/'             # FIND
-          find env[:query]['f'] unless env[:query]['f'].empty? # exact find
-       elsif env[:query].has_key?('find') && path != '/'       # easy find
-          find '*' + env[:query]['find'] + '*' unless env[:query]['find'].empty?
-       elsif (env[:query].has_key?('Q') || env[:query].has_key?('q')) && path != '/'
-         env[:grep] = true                                     # GREP
-         grep
-       else                                                    # LS
-         [self]
-       end
-      else                                                     # file(s):
-        if uri.match GlobChars         # parametric GLOB
-          env[:grep] = true if env && env[:query].has_key?('q')
-          glob
-        else                           # default GLOB
-          files = (self + '.*').R.glob #  base + extension
-          files = (self + '*').R.glob if files.empty? # prefix
-          [self, files]
-        end
-       end).flatten.compact.uniq.select(&:exist?).map{|n|n.bindEnv env}
     end
 
     def notfound
@@ -673,8 +667,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       }.join("&")
     end
 
-    # latest query-string
-    def qs
+    def querystring
       if env
         if env[:query] && LocalArgs.find{|a|env[:query].has_key? a} # parsed query w/ local args in use
           q = env[:query].dup          # copy query
@@ -689,6 +682,8 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
         staticQuery
       end
     end
+
+    alias_method :qs, :querystring
 
     def redirect location
       if location.match? /campaign|[iu]tm_/

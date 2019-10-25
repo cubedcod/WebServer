@@ -465,11 +465,14 @@ firefox.settings.services.mozilla.com
     # Twitter
     Allow 'api.twitter.com'
     Allow 'proxsee.pscp.tv'
+
     GotoTwitter = -> r {[301,{'Location' => 'https://twitter.com' + r.path },[]]}
     GET 'mobile.twitter.com', GotoTwitter
     GET 'tweettunnel.com', GotoTwitter
     GET 'www.twitter.com', GotoTwitter
+
     GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : r.fetch}
+
     GET 'twitter.com', -> r {
       r.desktopUA
       if !r.path || r.path == '/'
@@ -487,7 +490,7 @@ firefox.settings.services.mozilla.com
       else
         r.env[:links][:up]    = '/' if r.parts.size == 1
         r.env[:links][:up]    = '/' + r.parts[0] if r.path.match? /\/status\/\d+\/?$/
-        r.env[:links][:media] = '/' + r.parts[0] + '/media' unless r.parts[1] == 'media'
+        r.env[:links][:media] = '/' + r.parts[0] + '/media' unless %w(media search).member? r.parts[1]
         r.fetch noRDF: true
       end}
 
