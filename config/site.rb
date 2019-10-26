@@ -89,6 +89,9 @@ images-na.ssl-images-amazon.com
     # Ars Technica
     GET 'cdn.arstechnica.net', NoJS
 
+    # Bing
+    GET 'www.bing.com', NoJS
+
     # Boston Globe
     GET 'bos.gl', -> r {r.fetch scheme: :http}
     GET 'www3.bostonglobe.com', Fetch
