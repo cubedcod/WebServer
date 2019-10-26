@@ -297,8 +297,10 @@ android.clients.google.com
 ).map{|host|
       GET host, IG0}
 
-    %w(pikdo.net
- www.pictame.com).map{|host|
+    %w(
+jolygram.com
+pikdo.net
+www.pictame.com).map{|host|
       GET host, IG1}
 
     # Linkedin
