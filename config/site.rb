@@ -292,15 +292,21 @@ android.clients.google.com
     IG0 =  -> r {r.parts[0] ? [301, {'Location' => 'https://www.instagram.com/'+r.parts[0]}, []] : r.deny}
     IG1 =  -> r {r.parts[1] ? [301, {'Location' => 'https://www.instagram.com/'+r.parts[1]}, []] : r.deny}
 
-    %w(saveig.org
-  www.toopics.com
+    %w(
+deskgram.net
+graphixto.com
+saveig.org
+www.pictosee.com
+www.toopics.com
 ).map{|host|
       GET host, IG0}
 
     %w(
 jolygram.com
 pikdo.net
-www.pictame.com).map{|host|
+www.pictame.com
+zoopps.com
+).map{|host|
       GET host, IG1}
 
     # Linkedin
