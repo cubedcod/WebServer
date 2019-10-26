@@ -148,9 +148,6 @@ images-na.ssl-images-amazon.com
     GET 'rover.ebay.com', -> r {
       r.env[:query].has_key?('mpre') ? [301, {'Location' => r.env[:query]['mpre']}, []] : r.deny}
 
-    # Engadget
-    GET 'guce.engadget.com', -> r {r.env[:query].has_key?('done') ? [301, {'Location' => r.env[:query]['done']}, []] : NoGunk[r]}
-
     # Facebook
     FBgunk = %w(common connect pages_reaction_units security tr)
 
