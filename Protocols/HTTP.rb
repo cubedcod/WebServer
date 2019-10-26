@@ -685,7 +685,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     def redirect location
       if location.match? /campaign|[iu]tm_/
         l = location.R
-        location = (l.host ? ('https://' + l.host) : '') + l.path # strip query
+        location = (l.host ? ('https://' + l.host) : '') + (l.path||'/') # strip query
       end
       [302, {'Location' => location}, []]
     end

@@ -391,10 +391,15 @@ firefox.settings.services.mozilla.com
     GET 'patch.com', NoQuery
 
     # Reddit
+    %w(gateway gql oauth www).map{|host|
+      Allow host + '.reddit.com'}
     Allow 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
-    %w(gateway gql oauth www).map{|host| Allow host + '.reddit.com'}
-    GET 'old.reddit.com', -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path}, []]}
-    GET 'reddit.com',     -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path}, []]}
+
+    GotoReddit = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path}, []]}
+
+    GET 'old.reddit.com', GotoReddit
+    GET 'reddit.com', GotoReddit
+
     GET 'www.reddit.com', -> r {
       options = {}
       r = ('/r/' + 'com/reddit/www/r/*/.sub*'.R.glob.map(&:dir).map(&:basename).join('+') + '/new').R r.env if r.path == '/'
@@ -409,6 +414,8 @@ firefox.settings.services.mozilla.com
                              '/'
                            end
       r.fetch options}
+
+    GET 'www.redditmedia.com', Desktop
 
     # Responsys
     GET 'static.cdn.responsys.net', NoJS
