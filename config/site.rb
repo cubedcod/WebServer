@@ -289,8 +289,11 @@ android.clients.google.com
     GET 'l.instagram.com', GotoU
     GET 'www.instagram.com', RootIndex
 
-    IG0 =  -> r {r.parts[0] ? [301, {'Location' => 'https://www.instagram.com/'+r.parts[0]}, []] : r.deny}
-    IG1 =  -> r {r.parts[1] ? [301, {'Location' => 'https://www.instagram.com/'+r.parts[1]}, []] : r.deny}
+    IG  =  -> r {             [301, {'Location' => 'https://www.instagram.com'  + r.path},     []]         }
+    IG0 =  -> r {r.parts[0] ? [301, {'Location' => 'https://www.instagram.com/' + r.parts[0]}, []] : r.deny}
+    IG1 =  -> r {r.parts[1] ? [301, {'Location' => 'https://www.instagram.com/' + r.parts[1]}, []] : r.deny}
+
+    %w(ig).map{|host| GET host, IG}
 
     %w(
 deskgram.net
@@ -298,16 +301,14 @@ graphixto.com
 saveig.org
 www.pictosee.com
 www.toopics.com
-).map{|host|
-      GET host, IG0}
+).map{|host| GET host, IG0}
 
     %w(
 jolygram.com
 pikdo.net
 www.pictame.com
 zoopps.com
-).map{|host|
-      GET host, IG1}
+).map{|host| GET host, IG1}
 
     # Linkedin
     if ENV.has_key? 'LINKEDIN'
