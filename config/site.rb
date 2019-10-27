@@ -296,7 +296,7 @@ android.clients.google.com
     %w(ig).map{|host| GET host, IG}
 
     %w(
-deskgram.net
+deskgram.cc deskgram.net
 graphixto.com
 saveig.org
 www.pictosee.com

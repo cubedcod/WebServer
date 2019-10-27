@@ -452,12 +452,14 @@ class WebResource
     end
 
     def gunk?
-      return false if ENV.has_key?('GUNK') || env[:query]['allow'] == ServerKey # environment override of all tags
-      return true  if env.has_key?('HTTP_GUNK') && !AllowedHosts.has_key?(host) # local override or upstream tag
-      return gunkURI                                                            # local tag
+      return true if env.has_key?('HTTP_GUNK') && !AllowedHosts.has_key?(host) # upstream tag - domain-name derived
+      gunkURI                                                                  # local tag - URI-regex derived
     end
 
-    def gunkURI; ('/' + hostname + (env && env['REQUEST_URI'] || path || '/')).match? Gunk end
+    def gunkURI
+      return false if env[:query]['allow'] == ServerKey
+      ('/' + hostname + (env && env['REQUEST_URI'] || path || '/')).match? Gunk
+    end
 
     def HEAD
       send(Methods['GET']).yield_self{|s,h,_| [s,h,[]] } # status-code & header
