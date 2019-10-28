@@ -33,7 +33,7 @@ class WebResource
       AllowedHosts[host] = true
     end
 
-    def allowCDN?
+    def allowCDNcontent?
       return false if gunkURI
       return true if AV.member? ext.downcase           # media file
       return true if ext == 'js' && ENV.has_key?('JS') # executable
@@ -127,7 +127,7 @@ class WebResource
                                                             (HTML.keyval (Webize::HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
     end
 
-    def CDN?; host.match? /\.(amazonaws|.*cdn|cloud(f(lare|ront)|inary)|netdna.*)\.(com|net)$/ end
+    def CDN?; host.match? CDNhost end
 
     def self.Cookies host
       CookieHost[host] = true
@@ -407,7 +407,7 @@ class WebResource
         [204, {}, []]
       elsif handler=HostGET[host] # host handler
         handler[self]
-      elsif self.CDN? && allowCDN?
+      elsif self.CDN? && allowCDNcontent?
         fetch
       elsif gunk?
         deny
@@ -452,6 +452,7 @@ class WebResource
     end
 
     def gunk?
+      return false if env[:query]['allow'] == ServerKey
       return true if env.has_key?('HTTP_GUNK') && !AllowedHosts.has_key?(host) # upstream tag - domain-name derived
       gunkURI                                                                  # local tag - URI-regex derived
     end
