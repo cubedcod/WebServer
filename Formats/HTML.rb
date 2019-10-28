@@ -278,8 +278,10 @@ class WebResource
                                       href: bc += p + '/', c: (CGI.escapeHTML URI.unescape p),
                                       id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
                                   {_: :a, class: :breadcrumb, href: path, c: (CGI.escapeHTML URI.unescape basename)},
-                                  link[:media, '🖼️'], link[:feed, FeedIcon], link[:turtle, '🐢'],
-                                  ({_: :a, id: :UX, class: :icon, style: 'color: #555', c: '⚗️', href: HTTP.qs((env[:query]||{}).merge({'UX' => 'upstream'}))} unless local?)
+                                  link[:media, '🖼️'],
+                                  ({_: :a, id: :UX, class: :icon, style: 'color: #555', c: '⚗️', href: HTTP.qs((env[:query]||{}).merge({'UX' => 'upstream'}))} unless local?),
+                                  link[:feed, FeedIcon],
+                                  link[:turtle, '🐢'],
                                  ]},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?

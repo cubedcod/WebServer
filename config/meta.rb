@@ -435,6 +435,7 @@ class WebResource
       OG + 'username' => Creator,
       OG + 'video' => Video,
       OG + 'video:duration' => :drop,
+      OG + 'video:secure_url' => Video,
       Podcast + 'author' => Creator,
       Podcast + 'subtitle' => Title,
       Podcast + 'title' => Title,
