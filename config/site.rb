@@ -524,6 +524,9 @@ firefox.settings.services.mozilla.com
     # WaPo
     GET 'www.washingtonpost.com', -> r {(r.parts[0]=='resizer' ? Resizer : NoGunk)[r]}
 
+    #WCVB
+    GET 'www.wcvb.com', Desktop
+
     # WGBH
     GET 'wgbh.brightspotcdn.com', GoIfURL
 
