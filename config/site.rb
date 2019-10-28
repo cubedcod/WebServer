@@ -403,13 +403,14 @@ firefox.settings.services.mozilla.com
 
     # Reddit
     %w(gateway gql oauth www).map{|host|
-      Allow host + '.reddit.com'}
-    Allow 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
+      Allow host + '.reddit.com'
+      GET host, NoGunk}
 
     GotoReddit = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path}, []]}
-
     GET 'old.reddit.com', GotoReddit
     GET 'reddit.com', GotoReddit
+    GET 'www.redditmedia.com', Desktop
+    Allow 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
 
     GET 'www.reddit.com', -> r {
       options = {}
@@ -425,8 +426,6 @@ firefox.settings.services.mozilla.com
                              '/'
                            end
       r.fetch options}
-
-    GET 'www.redditmedia.com', Desktop
 
     # Responsys
     GET 'static.cdn.responsys.net', NoJS
