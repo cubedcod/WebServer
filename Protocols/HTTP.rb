@@ -413,7 +413,6 @@ class WebResource
         deny
       else
         env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
-        env[:links][:turtle] = name + '.ttl'
         if local?
           if %w{y year m month d day h hour}.member? parts[0]              # timeseg redirect
             dateDir
@@ -424,6 +423,7 @@ class WebResource
           elsif directory? && qs.empty? && (index = (self + 'index.html').R env).exist? && selectFormat == 'text/html'
             index.fileResponse                                             # directory-index file
           else
+            env[:links][:turtle] = (path[-1] == '/' ? 'index' : name) + '.ttl'
             dateMeta
             nodeResponse
           end

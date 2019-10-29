@@ -308,6 +308,7 @@ www.toopics.com
     %w(
 jolygram.com
 pikdo.net
+publicinsta.com
 www.pictame.com
 zoopps.com
 ).map{|host| GET host, IG1}
@@ -462,7 +463,8 @@ firefox.settings.services.mozilla.com
 
     # Spotify
     %w(embed open).map{|host|
-      Allow host+'.spotify.com'}
+      Allow host+'.spotify.com'
+      GET host+'.spotify.com', Desktop}
 
     # StarTribune
     Allow 'comments.startribune.com'
