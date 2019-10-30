@@ -8,6 +8,7 @@ class WebResource
       'https://schema.org/ImageObject' => Image,
       'https://schema.org/NewsArticle' => Post,
       'https://schema.org/Person' => Person,
+      FOAF + 'Image' => Image,
       SIOC + 'BlogPost' => Post,
       SIOC + 'MailMessage' => Post,
       SIOC + 'UserAccount' => Person,
