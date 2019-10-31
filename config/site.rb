@@ -451,7 +451,7 @@ firefox.settings.services.mozilla.com
 
     # Soundcloud
     GET 'gate.sc', GotoURL
-    GET 'soundcloud.com', RootIndex
+    GET 'soundcloud.com', -> r {r.path=='/' ? RootIndex[r] : Desktop[r]}
     GET 'w.soundcloud.com', Desktop
     %w(api-auth.soundcloud.com
        api-mobi.soundcloud.com
