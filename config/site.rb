@@ -184,6 +184,9 @@ business.facebook.com
     GET 'gfycat.com', NoGunk
     GET 'thumbs.gfycat.com', NoGunk
 
+    # GitHub
+    GET 'github.com', NoGunk
+
     # GitLab
     GET 'assets.gitlab-static.net', Fetch
 
@@ -335,12 +338,12 @@ zoopps.com
     GET 'i.masslive.com', Resizer
 
     # Mastodon
-    Allow 'nya.social'
     %w(
 assets.octodon.social
      drive.nya.social
 files.mastodon.social
       mastodon.social
+           pdx.social
            nya.social
        octodon.social
 ).map{|host|
