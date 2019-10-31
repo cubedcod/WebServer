@@ -150,6 +150,9 @@ images-na.ssl-images-amazon.com
     GET 'rover.ebay.com', -> r {
       r.env[:query].has_key?('mpre') ? [301, {'Location' => r.env[:query]['mpre']}, []] : r.deny}
 
+    # embedly
+    GET 'cdn.embedly.com', Desktop
+
     # Facebook
     FBgunk = %w(common connect pages_reaction_units security tr)
 
