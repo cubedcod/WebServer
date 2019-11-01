@@ -329,7 +329,7 @@ class WebResource
           cachePath.write body if AV.member? ext.downcase                 # cache if static-media
           options[:intermediate] ? (return self) : index                  # return if intermediate fetch
 
-          BaseMeta.map{|k|env[:resp][k]||=h[k.downcase] if h[k.downcase]} # ustream metadata
+          BaseMeta.map{|k|env[:resp][k]||=h[k.downcase] if h[k.downcase]} # upstream metadata
           env[:resp]['Content-Length'] = body.bytesize.to_s               # content-length
           (fixedFormat? format) ? [200,env[:resp],[body]] : graphResponse # HTTP response
         end
