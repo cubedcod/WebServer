@@ -33,7 +33,7 @@ class WebResource
       AllowedHosts[host] = true
     end
 
-    def allowCDNcontent?
+    def allowContent?
       return false if gunkURI
       return true if AV.member? ext.downcase           # media file
       return true if ext == 'js' && ENV.has_key?('JS') # executable
@@ -407,7 +407,7 @@ class WebResource
         [204, {}, []]
       elsif handler=HostGET[host] # host handler
         handler[self]
-      elsif self.CDN? && allowCDNcontent?
+      elsif self.CDN? && allowContent?
         fetch
       elsif gunk?
         deny
@@ -423,7 +423,7 @@ class WebResource
           elsif directory? && qs.empty? && (index = (self + 'index.html').R env).exist? && selectFormat == 'text/html'
             index.fileResponse                                             # directory-index file
           else
-            env[:links][:turtle] = (path[-1] == '/' ? 'index' : name) + '.ttl'
+            env[:links][:turtle] = (path[-1] == '/' ? 'index' : name) + '.ttl' # local graph-files
             dateMeta
             nodeResponse
           end

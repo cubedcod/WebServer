@@ -14,7 +14,6 @@ module Webize
     class Reader < RDF::Reader
       include WebResource::URIs
       format Format
-      EmailAddress = ENV['EMAIL']
       MailDir = (Pathname.new ENV['HOME'] + '/.mail').relative_path_from(PWD).to_s
 
       def initialize(input = $stdin, options = {}, &block)
@@ -32,13 +31,12 @@ module Webize
       def each_triple &block; each_statement{|s| block.call *s.to_triple} end
 
       def each_statement &fn
-        mail_triples(@doc){|subject, predicate, o, graph=nil|
-          fn.call RDF::Statement.new(subject.R,
-                                     predicate.R,
+        mail_triples(@doc){|subject, predicate, o, graph_name=nil|
+          fn.call RDF::Statement.new(subject.R, predicate.R,
                                      (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal o
                                                                                             l.datatype=RDF.XMLLiteral if predicate == Content
                                                                                             l),
-                                     :graph_name => graph || subject.R)}
+                                     :graph_name => graph_name || subject.path.R)}
       end
 
       def mail_triples body, &b
