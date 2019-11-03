@@ -59,7 +59,8 @@ class WebResource
       end}
 
     # ABC
-    Allow 'abcnews.go.com'
+    GET 'abcnews.go.com', NoJS
+    GET 's.abcnews.com', NoJS
 
     # ACM
     Cookies 'dl.acm.org'
@@ -112,6 +113,9 @@ images-na.ssl-images-amazon.com
 
     # BuzzFeed
     GET 'img.buzzfeed.com', NoJS
+
+    # CBS
+    GET 'www.cbsnews.com', NoJS
 
     # CircleCI
     GET 'circleci.com', -> r {r.parts[0] == 'blog' ? r.fetch : r.deny}
@@ -247,6 +251,7 @@ android.clients.google.com
       Allow host}
     else
       GET 'google.com', -> r {[301,{'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] },[]]}
+      GET 'news.google.com', NoJS
       GET 'www.google.com', -> r {
         case r.path
         when /^.(aclk)?$/
