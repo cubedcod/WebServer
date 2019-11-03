@@ -317,6 +317,7 @@ www.toopics.com
 ).map{|host| GET host, IG0}
 
     %w(
+insee.me
 jolygram.com
 pikdo.net
 publicinsta.com
