@@ -92,9 +92,6 @@ images-na.ssl-images-amazon.com
     # Ars Technica
     GET 'cdn.arstechnica.net', NoJS
 
-    # Bing
-    GET 'www.bing.com', NoJS
-
     # Boston Globe
     GET 'bos.gl', -> r {r.fetch scheme: :http}
     GET 'www3.bostonglobe.com', Fetch
@@ -104,6 +101,7 @@ images-na.ssl-images-amazon.com
     Allow 'players.brightcove.net'
     Allow 'edge.api.brightcove.com'
     Allow 'secure.brightcove.com'
+    GET 'edge.api.brightcove.com', Fetch
 
     # Brightspot
     GET 'ca-times.brightspotcdn.com', GoIfURL
@@ -366,6 +364,10 @@ files.mastodon.social
 
     # Meredith
     GET 'imagesvc.meredithcorp.io', GoIfURL
+
+    # Microsoft
+    GET 'www.bing.com', NoJS
+    GET 'www.msn.com', NoJS
 
     # Mixcloud
     Allow 'm.mixcloud.com'
