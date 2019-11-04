@@ -309,6 +309,7 @@ android.clients.google.com
     %w(
 deskgram.cc deskgram.net
 graphixto.com
+instapuma.com
 saveig.org
 www.pictosee.com
 www.toopics.com
