@@ -313,6 +313,7 @@ android.clients.google.com
 deskgram.cc deskgram.net
 graphixto.com
 instapuma.com
+picpanzee.com
 saveig.org
 www.pictosee.com
 www.toopics.com
@@ -322,19 +323,15 @@ www.toopics.com
 insee.me
 jolygram.com
 pikdo.net
+piknu.com
 publicinsta.com
 www.pictame.com
 zoopps.com
 ).map{|host| GET host, IG1}
 
     # Linkedin
-    if ENV.has_key? 'LINKEDIN'
-      Allow 'media.licdn.com'
-      Allow 'www.linkedin.com'
-    else
-      GET 'media.licdn.com', NoJS
-      GET 'www.linkedin.com', NoJS
-    end
+    GET 'media.licdn.com', NoJS
+    GET 'www.linkedin.com', NoJS
 
     # Little Free Library
     Allow 'littlefreelibrary.secure.force.com'
