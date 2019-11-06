@@ -234,19 +234,19 @@ class WebResource
     def desktopUA; env['HTTP_USER_AGENT'] = DesktopUA; self end
 
     def entity generator = nil
-      entities = env['HTTP_IF_NONE_MATCH']&.strip&.split /\s*,\s*/ # client entities
-      if entities && entities.include?(env[:resp]['ETag']) # client has entity
-        [304, {}, []]                            # unmodified
+      entities = env['HTTP_IF_NONE_MATCH']&.strip&.split /\s*,\s*/
+      if entities && entities.include?(env[:resp]['ETag'])
+        [304, {}, []]                            # unmodified resource
       else
-        body = generator ? generator.call : self # call generator
-        if body.class == WebResource             # resource reference?
+        body = generator ? generator.call : self # generate resource
+        if body.class == WebResource             # resource reference
           Rack::File.new(nil).serving(Rack::Request.new(env), body.relPath).yield_self{|s,h,b|
             if s == 304
-              [s, {}, []]                          # unmodified
-            else                                   # Rack file-handler
+              [s, {}, []]                        # unmodified resource
+            else                                 # file reference
               h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type'] == 'application/javascript'
               env[:resp]['Content-Length'] = body.node.size.to_s
-              [s, h.update(env[:resp]), b]         # file-backed entity
+              [s, h.update(env[:resp]), b]       # file handler
             end}
         else
           env[:resp]['Content-Length'] = body.bytesize.to_s
@@ -695,40 +695,29 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     end
 
     def stat options = {}
-      return if basename.index('msg.') == 0 || ext=='ttl'           # hide internal graph-storage nodes
       graph = env[:repository] ||= RDF::Repository.new
       options[:base_uri] ||= self
       subject = options[:base_uri].R
+
       if node.directory?
-        subject = subject.to_s[-1] == '/' ? subject : (subject+'/') # enforce trailing slash on container URI
+        subject = subject.to_s[-1] == '/' ? subject : (subject+'/')                          # container URI
         graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#Container').R)
-        node.children.map{|n|                                       # point to contained nodes TODO recursion w/ stop-recursion flag?
-          directory = n.directory?
-          file = n.file?
+        node.children.map{|n|
           name = n.basename.to_s
-          name = directory ? (name + '/') : name.sub(GraphExt, '')
-          child = subject.join name
-          graph << (RDF::Statement.new subject, (W3+'ns/ldp#contains').R, child)
-          graph << (RDF::Statement.new child, Title.R, name)
-          if directory
-            graph << (RDF::Statement.new child, Type.R, (W3+'ns/ldp#Container').R)
-          elsif file
-            graph << (RDF::Statement.new child, Type.R, (W3+'ns/posix/stat#File').R)
-            graph << (RDF::Statement.new child, (W3+'ns/posix/stat#size').R, n.size)
-          end
-          if file || directory
-            mtime = n.stat.mtime
-            graph << (RDF::Statement.new child, Date.R, mtime.iso8601)
-            graph << (RDF::Statement.new child, (W3+'ns/posix/stat#mtime').R, mtime.to_i)
-          end}
-      else
+          name = n.directory? ? (name + '/') : name.sub(GraphExt, '')                        # contained-resource URI
+          graph << (RDF::Statement.new subject,(W3+'ns/ldp#contains').R,subject.join(name))} # containment triple
+      elsif node.file?
         graph << (RDF::Statement.new subject, Type.R, (W3+'ns/posix/stat#File').R)
+        graph << (RDF::Statement.new subject, (W3+'ns/posix/stat#size').R, node.size)        # node size
       end
-      graph << (RDF::Statement.new subject, Title.R, basename)
-      graph << (RDF::Statement.new subject, (W3+'ns/posix/stat#size').R, node.size)
-      mtime = node.stat.mtime
-      graph << (RDF::Statement.new subject, (W3+'ns/posix/stat#mtime').R, mtime.to_i)
-      graph << (RDF::Statement.new subject, Date.R, mtime.iso8601)
+
+      if mtime = node.stat.mtime
+        graph << (RDF::Statement.new subject, (W3+'ns/posix/stat#mtime').R, mtime.to_i)      # node mtime
+        graph << (RDF::Statement.new subject, Date.R, mtime.iso8601)
+      end
+
+      graph << (RDF::Statement.new subject, Title.R, basename)                               # node name
+
       self
     end
 
