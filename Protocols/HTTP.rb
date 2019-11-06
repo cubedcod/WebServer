@@ -760,7 +760,12 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
     end
 
     def upstreamUI;  env[:UX] = true; self end
-    def upstreamUI?; env.has_key?(:UX) || ENV.has_key?('UX') || env[:query].has_key?('UX') || env['HTTP_REFERER']&.match?(/UX=upstream/) end
+    def upstreamUI?
+      env.has_key?(:UX)  ||      # per-request setting
+      ENV.has_key?('UX') ||      # global setting
+      env[:query].has_key?('UX') # query parameter
+      #env['HTTP_REFERER']&.match?(/UX=upstream/)
+    end
 
     def verbose?; ENV.has_key? 'VERBOSE' end
 

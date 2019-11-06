@@ -612,6 +612,9 @@ heartbeat iframe_api live_chat manifest.json opensearch playlist results signin 
 
     GET 'youtu.be', -> r {[301, {'Location' => 'https://www.youtube.com/watch?v=' + r.path[1..-1]}, []]}
 
+    # ZeroHedge
+    Allow 'talk.zerohedge.com'
+
     # Zillow
     Allow 'www.zillow.com'
 
