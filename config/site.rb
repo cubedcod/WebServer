@@ -552,6 +552,9 @@ firefox.settings.services.mozilla.com
     # WGBH
     GET 'wgbh.brightspotcdn.com', GoIfURL
 
+    # Wiley
+    Cookies 'agupubs.onlinelibrary.wiley.com'
+
     # Wix
     GET 'static.parastorage.com', NoGunk
     GET 'static.wixstatic.com', NoGunk
