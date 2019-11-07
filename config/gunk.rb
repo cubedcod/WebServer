@@ -8,7 +8,7 @@ c(ampaign|edexis|hartbeat.*|ollector|omscore|onversion|ookie(c(hoice|onsent)|law
 de(als|tect)|
 e(moji.*\.js|ndscreen|nsighten|proof|scenic|vidon)|
 (web)?fonts?(awesome)?|
-g(dpr|eo(ip|locate)|igya|pt|tag|tm)|.*
+g(dpr|eo(ip|locat(e|ion))|igya|pt|tag|tm)|.*
 (header|pre)[-_]?bid.*|.*hubspot.*|[hp]b.?js|ima[0-9]?|
 impression|
 kr(ux|xd).*|

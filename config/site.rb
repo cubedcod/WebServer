@@ -484,6 +484,10 @@ firefox.settings.services.mozilla.com
     # StarTribune
     Allow 'comments.startribune.com'
 
+    # Tableau
+    Allow 'public.tableau.com'
+    GET   'public.tableau.com', Desktop
+
     # Technology Review
     GET 'cdn.technologyreview.com', NoQuery
 
