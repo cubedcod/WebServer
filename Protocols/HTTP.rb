@@ -72,9 +72,9 @@ class WebResource
         verbose = resource.verbose?                              # log request
         if verbose
           print "\n"
-          puts env['REQUEST_METHOD'] + '-REQUEST header'
+          puts env['REQUEST_METHOD'] + ' REQUEST'
           HTTP.print_header env
-          puts env['REQUEST_METHOD'] + '-RESPONSE code ' + status.to_s + ' header'
+          puts env['REQUEST_METHOD'] + ' RESPONSE ' + status.to_s
           HTTP.print_header head
         end
         if resource.env[:deny]
@@ -249,8 +249,8 @@ class WebResource
         body = generator ? generator.call : self # generate resource
         if body.class == WebResource             # resource reference
           Rack::File.new(nil).serving(Rack::Request.new(env), body.relPath).yield_self{|s,h,b|
-            if s == 304
-              [s, {}, []]                        # unmodified resource
+            if 304 == s
+              R304                               # unmodified resource
             else                                 # file reference
               h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type'] == 'application/javascript'
               env[:resp]['Content-Length'] = body.node.size.to_s
@@ -326,7 +326,7 @@ class WebResource
     # fetch over HTTP
     def fetchHTTP options = {}
       if verbose?
-        puts "\nFETCH "  + uri + ' request'
+        puts "\nFETCH "  + uri
         HTTP.print_header headers
       end
 
@@ -335,7 +335,7 @@ class WebResource
 
         h = response.meta                                                 # metadata
         if verbose?
-          puts "FETCH response"
+          puts '<< code ' + response.status.to_s
           HTTP.print_header h
         end
 
