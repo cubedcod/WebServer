@@ -411,7 +411,7 @@ firefox.settings.services.mozilla.com
         elsif r.env['REQUEST_PATH'][1..5] == 'https'
           options[:query] = {source_url: r.env['REQUEST_PATH'][1..-1]}
           '/article'.R(r.env).fetch options
-         end).index.graphResponse
+         end).indexRDF.graphResponse
       end}
 
     # Patch
@@ -518,7 +518,7 @@ firefox.settings.services.mozilla.com
                                    noRDF: true,
                                    query: {vertical: :default, f: :tweets, q: s.map{|u|'from:'+u}.join('+OR+')}}
         r.env[:query].update({'sort' => 'date', 'view' => 'table'})
-        r.index.graphResponse
+        r.indexRDF.graphResponse
       elsif r.gunkURI
         r.deny
       else

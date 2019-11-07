@@ -264,16 +264,16 @@ class WebResource
       end
     end
 
-    # fetch resource
+    # fetch resource, unless cached
     def fetch options = {}
       if AV.member? ext.downcase
-        return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has static-media, return 304
-        return cachePath.fileResponse if cachePath.file?                                                 # server has static-media, respond with it
+        return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has static-data, return 304
+        return cachePath.fileResponse if cachePath.file?                                                 # server has static-data, return it
       end
       return cachedGraph if offline?                                                                     # offline, cache of prior fetch
-      u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? (HTTP.qs options[:query]) : qs)   # base locator
-      primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env                                    # primary-scheme locator
-      fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env                                 # fallback-scheme locator
+      u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? (HTTP.qs options[:query]) : qs)   # locator: base
+      primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env                                    #          primary scheme
+      fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env                                 #          fallback scheme
       primary.fetchHTTP options                           # fetch
     rescue Exception => e                                 # fetch failure
       case e.class.to_s
@@ -327,7 +327,7 @@ class WebResource
           reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|  # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader   # extract RDF
           cachePath.write body if AV.member? ext.downcase                 # cache if static-media
-          options[:intermediate] ? (return self) : index                  # return if intermediate fetch
+          options[:intermediate] ? (return self) : indexRDF               # intermediate fetch has no immediate indexing or HTTP response
 
           BaseMeta.map{|k|env[:resp][k]||=h[k.downcase] if h[k.downcase]} # upstream metadata
           env[:resp]['Content-Length'] = body.bytesize.to_s               # content-length

@@ -1,8 +1,7 @@
 # coding: utf-8
 class WebResource
 
-  # Graph -> files
-  def index
+  def indexRDF
     return self unless env[:repository]
 
     env[:repository].each_graph.map{|graph|
@@ -20,14 +19,17 @@ class WebResource
                       flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.').R                   # slugskip
         end
       end
+
       docs.map{|doc|
         unless doc.exist?
           doc.dir.mkdir
-          RDF::Writer.for(:turtle).open(doc.relPath + '.ttl'){|f|
-            f << graph}
-        end}}
+          RDF::Writer.for(:turtle).open(doc.relPath + '.ttl'){|f|f << graph}
+        end
+      }
+    }
     self
   end
+
   module HTTP
     def rdfDocument format = 'text/turtle'
       env[:repository].dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true
