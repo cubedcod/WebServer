@@ -84,7 +84,6 @@ images-na.ssl-images-amazon.com
                s3.amazonaws.com
                  www.amazon.com).map{|h|Allow h}
     else
-      Cookies 's3.amazonaws.com'
       GET 'amazon.com', NoJS
       GET 'www.amazon.com', NoJS
       GET 'images-na.ssl-images-amazon.com', AmazonMedia
