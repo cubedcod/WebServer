@@ -12,6 +12,7 @@ module Webize
         'lwn.net' => :LWN,
         'news.ycombinator.com' => :HackerNews,
         'twitter.com' => :Twitter,
+        'universalhub.com' => :UHub,
         'www.aliexpress.com' => :AX,
         'www.apnews.com' => :AP,
         'www.city-data.com' => :CityData,
@@ -83,6 +84,7 @@ images-na.ssl-images-amazon.com
                s3.amazonaws.com
                  www.amazon.com).map{|h|Allow h}
     else
+      Cookies 's3.amazonaws.com'
       GET 'amazon.com', NoJS
       GET 'www.amazon.com', NoJS
       GET 'images-na.ssl-images-amazon.com', AmazonMedia

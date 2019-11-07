@@ -16,7 +16,7 @@ class WebResource
     Servers = {}
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
 
-    # handler lambdas
+    # handlers
     Desktop = -> r {r.gunkURI ? r.deny : r.desktopUI.fetch}
     Fetch = -> r {r.fetch}
     GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : NoGunk[r]}
@@ -28,6 +28,7 @@ class WebResource
     NoJS    = -> r {(r.gunkURI || r.ext=='js') ? r.deny : r.fetch}
     NoQuery = -> r {r.qs.empty? ? r.fetch : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
     RootIndex = -> r {r.path=='/' ? r.cachedGraph : NoGunk[r]}
+    R304 = [304, {}, []]
 
     def self.Allow host
       AllowedHosts[host] = true
@@ -69,6 +70,13 @@ class WebResource
         ext = resource.ext.downcase
         mime = head['Content-Type'] || ''
         verbose = resource.verbose?                              # log request
+        if verbose
+          print "\n"
+          puts env['REQUEST_METHOD'] + '-REQUEST header'
+          HTTP.print_header env
+          puts env['REQUEST_METHOD'] + '-RESPONSE code ' + status.to_s + ' header'
+          HTTP.print_header head
+        end
         if resource.env[:deny]
           if %w(css eot otf ttf woff woff2).member?(ext) #|| QuietGunk.member?(resource.basename)
             print "🛑"
@@ -236,7 +244,7 @@ class WebResource
     def entity generator = nil
       entities = env['HTTP_IF_NONE_MATCH']&.strip&.split /\s*,\s*/
       if entities && entities.include?(env[:resp]['ETag'])
-        [304, {}, []]                            # unmodified resource
+        R304                                     # unmodified resource
       else
         body = generator ? generator.call : self # generate resource
         if body.class == WebResource             # resource reference
@@ -264,27 +272,33 @@ class WebResource
       end
     end
 
-    # fetch resource, unless cached
+    # fetch resource from remote or local cache
     def fetch options = {}
+
+      # cache hits
       if AV.member? ext.downcase
-        return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has static-data, return 304
-        return cachePath.fileResponse if cachePath.file?                                                 # server has static-data, return it
+        return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE')     # client has static-data, return 304
+        return cachePath.fileResponse if cachePath.file?                                              # server has static-data, return data
       end
-      return cachedGraph if offline?                                                                     # offline, cache of prior fetch
-      u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? (HTTP.qs options[:query]) : qs)   # locator: base
-      primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env                                    #          primary scheme
-      fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env                                 #          fallback scheme
-      primary.fetchHTTP options                           # fetch
+      return cachedGraph if offline?                                                                  # offline, return cache
+
+      # locator
+      u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? HTTP.qs(options[:query]) : qs) # base URI
+      primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env                                 # primary scheme
+      fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env                              # fallback scheme
+
+      # fetch
+      primary.fetchHTTP options
     rescue Exception => e                                 # fetch failure
       case e.class.to_s
       when 'OpenURI::HTTPRedirect'                        # redirected
-        if (fallback.uri.index e.io.meta['location']) == 0
-          fallback.fetchHTTP options                      # follow to fallback
+        if (fallback.uri.index e.io.meta['location'])==0  # redirected to fallback URL?
+          fallback.fetchHTTP options                      # fetch fallback
         elsif options[:intermedate]                       # non-HTTP caller?
           puts "RELOC #{uri} -> #{e.io.meta['location']}" # alert caller of new location
-          e.io.meta['location'].R(env).fetchHTTP options  # follow redirect for caller
+          e.io.meta['location'].R(env).fetchHTTP options  # follow redirect for non-HTTP caller
         else
-          redirect e.io.meta['location']                  # HTTP caller can follow at discretion
+          redirect e.io.meta['location']                  # return new location
         end
       when 'Errno::ECONNREFUSED'
         fallback.fetchHTTP options
@@ -311,8 +325,20 @@ class WebResource
 
     # fetch over HTTP
     def fetchHTTP options = {}
+      if verbose?
+        puts "\nFETCH "  + uri + ' request'
+        HTTP.print_header headers
+      end
+
       open(uri, headers.merge({redirect: false})) do |response|           # fetch
-        h = response.meta; print '🌍🌎🌏🌐'[rand 4]                       # metadata
+        print '🌍🌎🌏🌐'[rand 4]
+
+        h = response.meta                                                 # metadata
+        if verbose?
+          puts "FETCH response"
+          HTTP.print_header h
+        end
+
         if response.status.to_s.match? /206/                              # partial body
           [206, h, [response.read]]                                       # return part
         else                                                              # complete body
@@ -339,7 +365,7 @@ class WebResource
       when /300/ # Multiple Choices
         [300, e.io.meta, [e.io.read]]
       when /304/ # Not Modified
-        [304, {}, []]
+        R304
       when /401/ # Unauthorized
         print "\n🚫 " + uri + ' '
         options[:intermediate] ? self : cachedGraph
@@ -487,7 +513,7 @@ class WebResource
         head[key] = v.to_s unless %w{connection gunk host links path-info query query-modified query-string
 rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version
 remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software
-transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forwarded-for}.member?(key.downcase)}
+transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forwarded-for}.member?(key.downcase)}
 
       # Cookie
       unless AllowedHosts.has_key?(host) || CookieHost.has_key?(host)
@@ -602,9 +628,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests version via x-forward
       body = env['rack.input'].read
 
       if verbose?
-        puts "REQUEST HEAD:"
-        HTTP.print_header head
-        puts "REQUEST BODY:"
+        puts "POST BODY:"
         HTTP.print_body head, body
       end
 
