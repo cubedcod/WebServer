@@ -289,16 +289,18 @@ class WebResource
 
       # fetch
       primary.fetchHTTP options
-    rescue Exception => e                                 # fetch failure
+    rescue Exception => e                                # fetch failure
       case e.class.to_s
-      when 'OpenURI::HTTPRedirect'                        # redirected
-        if (fallback.uri.index e.io.meta['location'])==0  # redirected to fallback URL?
-          fallback.fetchHTTP options                      # fetch fallback
-        elsif options[:intermedate]                       # non-HTTP caller?
-          puts "RELOC #{uri} -> #{e.io.meta['location']}" # alert caller of new location
-          e.io.meta['location'].R(env).fetchHTTP options  # follow redirect for non-HTTP caller
+      when 'OpenURI::HTTPRedirect'                       # redirected
+        location = e.io.meta['location'].R env
+        if location.scheme == 'http'                     # redirected to insecure URL
+          puts "WARNING transport downgrade #{location}" # warn on downgrade
+          location.fetchHTTP options                     # fetch insecure
+        elsif options[:intermediate]                     # non-HTTP caller or intermediate fetch
+          puts "RELOCATION #{uri} ➡️ #{location}"         # alert caller of new location
+          e.io.meta['location'].R(env).fetchHTTP options # follow redirect
         else
-          redirect e.io.meta['location']                  # return new location
+          redirect location                              # return new location
         end
       when 'Errno::ECONNREFUSED'
         fallback.fetchHTTP options
@@ -711,6 +713,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     alias_method :qs, :querystring
 
     def redirect location
+      location = location.to_s
       if location.match? /campaign|[iu]tm_/
         l = location.R
         location = (l.host ? ('https://' + l.host) : '') + (l.path||'/') # strip query
