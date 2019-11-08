@@ -24,6 +24,7 @@ class WebResource
         unless doc.exist?
           doc.dir.mkdir
           RDF::Writer.for(:turtle).open(doc.relPath + '.ttl'){|f|f << graph}
+          print "\e[32;7m🐢\e[0m"
         end
       }
     }
