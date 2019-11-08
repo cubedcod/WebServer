@@ -696,18 +696,15 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
 
     def querystring
       if env
-        if env[:query] && LocalArgs.find{|a|env[:query].has_key? a} # parsed query w/ local args in use
-          q = env[:query].dup          # copy query
-          LocalArgs.map{|a|q.delete a} # strip local args
-          q.empty? ? '' : HTTP.qs(q)   # serialize
+        if env[:query] && LocalArgs.find{|a|env[:query].has_key? a} # parsed query from environment
+          q = env[:query].dup                                        # query Hash
+          LocalArgs.map{|a| q.delete a }                             # eat internal args
+          return q.empty? ? '' : HTTP.qs(q)                          # stringify external qs
         elsif env['QUERY_STRING'] && !env['QUERY_STRING'].empty?    # query-string from environment
-          '?' + env['QUERY_STRING']
-        else                                                        # query-string from URI
-          staticQuery
+          return '?' + env['QUERY_STRING']
         end
-      else
-        staticQuery
       end
+      query && !query.empty? && ('?' + query) || ''                 # query-string from URI
     end
 
     alias_method :qs, :querystring
@@ -746,14 +743,6 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
       graph << (RDF::Statement.new subject, Title.R, basename)                               # node name
 
       self
-    end
-
-    def staticQuery
-      if query && !query.empty?
-        '?' + query
-      else
-        ''
-      end
     end
 
     def selectFormat default='text/html'

@@ -423,7 +423,7 @@ firefox.settings.services.mozilla.com
       Allow host + '.reddit.com'
       GET host, NoGunk}
 
-    GotoReddit = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path}, []]}
+    GotoReddit = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path + r.qs}, []]}
     GET 'old.reddit.com', GotoReddit
     GET 'reddit.com', GotoReddit
     GET 'www.redditmedia.com', Desktop
