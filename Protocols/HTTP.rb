@@ -82,7 +82,13 @@ class WebResource
           HTTP.print_header head
         end
 
-        if resource.env[:deny]                                   # deny
+        # highlight host on first encounter
+        unless Servers.has_key? env['SERVER_NAME']
+          Servers[env['SERVER_NAME']] = true
+          puts "\n➕ \e[1;7;32mhttps://" + env['SERVER_NAME'] + "\e[0m "
+        end
+
+        if resource.env[:deny]
           if %w(css eot otf ttf woff woff2).member?(ext) || path.match?(/204$/) #|| QuietGunk.member?(resource.basename)
             print "🛑"
           else
@@ -91,23 +97,23 @@ class WebResource
             resource.env[:query]&.map{|k,v| print "\n\e[7m#{k}\e[0m\t#{v}"} if verbose
           end
 
+        # OPTIONS
         elsif env['REQUEST_METHOD'] == 'OPTIONS'
-          print "\n🔧 \e[32;1;7m #{resource.uri}\e[0m "          # OPTIONS
+          print "\n🔧 \e[32;1;7m #{resource.uri}\e[0m "
 
+        # POST
         elsif env['REQUEST_METHOD'] == 'POST'
-          print "\n📝 \e[32;1;7m #{resource.uri}\e[0m "          # POST
+          print "\n📝 \e[32;1;7m #{resource.uri}\e[0m "
 
-        elsif !Servers.has_key? env['SERVER_NAME']
-          Servers[env['SERVER_NAME']] = true                     # new host
-          print "\n➕ \e[1;32mhttps://" + env['SERVER_NAME'] + "\e[7m" + resource.path + "\e[0m "
-
+        # non-content response
         elsif [301, 302, 303].member? status
-          print "\n➡️ ",head['Location']                          # redirected
+          print "\n➡️ ",head['Location'] # redirection
         elsif [204, 304].member? status
-          print '✅'                                             # up-to-date
+          print '✅'                    # up-to-date
         elsif status == 404
-          print "\n❓ #{resource.uri} "                          # not found
+          print "\n❓ #{resource.uri} " # not found
 
+        # typed data
         elsif ext == 'css'                                       # stylesheet
           print '🎨'
         elsif ext == 'js' || mime.match?(/script/)               # script
@@ -123,12 +129,15 @@ class WebResource
         elsif ext == 'ttl' || mime == 'text/turtle; charset=utf-8'
           print '🐢'                                             # turtle
 
+        # generic logger
         else
           print "\n\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : (env['REQUEST_METHOD']+' ')) + (status == 200 ? '' : (status.to_s+' ')) +
                 (env['HTTP_REFERER'] ? ((env['HTTP_REFERER'].R.host||'') + ' → ') : '') +
                 "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + resource.qs + "\e[0m "
         end
-        [status, head, body]} # response
+
+        # response
+        [status, head, body]}
     rescue Exception => e
       uri = 'https://' + env['SERVER_NAME'] + (env['REQUEST_URI']||'')
       msg = [uri, e.class, e.message].join " "
