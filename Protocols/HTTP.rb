@@ -92,7 +92,7 @@ class WebResource
         end
 
         if resource.env[:deny]
-          if %w(css eot otf ttf woff woff2).member?(ext) || path.match?(/204$/) #|| QuietGunk.member?(resource.basename)
+          if %w(css eot otf ttf woff woff2).member?(ext) || path.match?(/204$/)
             print "🛑"
           else
             referer_host = env['HTTP_REFERER'] && env['HTTP_REFERER'].R.host

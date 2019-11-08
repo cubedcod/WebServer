@@ -557,6 +557,10 @@ firefox.settings.services.mozilla.com
     # WaPo
     GET 'www.washingtonpost.com', -> r {(r.parts[0]=='resizer' ? Resizer : NoGunk)[r]}
 
+    # Weather
+    Allow 'api.weather.com'
+    Allow 'profile.wunderground.com'
+
     #WCVB
     GET 'www.wcvb.com', Desktop
 
