@@ -21,12 +21,18 @@ class String
 end
 
 class WebResource < RDF::URI
-  def R env_=nil; env_ ? env(env_) : self end
-  alias_method :uri, :to_s
-  module URIs
-    PWD = Pathname.new Dir.pwd
 
-    # vocab prefixes
+  def R env_=nil; env_ ? env(env_) : self end
+
+  alias_method :uri, :to_s
+
+  module URIs
+    AV = %w(css gif ico jpeg jpg m3u8 m4a mp3 mp4 opus pdf png svg ts webm webp) # media filename-extensions
+    GraphExt = /\.(md|ttl|u)$/                                                   # extension-pattern of native graph-formats
+    PWD = Pathname.new Dir.pwd                                                   # working directory
+    LocalAddr = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
+
+    # vocabulary base-URI
     W3       = 'http://www.w3.org/'
     DC       = 'http://purl.org/dc/terms/'
     OG       = 'http://ogp.me/ns#'
@@ -55,9 +61,8 @@ class WebResource < RDF::URI
     Type     = W3 + '1999/02/22-rdf-syntax-ns#type'
     Video    = DC + 'Video'
 
-    GraphExt = /\.(md|ttl|u)$/ # extensions of native graph-formats
-
-    Icons = { # single-character representation of URI
+    # single-character representation of a URI
+    Icons = {
       'https://twitter.com' => '🐦',
       Abstract => '✍',
       Audio => '🔊',
@@ -80,12 +85,10 @@ class WebResource < RDF::URI
       Video => '🎞',
     }
 
-    AV = %w(css gif ico jpeg jpg m3u8 m4a mp3 mp4 opus pdf png svg ts webm webp)
-
     def formatHint
       if basename.index('msg.')==0 || path.index('/sent/cur')==0
-        # procmail doesnt allow suffix (like .eml), only prefix? email author if you find solution
-        # presumably this is due to crazy maildir suffix-rewrites etc
+        # procmail doesnt allow suffix (like .eml extension), only prefix?
+        # presumably this is due to maildir suffix-rewrites to denote state
         :mail
       elsif ext.match? /^html?$/
         :html
@@ -106,7 +109,6 @@ class WebResource < RDF::URI
 
     def hostname; env && env['SERVER_NAME'] || host || 'localhost' end
     def hostpath; '/' + hostname.split('.').reverse.join('/') end
-    def isRDF?; ext == 'ttl' end
 
   end
 

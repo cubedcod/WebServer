@@ -4,14 +4,17 @@ class WebResource
   module HTTP
     include POSIX
     include URIs
+
     AllowedHosts = {}
     BaseMeta = %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie)
     CookieHost = {}
     HostGET = {}
     HostPOST = {}
-    LocalAddr = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
     LocalArgs = %w(allow view sort UX)
-    Methods = {'GET' => :GETresource, 'HEAD' => :HEAD, 'OPTIONS' => :OPTIONS, 'POST' => :POSTresource}
+    Methods = {'GET' => :GETresource,
+               'HEAD' => :HEAD,
+               'OPTIONS' => :OPTIONS,
+               'POST' => :POSTresource}
     NoTransform = /^(application|audio|font|image|text\/(css|(x-)?javascript|proto)|video)/
     Servers = {}
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
@@ -82,10 +85,10 @@ class WebResource
           HTTP.print_header head
         end
 
-        # highlight host on first encounter
+        # highlight host on first encounter TODO dedupe across forked workers
         unless Servers.has_key? env['SERVER_NAME']
           Servers[env['SERVER_NAME']] = true
-          puts "\n➕ \e[1;7;32mhttps://" + env['SERVER_NAME'] + "\e[0m "
+          print "\n➕ \e[1;7;32mhttps://" + env['SERVER_NAME'] + "\e[0m "
         end
 
         if resource.env[:deny]
