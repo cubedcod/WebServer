@@ -199,6 +199,9 @@ business.facebook.com
     # GitLab
     GET 'assets.gitlab-static.net', Fetch
 
+    # Gitter
+    Allow 'gitter.im'
+
     # Google
     %w(ajax.googleapis.com
           books.google.com
@@ -419,7 +422,7 @@ firefox.settings.services.mozilla.com
     GET 'patch.com', NoQuery
 
     # Photobucket
-    Allow 's116.photobucket.com'
+    #Allow 's116.photobucket.com'
 
     # Reddit
     %w(gateway gql oauth www).map{|host|
@@ -448,6 +451,9 @@ firefox.settings.services.mozilla.com
                              '/'
                            end
       r.fetch options}
+
+    # ResearchGate
+    Cookies 'www.researchgate.net'
 
     # Responsys
     GET 'static.cdn.responsys.net', NoJS
