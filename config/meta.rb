@@ -3,6 +3,7 @@ class WebResource
 
     MarkupMap = {
       'http://schema.org/Comment' => Post,
+      'http://schema.org/ProfilePage' => Person,
       'https://schema.org/BreadcrumbList' => List,
       'https://schema.org/Comment' => Post,
       'https://schema.org/ImageObject' => Image,
