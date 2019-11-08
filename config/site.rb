@@ -418,6 +418,9 @@ firefox.settings.services.mozilla.com
     # Patch
     GET 'patch.com', NoQuery
 
+    # Photobucket
+    Allow 's116.photobucket.com'
+
     # Reddit
     %w(gateway gql oauth www).map{|host|
       Allow host + '.reddit.com'
