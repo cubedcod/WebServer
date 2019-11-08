@@ -27,7 +27,9 @@ class WebResource
     NoGunk  = -> r {r.gunkURI ? r.deny : r.fetch}
     NoJS    = -> r {(r.gunkURI || r.ext=='js') ? r.deny : r.fetch}
     NoQuery = -> r {r.qs.empty? ? r.fetch : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
-    RootIndex = -> r {r.path=='/' ? r.cachedGraph : NoGunk[r]}
+    RootIndex = -> r {
+      r.chrono_sort if r.parts.size == 1
+      r.path == '/' ? r.cachedGraph : NoGunk[r]}
     R304 = [304, {}, []]
 
     def self.Allow host

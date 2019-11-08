@@ -234,6 +234,11 @@ end
 class WebResource
   module HTML
 
+    def chrono_sort
+      env[:query].update 'sort' => 'date',
+                         'view' => 'table'
+    end
+
     def self.colorize color = '#%06x' % (rand 16777216)
       "color: black; background-color: #{color}; border-color: #{color}"
     end

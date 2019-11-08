@@ -430,10 +430,12 @@ firefox.settings.services.mozilla.com
     Allow 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
 
     GET 'www.reddit.com', -> r {
-      options = {}
-      r = ('/r/' + 'com/reddit/www/r/*/.sub*'.R.glob.map(&:dir).map(&:basename).join('+') + '/new').R r.env if r.path == '/'
+      if r.path == '/'
+        r = ('/r/'+'com/reddit/www/r/*/.sub*'.R.glob.map(&:dir).map(&:basename).join('+')+'/new').R r.env
+        r.chrono_sort
+      end
       r.desktopUI if r.parts[-1] == 'submit'
-      options[:suffix] = '.rss' if r.ext.empty? && !r.upstreamUI?
+      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? # upstream representation-preference
       depth = r.parts.size
       r.env[:links][:up] = if [3,6].member? depth
                              r.dirname
@@ -522,7 +524,7 @@ firefox.settings.services.mozilla.com
           '/search'.R(r.env).fetch intermediate: true,
                                    noRDF: true,
                                    query: {vertical: :default, f: :tweets, q: s.map{|u|'from:'+u}.join('+OR+')}}
-        r.env[:query].update({'sort' => 'date', 'view' => 'table'})
+        r.chrono_sort
         r.indexRDF.graphResponse
       elsif r.gunkURI
         r.deny
