@@ -293,7 +293,8 @@ class WebResource
     end
 
     # fetch resource from remote or local cache
-    def fetch options = {}
+    def fetch options=nil
+      options ||= {}
 
       # cache hits
       if AV.member? ext.downcase

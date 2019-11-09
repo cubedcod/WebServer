@@ -317,19 +317,15 @@ android.clients.google.com
 deskgram.cc deskgram.net
 graphixto.com
 instapuma.com
-picpanzee.com
+picpanzee.com www.pictosee.com
 saveig.org
-www.pictosee.com
 www.toopics.com
 ).map{|host| GET host, IG0}
 
     %w(
-insee.me
+insee.me instadigg.com
 jolygram.com
-pikdo.net
-piknu.com
-publicinsta.com
-www.pictame.com
+pikdo.net piknu.com publicinsta.com www.pictame.com
 zoopps.com
 ).map{|host| GET host, IG1}
 
