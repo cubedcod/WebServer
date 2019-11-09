@@ -86,7 +86,7 @@ class WebResource
         end
 
         # highlight host on first encounter TODO dedupe across forked workers
-        unless Servers.has_key? env['SERVER_NAME']
+        unless (Servers.has_key? env['SERVER_NAME']) || resource.env[:deny]
           Servers[env['SERVER_NAME']] = true
           print "\n➕ \e[1;7;32mhttps://" + env['SERVER_NAME'] + "\e[0m "
         end
