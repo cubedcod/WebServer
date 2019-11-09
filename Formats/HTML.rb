@@ -501,8 +501,7 @@ class WebResource
 
     Markup[Date] = -> date, env=nil {
       glob = env && env['SERVER_NAME'] && ('*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*') || ''
-      {_: :a, class: :date, c: date,
-       href: 'http://localhost:8000/' + date[0..13].gsub(/[-T:]/,'/') + glob}}
+      {_: :a, class: :date, c: date, href: '/' + date[0..13].gsub(/[-T:]/,'/') + glob}}
 
     Markup[Link] = -> ref, env=nil {
       u = ref.to_s
