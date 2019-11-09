@@ -6,20 +6,22 @@ class WebResource
     include URIs
 
     AllowedHosts = {}
-    BaseMeta = %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie)
     CookieHost = {}
     HostGET = {}
     HostPOST = {}
     LocalArgs = %w(allow view sort UX)
-    Methods = {'GET' => :GETresource,
-               'HEAD' => :HEAD,
-               'OPTIONS' => :OPTIONS,
-               'POST' => :POSTresource}
     NoTransform = /^(application|audio|font|image|text\/(css|(x-)?javascript|proto)|video)/
     Servers = {}
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
 
     # handlers
+    Methods = {
+      'GET'     => :GETresource,
+      'HEAD'    => :HEAD,
+      'OPTIONS' => :OPTIONS,
+      'POST'    => :POSTresource,
+    }
+
     Desktop = -> r {r.gunkURI ? r.deny : r.desktopUI.fetch}
     Fetch = -> r {r.fetch}
     GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : NoGunk[r]}
@@ -376,9 +378,11 @@ class WebResource
           reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|  # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader   # extract RDF
           cachePath.write body if AV.member? ext.downcase                 # cache if static-media
+
           options[:intermediate] ? (return self) : indexRDF               # intermediate fetch has no immediate indexing or HTTP response
 
-          BaseMeta.map{|k|env[:resp][k]||=h[k.downcase] if h[k.downcase]} # upstream metadata
+          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie).map{|k|
+            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}             # upstream metadata
           env[:resp]['Content-Length'] = body.bytesize.to_s               # content-length
           (fixedFormat? format) ? [200,env[:resp],[body]] : graphResponse # HTTP response
         end
