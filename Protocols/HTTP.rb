@@ -10,7 +10,6 @@ class WebResource
     HostGET = {}
     HostPOST = {}
     LocalArgs = %w(allow view sort UX)
-    NoTransform = /^(application|audio|font|image|text\/(css|(x-)?javascript|proto)|video)/
     Servers = {}
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
 
@@ -22,15 +21,16 @@ class WebResource
       'POST'    => :POSTresource,
     }
 
-    Desktop = -> r {r.gunkURI ? r.deny : r.desktopUI.fetch}
+    Desktop = -> r {NoGunk[r.desktopUI]}
     Fetch = -> r {r.fetch}
     GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : NoGunk[r]}
     GotoBasename = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
     GotoU   = -> r {[301, {'Location' =>  r.env[:query]['u']}, []]}
     GotoURL = -> r {[301, {'Location' => (r.env[:query]['url']||r.env[:query]['q'])}, []]}
     Icon    = -> r {r.env[:deny] = true; [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
+    JS = -> r, pattern {(r.env['HTTP_REFERER']&.match(pattern) && NoGunk || NoJS)[r]}
     NoGunk  = -> r {r.gunkURI ? r.deny : r.fetch}
-    NoJS    = -> r {(r.gunkURI || r.ext=='js') ? r.deny : r.fetch}
+    NoJS    = -> r {r.ext=='js' ? r.deny : NoGunk[r]} # TODO inspect response content-type
     NoQuery = -> r {r.qs.empty? ? r.fetch : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
     RootIndex = -> r {
       r.chrono_sort if r.parts.size == 1
@@ -41,11 +41,19 @@ class WebResource
       AllowedHosts[host] = true
     end
 
+    def allow?
+      AllowedHosts.has_key? host
+    end
+
     def allowContent?
       return false if gunkURI
       return true if AV.member? ext.downcase           # media file
       return true if ext == 'js' && ENV.has_key?('JS') # executable
       false
+    end
+
+    def allowCookies?
+      allow? || CookieHost.has_key?(host)
     end
 
     def allowedOrigin
@@ -355,10 +363,10 @@ class WebResource
         HTTP.print_header headers
       end
 
-      open(uri, headers.merge({redirect: false})) do |response|           # fetch
-        print '🌍🌎🌏🌐'[rand 4]
+      # fetch
+      open(uri, headers.merge({redirect: false})) do |response| print '🌍🌎🌏🌐'[rand 4]
 
-        h = response.meta                                                 # metadata
+        h = response.meta                                                 # response metadata
         if verbose?
           puts '<< code ' + response.status.to_s
           HTTP.print_header h
@@ -366,25 +374,33 @@ class WebResource
 
         if response.status.to_s.match? /206/                              # partial body
           [206, h, [response.read]]                                       # return part
-        else                                                              # complete body
-          body = HTTP.decompress h, response.read                         # decode body
+        else
 
-          format = h['content-type'].split(/;/)[0] if h['content-type']   # format
-          format ||= (xt=ext.to_sym; puts "WARNING no MIME for #{uri}"    # extension -> format
-                      RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
+          # body
+          body = HTTP.decompress h, response.read                         # decode
+          format = h['content-type'].split(/;/)[0] if h['content-type']   # find format
+          format ||= (xt = ext.to_sym; puts "WARNING no MIME for #{uri}"  # extension -> format mapping
+           RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
           format = 'text/nfo' if ext=='nfo' && format.match?(/^text.plain/)
-
           reader = RDF::Reader.for content_type: format                   # find RDF reader
           reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|  # instantiate reader
-            (env[:repository] ||= RDF::Repository.new) << _ } if reader   # extract RDF
-          cachePath.write body if AV.member? ext.downcase                 # cache if static-media
+            (env[:repository] ||= RDF::Repository.new) << _ } if reader   # read RDF
+          cachePath.write body if AV.member? ext.downcase                 # cache static-media
 
-          options[:intermediate] ? (return self) : indexRDF               # intermediate fetch has no immediate indexing or HTTP response
+          return self if options[:intermediate]                           # intermediate fetch w/ no direct HTTP caller
 
-          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie).map{|k|
-            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}             # upstream metadata
-          env[:resp]['Content-Length'] = body.bytesize.to_s               # content-length
-          (fixedFormat? format) ? [200,env[:resp],[body]] : graphResponse # HTTP response
+          # upstream metadata
+          %w(Access-Control-Allow-Origin
+             Access-Control-Allow-Credentials Content-Type ETag).map{|k|
+            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}
+          env[:resp]['Set-Cookie'] = h['set-cookie'] if h['set-cookie'] && allowCookies?
+
+          # local metadata
+          indexRDF
+          env[:resp]['Content-Length'] = body.bytesize.to_s
+
+          # HTTP response
+          (fixedFormat? format) ? [200,env[:resp],[body]] : graphResponse
         end
       end
     rescue Exception => e
@@ -421,10 +437,10 @@ class WebResource
 
     def findNodes
       return dir.findNodes if name == 'index'
-      (if directory?                                           # directory:
-       if env[:query].has_key?('f') && path != '/'             # FIND
-          find env[:query]['f'] unless env[:query]['f'].empty? # exact find
-       elsif env[:query].has_key?('find') && path != '/'       # easy find
+      (if directory?                                           # directory?
+       if env[:query].has_key?('f') && path != '/'             # FIND:
+          find env[:query]['f'] unless env[:query]['f'].empty? # pedantic find
+       elsif env[:query].has_key?('find') && path != '/'       # easy-mode find
           find '*' + env[:query]['find'] + '*' unless env[:query]['find'].empty?
        elsif (env[:query].has_key?('Q') || env[:query].has_key?('q')) && path != '/'
          env[:grep] = true                                     # GREP
@@ -432,22 +448,27 @@ class WebResource
        else                                                    # LS
          [self]
        end
-      else                                                     # file(s):
-        if uri.match GlobChars         # parametric GLOB
+      else                                                     # file-pattern
+        if uri.match GlobChars         # parametric GLOB:
           env[:grep] = true if env && env[:query].has_key?('q')
           glob
-        else                           # default GLOB
-          files = (self + '.*').R.glob #  base + extension
-          files = (self + '*').R.glob if files.empty? # prefix
+        else                           # default GLOB:
+          files = (self + '.*').R.glob # basename + format-extension
+          files = (self + '*').R.glob if files.empty? # prefix match
           [self, files]
         end
        end).flatten.compact.uniq.select(&:exist?).map{|n|n.bindEnv env}
     end
 
     def fixedFormat? format = nil
+      # no rewrites if upstream UI
       return true if upstreamUI?
+
+      # rewritable if explicit transform-preference  or Atom/RSS feed formats
       return false if env[:transformable] || !format || format.match?(/\/(atom|rss|xml)/i)
-      format.match? NoTransform # MIME-pattern: application/* and media/* fixed, graph + text formats transformable
+
+      # MIME-pattern: application/ and media/ fixed, graph-formats (text/turtle) + text/ transformable
+      format.match? /^(application|audio|font|image|text\/(css|(x-)?javascript|proto)|video)/
     end
 
     def self.GET arg, lambda
@@ -507,8 +528,8 @@ class WebResource
 
     def gunk?
       return false if env[:query]['allow'] == ServerKey
-      return true if env.has_key?('HTTP_GUNK') && !AllowedHosts.has_key?(host) # upstream tag - domain-name derived
-      gunkURI                                                                  # local tag - URI-regex derived
+      return true if env.has_key?('HTTP_GUNK') && !allow? # upstream tag - domain-name derived
+      gunkURI                                             # local tag - URI-regex derived
     end
 
     def gunkURI
@@ -543,13 +564,13 @@ remote-addr repository request-method request-path request-uri resp script-name 
 transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forwarded-for}.member?(key.downcase)}
 
       # Cookie
-      unless AllowedHosts.has_key?(host) || CookieHost.has_key?(host)
+      unless allowCookies?
         head.delete 'Cookie'
         head.delete 'Set-Cookie'
       end
 
       # Referer
-      head.delete 'Referer' unless AllowedHosts.has_key? host
+      head.delete 'Referer' unless allow?
       if env && env['SERVER_NAME']
         case env['SERVER_NAME']
         when /wsj\.com$/
@@ -601,7 +622,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     end
 
     def OPTIONS
-      if AllowedHosts.has_key? host
+      if allow?
         self.OPTIONSthru
       else
         env[:deny] = true
@@ -641,7 +662,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     def POSTresource
       if handler = HostPOST[host]
         handler[self]
-      elsif AllowedHosts.has_key?(host) || (ENV.has_key?('TWITCH')&&host.match?(/\.ttvnw\.net$/))
+      elsif allow?
         self.POSTthru
       else
         denyPOST
