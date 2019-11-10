@@ -461,10 +461,10 @@ class WebResource
     end
 
     def fixedFormat? format = nil
-      # no rewrites if upstream UI
+      # preserve upstream-UI request's format
       return true if upstreamUI?
 
-      # rewritable if explicit transform-preference  or Atom/RSS feed formats
+      # rewritable if explicit preference, no format or Atom/RSS feed
       return false if env[:transformable] || !format || format.match?(/\/(atom|rss|xml)/i)
 
       # MIME-pattern: application/ and media/ fixed, graph-formats (text/turtle) + text/ transformable

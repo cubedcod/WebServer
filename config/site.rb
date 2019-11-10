@@ -580,6 +580,9 @@ videos.files.wordpress.com
 
     (0..7).map{|i| GET "i#{i}.wp.com", NoQuery}
 
+    # WSJ
+    GET 'images.wsj.net', NoJS
+
     # Yahoo!
     %w(finance.yahoo.com
           news.yahoo.com

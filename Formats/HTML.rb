@@ -28,7 +28,7 @@ image-src
       # images
       # CSS:background-image → <img>
       html.css('[style*="background-image"]').map{|node|
-        node['style'].match(/url\(['"]*([^\)]+)['"]*\)/).yield_self{|url|
+        node['style'].match(/url\(['"]*([^\)'"]+)['"]*\)/).yield_self{|url|
           node.add_child "<img src=\"#{url[1]}\">" if url}}
       # <amp-img> → <img>
       html.css('amp-img').map{|amp|amp.add_child "<img src=\"#{amp['src']}\">"}
