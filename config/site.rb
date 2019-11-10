@@ -317,7 +317,7 @@ android.clients.google.com
 deskgram.cc deskgram.net
 graphixto.com
 instapuma.com
-picpanzee.com www.pictosee.com
+www.picimon.com picpanzee.com www.pictosee.com
 saveig.org
 www.toopics.com
 ).map{|host| GET host, IG0}
@@ -367,8 +367,8 @@ files.mastodon.social
     GET 'imagesvc.meredithcorp.io', GoIfURL
 
     # Microsoft
-    GET 'www.bing.com', NoJS
-    GET 'www.msn.com', NoJS
+    GET 'www.bing.com', NoGunk
+    GET 'www.msn.com', NoGunk
 
     # Mixcloud
     Allow 'm.mixcloud.com'
@@ -582,6 +582,8 @@ videos.files.wordpress.com
 
     # WSJ
     GET 'images.wsj.net', NoJS
+    GET 'm.wsj.net', NoJS
+    GET 's.wsj.net', NoJS
 
     # Yahoo!
     %w(finance.yahoo.com
