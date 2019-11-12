@@ -571,7 +571,6 @@ firefox.settings.services.mozilla.com
     GET 'static.wixstatic.com', NoGunk
 
     # WordPress
-    #Allow 'public-api.wordpress.com'
     %w(
 public-api.wordpress.com
 videos.files.wordpress.com
