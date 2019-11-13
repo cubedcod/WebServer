@@ -487,9 +487,9 @@ firefox.settings.services.mozilla.com
 ).map{|h|Allow h}
 
     # Spotify
-    %w(embed open).map{|host|
+    %w(api apresolve embed guc-dealer guc-spclient open spclient.wg).map{|host|
       Allow host+'.spotify.com'
-      GET host+'.spotify.com', Desktop}
+      GET host+'.spotify.com', Desktop} if ENV.has_key? 'SPOTIFY'
 
     # StarTribune
     Allow 'comments.startribune.com'
@@ -503,12 +503,10 @@ firefox.settings.services.mozilla.com
 
     # Twitch
     GET 'www.twitch.tv', Desktop
-    if ENV.has_key? 'TWITCH'
-      %w(api.twitch.tv
+    %w(api.twitch.tv
          gql.twitch.tv
          www.twitch.tv
-).map{|h|Allow h}
-    end
+).map{|h|Allow h} if ENV.has_key? 'TWITCH'
 
     # Twitter
     Allow 'api.twitter.com'
