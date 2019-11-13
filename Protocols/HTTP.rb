@@ -244,6 +244,8 @@ class WebResource
       env[:deny] = true
       type, content = if type == :stylesheet || ext == 'css'
                         ['text/css', '']
+                      elsif type == :font || %w(eot otf ttf woff woff2).member?(ext)
+                        ['font/woff2', SiteFont]
                       elsif type == :image || %w(gif png).member?(ext)
                         ['image/gif', SiteGIF]
                       elsif type == :script || ext == 'js'
