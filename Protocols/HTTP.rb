@@ -242,12 +242,14 @@ class WebResource
 
     def deny status=200, type=nil
       env[:deny] = true
-      type, content = if ext == 'js' || type == :script
+      type, content = if type == :stylesheet || ext == 'css'
+                        ['text/css', '']
+                      elsif type == :image || %w(gif png).member?(ext)
+                        ['image/gif', SiteGIF]
+                      elsif type == :script || ext == 'js'
                         source = SiteDir.join 'alternatives/' + host + path
                         ['application/javascript', source.exist? ? source.read : '//']
-                      elsif %w(gif png).member?(ext) || type == :image
-                        ['image/gif', SiteGIF]
-                      elsif ext == 'json' || type == :json
+                      elsif type == :JSON || ext == 'json'
                         ['application/json','{}']
                       else
                         ['text/html; charset=utf-8',
