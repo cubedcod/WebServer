@@ -13,7 +13,7 @@ g(dpr|eo(ip|locat(e|ion))|igya|pt|tag|tm)|.*
 impression|
 kr(ux|xd).*|
 log(event|g(er|ing))?|(app|s)?
-m(e(asurement|t(er|rics?))|ms|onitor(ing)?|odal|tr)|
+m(atomo|e(asurement|t(er|rics?))|ms|onitor(ing)?|odal|tr)|
 new(relic|sletters?)|.*notifications?.*|
 o(m(niture|tr)|nboarding|nesignal|ptanon|utbrain)|
 p(a(idpost|rtner|ywall)|er(imeter-?x|sonali[sz](ation|e))|i(wik|xel(propagate)?)|lacement|op(down|over|up)|repopulator|ro(fitwell|m(o(tion)?s?|pt))|ubmatic|[vx])|

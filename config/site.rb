@@ -98,8 +98,9 @@ images-na.ssl-images-amazon.com
 
     # Boston Globe
     GET 'bos.gl', -> r {r.fetch scheme: :http}
-    GET 'www3.bostonglobe.com', Fetch
     GET 'bostonglobe-prod.cdn.arcpublishing.com', Resizer
+
+    %w(www www3).map{|host| GET host + '.bostonglobe.com', NoJS}
 
     # Brightcove
     Allow 'players.brightcove.net'
