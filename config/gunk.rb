@@ -6,11 +6,12 @@ class WebResource
 b(anner|eacon|reakingnew)s?|
 c(ampaign|edexis|hartbeat.*|loudflare|ollector|omscore|onversion|ookie(c(hoice|onsent)|law|notice)?s?|se)|
 de(als|tect)|
-e(moji.*\.js|ndscreen|nsighten|proof|scenic|vidon)|
-(web)?fonts?(awesome)?|
-g(dpr|eo(ip|locat(e|ion))|igya|pt|tag|tm)|.*
-(header|pre)[-_]?bid.*|.*hubspot.*|[hp]b.?js|ima[0-9]?|
+e(moji.*\.js|ndscreen|nsighten|proof|scenic|vidon)|(web)?
+fonts?(awesome)?|
+g(dpr|eo(ip|locat(e|ion))|igya|pt|tag|tm)|.*(
+header|pre)[-_]?bid.*|.*hubspot.*|[hp]b.?js|ima[0-9]?|
 impression|
+jquery|
 kr(ux|xd).*|
 log(event|g(er|ing))?|(app|s)?
 m(atomo|e(asurement|t(er|rics?))|ms|onitor(ing)?|odal|tr)|
