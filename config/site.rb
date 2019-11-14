@@ -244,7 +244,7 @@ android.clients.google.com
 ).map{|host| Allow host }
     else
        (0..3).map{|i|
-      GET 'encrypted-tbn'+i+'.gstatic.com', NoJS }
+      GET "encrypted-tbn#{i}.gstatic.com", NoJS }
        %w(books docs drive images scholar).map{|host|
       GET host+'.google.com', NoJS }
       GET 'ajax.googleapis.com', Fetch
@@ -253,11 +253,8 @@ android.clients.google.com
       GET 'www.google.com', -> r {
         case r.path
         when '/search'
-          if r.env[:query]['q']&.match? /^(https?:\/\/|l(:8000|\/)|localhost)/
-            [301, {'Location' => r.env[:query]['q'].sub(/^l/,'http://l')}, []]
-          else
-            r.fetch
-          end
+          q = r.env[:query]['q']
+          q && q.match?(/^(https?:|l(ocalhost)?(:8000)?)\//) && [301,{'Location'=>q.sub(/^l/,'http://l')},[]] || r.fetch
         when /^.(images|.*photos)/
           NoJS[r]
         when '/url'
