@@ -499,9 +499,7 @@ class WebResource
         CGI.escapeHTML t.to_s
       end}
 
-    Markup[Date] = -> date, env=nil {
-      glob = env && env['SERVER_NAME'] && ('*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*') || ''
-      {_: :a, class: :date, c: date, href: '/' + date[0..13].gsub(/[-T:]/,'/') + glob}}
+    Markup[Date] = -> date, env=nil {{_: :a, class: :date, c: date, href: '/' + date[0..13].gsub(/[-T:]/,'/')}}
 
     Markup[Link] = -> ref, env=nil {
       u = ref.to_s

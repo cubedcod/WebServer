@@ -494,8 +494,12 @@ class WebResource
             dateMeta
             nodeResponse
           end
+        elsif path.match? /^\/\d\d\d\d\/\d\d\/\d\d\/\d\d\/$/ # cache-timeseg, local hour-dir
+          name = '*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*'
+          
+        #elsif                                               # cache-timeseg, merge with remote y/m/d-dir
         else
-          fetch
+          fetch                                              # remote resource
         end
       end
     rescue OpenURI::HTTPRedirect => e
@@ -596,8 +600,8 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     def nodeResponse fs_base=self
       nodes = fs_base.findNodes
       if nodes.size==1 && nodes[0].ext=='ttl' && selectFormat=='text/turtle'
-        nodes[0].fileResponse # nothing to transform or merge. return file
-      else                    # merge and transform
+        nodes[0].fileResponse # nothing to merge or transform. return static node
+      else                    # merge and/or transform
         nodes.map{|node|
           options = fs_base == self ? {} : {base_uri: (join node.relFrom fs_base)}
           node.load options}
@@ -606,7 +610,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     end
 
     def notfound
-      dateMeta # nearby nodes may exist, search for pointers
+      dateMeta # nearby nodes may exist, add pointers
       [404, {'Content-Type' => 'text/html'}, [htmlDocument]]
     end
 
