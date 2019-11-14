@@ -315,25 +315,14 @@ class WebResource
       return cachedGraph if offline?                                                                  # offline, return cache
 
       # locator
-      u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? HTTP.qs(options[:query]) : qs) # base URI
+      u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? HTTP.qs(options[:query]) : qs) # base locator
       primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env                                 # primary scheme
       fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env                              # fallback scheme
 
       # fetch
       primary.fetchHTTP options
-    rescue Exception => e                                # fetch failure
+    rescue Exception => e
       case e.class.to_s
-      when 'OpenURI::HTTPRedirect'                       # redirected
-        location = e.io.meta['location'].R env
-        if location.scheme == 'http'                     # redirected to insecure URL
-          puts "WARNING transport downgrade #{location}" # warn on downgrade
-          location.fetchHTTP options                     # fetch insecure
-        elsif options[:intermediate]                     # non-HTTP caller or intermediate fetch
-          puts "RELOCATION #{uri} ➡️ #{location}"         # alert caller of new location
-          e.io.meta['location'].R(env).fetchHTTP options # follow redirect
-        else
-          redirect location                              # return new location
-        end
       when 'Errno::ECONNREFUSED'
         fallback.fetchHTTP options
       when 'Errno::ECONNRESET'
@@ -401,6 +390,8 @@ class WebResource
       case e.message
       when /300/ # Multiple Choices
         [300, e.io.meta, [e.io.read]]
+      when /30[238]/ # Relocated
+        redirect e.io.meta['location'].R env
       when /304/ # Not Modified
         R304
       when /401/ # Unauthorized
