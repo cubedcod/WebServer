@@ -390,8 +390,8 @@ class WebResource
       case e.message
       when /300/ # Multiple Choices
         [300, e.io.meta, [e.io.read]]
-      when /30[238]/ # Relocated
-        redirect e.io.meta['location'].R env
+      when /30[2378]/ # Relocated
+        redirect e.io.meta['location']
       when /304/ # Not Modified
         R304
       when /401/ # Unauthorized
@@ -493,8 +493,6 @@ class WebResource
           fetch                                              # remote resource
         end
       end
-    rescue OpenURI::HTTPRedirect => e
-      redirect e.io.meta['location']
     end
 
     def graphResponse
