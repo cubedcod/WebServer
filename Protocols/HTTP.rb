@@ -487,7 +487,7 @@ class WebResource
           end
         elsif path.match? /^\/\d\d\d\d\/\d\d\/\d\d\/\d\d\/$/ # cache-timeseg, local hour-dir
           name = '*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*'
-          
+          nodeResponse (path + name).R env
         #elsif                                               # cache-timeseg, merge with remote y/m/d-dir
         else
           fetch                                              # remote resource
