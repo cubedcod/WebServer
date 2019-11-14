@@ -205,30 +205,10 @@ business.facebook.com
     Allow 'gitter.im'
 
     # Google
-    %w(ajax.googleapis.com
-          books.google.com
-     developers.google.com
-           docs.google.com
-          drive.google.com
-encrypted-tbn0.gstatic.com
-encrypted-tbn1.gstatic.com
-encrypted-tbn2.gstatic.com
-encrypted-tbn3.gstatic.com
-         groups.google.com
-         images.google.com
-             kh.google.com
-           maps.google.com
-       maps.googleapis.com
-          maps.gstatic.com
-        scholar.google.com
-           ssl.gstatic.com
-    storage.googleapis.com
-           www.gstatic.com
-).map{|h| Allow h }
+    GET 'ajax.googleapis.com', Fetch
 
     if ENV.has_key? 'GOOGLE'
-    %w(
-      adservice.google.com
+   %w(adservice.google.com
        accounts.google.com
 android.clients.google.com
     android.googleapis.com
@@ -241,30 +221,37 @@ android.clients.google.com
       feedproxy.google.com
       feeds.feedburner.com
                 google.com
+         groups.google.com
              id.google.com
              kh.google.com
            mail.google.com
+           maps.google.com
+          maps.gstatic.com
+       maps.googleapis.com
+   maps-api-ssl.google.com
            news.google.com
             ogs.google.com
            play.google.com
        play.googleapis.com
+    storage.googleapis.com
+           ssl.gstatic.com
  suggestqueries.google.com
  tpc.googlesyndication.com
             www.google.com
   www.googleadservices.com
         www.googleapis.com
+           www.gstatic.com
          www.recaptcha.net
 ).map{|host|
       Allow host}
     else
+      (0..3).map{|i| GET 'encrypted-tbn' + i + '.gstatic.com', NoJS }
+      %w(books docs drive images scholar).map{|host| GET host + '.google.com', NoJS }
+
       GET 'google.com', -> r {[301,{'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] },[]]}
-      GET 'news.google.com', NoJS
+      GET 'www.googleadservices.com', -> r {u=r.env[:query]['adurl'];u ? [301,{'Location' => u},[]] : r.deny}
       GET 'www.google.com', -> r {
         case r.path
-        when /^.(aclk)?$/
-          r.fetch
-        when /^.maps/
-          Desktop[r]
         when '/search'
           if r.env[:query]['q']&.match? /^(https?:\/\/|l(:8000|\/)|localhost|view-source)/
             [301, {'Location' => r.env[:query]['q'].sub(/^l/,'http://l')}, []]
@@ -278,7 +265,7 @@ android.clients.google.com
         else
           r.deny
         end}
-      GET 'www.googleadservices.com', -> r {r.path=='/pagead/aclk' && r.env[:query].has_key?('adurl') && [301, {'Location' =>  r.env[:query]['adurl']}, []] || r.deny}
+
     end
 
     # Guardian
