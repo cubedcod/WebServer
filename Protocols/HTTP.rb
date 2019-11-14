@@ -18,8 +18,7 @@ class WebResource
       'GET'     => :GETresource,
       'HEAD'    => :HEAD,
       'OPTIONS' => :OPTIONS,
-      'POST'    => :POSTresource,
-    }
+      'POST'    => :POSTresource}
 
     Desktop = -> r {NoGunk[r.desktopUI]}
     Fetch = -> r {r.fetch}
@@ -32,10 +31,8 @@ class WebResource
     NoGunk  = -> r {r.gunkURI ? r.deny : r.fetch}
     NoJS    = -> r {r.ext=='js' ? r.deny : NoGunk[r]} # TODO inspect response content-type
     NoQuery = -> r {r.qs.empty? ? r.fetch : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
-    RootIndex = -> r {
-      r.chrono_sort if r.parts.size == 1
-      r.path == '/' ? r.cachedGraph : NoGunk[r]}
     R304 = [304, {}, []]
+    RootIndex = -> r { r.chrono_sort if r.parts.size == 1; r.path == '/' ? r.cachedGraph : NoGunk[r]}
 
     def self.Allow host
       AllowedHosts[host] = true
@@ -142,8 +139,7 @@ class WebResource
         elsif ext == 'ttl' || mime == 'text/turtle; charset=utf-8'
           print '🐢'                                             # turtle
 
-        # generic logger
-        else
+        else # generic logger
           print "\n\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : (env['REQUEST_METHOD']+' ')) + (status == 200 ? '' : (status.to_s+' ')) +
                 (env['HTTP_REFERER'] ? ((env['HTTP_REFERER'].R.host||'') + ' → ') : '') +
                 "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + resource.qs + "\e[0m "
@@ -273,6 +269,7 @@ class WebResource
     end
 
     def desktopUI; upstreamUI; desktopUA end
+
     def desktopUA; env['HTTP_USER_AGENT'] = DesktopUA; self end
 
     def entity generator = nil
@@ -360,16 +357,9 @@ class WebResource
       end
     end
 
-    # fetch over HTTP
-    def fetchHTTP options = {}
-      if verbose?
-        puts "\nFETCH "  + uri
-        HTTP.print_header headers
-      end
-
-      # fetch
+    # fetch resource over HTTP
+    def fetchHTTP options={}; (puts "\nFETCH "  + uri; HTTP.print_header headers) if verbose?
       open(uri, headers.merge({redirect: false})) do |response| print '🌍🌎🌏🌐'[rand 4]
-
         h = response.meta                                                 # response metadata
         if verbose?
           puts '<< code ' + response.status.to_s
@@ -465,13 +455,12 @@ class WebResource
     end
 
     def fixedFormat? format = nil
-      # preserve upstream-UI request's format
       return true if upstreamUI?
 
-      # rewritable if explicit preference, no format or Atom/RSS feed
+      # rewritable if explicitly allowed  || untyped || Atom/RSS feed
       return false if env[:transformable] || !format || format.match?(/\/(atom|rss|xml)/i)
 
-      # MIME-pattern: application/ and media/ fixed, graph-formats (text/turtle) + text/ transformable
+      # MIME pattern: application/ + media/ fixed, text/ + graph-formats transformable
       format.match? /^(application|audio|font|image|text\/(css|(x-)?javascript|proto)|video)/
     end
 
