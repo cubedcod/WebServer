@@ -485,9 +485,9 @@ class WebResource
             dateMeta
             nodeResponse
           end
-        elsif path.match? /^\/\d\d\d\d\/\d\d\/\d\d\/\d\d\/$/ # cache-timeseg, local hour-dir
+        elsif path.match? /^\/\d\d\d\d\/\d\d\/\d\d\/\d\d\/$/ # cache-timeseg, hour-dir
           name = '*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*'
-          nodeResponse (path + name).R env
+          nodeResponse (path + name)
         #elsif                                               # cache-timeseg, merge with remote y/m/d-dir
         else
           fetch                                              # remote resource
@@ -587,7 +587,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     def local?; LocalAddr.member?(env['SERVER_NAME']) || ENV['SERVER_NAME'] == env['SERVER_NAME'] end
 
     def nodeResponse fs_base=self
-      nodes = fs_base.findNodes
+      nodes = fs_base.env(env).findNodes
       if nodes.size==1 && nodes[0].ext=='ttl' && selectFormat=='text/turtle'
         nodes[0].fileResponse # nothing to merge or transform. return static node
       else                    # merge and/or transform
