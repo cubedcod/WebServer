@@ -250,8 +250,9 @@ class WebResource
                       elsif type == :JSON || ext == 'json'
                         ['application/json','{}']
                       else
+                        href = qs.match?(/campaign|[iu]tm_/) ? '?' : ('?allow=' + ServerKey)
                         ['text/html; charset=utf-8',
-                         "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center'><a href='?allow=#{ServerKey}' style='color: #fff; font-size: 22em; text-decoration: none'>⌘</a></body></html>"]
+                         "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center'><a href='#{href}' style='color: #fff; font-size: 22em; text-decoration: none'>⌘</a></body></html>"]
                       end
       [status,
        {'Access-Control-Allow-Credentials' => 'true',
@@ -319,7 +320,6 @@ class WebResource
       primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env                                 # primary scheme
       fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env                              # fallback scheme
 
-      # fetch
       primary.fetchHTTP options
     rescue Exception => e
       case e.class.to_s
@@ -346,8 +346,8 @@ class WebResource
       end
     end
 
-    # fetch resource over HTTP
-    def fetchHTTP options={}; (puts "\nFETCH "  + uri; HTTP.print_header headers) if verbose?
+    # fetch resource: HTTP(S)
+    def fetchHTTP options={} ;(puts "\nFETCH "  + uri; HTTP.print_header headers) if verbose?
       open(uri, headers.merge({redirect: false})) do |response| print '🌍🌎🌏🌐'[rand 4]
         h = response.meta                                                 # response metadata
         if verbose?
@@ -390,8 +390,13 @@ class WebResource
       case e.message
       when /300/ # Multiple Choices
         [300, e.io.meta, [e.io.read]]
-      when /30[2378]/ # Relocated
-        redirect e.io.meta['location']
+      when /30[12378]/ # Relocated
+        dest = e.io.meta['location'].R
+        if dest.path == path && dest.host == host
+          puts "WARNING: redirected to self with #{scheme} to #{dest.scheme} scheme switch: #{uri}"; cachedGraph
+        else
+          [302, {'Location' => dest.uri}, []]
+        end
       when /304/ # Not Modified
         R304
       when /401/ # Unauthorized
@@ -738,17 +743,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
       end
       query && !query.empty? && ('?' + query) || ''                 # query-string from URI
     end
-
     alias_method :qs, :querystring
-
-    def redirect location
-      location = location.to_s
-      if location.match? /campaign|[iu]tm_/
-        l = location.R
-        location = (l.host ? ('https://' + l.host) : '') + (l.path||'/') # strip query
-      end
-      [302, {'Location' => location}, []]
-    end
 
     def stat options = {}
       graph = env[:repository] ||= RDF::Repository.new
