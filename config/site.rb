@@ -205,11 +205,10 @@ business.facebook.com
     Allow 'gitter.im'
 
     # Google
-    GET 'ajax.googleapis.com', Fetch
-
     if ENV.has_key? 'GOOGLE'
    %w(adservice.google.com
        accounts.google.com
+       ajax.googleapis.com
 android.clients.google.com
     android.googleapis.com
            apis.google.com
@@ -242,18 +241,19 @@ android.clients.google.com
         www.googleapis.com
            www.gstatic.com
          www.recaptcha.net
-).map{|host|
-      Allow host}
+).map{|host| Allow host }
     else
-      (0..3).map{|i| GET 'encrypted-tbn' + i + '.gstatic.com', NoJS }
-      %w(books docs drive images scholar).map{|host| GET host + '.google.com', NoJS }
-
-      GET 'google.com', -> r {[301,{'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] },[]]}
+       (0..3).map{|i|
+      GET 'encrypted-tbn'+i+'.gstatic.com', NoJS }
+       %w(books docs drive images scholar).map{|host|
+      GET host+'.google.com', NoJS }
+      GET 'ajax.googleapis.com', Fetch
+      GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
       GET 'www.googleadservices.com', -> r {u=r.env[:query]['adurl'];u ? [301,{'Location' => u},[]] : r.deny}
       GET 'www.google.com', -> r {
         case r.path
         when '/search'
-          if r.env[:query]['q']&.match? /^(https?:\/\/|l(:8000|\/)|localhost|view-source)/
+          if r.env[:query]['q']&.match? /^(https?:\/\/|l(:8000|\/)|localhost)/
             [301, {'Location' => r.env[:query]['q'].sub(/^l/,'http://l')}, []]
           else
             r.fetch
@@ -265,7 +265,6 @@ android.clients.google.com
         else
           r.deny
         end}
-
     end
 
     # Guardian
