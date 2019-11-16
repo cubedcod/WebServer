@@ -460,7 +460,7 @@ class WebResource
       format.match? /^(application|audio|font|image|text\/(css|(x-)?javascript|proto)|video)/
     end
 
-    def self.GET arg, lambda=NoGunk
+    def self.GET arg, lambda = NoGunk
       HostGET[arg] = lambda
     end
     alias_method :get, :fetch
@@ -468,13 +468,13 @@ class WebResource
     def GETresource
       if path.match? /\D204$/      # connectivity check
         [204, {}, []]
-      elsif handler=HostGET[host]  # host handler
+      elsif handler = HostGET[host]# host handler
         handler[self]
       elsif self.CDN? && allowCDN? # CDN static-data
         fetch
       elsif gunk?                  # dropped gunk
         deny
-      elsif local?                 # local resource
+      elsif local?                 # local resource:
         if %w{y year m month d day h hour}.member? parts[0]
           dateDir                  # time-segment redirection
         elsif path == '/mail'      # inbox redirection
