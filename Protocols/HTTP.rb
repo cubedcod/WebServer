@@ -42,10 +42,10 @@ class WebResource
       AllowedHosts.has_key? host
     end
 
-    def allowContent?
+    def allowCDN?
       return false if gunkURI
-      return true if AV.member? ext.downcase           # media file
-      return true if ext == 'js' && ENV.has_key?('JS') # executable
+      return true if AV.member? ext.downcase           # static-media allowed
+      return true if ext == 'js' && ENV.has_key?('JS') # CDN JS dropped by default
       false
     end
 
@@ -466,37 +466,36 @@ class WebResource
     alias_method :get, :fetch
 
     def GETresource
-      if path.match? /\D204$/     # connectivity-check
+      if path.match? /\D204$/      # connectivity check
         [204, {}, []]
-      elsif handler=HostGET[host] # host handler
+      elsif handler=HostGET[host]  # host handler
         handler[self]
-      elsif self.CDN? && allowContent?
+      elsif self.CDN? && allowCDN? # CDN static-data
         fetch
-      elsif gunk?
+      elsif gunk?                  # dropped gunk
         deny
+      elsif local?                 # local resource
+        if %w{y year m month d day h hour}.member? parts[0]
+          dateDir                  # time-segment redirection
+        elsif path == '/mail'      # inbox redirection
+          [302,{'Location' => '/d/*/msg*?head&sort=date&view=table'},[]]
+        elsif file?
+          fileResponse             # local static-data
+        elsif directory? && qs.empty? && (index = (self + 'index.html').R env).exist? && selectFormat == 'text/html'
+          index.fileResponse       # local static directory-index
+        else                       # local graph-data
+          env[:links][:turtle] = (path[-1] == '/' ? 'index' : name) + '.ttl'
+          env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
+          dateMeta
+          nodeResponse
+        end
+      elsif path.match? /^\/\d\d\d\d\/\d\d\/\d\d\/\d\d\/$/
+        name = '*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*'
+        nodeResponse (path + name) # cache-timeslice, local hour
+      #elsif                       # cache-timeslice, local+remote y/m/d
       else
         env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
-        if local?
-          if %w{y year m month d day h hour}.member? parts[0]              # timeseg redirect
-            dateDir
-          elsif path == '/mail'                                            # inbox redirect
-            [302,{'Location' => '/d/*/msg*?head&sort=date&view=table'},[]]
-          elsif file?                                                      # local file
-            fileResponse
-          elsif directory? && qs.empty? && (index = (self + 'index.html').R env).exist? && selectFormat == 'text/html'
-            index.fileResponse                                             # directory-index file
-          else
-            env[:links][:turtle] = (path[-1] == '/' ? 'index' : name) + '.ttl' # local graph-files
-            dateMeta
-            nodeResponse
-          end
-        elsif path.match? /^\/\d\d\d\d\/\d\d\/\d\d\/\d\d\/$/ # cache-timeseg, hour-dir
-          name = '*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*'
-          nodeResponse (path + name)
-        #elsif                                               # cache-timeseg, merge with remote y/m/d-dir
-        else
-          fetch                                              # remote resource
-        end
+        fetch                      # remote resource
       end
     end
 
