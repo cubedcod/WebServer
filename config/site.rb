@@ -5,6 +5,7 @@ module Webize
       SiteGunk = {'www.google.com' => %w(div.logo h1 h2),
                   'www.bostonmagazine.com' => %w(a[href*='scrapertrap'])}
 
+      # HTML -> RDF lambdas
       Triplr = {
         'apnews.com' => :AP,
         'boards.4channel.org' => :FourChannel,
@@ -27,12 +28,15 @@ module Webize
     end
   end
   module JSON
+
+    # JSON -> RDF lambdas
     Triplr = {
       'gateway.reddit.com' => :Reddit,
       'outline.com' => :Outline,
       'outlineapi.com' => :Outline,
       'www.youtube.com' => :YouTubeJSON,
     }
+
   end
 end
 class WebResource
@@ -75,20 +79,32 @@ class WebResource
 s.click.aliexpress.com
     www.aliexpress.com
 ).map{|host|
-      GET host, NoGunk}
+      GET host}
 
     # Amazon
-    AmazonMedia = -> r {%w(css jpg mp4 png webm webp svg).member?(r.ext.downcase) && r.env['HTTP_REFERER']&.match(/(amazon|imdb)\.com/) && r.fetch || r.deny}
     if ENV.has_key? 'AMAZON'
-      %w(            amazon.com
-images-na.ssl-images-amazon.com
-               s3.amazonaws.com
-                 www.amazon.com).map{|h|Allow h}
+      %w(
+amazon.com
+images-na.ssl-images-amazon.com m.media-amazon.com
+s3.amazonaws.com
+www.amazon.com).map{|h|
+        Allow h}
     else
+      Amazon = -> r {r.env['HTTP_REFERER']&.match(/(amazon|imdb)\.com/) && NoJS[r] || r.deny}
       GET 'amazon.com', NoJS
       GET 'www.amazon.com', NoJS
-      GET 'images-na.ssl-images-amazon.com', AmazonMedia
-      GET 'm.media-amazon.com', AmazonMedia
+      GET 'images-na.ssl-images-amazon.com', Amazon
+      GET 'm.media-amazon.com', Amazon
+    end
+
+    # Apple
+    if ENV.has_key? 'APPLE'
+      %w{
+amp-api.music audio-ssl.itunes
+itunes js-cdn.music
+music
+www xp
+}.map{|h| Allow h+'.apple.com' }
     end
 
     # Anvato
@@ -184,19 +200,12 @@ business.facebook.com
     # Forbes
     GET 'thumbor.forbes.com', -> r {[301, {'Location' => URI.unescape(r.parts[-1])}, []]}
 
-    # FSDN
-    if ENV.has_key?('FSDN')
-      GET 'a.fsdn.com', NoGunk
-    else
-      GET 'a.fsdn.com', NoJS
-    end
-
     # Gfycat
-    GET 'gfycat.com', NoGunk
-    GET 'thumbs.gfycat.com', NoGunk
+    GET 'gfycat.com'
+    GET 'thumbs.gfycat.com'
 
     # GitHub
-    GET 'github.com', NoGunk
+    GET 'github.com'
 
     # GitLab
     GET 'assets.gitlab-static.net', Fetch
@@ -274,7 +283,7 @@ android.clients.google.com
      m.imgur.com
      s.imgur.com
 ).map{|host|
-      GET host, NoGunk}
+      GET host}
 
     Cookies 'imgur.com'
 
@@ -322,9 +331,9 @@ zoopps.com
     Allow 'littlefreelibrary.secure.force.com'
 
     # Mail.ru
-    GET 'cloud.mail.ru', NoGunk
-    GET 'img.imgsmail.ru', NoGunk
-    GET 's.mail.ru', NoGunk
+    GET 'cloud.mail.ru'
+    GET 'img.imgsmail.ru'
+    GET 's.mail.ru'
     GET 'thumb.cloud.mail.ru', NoJS
 
     # MassLive
@@ -352,8 +361,8 @@ files.mastodon.social
     GET 'imagesvc.meredithcorp.io', GoIfURL
 
     # Microsoft
-    GET 'www.bing.com', NoGunk
-    GET 'www.msn.com', NoGunk
+    GET 'www.bing.com'
+    GET 'www.msn.com'
 
     # Mixcloud
     Allow 'm.mixcloud.com'
@@ -408,7 +417,7 @@ firefox.settings.services.mozilla.com
     # Reddit
     %w(gateway gql oauth www).map{|host|
       Allow host + '.reddit.com'
-      GET host, NoGunk}
+      GET host}
 
     GotoReddit = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path + r.qs}, []]}
     GET 'old.reddit.com', GotoReddit
@@ -449,7 +458,7 @@ firefox.settings.services.mozilla.com
         end}}
 
     # Shopify
-    GET 'cdn.shopify.com', NoGunk
+    GET 'cdn.shopify.com'
 
     # SkimResources
     GET 'go.skimresources.com', GotoURL
@@ -550,8 +559,8 @@ firefox.settings.services.mozilla.com
     Cookies 'agupubs.onlinelibrary.wiley.com'
 
     # Wix
-    GET 'static.parastorage.com', NoGunk
-    GET 'static.wixstatic.com', NoGunk
+    GET 'static.parastorage.com'
+    GET 'static.wixstatic.com'
 
     # WordPress
     %w(

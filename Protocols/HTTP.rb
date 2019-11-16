@@ -460,7 +460,7 @@ class WebResource
       format.match? /^(application|audio|font|image|text\/(css|(x-)?javascript|proto)|video)/
     end
 
-    def self.GET arg, lambda
+    def self.GET arg, lambda=NoGunk
       HostGET[arg] = lambda
     end
     alias_method :get, :fetch
