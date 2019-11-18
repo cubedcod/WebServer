@@ -190,6 +190,7 @@ class WebResource
       'http://data-vocabulary.org/url' => 'uri',
       'http://ogp.me/ns#image:alt' => Abstract,
       'http://ogp.me/ns/fb#pages' => :drop,
+      'http://ogp.me/ns#video:url' => Video,
       'http://opengraphprotocol.org/schema/description' => Abstract,
       'http://opengraphprotocol.org/schema/image' => Image,
       'http://opengraphprotocol.org/schema/image:height' => :drop,

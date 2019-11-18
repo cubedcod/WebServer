@@ -206,6 +206,7 @@ business.facebook.com
 
     # GitHub
     GET 'github.com'
+    GET 'raw.githubusercontent.com'
 
     # GitLab
     GET 'assets.gitlab-static.net', Fetch
