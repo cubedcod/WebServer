@@ -51,7 +51,7 @@ class WebResource
   end
   module HTTP
 
-    CDNhost = /\.(amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|googleapis|netdna.*)\.(com|net)$/
+    CDNhost = /\.(amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|github|googleapis|netdna.*)\.(com|io|net)$/
     DesktopUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
 
     Resizer = -> r {
@@ -120,10 +120,13 @@ www xp
     %w(www www3).map{|host| GET host + '.bostonglobe.com', NoJS}
 
     # Brightcove
-    Allow 'players.brightcove.net'
-    Allow 'edge.api.brightcove.com'
-    Allow 'secure.brightcove.com'
-    GET 'edge.api.brightcove.com', Fetch
+    %w(
+edge.api.brightcove.com
+players.brightcove.net
+secure.brightcove.com
+).map{|h|
+      Allow h
+        GET h, Desktop}
 
     # Brightspot
     GET 'ca-times.brightspotcdn.com', GoIfURL
@@ -215,64 +218,27 @@ business.facebook.com
     Allow 'gitter.im'
 
     # Google
-    if ENV.has_key? 'GOOGLE'
-   %w(adservice.google.com
-       accounts.google.com
-       ajax.googleapis.com
-android.clients.google.com
-    android.googleapis.com
-           apis.google.com
-         chrome.google.com
-       clients1.google.com
-       clients2.google.com
-       clients4.google.com
-       clients5.google.com
-      feedproxy.google.com
-      feeds.feedburner.com
-                google.com
-         groups.google.com
-             id.google.com
-             kh.google.com
-           mail.google.com
-           maps.google.com
-          maps.gstatic.com
-       maps.googleapis.com
-   maps-api-ssl.google.com
-           news.google.com
-            ogs.google.com
-           play.google.com
-       play.googleapis.com
-    storage.googleapis.com
-           ssl.gstatic.com
- suggestqueries.google.com
- tpc.googlesyndication.com
-            www.google.com
-  www.googleadservices.com
-        www.googleapis.com
-           www.gstatic.com
-         www.recaptcha.net
-).map{|host| Allow host }
-    else
-       (0..3).map{|i|
-      GET "encrypted-tbn#{i}.gstatic.com", NoJS }
-       %w(books docs drive images scholar).map{|host|
-      GET host+'.google.com', NoJS }
-      GET 'ajax.googleapis.com', Fetch
-      GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
-      GET 'www.googleadservices.com', -> r {u=r.env[:query]['adurl'];u ? [301,{'Location' => u},[]] : NoJS[r]}
-      GET 'www.google.com', -> r {
-        case r.path
-        when '/search'
-          q = r.env[:query]['q']
-          q && q.match?(/^(https?:|l(ocalhost)?(:8000)?)\//) && [301,{'Location'=>q.sub(/^l/,'http://l')},[]] || r.fetch
-        when /^.(images|.*photos)/
-          NoJS[r]
-        when '/url'
-          GotoURL[r]
-        else
-          r.deny
-        end}
-    end
+    GET 'ajax.googleapis.com', Fetch
+
+    (1..4).map{|i| GET "#{i}.bp.blogspot.com", NoJS }
+    (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com", NoJS }
+
+    %w(books docs drive images scholar).map{|host| GET host+'.google.com', NoJS }
+
+    GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
+
+    GET 'www.google.com', -> r {
+      case r.path
+      when '/search'
+        q = r.env[:query]['q']
+        q && q.match?(/^(https?:|l(ocalhost)?(:8000)?)\//) && [301,{'Location'=>q.sub(/^l/,'http://l')},[]] || r.fetch
+      when /^.(images|.*photos)/
+        NoJS[r]
+      when '/url'
+        GotoURL[r]
+      else
+        r.deny
+      end}
 
     # Guardian
     GET 'i.guim.co.uk', NoJS
@@ -318,7 +284,7 @@ www.toopics.com
 ).map{|host| GET host, IG0}
 
     %w(
-insee.me instadigg.com
+insee.me instadigg.com www.instagimg.com
 jolygram.com
 pikdo.net piknu.com publicinsta.com www.pictame.com
 zoopps.com
@@ -567,10 +533,9 @@ firefox.settings.services.mozilla.com
     %w(
 public-api.wordpress.com
 videos.files.wordpress.com
-).map{|host|
-      GET host, Fetch}
-
+).map{|host| GET host, Fetch}
     (0..7).map{|i| GET "i#{i}.wp.com", NoQuery}
+    (0..2).map{|i| GET "s#{i}.wp.com", NoJS}
 
     # WSJ
     GET 'images.wsj.net', NoJS

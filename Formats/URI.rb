@@ -27,10 +27,10 @@ class WebResource < RDF::URI
   alias_method :uri, :to_s
 
   module URIs
-    AV = %w(css gif ico jpeg jpg m3u8 m4a mp3 mp4 opus pdf png svg ts webm webp) # media filename-extensions
-    GraphExt = /\.(md|ttl|u)$/                                                   # extension-pattern of native graph-formats
-    PWD = Pathname.new Dir.pwd                                                   # working directory
+    GraphExt = /\.(md|ttl|u)$/ # native graph-formats filename-pattern
+    PWD = Pathname.new Dir.pwd # working directory
     LocalAddr = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
+    StaticExt = %w(css gif html ico jpeg jpg m3u8 m4a md mp3 mp4 opus pdf png svg ts webm webp)
 
     # vocabulary base-URI
     W3       = 'http://www.w3.org/'

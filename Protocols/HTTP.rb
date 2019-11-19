@@ -44,7 +44,7 @@ class WebResource
 
     def allowCDN?
       return false if gunkURI
-      return true if AV.member? ext.downcase           # static-media allowed
+      return true if StaticExt.member? ext.downcase    # static-media allowed
       return true if ext == 'js' && ENV.has_key?('JS') # CDN JS dropped by default
       false
     end
@@ -309,7 +309,7 @@ class WebResource
       options ||= {}
 
       # cache hits
-      if AV.member? ext.downcase
+      if StaticExt.member? ext.downcase
         return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE')     # client has static-data, return 304
         return cachePath.fileResponse if cachePath.file?                                              # server has static-data, return data
       end
@@ -361,14 +361,20 @@ class WebResource
 
           # body
           body = HTTP.decompress h, response.read                         # decode
-          format = h['content-type'].split(/;/)[0] if h['content-type']   # find format
-          format ||= (xt = ext.to_sym; puts "WARNING no MIME for #{uri}"  # extension -> format mapping
+
+          # format
+          format = h['content-type'].split(/;/)[0] if h['content-type'] # HTTP Header
+          format ||= (xt = ext.to_sym; puts "WARNING no MIME for #{uri}"  # extension -> format map
            RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
           format = 'text/nfo' if ext=='nfo' && format.match?(/^text.plain/)
-          reader = RDF::Reader.for content_type: format                   # find RDF reader
-          reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|  # instantiate reader
-            (env[:repository] ||= RDF::Repository.new) << _ } if reader   # read RDF
-          cachePath.write body if AV.member? ext.downcase                 # cache static-media
+          #format = 'application/ld+json' if format == 'application/geo+json'
+
+          # read data
+          reader = RDF::Reader.for content_type: format
+          reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|
+            (env[:repository] ||= RDF::Repository.new) << _ } if reader
+
+          cachePath.write body if StaticExt.member? ext.downcase          # cache static-file
 
           return self if options[:intermediate]                           # intermediate fetch w/ no direct HTTP caller
 
