@@ -259,7 +259,7 @@ android.clients.google.com
       GET host+'.google.com', NoJS }
       GET 'ajax.googleapis.com', Fetch
       GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
-      GET 'www.googleadservices.com', -> r {u=r.env[:query]['adurl'];u ? [301,{'Location' => u},[]] : r.deny}
+      GET 'www.googleadservices.com', -> r {u=r.env[:query]['adurl'];u ? [301,{'Location' => u},[]] : NoJS[r]}
       GET 'www.google.com', -> r {
         case r.path
         when '/search'
