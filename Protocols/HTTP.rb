@@ -474,15 +474,7 @@ class WebResource
     alias_method :get, :fetch
 
     def GETresource
-      if path.match? /\D204$/      # connectivity check
-        [204, {}, []]
-      elsif handler = HostGET[host]# host handler
-        handler[self]
-      elsif self.CDN? && allowCDN? # CDN static-data
-        fetch
-      elsif gunk?                  # dropped gunk
-        deny
-      elsif local?                 # local resource:
+      if local?                 # local resource:
         if %w{y year m month d day h hour}.member? parts[0]
           dateDir                  # time-segment redirection
         elsif path == '/mail'      # inbox redirection
@@ -497,7 +489,15 @@ class WebResource
           dateMeta
           nodeResponse
         end
-      elsif path.match? /^\/\d\d\d\d\/\d\d\/\d\d\/\d\d\/$/
+      elsif path.match? /\D204$/   # connectivity check
+        [204, {}, []]
+      elsif handler=HostGET[host]  # host handler
+        handler[self]
+      elsif self.CDN? && allowCDN? # CDN static-data
+        fetch
+      elsif gunk?                  # dropped gunk
+        deny
+      elsif path.match? /^\/\d\d\d\d\/\d\d\/\d\d\/\d\d\/$/ # timeslice path
         name = '*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*'
         nodeResponse (path + name) # cache-timeslice, local hour
       #elsif                       # cache-timeslice, local+remote y/m/d
