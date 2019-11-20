@@ -117,7 +117,7 @@ www xp
     GET 'bos.gl', -> r {r.fetch scheme: :http}
     GET 'bostonglobe-prod.cdn.arcpublishing.com', Resizer
 
-    %w(www www3).map{|host| GET host + '.bostonglobe.com', NoJS}
+    %w(apps www www3).map{|host| GET host + '.bostonglobe.com', NoJS}
 
     # Brightcove
     %w(
