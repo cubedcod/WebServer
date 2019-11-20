@@ -510,7 +510,7 @@ firefox.settings.services.mozilla.com
     GET 'vimeo.com', Desktop
 
     # WaPo
-    GET 'www.washingtonpost.com', -> r {(r.parts[0]=='resizer' ? Resizer : NoGunk)[r]}
+    GET 'www.washingtonpost.com', -> r {(r.parts[0]=='resizer' ? Resizer : NoJS)[r]}
 
     # Weather
     Allow 'api.weather.com'

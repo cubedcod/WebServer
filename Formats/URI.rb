@@ -30,7 +30,7 @@ class WebResource < RDF::URI
     GraphExt = /\.(md|ttl|u)$/ # native graph-formats filename-pattern
     PWD = Pathname.new Dir.pwd # working directory
     LocalAddr = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
-    StaticExt = %w(css gif html ico jpeg jpg m3u8 m4a md mp3 mp4 opus pdf png svg ts webm webp)
+    StaticExt = %w(css gif html ico jpeg jpg m3u8 m4a md mp3 mp4 opus pdf png svg ts webm webp xml)
 
     # vocabulary base-URI
     W3       = 'http://www.w3.org/'
@@ -159,7 +159,7 @@ class WebResource < RDF::URI
     def relPath; ['/','',nil].member?(path) ? '.' : (path[0]=='/' ? path[1..-1] : path) end
     def self.splitArgs args; args.shellsplit rescue args.split /\W/ end
     def shellPath; Shellwords.escape relPath.force_encoding 'UTF-8' end
-    def write o; dir.mkdir; File.open(relPath,'w'){|f|f << o}; self end
+    def write o; dir.mkdir; File.open(relPath,'w'){|f|f << o.force_encoding('UTF-8')}; self end
   end
   include POSIX
 end
