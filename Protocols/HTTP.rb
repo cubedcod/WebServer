@@ -327,6 +327,8 @@ class WebResource
         fallback.fetchHTTP options
       when 'Errno::ECONNRESET'
         fallback.fetchHTTP options
+      when 'Errno::EHOSTUNREACH'
+        fallback.fetchHTTP options
       when 'Errno::ENETUNREACH'
         fallback.fetchHTTP options
       when 'Net::OpenTimeout'
