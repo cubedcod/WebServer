@@ -393,13 +393,14 @@ firefox.settings.services.mozilla.com
     Allow 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
 
     GET 'www.reddit.com', -> r {
-      if r.path == '/'
+      if r.path == '/'                                             # subscriptions
         r = ('/r/'+'com/reddit/www/r/*/.sub*'.R.glob.map(&:dir).map(&:basename).join('+')+'/new').R r.env
         r.chrono_sort
       end
-      r.desktopUI if r.parts[-1] == 'submit'
-      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? # upstream representation-preference
-      depth = r.parts.size
+      r.chrono_sort if r.parts[-1] == 'new'                        # chrono sort new posts
+      r.desktopUI if r.parts[-1] == 'submit'                       # upstream UI for post submission
+      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? # upstream-representation preference
+      depth = r.parts.size                                         # container pointers
       r.env[:links][:up] = if [3,6].member? depth
                              r.dirname
                            elsif 5 == depth
