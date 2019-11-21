@@ -144,7 +144,7 @@ secure.brightcove.com
     GET 'circleci.com', -> r {r.parts[0] == 'blog' ? r.fetch : r.deny}
 
     # Cloudflare
-    Allow 'cdnjs.cloudflare.com'
+    GET 'cdnjs.cloudflare.com', Fetch
 
     # Costco
     Allow 'www.costco.com'
@@ -491,6 +491,8 @@ firefox.settings.services.mozilla.com
                                    query: {vertical: :default, f: :tweets, q: s.map{|u|'from:'+u}.join('+OR+')}}
         r.chrono_sort
         r.indexRDF.graphResponse
+      elsif r.parts[-1] == 'status'
+        r.cachedGraph
       elsif r.gunkURI
         r.deny
       else
