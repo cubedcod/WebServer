@@ -238,6 +238,8 @@ business.facebook.com
         q && q.match?(/^(https?:|l(ocalhost)?(:8000)?)\//) && [301,{'Location'=>q.sub(/^l/,'http://l')},[]] || r.fetch
       when /^.(images|.*photos)/
         NoJS[r]
+      when /^.maps/
+        ((r.env['QUERY_STRING']&.index(ServerKey)) || (r.env['HTTP_REFERER']&.index(ServerKey))) ? r.fetch : NoJS[r]
       when '/url'
         GotoURL[r]
       else

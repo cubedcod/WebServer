@@ -6,8 +6,8 @@ class WebResource
 b(anner|eacon|reakingnew)s?|
 c(ampaign|edexis|hartbeat.*|loudflare|ollector|omscore|on(sent|version)|ookie(c(hoice|onsent)|law|notice)?s?|se)|
 de(als|tect)|
-e(moji.*\.js|ndscreen|nsighten|proof|scenic|vidon)|(web)?
-fonts?(awesome)?|
+e(moji.*\.js|ndscreen|nsighten|proof|scenic|vidon)|
+firebase|(web)?fonts?(awesome)?|
 g(dpr|eo(ip|locat(e|ion))|igya|pt|tag|tm)|.*(
 header|pre)[-_]?bid.*|.*hubspot.*|[hp]b.?js|ima[0-9]?|
 impression|
