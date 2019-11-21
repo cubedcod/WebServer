@@ -68,7 +68,9 @@ class WebResource
       self
     end
 
-    def cachePath; (hostpath + path).R env end
+    def cachePath
+      (hostpath + path).R env
+    end
 
     def cachedGraph; nodeResponse cachePath end
 
