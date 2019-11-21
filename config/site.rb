@@ -113,6 +113,10 @@ www xp
     # Ars Technica
     GET 'cdn.arstechnica.net', NoJS
 
+    # Balamii
+    Allow 'balamii-parse.herokuapp.com'
+    Allow 'player.balamii.com'
+
     # Boston Globe
     GET 'bos.gl', -> r {r.fetch scheme: :http}
     GET 'bostonglobe-prod.cdn.arcpublishing.com', Resizer
