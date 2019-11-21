@@ -599,7 +599,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     def local?; LocalAddr.member?(env['SERVER_NAME']) || ENV['SERVER_NAME'] == env['SERVER_NAME'] end
 
     def nodeResponse fs_base=self
-      nodes = fs_base.env(env).findNodes
+      nodes = fs_base.R(env).findNodes
       if nodes.size==1 && nodes[0].ext=='ttl' && selectFormat=='text/turtle'
         nodes[0].fileResponse # nothing to merge or transform. return static node
       else                    # merge and/or transform

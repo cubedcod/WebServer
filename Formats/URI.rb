@@ -22,7 +22,7 @@ end
 
 class WebResource < RDF::URI
 
-  def R env_=nil; env_ ? env(env_) : self end
+  def R e=nil; e ? env(e) : self end
 
   alias_method :uri, :to_s
 
