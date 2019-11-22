@@ -290,6 +290,7 @@ www.toopics.com
 ).map{|host| GET host, IG0}
 
     %w(
+gramho.com
 insee.me instadigg.com www.instagimg.com
 jolygram.com
 pikdo.net piknu.com publicinsta.com www.pictame.com
