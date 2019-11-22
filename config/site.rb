@@ -384,8 +384,8 @@ firefox.settings.services.mozilla.com
     # Patch
     GET 'patch.com', NoQuery
 
-    # Photobucket
-    #Allow 's116.photobucket.com'
+    # Patriot Ledger
+    GET 'www.patriotledger.com', -> r {NoGunk[r.env[:query].has_key?('template') ? r.desktopUI : r]}
 
     # Reddit
     %w(gateway gql oauth www).map{|host|
