@@ -479,6 +479,8 @@ class WebResource
       if local?                 # local resource:
         if %w{y year m month d day h hour}.member? parts[0]
           dateDir                  # time-segment redirection
+        #elsif path == '/log'
+        #  
         elsif path == '/mail'      # inbox redirection
           [302,{'Location' => '/d/*/msg*?head&sort=date&view=table'},[]]
         elsif file?
@@ -527,9 +529,9 @@ class WebResource
     end
 
     def gunk?
-      return false if env[:query]['allow'] == ServerKey
-      return true if env.has_key?('HTTP_GUNK') && !allow? # upstream tag - domain-name derived
-      gunkURI                                             # local tag - URI-regex derived
+      return false if env[:query]['allow'] == ServerKey || ENV.has_key?('GUNK')
+      return true if env.has_key?('HTTP_GUNK') && !allow? # upstream tag
+      gunkURI                                             # local tag
     end
 
     def gunkURI
