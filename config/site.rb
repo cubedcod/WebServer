@@ -359,6 +359,9 @@ firefox.settings.services.mozilla.com
 
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
+    # NOAA
+    GET 'www.tsunami.gov', Desktop
+
     # NYTimes
     %w(cooking.nytimes.com
            www.nytimes.com).map{|host|
