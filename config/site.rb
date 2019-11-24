@@ -73,6 +73,9 @@ class WebResource
 
     # Adobe
     Allow 'entitlement.auth.adobe.com'
+    Allow 'sp.auth.adobe.com'
+    GET 'entitlement.auth.adobe.com', Desktop
+    GET 'sp.auth.adobe.com', Desktop
 
     # AliBaba
     %w(ae01.alicdn.com
@@ -188,8 +191,11 @@ secure.brightcove.com
     GET 'cdn.embedly.com', Desktop
 
     # ESPN
-    %w(broadband secure www).map{|h| GET h + '.espn.com' }
-    GET 'a.espncdn.com'
+    %w(api-app broadband media.video-cdn secure site.api site.web.api watch.auth.api watch.graph.api www).map{|h|
+      Allow h + '.espn.com' }
+
+    %w(a a1 a2 a3 a4).map{|a|
+      GET a + '.espncdn.com' }
 
     # Facebook
     FBgunk = %w(common connect pages_reaction_units security tr)
