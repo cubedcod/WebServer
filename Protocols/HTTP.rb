@@ -661,7 +661,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     def POSTresource
       if handler = HostPOST[host]
         handler[self]
-      elsif allow?
+      elsif allow? || ENV.has_key?('GUNK')
         self.POSTthru
       else
         denyPOST
@@ -804,7 +804,6 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
       env.has_key?(:UX)  ||      # per-request setting
       ENV.has_key?('UX') ||      # global setting
       env[:query].has_key?('UX') # query parameter
-      #env['HTTP_REFERER']&.match?(/UX=upstream/)
     end
 
     def verbose?; ENV.has_key? 'VERBOSE' end
