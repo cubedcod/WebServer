@@ -254,7 +254,7 @@ class WebResource
                       else
                         href = qs.match?(/campaign|[iu]tm_/) ? '?' : ('?allow=' + ServerKey)
                         ['text/html; charset=utf-8',
-                         "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center'><a href='#{href}' style='color: #fff; font-size: 22em; text-decoration: none'>⌘</a></body></html>"]
+                         "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center'><a href='#{href}' style='color: #fff; font-size: 22em; text-decoration: none; font-weight: normal'>⌘</a></body></html>"]
                       end
       [status,
        {'Access-Control-Allow-Credentials' => 'true',

@@ -184,6 +184,10 @@ secure.brightcove.com
     # embedly
     GET 'cdn.embedly.com', Desktop
 
+    # ESPN
+    GET 'www.espn.com'
+    #GET 
+
     # Facebook
     FBgunk = %w(common connect pages_reaction_units security tr)
 
