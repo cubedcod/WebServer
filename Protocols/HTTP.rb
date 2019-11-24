@@ -75,9 +75,9 @@ class WebResource
     def cachedGraph; nodeResponse cachePath end
 
     def self.call env
-      return [405,{},[]] unless m=Methods[env['REQUEST_METHOD']] # look up method handler
-      path = Pathname.new(env['REQUEST_PATH']).expand_path.to_s  # evaluate path expression,
-      path+='/' if env['REQUEST_PATH'][-1]=='/' && path[-1]!='/' # preserving trailing slash
+      return [405,{},[]] unless m=Methods[env['REQUEST_METHOD']] # find method-handler
+      path = Pathname.new(env['REQUEST_PATH']).expand_path.to_s  # evaluate path expression
+      path+='/' if env['REQUEST_PATH'][-1]=='/' && path[-1]!='/' # preserve trailing slash
       resource = ('//' + env['SERVER_NAME'] + path).R env.merge( # instantiate request w/ blank response fields
        {resp:{}, links:{}, query: parseQs(env['QUERY_STRING'])}) # parse query
       resource.send(m).yield_self{|status, head, body|           # dispatch request
@@ -94,7 +94,7 @@ class WebResource
           HTTP.print_header head
         end
 
-        # highlight host on first encounter TODO dedupe across forked workers
+        # highlight host on first encounter
         unless (Servers.has_key? env['SERVER_NAME']) || resource.env[:deny]
           Servers[env['SERVER_NAME']] = true
           print "\n➕ \e[1;7;32mhttps://" + env['SERVER_NAME'] + "\e[0m "
@@ -125,7 +125,7 @@ class WebResource
         elsif status == 404
           print "\n❓ #{resource.uri} " # not found
 
-        # typed data
+        # content response
         elsif ext == 'css'                                       # stylesheet
           print '🎨'
         elsif ext == 'js' || mime.match?(/script/)               # script
@@ -141,10 +141,9 @@ class WebResource
         elsif ext == 'ttl' || mime == 'text/turtle; charset=utf-8'
           print '🐢'                                             # turtle
 
-        else # generic logger
+        else # generic logging
           print "\n\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : (env['REQUEST_METHOD']+' ')) + (status == 200 ? '' : (status.to_s+' ')) +
-                (env['HTTP_REFERER'] ? ((env['HTTP_REFERER'].R.host||'') + ' → ') : '') +
-                "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + resource.qs + "\e[0m "
+                (env['HTTP_REFERER'] ? ((env['HTTP_REFERER'].R.host||'') + ' → ') : '') + "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + resource.qs + "\e[0m "
         end
 
         # response
