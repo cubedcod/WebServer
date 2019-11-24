@@ -38,19 +38,8 @@ class WebResource
       AllowedHosts[host] = true
     end
 
-    def allow?
-      AllowedHosts.has_key? host
-    end
-
-    def allowCDN?
-      return false if gunkURI
-      extension = ext.downcase
-      return true if StaticExt.member?(extension) && extension != 'js'
-      false
-    end
-
     def allowCookies?
-      allow? || CookieHost.has_key?(host)
+      AllowedHosts.has_key?(host) || CookieHost.has_key?(host)
     end
 
     def allowedOrigin
@@ -489,13 +478,14 @@ class WebResource
           dateMeta
           nodeResponse
         end
-      elsif path.match? /\D204$/   # connectivity check
-        [204, {}, []]
-      elsif handler=HostGET[host]  # host handler
+      elsif path.match? /\D204$/    # connectivity check
+        [204,{},[]]
+      elsif handler = HostGET[host] # host handler
         handler[self]
-      elsif self.CDN? && allowCDN? # CDN static-data
-        fetch
-      elsif gunk?                  # dropped gunk
+      elsif self.CDN?
+        extension = ext.downcase
+        StaticExt.member?(extension) && extension != 'js' && !gunkURI && fetch || deny
+      elsif gunkHost || gunkURI
         deny
       elsif path.match? /^\/\d\d\d\d\/\d\d\/\d\d\/\d\d\/$/ # timeslice path
         name = '*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*'
@@ -524,8 +514,9 @@ class WebResource
         end}
     end
 
-    def gunk? # upstream or local flag
-      env.has_key?('HTTP_GUNK') || gunkURI
+    def gunkHost
+      return false if AllowedHosts.has_key? host
+      env.has_key? 'HTTP_GUNK'
     end
 
     def gunkURI
@@ -565,7 +556,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
       end
 
       # Referer
-      head.delete 'Referer' unless allow?
+      head.delete 'Referer' unless AllowedHosts.has_key? host
       if env && env['SERVER_NAME']
         case env['SERVER_NAME']
         when /wsj\.com$/
@@ -617,7 +608,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     end
 
     def OPTIONS
-      if allow?
+      if AllowedHosts.has_key? host
         self.OPTIONSthru
       else
         env[:deny] = true
@@ -657,7 +648,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     def POSTresource
       if handler = HostPOST[host]
         handler[self]
-      elsif allow?
+      elsif AllowedHosts.has_key? host
         self.POSTthru
       else
         denyPOST
