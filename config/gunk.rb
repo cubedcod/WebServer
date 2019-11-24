@@ -16,7 +16,7 @@ log(event|g(er|ing))?|(app|s)?
 m(atomo|e(asurement|t(er|rics?))|ms|onitor(ing)?|odal|tr)|
 new(relic|sletters?)|.*notifications?.*|
 o(m(niture|tr)|nboarding|nesignal|ptanon|utbrain)|
-p(a(idpost|rtner|ywall)|er(imeter-?x|sonali[sz](ation|e))|i(wik|xel(propagate)?)|lacement|op(down|over|up)|repopulator|ro(fitwell|m(o(tion)?s?|pt))|ubmatic)|/pv|
+p(a(idpost|ywall)|er(imeter-?x|sonali[sz](ation|e))|i(wik|xel(propagate)?)|lacement|op(down|over|up)|repopulator|ro(fitwell|m(o(tion)?s?|pt))|ubmatic)|/pv|
 quantcast|
 record(event|stats?)|re?t(ar)?ge?t(ing)?|remote[-_]?(control)?|rpc|
 s?s(a(fe[-_]?browsing|ilthru)|cheduler|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(cial(shar(e|ing))?|urcepoint)|ponsor(ed)?|tat(istic)?s?|ubscri(ber?|ptions?)|urvey|w.js|yn(c|dicat(ed|ion)))|

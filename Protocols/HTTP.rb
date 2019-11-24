@@ -44,8 +44,8 @@ class WebResource
 
     def allowCDN?
       return false if gunkURI
-      return true if StaticExt.member? ext.downcase    # static-media allowed
-      return true if ext == 'js' && ENV.has_key?('JS') # CDN JS dropped by default
+      extension = ext.downcase
+      return true if StaticExt.member?(extension) && extension != 'js'
       false
     end
 

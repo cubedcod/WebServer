@@ -71,6 +71,9 @@ class WebResource
     # ACM
     Cookies 'dl.acm.org'
 
+    # Adobe
+    Allow 'entitlement.auth.adobe.com'
+
     # AliBaba
     %w(ae01.alicdn.com
      assets.alicdn.com
@@ -185,8 +188,8 @@ secure.brightcove.com
     GET 'cdn.embedly.com', Desktop
 
     # ESPN
-    GET 'www.espn.com'
-    #GET 
+    %w(broadband secure www).map{|h| GET h + '.espn.com' }
+    GET 'a.espncdn.com'
 
     # Facebook
     FBgunk = %w(common connect pages_reaction_units security tr)
