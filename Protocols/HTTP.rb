@@ -524,14 +524,11 @@ class WebResource
         end}
     end
 
-    def gunk?
-      return false if env[:query]['allow'] == ServerKey || ENV.has_key?('GUNK')
-      return true if env.has_key?('HTTP_GUNK') && !allow? # upstream tag
-      gunkURI                                             # local tag
+    def gunk? # upstream or local flag
+      env.has_key?('HTTP_GUNK') || gunkURI
     end
 
     def gunkURI
-      return false if env[:query]['allow'] == ServerKey
       ('/' + hostname + (env && env['REQUEST_URI'] || path || '/')).match? Gunk
     end
 
@@ -660,7 +657,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     def POSTresource
       if handler = HostPOST[host]
         handler[self]
-      elsif allow? || ENV.has_key?('GUNK')
+      elsif allow?
         self.POSTthru
       else
         denyPOST
