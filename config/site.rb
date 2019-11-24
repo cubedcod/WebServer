@@ -187,7 +187,10 @@ secure.brightcove.com
     GET 'rover.ebay.com', -> r {
       r.env[:query].has_key?('mpre') ? [301, {'Location' => r.env[:query]['mpre']}, []] : r.deny}
 
-    # embedly
+    # Economist
+    GET 'www.economist.com'
+
+    # Embedly
     GET 'cdn.embedly.com', Desktop
 
     # ESPN
