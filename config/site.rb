@@ -88,30 +88,15 @@ s.click.aliexpress.com
       GET host}
 
     # Amazon
-    if ENV.has_key? 'AMAZON'
-      %w(
-amazon.com
-images-na.ssl-images-amazon.com m.media-amazon.com
-s3.amazonaws.com
-www.amazon.com).map{|h|
-        Allow h}
-    else
-      Amazon = -> r {r.env['HTTP_REFERER']&.match(/(amazon|imdb)\.com/) && NoJS[r] || r.deny}
-      GET 'amazon.com', NoJS
-      GET 'www.amazon.com', NoJS
-      GET 'images-na.ssl-images-amazon.com', Amazon
-      GET 'm.media-amazon.com', Amazon
-    end
+    Amazon = -> r {r.env['HTTP_REFERER']&.match(/(amazon|imdb)\.com/) && NoJS[r] || r.deny}
+    GET 'amazon.com', NoJS
+    GET 'www.amazon.com', NoJS
+    GET 'images-na.ssl-images-amazon.com', Amazon
+    GET 'm.media-amazon.com', Amazon
 
     # Apple
-    if ENV.has_key? 'APPLE'
-      %w{
-amp-api.music audio-ssl.itunes
-itunes js-cdn.music
-music
-www xp
-}.map{|h| Allow h+'.apple.com' }
-    end
+    %w{amp-api.music audio-ssl.itunes itunes js-cdn.music music www xp}.map{|host|
+      Allow host + '.apple.com' } if ENV.has_key? 'APPLE'
 
     # Anvato
     Allow 'tkx.apis.anvato.net'
@@ -201,20 +186,11 @@ secure.brightcove.com
       GET a + '.espncdn.com' }
 
     # Facebook
-    FBgunk = %w(common connect pages_reaction_units security tr)
+    %w(facebook.com business.facebook.com
+     m.facebook.com      www.facebook.com
+).map{|host| Allow host } if ENV.has_key?('FACEBOOK')
 
-    if ENV.has_key?('FACEBOOK')
-      %w(facebook.com
-business.facebook.com
-       m.facebook.com
-     www.facebook.com
-).map{|host|
-        Allow host
-        GET host, -> r {FBgunk.member?(r.parts[0]) ? r.deny : NoGunk[r]}}
-    end
-
-    %w(l.facebook.com
-      lm.facebook.com).map{|host|
+    %w(l.facebook.com lm.facebook.com).map{|host|
       GET host, GotoU}
 
     # Flickr
