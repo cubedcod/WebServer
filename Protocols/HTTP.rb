@@ -476,8 +476,8 @@ class WebResource
       if local?                 # local resource:
         if %w{y year m month d day h hour}.member? parts[0]
           dateDir                  # time-segment redirect
-        #elsif path == '/log'
-        #  
+        elsif path == '/js'
+          File.open('js').each_line{|l| puts l}
         elsif path == '/mail'      # inbox redirect
           [302,{'Location' => '/d/*/msg*?head&sort=date&view=table'},[]]
         elsif file?
