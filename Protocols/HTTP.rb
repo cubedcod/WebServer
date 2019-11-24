@@ -438,9 +438,9 @@ class WebResource
     def findNodes
       return dir.findNodes if name == 'index'
       (if directory?                                           # directory?
-       if env[:query].has_key?('f') && path != '/'             # FIND:
-          find env[:query]['f'] unless env[:query]['f'].empty? # pedantic find
-       elsif env[:query].has_key?('find') && path != '/'       # easy-mode find
+       if env[:query].has_key?('f') && path != '/'             # FIND
+          find env[:query]['f'] unless env[:query]['f'].empty? #  pedantic
+       elsif env[:query].has_key?('find') && path != '/'       #  easy mode
           find '*' + env[:query]['find'] + '*' unless env[:query]['find'].empty?
        elsif (env[:query].has_key?('Q') || env[:query].has_key?('q')) && path != '/'
          env[:grep] = true                                     # GREP
@@ -448,20 +448,20 @@ class WebResource
        else                                                    # LS
          [self]
        end
-      else                                                     # file-pattern
-        if uri.match GlobChars         # parametric GLOB:
+      else                                                     # file(s)
+        if uri.match GlobChars         # parametric GLOB
           env[:grep] = true if env && env[:query].has_key?('q')
           glob
-        else                           # default GLOB:
-          files = (self + '.*').R.glob # basename + format-extension
-          files = (self + '*').R.glob if files.empty? # prefix match
-          [self, files]
+        else                           # default GLOB
+          files = (self + '.*').R.glob #  basename + format
+          files = (self + '*').R.glob if files.empty? # path prefix
+          [self, files]                # exact match
         end
        end).flatten.compact.uniq.select(&:exist?).map{|n|n.bindEnv env}
     end
 
+    # allow rewrite if explicit-allow, untyped, Atom/RSS feed, or HTML and not using upstream UI
     def fixedFormat? format = nil
-      # transformable if explicit allow or untyped or Atom/RSS feed or HTML and not upstream UI
       return true if upstreamUI?
       return false if env[:transformable] || !format || format.match?(/\/(atom|html|rss|xml)/i)
       return true
@@ -475,10 +475,10 @@ class WebResource
     def GETresource
       if local?                 # local resource:
         if %w{y year m month d day h hour}.member? parts[0]
-          dateDir                  # time-segment redirection
+          dateDir                  # time-segment redirect
         #elsif path == '/log'
         #  
-        elsif path == '/mail'      # inbox redirection
+        elsif path == '/mail'      # inbox redirect
           [302,{'Location' => '/d/*/msg*?head&sort=date&view=table'},[]]
         elsif file?
           fileResponse             # local static-data
