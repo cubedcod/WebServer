@@ -113,7 +113,7 @@ module Webize
             end
             p = MetaMap[p] || p
             puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/
-            yield s, p, o unless [:drop,'id','url'].member? p}}
+            yield s, p, o unless [:drop,'id','url'].member? p}} if @json['items'] && @json['items'].respond_to?(:map)
       end
 
       def scanContent &f

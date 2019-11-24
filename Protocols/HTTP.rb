@@ -461,13 +461,10 @@ class WebResource
     end
 
     def fixedFormat? format = nil
+      # transformable if explicit allow or untyped or Atom/RSS feed or HTML and not upstream UI
       return true if upstreamUI?
-
-      # rewritable if explicitly allowed  || untyped || Atom/RSS feed
-      return false if env[:transformable] || !format || format.match?(/\/(atom|rss|xml)/i)
-
-      # MIME pattern: application/ + media/ fixed, text/ + graph-formats transformable
-      format.match? /^(application|audio|font|image|text\/(css|(x-)?javascript|proto)|video)/
+      return false if env[:transformable] || !format || format.match?(/\/(atom|html|rss|xml)/i)
+      return true
     end
 
     def self.GET arg, lambda = NoGunk

@@ -27,12 +27,12 @@ class WebResource < RDF::URI
   alias_method :uri, :to_s
 
   module URIs
-    GraphExt = /\.(md|ttl|u)$/ # native graph-formats filename-pattern
-    PWD = Pathname.new Dir.pwd # working directory
-    LocalAddr = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
-    StaticExt = %w(css gif html ico jpeg jpg m3u8 m4a md mp3 mp4 opus pdf png svg ts webm webp xml)
+    GraphExt = /\.(md|ttl|u)$/                                                                                   # pattern of native graph file types
+    PWD = Pathname.new Dir.pwd                                                                                   # working directory
+    LocalAddr = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq            # local addresses and hostnames
+    StaticExt = %w(css geojson gif html ico jpeg jpg json m3u8 m4a md mp3 mp4 opus pdf png svg ts webm webp xml) # extensions of cached file-types
 
-    # vocabulary base-URI
+    # vocabulary base-URIs
     W3       = 'http://www.w3.org/'
     DC       = 'http://purl.org/dc/terms/'
     OG       = 'http://ogp.me/ns#'
@@ -61,7 +61,7 @@ class WebResource < RDF::URI
     Type     = W3 + '1999/02/22-rdf-syntax-ns#type'
     Video    = DC + 'Video'
 
-    # single-character representation of a URI
+    # single-character representations of a URI
     Icons = {
       'https://twitter.com' => '🐦',
       Abstract => '✍',
