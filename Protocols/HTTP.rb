@@ -460,8 +460,8 @@ class WebResource
       if local?                 # local resource:
         if %w{y year m month d day h hour}.member? parts[0]
           dateDir                  # time-segment redirect
-        elsif path == '/js'
-          File.open('js').each_line{|l| puts l}
+        elsif path == '/log'       # log handler
+          localLog
         elsif path == '/mail'      # inbox redirect
           [302,{'Location' => '/d/*/msg*?head&sort=date&view=table'},[]]
         elsif file?
@@ -469,22 +469,22 @@ class WebResource
         elsif directory? && qs.empty? && (index = (self + 'index.html').R env).exist? && selectFormat == 'text/html'
           index.fileResponse       # local static directory-index
         else                       # local graph-data
-          env[:links][:turtle] = (path[-1] == '/' ? 'index' : name) + '.ttl'
-          env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
-          dateMeta
-          nodeResponse
+          localGraph
         end
       elsif handler = HostGET[host] # host handler
         handler[self]
       elsif self.CDN?               # content-pool handler
-        extension = ext.downcase
-        StaticExt.member?(extension) && extension != 'js' && !gunkURI && fetch || deny
+        if ENV.has_key? 'BARNDOOR'
+          fetch
+        else
+          extension = ext.downcase
+          StaticExt.member?(extension) && extension != 'js' && !gunkURI && fetch || deny
+        end
       elsif gunkHost || gunkURI     # junk handler
         deny
       elsif path.match? /^\/\d\d\d\d\/\d\d\/\d\d\/\d\d\/$/ # cache-timeslice handler
         name = '*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*'
         nodeResponse (path + name)
-      #elsif                       # cache-timeslice, local+remote y/m/d
       else
         env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
         fetch                      # remote resource
@@ -581,6 +581,17 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     end
 
     def local?; LocalAddr.member?(env['SERVER_NAME']) || ENV['SERVER_NAME'] == env['SERVER_NAME'] end
+
+    def localGraph
+      env[:links][:turtle] = (path[-1] == '/' ? 'index' : name) + '.ttl'
+      env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
+      dateMeta
+      nodeResponse
+    end
+
+    def localLog
+      File.open('js').each_line{|l| puts l }
+    end
 
     def nodeResponse fs_base=self
       nodes = fs_base.R(env).findNodes
