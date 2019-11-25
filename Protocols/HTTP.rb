@@ -515,6 +515,7 @@ class WebResource
     end
 
     def gunkHost
+      return false if ENV.has_key? 'BARNDOOR'
       return false if AllowedHosts.has_key? host
       env.has_key? 'HTTP_GUNK'
     end
@@ -608,7 +609,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     end
 
     def OPTIONS
-      if AllowedHosts.has_key? host
+      if AllowedHosts.has_key?(host) || ENV.has_key?('BARNDOOR')
         self.OPTIONSthru
       else
         env[:deny] = true
@@ -648,7 +649,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     def POSTresource
       if handler = HostPOST[host]
         handler[self]
-      elsif AllowedHosts.has_key? host
+      elsif AllowedHosts.has_key?(host) || ENV.has_key?('BARNDOOR')
         self.POSTthru
       else
         denyPOST
