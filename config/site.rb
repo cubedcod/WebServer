@@ -566,7 +566,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
       fn = r.parts[0]
       if %w{attribution_link redirect}.member? fn
         [301, {'Location' =>  r.env[:query]['q'] || r.env[:query]['u']},[]]
-      elsif !fn || r.parts[-1] == 'subscriptions'
+      elsif !fn || r.parts[-1] == 'subscriptions' || r.env[:query]['allow'] == ServerKey
         r.fetch
       elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results signin user watch watch_videos yts).member? fn
         Desktop[r]

@@ -296,13 +296,13 @@ class WebResource
       end
     end
 
-    # fetch resource from remote or local cache
+    # fetch node from remote or local cache
     def fetch options=nil
       options ||= {}
 
       # cache hits
       if StaticExt.member? ext.downcase
-        return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE')     # client has static-data, return 304
+        return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE')     # client has static-data, return 304 response
         return cachePath.fileResponse if cachePath.file?                                              # server has static-data, return data
       end
       return cachedGraph if offline?                                                                  # offline, return cache
@@ -312,6 +312,7 @@ class WebResource
       primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env                                 # primary scheme
       fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env                              # fallback scheme
 
+      # fetch, HTTPS with HTTP fallback
       primary.fetchHTTP options
     rescue Exception => e
       case e.class.to_s
@@ -340,37 +341,30 @@ class WebResource
       end
     end
 
-    # fetch resource: HTTP(S)
-    def fetchHTTP options={} ;(puts "\nFETCH "  + uri; HTTP.print_header headers) if verbose?
+    def fetchHTTP options={}
       open(uri, headers.merge({redirect: false})) do |response| print '🌍🌎🌏🌐'[rand 4]
-        h = response.meta                                                 # response metadata
-        if verbose?
-          puts '<< code ' + response.status.to_s
-          HTTP.print_header h
-        end
+        h = response.meta; HTTP.print_header h if verbose?                # response header
 
         if response.status.to_s.match? /206/                              # partial body
           [206, h, [response.read]]                                       # return part
         else
 
           # body
-          body = HTTP.decompress h, response.read                         # decode
+          body = HTTP.decompress h, response.read                         # decompress body
 
           # format
-          format = h['content-type'].split(/;/)[0] if h['content-type'] # HTTP Header
+          format = h['content-type'].split(/;/)[0] if h['content-type']   # HTTPheader explicit format
           format ||= (xt = ext.to_sym; puts "WARNING no MIME for #{uri}"  # extension -> format map
            RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
-          format = 'text/nfo' if ext=='nfo' && format.match?(/^text.plain/)
-          #format = 'application/ld+json' if format == 'application/geo+json'
 
-          # read data
+          # read body
           reader = RDF::Reader.for content_type: format
           reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|
             (env[:repository] ||= RDF::Repository.new) << _ } if reader
 
           cachePath.write body if StaticExt.member? ext.downcase          # cache static-file
 
-          return self if options[:intermediate]                           # intermediate fetch w/ no direct HTTP caller
+          return self if options[:intermediate]                           # intermediate fetch - no direct HTTP caller
 
           # upstream metadata
           %w(Access-Control-Allow-Origin
@@ -393,7 +387,7 @@ class WebResource
       when /30[12378]/ # Relocated
         dest = e.io.meta['location'].R
         if dest.path == path && dest.host == host
-          puts "WARNING: redirected to self with #{scheme} to #{dest.scheme} scheme switch: #{uri}"; cachedGraph
+          puts "NOTICE: #{scheme} to #{dest.scheme} scheme-switch redirect at #{uri}"; cachedGraph
         else
           [302, {'Location' => dest.uri}, []]
         end

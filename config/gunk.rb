@@ -20,7 +20,7 @@ p(a(idpost|ywall)|er(imeter-?x|sonali[sz](ation|e))|i(wik|xel(propagate)?)|lacem
 quantcast|
 record(event|stats?)|re?t(ar)?ge?t(ing)?|remote[-_]?(control)?|rpc|
 s?s(a(fe[-_]?browsing|ilthru)|cheduler|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(cial(shar(e|ing))?|urcepoint)|ponsor(ed)?|tat(istic)?s?|ubscri(ber?|ptions?)|urvey|w.js|yn(c|dicat(ed|ion)))|
-t(aboola|ags|(arget|rack)(ers?|ing)|ampering|bproxy|ea(lium|ser)|elemetry|hirdparty|inypass|rack?ing(data)?|rend(ing|s)|ypeface)|autotrack|
+t(aboola|ags|(arget|rack)(ers?|ing)|ampering|ea(lium|ser)|elemetry|inypass|rack?ing(data)?|rend(ing|s)|ypeface)|autotrack|
 u(rchin|ser[-_]?(context|location)|tm)|
 viral|
 wp-rum)
