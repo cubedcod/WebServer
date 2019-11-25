@@ -31,6 +31,7 @@ class WebResource
     NoGunk  = -> r {r.gunkURI ? r.deny : r.fetch}
     NoJS    = -> r {r.ext=='js' ? r.deny : NoGunk[r]} # TODO inspect response content-type
     NoQuery = -> r {r.qs.empty? ? r.fetch : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
+    R204 = [204, {}, []]
     R304 = [304, {}, []]
     RootIndex = -> r { r.chrono_sort if r.parts.size == 1; r.path == '/' ? r.cachedGraph : NoGunk[r]}
 
@@ -478,18 +479,16 @@ class WebResource
           dateMeta
           nodeResponse
         end
-      elsif path.match? /\D204$/    # connectivity check
-        [204,{},[]]
       elsif handler = HostGET[host] # host handler
         handler[self]
-      elsif self.CDN?
+      elsif self.CDN?               # content-pool handler
         extension = ext.downcase
         StaticExt.member?(extension) && extension != 'js' && !gunkURI && fetch || deny
-      elsif gunkHost || gunkURI
+      elsif gunkHost || gunkURI     # junk handler
         deny
-      elsif path.match? /^\/\d\d\d\d\/\d\d\/\d\d\/\d\d\/$/ # timeslice path
+      elsif path.match? /^\/\d\d\d\d\/\d\d\/\d\d\/\d\d\/$/ # cache-timeslice handler
         name = '*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*'
-        nodeResponse (path + name) # cache-timeslice, local hour
+        nodeResponse (path + name)
       #elsif                       # cache-timeslice, local+remote y/m/d
       else
         env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
