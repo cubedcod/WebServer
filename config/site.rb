@@ -560,25 +560,25 @@ media-mbst-pub-ue1.s3.amazonaws.com
     GET 'www.yelp.com', -> r {r.env[:query]['redirect_url'] ? [301, {'Location' => r.env[:query]['redirect_url']},[]] : r.fetch}
 
     # YouTube
-    Allow 'youtubei.googleapis.com'
     Allow 'www.youtube.com'
-    GotoYoutube = -> r {[301, {'Location' => 'https://www.youtube.com' + r.env['REQUEST_URI']}, []]}
+
     GET 's.ytimg.com', Desktop
-    GET 'youtube.com', GotoYoutube
-    GET 'm.youtube.com', GotoYoutube
-    GET 'www.youtube.com', -> r {
+    GET 'youtube.com', -> r {[301, {'Location' => 'https://www.youtube.com' + r.env['REQUEST_URI']}, []]}
+
+    YT = -> r {
       fn = r.parts[0]
       if %w{attribution_link redirect}.member? fn
         [301, {'Location' =>  r.env[:query]['q'] || r.env[:query]['u']},[]]
-      elsif !r.gunkURI && (!fn || %w(browse_ajax c channel embed feed get_video_info guide_ajax
-heartbeat iframe_api live_chat manifest.json opensearch playlist results signin user watch watch_videos yts).member?(fn))
-        Desktop[r]
-      elsif r.env[:query]['allow'] == ServerKey
+      elsif !fn || r.parts[-1] == 'subscriptions'
         r.fetch
+      elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results signin user watch watch_videos yts).member? fn
+        Desktop[r]
       else
         r.deny
       end}
-    GET 'www.invidio.us', GotoYoutube
+
+    GET 'm.youtube.com', YT
+    GET 'www.youtube.com', YT
 
     POST 'www.youtube.com', -> r {
       if r.parts.member? 'stats'
