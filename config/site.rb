@@ -65,8 +65,8 @@ class WebResource
       end}
 
     # ABC
-    GET 'abcnews.go.com', NoJS
-    GET 's.abcnews.com', NoJS
+    GET 'abcnews.go.com'
+    GET 's.abcnews.com'
 
     # ACM
     Cookies 'dl.acm.org'
@@ -100,9 +100,6 @@ s.click.aliexpress.com
 
     # Anvato
     Allow 'tkx.apis.anvato.net'
-
-    # Ars Technica
-    GET 'cdn.arstechnica.net', NoJS
 
     # Balamii
     Allow 'balamii-parse.herokuapp.com'
@@ -145,7 +142,7 @@ secure.brightcove.com
     Allow 'www.costco.com'
 
     # CNet
-    GET 'www.cnet.com', NoJS
+    GET 'www.cnet.com'
 
     # CNN
     %w(cdn edition www).map{|host|
@@ -239,8 +236,8 @@ secure.brightcove.com
       end}
 
     # Guardian
-    GET 'i.guim.co.uk', NoJS
-    GET 'www.theguardian.com', NoJS
+    GET 'i.guim.co.uk'
+    GET 'www.theguardian.com'
 
     # Imgur
     %w(imgur.com
@@ -288,13 +285,6 @@ jolygram.com
 pikdo.net piknu.com publicinsta.com www.pictame.com
 zoopps.com
 ).map{|host| GET host, IG1}
-
-    # Linkedin
-    GET 'media.licdn.com', NoJS
-    GET 'www.linkedin.com', NoJS
-
-    # Little Free Library
-    Allow 'littlefreelibrary.secure.force.com'
 
     # Mail.ru
     GET 'cloud.mail.ru'
@@ -355,9 +345,8 @@ firefox.settings.services.mozilla.com
     GET 'www.tsunami.gov', Desktop
 
     # NYTimes
-    %w(cooking.nytimes.com
-           www.nytimes.com).map{|host|
-      GET host, NoJS}
+    %w(cooking www).map{|host|
+      GET host+'.nytimes.com'}
 
     # Outline
     GET 'outline.com', -> r {
@@ -543,9 +532,7 @@ videos.files.wordpress.com
     (0..2).map{|i| GET "s#{i}.wp.com", NoJS}
 
     # WSJ
-    GET 'images.wsj.net', NoJS
-    GET 'm.wsj.net', NoJS
-    GET 's.wsj.net', NoJS
+    %w(images m s).map{|h| GET h + '.wsj.net' }
 
     # Yahoo!
     %w(finance.yahoo.com
