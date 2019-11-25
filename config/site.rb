@@ -101,6 +101,9 @@ s.click.aliexpress.com
     # Anvato
     Allow 'tkx.apis.anvato.net'
 
+    # Atlassian
+    Allow 'zerotier.atlassian.net'
+
     # Balamii
     Allow 'balamii-parse.herokuapp.com'
     Allow 'player.balamii.com'

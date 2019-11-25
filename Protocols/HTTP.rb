@@ -20,6 +20,9 @@ class WebResource
       'OPTIONS' => :OPTIONS,
       'POST'    => :POSTresource}
 
+    R204 = [204, {}, []]
+    R304 = [304, {}, []]
+
     Desktop = -> r {NoGunk[r.desktopUI]}
     Fetch = -> r {r.fetch}
     GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : NoGunk[r]}
@@ -31,8 +34,6 @@ class WebResource
     NoGunk  = -> r {r.gunkURI ? r.deny : r.fetch}
     NoJS    = -> r {r.ext=='js' ? r.deny : NoGunk[r]} # TODO inspect response content-type
     NoQuery = -> r {r.qs.empty? ? r.fetch : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
-    R204 = [204, {}, []]
-    R304 = [304, {}, []]
     RootIndex = -> r { r.chrono_sort if r.parts.size == 1; r.path == '/' ? r.cachedGraph : NoGunk[r]}
 
     def self.Allow host
@@ -515,8 +516,9 @@ class WebResource
 
     def gunkHost
       return false if ENV.has_key? 'BARNDOOR'
+      return false if env[:query]['allow'] == ServerKey
       return false if AllowedHosts.has_key? host
-      env.has_key? 'HTTP_GUNK'
+      env.has_key? 'HTTP_GUNK' # upstream flag
     end
 
     def gunkURI
