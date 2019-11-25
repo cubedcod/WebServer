@@ -60,21 +60,20 @@ ip6tables -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m own
 open_TCP    587 SMTP
 
 open_TCP   6667 IRC
-open_TCP   6789 IRC-proxy
+open_TCP   6789 IRC
 
 open_TCP   8022 SSH
-
 open_TCP   8000 HTTP
-open_TCP   8080 HTTP-proxy
-open_TCP   8081 HTTP-transparent
-open_TCP   8082 HTTPS-transparent
-
-open_port  8073 SDR-kiwi
-open_port  8443 SDR-HFU
-open_port  8790
-open_port  8901 SDR-REA
+open_TCP   8080 HTTP
+open_TCP   8081 HTTP
+open_TCP   8082 HTTP
+open_port  8073 SDR
+open_port  8443 SDR
+open_port  8790 SSH
+open_port  8901 SDR
 
 open_TCP   9418 Git
+open_UDP   9993 ZeroTier
 
 open_UDP  60001 Mosh
 open_UDP  60002 Mosh
