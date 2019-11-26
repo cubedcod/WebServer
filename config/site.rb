@@ -382,13 +382,10 @@ firefox.settings.services.mozilla.com
     GET 'www.patriotledger.com', -> r {NoGunk[r.env[:query].has_key?('template') ? r.desktopUI : r]}
 
     # Reddit
-    #Allow 'events.redditmedia.com'
     Allow 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
-    %w(gateway gql oauth www).map{|host|Allow host + '.reddit.com'}
-    GotoReddit = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path + r.qs}, []]}
-    GET 'old.reddit.com', GotoReddit
-    GET 'reddit.com', GotoReddit
-    GET 'www.redditmedia.com', Desktop
+    %w(gateway gql oauth www).map{|h| Allow h + '.reddit.com' }
+    %w(old.reddit.com www.redditmedia.com).map{|host| GET host, Desktop }
+    GET 'reddit.com', -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path + r.qs}, []]}
     GET 'www.reddit.com', -> r {
       if r.path == '/'                                             # subscriptions
         r = ('/r/'+'com/reddit/www/r/*/.sub*'.R.glob.map(&:dir).map(&:basename).join('+')+'/new').R r.env
