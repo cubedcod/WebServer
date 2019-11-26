@@ -237,7 +237,7 @@ secure.brightcove.com
         GotoURL[r]
       else
         NoGunk[r]
-      end} unless ENV.has_key? 'BARNDOOR'
+      end}
 
     # Guardian
     GET 'i.guim.co.uk'

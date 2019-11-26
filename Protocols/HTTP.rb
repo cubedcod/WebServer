@@ -242,7 +242,8 @@ class WebResource
                       elsif type == :JSON || ext == 'json'
                         ['application/json','{}']
                       else
-                        href = qs.match?(/campaign|[iu]tm_/) ? '?' : ('?allow=' + ServerKey)
+                        env[:query]['allow'] = ServerKey
+                        href = qs.match?(/campaign|[iu]tm_/) ? '?' : HTTP.qs(env[:query])
                         ['text/html; charset=utf-8',
                          "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center'><a href='#{href}' style='color: #fff; font-size: 22em; text-decoration: none; font-weight: normal'>⌘</a></body></html>"]
                       end
@@ -394,10 +395,10 @@ class WebResource
       when /304/ # Not Modified
         R304
       when /401/ # Unauthorized
-        print "\n🚫 " + uri + ' '
+        print "\n🚫401 " + uri + ' '
         options[:intermediate] ? self : cachedGraph
       when /403/ # Forbidden
-        print "\n🚫 " + uri + ' '
+        print "\n🚫403 " + uri + ' '
         options[:intermediate] ? self : cachedGraph
       when /404/ # Not Found
         options[:intermediate] ? self : cachedGraph
@@ -740,15 +741,15 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
 
     def querystring
       if env
-        if env[:query] && LocalArgs.find{|a|env[:query].has_key? a} # parsed query from environment
-          q = env[:query].dup                                        # query Hash
-          LocalArgs.map{|a| q.delete a }                             # eat internal args
-          return q.empty? ? '' : HTTP.qs(q)                          # stringify external qs
-        elsif env['QUERY_STRING'] && !env['QUERY_STRING'].empty?    # query-string from environment
+        if env[:query]                                           # parsed query?
+          q = env[:query].dup                                    # load query
+          LocalArgs.map{|a| q.delete a }                         # eat internal args
+          return q.empty? ? '' : HTTP.qs(q)                      # stringify
+        elsif env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # query-string in environment
           return '?' + env['QUERY_STRING']
         end
       end
-      query && !query.empty? && ('?' + query) || ''                 # query-string from URI
+      query && !query.empty? && ('?' + query) || ''              # query-string in URI
     end
     alias_method :qs, :querystring
 

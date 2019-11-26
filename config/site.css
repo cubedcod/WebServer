@@ -26,7 +26,8 @@
 .toolbox a:target {text-shadow: 0px 0px #000000}
 .toolbox { position: fixed; top: 0; z-index: 2 }
 :target, :target * {background-color: #0f0 !important; color: #000 !important}
-a {text-decoration: none; font-weight: bold; color: #ddd}
+a {text-decoration: none; font-weight: bold; color: #ccc}
+a:visited {background-color: #555; color: #000}
 a.date {float: right; color: #888; font-size: .8em; border-color: #222}
 a.icon {font-weight: normal}
 a.id {float: right; color: #333; border-color: #222}
