@@ -88,9 +88,11 @@ s.click.aliexpress.com
       GET host}
 
     # Amazon
-    Amazon = -> r {r.env['HTTP_REFERER']&.match(/(amazon|imdb)\.com/) && NoJS[r] || r.deny}
-    GET 'amazon.com', NoJS
-    GET 'www.amazon.com', NoJS
+    Amazon = -> r {r.env['HTTP_REFERER']&.match(/(amazon|imdb)\.com/) && NoGunk[r] || r.deny}
+
+    GET 'amazon.com'
+    GET 'www.amazon.com'
+
     GET 'images-na.ssl-images-amazon.com', Amazon
     GET 'm.media-amazon.com', Amazon
 
