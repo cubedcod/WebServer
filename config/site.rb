@@ -560,9 +560,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
     Allow 'www.youtube.com'
 
     GET 's.ytimg.com', Desktop
-    GET 'youtube.com', -> r {[301, {'Location' => 'https://www.youtube.com' + r.env['REQUEST_URI']}, []]}
-
-    YT = -> r {
+    GET 'www.youtube.com', -> r {
       fn = r.parts[0]
       if %w{attribution_link redirect}.member? fn
         [301, {'Location' =>  r.env[:query]['q'] || r.env[:query]['u']},[]]
@@ -574,9 +572,6 @@ media-mbst-pub-ue1.s3.amazonaws.com
         r.deny
       end}
 
-    GET 'm.youtube.com', YT
-    GET 'www.youtube.com', YT
-
     POST 'www.youtube.com', -> r {
       if r.parts.member? 'stats'
         r.denyPOST
@@ -585,8 +580,6 @@ media-mbst-pub-ue1.s3.amazonaws.com
       else
         r.denyPOST
       end}
-
-    GET 'youtu.be', -> r {[301, {'Location' => 'https://www.youtube.com/watch?v=' + r.path[1..-1]}, []]}
 
     # ZeroHedge
     Allow 'talk.zerohedge.com'
