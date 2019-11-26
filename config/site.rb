@@ -164,17 +164,10 @@ secure.brightcove.com
     GET 'proxy.duckduckgo.com', -> r {%w{iu}.member?(r.parts[0]) ? [301, {'Location' => r.env[:query]['u']}, []] : r.fetch}
 
     # eBay
-    Allow 'ebay.com'
-    Allow 'www.ebay.com'
-    Allow 'ir.ebaystatic.com'
+    %w(ebay.com www.ebay.com ir.ebaystatic.com).map{|host| GET host }
     GET 'i.ebayimg.com', -> r {
-      if r.basename.match? /s-l(64|96|200|225).jpg/
-        [301, {'Location' => r.dirname + '/s-l1600.jpg'}, []]
-      else
-        r.fetch
-      end}
-    GET 'rover.ebay.com', -> r {
-      r.env[:query].has_key?('mpre') ? [301, {'Location' => r.env[:query]['mpre']}, []] : r.deny}
+      r.basename.match?(/s-l(64|96|200|225).jpg/) ? [301, {'Location' => r.dirname + '/s-l1600.jpg'}, []] : r.fetch}
+    GET 'rover.ebay.com', -> r {r.env[:query].has_key?('mpre') ? [301, {'Location' => r.env[:query]['mpre']}, []] : r.deny}
 
     # Economist
     GET 'www.economist.com'
