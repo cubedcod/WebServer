@@ -88,13 +88,12 @@ s.click.aliexpress.com
       GET host}
 
     # Amazon
-    Amazon = -> r {r.env['HTTP_REFERER']&.match(/(amazon|imdb)\.com/) && NoGunk[r] || r.deny}
+    AmazonReferer = -> r {r.env['HTTP_REFERER']&.match(/(amazon|imdb)\.com/) && NoGunk[r] || r.deny}
 
     GET 'amazon.com'
     GET 'www.amazon.com'
-
-    GET 'images-na.ssl-images-amazon.com', Amazon
-    GET 'm.media-amazon.com', Amazon
+    GET 'images-na.ssl-images-amazon.com', AmazonReferer
+    GET 'm.media-amazon.com', AmazonReferer
 
     # Apple
     %w{amp-api.music audio-ssl.itunes itunes js-cdn.music music www xp}.map{|host|
