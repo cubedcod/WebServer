@@ -251,7 +251,7 @@ class WebResource
         host && path && ('https://' + host + path),
       ].compact.find{|u| graph[u] && graph[u][Title]}
       bc = '/' # breadcrumb path
-      icon = ('//' + host + '/favicon.ico').R # site icon
+      icon = ('//' + (host || 'localhost') + '/favicon.ico').R # site icon
       link = -> key, content { # render Link reference
         if url = env[:links] && env[:links][key]
           [{_: :a, href: url, id: key, class: :icon, c: content},

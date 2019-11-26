@@ -441,9 +441,9 @@ firefox.settings.services.mozilla.com
 ).map{|h|Allow h}
 
     # Spotify
-    %w(api apresolve embed guc-dealer guc-spclient open spclient.wg).map{|host|
-      Allow host+'.spotify.com'
-      GET host+'.spotify.com', Desktop} if ENV.has_key? 'SPOTIFY'
+    %w(api apresolve embed guc-dealer guc-spclient open spclient.wg).map{|h|
+      host = h + '.spotify.com'
+      Allow host; GET host, Desktop}
 
     # StarTribune
     Allow 'comments.startribune.com'
