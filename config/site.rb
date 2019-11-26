@@ -382,7 +382,7 @@ firefox.settings.services.mozilla.com
     GET 'www.patriotledger.com', -> r {NoGunk[r.env[:query].has_key?('template') ? r.desktopUI : r]}
 
     # Reddit
-    Allow 'reddit-uploaded-media.s3-accelerate.amazonaws.com'
+    %w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h| Allow h }
     %w(gateway gql oauth www).map{|h| Allow h + '.reddit.com' }
     %w(old.reddit.com www.redditmedia.com).map{|host| GET host, Desktop }
     GET 'reddit.com', -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path + r.qs}, []]}
