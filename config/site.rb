@@ -224,25 +224,19 @@ secure.brightcove.com
 
     (1..4).map{|i| GET "#{i}.bp.blogspot.com", NoJS }
     (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com", NoJS }
-    %w(books docs drive images scholar).map{|host| GET host+'.google.com', NoJS }
+    %w(books docs drive images scholar).map{|host| GET host+'.google.com' }
 
     GET 'www.google.com', -> r {
       case r.path
-      when '/'
-        r.fetch
       when /^.gen(erate)?_?204/
         R204
       when '/search'
         q = r.env[:query]['q']
         q && q.match?(/^(https?:|l(ocalhost)?(:8000)?)\//) && [301,{'Location'=>q.sub(/^l/,'http://l')},[]] || r.fetch
-      when /^.(images|.*photos)/
-        NoJS[r]
-      when /^.maps/
-        ((r.env['QUERY_STRING']&.index(ServerKey)) || (r.env['HTTP_REFERER']&.index(ServerKey))) ? r.fetch : NoJS[r]
       when '/url'
         GotoURL[r]
       else
-        r.deny
+        NoGunk[r]
       end} unless ENV.has_key? 'BARNDOOR'
 
     # Guardian
