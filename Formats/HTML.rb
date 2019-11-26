@@ -101,7 +101,7 @@ image-src
       include WebResource::URIs
       format Format
 
-      BasicGunk = %w{
+      GlobalGunk = %w{
         [class*='cookie']  [id*='cookie']
         [class*='related'] [id*='related']
         [class*='share']   [id*='share']
@@ -217,10 +217,7 @@ sidebar [class^='side']    [id^='side']
             if content = body.css('.' + bsel)[0]
               yield subject, Content, HTML.clean(content.inner_html)
             end}
-          [*BasicGunk,*Gunk,*SiteGunk[@base.host]].map{|selector|
-            body.css(selector).map{|sel|
-              #puts "X"*80,"stripping #{selector}:", sel
-              sel.remove }} # strip elements
+          [*GlobalGunk,*SiteGunk[@base.host]].map{|s|body.css(s).map &:remove} # strip elements
           yield subject, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
         else # body element missing
           n.css('head').remove
@@ -538,7 +535,9 @@ class WebResource
       images = post.delete(Image) || []
       content = post.delete(Content) || []
       uri_hash = 'r' + Digest::SHA2.hexdigest(uri) if uri
-      {class: :post,
+      cssname = 'post'
+      cssname += ' main' if uri.R.path == env['REQUEST_PATH']
+      {class: cssname,
        c: ["\n",
            titles.map{|title|
              title = title.to_s.sub(/\/u\/\S+ on /,'')

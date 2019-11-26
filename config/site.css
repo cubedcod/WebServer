@@ -15,7 +15,8 @@
 .file {position: relative}
 .list {background-color: #fff; color: #000}
 .post a.avatar {border-width: 0}
-.post {border-radius: .38em; max-width: 87ex; overflow: hidden; margin: 1px; border: 1px solid #333}
+.post {border-radius: .38em; max-width: 87ex; overflow: hidden; margin: 1px; border: 1px solid #222}
+.main.post {background-color: #fff; color: #000}
 .quote {background-color: #ccc; color: #000}
 .thumb, svg {max-width: 28em}
 .title {background-color: #fff; color: #000; font-size: 1.1em; vertical-align: top; padding: .06em .1em .06em .1em; border-radius: 0 .3em .3em 0; display: inline-block; min-width: 16em}
@@ -30,9 +31,9 @@
 .user {background-color: white; color: black; margin: .5em; border-radius: .4em}
 :target, :target * {background-color: #0f0 !important; color: #000 !important}
 a {text-decoration: none; font-weight: bold; color: #ddd}
-a.date {float: right; background-color: #000; color: #888; font-size: .8em; border-color: #222}
+a.date {float: right; color: #888; font-size: .8em; border-color: #222}
 a.icon {font-weight: normal}
-a.id {float: right; background-color: #000; color: #333; border-color: #222}
+a.id {float: right; color: #333; border-color: #222}
 a:visited {border-color: #333; background-color: #111; color: #fff}
 body {font-family: sans-serif; margin: 2em}
 body, td, .post, a.head {background-color: #000; color: #fff}
