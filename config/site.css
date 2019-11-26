@@ -5,7 +5,7 @@
 #subscribe.off {color: #777; background-color: #000}
 #subscribe.on  {color: #000; background-color: #fff}
 * {border-radius: .2em}
-.avatar {max-height: 2em; background-color: #000; border-color: #000}
+.avatar {max-height: 2em; background-color: #000}
 .breadcrumb {border-width: 0 0 0 .08em; border-color: #888; border-style: dotted; border-radius: 0}
 .container > .body {border-radius: 0 .2em .2em .2em; background-color: #fff; color: #000; width: 100%}
 .container > .label {border-radius: .5em .5em 0 0; display: inline-block; font-size: 1.2em; padding: .1em; background-color: #fff; color: #000}
@@ -14,27 +14,22 @@
 .file > .name {font-size: .8em; position: absolute; top: 4.8em; left: .4em}
 .file {position: relative}
 .list {background-color: #fff; color: #000}
-.post a.avatar {border-width: 0}
 .post {border-radius: .38em; max-width: 87ex; overflow: hidden; margin: 1px; border: 1px solid #222}
 .main.post {background-color: #fff; color: #000}
 .quote {background-color: #ccc; color: #000}
 .thumb, svg {max-width: 28em}
-.title {background-color: #fff; color: #000; font-size: 1.1em; vertical-align: top; padding: .06em .1em .06em .1em; border-radius: 0 .3em .3em 0; display: inline-block; min-width: 16em}
+.title {background-color: #fff; color: #000; font-size: 1.1em; vertical-align: top; display: inline-block}
 .toolbox a {text-shadow: 1.5px 1.5px #000000}
 .toolbox a.hostname img {max-height: 4.2em}
 .toolbox a.icon {font-size: 1.6em}
 .toolbox svg {height: 1em; width: 1em}
 .toolbox a:target {text-shadow: 0px 0px #000000}
 .toolbox { position: fixed; top: 0; z-index: 2 }
-.user > img {max-width: 20em}
-.user > span {font-size: 3em}
-.user {background-color: white; color: black; margin: .5em; border-radius: .4em}
 :target, :target * {background-color: #0f0 !important; color: #000 !important}
 a {text-decoration: none; font-weight: bold; color: #ddd}
 a.date {float: right; color: #888; font-size: .8em; border-color: #222}
 a.icon {font-weight: normal}
 a.id {float: right; color: #333; border-color: #222}
-a:visited {border-color: #333; background-color: #111; color: #fff}
 body {font-family: sans-serif; margin: 2em}
 body, td, .post, a.head {background-color: #000; color: #fff}
 h1,h2,h3,h4,h5,h6,p,pre {margin: 0}
@@ -42,8 +37,6 @@ img, video {max-width: 100%}
 p, li, blockquote {max-width: 86ex; border-width: 0 0 1px 0; border-style: solid; border-color: #333; border-radius: 0}
 pre {white-space: pre-wrap}
 table, div, li, svg {display: inline-block}
-table.fromTo {border-spacing: 0}
-td {border-color: #333; border-width: 0 1px 1px 0; border-style: dotted}
 td.k a {background-color: #000; color: #eee}
 td.k {max-width: 28ex; overflow: hidden; text-align: right}
 tr[name="title"] > td.v {max-width: 86ex; overflow: hidden}
