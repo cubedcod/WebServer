@@ -108,6 +108,9 @@ s.click.aliexpress.com
     Allow 'balamii-parse.herokuapp.com'
     Allow 'player.balamii.com'
 
+    # Bloomberg
+    Cookies 'www.bloomberg.com'
+
     # Boston Globe
     GET 'bos.gl', -> r {r.fetch scheme: :http}
     GET 'bostonglobe-prod.cdn.arcpublishing.com', Resizer
@@ -532,7 +535,7 @@ public-api.wordpress.com
 videos.files.wordpress.com
 ).map{|host| GET host, Fetch}
     (0..7).map{|i| GET "i#{i}.wp.com", NoQuery}
-    (0..2).map{|i| GET "s#{i}.wp.com", NoJS}
+    (0..2).map{|i| GET "s#{i}.wp.com"}
 
     # WSJ
     %w(images m s).map{|h| GET h + '.wsj.net' }
