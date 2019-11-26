@@ -558,7 +558,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
 
     # YouTube
     Allow 'www.youtube.com'
-
+    GET 'm.youtube.com'
     GET 's.ytimg.com', Desktop
     GET 'www.youtube.com', -> r {
       fn = r.parts[0]
