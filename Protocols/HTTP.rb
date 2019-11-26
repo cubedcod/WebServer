@@ -554,10 +554,10 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
       unless allowCookies?
         head.delete 'Cookie'
         head.delete 'Set-Cookie'
-      end
 
       # Referer
-      head.delete 'Referer' unless AllowedHosts.has_key? host
+        head.delete 'Referer'
+      end
       if env && env['SERVER_NAME']
         case env['SERVER_NAME']
         when /wsj\.com$/
