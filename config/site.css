@@ -18,7 +18,7 @@
 .post {border-radius: .38em; max-width: 87ex; overflow: hidden; margin: 1px; border: 1px solid #222}
 .quote {background-color: #ccc; color: #000}
 .thumb, svg {max-width: 28em}
-.title {background-color: #fff; color: #000; font-size: 1.1em; vertical-align: top; display: inline-block}
+.title {background-color: #fff; color: #000; font-size: 1.1em; vertical-align: top; display: inline-block; min-width: 20em}
 .toolbox a {text-shadow: 1.5px 1.5px #000000}
 .toolbox a.hostname img {max-height: 4.2em}
 .toolbox a.icon {font-size: 1.6em}
@@ -32,13 +32,12 @@ a.date {float: right; color: #888; font-size: .8em; border-color: #222}
 a.icon {font-weight: normal}
 a.id {float: right; color: #333; border-color: #222}
 body {font-family: sans-serif; margin: 2em}
-body, .post, a.head {background-color: #000; color: #fff}
+body, .post, a.head, td.k a, td.v {background-color: #000; color: #fff}
 h1,h2,h3,h4,h5,h6,p,pre {margin: 0}
 img, video {max-width: 100%}
 p, li, blockquote {max-width: 86ex; border-width: 0 0 1px 0; border-style: solid; border-color: #333; border-radius: 0}
 pre {white-space: pre-wrap}
 table, div, li, svg {display: inline-block}
-td.k a {background-color: #000; color: #eee}
 td.k {max-width: 28ex; overflow: hidden; text-align: right}
 tr[name="title"] > td.v {max-width: 86ex; overflow: hidden}
 video {min-width: 40ex}
