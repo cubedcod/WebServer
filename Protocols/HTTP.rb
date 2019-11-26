@@ -41,7 +41,7 @@ class WebResource
     end
 
     def allowCookies?
-      AllowedHosts.has_key?(host) || CookieHost.has_key?(host)
+      @cookies || AllowedHosts.has_key?(host) || CookieHost.has_key?(host)
     end
 
     def allowedOrigin
@@ -383,7 +383,7 @@ class WebResource
     rescue Exception => e
       case e.message
       when /300/ # Multiple Choices
-        [300, e.io.meta, [e.io.read]]
+        [300, (headers e.io.meta), [e.io.read]]
       when /30[12378]/ # Relocated
         dest = e.io.meta['location'].R
         if dest.path == path && dest.host == host
@@ -405,9 +405,14 @@ class WebResource
         print "\n❌ " + uri + ' '
         options[:intermediate] ? self : cachedGraph
       when /500/ # upstream error
-        [500, e.io.meta, [e.io.read]]
+        [500, (headers e.io.meta), [e.io.read]]
       when /503/
-        [200, e.io.meta, [e.io.read]]
+        @cookies = true
+        hdrs = e.io.meta
+        head = headers hdrs
+        body = e.io.read
+        puts 503 ; HTTP.print_header hdrs; puts '^^^^vvvv' ;  HTTP.print_header head ; puts body
+        [200, head, [body]]
       else
         raise
       end
@@ -524,10 +529,10 @@ class WebResource
     end
 
     # header formatted and filtered
-    def headers hdr = nil
+    def headers hdrs = nil
       head = {} # header storage
 
-      (hdr || env || {}).map{|k,v| # raw headers
+      (hdrs || env || {}).map{|k,v| # raw headers
         k = k.to_s
         underscored = k.match? /(_AP_|PASS_SFP)/i
         key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|k| # eat Rack HTTP_ prefix
