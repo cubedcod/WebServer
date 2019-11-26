@@ -249,12 +249,12 @@ secure.brightcove.com
     GET 'i.iheart.com'
 
     # Imgur
+    Allow 'api.imgur.com'
     %w(imgur.com
      i.imgur.com
      m.imgur.com
      s.imgur.com
-).map{|host|
-      GET host}
+).map{|host| GET host}
 
     Cookies 'imgur.com'
 
