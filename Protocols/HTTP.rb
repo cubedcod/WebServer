@@ -59,8 +59,10 @@ class WebResource
       self
     end
 
-    def cachePath
-      (hostpath + path).R env
+    def cachePath format = nil
+      p = path || '/'
+      p += 'index' + (Rack::Mime::MIME_TYPES.invert[format] || '.bin') if format && p[-1] == '/' # find format-extension
+      (hostpath + p).R env
     end
 
     def cachedGraph; nodeResponse cachePath end
@@ -365,7 +367,7 @@ class WebResource
           reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|
             (env[:repository] ||= RDF::Repository.new) << _ } if reader
 
-          cachePath.write body if CacheExt.member? ext.downcase           # cache update
+          cachePath(format).write body if CacheExt.member? ext.downcase   # cache update
 
           return self if options[:intermediate]                           # intermediate fetch - no direct HTTP caller
 
