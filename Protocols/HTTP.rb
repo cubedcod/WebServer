@@ -302,7 +302,7 @@ class WebResource
       options ||= {}
 
       # cache hits
-      if StaticExt.member? ext.downcase
+      if CacheExt.member? ext.downcase
         return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE')     # client has static-data, return 304 response
         return cachePath.fileResponse if cachePath.file?                                              # server has static-data, return data
       end
@@ -365,7 +365,7 @@ class WebResource
           reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|
             (env[:repository] ||= RDF::Repository.new) << _ } if reader
 
-          cachePath.write body if StaticExt.member? ext.downcase          # cache static-file
+          cachePath.write body if CacheExt.member? ext.downcase           # cache update
 
           return self if options[:intermediate]                           # intermediate fetch - no direct HTTP caller
 
@@ -486,7 +486,7 @@ class WebResource
           fetch
         else
           extension = ext.downcase
-          StaticExt.member?(extension) && extension != 'js' && !gunkURI && fetch || deny
+          CacheExt.member?(extension) && extension != 'js' && !gunkURI && fetch || deny
         end
       elsif gunkHost || gunkURI     # junk handler
         deny
