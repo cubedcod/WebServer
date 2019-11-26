@@ -102,11 +102,11 @@ class WebResource
 
         # OPTIONS
         elsif env['REQUEST_METHOD'] == 'OPTIONS'
-          print "\n🔧 \e[32;1m #{resource.uri}\e[0m "
+          print "\n🔧 \e[32;1m#{resource.uri}\e[0m "
 
         # POST
         elsif env['REQUEST_METHOD'] == 'POST'
-          print "\n📝 \e[32;1m #{resource.uri}\e[0m "
+          print "\n📝 \e[32;1m#{resource.uri}\e[0m "
 
         # non-content response
         elsif [301, 302, 303].member? status

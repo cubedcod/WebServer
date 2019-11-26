@@ -248,6 +248,11 @@ secure.brightcove.com
     GET 'i.guim.co.uk'
     GET 'www.theguardian.com'
 
+    # iHeart
+    Allow 'us.api.iheart.com'
+    Allow 'www.iheart.com'
+    GET 'i.iheart.com'
+
     # Imgur
     %w(imgur.com
      i.imgur.com
