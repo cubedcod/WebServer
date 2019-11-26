@@ -333,6 +333,8 @@ class WebResource
         fallback.fetchHTTP options
       when 'OpenURI::HTTPError'
         fallback.fetchHTTP options
+      when 'OpenURI::HTTPRedirect'
+        fallback.fetchHTTP options
       when 'RuntimeError'
         fallback.fetchHTTP options
       when 'SocketError'
@@ -387,8 +389,8 @@ class WebResource
         [300, (headers e.io.meta), [e.io.read]]
       when /30[12378]/ # Relocated
         dest = e.io.meta['location'].R
-        if dest.path == path && dest.host == host
-          puts "NOTICE: #{scheme} to #{dest.scheme} scheme-switch redirect at #{uri}"; cachedGraph
+        if dest.path == path && dest.host == host && scheme == 'https' && dest.scheme == 'http'
+          raise
         else
           [302, {'Location' => dest.uri}, []]
         end
