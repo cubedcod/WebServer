@@ -225,6 +225,8 @@ secure.brightcove.com
 
     GET 'www.google.com', -> r {
       case r.path
+      when /^.complete/
+        r.deny
       when /^.gen(erate)?_?204/
         R204
       when '/search'
