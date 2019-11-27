@@ -16,7 +16,7 @@
 .post {border-radius: .38em; max-width: 88ex; overflow: hidden; border: 1px solid #222}
 .quote {background-color: #ccc; color: #000}
 .thumb, svg {max-width: 28em}
-.title {background-color: #fff; color: #000; font-size: 1.1em; vertical-align: top; display: inline-block; min-width: 20em}
+.title {background-color: #fff; color: #000; font-size: 1.1em; vertical-align: top; display: inline-block; min-width: 20em; border-radius: 0 .5em .5em 0}
 .toolbox a {text-shadow: 1.2px 1.2px #000000}
 .toolbox a.hostname img {max-height: 4.2em}
 .toolbox a.icon {font-size: 1.6em}
@@ -24,12 +24,11 @@
 .toolbox svg {height: 1em; width: 1em}
 .toolbox { position: fixed; top: 0; z-index: 2 }
 :target {background-color: #0f0; color: #000}
-:visited {background-color: #aaa; color: #000}
-a {text-decoration: none; font-weight: bold; background-color: #000; color: #ccc}
+a {text-decoration: none; font-weight: bold; color: #aaa}
 a.date {float: right; color: #888; font-size: .8em; border-color: #222}
 a.icon {font-weight: normal}
 a.id {float: right; color: #333; border-color: #222}
-body {font-family: sans-serif; margin: 2em}
+body {font-family: sans-serif; margin: 2.2em}
 body, .post, a.head, td.k a, td.v {background-color: #000; color: #fff}
 h1,h2,h3,h4,h5,h6,p,pre {margin: 0}
 img, video {max-width: 100%}
