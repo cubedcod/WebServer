@@ -758,6 +758,8 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     end
     alias_method :qs, :querystring
 
+    def rdfDocument format='text/turtle'; env[:repository].dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true end
+
     def stat options = {}
       graph = env[:repository] ||= RDF::Repository.new
       options[:base_uri] ||= self

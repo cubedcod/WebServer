@@ -31,11 +31,6 @@ class WebResource
     self
   end
 
-  module HTTP
-    def rdfDocument format = 'text/turtle'
-      env[:repository].dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true
-    end
-  end
 end
 
 module Webize
