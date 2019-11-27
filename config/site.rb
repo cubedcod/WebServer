@@ -152,8 +152,7 @@ secure.brightcove.com
     GET 'www.cnet.com'
 
     # CNN
-    %w(cdn edition www).map{|host|
-      Allow host + '.cnn.com'}
+    %w(cdn edition rss www www.i.cdn).map{|host| Allow host + '.cnn.com' }
     GET 'dynaimage.cdn.cnn.com', GotoBasename
 
     # DartSearch
