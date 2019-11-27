@@ -599,7 +599,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     end
 
     def localLog
-      File.open('js').each_line{|l| puts l }
+      `tail -n 10000 ../web.log | grep '.js '`.each_line{|l| puts l }
     end
 
     def nodeResponse fs_base=self

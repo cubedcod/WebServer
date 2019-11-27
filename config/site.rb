@@ -204,7 +204,7 @@ secure.brightcove.com
 
     # GitHub
     GET 'github.com'
-    %w(avatars0 avatars1 avatars2 raw).map{|h|
+    %w(avatars0 avatars1 avatars2 avatars3 raw).map{|h|
       GET h + '.githubusercontent.com', NoJS }
 
     # GitLab
@@ -212,6 +212,7 @@ secure.brightcove.com
 
     # Gitter
     Allow 'gitter.im'
+    Allow 'ws.gitter.im'
 
     # Google
     GET 'ajax.googleapis.com', Fetch
