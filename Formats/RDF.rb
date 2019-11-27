@@ -14,6 +14,7 @@ class WebResource
         docs.push n.host ? (n.hostpath + (n.path ? (n.path[-1]=='/' ? (n.path + 'index') : n.path) : '')).R : n
         # time index
         if timestamp = graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value     # timestamp query
+          puts "timestamp #{timestamp}"
           docs.push ['/' + timestamp.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/\+?(00.00|Z)$/,''), # hour-dir location
                      %w{host path query fragment}.map{|a|n.send(a).yield_self{|p|p&&p.split(/[\W_]/)}}]. # URI slugs
                       flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.').R                   # slugskip
