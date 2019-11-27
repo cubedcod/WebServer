@@ -222,6 +222,7 @@ secure.brightcove.com
     (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com", NoJS }
     %w(books docs drive images scholar).map{|host| GET host+'.google.com' }
 
+    Cookies 'www.google.com'
     GET 'www.google.com', -> r {
       case r.path
       when /^.(complete|recaptcha)/
