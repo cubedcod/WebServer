@@ -5,19 +5,20 @@ class WebResource
     return self unless env[:repository]
 
     env[:repository].each_graph.map{|graph|
-      n = graph.name.R # graph pointer
-      docs = []
+      n = graph.name.R # named-graph resource
 
-      unless n.uri.match?(/^(_|data):/) # unless blank node or data-URI
+      docs = []        # storage references
 
-        # canonical document
+      unless n.uri.match?(/^(_|data):/) # blank node or data-URI only stored in context
+
+        # canonical document location
         docs.push n.host ? (n.hostpath + (n.path ? (n.path[-1]=='/' ? (n.path + 'index') : n.path) : '')).R : n
-        # time index
-        if timestamp = graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value     # timestamp query
-          puts "timestamp #{timestamp}"
-          docs.push ['/' + timestamp.gsub(/[-T]/,'/').sub(':','/').sub(':','.').sub(/\+?(00.00|Z)$/,''), # hour-dir location
-                     %w{host path query fragment}.map{|a|n.send(a).yield_self{|p|p&&p.split(/[\W_]/)}}]. # URI slugs
-                      flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.').R                   # slugskip
+
+        # temporal index location
+        if timestamp = graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value       # find timestamp
+          docs.push ['/' + timestamp.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), # build hour-dir path
+                     %w{host path query fragment}.map{|a|n.send(a).yield_self{|p|p && p.split(/[\W_]/)}}]. # tokenize slugs
+                      flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.').R                     # apply slug skiplist
         end
       end
 
@@ -25,7 +26,7 @@ class WebResource
         unless doc.exist?
           doc.dir.mkdir
           RDF::Writer.for(:turtle).open(doc.relPath + '.ttl'){|f|f << graph}
-          print '🐢'
+          print "\n🐢 \e[32;1m" + doc.uri + "\e[0m "
         end
       }
     }
