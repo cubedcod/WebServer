@@ -304,7 +304,7 @@ class WebResource
       options ||= {}
 
       # cache hits
-      if CacheExt.member? ext.downcase
+      if (CacheExt - %w(html)).member? ext.downcase                                                   # request HTML updates
         return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE')     # client has static-data, return 304 response
         return cachePath.fileResponse if cachePath.file?                                              # server has static-data, return data
       end
