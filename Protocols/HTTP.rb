@@ -519,12 +519,12 @@ class WebResource
     end
 
     def gunkHost
-      return false if ENV.has_key?('BARNDOOR') || env[:query]['allow'] == ServerKey || AllowedHosts.has_key?(host)
-      env.has_key? 'HTTP_GUNK'
+      return false if ENV.has_key?('BARNDOOR') || (env && env[:query]['allow'] == ServerKey) || AllowedHosts.has_key?(host)
+      env && env.has_key?('HTTP_GUNK')
     end
 
     def gunkURI
-      return false if ENV.has_key?('BARNDOOR') || env[:query]['allow'] == ServerKey
+      return false if ENV.has_key?('BARNDOOR') || (env && env[:query]['allow'] == ServerKey)
       ('/' + hostname + (env && env['REQUEST_URI'] || path || '/')).match? Gunk
     end
 
