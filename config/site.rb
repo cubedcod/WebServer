@@ -185,7 +185,9 @@ secure.brightcove.com
     # Facebook
     %w(facebook.com business.facebook.com
      m.facebook.com      www.facebook.com
-).map{|host| Allow host } if ENV.has_key?('FACEBOOK')
+).map{|host|
+      Allow host
+    } if ENV.has_key?('FACEBOOK')
 
     %w(l.facebook.com lm.facebook.com).map{|host|
       GET host, GotoU}
@@ -202,7 +204,8 @@ secure.brightcove.com
 
     # GitHub
     GET 'github.com'
-    GET 'raw.githubusercontent.com'
+    %w(avatars0 avatars1 avatars2 raw).map{|h|
+      GET h + '.githubusercontent.com', NoJS }
 
     # GitLab
     GET 'assets.gitlab-static.net', Fetch
