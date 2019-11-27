@@ -6,7 +6,7 @@ class WebResource
     include URIs
 
     AllowedHosts = {}
-    CookieHost = {}
+    CookieHosts = {}
     HostGET = {}
     HostPOST = {}
     LocalArgs = %w(allow view sort UX)
@@ -43,7 +43,7 @@ class WebResource
     end
 
     def allowCookies?
-      @cookies || AllowedHosts.has_key?(host) || CookieHost.has_key?(host) || CookieHosts.match?(host)
+      @cookies || AllowedHosts.has_key?(host) || CookieHosts.has_key?(host) || CookieHost.match?(host)
     end
 
     def allowedOrigin
@@ -160,7 +160,7 @@ class WebResource
     def CDN?; host.match? CDNhost end
 
     def self.Cookies host
-      CookieHost[host] = true
+      CookieHosts[host] = true
     end
 
     def dateDir
