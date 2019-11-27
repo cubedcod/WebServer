@@ -804,11 +804,11 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
       default                                                 # HTML via default
     end
 
-    def upstreamUI;  env[:UX] = true; self end
+    def upstreamUI; env[:UX] = true; self end
     def upstreamUI?
-      env.has_key?(:UX)  ||      # per-request setting
-      ENV.has_key?('UX') ||      # global setting
-      env[:query].has_key?('UX') # query parameter
+      env.has_key?(:UX)  ||      # request environment
+      ENV.has_key?('UX') ||      # global environment
+      env[:query].has_key?('UX') # URL parameter
     end
 
     def verbose?; ENV.has_key? 'VERBOSE' end

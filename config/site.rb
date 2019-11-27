@@ -383,6 +383,10 @@ firefox.settings.services.mozilla.com
     # Patriot Ledger
     GET 'www.patriotledger.com', -> r {NoGunk[r.env[:query].has_key?('template') ? r.desktopUI : r]}
 
+    #rarbg
+    Allow 'rarbg.to'
+    GET 'rarbg.to', -> r {r.desktopUI.fetch}
+
     # Reddit
     %w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h| Allow h }
     %w(gateway gql oauth www).map{|h| Allow h + '.reddit.com' }
