@@ -52,6 +52,7 @@ class WebResource
   module HTTP
 
     CDNhost = /\.(amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|github|googleapis|netdna.*)\.(com|io|net)$/
+    CookieHosts = /\.bandcamp\.com$/
     DesktopUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
 
     Resizer = -> r {
@@ -383,7 +384,7 @@ firefox.settings.services.mozilla.com
     # Patriot Ledger
     GET 'www.patriotledger.com', -> r {NoGunk[r.env[:query].has_key?('template') ? r.desktopUI : r]}
 
-    #rarbg
+    #Rarbg
     Allow 'rarbg.to'
     GET 'rarbg.to', -> r {r.desktopUI.fetch}
 

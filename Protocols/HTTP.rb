@@ -43,7 +43,7 @@ class WebResource
     end
 
     def allowCookies?
-      @cookies || AllowedHosts.has_key?(host) || CookieHost.has_key?(host)
+      @cookies || AllowedHosts.has_key?(host) || CookieHost.has_key?(host) || CookieHosts.match?(host)
     end
 
     def allowedOrigin
