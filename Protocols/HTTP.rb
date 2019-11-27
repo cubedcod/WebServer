@@ -486,7 +486,7 @@ class WebResource
       elsif handler = HostGET[host] # host handler
         handler[self]
       elsif self.CDN?               # content-pool handler
-        if ENV.has_key? 'BARNDOOR'
+        if ENV.has_key?('BARNDOOR') || env[:query]['allow'] == ServerKey
           fetch
         else
           extension = ext.downcase
