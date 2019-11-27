@@ -66,7 +66,7 @@ class WebResource
 
     # ABC
     GET 'abcnews.go.com'
-    GET 's.abcnews.com'
+    GET 's.abcnews.com', NoJS
 
     # ACM
     Cookies 'dl.acm.org'
