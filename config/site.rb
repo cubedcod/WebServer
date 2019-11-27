@@ -292,6 +292,9 @@ pikdo.net piknu.com publicinsta.com www.pictame.com
 zoopps.com
 ).map{|host| GET host, IG1}
 
+    # JWPlayer
+    GET 'ssl.p.jwpcdn.com'
+
     # Mail.ru
     GET 'cloud.mail.ru'
     GET 'img.imgsmail.ru'
