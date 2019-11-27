@@ -33,7 +33,7 @@ body {font-family: sans-serif; margin: 2.1em}
 body, .post, a.head, td.k a, td.v {background-color: #000; color: #fff}
 h1,h2,h3,h4,h5,h6,p,pre {margin: 0}
 img, video {max-width: 100%}
-p, li, blockquote {max-width: 86ex; border-width: 0 0 1px 0; border-style: dotted; border-color: #888; border-radius: 0}
+p, li, blockquote {max-width: 86ex}
 pre {white-space: pre-wrap}
 table, div, li, svg {display: inline-block}
 td.k {max-width: 28ex; overflow: hidden; text-align: right}

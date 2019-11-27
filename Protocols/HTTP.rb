@@ -13,16 +13,14 @@ class WebResource
     Servers = {}
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
 
-    # handlers
+    # base HTTP methods
     Methods = {
       'GET'     => :GETresource,
       'HEAD'    => :HEAD,
       'OPTIONS' => :OPTIONS,
       'POST'    => :POSTresource}
 
-    R204 = [204, {}, []]
-    R304 = [304, {}, []]
-
+    # handler lambdas
     Desktop = -> r {NoGunk[r.desktopUI]}
     Fetch = -> r {r.fetch}
     GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : NoGunk[r]}
@@ -35,6 +33,10 @@ class WebResource
     NoJS    = -> r {r.ext=='js' ? r.deny : NoGunk[r]} # TODO inspect response content-type
     NoQuery = -> r {r.qs.empty? ? r.fetch : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
     RootIndex = -> r { r.chrono_sort if r.parts.size == 1; r.path == '/' ? r.cachedGraph : NoGunk[r]}
+
+    # canned responses
+    R204 = [204, {}, []]
+    R304 = [304, {}, []]
 
     def self.Allow host
       AllowedHosts[host] = true
