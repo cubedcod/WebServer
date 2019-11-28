@@ -141,8 +141,7 @@ class WebResource
                 (env['HTTP_REFERER'] ? ((env['HTTP_REFERER'].R.host||'') + ' → ') : '') + "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + resource.qs + "\e[0m "
         end
 
-        # response
-        [status, head, body]}
+        [status, head, body]} # response
     rescue Exception => e
       uri = 'https://' + env['SERVER_NAME'] + (env['REQUEST_URI']||'')
       msg = [uri, e.class, e.message].join " "
@@ -604,7 +603,14 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     end
 
     def localLog
-      `tail -n 10000 ../web.log | grep '.js '`.each_line{|l| puts l }
+      hosts = {}
+      `grep '.js ' ../web.log`.each_line{|line|
+        line.chomp.split(' ').map{|token|
+          if token.match? /^https?:/
+            re = token.R
+            hosts[re.host] ||= {'uri' => re.uri, Title => [re.uri]}
+          end}}
+      [200, {'Content-Type' => 'text/html'}, [htmlDocument(hosts)]]
     end
 
     def nodeResponse fs_base=self

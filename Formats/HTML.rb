@@ -413,13 +413,11 @@ class WebResource
               _name == :RDF ? (value nil, _t, env) : (tree _t, env, _name)}]}.update(css ? css : {})]
     end
 
-    # Graph -> Hash
+    # RDF::Graph -> URI-indexed Hash
     def treeFromGraph
       return {} unless env[:repository]
-
       tree = {}
       head = env && env[:query] && env[:query].has_key?('head')
-
       env[:repository].each_triple{|s,p,o| s = s.to_s;  p = p.to_s
         unless p == 'http://www.w3.org/1999/xhtml/vocab#role' || (head && p == Content)
           o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object URI or literal
