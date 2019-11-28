@@ -567,6 +567,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
     Allow 'www.youtube.com'
     GET 'm.youtube.com'
     GET 's.ytimg.com', Desktop
+    GET 'www.youtube-nocookie.com', Desktop
     GET 'www.youtube.com', -> r {
       fn = r.parts[0]
       if %w{attribution_link redirect}.member? fn
