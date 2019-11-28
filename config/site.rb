@@ -197,6 +197,11 @@ secure.brightcove.com
     # Forbes
     GET 'thumbor.forbes.com', -> r {[301, {'Location' => URI.unescape(r.parts[-1])}, []]}
 
+    # FoxNews
+    if ENV.has_key? 'FOX'
+      #Cookies 'video.foxnews.com'
+    end
+
     # Gfycat
     GET 'gfycat.com'
     GET 'thumbs.gfycat.com'
