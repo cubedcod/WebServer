@@ -328,7 +328,7 @@ files.mastodon.social
       GET host, Fetch}
 
     # Medium
-    GET 'medium.com', -> r {r.env[:query].has_key?('redirecturl') ? [301, {'Location' => r.env[:query]['redirecturl']}, []] : r.fetch}
+    Allow 'medium.com'
 
     # Meetup
     Allow 'www.meetup.com'
@@ -341,8 +341,7 @@ files.mastodon.social
     GET 'www.msn.com'
 
     # Mixcloud
-    Allow 'm.mixcloud.com'
-    Allow 'www.mixcloud.com'
+    %w(m www).map{|h| GET h + '.mixcloud.com' }
 
     # Mozilla
     %w(            addons.mozilla.org
