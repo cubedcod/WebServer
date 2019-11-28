@@ -183,11 +183,8 @@ secure.brightcove.com
       GET a + '.espncdn.com' }
 
     # Facebook
-    %w(facebook.com business.facebook.com
-     m.facebook.com      www.facebook.com
-).map{|host|
-      Allow host
-    } if ENV.has_key?('FACEBOOK')
+    %w(facebook.com business.facebook.com edge-chat.facebook.com m.facebook.com static.xx.fbcdn.net www.facebook.com).map{|host|
+      Allow host } if ENV.has_key?('FACEBOOK')
 
     %w(l.facebook.com lm.facebook.com).map{|host|
       GET host, GotoU}
@@ -454,7 +451,7 @@ firefox.settings.services.mozilla.com
     # Spotify
     %w(api apresolve embed guc-dealer guc-spclient open spclient.wg).map{|h|
       host = h + '.spotify.com'
-      Allow host; GET host, Desktop}
+      Allow host; GET host, Desktop} if ENV.has_key? 'SPOTIFY'
 
     # StarTribune
     Allow 'comments.startribune.com'

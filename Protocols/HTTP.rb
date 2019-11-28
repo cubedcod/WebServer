@@ -486,7 +486,7 @@ class WebResource
       elsif handler = HostGET[host] # host handler
         handler[self]
       elsif self.CDN?               # content-pool handler
-        if ENV.has_key?('BARNDOOR') || env[:query]['allow'] == ServerKey
+        if ENV.has_key?('BARNDOOR') || AllowedHosts.has_key?(host) || env[:query]['allow'] == ServerKey
           fetch
         else
           extension = ext.downcase
@@ -591,7 +591,10 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
       self                                     # node w/ Repository reference
     end
 
-    def local?; LocalAddr.member?(env['SERVER_NAME']) || ENV['SERVER_NAME'] == env['SERVER_NAME'] end
+    def local?
+      name = hostname
+      LocalAddr.member?(name) || ENV['SERVER_NAME'] == name
+    end
 
     def localGraph
       env[:links][:turtle] = (path[-1] == '/' ? 'index' : name) + '.ttl'
