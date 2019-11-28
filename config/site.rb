@@ -441,8 +441,6 @@ firefox.settings.services.mozilla.com
 
     # Soundcloud
     GET 'gate.sc', GotoURL
-    GET 'soundcloud.com', -> r {r.path=='/' ? RootIndex[r] : Desktop[r]}
-    GET 'w.soundcloud.com', Desktop
     %w(api-auth.soundcloud.com
        api-mobi.soundcloud.com
      api-mobile.soundcloud.com
@@ -452,7 +450,8 @@ firefox.settings.services.mozilla.com
                 soundcloud.com
          secure.soundcloud.com
               w.soundcloud.com
-).map{|h|Allow h}
+).map{|h| Allow h; GET h, Desktop}
+    GET 'soundcloud.com', -> r {r.path=='/' ? RootIndex[r] : Desktop[r]}
 
     # Spotify
     %w(api apresolve embed guc-dealer guc-spclient open spclient.wg).map{|h|
