@@ -183,8 +183,10 @@ secure.brightcove.com
       GET a + '.espncdn.com' }
 
     # Facebook
-    %w(facebook.com business.facebook.com edge-chat.facebook.com m.facebook.com static.xx.fbcdn.net www.facebook.com).map{|host|
-      Allow host } if ENV.has_key?('FACEBOOK')
+    if ENV.has_key?('FACEBOOK')
+      GET 'www.facebook.com', Fetch
+      %w(facebook.com business.facebook.com edge-chat.facebook.com m.facebook.com static.xx.fbcdn.net www.facebook.com).map{|host| Allow host }
+    end
 
     %w(l.facebook.com lm.facebook.com).map{|host|
       GET host, GotoU}
