@@ -411,7 +411,7 @@ class WebResource
       when /410/ # Gone
         print "\n❌ " + uri + ' '
         options[:intermediate] ? self : cachedGraph
-      when /500/ # upstream error
+      when /(500|999)/ # upstream error
         [500, (headers e.io.meta), [e.io.read]]
       when /503/
         @cookies = true

@@ -298,6 +298,10 @@ zoopps.com
     # JWPlayer
     GET 'ssl.p.jwpcdn.com'
 
+    # Linkedin
+    GET 'media.licdn.com', NoJS
+    GET 'www.linkedin.com', NoJS
+
     # Mail.ru
     GET 'cloud.mail.ru'
     GET 'img.imgsmail.ru'
