@@ -392,6 +392,7 @@ class WebResource
         [300, (headers e.io.meta), [e.io.read]]
       when /30[12378]/ # Relocated
         dest = e.io.meta['location'].R
+        puts "REDIR #{uri} -> #{dest}"
         if (dest.path || '/') == (path || '/') && dest.host == host && dest.scheme != scheme # directed to fallback scheme
           raise
         else
