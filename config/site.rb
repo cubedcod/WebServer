@@ -478,14 +478,11 @@ firefox.settings.services.mozilla.com
     # Twitter
     Allow 'api.twitter.com'
     Allow 'proxsee.pscp.tv'
-
     GotoTwitter = -> r {[301,{'Location' => 'https://twitter.com' + r.path },[]]}
     GET 'mobile.twitter.com', GotoTwitter
     GET 'tweettunnel.com', GotoTwitter
     GET 'www.twitter.com', GotoTwitter
-
     GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : r.fetch}
-
     GET 'twitter.com', -> r {
       r.desktopUA
       if !r.path || r.path == '/'
@@ -570,6 +567,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
     GET 'www.yelp.com', -> r {r.env[:query]['redirect_url'] ? [301, {'Location' => r.env[:query]['redirect_url']},[]] : r.fetch}
 
     # YouTube
+    Allow 'm.youtube.com'
     Allow 'www.youtube.com'
     GET 'm.youtube.com'
     GET 's.ytimg.com', Desktop
@@ -585,7 +583,6 @@ media-mbst-pub-ue1.s3.amazonaws.com
       else
         r.deny
       end}
-
     POST 'www.youtube.com', -> r {
       if r.parts.member? 'stats'
         r.denyPOST
