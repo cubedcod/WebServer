@@ -222,12 +222,11 @@ secure.brightcove.com
     GET 'ajax.googleapis.com', Fetch
     GET 'connectivitycheck.gstatic.com', -> _ {R204}
     GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
-
     (1..4).map{|i| GET "#{i}.bp.blogspot.com", NoJS }
     (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com", NoJS }
     %w(books docs drive images scholar).map{|host| GET host+'.google.com' }
-
     Cookies 'www.google.com'
+    GET 'www.googleapis.com', -> r {%w(youtube).member?(r.parts[0]) ? r.fetch : r.deny}
     GET 'www.google.com', -> r {
       case r.path
       when /^.(complete|recaptcha)/
@@ -569,6 +568,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
     # YouTube
     Allow 'm.youtube.com'
     Allow 'www.youtube.com'
+    GET 'youtube.com'
     GET 'm.youtube.com', -> r {%w(feed watch).member?(r.parts[0]) ? r.fetch : r.deny}
     GET 's.ytimg.com', Desktop; GET 'www.youtube-nocookie.com', Desktop
     GET 'www.youtube.com', -> r {
@@ -578,7 +578,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
       elsif !fn || r.parts[-1] == 'subscriptions' || r.env[:query]['allow'] == ServerKey
         r.fetch
       elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results signin user watch watch_videos yts).member? fn
-        Desktop[r]
+        r.desktopUI.fetch
       else
         r.deny
       end}
