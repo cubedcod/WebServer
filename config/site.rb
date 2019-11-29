@@ -569,7 +569,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
     # YouTube
     Allow 'm.youtube.com'
     Allow 'www.youtube.com'
-    GET 'm.youtube.com', -> r {%w(feed).member?(r.parts[0]) ? r.fetch : r.deny}
+    GET 'm.youtube.com', -> r {%w(feed watch).member?(r.parts[0]) ? r.fetch : r.deny}
     GET 's.ytimg.com', Desktop; GET 'www.youtube-nocookie.com', Desktop
     GET 'www.youtube.com', -> r {
       fn = r.parts[0]

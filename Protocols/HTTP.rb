@@ -319,6 +319,7 @@ class WebResource
       # fetch, HTTPS with HTTP fallback
       primary.fetchHTTP options
     rescue Exception => e
+      #puts e.class.to_s + ' ' + e.message + ' ' + primary.uri
       case e.class.to_s
       when 'Errno::ECONNREFUSED'
         fallback.fetchHTTP options
