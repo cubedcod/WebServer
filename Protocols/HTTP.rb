@@ -306,7 +306,6 @@ class WebResource
       # fetch, HTTPS with HTTP fallback
       primary.fetchHTTP options
     rescue Exception => e
-      #puts e.class.to_s + ' ' + e.message + ' ' + primary.uri
       case e.class.to_s
       when 'Errno::ECONNREFUSED'
         fallback.fetchHTTP options
@@ -387,11 +386,7 @@ class WebResource
         [500, (headers e.io.meta), [e.io.read]]
       when /503/
         @cookies = true
-        hdrs = e.io.meta
-        head = headers hdrs
-        body = e.io.read
-        puts 503 ; HTTP.print_header hdrs; puts '^^^^vvvv' ;  HTTP.print_header head ; puts body
-        [200, head, [body]]
+        [503, (headers e.io.meta), [e.io.read]]
       else
         raise
       end
@@ -478,7 +473,6 @@ class WebResource
     def graphResponse
       return notfound if !env.has_key?(:repository) || env[:repository].empty?
       format = selectFormat
-      puts :graphresp, uri, format
       env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
       env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
       env[:resp].update({'Link' => env[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !env[:links] || env[:links].empty?
