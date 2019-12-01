@@ -219,28 +219,40 @@ secure.brightcove.com
     Allow 'ws.gitter.im'
 
     # Google
-    GET 'ajax.googleapis.com', Fetch
-    GET 'connectivitycheck.gstatic.com', -> _ {R204}
-    GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
-    (1..4).map{|i| GET "#{i}.bp.blogspot.com", NoJS }
-    (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com", NoJS }
-    %w(books docs drive images scholar).map{|host| GET host+'.google.com' }
-    Cookies 'www.google.com'
-    GET 'www.googleapis.com', -> r {%w(youtube).member?(r.parts[0]) ? r.fetch : r.deny}
-    GET 'www.google.com', -> r {
-      case r.path
-      when /^.(complete|recaptcha)/
-        ENV.has_key?('GOOGLE') ? r.fetch : r.deny
-      when /^.gen(erate)?_?204/
-        R204
-      when '/search'
-        q = r.env[:query]['q']
-        q && q.match?(/^(https?:|l(ocalhost)?(:8000)?)\//) && [301,{'Location'=>q.sub(/^l/,'http://l')},[]] || r.fetch
-      when '/url'
-        GotoURL[r]
-      else
-        NoGunk[r]
-      end}
+    unless ENV.has_key? 'DEGOOGLE'
+      Cookies 'www.google.com'
+      GET 'ajax.googleapis.com', Fetch
+      GET 'connectivitycheck.gstatic.com', -> _ {R204}
+      GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
+      GET 'www.googleapis.com', -> r {%w(youtube).member?(r.parts[0]) ? r.fetch : r.deny}
+
+      (1..4).map{|i|
+        GET "#{i}.bp.blogspot.com" }
+
+      (1..4).map{|i|
+        Allow "clients#{i}.google.com" }
+
+      (0..3).map{|i|
+        GET "encrypted-tbn#{i}.gstatic.com" }
+
+      %w(books docs drive images scholar).map{|h|
+        GET h + '.google.com' }
+
+      GET 'www.google.com', -> r {
+        case r.path
+        when /^.(complete|recaptcha)/
+          ENV.has_key?('GOOGLE') ? r.fetch : r.deny
+        when /^.gen(erate)?_?204/
+          R204
+        when '/search'
+          q = r.env[:query]['q']
+          q && q.match?(/^(https?:|l(ocalhost)?(:8000)?)\//) && [301,{'Location'=>q.sub(/^l/,'http://l')},[]] || r.fetch
+        when '/url'
+          GotoURL[r]
+        else
+          NoGunk[r]
+        end}
+    end
 
     # Guardian
     GET 'i.guim.co.uk'
@@ -396,9 +408,15 @@ firefox.settings.services.mozilla.com
 
     # Reddit
     %w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h| Allow h }
-    %w(gateway gql oauth www).map{|h| Allow h + '.reddit.com' }
-    %w(old.reddit.com www.redditmedia.com).map{|host| GET host, Desktop }
-    GET 'reddit.com', -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path + r.qs}, []]}
+    %w(gateway gql oauth www).map{|h|
+      Allow h + '.reddit.com' }
+
+    %w(www.redditmedia.com).map{|host|
+      GET host, Desktop }
+
+    %w(np.reddit.com old.reddit.com reddit.com).map{|host|
+      GET host, -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path + r.qs}, []]}}
+
     GET 'www.reddit.com', -> r {
       if r.path == '/'                                             # subscriptions
         r = ('/r/'+'com/reddit/www/r/*/.sub*'.R.glob.map(&:dir).map(&:basename).join('+')+'/new').R r.env
