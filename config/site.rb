@@ -100,6 +100,9 @@ s.click.aliexpress.com
     %w{amp-api.music audio-ssl.itunes itunes js-cdn.music music www xp}.map{|host|
       Allow host + '.apple.com' } if ENV.has_key? 'APPLE'
 
+    # Appspot
+    %w(xmountwashington).map{|h| Allow h + '.appspot.com'}
+
     # Anvato
     Allow 'tkx.apis.anvato.net'
 
