@@ -428,10 +428,10 @@ class WebResource
        end).flatten.compact.uniq.select(&:exist?).map{|n|n.bindEnv env}
     end
 
-    # allow rewrite if explicit-allow, untyped, Atom/RSS feed, or HTML and not using upstream UI
+    # allow transform if explicitly allowed, Atom/RSS, HTML and local UI
     def fixedFormat? format = nil
       return true if upstreamUI?
-      return false if env[:transformable] || !format || format.match?(/\/(atom|html|rss|xml)/i)
+      return false if env[:transformable] || !format || format.match?(/atom|html|rss|xml/i)
       return true
     end
 
