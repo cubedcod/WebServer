@@ -590,16 +590,18 @@ media-mbst-pub-ue1.s3.amazonaws.com
     Allow 'm.youtube.com'
     Allow 'www.youtube.com'
     GET 'youtube.com'
-    GET 'm.youtube.com', -> r {%w(feed watch).member?(r.parts[0]) ? r.fetch : r.deny}
+    GET 'm.youtube.com', -> r {%w(feed watch watch_comment yts).member?(r.parts[0]) ? r.upstreamUI.fetch : r.deny}
     GET 's.ytimg.com', Desktop; GET 'www.youtube-nocookie.com', Desktop
     GET 'www.youtube.com', -> r {
       fn = r.parts[0]
       if %w{attribution_link redirect}.member? fn
-        [301, {'Location' =>  r.env[:query]['q'] || r.env[:query]['u']},[]]
-      elsif !fn || r.parts[-1] == 'subscriptions' || r.env[:query]['allow'] == ServerKey
+        [301, {'Location' =>  r.env[:query]['q'] || r.env[:query]['u']}, []]
+      elsif !fn
+        [301, {'Location' => '/feed/subscriptions'}, []]
+      elsif r.env[:query]['allow'] == ServerKey
         r.fetch
       elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results signin user watch watch_videos yts).member? fn
-        r.desktopUI.fetch
+        r.upstreamUI.fetch
       else
         r.deny
       end}
