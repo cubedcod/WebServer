@@ -76,19 +76,8 @@ class WebResource
       resource = ('//' + env['SERVER_NAME'] + path).R env.merge( # instantiate request w/ blank response fields
        {resp:{}, links:{}, query: parseQs(env['QUERY_STRING'])}) # parse query
       resource.send(m).yield_self{|status, head, body|           # dispatch request
-
-        verbose = resource.verbose?                              # log request
         ext = resource.ext.downcase
         mime = head['Content-Type'] || ''
-
-        if verbose
-          print "\n"
-          puts env['REQUEST_METHOD'] + ' REQUEST'
-          HTTP.print_header env
-          puts env['REQUEST_METHOD'] + ' RESPONSE ' + status.to_s
-          HTTP.print_header head
-        end
-
         # highlight host on first encounter
         unless (Servers.has_key? env['SERVER_NAME']) || resource.env[:deny]
           Servers[env['SERVER_NAME']] = true
@@ -101,7 +90,6 @@ class WebResource
           else
             referer_host = env['HTTP_REFERER'] && env['HTTP_REFERER'].R.host
             print "\n" + (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "🛑 \e[31;1m") + (referer_host ? ("\e[7m" + referer_host + "\e[0m\e[31;1m → ") : '') + (referer_host == resource.host ? '' : resource.host) + "\e[7m" + resource.path + "\e[0m\e[31m" + resource.qs + "\e[0m "
-            resource.env[:query]&.map{|k,v| print "\n\e[7m#{k}\e[0m\t#{v}"} if verbose
           end
 
         # OPTIONS
@@ -136,7 +124,7 @@ class WebResource
         elsif ext == 'ttl' || mime == 'text/turtle; charset=utf-8'
           print '🐢'                                             # turtle
 
-        else # generic logging
+        else # generic logger
           print "\n\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : (env['REQUEST_METHOD']+' ')) + (status == 200 ? '' : (status.to_s+' ')) +
                 (env['HTTP_REFERER'] ? ((env['HTTP_REFERER'].R.host||'') + ' → ') : '') + "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + resource.qs + "\e[0m "
         end
@@ -260,7 +248,6 @@ class WebResource
     def denyPOST
       env[:deny] = true
       hd = headers
-      HTTP.print_body hd, HTTP.decompress(hd, env['rack.input'].read.force_encoding('UTF-8')) if verbose?
       [202, {'Access-Control-Allow-Credentials' => 'true',
              'Access-Control-Allow-Origin' => allowedOrigin}, []]
     end
@@ -304,8 +291,8 @@ class WebResource
     def fetch options=nil
       options ||= {}
 
-      # cache hits
-      if (CacheExt - %w(html)).member? ext.downcase                                                   # request HTML updates
+      # cache hits for static media
+      if (CacheExt - %w(html xml)).member? ext.downcase
         return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE')     # client has static-data, return 304 response
         return cachePath.fileResponse if cachePath.file?                                              # server has static-data, return data
       end
@@ -350,41 +337,25 @@ class WebResource
 
     def fetchHTTP options={}
       open(uri, headers.merge({redirect: false})) do |response| print '🌍🌎🌏🌐'[rand 4]
-        h = response.meta; HTTP.print_header h if verbose?                # response header
-
+        h = response.meta                                                 # upstream metadata
         if response.status.to_s.match? /206/                              # partial body
           [206, h, [response.read]]                                       # return part
         else
-
-          # body
           body = HTTP.decompress h, response.read                         # decompress body
-
-          # format
-          format = h['content-type'].split(/;/)[0] if h['content-type']   # HTTPheader explicit format
-          format ||= (xt = ext.to_sym; puts "WARNING no MIME for #{uri}"  # extension -> format map
+          format = h['content-type'].split(/;/)[0] if h['content-type']   # HTTP header -> format
+          format ||= (xt = ext.to_sym; puts "WARNING no MIME for #{uri}"  # extension -> format
            RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
-
-          # read body
-          reader = RDF::Reader.for content_type: format
-          reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|
+          reader = RDF::Reader.for content_type: format                   # select reader
+          reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|  # read RDF
             (env[:repository] ||= RDF::Repository.new) << _ } if reader
-
-          cachePath(format).write body if CacheExt.member? ext.downcase   # cache update
-
+          cachePath(format).write body if CacheExt.member? ext.downcase   # cache static-data
           return self if options[:intermediate]                           # intermediate fetch - no direct HTTP caller
-
-          # upstream metadata
-          %w(Access-Control-Allow-Origin
-             Access-Control-Allow-Credentials Content-Type ETag).map{|k|
-            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}
-          env[:resp]['Set-Cookie'] = h['set-cookie'] if h['set-cookie'] && allowCookies?
-
-          # local metadata
-          indexRDF
+          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
+            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}             # upstream metadata for downstream
           env[:resp]['Content-Length'] = body.bytesize.to_s
-
-          # HTTP response
-          (fixedFormat? format) ? [200,env[:resp],[body]] : graphResponse
+          env[:resp]['Set-Cookie'] = h['set-cookie'] if h['set-cookie'] && allowCookies?
+          indexRDF                                                        # cache metadata
+          (fixedFormat? format) ? [200,env[:resp],[body]] : graphResponse # response for HTTP caller
         end
       end
     rescue Exception => e
@@ -507,6 +478,7 @@ class WebResource
     def graphResponse
       return notfound if !env.has_key?(:repository) || env[:repository].empty?
       format = selectFormat
+      puts :graphresp, uri, format
       env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
       env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
       env[:resp].update({'Link' => env[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !env[:links] || env[:links].empty?
@@ -690,11 +662,6 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
       head = headers
       body = env['rack.input'].read
 
-      if verbose?
-        puts "POST BODY:"
-        HTTP.print_body head, body
-      end
-
       # origin response
       r = HTTParty.post url, :headers => head, :body => body
       code = r.code
@@ -703,14 +670,6 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
       head.delete 'connection'
       head.delete 'transfer-encoding'
 
-      if verbose?
-        puts "RESPONSE HEAD:"
-        HTTP.print_header head
-        if body
-          puts "RESPONSE BODY:"
-          HTTP.print_body head, (HTTP.decompress head, body)
-        end
-      end
       [code, head, [body]]
     end
 
@@ -821,8 +780,6 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
       ENV.has_key?('UX') ||      # global environment
       env[:query].has_key?('UX') # URL parameter
     end
-
-    def verbose?; ENV.has_key? 'VERBOSE' end
 
   end
   include HTTP
