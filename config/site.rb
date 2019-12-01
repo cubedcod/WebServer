@@ -232,8 +232,7 @@ secure.brightcove.com
       (1..4).map{|i|
         GET "#{i}.bp.blogspot.com" }
 
-      (1..4).map{|i|
-        Allow "clients#{i}.google.com" }
+      (1..4).map{|i| Allow "clients#{i}.google.com" } if ENV.has_key? 'GOOGLE'
 
       (0..3).map{|i|
         GET "encrypted-tbn#{i}.gstatic.com" }
@@ -590,7 +589,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
     Cookies 'm.youtube.com'
     Allow 'www.youtube.com'
     GET 'youtube.com', -> r {[301, {'Location' =>  'https://www.youtube.com' + r.path + r.qs}, []]}
-    GET 'm.youtube.com', -> r {%w(feed results watch watch_comment yts).member?(r.parts[0]) ? r.upstreamUI.fetch : r.deny}
+    GET 'm.youtube.com', -> r {%w(channel feed results user watch watch_comment yts).member?(r.parts[0]) ? r.upstreamUI.fetch : r.deny}
     GET 's.ytimg.com', Desktop
     GET 'www.youtube-nocookie.com', Desktop
     GET 'www.youtube.com', -> r {
