@@ -587,11 +587,12 @@ media-mbst-pub-ue1.s3.amazonaws.com
     GET 'www.yelp.com', -> r {r.env[:query]['redirect_url'] ? [301, {'Location' => r.env[:query]['redirect_url']},[]] : r.fetch}
 
     # YouTube
-    Allow 'm.youtube.com'
+    Cookies 'm.youtube.com'
     Allow 'www.youtube.com'
-    GET 'youtube.com'
-    GET 'm.youtube.com', -> r {%w(feed watch watch_comment yts).member?(r.parts[0]) ? r.upstreamUI.fetch : r.deny}
-    GET 's.ytimg.com', Desktop; GET 'www.youtube-nocookie.com', Desktop
+    GET 'youtube.com', -> r {[301, {'Location' =>  'https://www.youtube.com' + r.path + r.qs}, []]}
+    GET 'm.youtube.com', -> r {%w(feed results watch watch_comment yts).member?(r.parts[0]) ? r.upstreamUI.fetch : r.deny}
+    GET 's.ytimg.com', Desktop
+    GET 'www.youtube-nocookie.com', Desktop
     GET 'www.youtube.com', -> r {
       fn = r.parts[0]
       if %w{attribution_link redirect}.member? fn
