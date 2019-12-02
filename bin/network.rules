@@ -64,6 +64,7 @@ open_TCP   8080 HTTP
 open_TCP   8081 HTTP
 open_TCP   8082 HTTP
 open_port  8073 SDR
+open_port  8078 SDR
 open_port  8443 SDR
 open_port  8790 SSH
 open_port  8901 SDR
