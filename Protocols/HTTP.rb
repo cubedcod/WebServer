@@ -457,7 +457,13 @@ class WebResource
           fetch
         else
           extension = ext.downcase
-          CacheExt.member?(extension) && extension != 'js' && !gunkURI && fetch || deny
+          if CacheExt.member?(extension) && extension != 'js' && !gunkURI
+            fetch
+          elsif path[-1] == '/'
+            cachedGraph
+          else
+            deny
+          end
         end
       elsif gunkHost || gunkURI     # junk handler
         deny
