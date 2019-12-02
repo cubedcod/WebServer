@@ -229,15 +229,12 @@ secure.brightcove.com
       GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
       GET 'www.googleapis.com', -> r {%w(youtube).member?(r.parts[0]) ? r.fetch : r.deny}
 
-      (1..4).map{|i|
-        GET "#{i}.bp.blogspot.com" }
-
+      (1..4).map{|i| GET "#{i}.bp.blogspot.com" }
       (1..4).map{|i| Allow "clients#{i}.google.com" } if ENV.has_key? 'GOOGLE'
+      (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com" }
+      %w(ssl www).map{|n| GET "#{n}.gstatic.com" }
 
-      (0..3).map{|i|
-        GET "encrypted-tbn#{i}.gstatic.com" }
-
-      %w(books docs drive images scholar).map{|h|
+      %w(books docs drive images news scholar).map{|h|
         GET h + '.google.com' }
 
       GET 'www.google.com', -> r {
@@ -267,20 +264,12 @@ secure.brightcove.com
 
     # Imgur
     Allow 'api.imgur.com'
+    GET 'i.imgur.com', Desktop
+
     %w(imgur.com
-     i.imgur.com
      m.imgur.com
      s.imgur.com
 ).map{|host| GET host}
-
-    Cookies 'imgur.com'
-
-    POST 'imgur.com', -> r {
-      if r.path == '/signin'
-        r.POSTthru
-      else
-        r.denyPOST
-      end}
 
     # Inrupt
     Allow 'dev.inrupt.net'
