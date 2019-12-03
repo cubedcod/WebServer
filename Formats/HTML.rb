@@ -38,9 +38,11 @@ image-src
         div.add_child "<img src=\"#{div['data-src']}\">"}
 
       html.traverse{|e|
-
-        # link-identifiers
-        e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) if e['href'] && !e['id']
+        # links
+        if e['href']
+          e.add_child "<span class='uri'>#{CGI.escapeHTML e['href'].sub(/^https?:..(www.)?/,'')[0..41]}</span>"
+          e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id']
+        end
 
         # @src normalization
         e.attribute_nodes.map{|a|

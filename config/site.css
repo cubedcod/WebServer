@@ -35,6 +35,7 @@ h1,h2,h3,h4,h5,h6,p,pre {margin: 0}
 img, video {max-width: 100%}
 p, li, blockquote {max-width: 86ex}
 pre {white-space: pre-wrap}
+span.uri {font-size: 0.8em; color: #fff; font-weight: normal; border: 1px dotted #888}
 table, div, li, svg {display: inline-block}
 td.k {max-width: 28ex; overflow: hidden; text-align: right}
 tr[name="title"] > td.v {max-width: 86ex; overflow: hidden}
