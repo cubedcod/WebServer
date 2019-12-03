@@ -381,7 +381,13 @@ class WebResource
         print "\n🚫403 " + uri + ' '
         options[:intermediate] ? self : cachedGraph
       when /404/ # Not Found
-        options[:intermediate] ? self : cachedGraph
+        if options[:intermediate]
+          self
+        elsif upstreamUI?
+          [404, (headers e.io.meta), [e.io.read]]
+        else
+          cachedGraph
+        end
       when /410/ # Gone
         print "\n❌ " + uri + ' '
         options[:intermediate] ? self : cachedGraph
