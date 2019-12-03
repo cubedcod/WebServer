@@ -435,11 +435,15 @@ firefox.settings.services.mozilla.com
           [status, head, body]
         elsif page = r.env[:links][:next]
           [302, {'Location' => page}, []]
-        elsif ref = body[0].match(/href="([^"]+after=[^"]+)/)
-          page = ref[1].R
-          [302, {'Location' => 'https://www.reddit.com' + page.path + page.qs}, []]
         else
-          R404
+          refs = []
+          body[0].scan(/href="([^"]+after=[^"]+)/){|l| refs << l[0] }
+          if refs.empty?
+            [status, head, body]
+          else
+            page = refs[-1].R
+            [302, {'Location' => 'https://www.reddit.com' + page.path + page.qs}, []]
+          end
         end
       }}
 
