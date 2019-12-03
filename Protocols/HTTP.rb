@@ -37,6 +37,7 @@ class WebResource
     # canned responses
     R204 = [204, {}, []]
     R304 = [304, {}, []]
+    R404 = [404, {}, []]
 
     def self.Allow host
       AllowedHosts[host] = true
@@ -323,8 +324,6 @@ class WebResource
         fallback.fetchHTTP options
       when 'OpenURI::HTTPError'
         fallback.fetchHTTP options
-      when 'OpenURI::HTTPRedirect'
-        fallback.fetchHTTP options
       when 'RuntimeError'
         fallback.fetchHTTP options
       when 'SocketError'
@@ -363,9 +362,9 @@ class WebResource
         [300, (headers e.io.meta), [e.io.read]]
       when /30[12378]/ # Relocated
         dest = e.io.meta['location'].R
-        puts "REDIR #{uri} -> #{dest}"
-        if (dest.path || '/') == (path || '/') && dest.host == host && dest.scheme != scheme # directed to fallback scheme
-          raise
+        if (dest.path || '/') == (path || '/') && dest.host == host && dest.scheme == 'http' && scheme == 'https' # directed to fallback scheme
+          puts "DROPPED DOWNGRADE #{dest}"
+          R404
         else
           [302, {'Location' => dest.uri}, []]
         end

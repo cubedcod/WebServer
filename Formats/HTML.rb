@@ -1,5 +1,6 @@
 # coding: utf-8
 require 'nokogiri'
+#require 'nokogumbo'
 module Webize
   module HTML
 

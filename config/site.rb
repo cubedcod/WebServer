@@ -1,3 +1,4 @@
+require 'pry'
 module Webize
   module HTML
     class Reader
@@ -14,6 +15,7 @@ module Webize
         'news.ycombinator.com' => :HackerNews,
         'twitter.com' => :Twitter,
         'universalhub.com' => :UHub,
+        'old.reddit.com' => :RedditPager,
         'www.aliexpress.com' => :AX,
         'www.apnews.com' => :AP,
         'www.city-data.com' => :CityData,
@@ -394,22 +396,19 @@ firefox.settings.services.mozilla.com
     # Patriot Ledger
     GET 'www.patriotledger.com', -> r {NoGunk[r.env[:query].has_key?('template') ? r.desktopUI : r]}
 
-    #Rarbg
+    # Rarbg
     Allow 'rarbg.to'
     GET 'rarbg.to', -> r {r.desktopUI.fetch}
 
     # Reddit
+    GotoReddit = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path + r.qs}, []]}
+
     %w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h| Allow h }
-    %w(gateway gql oauth www).map{|h|
-      Allow h + '.reddit.com' }
+    %w(gateway gql oauth www).map{|h| Allow h + '.reddit.com' }
+    %w(www.redditmedia.com).map{|host| GET host, Desktop }
+    %w(np.reddit.com reddit.com).map{|host| GET host, GotoReddit }
 
-    %w(www.redditmedia.com).map{|host|
-      GET host, Desktop }
-
-    %w(np.reddit.com old.reddit.com reddit.com).map{|host|
-      GET host, -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path + r.qs}, []]}}
-
-    GET 'www.reddit.com', -> r {
+    Reddit = -> r {
       if r.path == '/'                                             # subscriptions
         r = ('/r/'+'com/reddit/www/r/*/.sub*'.R.glob.map(&:dir).map(&:basename).join('+')+'/new').R r.env
         r.chrono_sort
@@ -417,7 +416,8 @@ firefox.settings.services.mozilla.com
       r.chrono_sort if r.parts[-1] == 'new'                        # chrono sort new posts
       r.desktopUI if r.parts[-1] == 'submit'                       # upstream UI for post submission
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? # upstream-representation preference
-      depth = r.parts.size                                         # container pointers
+      depth = r.parts.size                                         # page pointers
+      r.env[:links][:next] = 'https://old.reddit.com' + r.path + r.qs
       r.env[:links][:up] = if [3,6].member? depth
                              r.dirname
                            elsif 5 == depth
@@ -426,6 +426,22 @@ firefox.settings.services.mozilla.com
                              '/'
                            end
       r.fetch options}
+
+    GET 'www.reddit.com', Reddit
+
+    GET 'old.reddit.com', -> r {
+      r.desktopUI.fetch.yield_self{|status,head,body|
+        if status.to_s.match? /^30/
+          [status, head, body]
+        elsif page = r.env[:links][:next]
+          [302, {'Location' => page}, []]
+        elsif ref = body[0].match(/href="([^"]+after=[^"]+)/)
+          page = ref[1].R
+          [302, {'Location' => 'https://www.reddit.com' + page.path + page.qs}, []]
+        else
+          R404
+        end
+      }}
 
     # ResearchGate
     Cookies 'www.researchgate.net'
@@ -792,6 +808,10 @@ media-mbst-pub-ue1.s3.amazonaws.com
 
   def Reddit tree
     puts tree.keys
+  end
+
+  def RedditPager doc
+    doc.css('[rel="next"]').map{|n| env[:links][:next] = n['href'] }
   end
 
   def Twitter doc
