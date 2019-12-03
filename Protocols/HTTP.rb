@@ -85,7 +85,7 @@ class WebResource
           print "\n➕ \e[1;7;32mhttps://" + env['SERVER_NAME'] + "\e[0m "
         end
 
-        print "\n#{env['HTTP_ACCEPT']} -> #{head['Content-Type'] || head['content-type']}"
+        #print "\n#{env['HTTP_ACCEPT']} -> #{head['Content-Type'] || head['content-type']} "
 
         if resource.env[:deny]
           if %w(css eot otf ttf woff woff2).member?(ext) || path.match?(/204$/)
@@ -344,7 +344,8 @@ class WebResource
           body = HTTP.decompress h, response.read                         # decompress body
           format = h['content-type'].split(/;/)[0] if h['content-type']   # HTTP header -> format
           format ||= (xt = ext.to_sym; puts "WARNING no MIME for #{uri}"  # extension -> format
-           RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
+                      RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
+          format = 'text/html' if format.match?(/xml/) && host.match?(/doriantaylor/)
           reader = RDF::Reader.for content_type: format                   # select reader
           reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|  # read RDF
             (env[:repository] ||= RDF::Repository.new) << _ } if reader
@@ -359,7 +360,7 @@ class WebResource
         end
       end
     rescue Exception => e
-      puts uri, e.class, e.message
+      #puts uri, e.class, e.message
       case e.message
       when /300/ # Multiple Choices
         [300, (headers e.io.meta), [e.io.read]]
