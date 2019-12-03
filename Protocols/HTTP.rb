@@ -13,7 +13,7 @@ class WebResource
     Servers = {}
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
 
-    # base HTTP methods
+    # HTTP method -> resource-instance method
     Methods = {
       'GET'     => :GETresource,
       'HEAD'    => :HEAD,
@@ -84,6 +84,8 @@ class WebResource
           Servers[env['SERVER_NAME']] = true
           print "\n➕ \e[1;7;32mhttps://" + env['SERVER_NAME'] + "\e[0m "
         end
+
+        print "\n#{env['HTTP_ACCEPT']} -> #{head['Content-Type'] || head['content-type']}"
 
         if resource.env[:deny]
           if %w(css eot otf ttf woff woff2).member?(ext) || path.match?(/204$/)
@@ -357,6 +359,7 @@ class WebResource
         end
       end
     rescue Exception => e
+      puts uri, e.class, e.message
       case e.message
       when /300/ # Multiple Choices
         [300, (headers e.io.meta), [e.io.read]]
@@ -422,7 +425,7 @@ class WebResource
        end).flatten.compact.uniq.select(&:exist?).map{|n|n.bindEnv env}
     end
 
-    # allow transform if explicitly allowed, Atom/RSS, HTML and local UI
+    # transform is explicitly allowed or implicit with Atom, RSS or HTML and local UI
     def fixedFormat? format = nil
       return true if upstreamUI?
       return false if env[:transformable] || !format || format.match?(/atom|html|rss|xml/i)

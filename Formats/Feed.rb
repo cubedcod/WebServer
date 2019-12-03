@@ -7,8 +7,8 @@ module Webize
                    aliases: %w(
                    application/atom+xml;q=0.8
                    application/xml;q=0.2
-                   text/xml;q=0.2
-                   )
+                   text/xml;q=0.2)
+
       content_encoding 'utf-8'
 
       reader { Reader }
