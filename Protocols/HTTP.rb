@@ -295,7 +295,7 @@ class WebResource
     def fetch options=nil
       options ||= {}
 
-      # cache hits for static media
+      # cache fetch
       if (CacheExt - %w(html xml)).member?(ext.downcase) && !host.match?(DynamicImgHost)
         return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE')     # client has static-data, return 304 response
         return cachePath.fileResponse if cachePath.file?                                              # server has static-data, return data
@@ -307,7 +307,7 @@ class WebResource
       primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env                                 # primary scheme
       fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env                              # fallback scheme
 
-      # fetch, HTTPS with HTTP fallback
+      # network fetch: HTTPS with HTTP fallback
       primary.fetchHTTP options
     rescue Exception => e
       case e.class.to_s
@@ -453,6 +453,8 @@ class WebResource
           localLog
         elsif path == '/mail'      # inbox redirect
           [302,{'Location' => '/d/*/msg*?head&sort=date&view=table'},[]]
+        elsif parts[0] == 'msg'
+          nodeResponse MID2PATH[URI.unescape parts[1]]
         elsif file?
           fileResponse             # local static-data
         elsif directory? && qs.empty? && (index = (self + 'index.html').R env).exist? && selectFormat == 'text/html'
@@ -605,6 +607,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
         nodes.map{|node|
           options = fs_base == self ? {} : {base_uri: (join node.relFrom fs_base)}
           node.load options}
+        indexRDF if env[:new]
         graphResponse
       end
     end
@@ -766,7 +769,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     end
 
     def selectFormat default='text/html'
-      return 'text/turtle' if ext == 'ttl'
+      #return 'text/turtle' if ext == 'ttl'
       return default unless env && env.has_key?('HTTP_ACCEPT')
       index = {}
       env['HTTP_ACCEPT'].split(/,/).map{|e| # split to (MIME,q) pairs

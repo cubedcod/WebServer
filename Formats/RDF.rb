@@ -25,9 +25,11 @@ class WebResource
       docs.map{|doc|
         turtle = doc.relPath + '.ttl'
         unless File.exist? turtle
-          doc.dir.mkdir
-          RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
-          print "\n🐢 \e[32;1mhttp://localhost:8000" + doc.path + "\e[0m "
+          if dir = doc.dir
+            dir.mkdir
+            RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
+            print "\n🐢 \e[32;1mhttp://localhost:8000" + doc.path + "\e[0m "
+          end
         end
       }
     }

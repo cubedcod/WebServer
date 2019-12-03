@@ -301,6 +301,7 @@ gramho.com
 insee.me instadigg.com www.instagimg.com
 jolygram.com
 pikdo.net piknu.com publicinsta.com www.pictame.com
+rankersta.com
 zoopps.com
 ).map{|host| GET host, IG1}
 
