@@ -54,6 +54,7 @@ class WebResource
     CDNhost = /\.(amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|github|googleapis|netdna.*)\.(com|io|net)$/
     CookieHost = /\.bandcamp\.com$/
     DesktopUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
+    DynamicImgHost = /weather\.gov$/
 
     Resizer = -> r {
       if r.parts[0] == 'resizer'
@@ -578,7 +579,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
     Cookies 'm.youtube.com'
     Allow 'www.youtube.com'
     GET 'youtube.com', -> r {[301, {'Location' =>  'https://www.youtube.com' + r.path + r.qs}, []]}
-    GET 'm.youtube.com', -> r {%w(channel feed results user watch watch_comment yts).member?(r.parts[0]) ? r.upstreamUI.fetch : r.deny}
+    GET 'm.youtube.com', -> r {%w(channel feed playlist results user watch watch_comment yts).member?(r.parts[0]) ? r.upstreamUI.fetch : r.deny}
     GET 's.ytimg.com', Desktop
     GET 'www.youtube-nocookie.com', Desktop
     GET 'www.youtube.com', -> r {
