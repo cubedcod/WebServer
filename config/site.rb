@@ -1,4 +1,4 @@
-require 'pry'
+#require 'pry'
 module Webize
   module HTML
     class Reader
@@ -417,7 +417,7 @@ firefox.settings.services.mozilla.com
       r.desktopUI if r.parts[-1] == 'submit'                       # upstream UI for post submission
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? # upstream-representation preference
       depth = r.parts.size                                         # page pointers
-      r.env[:links][:next] = 'https://old.reddit.com' + r.path + r.qs
+      r.env[:links][:prev] = 'https://old.reddit.com' + r.path + r.qs
       r.env[:links][:up] = if [3,6].member? depth
                              r.dirname
                            elsif 5 == depth
