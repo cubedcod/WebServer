@@ -86,12 +86,12 @@ class WebResource
         end
 
         #print "\n#{env['HTTP_ACCEPT']} -> #{head['Content-Type'] || head['content-type']} "
+        referer_host = env['HTTP_REFERER'] && env['HTTP_REFERER'].R.host
 
         if resource.env[:deny]
           if %w(css eot otf ttf woff woff2).member?(ext) || path.match?(/204$/)
             print "🛑"
           else
-            referer_host = env['HTTP_REFERER'] && env['HTTP_REFERER'].R.host
             print "\n" + (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "🛑 \e[31;1m") + (referer_host ? ("\e[7m" + referer_host + "\e[0m\e[31;1m → ") : '') + (referer_host == resource.host ? '' : resource.host) + "\e[7m" + resource.path + "\e[0m\e[31m" + resource.qs + "\e[0m "
           end
 
@@ -115,7 +115,8 @@ class WebResource
         elsif ext == 'css'                                       # stylesheet
           print '🎨'
         elsif ext == 'js' || mime.match?(/script/)               # script
-          print "\n📜\e[36;1m https://" + resource.host + "\e[7m" + resource.path + "\e[0m "
+          third_party = referer_host != resource.host
+          print "\n📜\e[36#{third_party ? ';7' : ''};1m https://" + resource.host + resource.path + "\e[0m "
         elsif ext == 'json' || mime.match?(/json/)               # data
           print "\n🗒 https://" + resource.host + resource.path + resource.qs + ' '
         elsif %w(gif jpeg jpg png svg webp).member?(ext) || mime.match?(/^image/)
