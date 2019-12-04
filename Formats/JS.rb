@@ -127,7 +127,7 @@ module Webize
 
         # path-heuristic binding
         if @base.parts.map{|part| part.split '.'}.flatten.member? 'feed'
-          @base.env[:transformable] = true
+          @base.env[:transform] = true
           self.JSONfeed &f
         end
 

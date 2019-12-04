@@ -437,7 +437,7 @@ class WebResource
     # transform is explicitly allowed or implicit with Atom, RSS or HTML and local UI
     def fixedFormat? format = nil
       return true if upstreamUI?
-      return false if env[:transformable] || !format || format.match?(/atom|html|rss|xml/i)
+      return false if ENV.has_key?('TRANSFORM') || env[:transform] || !format || format.match?(/atom|html|rss|xml/i)
       return true
     end
 

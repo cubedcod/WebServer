@@ -775,31 +775,35 @@ media-mbst-pub-ue1.s3.amazonaws.com
   end
 
   IGgraph = /^window._sharedData = /
-  def Instagram doc
+
+  def Instagram doc, &b
     doc.css('script').map{|script|
       if script.inner_text.match? IGgraph
-        graph = ::JSON.parse script.inner_text.sub(IGgraph,'')[0..-2]
-        Webize::HTML.webizeHash(graph){|h|
-          if h['shortcode']
-            s = 'https://www.instagram.com/p/' + h['shortcode']
-            yield s, Type, Post.R
-            yield s, Image, h['display_url'].R if h['display_url']
-            if owner = h['owner']
-              yield s, Creator, ('https://www.instagram.com/' + owner['username']).R if owner['username']
-              yield s, To, 'https://www.instagram.com/'.R
-            end
-            if time = h['taken_at_timestamp']
-              yield s, Date, Time.at(time).iso8601
-            end
-            if text = h['edge_media_to_caption']['edges'][0]['node']['text']
-              yield s, Abstract, CGI.escapeHTML(text).split(' ').map{|t|
+        InstagramJSON ::JSON.parse(script.inner_text.sub(IGgraph,'')[0..-2]), &b
+      end}
+  end
+
+  def InstagramJSON tree, &b
+    Webize::HTML.webizeHash(tree){|h|
+      if h['shortcode']
+        s = 'https://www.instagram.com/p/' + h['shortcode']
+        yield s, Type, Post.R
+        yield s, Image, h['display_url'].R if h['display_url']
+        if owner = h['owner']
+          yield s, Creator, ('https://www.instagram.com/' + owner['username']).R if owner['username']
+          yield s, To, 'https://www.instagram.com/'.R
+        end
+        if time = h['taken_at_timestamp']
+          yield s, Date, Time.at(time).iso8601
+        end
+        if text = h['edge_media_to_caption']['edges'][0]['node']['text']
+          yield s, Abstract, CGI.escapeHTML(text).split(' ').map{|t|
                 if match = (t.match /^@([a-zA-Z0-9._]+)(.*)/)
                   "<a href='https://www.instagram.com/#{match[1]}'>#{match[1]}</a>#{match[2]}"
                 else
                   t
                 end}.join(' ')
-            end rescue nil
-          end}
+        end rescue nil
       end}
   end
 
