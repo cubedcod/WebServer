@@ -348,7 +348,6 @@ class WebResource
           format = h['content-type'].split(/;/)[0] if h['content-type']   # HTTP header -> format
           format ||= (xt = ext.to_sym; puts "WARNING no MIME for #{uri}"  # extension -> format
                       RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
-          format = 'text/html' if format.match?(/xml/) && host.match?(/doriantaylor/)
           reader = RDF::Reader.for content_type: format                   # select reader
           reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|  # read RDF
             (env[:repository] ||= RDF::Repository.new) << _ } if reader
@@ -464,6 +463,8 @@ class WebResource
         else                       # local graph-data
           localGraph
         end
+      elsif path.match? /^.gen(erate)?_?204$/
+        R204
       elsif handler = HostGET[host] # host handler
         handler[self]
       elsif self.CDN?               # content-pool handler

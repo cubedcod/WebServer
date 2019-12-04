@@ -242,10 +242,10 @@ secure.brightcove.com
 
       GET 'www.google.com', -> r {
         case r.path
-        when /^.(complete|recaptcha)/
+        when /^.complete/
+          r.deny
+        when /recaptcha/
           ENV.has_key?('GOOGLE') ? r.fetch : r.deny
-        when /^.gen(erate)?_?204/
-          R204
         when '/search'
           q = r.env[:query]['q']
           q && q.match?(/^(https?:|l(ocalhost)?(:8000)?)\//) && [301,{'Location'=>q.sub(/^l/,'http://l')},[]] || r.fetch
