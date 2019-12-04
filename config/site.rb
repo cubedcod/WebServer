@@ -43,8 +43,8 @@ module Webize
 end
 class WebResource
   module URIs
+    CacheExt = %w(css geojson gif html ico jpeg jpg js json m3u8 m4a md mp3 mp4 opus pdf png svg ts webm webp xml) # cache these filetypes
     SiteDir  = (Pathname.new __dir__).relative_path_from Pathname.new Dir.pwd
-
     FeedIcon = SiteDir.join('feed.svg').read
     SiteFont = SiteDir.join('fonts/hack-regular-subset.woff2').read
     SiteGIF = SiteDir.join('site.gif').read
@@ -549,8 +549,7 @@ firefox.settings.services.mozilla.com
     GET 'redirect.viglink.com', GotoU
 
     # Vimeo
-    GET 'player.vimeo.com', Desktop
-    GET 'vimeo.com', Desktop
+    %w(f.vimeocdn.com player.vimeo.com vimeo.com).map{|host| GET host, Desktop }
 
     # WaPo
     GET 'www.washingtonpost.com', -> r {(r.parts[0]=='resizer' ? Resizer : NoJS)[r]}

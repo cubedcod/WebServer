@@ -1,5 +1,10 @@
 # coding: utf-8
 require 'mail'
+class WebResource
+  module URIs
+    MID2PATH = -> id { id_hash = Digest::SHA2.hexdigest id; ['', '.msg', id_hash[0..1], id.gsub('/','')].join '/'} # Message-ID -> Pathname
+  end
+end
 module Webize
   module Mail
     class Format < RDF::Format

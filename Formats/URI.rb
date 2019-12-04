@@ -31,8 +31,6 @@ class WebResource < RDF::URI
     HourDir = /^\/\d\d\d\d\/\d\d\/\d\d\/\d\d\/$/
     PWD = Pathname.new Dir.pwd                                                                        # working directory
     LocalAddr = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq # local addresses and hostnames
-    CacheExt = %w(css geojson gif html ico jpeg jpg js json m3u8 m4a md mp3 mp4 opus pdf png svg ts webm webp xml) # cached file-types
-    MID2PATH = -> id { id_hash = Digest::SHA2.hexdigest id; ['', '.msg', id_hash[0..1], id.gsub('/','')].join '/'} # Message-ID -> Pathname
 
     # vocabulary base-URIs
     W3       = 'http://www.w3.org/'
