@@ -41,7 +41,7 @@ module Webize
       end
 
       def mail_triples body, &b
-        m = ::Mail.new body; return puts "mail-read failed #{@base}" unless m
+        m = ::Mail.new body; return puts "mail-parse failed #{@base}" unless m
 
         # Message resource
         id = m.message_id || m.resent_message_id || Digest::SHA2.hexdigest(rand.to_s)
@@ -54,7 +54,7 @@ module Webize
         htmlFiles, parts = m.all_parts.push(m).partition{|p| p.mime_type == 'text/html' }
         htmlCount = 0
         htmlFiles.map{|p|
-          html = (mail.path + ".#{htmlCount}.html").R # HTML-file
+          html = (graph.path + ".#{htmlCount}.html").R # HTML-file
           yield mail, DC + 'hasFormat', html, graph   # reference
           html.write p.decoded unless html.exist? # store
           htmlCount += 1 } # increment count
@@ -145,7 +145,7 @@ module Webize
             (rs.class == Array ? rs : [rs]).compact.map{|r|
               msg = ('/msg/' + URI.escape(r)).R
               yield mail, SIOC + 'reply_of', msg, graph
-              #yield dest, SIOC + 'has_reply', mail, (dest.path + '.' + Digest::SHA2.hexdigest(id)).R
+              yield msg, SIOC + 'has_reply', mail, (MID2PATH[r] + '.' + Digest::SHA2.hexdigest(id)).R
             }}}
 
         # attachments
@@ -153,7 +153,7 @@ module Webize
           ::Mail::Encodings.defined?(p.body.encoding)}.map{|p|     # decodability check
           name = p.filename && !p.filename.empty? && p.filename || # attachment name
                  (Digest::SHA2.hexdigest(rand.to_s) + (Rack::Mime::MIME_TYPES.invert[p.mime_type] || '.bin').to_s) # generate name
-          file = (mail.path + '.' + name).R   # file location
+          file = (graph.path + '.' + name).R   # file location
           unless file.exist?                  # store file
             file.write p.body.decoded.force_encoding 'UTF-8'
           end
