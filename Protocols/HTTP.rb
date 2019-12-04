@@ -18,7 +18,9 @@ class WebResource
       'GET'     => :GETresource,
       'HEAD'    => :HEAD,
       'OPTIONS' => :OPTIONS,
-      'POST'    => :POSTresource}
+      'POST'    => :POSTresource,
+      'PUT'     => :PUT
+    }
 
     # handler lambdas
     Desktop = -> r {NoGunk[r.desktopUI]}
@@ -640,7 +642,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
       body = env['rack.input'].read
       # response
       r = HTTParty.options url, :headers => headers, :body => body
-      [r.code, r.headers, [r.body]]
+      [r.code, (headers r.headers), [r.body]]
     end
 
     # String -> Hash
@@ -678,13 +680,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
 
       # origin response
       r = HTTParty.post url, :headers => head, :body => body
-      code = r.code
-      head = r.headers
-      body = r.body
-      head.delete 'connection'
-      head.delete 'transfer-encoding'
-
-      [code, head, [body]]
+      [r.code, (headers r.headers), [r.body]]
     end
 
     def HTTP.print_body head, body
@@ -716,8 +712,25 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     end
 
     def PUT
-      env[:deny] = true
-      [202,{},[]]
+      if AllowedHosts.has_key?(host) || ENV.has_key?('BARNDOOR')
+        self.PUTthru
+      else
+        env[:deny] = true
+        [204, {'Access-Control-Allow-Credentials' => 'true',
+               'Access-Control-Allow-Headers' => 'authorization, content-type, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-hostname, x-lib-version, x-locale, x-requested-with',
+               'Access-Control-Allow-Origin' => allowedOrigin},
+         []]
+      end
+    end
+
+    def PUTthru
+      # request
+      url = 'https://' + host + path + qs
+      body = env['rack.input'].read
+      puts "PUT #{url}", body
+      # response
+      r = HTTParty.put url, :headers => headers, :body => body
+      [r.code, (headers r.headers), [r.body]]
     end
 
     # Hash -> querystring

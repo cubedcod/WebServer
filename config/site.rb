@@ -35,6 +35,7 @@ module Webize
       'gateway.reddit.com' => :Reddit,
       'outline.com' => :Outline,
       'outlineapi.com' => :Outline,
+      'www.instagram.com' => :InstagramJSON,
       'www.youtube.com' => :YouTubeJSON,
     }
 
