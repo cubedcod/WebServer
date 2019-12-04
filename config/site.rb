@@ -531,6 +531,9 @@ firefox.settings.services.mozilla.com
         r.cachedGraph
       elsif r.gunkURI
         r.deny
+      elsif r.path.match? HourDir
+        r.dateMeta
+        r.nodeResponse r.path + '*twitter*'
       else
         r.env[:links][:up]    = '/' if r.parts.size == 1
         r.env[:links][:up]    = '/' + r.parts[0] if r.path.match? /\/status\/\d+\/?$/
