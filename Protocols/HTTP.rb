@@ -481,6 +481,7 @@ class WebResource
         deny
       elsif path.match? HourDir
         name = '*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*'
+        dateMeta
         nodeResponse (path + name)
       else
         env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
@@ -568,7 +569,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     # node metadata/RDF -> RDF::Repository
     def load options = {}
       env[:repository] ||= RDF::Repository.new # graph
-      stat options                             # read filesystem-metadata
+      stat options unless ext=='ttl' || basename.match?(/^msg\./) # fs stat
       return self unless file?
       options[:base_uri] ||= self              # base-URI
       options[:format]  ||= formatHint         # URI-derived format hint

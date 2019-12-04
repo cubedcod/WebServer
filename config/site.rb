@@ -414,6 +414,7 @@ firefox.settings.services.mozilla.com
         r.chrono_sort
       end
       if r.path.match? HourDir
+        r.dateMeta
         r.nodeResponse r.path + '*reddit*'
       else
         r.chrono_sort if r.parts[-1] == 'new'                        # chrono sort new posts
