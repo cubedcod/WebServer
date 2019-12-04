@@ -458,7 +458,7 @@ class WebResource
         elsif file?
           fileResponse             # local static-data
         elsif directory? && qs.empty? && (index = (self + 'index.html').R env).exist? && selectFormat == 'text/html'
-          index.fileResponse       # local static directory-index
+          index.fileResponse       # local static-dir-index
         else                       # local graph-data
           localGraph
         end
@@ -479,7 +479,7 @@ class WebResource
         end
       elsif gunkHost || gunkURI     # junk handler
         deny
-      elsif path.match? /^\/\d\d\d\d\/\d\d\/\d\d\/\d\d\/$/ # cache-timeslice handler
+      elsif path.match? HourDir
         name = '*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*'
         nodeResponse (path + name)
       else

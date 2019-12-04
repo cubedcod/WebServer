@@ -15,7 +15,6 @@ module Webize
         'news.ycombinator.com' => :HackerNews,
         'twitter.com' => :Twitter,
         'universalhub.com' => :UHub,
-        'old.reddit.com' => :RedditPager,
         'www.aliexpress.com' => :AX,
         'www.apnews.com' => :AP,
         'www.city-data.com' => :CityData,
@@ -414,19 +413,23 @@ firefox.settings.services.mozilla.com
         r = ('/r/'+'com/reddit/www/r/*/.sub*'.R.glob.map(&:dir).map(&:basename).join('+')+'/new').R r.env
         r.chrono_sort
       end
-      r.chrono_sort if r.parts[-1] == 'new'                        # chrono sort new posts
-      r.desktopUI if r.parts[-1] == 'submit'                       # upstream UI for post submission
-      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? # upstream-representation preference
-      depth = r.parts.size                                         # page pointers
-      r.env[:links][:prev] = 'https://old.reddit.com' + r.path + r.qs
-      r.env[:links][:up] = if [3,6].member? depth
-                             r.dirname
-                           elsif 5 == depth
-                             '/' + r.parts[0..1].join('/')
-                           else
-                             '/'
-                           end
-      r.fetch options}
+      if r.path.match? HourDir
+        r.nodeResponse r.path + '*reddit*'
+      else
+        r.chrono_sort if r.parts[-1] == 'new'                        # chrono sort new posts
+        r.desktopUI if r.parts[-1] == 'submit'                       # upstream UI for post submission
+        options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? # upstream-representation preference
+        depth = r.parts.size                                         # page pointers
+        r.env[:links][:prev] = 'https://old.reddit.com' + r.path + r.qs
+        r.env[:links][:up] = if [3,6].member? depth
+                               r.dirname
+                             elsif 5 == depth
+                               '/' + r.parts[0..1].join('/')
+                             else
+                               '/'
+                             end
+        r.fetch options
+      end}
 
     GET 'www.reddit.com', Reddit
 
@@ -434,13 +437,11 @@ firefox.settings.services.mozilla.com
       r.desktopUI.fetch.yield_self{|status,head,body|
         if status.to_s.match? /^30/
           [status, head, body]
-        elsif page = r.env[:links][:next]
-          [302, {'Location' => page}, []]
         else
           refs = []
           body[0].scan(/href="([^"]+after=[^"]+)/){|l| refs << l[0] }
           if refs.empty?
-            [status, head, body]
+            GotoReddit[r]
           else
             page = refs[-1].R
             [302, {'Location' => 'https://www.reddit.com' + page.path + page.qs}, []]
@@ -813,10 +814,6 @@ media-mbst-pub-ue1.s3.amazonaws.com
 
   def Reddit tree
     puts tree.keys
-  end
-
-  def RedditPager doc
-    doc.css('[rel="next"]').map{|n| env[:links][:next] = n['href'] }
   end
 
   def Twitter doc
