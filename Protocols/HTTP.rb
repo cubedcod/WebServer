@@ -447,27 +447,31 @@ class WebResource
     alias_method :get, :fetch
 
     def GETresource
-      if local?                 # local resource:
+      if local?                     # local resource:
         if %w{y year m month d day h hour}.member? parts[0]
-          dateDir                  # time-segment redirect
-        elsif path == '/log'       # log handler
+          dateDir                   # time-segment
+        elsif path == '/log'        # log handler
           localLog
-        elsif path == '/mail'      # inbox redirect
+        elsif path == '/mail'       # inbox redirect
           [302,{'Location' => '/d/*/msg*?head&sort=date&view=table'},[]]
         elsif parts[0] == 'msg'
           nodeResponse MID2PATH[URI.unescape parts[1]]
         elsif file?
-          fileResponse             # local static-data
+          fileResponse              # local static-data
         elsif directory? && qs.empty? && (index = (self + 'index.html').R env).exist? && selectFormat == 'text/html'
-          index.fileResponse       # local static-dir-index
-        else                       # local graph-data
+          index.fileResponse        # local static-dir-index
+        else                        # local graph-data
           localGraph
         end
-      elsif path.match? /^.gen(erate)?_?204$/
+      elsif path.match? /^.gen(erate)?_?204$/ # connectivity check
         R204
+      elsif path.match? HourDir     # local cache, hour slice
+        name = '*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*'
+        dateMeta
+        nodeResponse (path + name)
       elsif handler = HostGET[host] # host handler
         handler[self]
-      elsif self.CDN?               # content-pool handler
+      elsif self.CDN?               # content-pool
         if ENV.has_key?('BARNDOOR') || AllowedHosts.has_key?(host) || env[:query]['allow'] == ServerKey
           fetch
         else
@@ -480,15 +484,11 @@ class WebResource
             deny
           end
         end
-      elsif gunkHost || gunkURI     # junk handler
+      elsif gunkHost || gunkURI     # junk
         deny
-      elsif path.match? HourDir
-        name = '*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*'
-        dateMeta
-        nodeResponse (path + name)
       else
         env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
-        fetch                      # remote resource
+        fetch                       # remote resource
       end
     end
 

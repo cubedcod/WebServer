@@ -410,28 +410,20 @@ firefox.settings.services.mozilla.com
     %w(np.reddit.com reddit.com).map{|host| GET host, GotoReddit }
 
     Reddit = -> r {
-      if r.path == '/'                                             # subscriptions
-        r = ('/r/'+'com/reddit/www/r/*/.sub*'.R.glob.map(&:dir).map(&:basename).join('+')+'/new').R r.env
-        r.chrono_sort
-      end
-      if r.path.match? HourDir
-        r.dateMeta
-        r.nodeResponse r.path + '*reddit*'
-      else
-        r.chrono_sort if r.parts[-1] == 'new'                        # chrono sort new posts
-        r.desktopUI if r.parts[-1] == 'submit'                       # upstream UI for post submission
-        options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? # upstream-representation preference
-        depth = r.parts.size                                         # page pointers
-        r.env[:links][:prev] = 'https://old.reddit.com' + r.path + r.qs
-        r.env[:links][:up] = if [3,6].member? depth
-                               r.dirname
-                             elsif 5 == depth
-                               '/' + r.parts[0..1].join('/')
-                             else
-                               '/'
-                             end
-        r.fetch options
-      end}
+      r.chrono_sort if r.parts[-1] == 'new' || r.path == '/'       # chrono sort new posts
+      r = ('/r/'+'com/reddit/www/r/*/.sub*'.R.glob.map(&:dir).map(&:basename).join('+')+'/new').R r.env if r.path == '/' # subscriptions
+      r.desktopUI if r.parts[-1] == 'submit'                       # upstream UI for post submission
+      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? # upstream-representation preference
+      r.env[:links][:prev] = 'https://old.reddit.com' + r.path + r.qs # page pointers
+      depth = r.parts.size
+      r.env[:links][:up] = if [3,6].member? depth
+                             r.dirname
+                           elsif 5 == depth
+                             '/' + r.parts[0..1].join('/')
+                           else
+                             '/'
+                           end
+      r.fetch options}
 
     GET 'www.reddit.com', Reddit
 
@@ -532,9 +524,6 @@ firefox.settings.services.mozilla.com
         r.cachedGraph
       elsif r.gunkURI
         r.deny
-      elsif r.path.match? HourDir
-        r.dateMeta
-        r.nodeResponse r.path + '*twitter*'
       else
         r.env[:links][:up]    = '/' if r.parts.size == 1
         r.env[:links][:up]    = '/' + r.parts[0] if r.path.match? /\/status\/\d+\/?$/
