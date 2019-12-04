@@ -27,9 +27,9 @@ class WebResource < RDF::URI
   alias_method :uri, :to_s
 
   module URIs
-    GraphExt = /\.(md|ttl|u)$/                                                                        # pattern of native graph file types
-    HourDir = /^\/\d\d\d\d\/\d\d\/\d\d\/\d\d\/$/
-    PWD = Pathname.new Dir.pwd                                                                        # working directory
+    GraphExt = /\.(md|ttl|u)$/                   # pattern of graph-storage name
+    HourDir = /^\/\d\d\d\d\/\d\d\/\d\d\/\d\d\/$/ # pattern of hour-directory name
+    PWD = Pathname.new Dir.pwd                   # working directory
     LocalAddr = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq # local addresses and hostnames
 
     # vocabulary base-URIs
