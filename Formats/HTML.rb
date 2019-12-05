@@ -49,7 +49,7 @@ image-src
           e.set_attribute 'class', 'uri'                                                # add node class for styling
         elsif e['id']
           e.set_attribute 'class', 'identified'
-          e.add_child " <span class='id'>##{CGI.escapeHTML e['id']}</span> " # show id
+          e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id']}</span> " # show id
         end
         if e['src'] && e['src'][0] == '/' && e['src'][1] != '/' # TODO baseURI argument to cleaner method
           puts :relURI, e['src']
