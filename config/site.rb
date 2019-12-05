@@ -1,4 +1,3 @@
-#require 'pry'
 module Webize
   module HTML
     class Reader
@@ -6,7 +5,7 @@ module Webize
       SiteGunk = {'www.google.com' => %w(div.logo h1 h2),
                   'www.bostonmagazine.com' => %w(a[href*='scrapertrap'])}
 
-      # HTML -> RDF lambdas
+      # HTML -> RDF methods
       Triplr = {
         'apnews.com' => :AP,
         'boards.4channel.org' => :FourChannel,
@@ -30,7 +29,7 @@ module Webize
   end
   module JSON
 
-    # JSON -> RDF lambdas
+    # JSON -> RDF methods
     Triplr = {
       'gateway.reddit.com' => :Reddit,
       'outline.com' => :Outline,
@@ -43,7 +42,7 @@ module Webize
 end
 class WebResource
   module URIs
-    CacheExt = %w(css geojson gif html ico jpeg jpg js json m3u8 m4a md mp3 mp4 opus pdf png svg ts webm webp xml) # cache these filetypes
+    CacheExt = %w(css geojson gif html ico jpeg jpg js json m3u8 m4a md mp3 mp4 opus pdf png svg ts webm webp xml) # cached filetypes
     SiteDir  = (Pathname.new __dir__).relative_path_from Pathname.new Dir.pwd
     FeedIcon = SiteDir.join('feed.svg').read
     SiteFont = SiteDir.join('fonts/hack-regular-subset.woff2').read
@@ -406,19 +405,12 @@ firefox.settings.services.mozilla.com
     %w(np.reddit.com reddit.com).map{|host| GET host, GotoReddit }
 
     Reddit = -> r {
-      r.chrono_sort if r.parts[-1] == 'new' || r.path == '/'       # chrono sort new posts
+      r.chrono_sort if r.parts[-1] == 'new' || r.path == '/'       # chrono-sort new posts
       r = ('/r/'+'com/reddit/www/r/*/.sub*'.R.glob.map(&:dir).map(&:basename).join('+')+'/new').R r.env if r.path == '/' # subscriptions
       r.desktopUI if r.parts[-1] == 'submit'                       # upstream UI for post submission
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? # upstream-representation preference
       r.env[:links][:prev] = 'https://old.reddit.com' + r.path + r.qs # page pointers
-      depth = r.parts.size
-      r.env[:links][:up] = if [3,6].member? depth
-                             r.dirname
-                           elsif 5 == depth
-                             '/' + r.parts[0..1].join('/')
-                           else
-                             '/'
-                           end
+      r.env[:links][:up] = r.dirname unless r.path == '/'
       r.fetch options}
 
     GET 'www.reddit.com', Reddit
