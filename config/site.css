@@ -4,7 +4,7 @@
 #prev, #next {position: fixed; height: 100%; font-size: 2em}
 * {border-radius: .2em}
 .avatar {max-height: 2em; background-color: #000}
-.breadcrumb {border-width: 0 0 0 .08em; border-color: #888; border-style: dotted; border-radius: 0}
+.breadcrumb {border-width: 0 0 0 .08em; border-color: #888; border-style: dotted; border-radius: 0; color: #ddd}
 .container > .body {border-radius: 0 .2em .2em .2em; background-color: #fff; color: #000; width: 100%}
 .container > .label {border-radius: .5em .5em 0 0; display: inline-block; font-size: 1.2em; padding: .1em; background-color: #fff; color: #000}
 .container {margin: .3em}
@@ -35,8 +35,8 @@ h1,h2,h3,h4,h5,h6,p,pre {margin: 0}
 img, video {max-width: 100%}
 p, li, blockquote {max-width: 86ex}
 pre {white-space: pre-wrap}
-a.uri {background-color: #ddd; color: #000; display: inline-block; max-width: 48ex; overflow: hidden; margin-right: .2em; margin-bottom: .2em}
-a.uri > span.uri {font-size: 0.78em; color: #000; background-color: #eee; font-weight: normal}
+a.uri {background-color: #fff; border-radius: .28em; color: #000; display: inline-block; max-width: 48ex; overflow: hidden; margin-right: .18em; margin-bottom: .18em; padding-left: .18em}
+a.uri > span.uri {font-size: 0.78em; color: #333; font-weight: normal}
 table, div, li, svg {display: inline-block}
 td.k {max-width: 28ex; overflow: hidden; text-align: right}
 tr[name="title"] > td.v {max-width: 86ex; overflow: hidden}
