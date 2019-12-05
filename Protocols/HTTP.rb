@@ -584,15 +584,14 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
       head # output header
     end
 
-    # node metadata/RDF -> RDF::Repository
+    # node RDF -> Repository
     def load options = {}
-      env[:repository] ||= RDF::Repository.new # graph
-      stat options unless ext=='ttl' || basename.match?(/^msg\./) # fs stat
       return self unless file?
+      env[:repository] ||= RDF::Repository.new # graph
       options[:base_uri] ||= self              # base-URI
       options[:format]  ||= formatHint         # URI-derived format hint
-      env[:repository].load relPath, options   # read file
-      self                                     # node w/ Repository reference
+      env[:repository].load relPath, options   # load
+      self
     end
 
     def local?

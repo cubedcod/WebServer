@@ -55,7 +55,7 @@ class WebResource
     CDNhost = /\.(amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|github|googleapis|netdna.*)\.(com|io|net)$/
     CookieHost = /\.bandcamp\.com$/
     DesktopUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
-    DynamicImgHost = /weather\.gov$/
+    DynamicImgHost = /(noaa|weather)\.gov$/
 
     Resizer = -> r {
       if r.parts[0] == 'resizer'
