@@ -374,6 +374,7 @@ firefox.settings.services.mozilla.com
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # Nextdoor
+    Cookies 'nextdoor.com'
     CDNscripts 'nextdoor.com'
 
     # NOAA

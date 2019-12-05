@@ -468,9 +468,10 @@ class WebResource
         elsif path == '/log'        # log handler
           localLog
         elsif path == '/mail'       # inbox redirect
-          [302,{'Location' => '/d/*/msg*?head&sort=date&view=table'},[]]
+          [302, {'Location' => '/d/*/msg*?head&sort=date&view=table'}, []]
         elsif parts[0] == 'msg'
-          nodeResponse MID2PATH[URI.unescape parts[1]]
+          id = parts[1]
+          id ? (nodeResponse MID2PATH[URI.unescape id]) : [301, {'Location' => '/mail'}, []]
         elsif file?
           fileResponse              # local static-data
         elsif directory? && qs.empty? && (index = (self + 'index.html').R env).exist? && selectFormat == 'text/html'
@@ -640,9 +641,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
       if nodes.size==1 && nodes[0].ext=='ttl' && selectFormat=='text/turtle'
         nodes[0].fileResponse # nothing to merge or transform. return static node
       else                    # merge and/or transform
-        nodes.map{|node|
-          options = fs_base == self ? {} : {base_uri: (join node.relFrom fs_base)}
-          node.load options}
+        nodes.map &:load
         indexRDF if env[:new]
         graphResponse
       end
