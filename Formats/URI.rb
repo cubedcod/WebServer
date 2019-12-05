@@ -108,7 +108,7 @@ class WebResource < RDF::URI
     end
 
     def hostname; env && env['SERVER_NAME'] || host || 'localhost' end
-    def hostpath; '/' + hostname.split('.').reverse.join('/') end
+    def hostpath; '/' + hostname.split('.').-(%w(www)).reverse.join('/') end
 
   end
 

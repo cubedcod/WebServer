@@ -29,7 +29,7 @@
 .toolbox { position: fixed; top: 0; z-index: 2 }
 :target {background-color: #0f0; color: #000}
 a {text-decoration: none}
-a.date {float: right; color: #888; font-size: .8em; border-color: #222}
+a.date {float: right; white-space: nowrap; color: #888; font-size: .8em; border-color: #222}
 a.id {float: right; color: #333; border-color: #222}
 a.idlink {background-color: #0ff; color: #000; font-size: .72em; float: left; border-radius: 0 .2em 0 0}
 a.uri > span.uri {font-size: 0.78em; color: #222; font-weight: normal}

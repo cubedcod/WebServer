@@ -260,7 +260,7 @@ class WebResource
       htmlGrep if env[:graph] && env[:grep]
  
       # Markup -> HTML
-      HTML.render ["<!DOCTYPE html>\n\n",
+      HTML.render ["<!DOCTYPE html>\n",
                    {_: :html,
                     c: [{_: :head,
                          c: [{_: :meta, charset: 'utf-8'},
@@ -268,7 +268,7 @@ class WebResource
                              {_: :style, c: ["\n", SiteCSS]}, "\n",
                              (env[:links] || {}).map{|type,uri|
                                {_: :link, rel: type, href: CGI.escapeHTML(uri.to_s)}}
-                            ].map{|e|['  ',e,"\n"]}}, "\n\n",
+                            ].map{|e|['  ',e,"\n"]}}, "\n",
                         {_: :body,
                          c: [{class: :toolbox,
                               c: [{_: :a, id: :hostname, class: :host, href: '/', c: icon.cachePath.exist? ? {_: :img, src: icon.uri} : {_: :span, c: host}},

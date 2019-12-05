@@ -586,11 +586,29 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
 
     # node RDF -> Repository
     def load options = {}
-      return self unless file?
-      env[:repository] ||= RDF::Repository.new # graph
-      options[:base_uri] ||= self              # base-URI
-      options[:format]  ||= formatHint         # URI-derived format hint
-      env[:repository].load relPath, options   # load
+      graph = env[:repository] ||= RDF::Repository.new
+      options[:base_uri] ||= self
+      if file?
+        options[:format]  ||= formatHint
+        env[:repository].load relPath, options
+      elsif directory?
+        container = options[:base_uri] + (options[:base_uri].to_s[-1] == '/' ? '' : '/')
+        graph << RDF::Statement.new(container, Type.R, (W3+'ns/ldp#Container').R)
+        node.children.map{|n|
+          isDir = n.directory?
+          name = n.basename.to_s + (isDir ? '/' : '')
+          item = container.join name
+          graph << RDF::Statement.new(container, (W3+'ns/ldp#contains').R, item)
+          if n.file?
+            graph << RDF::Statement.new(item, Type.R, (W3+'ns/posix/stat#File').R)
+            graph << RDF::Statement.new(item, (W3+'ns/posix/stat#size').R, n.size)
+          elsif isDir
+            graph << RDF::Statement.new(item, Type.R, (W3+'ns/ldp#Container').R)
+          end
+          graph << RDF::Statement.new(item, Title.R, name)
+          graph << RDF::Statement.new(item, Date.R, n.mtime.iso8601) rescue nil
+        }
+      end
       self
     end
 
@@ -775,33 +793,6 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
       query && !query.empty? && ('?' + query) || ''              # query-string in URI
     end
     alias_method :qs, :querystring
-
-    def stat options = {}
-      graph = env[:repository] ||= RDF::Repository.new
-      options[:base_uri] ||= self
-      subject = options[:base_uri].R
-
-      if node.directory?
-        subject = subject.to_s[-1] == '/' ? subject : (subject+'/')                          # container URI
-        graph << (RDF::Statement.new subject, Type.R, (W3+'ns/ldp#Container').R)
-        node.children.map{|n|
-          name = n.basename.to_s
-          name = n.directory? ? (name + '/') : name.sub(GraphExt, '')                        # contained-resource URI
-          graph << (RDF::Statement.new subject,(W3+'ns/ldp#contains').R,subject.join(name))} # containment triple
-      elsif node.file?
-        graph << (RDF::Statement.new subject, Type.R, (W3+'ns/posix/stat#File').R)
-        graph << (RDF::Statement.new subject, (W3+'ns/posix/stat#size').R, node.size)        # node size
-      end
-
-      if mtime = node.stat.mtime
-        graph << (RDF::Statement.new subject, (W3+'ns/posix/stat#mtime').R, mtime.to_i)      # node mtime
-        graph << (RDF::Statement.new subject, Date.R, mtime.iso8601)
-      end
-
-      graph << (RDF::Statement.new subject, Title.R, basename)                               # node name
-
-      self
-    end
 
     def selectFormat default='text/html'
       #return 'text/turtle' if ext == 'ttl'
