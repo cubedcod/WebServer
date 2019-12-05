@@ -1,7 +1,7 @@
 #down {display: block}
 #next {right: 0}
 #prev {left: 0}
-#prev, #next {position: fixed; height: 100%; font-size: 2em}
+#prev, #next {position: fixed; height: 100%; font-size: 2em; color: #eee}
 * {border-radius: .2em}
 .avatar {max-height: 2em; background-color: #000}
 .breadcrumb {border-width: 0 0 0 .08em; border-color: #888; border-style: dotted; border-radius: 0; color: #ddd}
@@ -17,7 +17,7 @@
 .post {border-radius: .38em; max-width: 88ex; overflow: hidden; border: 1px solid #222}
 .quote {background-color: #ccc; color: #000}
 .thumb, svg {max-width: 28em}
-.title {background-color: #eee; color: #000; font-size: 1.1em; vertical-align: top; display: inline-block}
+.title {background-color: #fff; color: #000; font-size: 1.1em; vertical-align: top; display: inline-block}
 .title:visited {background-color: #000; color: #fff}
 .toolbox a.icon, .breadcrumb {text-shadow: 1.2px 1.2px #000000}
 .toolbox a.host img {max-height: 4.2em}
@@ -37,7 +37,7 @@ h1,h2,h3,h4,h5,h6,p,pre {margin: 0}
 img, video {max-width: 100%}
 p, li, blockquote {max-width: 86ex}
 pre {white-space: pre-wrap}
-a.uri {background-color: #fff; border-radius: .28em; color: #000; display: inline-block; max-width: 48ex; overflow: hidden; margin-right: .18em; margin-bottom: .18em; border: .07em solid black; padding: .1em}
+a.uri {background-color: #eee; border-radius: .28em; color: #000; display: inline-block; max-width: 48ex; overflow: hidden; margin-right: .18em; margin-bottom: .18em; border: .07em solid black; padding: .1em}
 a.uri > span.uri {font-size: 0.78em; color: #222; font-weight: normal}
 a.uri:visited {background-color: #000; color: #fff; border-color: #ccc}
 a.uri:visited > span.uri {color: #ddd}

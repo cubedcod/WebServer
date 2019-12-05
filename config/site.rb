@@ -99,7 +99,7 @@ s.click.aliexpress.com
     GET 'm.media-amazon.com', AmazonReferer
 
     # Apple
-    %w{amp-api.music audio-ssl.itunes embed.music itunes js-cdn.music music www xp}.map{|h|
+    %w{amp-api.music api.music audio-ssl.itunes embed.music itunes js-cdn.music music www xp}.map{|h|
       host = h + '.apple.com'
       Allow host
       GET host, Desktop}
