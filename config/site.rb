@@ -117,6 +117,9 @@ s.click.aliexpress.com
     Allow 'balamii-parse.herokuapp.com'
     Allow 'player.balamii.com'
 
+    # Blocks
+    GET 'bl.ocks.org', Desktop
+
     # Bloomberg
     Cookies 'www.bloomberg.com'
 
