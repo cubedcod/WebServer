@@ -372,6 +372,9 @@ firefox.settings.services.mozilla.com
 
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
+    # Nextdoor
+    %w(flask www).map{|h| allow h + '.nextdoor.com'}
+
     # NOAA
     GET 'www.tsunami.gov', Desktop
 

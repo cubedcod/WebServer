@@ -15,7 +15,7 @@
 .identified {border: .08em solid #0ff; padding: 0; border-radius: .24em}
 .list {background-color: #fff; color: #000}
 .main.post {background-color: #fff; color: #000; border-width: 0; padding: .2em}
-.post {border-radius: .38em; max-width: 88ex; border: 1px solid #222}
+.post {border-radius: .38em; margin: .1em; max-width: 88ex; border: 1px solid #222}
 .quote {background-color: #ccc; color: #000}
 .thumb, svg {max-width: 28em}
 .title {background-color: #fff; color: #000; font-size: 1.1em; vertical-align: top; display: inline-block}
