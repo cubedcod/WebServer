@@ -66,7 +66,7 @@ module Webize
 
         # plaintext message
         parts.select{|p|
-          (!p.mime_type || p.mime_type == 'text/plain') && # text parts
+          (!p.mime_type || p.mime_type.match?(/^text\/plain/)) && # text parts
             ::Mail::Encodings.defined?(p.body.encoding)    # decodable?
         }.map{|p|
           yield mail, Content,
@@ -85,7 +85,7 @@ module Webize
                                    yield mail, p, o, graph}]
                               end}.map{|line| [line, "<br>\n"]}), graph}
 
-        # recursive contained messages: digests, forwards, archives
+        # recursively contained messages: digests, forwards, archives
         parts.select{|p|p.mime_type=='message/rfc822'}.map{|m|
           mail_triples m.body.decoded, &b}
 

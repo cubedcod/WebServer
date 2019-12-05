@@ -35,8 +35,10 @@ h1,h2,h3,h4,h5,h6,p,pre {margin: 0}
 img, video {max-width: 100%}
 p, li, blockquote {max-width: 86ex}
 pre {white-space: pre-wrap}
-a.uri {background-color: #fff; border-radius: .28em; color: #000; display: inline-block; max-width: 48ex; overflow: hidden; margin-right: .18em; margin-bottom: .18em; padding-left: .18em}
-a.uri > span.uri {font-size: 0.78em; color: #333; font-weight: normal}
+a.uri {background-color: #fff; border-radius: .28em; color: #000; display: inline-block; max-width: 48ex; overflow: hidden; margin-right: .18em; margin-bottom: .18em; border: .06em solid white}
+a.uri > span.uri {font-size: 0.78em; color: #222; font-weight: normal}
+a.uri:visited {background-color: #000; color: #fff}
+a.uri:visited > span.uri {color: #ddd}
 table, div, li, svg {display: inline-block}
 td.k {max-width: 28ex; overflow: hidden; text-align: right}
 tr[name="title"] > td.v {max-width: 86ex; overflow: hidden}
