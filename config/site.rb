@@ -99,8 +99,10 @@ s.click.aliexpress.com
     GET 'm.media-amazon.com', AmazonReferer
 
     # Apple
-    %w{amp-api.music audio-ssl.itunes itunes js-cdn.music music www xp}.map{|host|
-      Allow host + '.apple.com' } if ENV.has_key? 'APPLE'
+    %w{amp-api.music audio-ssl.itunes embed.music itunes js-cdn.music music www xp}.map{|h|
+      host = h + '.apple.com'
+      Allow host
+      GET host, Desktop}
 
     # Appspot
     %w(xmountwashington).map{|h| Allow h + '.appspot.com'}
@@ -152,7 +154,7 @@ secure.brightcove.com
     GET 'cdnjs.cloudflare.com', Fetch
 
     # Complex
-    GET 'www.complex.com'
+    %w(images www).map{|h| GET h + '.complex.com' }
 
     # Costco
     Allow 'www.costco.com'
