@@ -6,6 +6,7 @@ class WebResource
     include URIs
 
     AllowedHosts = {}
+    CDNscripter = {}
     CookieHosts = {}
     HostGET = {}
     HostPOST = {}
@@ -76,8 +77,9 @@ class WebResource
       return [405,{},[]] unless m=Methods[env['REQUEST_METHOD']] # find method-handler
       path = Pathname.new(env['REQUEST_PATH']).expand_path.to_s  # evaluate path expression
       path+='/' if env['REQUEST_PATH'][-1]=='/' && path[-1]!='/' # preserve trailing slash
-      resource = ('//' + env['SERVER_NAME'] + path).R env.merge( # instantiate request w/ blank response fields
-       {resp:{}, links:{}, query: parseQs(env['QUERY_STRING'])}) # parse query
+      env[:referer] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # find referer host
+      resource = ('//' + env['SERVER_NAME'] + path).R env.merge( # instantiate request
+       {resp:{}, links:{}, query: parseQs(env['QUERY_STRING'])}) # parse querystring
       resource.send(m).yield_self{|status, head, body|           # dispatch request
         ext = resource.ext.downcase
         mime = head['Content-Type'] || ''
@@ -87,14 +89,11 @@ class WebResource
           print "\n➕ \e[1;7;32mhttps://" + env['SERVER_NAME'] + "\e[0m "
         end
 
-        #print "\n#{env['HTTP_ACCEPT']} -> #{head['Content-Type'] || head['content-type']} "
-        referer_host = env['HTTP_REFERER'] && env['HTTP_REFERER'].R.host
-
         if resource.env[:deny]
           if %w(css eot otf ttf woff woff2).member?(ext) || path.match?(/204$/)
             print "🛑"
           else
-            print "\n" + (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "🛑 \e[31;1m") + (referer_host ? ("\e[7m" + referer_host + "\e[0m\e[31;1m → ") : '') + (referer_host == resource.host ? '' : resource.host) + "\e[7m" + resource.path + "\e[0m\e[31m" + resource.qs + "\e[0m "
+            print "\n" + (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "🛑 \e[31;1m") + (env[:referer] ? ("\e[7m" + env[:referer] + "\e[0m\e[31;1m → ") : '') + (env[:referer] == resource.host ? '' : resource.host) + "\e[7m" + resource.path + "\e[0m\e[31m" + resource.qs + "\e[0m "
           end
 
         # OPTIONS
@@ -117,7 +116,7 @@ class WebResource
         elsif ext == 'css'                                       # stylesheet
           print '🎨'
         elsif ext == 'js' || mime.match?(/script/)               # script
-          third_party = referer_host != resource.host
+          third_party = env[:referer] != resource.host
           print "\n📜\e[36#{third_party ? ';7' : ''};1m https://" + resource.host + resource.path + "\e[0m "
         elsif ext == 'json' || mime.match?(/json/)               # data
           print "\n🗒 https://" + resource.host + resource.path + resource.qs + ' '
@@ -132,7 +131,7 @@ class WebResource
 
         else # generic logger
           print "\n\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : (env['REQUEST_METHOD']+' ')) + (status == 200 ? '' : (status.to_s+' ')) +
-                (env['HTTP_REFERER'] ? ((env['HTTP_REFERER'].R.host||'') + ' → ') : '') + "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + resource.qs + "\e[0m "
+                (env[:referer] ? (env[:referer] + ' → ') : '') + "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + resource.qs + "\e[0m "
         end
 
         [status, head, body]} # response
@@ -148,6 +147,10 @@ class WebResource
                                                             {_: :pre, c: trace.hrefs},
                                                             (HTML.keyval (Webize::HTML.webizeHash env), env),
                                                             (HTML.keyval (Webize::HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
+    end
+
+    def self.CDNscripts host
+      CDNscripter[host] = true
     end
 
     def CDN?; host.match? CDNhost end
@@ -472,7 +475,7 @@ class WebResource
       elsif handler = HostGET[host] # host handler
         handler[self]
       elsif self.CDN?               # content-pool
-        if ENV.has_key?('BARNDOOR') || AllowedHosts.has_key?(host) || env[:query]['allow'] == ServerKey
+        if ENV.has_key?('BARNDOOR') || AllowedHosts.has_key?(host) || CDNscripter.has_key?(env[:referer]) || env[:query]['allow'] == ServerKey
           fetch
         else
           extension = ext.downcase

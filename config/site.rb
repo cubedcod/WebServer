@@ -534,6 +534,10 @@ firefox.settings.services.mozilla.com
     # Vimeo
     %w(f.vimeocdn.com player.vimeo.com vimeo.com).map{|host| GET host, Desktop }
 
+    # VRT
+    CDNscripts 'www.vrt.be'
+    Allow 'media-services-public.vrt.be'
+
     # WaPo
     GET 'www.washingtonpost.com', -> r {(r.parts[0]=='resizer' ? Resizer : NoJS)[r]}
 
