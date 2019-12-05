@@ -309,8 +309,10 @@ zoopps.com
     GET 'ssl.p.jwpcdn.com'
 
     # Linkedin
-    GET 'media.licdn.com', NoJS
-    GET 'www.linkedin.com', NoJS
+    Cookies 'www.linkedin.com'
+    GET 'static-exp1.licdn.com'
+    GET 'media.licdn.com'
+    GET 'www.linkedin.com'
 
     # Mail.ru
     GET 'cloud.mail.ru'

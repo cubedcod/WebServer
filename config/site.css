@@ -14,12 +14,12 @@
 .file {position: relative}
 .list {background-color: #fff; color: #000}
 .main.post {background-color: #fff; color: #000; border-width: 0; padding: .2em}
-.post {border-radius: .38em; max-width: 88ex; overflow: hidden; border: 1px solid #222}
+.post {border-radius: .38em; max-width: 88ex; border: 1px solid #222}
 .quote {background-color: #ccc; color: #000}
 .thumb, svg {max-width: 28em}
 .title {background-color: #fff; color: #000; font-size: 1.1em; vertical-align: top; display: inline-block}
 .title:visited {background-color: #000; color: #fff}
-.toolbox a.icon, .breadcrumb {text-shadow: 1.2px 1.2px #000000}
+.toolbox a.icon, .breadcrumb {text-shadow: 1px 1px #000000}
 .toolbox a.host img {max-height: 4.2em}
 .toolbox a.host span {background-color: #fff; color: #000; font-weight: bold}
 .toolbox a.icon {font-size: 1.6em}
