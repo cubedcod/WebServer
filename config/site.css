@@ -5,6 +5,7 @@
 * {border-radius: .2em}
 .avatar {max-height: 2em; background-color: #000}
 .breadcrumb {border-width: 0 0 0 .08em; border-color: #888; border-style: dotted; border-radius: 0; color: #ddd}
+.breadcrumb.basename {color: #fff}
 .container > .body {border-radius: 0 .2em .2em .2em; background-color: #fff; color: #000; width: 100%}
 .container > .label {border-radius: .5em .5em 0 0; display: inline-block; font-size: 1.2em; padding: .1em; background-color: #fff; color: #000}
 .container {margin: .3em}
@@ -18,8 +19,9 @@
 .thumb, svg {max-width: 28em}
 .title {background-color: #fff; color: #000; font-size: 1.1em; vertical-align: top; display: inline-block}
 .title:visited {background-color: #ccc}
-.toolbox a {text-shadow: 1.2px 1.2px #000000}
-.toolbox a.hostname img {max-height: 4.2em}
+.toolbox a.icon, .breadcrumb {text-shadow: 1.2px 1.2px #000000}
+.toolbox a.host img {max-height: 4.2em}
+.toolbox a.host span {background-color: #fff; color: #000}
 .toolbox a.icon {font-size: 1.6em}
 .toolbox a:target {text-shadow: 0px 0px #000000}
 .toolbox svg {height: 1em; width: 1em}
@@ -35,9 +37,9 @@ h1,h2,h3,h4,h5,h6,p,pre {margin: 0}
 img, video {max-width: 100%}
 p, li, blockquote {max-width: 86ex}
 pre {white-space: pre-wrap}
-a.uri {background-color: #fff; border-radius: .28em; color: #000; display: inline-block; max-width: 48ex; overflow: hidden; margin-right: .18em; margin-bottom: .18em; border: .06em solid white}
+a.uri {background-color: #fff; border-radius: .28em; color: #000; display: inline-block; max-width: 48ex; overflow: hidden; margin-right: .18em; margin-bottom: .18em; border: .07em solid black; padding: .1em}
 a.uri > span.uri {font-size: 0.78em; color: #222; font-weight: normal}
-a.uri:visited {background-color: #000; color: #fff}
+a.uri:visited {background-color: #000; color: #fff; border-color: #ccc}
 a.uri:visited > span.uri {color: #ddd}
 table, div, li, svg {display: inline-block}
 td.k {max-width: 28ex; overflow: hidden; text-align: right}
