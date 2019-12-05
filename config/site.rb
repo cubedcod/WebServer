@@ -151,6 +151,9 @@ secure.brightcove.com
     # Cloudflare
     GET 'cdnjs.cloudflare.com', Fetch
 
+    # Complex
+    GET 'www.complex.com'
+
     # Costco
     Allow 'www.costco.com'
 
