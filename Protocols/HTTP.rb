@@ -693,9 +693,15 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
       url = 'https://' + host + path + qs
       head = headers
       body = env['rack.input'].read
-
       # origin response
       r = HTTParty.post url, :headers => head, :body => body
+      if ENV.has_key? 'VERBOSE'
+        HTTP.print_header head
+        puts body
+        puts :__________________
+        HTTP.print_header r.headers
+        puts r.body
+      end
       [r.code, (headers r.headers), [r.body]]
     end
 

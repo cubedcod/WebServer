@@ -234,23 +234,24 @@ secure.brightcove.com
 
     # Google
     unless ENV.has_key? 'DEGOOGLE'
-      Cookies 'www.google.com'
+      GET 'maps.googleapis.com', Desktop
       GET 'ajax.googleapis.com', Fetch
       GET 'connectivitycheck.gstatic.com', -> _ {R204}
-      GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
       GET 'www.googleapis.com', -> r {%w(youtube).member?(r.parts[0]) ? r.fetch : r.deny}
 
       (1..4).map{|i| GET "#{i}.bp.blogspot.com" }
       (1..4).map{|i| Allow "clients#{i}.google.com" } if ENV.has_key? 'GOOGLE'
       (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com" }
       %w(ssl www).map{|n| GET "#{n}.gstatic.com" }
+      %w(books docs drive images news scholar).map{|h|GET h + '.google.com' }
 
-      %w(books docs drive images news scholar).map{|h|
-        GET h + '.google.com' }
-
+      Cookies 'www.google.com'
+      GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
       GET 'www.google.com', -> r {
         case r.path
-        when '/search'
+        when /^.maps/
+          Desktop[r]
+        when /^.search/
           q = r.env[:query]['q']
           q && q.match?(/^(https?:|l(ocalhost)?(:8000)?)\//) && [301,{'Location'=>q.sub(/^l/,'http://l')},[]] || r.fetch
         when '/url'
@@ -373,7 +374,7 @@ firefox.settings.services.mozilla.com
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # Nextdoor
-    %w(flask www).map{|h| allow h + '.nextdoor.com'}
+    CDNscripts 'nextdoor.com'
 
     # NOAA
     GET 'www.tsunami.gov', Desktop
