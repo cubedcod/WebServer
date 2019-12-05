@@ -500,7 +500,8 @@ firefox.settings.services.mozilla.com
     Allow 'proxsee.pscp.tv'
     GotoTwitter = -> r {[301,{'Location' => 'https://twitter.com' + r.path },[]]}
     %w(mobile.twitter.com tweettunnel.com www.twitter.com).map{|host| GET host, GotoTwitter }
-    GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : r.fetch}
+    GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : NoQuery[r]}
+    GET 'trib.al', NoQuery
     GET 'twitter.com', -> r {
       r.desktopUA
       if !r.path || r.path == '/'

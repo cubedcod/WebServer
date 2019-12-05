@@ -14,7 +14,7 @@ class WebResource
     Servers = {}
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
 
-    # HTTP method -> resource-instance method
+    # HTTP method map
     Methods = {
       'GET'     => :GETresource,
       'HEAD'    => :HEAD,
@@ -34,9 +34,16 @@ class WebResource
     JS = -> r, pattern {(r.env['HTTP_REFERER']&.match(pattern) && NoGunk || NoJS)[r]}
     NoGunk  = -> r {r.gunkURI ? r.deny : r.fetch}
     NoJS    = -> r {r.ext=='js' ? r.deny : NoGunk[r]} # TODO inspect response content-type
-    NoQuery = -> r {r.qs.empty? ? r.fetch : [301, {'Location' => r.env['REQUEST_PATH']}, []]}
     RootIndex = -> r { r.chrono_sort if r.parts.size == 1; r.path == '/' ? r.cachedGraph : NoGunk[r]}
-
+    NoQuery = -> r {
+      if r.qs.empty?
+        NoGunk[r].yield_self{|s,h,b|
+          h.keys.map{|k|
+            h[k] = h[k].split('?')[0] if k.downcase == 'location' && h[k].match?(/\?/)}
+          [s,h,b]}
+      else
+        [301, {'Location' => r.env['REQUEST_PATH']}, []]
+      end}
     # canned responses
     R204 = [204, {}, []]
     R304 = [304, {}, []]
