@@ -12,6 +12,7 @@
 .file > .icon {font-size: 4.2em; background-color: #000; color: #fff}
 .file > .name {font-size: .8em; position: absolute; top: 4.8em; left: .4em}
 .file {position: relative}
+.identified {border: .08em solid #0ff; padding: 0}
 .list {background-color: #fff; color: #000}
 .main.post {background-color: #fff; color: #000; border-width: 0; padding: .2em}
 .post {border-radius: .38em; max-width: 88ex; border: 1px solid #222}
@@ -19,10 +20,10 @@
 .thumb, svg {max-width: 28em}
 .title {background-color: #fff; color: #000; font-size: 1.1em; vertical-align: top; display: inline-block}
 .title:visited {background-color: #000; color: #fff}
-.toolbox a.icon, .breadcrumb {text-shadow: 1px 1px #000000}
 .toolbox a.host img {max-height: 4.2em}
 .toolbox a.host span {background-color: #fff; color: #000; font-weight: bold}
 .toolbox a.icon {font-size: 1.6em}
+.toolbox a.icon, .breadcrumb {text-shadow: 1px 1px #000000}
 .toolbox a:target {text-shadow: 0px 0px #000000}
 .toolbox svg {height: 1em; width: 1em}
 .toolbox { position: fixed; top: 0; z-index: 2 }
@@ -30,16 +31,17 @@
 a {text-decoration: none}
 a.date {float: right; color: #888; font-size: .8em; border-color: #222}
 a.id {float: right; color: #333; border-color: #222}
+a.uri > span.uri {font-size: 0.78em; color: #222; font-weight: normal}
+a.uri {background-color: #eee; border-radius: .28em; color: #000; display: inline-block; max-width: 48ex; overflow: hidden; margin-right: .18em; margin-bottom: .18em; padding: .1em; font-weight: bold}
+a.uri:visited > span.uri {color: #ddd}
+a.uri:visited {background-color: #000; color: #fff}
 body {font-family: sans-serif; margin: 2.1em}
 body, .post, a.head, td.k a, td.v {background-color: #000; color: #fff}
 h1,h2,h3,h4,h5,h6,p,pre {margin: 0}
 img, video {max-width: 100%}
 p, li, blockquote {max-width: 86ex}
 pre {white-space: pre-wrap}
-a.uri {background-color: #eee; border-radius: .28em; color: #000; display: inline-block; max-width: 48ex; overflow: hidden; margin-right: .18em; margin-bottom: .18em; border: .07em solid black; padding: .1em; font-weight: bold}
-a.uri > span.uri {font-size: 0.78em; color: #222; font-weight: normal}
-a.uri:visited {background-color: #000; color: #fff; border-color: #ccc}
-a.uri:visited > span.uri {color: #ddd}
+span.id {background-color: #0ff; color: #000; font-size: .72em; float: left; border-radius: 0}
 table, div, li, svg {display: inline-block}
 td.k {max-width: 28ex; overflow: hidden; text-align: right}
 tr[name="title"] > td.v {max-width: 86ex; overflow: hidden}

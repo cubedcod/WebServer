@@ -44,9 +44,12 @@ image-src
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name # @srcset
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || StripAttrs.member?(a.name)} # strip attrs
         if e['href']
-          e.add_child " <span class='uri'>#{CGI.escapeHTML e['href'].sub(/^https?:..(www.)?/,'')[0..127]}</span>" # show full(er) URL
+          e.add_child " <span class='uri'>#{CGI.escapeHTML e['href'].sub(/^https?:..(www.)?/,'')[0..127]}</span> " # show full(er) URL
           e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # add node identifier for link traversal
           e.set_attribute 'class', 'uri'                                                # add node class for styling
+        elsif e['id']
+          e.set_attribute 'class', 'identified'
+          e.add_child " <span class='id'>##{CGI.escapeHTML e['id']}</span> " # show id
         end
         if e['src'] && e['src'][0] == '/' && e['src'][1] != '/' # TODO baseURI argument to cleaner method
           puts :relURI, e['src']
