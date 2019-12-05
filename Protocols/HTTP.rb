@@ -319,7 +319,7 @@ class WebResource
       primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env                                 # primary scheme
       fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env                              # fallback scheme
 
-      # network fetch: HTTPS with HTTP fallback
+      # network fetch, HTTPS with HTTP fallback
       primary.fetchHTTP options
     rescue Exception => e
       case e.class.to_s
@@ -372,14 +372,19 @@ class WebResource
         end
       end
     rescue Exception => e
-      #puts uri, e.class, e.message
       case e.message
       when /300/ # Multiple Choices
         [300, (headers e.io.meta), [e.io.read]]
       when /30[12378]/ # Relocated
-        dest = e.io.meta['location'].R
-        if (dest.path || '/') == (path || '/') && dest.host == host && dest.scheme == 'http' && scheme == 'https' # directed to fallback scheme
-          puts "DROPPED DOWNGRADE #{dest}"
+        dest = e.io.meta['location'].R env
+        same_path = (path || '/') == (dest.path || '/')
+        same_host = host == dest.host
+        scheme_downgrade = scheme == 'https' && dest.scheme == 'http'
+        if same_path && same_host && scheme_downgrade
+          puts "WARNING HTTPS redirected to HTTP at #{uri}"
+          dest.fetchHTTP options # transport-scheme downgrade
+        elsif same_path && same_host && scheme == dest.scheme
+          puts "ERROR #{uri} redirects to #{dest}"
           R404
         else
           [302, {'Location' => dest.uri}, []]
