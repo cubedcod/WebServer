@@ -595,6 +595,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
     Allow 'www.youtube.com'
     GET 'youtube.com', -> r {[301, {'Location' =>  'https://www.youtube.com' + r.path + r.qs}, []]}
     GET 'm.youtube.com', -> r {%w(channel feed playlist results user watch watch_comment yts).member?(r.parts[0]) ? r.upstreamUI.fetch : r.deny}
+    GET 'img.youtube.com', NoJS
     GET 's.ytimg.com', Desktop
     GET 'www.youtube-nocookie.com', Desktop
     GET 'www.youtube.com', -> r {

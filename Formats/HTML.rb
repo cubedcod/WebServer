@@ -17,6 +17,7 @@ data-original
 data-src
 image-src
 )
+    StripAttrs = %w(bgcolor class height http-equiv layout ping role style tabindex target theme width)
 
     def self.clean body
       html = Nokogiri::HTML.fragment body
@@ -37,25 +38,18 @@ image-src
       html.css("div[class*='image'][data-src]").map{|div|
         div.add_child "<img src=\"#{div['data-src']}\">"}
 
-      html.traverse{|e|
-        # links
+      html.traverse{|e| # visit nodes
+        e.attribute_nodes.map{|a| # visit attributes
+          e.set_attribute 'src', a.value if LazySRC.member? a.name            # @src map
+          e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name # @srcset
+          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || StripAttrs.member?(a.name)} # strip attrs
         if e['href']
-          e.add_child "<span class='uri'>#{CGI.escapeHTML e['href'].sub(/^https?:..(www.)?/,'')[0..41]}</span>"
-          e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id']
+          e.add_child " <span class='uri'>#{CGI.escapeHTML e['href'].sub(/^https?:..(www.)?/,'')[0..127]}</span>" # show full(er) URL
+          e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # add node identifier for link traversal
+          e.set_attribute 'class', 'uri'                                                # add node class for styling
         end
-
-        # @src normalization
-        e.attribute_nodes.map{|a|
-          if LazySRC.member? a.name
-            e.set_attribute 'src', a.value
-          end
-          e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
-
-          # stripped attrs
-          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w{bgcolor class height http-equiv layout ping role style tabindex target theme width}.member?(a.name)
-        }
-        if e['src'] && e['src'][0] == '/'
-          puts e['src']
+        if e['src'] && e['src'][0] == '/' # TODO baseURI arg to this method
+          puts :relURI,e['src']
         end
       }
 

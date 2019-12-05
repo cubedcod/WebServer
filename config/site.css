@@ -25,7 +25,7 @@
 .toolbox svg {height: 1em; width: 1em}
 .toolbox { position: fixed; top: 0; z-index: 2 }
 :target {background-color: #0f0; color: #000}
-a {text-decoration: none; font-weight: bold; color: #aaa}
+a {text-decoration: none; font-weight: bold}
 a.date {float: right; color: #888; font-size: .8em; border-color: #222}
 a.icon {font-weight: normal}
 a.id {float: right; color: #333; border-color: #222}
@@ -35,7 +35,8 @@ h1,h2,h3,h4,h5,h6,p,pre {margin: 0}
 img, video {max-width: 100%}
 p, li, blockquote {max-width: 86ex}
 pre {white-space: pre-wrap}
-span.uri {font-size: 0.78em; white-space: nowrap; color: #fff; background-color: #000; font-weight: normal; border: 1px dotted #888}
+a.uri {background-color: #ddd; color: #000; display: inline-block; max-width: 48ex; overflow: hidden; margin-right: .2em; margin-bottom: .2em}
+a.uri > span.uri {font-size: 0.78em; color: #000; background-color: #eee; font-weight: normal}
 table, div, li, svg {display: inline-block}
 td.k {max-width: 28ex; overflow: hidden; text-align: right}
 tr[name="title"] > td.v {max-width: 86ex; overflow: hidden}
