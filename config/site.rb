@@ -220,6 +220,7 @@ secure.brightcove.com
     GET 'thumbs.gfycat.com'
 
     # GitHub
+    GET 'api.github.com', -> r {r.desktopUI.fetch}
     GET 'github.com'
     %w(avatars0 avatars1 avatars2 avatars3 raw).map{|h|
       GET h + '.githubusercontent.com', NoJS }
