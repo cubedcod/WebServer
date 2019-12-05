@@ -48,8 +48,8 @@ image-src
           e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # add node identifier for link traversal
           e.set_attribute 'class', 'uri'                                                # add node class for styling
         end
-        if e['src'] && e['src'][0] == '/' # TODO baseURI arg to this method
-          puts :relURI,e['src']
+        if e['src'] && e['src'][0] == '/' && e['src'][1] != '/' # TODO baseURI argument to cleaner method
+          puts :relURI, e['src']
         end
       }
 

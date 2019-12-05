@@ -252,7 +252,7 @@ secure.brightcove.com
         when '/url'
           GotoURL[r]
         else
-          ENV.has_key?('GOOGLE') ? r.fetch : r.deny
+          (ENV.has_key?('BARNDOOR') || ENV.has_key?('GOOGLE')) ? r.fetch : r.deny
         end}
     end
 
@@ -422,7 +422,7 @@ firefox.settings.services.mozilla.com
 
     GET 'old.reddit.com', -> r {
       r.desktopUI.fetch.yield_self{|status,head,body|
-        if status.to_s.match? /^30/
+        if status.to_s.match?(/^30/) || ENV.has_key?('BARNDOOR')
           [status, head, body]
         else
           refs = []
