@@ -258,7 +258,7 @@ class WebResource
            "\n"]
         end}
       htmlGrep if env[:graph] && env[:grep]
- 
+
       # Markup -> HTML
       HTML.render ["<!DOCTYPE html>\n",
                    {_: :html,
@@ -271,7 +271,7 @@ class WebResource
                             ].map{|e|['  ',e,"\n"]}}, "\n",
                         {_: :body,
                          c: [{class: :toolbox,
-                              c: [{_: :a, id: :hostname, class: :host, href: '/', c: icon.cachePath.exist? ? {_: :img, src: icon.uri} : {_: :span, c: host}},
+                              c: [icon.cachePath.exist? ? {_: :a, href: '/', id: :host, c: {_: :img, src: icon.uri}} : hostname.split('.').-(%w(com net org www)).reverse.map{|h| {_: :a, class: :breadcrumb, href: '/', c: h}},
                                  ({_: :a, id: :UX, class: :icon, style: 'color: #555', c: '⚗️', href: HTTP.qs((env[:query]||{}).merge({'UX' => 'upstream'}))} unless local?),
                                  ({_: :a, id: :tabular, class: :icon, style: 'color: #555', c: '↨',
                                     href: HTTP.qs((env[:query]||{}).merge({'view' => 'table', 'sort' => 'date'}))} unless env[:query] && env[:query]['view']=='table'),

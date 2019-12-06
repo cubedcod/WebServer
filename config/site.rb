@@ -178,7 +178,11 @@ secure.brightcove.com
 
     # eBay
     Allow 'www.ebay.com'
-    %w(ebay.com www.ebay.com ir.ebaystatic.com).map{|host| GET host }
+    %w(ebay.com
+   www.ebay.com
+    ir.ebaystatic.com
+thumbs.ebaystatic.com).map{|host| GET host }
+
     GET 'i.ebayimg.com', -> r {r.basename.match?(/s-l(64|96|200|225).jpg/) ? [301, {'Location' => r.dirname + '/s-l1600.jpg'}, []] : r.fetch}
     GET 'rover.ebay.com', -> r {r.env[:query].has_key?('mpre') ? [301, {'Location' => r.env[:query]['mpre']}, []] : r.deny}
 
@@ -234,16 +238,13 @@ secure.brightcove.com
 
     # Google
     unless ENV.has_key? 'DEGOOGLE'
-      GET 'maps.googleapis.com', Desktop
-      GET 'ajax.googleapis.com', Fetch
-      GET 'connectivitycheck.gstatic.com', -> _ {R204}
-      GET 'www.googleapis.com', -> r {%w(youtube).member?(r.parts[0]) ? r.fetch : r.deny}
 
       (1..4).map{|i| GET "#{i}.bp.blogspot.com" }
       (1..4).map{|i| Allow "clients#{i}.google.com" } if ENV.has_key? 'GOOGLE'
       (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com" }
-      %w(ssl www).map{|n| GET "#{n}.gstatic.com" }
-      %w(books docs drive images news scholar).map{|h|GET h + '.google.com' }
+      %w(books docs drive images maps news scholar).map{|h|GET h + '.google.com' }
+      %w(ajax maps www).map{|h|GET h + '.googleapis.com' }
+      %w(maps ssl www).map{|h| GET h + '.gstatic.com' }
 
       Cookies 'www.google.com'
       GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
@@ -272,7 +273,7 @@ secure.brightcove.com
 
     # Imgur
     Allow 'api.imgur.com'
-    GET 'i.imgur.com', Desktop
+    %w(i.imgur.com i.stack.imgur.com).map{|host| GET host, Desktop }
 
     %w(imgur.com
      m.imgur.com
@@ -511,6 +512,11 @@ firefox.settings.services.mozilla.com
     %w(mobile.twitter.com tweettunnel.com www.twitter.com).map{|host| GET host, GotoTwitter }
     GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : NoQuery[r]}
     GET 'trib.al', NoQuery
+    Populate 'twitter.com', -> r {
+    }
+    #3    -  def HTTP.twits
+#-    `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|twit|
+#-      ('https://twitter.com/' + twit).R.subscribe}
     GET 'twitter.com', -> r {
       r.desktopUA
       if !r.path || r.path == '/'

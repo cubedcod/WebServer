@@ -11,6 +11,7 @@ class WebResource
     HostGET = {}
     HostPOST = {}
     LocalArgs = %w(allow view sort UX)
+    Populator = {}
     Servers = {}
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
 
@@ -449,7 +450,7 @@ class WebResource
        end).flatten.compact.uniq.select(&:exist?).map{|n|n.bindEnv env}
     end
 
-    # transform is explicitly allowed or implicit with Atom, RSS or HTML and local UI
+    # transform allowed explicitly, or implicitly w/ Atom, RSS or HTML and local UI
     def fixedFormat? format = nil
       return true if upstreamUI?
       return false if ENV.has_key?('TRANSFORM') || env[:transform] || !format || format.match?(/atom|html|rss|xml/i)
@@ -532,7 +533,7 @@ class WebResource
 
     def gunkURI
       return false if ENV.has_key?('BARNDOOR') || (env && env[:query]['allow'] == ServerKey)
-      ('/' + hostname + (env && env['REQUEST_URI'] || path || '/')).match? Gunk
+      ('/' + hostname + (env && env['REQUEST_URI'] || path || '/')).match? GunkURI
     end
 
     def HEAD
@@ -627,7 +628,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
 
     def localLog
       hosts = {}
-      `grep '.js ' ../web.log`.each_line{|line|
+      `tail -n 4096 ../web.log | grep '\.js'`.each_line{|line|
         line.chomp.split(' ').map{|token|
           if token.match? /^https?:/
             re = token.R
@@ -688,6 +689,10 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
       else
         {}
       end
+    end
+
+    def self.Populate host
+      Populator[host] = true
     end
 
     def self.POST host, lambda

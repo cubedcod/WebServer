@@ -1,4 +1,5 @@
 #down {display: block}
+#host img {max-height: 4.2em}
 #next {right: 0}
 #prev {left: 0}
 #prev, #next {position: fixed; height: 100%; font-size: 2em; color: #eee}
@@ -20,8 +21,6 @@
 .thumb, svg {max-width: 28em}
 .title {background-color: #fff; color: #000; font-size: 1.1em; vertical-align: top; display: inline-block}
 .title:visited {background-color: #000; color: #fff}
-.toolbox a.host img {max-height: 4.2em}
-.toolbox a.host span {background-color: #fff; color: #000; font-weight: bold}
 .toolbox a.icon {font-size: 1.6em}
 .toolbox a.icon, .breadcrumb {text-shadow: 1px 1px #000000}
 .toolbox a:target {text-shadow: 0px 0px #000000}
@@ -31,7 +30,7 @@
 a {text-decoration: none}
 a.date {float: right; white-space: nowrap; color: #888; font-size: .8em; border-color: #222}
 a.id {float: right; color: #333; border-color: #222}
-a.idlink {background-color: #0ff; color: #000; font-size: .72em; float: left; border-radius: 0 .2em 0 0}
+a.idlink {background-color: #0ff; color: #000; font-size: .72em; display: inline-block; vertical-align: bottom; border-radius: .28em 0 0 0}
 a.uri > span.uri {font-size: 0.78em; color: #222; font-weight: normal}
 a.uri {background-color: #eee; border-radius: .28em; color: #000; display: inline-block; max-width: 48ex; overflow: hidden; margin-right: .18em; margin-bottom: .18em; padding: .1em; font-weight: bold}
 a.uri:visited > span.uri {color: #ddd}
