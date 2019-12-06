@@ -1,8 +1,6 @@
 class WebResource
   module URIs
 
-    Gunk = %w(#adb-notification)
-
     GunkURI = %r([-.:_\/?&=~]
 ((block|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|id|rotat[eo]r?|slots?|tech|tools?|types?|units?|words?|zones?)?|alerts?|.*analytics.*|appnexus|audience|(app)?
 b(anner|eacon|reakingnew)s?|

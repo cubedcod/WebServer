@@ -53,8 +53,8 @@ image-src
           e.set_attribute 'class', 'identified'
           e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id']}</span> " # show id
         end
-        if e['src'] && e['src'][0] == '/' && e['src'][1] != '/' # TODO baseURI argument to cleaner method
-          puts :relURI, e['src']
+        if e['src'] && e['src'][0] == '/' && e['src'][1] != '/'
+          e['src'] = base.join(e['src']).to_s
         end
       }
 
