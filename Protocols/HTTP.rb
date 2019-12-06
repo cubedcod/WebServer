@@ -426,7 +426,7 @@ class WebResource
     end
 
     def findNodes
-      return dir.findNodes if name == 'index'
+      #return dir.findNodes if name == 'index'
       (if directory?                                           # directory?
        if env[:query].has_key?('f') && path != '/'             # FIND
           find env[:query]['f'] unless env[:query]['f'].empty? #  pedantic
@@ -645,7 +645,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
       if nodes.size==1 && nodes[0].ext=='ttl' && selectFormat=='text/turtle'
         nodes[0].fileResponse # nothing to merge or transform. return static node
       else                    # merge and/or transform
-        nodes.map &:load
+        nodes.map{|n| n.load base_uri: self }
         indexRDF if env[:new]
         graphResponse
       end

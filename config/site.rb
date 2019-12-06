@@ -126,7 +126,7 @@ s.click.aliexpress.com
     # Boston Globe
     GET 'bos.gl', -> r {r.fetch scheme: :http}
     GET 'bostonglobe-prod.cdn.arcpublishing.com', Resizer
-
+    %w(www).map{|host| GET host + '.boston.com', NoJS}
     %w(apps www www3).map{|host| GET host + '.bostonglobe.com', NoJS}
 
     # Brightcove
