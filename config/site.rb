@@ -208,6 +208,9 @@ thumbs.ebaystatic.com).map{|host| GET host }
     %w(l.facebook.com lm.facebook.com).map{|host|
       GET host, GotoU}
 
+    # FDroid
+    #Cookies 'f-droid.org'
+
     # Flickr
     GET 'combo.staticflickr.com', -> r {r.path=='/zz/combo' ? r.fetch : NoGunk[r]}
 
