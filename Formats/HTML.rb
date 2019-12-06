@@ -46,7 +46,9 @@ image-src
         if e['href']
           e.add_child " <span class='uri'>#{CGI.escapeHTML e['href'].sub(/^https?:..(www.)?/,'')[0..127]}</span> " # show full(er) URL
           e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # add node identifier for link traversal
-          e.set_attribute 'class', 'uri'                                                # add node class for styling
+          css = [:uri]
+          css.push :path if e['href'].match? /^\/[^\/]/
+          e.set_attribute 'class', css.join(' ')                                                # add node class for styling
         elsif e['id']
           e.set_attribute 'class', 'identified'
           e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id']}</span> " # show id
