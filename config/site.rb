@@ -533,19 +533,17 @@ firefox.settings.services.mozilla.com
     GET 'trib.al', NoQuery
 
     Populate 'twitter.com', -> r {
-      puts :populateTw
-    }
+      FileUtils.mkdir_p 'com/twitter'
+      `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|n|
+        FileUtils.touch 'com/twitter/.' + n}}
 
-    #3    -  def HTTP.twits
-#-    `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|twit|
-#-      ('https://twitter.com/' + twit).R.subscribe}
     GET 'twitter.com', -> r {
       r.desktopUA
       if !r.path || r.path == '/'
         r.env[:links][:feed] = '/feed'
         RootIndex[r]
       elsif r.path == '/feed'
-        'com/twitter/*/.follow*'.R.glob.map(&:dir).map(&:basename).shuffle.each_slice(18){|s|
+        Pathname.glob('com/twitter/.??*').map{|n|n.basename.to_s[1..-1]}.shuffle.each_slice(18){|s|
           '/search'.R(r.env).fetch intermediate: true,
                                    noRDF: true,
                                    query: {vertical: :default, f: :tweets, q: s.map{|u|'from:'+u}.join('+OR+')}}

@@ -602,16 +602,18 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
         node.children.map{|n|
           isDir = n.directory?
           name = n.basename.to_s + (isDir ? '/' : '')
-          item = container.join name
-          graph << RDF::Statement.new(container, (W3+'ns/ldp#contains').R, item)
-          if n.file?
-            graph << RDF::Statement.new(item, Type.R, (W3+'ns/posix/stat#File').R)
-            graph << RDF::Statement.new(item, (W3+'ns/posix/stat#size').R, n.size)
-          elsif isDir
-            graph << RDF::Statement.new(item, Type.R, (W3+'ns/ldp#Container').R)
+          unless name[0] == '.'
+            item = container.join name
+            graph << RDF::Statement.new(container, (W3+'ns/ldp#contains').R, item)
+            if n.file?
+              graph << RDF::Statement.new(item, Type.R, (W3+'ns/posix/stat#File').R)
+              graph << RDF::Statement.new(item, (W3+'ns/posix/stat#size').R, n.size)
+            elsif isDir
+              graph << RDF::Statement.new(item, Type.R, (W3+'ns/ldp#Container').R)
+            end
+            graph << RDF::Statement.new(item, Title.R, name)
+            graph << RDF::Statement.new(item, Date.R, n.mtime.iso8601) rescue nil
           end
-          graph << RDF::Statement.new(item, Title.R, name)
-          graph << RDF::Statement.new(item, Date.R, n.mtime.iso8601) rescue nil
         }
       end
       self
