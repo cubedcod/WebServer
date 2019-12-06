@@ -289,7 +289,6 @@ thumbs.ebaystatic.com).map{|host| GET host }
 
     Populate 'www.instagram.com', -> r {
       base = 'com/instagram/'
-      puts "NOTICE populating #{base} from log"
       FileUtils.mkdir_p base
       names = {}
       `grep -E 'instagram.com/[[:alnum:]]+/? ' ../web.log`.each_line{|line|
@@ -431,6 +430,7 @@ firefox.settings.services.mozilla.com
     # Reddit
     GotoReddit = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path + r.qs}, []]}
 
+    Populate 'www.reddit.com', -> r {FileUtils.mkdir_p 'com/reddit';'Dorchester+Rad_Decentralization+SOLID+StallmanWasRight+boston+dancehall+darknetplan+fossdroid+massachusetts+roxbury+selfhosted+shortwave'.split('+').map{|n| FileUtils.touch 'com/reddit/.' + n}}
     %w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h| Allow h }
     %w(gateway gql oauth www).map{|h| Allow h + '.reddit.com' }
     %w(www.redditmedia.com).map{|host| GET host, Desktop }
@@ -438,7 +438,7 @@ firefox.settings.services.mozilla.com
 
     Reddit = -> r {
       r.chrono_sort if r.parts[-1] == 'new' || r.path == '/'       # chrono-sort new posts
-      r = ('/r/'+'com/reddit/www/r/*/.sub*'.R.glob.map(&:dir).map(&:basename).join('+')+'/new').R r.env if r.path == '/' # subscriptions
+      r = ('/r/'+ Pathname.glob('com/reddit/.??*').map{|n|n.basename.to_s[1..-1]}.join('+')+'/new').R r.env if r.path == '/' # subscriptions
       r.desktopUI if r.parts[-1] == 'submit'                       # upstream UI for post submission
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? # upstream-representation preference
       r.env[:links][:prev] = 'https://old.reddit.com' + r.path + r.qs # page pointers
