@@ -691,8 +691,8 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
       end
     end
 
-    def self.Populate host
-      Populator[host] = true
+    def self.Populate host, lambda
+      Populator[host] = lambda
     end
 
     def self.POST host, lambda
