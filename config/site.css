@@ -37,14 +37,14 @@ a.uri:visited > span.uri {color: #ddd}
 a.uri:visited {background-color: #000; color: #fff}
 body {font-family: sans-serif; margin: 2.1em}
 body, .post, a.head, td.k a, td.v {background-color: #000; color: #fff}
-div.identified {background-color: #000; color: #fff}
+div.identified, p.identified {background-color: #000; color: #fff}
 h1,h2,h3,h4,h5,h6,p,pre {margin: 0}
 img, video {max-width: 100%}
 p, li, blockquote {max-width: 86ex}
 pre {white-space: pre-wrap}
 table, div, li, svg {display: inline-block}
-td > .title {border-radius: 0; border-width: .06em .06em .06em .5em; border-style: solid; border-color: #777; margin-left: -.5em}
-td > .title:visited {border-color: #555}
+td > .title {border-radius: 0; border-width: .06em .06em .06em .5em; border-style: solid; border-color: #555; margin-left: -.5em}
+td > .title:visited {border-color: #444}
 td.k {max-width: 28ex; overflow: hidden; text-align: right}
 tr[name="title"] > td.v {max-width: 86ex; overflow: hidden}
 video {min-width: 40ex}

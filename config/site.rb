@@ -52,7 +52,7 @@ class WebResource
   end
   module HTTP
 
-    CDNhost = /\.(amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|github|googleapis|netdna.*)\.(com|io|net)$/
+    CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|github|googleapis|netdna.*)\.(com|io|net)$/
     CookieHost = /\.bandcamp\.com$/
     DesktopUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
     DynamicImgHost = /(noaa|weather)\.gov$/
@@ -209,7 +209,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
       GET host, GotoU}
 
     # FDroid
-    #Cookies 'f-droid.org'
+    Cookies 'f-droid.org'
 
     # Flickr
     GET 'combo.staticflickr.com', -> r {r.path=='/zz/combo' ? r.fetch : NoGunk[r]}
