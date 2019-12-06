@@ -13,7 +13,7 @@
 .file > .icon {font-size: 4.2em; background-color: #000; color: #fff}
 .file > .name {font-size: .8em; position: absolute; top: 4.8em; left: .4em}
 .file {position: relative}
-.identified {border: .08em solid #0ff; padding: 0; border-radius: .24em}
+.identified {border: .08em solid; padding: 0; border-radius: .24em}
 .list {background-color: #fff; color: #000}
 .main.post {background-color: #fff; color: #000; border-width: 0; padding: .2em}
 .post {border-radius: .38em; margin: .1em; max-width: 88ex; border: 1px solid #222}
@@ -30,13 +30,14 @@
 a {text-decoration: none}
 a.date {float: right; white-space: nowrap; color: #888; font-size: .8em; border-color: #222}
 a.id {float: right; color: #333; border-color: #222}
-a.idlink {background-color: #0ff; color: #000; font-size: .72em; display: inline-block; vertical-align: bottom; border-radius: .28em .28em 0 0}
+a.idlink {color: #000; font-size: .72em; display: inline-block; vertical-align: bottom; border-radius: .28em .28em 0 0}
 a.uri > span.uri {font-size: 0.78em; color: #222; font-weight: normal}
 a.uri {background-color: #eee; border-radius: .28em; color: #000; display: inline-block; max-width: 48ex; overflow: hidden; margin-right: .18em; margin-bottom: .18em; padding: .1em; font-weight: bold}
 a.uri:visited > span.uri {color: #ddd}
 a.uri:visited {background-color: #000; color: #fff}
 body {font-family: sans-serif; margin: 2.1em}
 body, .post, a.head, td.k a, td.v {background-color: #000; color: #fff}
+div.identified {background-color: #000; color: #fff}
 h1,h2,h3,h4,h5,h6,p,pre {margin: 0}
 img, video {max-width: 100%}
 p, li, blockquote {max-width: 86ex}

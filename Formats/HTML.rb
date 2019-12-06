@@ -265,10 +265,10 @@ class WebResource
                     c: [{_: :head,
                          c: [{_: :meta, charset: 'utf-8'},
                             ({_: :title, c: CGI.escapeHTML(graph[titleRes][Title].map(&:to_s).join ' ')} if titleRes),
-                             {_: :style, c: ["\n", SiteCSS]}, "\n",
+                             {_: :style, c: ["\n", SiteCSS, ".idlink, .identified {", HTML.colorize, '}']}, "\n",
                              (env[:links] || {}).map{|type,uri|
                                {_: :link, rel: type, href: CGI.escapeHTML(uri.to_s)}}
-                            ].map{|e|['  ',e,"\n"]}}, "\n",
+                            ]}, "\n",
                         {_: :body,
                          c: [{class: :toolbox,
                               c: [icon.cachePath.exist? ? {_: :a, href: '/', id: :host, c: {_: :img, src: icon.uri}} : hostname.split('.').-(%w(com net org www)).reverse.map{|h| {_: :a, class: :breadcrumb, href: '/', c: h}},
