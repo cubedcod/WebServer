@@ -244,6 +244,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
 
       (1..4).map{|i| GET "#{i}.bp.blogspot.com" }
       (1..4).map{|i| Allow "clients#{i}.google.com" } if ENV.has_key? 'GOOGLE'
+      (0..3).map{|i| GET "khms#{i}.google.com" }
       (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com" }
       %w(books docs drive images maps news scholar).map{|h|GET h + '.google.com' }
       %w(ajax maps www).map{|h|GET h + '.googleapis.com' }
@@ -253,8 +254,10 @@ thumbs.ebaystatic.com).map{|host| GET host }
       GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
       GET 'www.google.com', -> r {
         case r.path
+        when /^.images/
+          NoJS[r]
         when /^.maps/
-          Desktop[r]
+          r.desktopUI.fetch
         when /^.search/
           q = r.env[:query]['q']
           q && q.match?(/^(https?:|l(ocalhost)?(:8000)?)\//) && [301,{'Location'=>q.sub(/^l/,'http://l')},[]] || r.fetch
