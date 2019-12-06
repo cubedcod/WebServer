@@ -19,7 +19,7 @@ image-src
 )
     StripAttrs = %w(bgcolor class height http-equiv layout ping role style tabindex target theme width)
 
-    def self.clean body
+    def self.clean body, base
       html = Nokogiri::HTML.fragment body
 
       # stripped elements
@@ -47,7 +47,7 @@ image-src
           e.add_child " <span class='uri'>#{CGI.escapeHTML e['href'].sub(/^https?:..(www.)?/,'')[0..127]}</span> " # show full(er) URL
           e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # add node identifier for link traversal
           css = [:uri]
-          css.push :path if e['href'].match? /^\/[^\/]/
+          css.push :path if e['href'].R.host == base.host
           e.set_attribute 'class', css.join(' ')                                                # add node class for styling
         elsif e['id']
           e.set_attribute 'class', 'identified'
@@ -217,13 +217,13 @@ sidebar [class^='side']    [id^='side']
         if body = n.css('body')[0]
           %w{content-body entry-content}.map{|bsel|
             if content = body.css('.' + bsel)[0]
-              yield subject, Content, HTML.clean(content.inner_html)
+              yield subject, Content, HTML.clean(content.inner_html, @base)
             end}
           [*GlobalGunk,*SiteGunk[@base.host]].map{|s|body.css(s).map &:remove} # strip elements
-          yield subject, Content, HTML.clean(body.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
+          yield subject, Content, HTML.clean(body.inner_html, @base).gsub(/<\/?(center|noscript)[^>]*>/i, '')
         else # body element missing
           n.css('head').remove
-          yield subject, Content, HTML.clean(n.inner_html).gsub(/<\/?(center|noscript)[^>]*>/i, '')
+          yield subject, Content, HTML.clean(n.inner_html, @base).gsub(/<\/?(center|noscript)[^>]*>/i, '')
         end
       end
     end

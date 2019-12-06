@@ -684,7 +684,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
         yield subject, Creator, (join user['href'])
         yield subject, Creator, user.inner_text }
       post.css("div[id^='post_message']").map{|content|
-        yield subject, Content, Webize::HTML.clean(content.inner_html)}
+        yield subject, Content, Webize::HTML.clean(content.inner_html, self)}
       if headers = post.css('td.thead > div.normal')
         if datetime = headers[1]
           datetime = datetime.inner_text.strip
@@ -839,7 +839,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
     yield subject, Type, Post.R
     yield subject, Title, tree['data']['title']
     yield subject, To, ('//' + tree['data']['domain']).R
-    yield subject, Content, (Webize::HTML.clean tree['data']['html'])
+    yield subject, Content, (Webize::HTML.clean tree['data']['html'], self)
     yield subject, Image, tree['data']['meta']['og']['og:image'].R
   end
 
@@ -875,7 +875,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
             a.set_attribute('id', 'l' + Digest::SHA2.hexdigest(rand.to_s))
             a.set_attribute('href', 'https://twitter.com' + (a.attr 'href')) if (a.attr 'href').match /^\//
             yield s, DC+'link', (a.attr 'href').R}
-          yield s, Content, Webize::HTML.clean(content.inner_html).gsub(/<\/?span[^>]*>/,'').gsub(/\n/,'').gsub(/\s+/,' ')
+          yield s, Content, Webize::HTML.clean(content.inner_html, self).gsub(/<\/?span[^>]*>/,'').gsub(/\n/,'').gsub(/\s+/,' ')
         end
 
         if img = tweet.attr('data-resolved-url-large')
