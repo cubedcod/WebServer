@@ -287,6 +287,21 @@ thumbs.ebaystatic.com).map{|host| GET host }
     GET 'l.instagram.com', GotoU
     GET 'www.instagram.com', RootIndex
 
+    Populate 'www.instagram.com', -> r {
+      base = 'com/instagram/'
+      puts "NOTICE populating #{base} from log"
+      FileUtils.mkdir_p base
+      names = {}
+      `grep -E 'instagram.com/[[:alnum:]]+/? ' ../web.log`.each_line{|line|
+        line.chomp.split(' ').map{|token|
+          if token.match? /^https?:/
+            name = token.split('/')[-1]
+            unless names[name]
+              names[name] = true
+              FileUtils.mkdir base + name
+            end
+          end}}}
+
     IG  =  -> r {             [301, {'Location' => 'https://www.instagram.com'  + r.path},     []]         }
     IG0 =  -> r {r.parts[0] ? [301, {'Location' => 'https://www.instagram.com/' + r.parts[0]}, []] : r.deny}
     IG1 =  -> r {r.parts[1] ? [301, {'Location' => 'https://www.instagram.com/' + r.parts[1]}, []] : r.deny}
@@ -508,12 +523,16 @@ firefox.settings.services.mozilla.com
     # Twitter
     Allow 'api.twitter.com'
     Allow 'proxsee.pscp.tv'
+
     GotoTwitter = -> r {[301,{'Location' => 'https://twitter.com' + r.path },[]]}
     %w(mobile.twitter.com tweettunnel.com www.twitter.com).map{|host| GET host, GotoTwitter }
     GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : NoQuery[r]}
     GET 'trib.al', NoQuery
+
     Populate 'twitter.com', -> r {
+      puts :populateTw
     }
+
     #3    -  def HTTP.twits
 #-    `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|twit|
 #-      ('https://twitter.com/' + twit).R.subscribe}

@@ -487,6 +487,7 @@ class WebResource
         dateMeta
         nodeResponse (path + name)
       elsif handler = HostGET[host] # host handler
+        Populator[host][self] if Populator[host] && !hostpath.R.exist?
         handler[self]
       elsif self.CDN?               # content-pool
         if ENV.has_key?('BARNDOOR') || AllowedHosts.has_key?(host) || CDNscripter.has_key?(env[:referer]) || env[:query]['allow'] == ServerKey
@@ -596,6 +597,8 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
       elsif directory?
         container = options[:base_uri] + (options[:base_uri].to_s[-1] == '/' ? '' : '/')
         graph << RDF::Statement.new(container, Type.R, (W3+'ns/ldp#Container').R)
+        graph << RDF::Statement.new(container, Title.R, basename)
+        graph << RDF::Statement.new(container, Date.R, stat.mtime.iso8601)
         node.children.map{|n|
           isDir = n.directory?
           name = n.basename.to_s + (isDir ? '/' : '')
