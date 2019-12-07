@@ -55,7 +55,7 @@ class WebResource
     end
 
     def allowCookies?
-      @cookies || AllowedHosts.has_key?(host) || CookieHosts.has_key?(host) || CookieHost.match?(host) || ENV.has_key?('BARNDOOR')
+      @cookies || AllowedHosts.has_key?(host) || CDNscripter.has_key?(env[:referer]) || CookieHosts.has_key?(host) || CookieHost.match?(host) || ENV.has_key?('BARNDOOR')
     end
 
     def allowedOrigin

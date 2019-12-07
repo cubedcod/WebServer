@@ -580,11 +580,14 @@ firefox.settings.services.mozilla.com
     # WaPo
     GET 'www.washingtonpost.com', -> r {(r.parts[0]=='resizer' ? Resizer : NoJS)[r]}
 
+    # WBUR
+    CDNscripts 'www.wbur.org'
+
     # Weather
     Allow 'api.weather.com'
     Allow 'profile.wunderground.com'
 
-    #WCVB
+    # WCVB
     GET 'www.wcvb.com', Desktop
 
     # WGBH
