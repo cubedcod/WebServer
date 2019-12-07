@@ -311,7 +311,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
     IG0 =  -> r {r.parts[0] ? [301, {'Location' => 'https://www.instagram.com/' + r.parts[0]}, []] : r.deny}
     IG1 =  -> r {r.parts[1] ? [301, {'Location' => 'https://www.instagram.com/' + r.parts[1]}, []] : r.deny}
 
-    %w(ig).map{|host| GET host, IG}
+    %w(instagram.com).map{|host| GET host, IG}
 
     %w(
 deskgram.cc deskgram.net
