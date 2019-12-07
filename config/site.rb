@@ -489,6 +489,7 @@ firefox.settings.services.mozilla.com
 
     # SkimResources
     GET 'go.skimresources.com', GotoURL
+    GET 'c212.net', GotoU
 
     # Soundcloud
     GET 'gate.sc', GotoURL
