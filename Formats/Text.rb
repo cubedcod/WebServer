@@ -1,6 +1,7 @@
 # coding: utf-8
 
 class String
+
   # text -> HTML, while yielding found (rel, href) tuples to block
   def hrefs &blk # wrapping <>()[] and trailing ,. chars not captured in URL
     pre, link, post = self.partition(/(https?:\/\/(\([^)>\s]*\)|[,.]\S|[^\s),.”\'\"<>\]])+)/)
@@ -26,9 +27,11 @@ class String
     puts "failed to scan #{self}"
     ''
   end
+
 end
 
 module Webize
+
   module NFO
     class Format < RDF::Format
       content_type 'text/nfo', :extension => :nfo
@@ -67,6 +70,7 @@ module Webize
       end
     end
   end
+
   module Plaintext
 
     BasicSlugs = %w{
@@ -126,6 +130,7 @@ module Webize
       end
     end
   end
+
   module VTT
     class Format < RDF::Format
       content_type 'text/vtt', :extension => :vtt
@@ -177,11 +182,46 @@ module Webize
       end
     end
   end
+
   module TempFile
     class Format < RDF::Format
       content_type 'text/tmpfile', :extension => :tmp
       content_encoding 'utf-8'
       reader { Plaintext::Reader }
+    end
+  end
+
+  module URIlist
+    class Format < RDF::Format
+      content_type 'text/uri-list',
+                   extension: :u
+      content_encoding 'utf-8'
+      reader { Reader }
+    end
+    class Reader < RDF::Reader
+      include WebResource::URIs
+      format Format
+
+      def initialize(input = $stdin, options = {}, &block)
+        @base = options[:base_uri].R.path.sub(/.u$/,'').R
+        @doc = input.respond_to?(:read) ? input.read : input
+        if block_given?
+          case block.arity
+          when 0 then instance_eval(&block)
+          else block.call(self)
+          end
+        end
+        nil
+      end
+
+      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
+
+      def each_statement &fn
+        fn.call RDF::Statement.new(@base, Type.R, (Schema+'BreadcrumbList').R)
+        @doc.lines.map(&:chomp).map{|line|
+          fn.call RDF::Statement.new @base, ('https://schema.org/itemListElement').R, line.R unless line.empty?
+        }
+      end
     end
   end
 end
