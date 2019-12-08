@@ -249,6 +249,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
       %w(books docs drive images maps news scholar).map{|h|GET h + '.google.com' }
       %w(ajax maps www).map{|h|GET h + '.googleapis.com' }
       %w(maps ssl www).map{|h| GET h + '.gstatic.com' }
+      Allow 'drive.google.com'
 
       Cookies 'www.google.com'
       GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
