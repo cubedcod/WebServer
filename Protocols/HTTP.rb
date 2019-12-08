@@ -828,7 +828,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     def upstreamUI?
       env.has_key?(:UX)  ||      # request environment
       ENV.has_key?('UX') ||      # global environment
-      env[:query].has_key?('UX') # URL parameter
+      parts.member?('embed') || env[:query].has_key?('UX') # URL parameter
     end
 
   end

@@ -148,7 +148,7 @@ secure.brightcove.com
     GET 'img.buzzfeed.com', NoJS
 
     # CBS
-    GET 'www.cbsnews.com', NoJS
+    GET 'www.cbsnews.com'
 
     # CircleCI
     GET 'circleci.com', -> r {r.parts[0] == 'blog' ? r.fetch : r.deny}
