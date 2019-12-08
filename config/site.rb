@@ -524,11 +524,14 @@ firefox.settings.services.mozilla.com
 
     # Twitch
     GET 'www.twitch.tv', Desktop
-    %w(api.twitch.tv
-         gql.twitch.tv
-         www.twitch.tv
+    %w( api.twitch.tv
+        gql.twitch.tv
+irc-ws.chat.twitch.tv
+pubsub-edge.twitch.tv
+        www.twitch.tv
+video-edge-8ec100.sjc02.hls.ttvnw.net
 ).map{|h|Allow h}
-    GET 'static.twitchcdn.net'
+    GET 'static.twitchcdn.net', Fetch
 
     # Twitter
     Allow 'api.twitter.com'
