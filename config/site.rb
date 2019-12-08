@@ -354,6 +354,7 @@ zoopps.com
 assets.octodon.social
      drive.nya.social
 files.mastodon.social
+      mastodon.art
       mastodon.social
            pdx.social
            nya.social
@@ -525,7 +526,7 @@ firefox.settings.services.mozilla.com
     %w(api.twitch.tv
          gql.twitch.tv
          www.twitch.tv
-).map{|h|Allow h} if ENV.has_key? 'TWITCH'
+).map{|h|Allow h}
 
     # Twitter
     Allow 'api.twitter.com'
