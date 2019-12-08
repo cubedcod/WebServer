@@ -19,6 +19,3 @@ pip install --upgrade pip pygments
 rm Gemfile.lock
 which bundle || gem install bundler
 bundle install
-
-# su -c '/usr/lib/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB'
-# mkdir ~/web
