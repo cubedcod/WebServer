@@ -109,7 +109,8 @@ class WebResource < RDF::URI
 
     def hostname; env && env['SERVER_NAME'] || host || 'localhost' end
     def hostpath; '/' + hostname.split('.').-(%w(www)).reverse.join('/') end
-    
+
+    # calculate URIs for index-storage, and store named-graph
     def indexRDF
       return self unless env[:repository]
       
