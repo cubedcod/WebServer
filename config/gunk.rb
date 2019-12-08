@@ -2,7 +2,7 @@ class WebResource
   module URIs
 
     GunkURI = %r([-.:_\/?&=~]
-((block|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|id|rotat[eo]r?|slots?|tech|tools?|types?|units?|words?|zones?)?|alerts?|.*analytics.*|appnexus|audience|(app)?
+((block|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|id|rotat[eo]r?|slots?|tech|tools?|types?|units?|words?|zones?)?|akismet|alerts?|.*analytics.*|appnexus|audience|(app)?
 b(anner|eacon|reakingnew)s?|
 c(ampaigns?|edexis|hartbeat.*|loudflare|ollector|omscore|on(sent|version)|ookie(c(hoice|onsent)|law|notice)?s?|se)|
 de(als|tect)|
@@ -21,7 +21,7 @@ quantcast|
 record(event|stats?)|re?t(ar)?ge?t(ing)?|remote[-_]?(control)?|rpc|
 s?s(a(fe[-_]?browsing|ilthru)|cheduler|ervice[-_]?worker|i(ftscience|gnalr|tenotice)|o(cial(shar(e|ing))?|urcepoint)|ponsor(ed)?|tat(istic)?s?|ubscri(ber?|ptions?)|urvey|w.js|yn(c|dicat(ed|ion)))|
 t(aboola|ags|(arget|rack)(ers?|ing)|ampering|ea(lium|ser)|elemetry|inypass|ra?c?k?ing(data)?|rend(ing|s)|ypeface)|autotrack|
-u(rchin|ser[-_]?(context|location)|tm)|
+u(psell|rchin|ser[-_]?(context|location)|tm)|
 viral|
 wp-rum)
 ([-.:_\/?&=~]|$)|

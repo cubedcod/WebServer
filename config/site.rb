@@ -527,6 +527,7 @@ firefox.settings.services.mozilla.com
          gql.twitch.tv
          www.twitch.tv
 ).map{|h|Allow h}
+    GET 'static.twitchcdn.net'
 
     # Twitter
     Allow 'api.twitter.com'
