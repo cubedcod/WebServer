@@ -642,8 +642,8 @@ media-mbst-pub-ue1.s3.amazonaws.com
     GET 'youtube.com', -> r {[301, {'Location' =>  'https://www.youtube.com' + r.path + r.qs}, []]}
     GET 'm.youtube.com', -> r {%w(channel feed playlist results user watch watch_comment yts).member?(r.parts[0]) ? r.upstreamUI.fetch : r.deny}
     GET 'img.youtube.com', NoJS
-    GET 's.ytimg.com', Desktop
-    GET 'www.youtube-nocookie.com', Desktop
+    %w(s.ytimg.com www.youtube-nocookie.com).map{|host| GET host, Desktop }
+
     GET 'www.youtube.com', -> r {
       fn = r.parts[0]
       if %w{attribution_link redirect}.member? fn
@@ -654,9 +654,12 @@ media-mbst-pub-ue1.s3.amazonaws.com
         r.fetch
       elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results signin user watch watch_videos yts).member? fn
         r.upstreamUI.fetch
+      elsif ENV.has_key?('BARNDOOR') || ENV.has_key?('GOOGLE')
+        r.fetch
       else
         r.deny
       end}
+
     POST 'www.youtube.com', -> r {
       if r.parts.member? 'stats'
         r.denyPOST
