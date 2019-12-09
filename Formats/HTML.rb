@@ -21,7 +21,7 @@ image-src
 
     def self.clean body, base
       html = Nokogiri::HTML.fragment body
-
+      puts "clean #{base}"
       # stripped elements
       %w{iframe link[rel='stylesheet'] style link[type='text/javascript'] link[as='script'] script}.map{|s| html.css(s).remove}
       html.css('a[href^="javascript"]').map{|a| a.remove }

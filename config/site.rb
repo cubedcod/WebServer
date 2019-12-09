@@ -442,11 +442,19 @@ firefox.settings.services.mozilla.com
     # Reddit
     GotoReddit = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path + r.qs}, []]}
 
-    Populate 'www.reddit.com', -> r {FileUtils.mkdir_p 'com/reddit';'Dorchester+Rad_Decentralization+SOLID+StallmanWasRight+boston+dancehall+darknetplan+fossdroid+massachusetts+roxbury+selfhosted+shortwave'.split('+').map{|n| FileUtils.touch 'com/reddit/.' + n}}
-    %w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h| Allow h }
-    %w(gateway gql oauth www).map{|h| Allow h + '.reddit.com' }
-    %w(www.redditmedia.com).map{|host| GET host, Desktop }
-    %w(np.reddit.com reddit.com).map{|host| GET host, GotoReddit }
+    Populate 'www.reddit.com', -> r {
+      FileUtils.mkdir_p 'com/reddit'
+      'Dorchester+Rad_Decentralization+SOLID+StallmanWasRight+boston+dancehall+darknetplan+fossdroid+massachusetts+roxbury+selfhosted+shortwave'.split('+').map{|n|
+        FileUtils.touch 'com/reddit/.' + n}}
+
+    %w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h|
+      Allow h }
+    %w(gateway gql oauth www).map{|h|
+      Allow h + '.reddit.com' }
+    %w(www.redditmedia.com).map{|host|
+      GET host, Desktop }
+    %w(np.reddit.com reddit.com).map{|host|
+      GET host, GotoReddit }
 
     Reddit = -> r {
       r.chrono_sort if r.parts[-1] == 'new' || r.path == '/'       # chrono-sort new posts
@@ -675,6 +683,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
 
     # ZeroHedge
     Allow 'talk.zerohedge.com'
+    GET 'www.zerohedge.com', Fetch
 
     # Zillow
     Allow 'www.zillow.com'
