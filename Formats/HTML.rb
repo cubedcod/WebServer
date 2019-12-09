@@ -43,20 +43,20 @@ image-src
           e.set_attribute 'src', a.value if LazySRC.member? a.name            # @src map
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name # @srcset
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || StripAttrs.member?(a.name)} # strip attrs
+
         if e['href']
+          ref = e['href'].R
           e.add_child " <span class='uri'>#{CGI.escapeHTML e['href'].sub(/^https?:..(www.)?/,'')[0..127]}</span> " # show full(er) URL
-          e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # add node identifier for link traversal
-          css = [:uri]
-          css.push :path if e['href'].R.host == base.host
-          e.set_attribute 'class', css.join(' ')                                                # add node class for styling
-        elsif e['id']
-          e.set_attribute 'class', 'identified'
-          e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id']}</span> " # show id
+          e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # identify node for traversal
+          css = [:uri]; css.push :path if !ref.host || (ref.host == base.host)
+          e['href'] = base.join e['href'] unless ref.host                               # resolve relative references
+          e['class'] = css.join ' '                                                     # node class for styling
+        elsif e['id']                                                                   # identified node w/ no target link
+          e.set_attribute 'class', 'identified'                                         # node class for styling
+          e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id']}</span> " # link to self
         end
-        if e['src'] && e['src'][0] == '/' && e['src'][1] != '/'
-          e['src'] = base.join(e['src']).to_s
-        end
-      }
+
+        e['src'] = base.join e['src'] if e['src'] && !e['src'].R.host}                  # resolve image location
 
 
       html.to_xhtml(:indent => 0)
