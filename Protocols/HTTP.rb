@@ -236,6 +236,10 @@ class WebResource
       ''
     end
 
+    def default_port?
+      [80, 443].member? (env['SERVER_PORT'] || 443).to_i
+    end
+
     def deny status=200, type=nil
       env[:deny] = true
       type, content = if type == :stylesheet || ext == 'css'
@@ -316,8 +320,9 @@ class WebResource
       return cachedGraph if offline?                                                                  # offline, return cache
 
       # locator
-puts env['SERVER_PORT']
-      u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? HTTP.qs(options[:query]) : qs) # base locator
+      p = default_port? ? '' : (':' + env['SERVER_PORT'].to_s)
+      puts "PORT #{p}" unless default_port?
+      u = '//'+hostname+p+path+(options[:suffix]||'')+(options[:query] ? HTTP.qs(options[:query]) : qs) # base locator
       primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env                                 # primary scheme
       fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env                              # fallback scheme
 
