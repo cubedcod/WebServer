@@ -273,6 +273,10 @@ thumbs.ebaystatic.com).map{|host| GET host }
     GET 'i.guim.co.uk'
     GET 'www.theguardian.com'
 
+    # HFU
+    Allow 'chat.hfunderground.com'
+    GET 'chat.hfunderground.com', Desktop
+
     # iHeart
     Allow 'us.api.iheart.com'
     Allow 'www.iheart.com'
