@@ -18,7 +18,7 @@
 .post {border-radius: .38em; margin: .1em; max-width: 88ex; border: 1px solid #222}
 .quote {background-color: #ccc; color: #000}
 .thumb, svg {max-width: 28em}
-.title {background-color: #fff; color: #000; font-size: 1.1em; vertical-align: top; display: inline-block; margin: -.4em; padding-left: .4em}
+.title {background-color: #fff; color: #000; border-radius: .1em; font-size: 1.1em; vertical-align: top; padding: .1em}
 .title:visited {background-color: #000; color: #fff}
 .toolbox a.icon {font-size: 1.6em}
 .toolbox a.icon, .breadcrumb {text-shadow: 1px 1px #000000}
@@ -45,6 +45,6 @@ p, li, blockquote {max-width: 86ex}
 pre {white-space: pre-wrap}
 table, div, li, svg {display: inline-block; border-spacing: 0}
 td.k {max-width: 28ex; overflow: hidden; text-align: right}
-tr:nth-child(even) {background-color: #181818}
+table.tabular tr:nth-child(even) {background-color: #181818}
 tr[name="title"] > td.v {max-width: 86ex; overflow: hidden}
 video {min-width: 40ex}

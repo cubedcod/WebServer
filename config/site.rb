@@ -564,7 +564,7 @@ video-edge-8ec100.sjc02.hls.ttvnw.net
       if !r.path || r.path == '/'
         r.env[:links][:feed] = '/feed'
         RootIndex[r]
-      elsif r.path == '/feed'
+      elsif r.parts[0] == 'feed'
         Pathname.glob('com/twitter/.??*').map{|n|n.basename.to_s[1..-1]}.shuffle.each_slice(18){|s|
           '/search'.R(r.env).fetch intermediate: true,
                                    noRDF: true,

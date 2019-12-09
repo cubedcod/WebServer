@@ -316,6 +316,7 @@ class WebResource
       return cachedGraph if offline?                                                                  # offline, return cache
 
       # locator
+puts env['SERVER_PORT']
       u = '//'+hostname+path+(options[:suffix]||'')+(options[:query] ? HTTP.qs(options[:query]) : qs) # base locator
       primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env                                 # primary scheme
       fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env                              # fallback scheme
