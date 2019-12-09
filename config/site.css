@@ -18,7 +18,7 @@
 .post {border-radius: .38em; margin: .1em; max-width: 88ex; border: 1px solid #222}
 .quote {background-color: #ccc; color: #000}
 .thumb, svg {max-width: 28em}
-.title {background-color: #fff; color: #000; font-size: 1.1em; vertical-align: top; display: inline-block}
+.title {background-color: #fff; color: #000; font-size: 1.1em; vertical-align: top; display: inline-block; margin: -.4em; padding-left: .4em}
 .title:visited {background-color: #000; color: #fff}
 .toolbox a.icon {font-size: 1.6em}
 .toolbox a.icon, .breadcrumb {text-shadow: 1px 1px #000000}
@@ -26,7 +26,7 @@
 .toolbox svg {height: 1em; width: 1em}
 .toolbox { position: fixed; top: 0; z-index: 2 }
 :target {background-color: #0f0; color: #000}
-a {text-decoration: none; border-radius: .2em}
+a {text-decoration: none}
 a.date {float: right; white-space: nowrap; color: #888; font-size: .8em; border-color: #222}
 a.id {float: right; color: #333; border-color: #222}
 a.idlink {color: #000; font-size: .72em; display: inline-block; vertical-align: bottom; border-radius: .28em .28em 0 0}
@@ -44,8 +44,6 @@ img, video {max-width: 100%}
 p, li, blockquote {max-width: 86ex}
 pre {white-space: pre-wrap}
 table, div, li, svg {display: inline-block; border-spacing: 0}
-td > .title {border-radius: 0; border-width: .06em .06em .06em .5em; border-style: solid; border-color: #555; margin-left: -.5em}
-td > .title:visited {border-color: #444}
 td.k {max-width: 28ex; overflow: hidden; text-align: right}
 tr:nth-child(even) {background-color: #181818}
 tr[name="title"] > td.v {max-width: 86ex; overflow: hidden}
