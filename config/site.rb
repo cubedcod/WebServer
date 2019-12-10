@@ -3,7 +3,9 @@ module Webize
     class Reader
 
       SiteGunk = {'www.google.com' => %w(div.logo h1 h2),
-                  'www.bostonmagazine.com' => %w(a[href*='scrapertrap'])}
+                  'www.bostonmagazine.com' => %w(a[href*='scrapertrap']),
+                  'www.theregister.co.uk' => %w(#hot #read_more_on #whitepapers),
+                 }
 
       # HTML -> RDF methods
       Triplr = {
@@ -47,7 +49,8 @@ class WebResource
     FeedIcon = SiteDir.join('feed.svg').read
     SiteFont = SiteDir.join('fonts/hack-regular-subset.woff2').read
     SiteGIF = SiteDir.join('site.gif').read
-    SiteCSS = SiteDir.join('site.css').read #+ SiteDir.join('code.css').read
+    SiteCSS = SiteDir.join('site.css').read
+    CodeCSS = SiteDir.join('code.css').read
     SiteJS  = SiteDir.join('site.js').read
   end
   module HTTP

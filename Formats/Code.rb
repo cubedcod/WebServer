@@ -12,8 +12,8 @@ module Webize
       format Format
 
       def initialize(input = $stdin, options = {}, &block)
-        #@doc = input.respond_to?(:read) ? input.read : input
         @base = options[:base_uri].R
+        @path = options[:file_path]
         @lang = options[:lang]
         if block_given?
           case block.arity
@@ -28,13 +28,14 @@ module Webize
 
       def each_statement &fn
         source_tuples{|p,o|
-          fn.call RDF::Statement.new(@base, p, o, :graph_name => @base)}
+          fn.call RDF::Statement.new(@path, p, o, :graph_name => @path)}
       end
 
       def source_tuples
         yield Type.R, (Schema + 'Code').R
+        yield Title.R, @path.basename
         lang = "-l #{@lang}" if @lang
-        html = RDF::Literal `pygmentize #{lang} -f html #{@base.shellPath}`
+        html = RDF::Literal [`pygmentize #{lang} -f html #{@path.shellPath}`,'<style>',CodeCSS,'</style>'].join
         html.datatype = RDF.XMLLiteral
         yield Content.R, html
       end

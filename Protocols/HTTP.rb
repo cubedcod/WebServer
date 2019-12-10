@@ -600,6 +600,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
       options[:base_uri] ||= self
       if file?
         options[:format]  ||= formatHint
+        options[:file_path] = self
         env[:repository].load relPath, options
       elsif directory?
         container = options[:base_uri] + (options[:base_uri].to_s[-1] == '/' ? '' : '/')
