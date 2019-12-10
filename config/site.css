@@ -38,7 +38,7 @@ a.uri:visited > span.uri {color: #ddd}
 a.uri:visited {background-color: #000; color: #fff}
 body {font-family: sans-serif; margin: 2.1em}
 body, .post, a.head, td.k a, td.v {background-color: #000; color: #fff}
-div.identified, p.identified {background-color: #000; color: #fff}
+div.identified, p.identified, article.identified, section.identified {background-color: #000; color: #fff}
 h1,h2,h3,h4,h5,h6,p,pre {margin: 0}
 img, video {max-width: 100%}
 p, li, blockquote {max-width: 86ex}
