@@ -60,7 +60,7 @@ class WebResource
 
     def allowedOrigin
       if env['HTTP_ORIGIN']
-        env['HTTP_ORIGIN']
+        env['HTTP_ORIGIN'].join ','
       elsif referer = env['HTTP_REFERER']
         'http' + (env['SERVER_NAME'] == 'localhost' ? '' : 's') + '://' + referer.R.host
       else
@@ -684,10 +684,19 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     def OPTIONSthru
       # request
       url = 'https://' + host + path + qs
+      head = headers
       body = env['rack.input'].read
       # response
-      r = HTTParty.options url, :headers => headers, :body => body
-      [r.code, (headers r.headers), [r.body]]
+      r = HTTParty.options url, :headers => head, :body => body
+      h = headers r.headers
+      if ENV.has_key? 'VERBOSE'
+        HTTP.print_header head
+        puts body
+        puts :__________________
+        HTTP.print_header h
+        puts r.body
+      end
+      [r.code, h, [r.body]]
     end
 
     # String -> Hash
@@ -728,14 +737,16 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
       body = env['rack.input'].read
       # origin response
       r = HTTParty.post url, :headers => head, :body => body
+      h = headers r.headers
       if ENV.has_key? 'VERBOSE'
+        puts '>'*32
         HTTP.print_header head
         puts body
-        puts :__________________
-        HTTP.print_header r.headers
+        puts '<'*32
+        HTTP.print_header h
         puts r.body
       end
-      [r.code, (headers r.headers), [r.body]]
+      [r.code, h, [r.body]]
     end
 
     def HTTP.print_body head, body
