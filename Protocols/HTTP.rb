@@ -565,7 +565,7 @@ class WebResource
         key = key.downcase if underscored
 
         # set external header keys & values
-        head[key] = v.to_s unless %w{connection gunk host links path-info query query-modified query-string
+        head[key] = v unless %w{connection gunk host links path-info query query-modified query-string
 rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version
 remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software
 transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forwarded-for}.member?(key.downcase)}

@@ -2,7 +2,7 @@
 #host img {max-height: 4.2em}
 #next {right: 0}
 #prev {left: 0}
-#prev, #next {position: fixed; height: 100%; font-size: 2em; color: #eee;background-color: #111}
+#prev, #next {position: fixed; height: 100%; font-size: 2em; padding: 0 .2em 0 .2em; color: #eee; background-color: #111}
 .avatar {max-height: 2em; background-color: #000}
 .breadcrumb {border-width: 0 0 0 .08em; border-color: #888; border-style: dotted; border-radius: 0; color: #ddd}
 .breadcrumb.basename {color: #fff; font-weight: bold}
@@ -46,5 +46,6 @@ pre {white-space: pre-wrap}
 table, div, li, svg {display: inline-block; border-spacing: 0}
 td.k {max-width: 28ex; overflow: hidden; text-align: right}
 table.tabular tr:nth-child(even) {background-color: #181818}
+table.tabular td {vertical-align: top}
 tr[name="title"] > td.v {max-width: 86ex; overflow: hidden}
 video {min-width: 40ex}

@@ -380,6 +380,7 @@ files.mastodon.social
 
     # Meetup
     Allow 'www.meetup.com'
+    GET 'www.meetup.com', Fetch
 
     # Meredith
     GET 'imagesvc.meredithcorp.io', GoIfURL
