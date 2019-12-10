@@ -1,4 +1,23 @@
 # coding: utf-8
+require 'redcarpet'
+
+module Redcarpet
+  module Render
+    class Pygment < HTML
+      def block_code(code, lang)
+        if lang
+          IO.popen("pygmentize -l #{Shellwords.escape lang.downcase} -f html",'r+'){|p|
+            p.puts code
+            p.close_write
+            p.read
+          }
+        else
+          code
+        end
+      end
+    end
+  end
+end
 
 class String
 
@@ -31,6 +50,127 @@ class String
 end
 
 module Webize
+
+  module CSS
+    class Format < RDF::Format
+      content_type 'text/css', :extension => :css
+      content_encoding 'utf-8'
+      reader { Reader }
+    end
+
+    class Reader < RDF::Reader
+      include WebResource::URIs
+      format Format
+
+      def initialize(input = $stdin, options = {}, &block)
+        @doc = input.respond_to?(:read) ? input.read : input
+        @subject = (options[:base_uri] || '#css').R
+        if block_given?
+          case block.arity
+          when 0 then instance_eval(&block)
+          else block.call(self)
+          end
+        end
+        nil
+      end
+
+      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
+
+      def each_statement &fn
+        css_triples{|s,p,o|
+          fn.call RDF::Statement.new(@subject, p.R,
+                                     (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal o
+                                                                                            l.datatype=RDF.XMLLiteral if p == Content
+                                                                                            l),
+                                     :graph_name => @subject)}
+      end
+
+      def css_triples
+      end
+    end
+  end
+
+  module Sourcecode
+    class Format < RDF::Format
+      content_type 'application/*'
+      content_encoding 'utf-8'
+      reader { Reader }
+    end
+
+    class Reader < RDF::Reader
+      include WebResource::URIs
+      format Format
+
+      def initialize(input = $stdin, options = {}, &block)
+        @base = options[:base_uri].R
+        @path = options[:file_path]
+        @lang = options[:lang]
+        if block_given?
+          case block.arity
+          when 0 then instance_eval(&block)
+          else block.call(self)
+          end
+        end
+        nil
+      end
+
+      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
+
+      def each_statement &fn
+        source_tuples{|p,o|
+          fn.call RDF::Statement.new(@path, p, o, :graph_name => @path)}
+      end
+
+      def source_tuples
+        yield Type.R, (Schema + 'Code').R
+        yield Title.R, @path.basename
+        lang = "-l #{@lang}" if @lang
+        html = RDF::Literal [`pygmentize #{lang} -f html #{@path.shellPath}`,'<style>',CodeCSS,'</style>'].join
+        html.datatype = RDF.XMLLiteral
+        yield Content.R, html
+      end
+    end
+  end
+
+  module Markdown
+    class Format < RDF::Format
+      content_type 'text/markdown', :extension => :md
+      content_encoding 'utf-8'
+      reader { Reader }
+    end
+
+    class Reader < RDF::Reader
+      include WebResource::URIs
+      format Format
+
+      def initialize(input = $stdin, options = {}, &block)
+        @doc = input.respond_to?(:read) ? input.read : input
+        @subject = (options[:base_uri] || '#textfile').R
+        if block_given?
+          case block.arity
+          when 0 then instance_eval(&block)
+          else block.call(self)
+          end
+        end
+        nil
+      end
+
+      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
+
+      def each_statement &fn
+        markdown_triples{|s,p,o|
+          fn.call RDF::Statement.new(@subject, p.R,
+                                     (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal o
+                                                                                            l.datatype=RDF.XMLLiteral if p == Content
+                                                                                            l),
+                                     :graph_name => @subject)}
+      end
+
+      def markdown_triples
+        yield @subject, Content, ::Redcarpet::Markdown.new(::Redcarpet::Render::Pygment, fenced_code_blocks: true).render(@doc)
+      end
+    end
+  end
 
   module NFO
     class Format < RDF::Format
