@@ -564,8 +564,8 @@ class WebResource
           k }.join(underscored ? '_' : '-')
         key = key.downcase if underscored
 
-        # set external header keys & values
-        head[key] = v unless %w{connection gunk host links path-info query query-modified query-string
+        # set header value
+        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w{connection gunk host links path-info query query-modified query-string
 rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version
 remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software
 transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forwarded-for}.member?(key.downcase)}
@@ -591,7 +591,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
       head['User-Agent'] = 'curl/7.65.1' if host == 'po.st'
       head.delete 'User-Agent' if host == 't.co'
 
-      head # output header
+      head
     end
 
     # node RDF -> Repository
@@ -772,9 +772,7 @@ transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forw
     end
 
     def HTTP.print_header header
-      header.map{|k,v|
-      puts       [k,v].join "\t"}
-      puts " "
+      header.map{|k, v| puts [k, v.to_s].join "\t"}
     end
 
     def PUT
