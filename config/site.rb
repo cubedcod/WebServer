@@ -277,6 +277,9 @@ thumbs.ebaystatic.com).map{|host| GET host }
     Allow 'chat.hfunderground.com'
     GET 'chat.hfunderground.com', Desktop
 
+    # Hubspot
+    GET 'hubs.ly', NoQuery
+
     # iHeart
     Allow 'us.api.iheart.com'
     Allow 'www.iheart.com'
