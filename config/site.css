@@ -18,7 +18,7 @@
 .post {border-radius: .38em; margin: .1em; max-width: 88ex; border: 1px solid #222}
 .quote {background-color: #ccc; color: #000}
 .thumb, svg {max-width: 28em}
-.title {background-color: #fff; color: #000; min-width: 10em; display: block; border-radius: .1em; font-size: 1.1em; vertical-align: top; padding: .1em}
+.title {background-color: #fff; color: #000; min-width: 10em; display: block; font-size: 1.1em; vertical-align: top; padding: .1em}
 .title:visited {background-color: #000; color: #fff}
 .toolbox a.icon {font-size: 1.6em}
 .toolbox a.icon, .breadcrumb {text-shadow: 1px 1px #000000}
@@ -30,8 +30,8 @@ a {text-decoration: none}
 a.date {float: right; white-space: nowrap; color: #888; font-size: .8em; border-color: #222}
 a.id {float: right; color: #333; border-color: #222}
 a.idlink {color: #000; font-size: .72em; display: inline-block; vertical-align: bottom; border-radius: .28em .28em 0 0}
-a.uri > span.uri {font-size: 0.78em; color: #222; font-weight: normal}
-a.uri {background-color: #eee; border-radius: .28em; color: #000; display: inline-block; max-width: 48ex; overflow: hidden; margin-right: .18em; margin-bottom: .18em; padding: .1em; font-weight: bold}
+a.uri > span.uri {font-size: 0.8em; color: #222; font-weight: normal}
+a.uri {background-color: #ddd; border-radius: .28em; color: #000; display: inline-block; max-width: 42ex; overflow: hidden; margin-right: .18em; margin-bottom: .18em; padding: .1em; font-weight: bold}
 a.uri.path > span.uri {color: #fff}
 a.uri.path {background-color: #181818; color: #fff; border: 1px solid #333}
 a.uri:visited > span.uri {color: #ddd}
