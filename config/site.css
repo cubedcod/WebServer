@@ -2,7 +2,7 @@
 #host img {max-height: 4.2em}
 #next {right: 0}
 #prev {left: 0}
-#prev, #next {position: fixed; height: 100%; font-size: 2em; color: #eee}
+#prev, #next {position: fixed; height: 100%; font-size: 2em; color: #eee;background-color: #111}
 .avatar {max-height: 2em; background-color: #000}
 .breadcrumb {border-width: 0 0 0 .08em; border-color: #888; border-style: dotted; border-radius: 0; color: #ddd}
 .breadcrumb.basename {color: #fff; font-weight: bold}
@@ -18,7 +18,7 @@
 .post {border-radius: .38em; margin: .1em; max-width: 88ex; border: 1px solid #222}
 .quote {background-color: #ccc; color: #000}
 .thumb, svg {max-width: 28em}
-.title {background-color: #fff; color: #000; border-radius: .1em; font-size: 1.1em; vertical-align: top; padding: .1em}
+.title {background-color: #fff; color: #000; min-width: 10em; display: block; border-radius: .1em; font-size: 1.1em; vertical-align: top; padding: .1em}
 .title:visited {background-color: #000; color: #fff}
 .toolbox a.icon {font-size: 1.6em}
 .toolbox a.icon, .breadcrumb {text-shadow: 1px 1px #000000}
