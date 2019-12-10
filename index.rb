@@ -1,4 +1,4 @@
-%w(URI Archive Audio Calendar Feed HTML Image JS Mail PDF SQL Text Video Web YAML).
+%w(URI Archive Audio Calendar Feed HTML Image JS Mail PDF SQL Text Video).
                      map{|f| require_relative 'Formats/'   + f }
 
 %w(Gopher HTTP NNTP).map{|p| require_relative 'Protocols/' + p }
