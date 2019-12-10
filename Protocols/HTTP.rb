@@ -321,7 +321,6 @@ class WebResource
 
       # locator
       p = default_port? ? '' : (':' + env['SERVER_PORT'].to_s)
-      puts "PORT #{p}" unless default_port?
       u = '//'+hostname+p+path+(options[:suffix]||'')+(options[:query] ? HTTP.qs(options[:query]) : qs) # base locator
       primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env                                 # primary scheme
       fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env                              # fallback scheme

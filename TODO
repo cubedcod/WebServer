@@ -1,0 +1,17 @@
+date from HTTP header https://therevisionist.org/bio-hacking/guide-to-deep-sleep/
+
+protocols: 
+nntp
+gemini https://tildegit.org/solderpunk/AV-98 https://github.com/michael-lazar/jetforce
+gopher
+
+dokieli
+databrowser
+send mail from browser
+custom slugs for timeline URI - IG user, reddit/mail post author
+more elegant blank-node handling for Dokieli RDFa
+POST logging / rdfication (index in sent folder)
+highlight new posts in view after fetch/index
+mbox parser 
+bring avatars back
+feeds
