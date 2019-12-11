@@ -10,6 +10,7 @@ class WebResource
     CookieHosts = {}
     HostGET = {}
     HostPOST = {}
+    HTTPHosts = {}
     LocalArgs = %w(allow view sort UX)
     Populator = {}
     Servers = {}
@@ -322,10 +323,10 @@ class WebResource
       # locator
       p = default_port? ? '' : (':' + env['SERVER_PORT'].to_s)
       u = '//'+hostname+p+path+(options[:suffix]||'')+(options[:query] ? HTTP.qs(options[:query]) : qs) # base locator
-      primary  = ((options[:scheme] || 'https').to_s + ':' + u).R env                                 # primary scheme
-      fallback = ((options[:scheme] ? 'https' : 'http') + ':' + u).R env                              # fallback scheme
+      primary  = ((insecure? ? 'http' : 'https') + ':' + u).R env                                  # primary scheme
+      fallback = ((insecure? ? 'https' : 'http') + ':' + u).R env                                  # fallback scheme
 
-      # network fetch, HTTPS with HTTP fallback
+      # network fetch
       primary.fetchHTTP options
     rescue Exception => e
       case e.class.to_s
@@ -497,7 +498,7 @@ class WebResource
         Populator[host][self] if Populator[host] && !hostpath.R.exist?
         handler[self]
       elsif self.CDN?               # content-pool
-        if ENV.has_key?('BARNDOOR') || AllowedHosts.has_key?(host) || CDNscripter.has_key?(env[:referer]) || env[:query]['allow'] == ServerKey
+        if AllowedHosts.has_key?(host) || CDNscripter.has_key?(env[:referer]) || env[:query]['allow'] == ServerKey
           fetch
         else
           extension = ext.downcase
@@ -535,20 +536,20 @@ class WebResource
     end
 
     def gunkHost
-      return false if ENV.has_key?('BARNDOOR') || (env && env[:query]['allow'] == ServerKey) || AllowedHosts.has_key?(host)
+      return false if (env && env[:query]['allow'] == ServerKey) || AllowedHosts.has_key?(host)
       env && env.has_key?('HTTP_GUNK')
     end
 
     def gunkURI
-      return false if ENV.has_key?('BARNDOOR') || (env && env[:query]['allow'] == ServerKey)
+      return false if env && env[:query]['allow'] == ServerKey
       ('/' + hostname + (env && env['REQUEST_URI'] || path || '/')).match? GunkURI
     end
 
     def HEAD
-      send(Methods['GET']).yield_self{|s,h,_| [s,h,[]] } # status-code & header
+      send(Methods['GET']).yield_self{|s,h,_| [s,h,[]] } # return-code & header
     end
 
-    # header formatted and filtered
+    # headers formatted and filtered
     def headers hdrs = nil
       head = {} # header storage
 
@@ -564,7 +565,7 @@ class WebResource
           k }.join(underscored ? '_' : '-')
         key = key.downcase if underscored
 
-        # set header value
+        # set values
         head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w{connection gunk host links path-info query query-modified query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forwarded-for}.member?(key.downcase)}
 
       # Cookie
@@ -589,6 +590,14 @@ class WebResource
       head.delete 'User-Agent' if host == 't.co'
 
       head
+    end
+
+    def self.Insecure host
+      HTTPHosts[host] = true
+    end
+
+    def insecure?
+      HTTPHosts.has_key? host
     end
 
     # node RDF -> Repository
@@ -668,7 +677,7 @@ class WebResource
     end
 
     def OPTIONS
-      if AllowedHosts.has_key?(host) || ENV.has_key?('BARNDOOR')
+      if AllowedHosts.has_key? host
         self.OPTIONSthru
       else
         env[:deny] = true
@@ -721,7 +730,7 @@ class WebResource
     def POSTresource
       if handler = HostPOST[host]
         handler[self]
-      elsif AllowedHosts.has_key?(host) || ENV.has_key?('BARNDOOR')
+      elsif AllowedHosts.has_key? host
         self.POSTthru
       else
         denyPOST
@@ -774,7 +783,7 @@ class WebResource
     end
 
     def PUT
-      if AllowedHosts.has_key?(host) || ENV.has_key?('BARNDOOR')
+      if AllowedHosts.has_key? host
         self.PUTthru
       else
         env[:deny] = true
@@ -817,23 +826,22 @@ class WebResource
     end
     alias_method :qs, :querystring
 
-    def selectFormat default='text/html'
-      #return 'text/turtle' if ext == 'ttl'
-      return default unless env && env.has_key?('HTTP_ACCEPT')
-      index = {}
+    def selectFormat default = 'text/html'
+      return default unless env && env.has_key?('HTTP_ACCEPT') # default due to no preference
+
+      index = {} # q -> format map
       env['HTTP_ACCEPT'].split(/,/).map{|e| # split to (MIME,q) pairs
         format, q = e.split /;/             # split (MIME,q) pair
         i = q && q.split(/=/)[1].to_f || 1  # q-value with default
         index[i] ||= []                     # init index
         index[i].push format.strip}         # index on q-value
 
-      index.sort.reverse.map{|q,formats| # formats in descending q-value order
-        formats.sort_by{|f|{'text/turtle'=>0}[f]||1}.map{|f|  # tiebreak with turtle-preference
-          return default if f == '*/*'                        # HTML via wildcard
-          return f if RDF::Writer.for(:content_type => f) ||  # RDF
-            ['application/atom+xml','text/html'].member?(f)}} # non-RDF
-
-      default                                                 # HTML via default
+      index.sort.reverse.map{|q,formats| # formats selected in descending q-value order
+        formats.sort_by{|f|{'text/turtle'=>0}[f]||1}.map{|f|  # tiebreak with 🐢-preference
+          return default if f == '*/*'                        # default via wildcard
+          return f if RDF::Writer.for(:content_type => f) ||  # RDF via writer definition
+            ['application/atom+xml','text/html'].member?(f)}} # non-RDF via writer definition
+      default                                                 # default
     end
 
     def upstreamUI; env[:UX] = true; self end

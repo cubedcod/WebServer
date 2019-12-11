@@ -128,10 +128,11 @@ s.click.aliexpress.com
     Cookies 'www.bloomberg.com'
 
     # Boston Globe
-    GET 'bos.gl', -> r {r.fetch scheme: :http}
+    %w(bos.gl w.bos.gl).map{|short| GET short, NoQuery}
     GET 'bostonglobe-prod.cdn.arcpublishing.com', Resizer
     %w(www).map{|host| GET host + '.boston.com', NoJS}
     %w(apps www www3).map{|host| GET host + '.bostonglobe.com', NoJS}
+    Insecure 'bos.gl'
 
     # Brightcove
     %w(
