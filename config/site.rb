@@ -220,17 +220,13 @@ thumbs.ebaystatic.com).map{|host| GET host }
     # Forbes
     GET 'thumbor.forbes.com', -> r {[301, {'Location' => URI.unescape(r.parts[-1])}, []]}
 
-    # FoxNews
-    if ENV.has_key? 'FOX'
-      #Cookies 'video.foxnews.com'
-    end
-
     # Gfycat
     GET 'gfycat.com'
     GET 'thumbs.gfycat.com'
 
     # GitHub
-    GET 'api.github.com', -> r {r.desktopUI.fetch}
+    GET 'api.github.com', Desktop
+    GET 'gist.github.com'
     GET 'github.com'
     %w(avatars0 avatars1 avatars2 avatars3 raw).map{|h|
       GET h + '.githubusercontent.com', NoJS }
@@ -481,7 +477,7 @@ firefox.settings.services.mozilla.com
 
     GET 'old.reddit.com', -> r {
       r.desktopUI.fetch.yield_self{|status,head,body|
-        if status.to_s.match?(/^30/) || ENV.has_key?('BARNDOOR')
+        if status.to_s.match? /^30/
           [status, head, body]
         else
           refs = []
@@ -685,7 +681,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
         r.fetch
       elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results signin user watch watch_videos yts).member? fn
         r.upstreamUI.fetch
-      elsif ENV.has_key?('BARNDOOR') || ENV.has_key?('GOOGLE')
+      elsif ENV.has_key? 'GOOGLE'
         r.fetch
       else
         r.deny
