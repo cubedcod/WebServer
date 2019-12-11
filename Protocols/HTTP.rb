@@ -323,8 +323,8 @@ class WebResource
       # locator
       p = default_port? ? '' : (':' + env['SERVER_PORT'].to_s)
       u = '//'+hostname+p+path+(options[:suffix]||'')+(options[:query] ? HTTP.qs(options[:query]) : qs) # base locator
-      primary  = ((insecure? ? 'http' : 'https') + ':' + u).R env                                  # primary scheme
-      fallback = ((insecure? ? 'https' : 'http') + ':' + u).R env                                  # fallback scheme
+      primary  = ('http' + (insecure? ? '' : 's') + ':' + u).R env                                      # primary scheme
+      fallback = ('http' + (insecure? ? 's' : '') + ':' + u).R env                                      # fallback scheme
 
       # network fetch
       primary.fetchHTTP options
