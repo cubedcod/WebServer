@@ -474,11 +474,9 @@ class WebResource
       if local?                     # local resource:
         if %w{y year m month d day h hour}.member? parts[0]
           dateDir                   # time-segment
-        elsif path == '/log'        # log handler
-          localLog
         elsif path == '/mail'       # inbox redirect
           [302, {'Location' => '/d/*/msg*?head&sort=date&view=table'}, []]
-        elsif parts[0] == 'msg'
+        elsif parts[0] == 'msg'     # (message -> path) map
           id = parts[1]
           id ? (nodeResponse MID2PATH[URI.unescape id]) : [301, {'Location' => '/mail'}, []]
         elsif file?
@@ -499,18 +497,18 @@ class WebResource
         handler[self]
       elsif self.CDN?               # content-pool
         if AllowedHosts.has_key?(host) || CDNscripter.has_key?(env[:referer]) || env[:query]['allow'] == ServerKey
-          fetch
+          fetch                     # allowed static content
         else
           extension = ext.downcase
           if CacheExt.member?(extension) && extension != 'js' && !gunkURI
-            fetch
+            fetch                   # allowed static content
           elsif path[-1] == '/'
             cachedGraph
           else
             deny
           end
         end
-      elsif gunkHost || gunkURI     # junk
+      elsif gunkHost || gunkURI     # gunk
         deny
       else
         env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
@@ -643,17 +641,6 @@ class WebResource
       env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
       dateMeta
       nodeResponse
-    end
-
-    def localLog
-      hosts = {}
-      `tail -n 4096 ../web.log | grep '\.js'`.each_line{|line|
-        line.chomp.split(' ').map{|token|
-          if token.match? /^https?:/
-            re = token.R
-            hosts[re.host] ||= {'uri' => re.uri, Title => [re.uri]}
-          end}}
-      [200, {'Content-Type' => 'text/html'}, [htmlDocument(hosts)]]
     end
 
     def nodeResponse fs_base=self
