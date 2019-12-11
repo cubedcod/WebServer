@@ -549,6 +549,9 @@ firefox.settings.services.mozilla.com
     # Time
     GET 'ti.me', NoQuery
 
+    # TinyURL
+    GET 'tinyurl.com', NoQuery
+
     # Twitch
     GET 'www.twitch.tv', Desktop
     %w( api.twitch.tv
