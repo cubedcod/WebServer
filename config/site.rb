@@ -7,35 +7,36 @@ module Webize
                   'www.theregister.co.uk' => %w(#hot #read_more_on #whitepapers),
                  }
 
-      # HTML -> RDF methods
+      # host HTML -> RDF
       Triplr = {
         'apnews.com' => :AP,
         'boards.4channel.org' => :FourChannel,
         'github.com' => :GitHub,
         'lwn.net' => :LWN,
         'news.ycombinator.com' => :HackerNews,
-        'twitter.com' => :Twitter,
+        'twitter.com' => :TwitterHTML,
         'universalhub.com' => :UHub,
         'www.aliexpress.com' => :AX,
         'www.apnews.com' => :AP,
         'www.city-data.com' => :CityData,
         'www.google.com' => :GoogleHTML,
-        'www.instagram.com' => :Instagram,
+        'www.instagram.com' => :InstagramHTML,
         'www.patriotledger.com' => :GateHouse,
         'www.providencejournal.com' => :GateHouse,
         'www.universalhub.com' => :UHub,
-        'www.youtube.com' => :YouTube,
+        'www.youtube.com' => :YouTubeHTML,
       }
 
     end
   end
   module JSON
 
-    # JSON -> RDF methods
+    # host JSON -> RDF
     Triplr = {
-      'gateway.reddit.com' => :Reddit,
+      'gateway.reddit.com' => :RedditJSON,
       'outline.com' => :Outline,
       'outlineapi.com' => :Outline,
+      'twitter.com' => :TwitterJSON,
       'www.instagram.com' => :InstagramJSON,
       'www.youtube.com' => :YouTubeJSON,
     }
@@ -171,6 +172,7 @@ secure.brightcove.com
     # CNN
     %w(cdn edition rss www www.i.cdn).map{|host| Allow host + '.cnn.com' }
     GET 'dynaimage.cdn.cnn.com', GotoBasename
+    GET 'rss.cnn.com', NoQuery
 
     # DartSearch
     GET 'clickserve.dartsearch.net', -> r {[301,{'Location' => r.env[:query]['ds_dest_url']}, []]}
@@ -597,7 +599,10 @@ video-edge-8ec100.sjc02.hls.ttvnw.net
       end}
 
     # Ubuntu
-    GET 'us.archive.ubuntu.com', Desktop
+    GET 'us.archive.ubuntu.com'
+
+    # USAtoday
+    GET 'rssfeeds.usatoday.com', NoQuery
 
     # Viglink
     GET 'redirect.viglink.com', GotoU
@@ -843,7 +848,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
 
   IGgraph = /^window._sharedData = /
 
-  def Instagram doc, &b
+  def InstagramHTML doc, &b
     doc.css('script').map{|script|
       if script.inner_text.match? IGgraph
         InstagramJSON ::JSON.parse(script.inner_text.sub(IGgraph,'')[0..-2]), &b
@@ -887,11 +892,11 @@ media-mbst-pub-ue1.s3.amazonaws.com
     yield subject, Image, tree['data']['meta']['og']['og:image'].R
   end
 
-  def Reddit tree
+  def RedditJSON tree
     puts tree.keys
   end
 
-  def Twitter doc
+  def TwitterHTML doc
     %w{grid-tweet tweet}.map{|tweetclass|
       doc.css('.' + tweetclass).map{|tweet|
         s = 'https://twitter.com' + (tweet.css('.js-permalink').attr('href') || tweet.attr('data-permalink-path') || '')
@@ -937,12 +942,15 @@ media-mbst-pub-ue1.s3.amazonaws.com
       doc.css(sel).remove}
   end
 
+  def TwitterJSON tree, &b
+  end
+
   def UHub doc
     doc.css('.pager-next > a[href]').map{|n| env[:links][:next] ||= n['href'] }
     doc.css('.pager-previous > a[href]').map{|p| env[:links][:prev] ||= p['href'] }
   end
 
-  def YouTube doc
+  def YouTubeHTML doc
     yield self, Video, self if path == '/watch'
   end
 

@@ -125,7 +125,7 @@ class WebResource
           print '🎨'
         elsif ext == 'js' || mime.match?(/script/)               # script
           third_party = env[:referer] != resource.host
-          print "\n📜\e[36#{third_party ? ';7' : ''};1m https://" + resource.host + resource.path + "\e[0m "
+          print "\n📜 \e[36#{third_party ? ';7' : ''};1mhttps://" + resource.host + resource.path + "\e[0m "
         elsif ext == 'json' || mime.match?(/json/)               # data
           print "\n🗒 https://" + resource.host + resource.path + resource.qs + ' '
         elsif %w(gif jpeg jpg png svg webp).member?(ext) || mime.match?(/^image/)
@@ -565,10 +565,7 @@ class WebResource
         key = key.downcase if underscored
 
         # set header value
-        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w{connection gunk host links path-info query query-modified query-string
-rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version
-remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software
-transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forwarded-for}.member?(key.downcase)}
+        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w{connection gunk host links path-info query query-modified query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forwarded-for}.member?(key.downcase)}
 
       # Cookie
       unless allowCookies?
