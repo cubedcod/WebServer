@@ -677,7 +677,7 @@ class WebResource
     end
 
     def OPTIONS
-      if AllowedHosts.has_key? host
+      if AllowedHosts.has_key?(host) || POSThost.match?(host)
         self.OPTIONSthru
       else
         env[:deny] = true
@@ -730,7 +730,7 @@ class WebResource
     def POSTresource
       if handler = HostPOST[host]
         handler[self]
-      elsif AllowedHosts.has_key? host
+      elsif AllowedHosts.has_key?(host) || POSThost.match?(host)
         self.POSTthru
       else
         denyPOST
@@ -827,7 +827,7 @@ class WebResource
     alias_method :qs, :querystring
 
     def selectFormat default = 'text/html'
-      return default unless env && env.has_key?('HTTP_ACCEPT') # default due to no preference
+      return default unless env && env.has_key?('HTTP_ACCEPT') # default via no specification
 
       index = {} # q -> format map
       env['HTTP_ACCEPT'].split(/,/).map{|e| # split to (MIME,q) pairs
@@ -841,6 +841,7 @@ class WebResource
           return default if f == '*/*'                        # default via wildcard
           return f if RDF::Writer.for(:content_type => f) ||  # RDF via writer definition
             ['application/atom+xml','text/html'].member?(f)}} # non-RDF via writer definition
+
       default                                                 # default
     end
 

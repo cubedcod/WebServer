@@ -60,6 +60,7 @@ class WebResource
     CookieHost = /\.bandcamp\.com$/
     DesktopUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
     DynamicImgHost = /(noaa|weather)\.gov$/
+    POSThost = /^video.*.ttvnw.net$/
 
     Resizer = -> r {
       if r.parts[0] == 'resizer'
@@ -556,13 +557,7 @@ firefox.settings.services.mozilla.com
 
     # Twitch
     GET 'www.twitch.tv', Desktop
-    %w( api.twitch.tv
-        gql.twitch.tv
-irc-ws.chat.twitch.tv
-pubsub-edge.twitch.tv
-        www.twitch.tv
-video-edge-8ec100.sjc02.hls.ttvnw.net
-).map{|h|Allow h}
+    %w( api gql irc-ws.chat panels-images pubsub-edge www ).map{|h|Allow h + '.twitch.tv'}
     GET 'static.twitchcdn.net', Fetch
 
     # Twitter
