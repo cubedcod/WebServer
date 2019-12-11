@@ -2,7 +2,7 @@ class WebResource
   module URIs
 
     GunkURI = %r([-.:_\/?&=~]
-((block|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|id|rotat[eo]r?|slots?|tech|tools?|types?|units?|words?|zones?)?|akismet|alerts?|.*analytics.*|appnexus|audience|(app)?
+((block|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|id|rotat[eo]r?|slots?|tech|tools?|types?|units?|words?|zones?)?|akismet|alerts?|.*analytics.*|appnexus|audience|(app|smart)?
 b(anner|eacon|reakingnew)s?|
 c(ampaigns?|edexis|hartbeat.*|loudflare|mp|ollector|omscore|on(sent|version)|ookie(c(hoice|onsent)|law|notice)?s?|se)|
 de(als|tect)|
