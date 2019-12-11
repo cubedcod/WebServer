@@ -309,11 +309,11 @@ class WebResource
       end
     end
 
-    # fetch node from remote or local cache
+    # fetch node from cache or remote server
     def fetch options=nil
       options ||= {}
 
-      # cache fetch
+      # cached fetch
       if (CacheExt - %w(html xml)).member?(ext.downcase) && !host.match?(DynamicImgHost)
         return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE')     # client has static-data, return 304 response
         return cachePath.fileResponse if cachePath.file?                                              # server has static-data, return data
@@ -461,7 +461,7 @@ class WebResource
     # transform allowed explicitly, or implicitly w/ Atom, RSS or HTML and local UI
     def fixedFormat? format = nil
       return true if upstreamUI?
-      return false if ENV.has_key?('TRANSFORM') || env[:transform] || !format || format.match?(/atom|html|rss|xml/i)
+      return false if ENV.has_key?('TRANSFORM') || env[:query].has_key?('TRANSFORM') || env[:transform] || !format || format.match?(/atom|html|rss|xml/i)
       return true
     end
 
@@ -480,15 +480,15 @@ class WebResource
           id = parts[1]
           id ? (nodeResponse MID2PATH[URI.unescape id]) : [301, {'Location' => '/mail'}, []]
         elsif file?
-          fileResponse              # local static-data
+          fileResponse              # static-data
         elsif directory? && qs.empty? && (index = (self + 'index.html').R env).exist? && selectFormat == 'text/html'
-          index.fileResponse        # local static-dir-index
-        else                        # local graph-data
+          index.fileResponse        # static dir-index
+        else                        # transformable graph-data
           localGraph
-        end
+        end                         # remote resource:
       elsif path.match? /^.gen(erate)?_?204$/ # connectivity check
         R204
-      elsif path.match? HourDir     # local cache, hour slice
+      elsif path.match? HourDir     # cache timeslice
         name = '*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*'
         dateMeta
         nodeResponse (path + name)
@@ -554,7 +554,7 @@ class WebResource
       (hdrs || env || {}).map{|k,v| # raw headers
         k = k.to_s
         underscored = k.match? /(_AP_|PASS_SFP)/i
-        key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|k| # eat Rack HTTP_ prefix
+        key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|k| # strip HTTP prefix
           if %w{cl dfe id spf utc xsrf}.member? k # acronyms
             k = k.upcase       # acronymize
           else
