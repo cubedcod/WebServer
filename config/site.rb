@@ -546,6 +546,9 @@ firefox.settings.services.mozilla.com
     # Technology Review
     GET 'cdn.technologyreview.com', NoQuery
 
+    # Time
+    GET 'ti.me', NoQuery
+
     # Twitch
     GET 'www.twitch.tv', Desktop
     %w( api.twitch.tv
