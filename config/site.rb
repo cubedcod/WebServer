@@ -664,6 +664,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
       end}
 
     # Yelp
+    CDNscripts 'www.yelp.com'
     GET 'www.yelp.com', -> r {r.env[:query]['redirect_url'] ? [301, {'Location' => r.env[:query]['redirect_url']},[]] : r.fetch}
 
     # YouTube
