@@ -497,15 +497,15 @@ class WebResource
         handler[self]
       elsif self.CDN?               # content-pool
         if AllowedHosts.has_key?(host) || CDNscripter.has_key?(env[:referer]) || env[:query]['allow'] == ServerKey
-          fetch                     # allowed static content
+          fetch                     # allowed static content - host
         else
           extension = ext.downcase
           if CacheExt.member?(extension) && extension != 'js' && !gunkURI
-            fetch                   # allowed static content
+            fetch                   # allowed static content - type
           elsif path[-1] == '/'
-            cachedGraph
+            cachedGraph             # cached index
           else
-            deny
+            deny                    # blocked CDN executables
           end
         end
       elsif gunkHost || gunkURI     # gunk
