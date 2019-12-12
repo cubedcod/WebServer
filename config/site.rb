@@ -942,6 +942,9 @@ media-mbst-pub-ue1.s3.amazonaws.com
   end
 
   def TwitterJSON tree, &b
+    if html = tree['items_html']
+      TwitterHTML Nokogiri::HTML.fragment(html), &b
+    end
   end
 
   def UHub doc
