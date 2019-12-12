@@ -502,8 +502,8 @@ class WebResource
           extension = ext.downcase
           if CacheExt.member?(extension) && extension != 'js' && !gunkURI
             fetch                   # allowed static content - type
-          elsif path[-1] == '/'
-            cachedGraph             # cached index
+          #elsif path[-1] == '/'
+          #  cachedGraph             # cached index
           else
             deny                    # blocked CDN executables
           end
