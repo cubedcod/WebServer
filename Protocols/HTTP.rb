@@ -366,7 +366,7 @@ class WebResource
           format ||= (xt = ext.to_sym; puts "WARNING no MIME for #{uri}"  # extension -> format
                       RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
           reader = RDF::Reader.for content_type: format                   # select reader
-          puts "RDFize #{uri} :: #{reader}"
+          #puts "RDFize #{uri} :: #{reader}"
           reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|  # read RDF
             (env[:repository] ||= RDF::Repository.new) << _ } if reader
           cachePath(format).write body if CacheExt.member? ext.downcase   # cache static-data
