@@ -119,6 +119,7 @@ s.click.aliexpress.com
     # Balamii
     Allow 'balamii-parse.herokuapp.com'
     Allow 'player.balamii.com'
+    GET 'www.bedbathandbeyond.com', NoJS
 
     # Blocks
     GET 'bl.ocks.org', Desktop

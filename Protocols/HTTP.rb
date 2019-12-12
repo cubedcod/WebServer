@@ -38,8 +38,11 @@ class WebResource
         r.deny
       else
         NoGunk[r].yield_self{|s,h,b|
-          puts :NoJS, h.keys
-          [s,h,b]}
+          if (h['content-type'] || h['Content-Type'] || 'maybescript').match? /script/
+            r.deny
+          else
+            [s,h,b]
+          end}
       end}
     NoQuery = -> r {
       if r.qs.empty?
