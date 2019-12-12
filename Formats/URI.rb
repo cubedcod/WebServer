@@ -183,7 +183,7 @@ class WebResource < RDF::URI
         cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -ilZ #{Shellwords.escape args[2]} | xargs -0 grep -il #{Shellwords.escape args[3]}"
       else # N ordered terms
         pattern = args.join '.*'
-        cmd = "grep -ril #{Shellwords.escape pattern} #{shellPath}"
+        cmd = "grep -ril -- #{Shellwords.escape pattern} #{shellPath}"
       end
       `#{cmd} | head -n 1024`.lines.map{|path|('/'+path.chomp).R}
     end

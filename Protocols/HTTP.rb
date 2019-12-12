@@ -32,11 +32,15 @@ class WebResource
     GotoBasename = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
     GotoU   = -> r {[301, {'Location' =>  r.env[:query]['u']}, []]}
     GotoURL = -> r {[301, {'Location' => (r.env[:query]['url']||r.env[:query]['q'])}, []]}
-    Icon    = -> r {r.env[:deny] = true; [200, {'Content-Type' => 'image/gif'}, [SiteGIF]]}
-    JS = -> r, pattern {(r.env['HTTP_REFERER']&.match(pattern) && NoGunk || NoJS)[r]}
     NoGunk  = -> r {r.gunkURI ? r.deny : r.fetch}
-    NoJS    = -> r {r.ext=='js' ? r.deny : NoGunk[r]} # TODO inspect response content-type
-    RootIndex = -> r { r.chrono_sort if r.parts.size == 1; r.path == '/' ? r.cachedGraph : NoGunk[r]}
+    NoJS    = -> r {
+      if r.ext == 'js'
+        r.deny
+      else
+        NoGunk[r].yield_self{|s,h,b|
+          puts :NoJS, h.keys
+          [s,h,b]}
+      end}
     NoQuery = -> r {
       if r.qs.empty?
         NoGunk[r].yield_self{|s,h,b|
@@ -46,10 +50,11 @@ class WebResource
       else
         [301, {'Location' => r.env['REQUEST_PATH']}, []]
       end}
-    # canned responses
+    RootIndex = -> r { r.path == '/' ? r.cachedGraph : NoGunk[r] }
+
+    # no-content responses
     R204 = [204, {}, []]
     R304 = [304, {}, []]
-    R404 = [404, {}, []]
 
     def self.Allow host
       AllowedHosts[host] = true
@@ -83,15 +88,17 @@ class WebResource
     def cachedGraph; nodeResponse cachePath end
 
     def self.call env
-      return [405,{},[]] unless m=Methods[env['REQUEST_METHOD']] # find method-handler
+      return [405,{},[]] unless m=Methods[env['REQUEST_METHOD']] # method-handler lookup
       path = Pathname.new(env['REQUEST_PATH']).expand_path.to_s  # evaluate path expression
       path+='/' if env['REQUEST_PATH'][-1]=='/' && path[-1]!='/' # preserve trailing slash
-      env[:referer] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # find referer host
+      env[:referer] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # find referring host
       resource = ('//' + env['SERVER_NAME'] + path).R env.merge( # instantiate request
-       {resp:{}, links:{}, query: parseQs(env['QUERY_STRING'])}) # parse querystring
+       {resp:{}, links:{}, query: parseQs(env['QUERY_STRING'])}) # parse query
       resource.send(m).yield_self{|status, head, body|           # dispatch request
-        ext = resource.ext.downcase
+
+        ext = resource.ext.downcase                              # log request
         mime = head['Content-Type'] || ''
+
         # highlight host on first encounter
         unless (Servers.has_key? env['SERVER_NAME']) || resource.env[:deny]
           Servers[env['SERVER_NAME']] = true
@@ -313,7 +320,7 @@ class WebResource
     def fetch options=nil
       options ||= {}
 
-      # cached fetch
+      # cached results
       if (CacheExt - %w(html xml)).member?(ext.downcase) && !host.match?(DynamicImgHost)
         return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE')     # client has static-data, return 304 response
         return cachePath.fileResponse if cachePath.file?                                              # server has static-data, return data
@@ -358,25 +365,26 @@ class WebResource
     def fetchHTTP options={}
       open(uri, headers.merge({redirect: false})) do |response| print '🌍🌎🌏🌐'[rand 4]
         h = response.meta                                                 # upstream metadata
-        if response.status.to_s.match? /206/                              # partial body
-          [206, h, [response.read]]                                       # return part
+        if response.status.to_s.match? /206/                              # partial response
+          [206, h, [response.read]]                                       # part to downstream
         else
           body = HTTP.decompress h, response.read                         # decompress body
           format = h['content-type'].split(/;/)[0] if h['content-type']   # HTTP header -> format
           format ||= (xt = ext.to_sym; puts "WARNING no MIME for #{uri}"  # extension -> format
                       RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
           reader = RDF::Reader.for content_type: format                   # select reader
-          #puts "RDFize #{uri} :: #{reader}"
-          reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|  # read RDF
-            (env[:repository] ||= RDF::Repository.new) << _ } if reader
+          reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|  # instantiate reader
+            (env[:repository] ||= RDF::Repository.new) << _ } if reader   # parse RDF
           cachePath(format).write body if CacheExt.member? ext.downcase   # cache static-data
           return self if options[:intermediate]                           # intermediate fetch - no direct HTTP caller
+
+          # HTTP response
+          indexRDF                                                        # cache graph-data
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
-            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}             # upstream metadata for downstream
+            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}             # upstream metadata -> downstream metadata
           env[:resp]['Content-Length'] = body.bytesize.to_s
           env[:resp]['Set-Cookie'] = h['set-cookie'] if h['set-cookie'] && allowCookies?
-          indexRDF                                                        # cache metadata
-          (fixedFormat? format) ? [200,env[:resp],[body]] : graphResponse # response for HTTP caller
+          (fixedFormat? format) ? [200,env[:resp],[body]] : graphResponse
         end
       end
     rescue Exception => e
@@ -395,7 +403,7 @@ class WebResource
         elsif same_path && same_host && same_scheme
           puts qs, dest.qs
           puts "ERROR #{uri} redirects to #{dest}"
-          R404
+          notfound
         else
           [302, {'Location' => dest.uri}, []]
         end
@@ -435,8 +443,7 @@ class WebResource
     end
 
     def findNodes
-      #return dir.findNodes if name == 'index'
-      (if directory?                                           # directory?
+      (if directory?                                           # directory:
        if env[:query].has_key?('f') && path != '/'             # FIND
           find env[:query]['f'] unless env[:query]['f'].empty? #  pedantic
        elsif env[:query].has_key?('find') && path != '/'       #  easy mode
@@ -447,14 +454,13 @@ class WebResource
        else                                                    # LS
          [self]
        end
-      else                                                     # file(s)
-        if uri.match GlobChars         # parametric GLOB
+      else                                                     # files:
+        if uri.match GlobChars                                 # GLOB - parametric
           env[:grep] = true if env && env[:query].has_key?('q')
           glob
-        else                           # default GLOB
-          files = (self + '.*').R.glob #  basename + format
-          files = (self + '*').R.glob if files.empty? # path prefix
-          [self, files]                # exact match
+        else                                                   # GLOB - default graph-storage
+          files =        (self + '.*').R.glob                  #  basename + extension match
+          files.empty? ? (self +  '*').R.glob : files          #  prefix match
         end
        end).flatten.compact.uniq.select(&:exist?).map{|n|n.bindEnv env}
     end

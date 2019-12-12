@@ -96,12 +96,10 @@ s.click.aliexpress.com
       GET host}
 
     # Amazon
-    AmazonReferer = -> r {r.env['HTTP_REFERER']&.match(/(amazon|imdb)\.com/) && NoGunk[r] || r.deny}
-
-    GET 'amazon.com'
-    GET 'www.amazon.com'
-    GET 'images-na.ssl-images-amazon.com', AmazonReferer
-    GET 'm.media-amazon.com', AmazonReferer
+    AmazonHost = -> r {%w(www.amazon.com www.imdb.com).member?(r.env[:referer]) ? NoGunk[r] : r.deny}
+    %w(amazon.com www.amazon.com).map{|host| GET host}
+    GET 'images-na.ssl-images-amazon.com', AmazonHost
+    GET 'm.media-amazon.com', AmazonHost
 
     # Apple
     %w{amp-api.music api.music audio-ssl.itunes embed.music itunes js-cdn.music music www xp}.map{|h|
@@ -264,19 +262,13 @@ thumbs.ebaystatic.com).map{|host| GET host }
       GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
       GET 'www.google.com', -> r {
         case r.path
-        when /^.images/
-          NoJS[r]
-        when /^.maps/
-          r.desktopUI.fetch
         when /^.search/
           q = r.env[:query]['q']
           q && q.match?(/^(https?:|l(ocalhost)?(:8000)?)\//) && [301,{'Location'=>q.sub(/^l/,'http://l')},[]] || r.fetch
         when '/url'
           GotoURL[r]
-        when /^.x?js/
-          ENV.has_key?('NOJS') ? r.deny : r.fetch
         else
-          ENV.has_key?('GOOGLE') ? r.fetch : r.deny
+          r.env[:referer] == 'www.google.com' ? NoGunk[r] : r.deny
         end}
     end
 
