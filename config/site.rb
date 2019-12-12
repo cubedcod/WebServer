@@ -593,7 +593,7 @@ firefox.settings.services.mozilla.com
       else
         r.env[:links][:up]    = '/' if r.parts.size == 1
         r.env[:links][:up]    = '/' + r.parts[0] if r.path.match? /\/status\/\d+\/?$/
-        r.env[:links][:media] = '/' + r.parts[0] + '/media' unless %w(media search).member? r.parts[1]
+        r.env[:links][:media] = '/' + r.parts[0] + '/media' unless %w(i media search).member? r.parts[1]
         r.fetch noRDF: true
       end}
 
@@ -895,7 +895,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
     puts tree.keys
   end
 
-  def TwitterHTML doc
+  def TwitterHTML doc, &b
     %w{grid-tweet tweet}.map{|tweetclass|
       doc.css('.' + tweetclass).map{|tweet|
         s = 'https://twitter.com' + (tweet.css('.js-permalink').attr('href') || tweet.attr('data-permalink-path') || '')
