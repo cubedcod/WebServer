@@ -2,7 +2,7 @@
 #host img {max-height: 4.2em}
 #next {right: 0}
 #prev {left: 0}
-#prev, #next {position: fixed; height: 100%; font-size: 2em; padding: 0 .2em 0 .2em; color: #eee; background-color: #111}
+#prev, #next {position: fixed; height: 100%; font-size: 1.9em; padding: 0 .1em 0 .1em; color: #eee; background-color: #111}
 .avatar {max-height: 2em; background-color: #000}
 .breadcrumb {border-width: 0 0 0 .08em; border-color: #888; border-style: dotted; border-radius: 0; color: #ddd}
 .breadcrumb.basename {color: #fff; font-weight: bold}

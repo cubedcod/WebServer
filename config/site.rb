@@ -89,6 +89,7 @@ class WebResource
     %w(ae01.alicdn.com
      assets.alicdn.com
           i.alicdn.com
+       www.alibaba.com
   chuwi.aliexpress.com
 s.click.aliexpress.com
     www.aliexpress.com
@@ -119,7 +120,6 @@ s.click.aliexpress.com
     # Balamii
     Allow 'balamii-parse.herokuapp.com'
     Allow 'player.balamii.com'
-    GET 'www.bedbathandbeyond.com', NoJS
 
     # Blocks
     GET 'bl.ocks.org', Desktop
@@ -608,6 +608,9 @@ firefox.settings.services.mozilla.com
 
     # WaPo
     GET 'www.washingtonpost.com', -> r {(r.parts[0]=='resizer' ? Resizer : NoJS)[r]}
+
+    # WaTi
+    #Cookies 'twt-thumbs.washtimes.com'
 
     # WBUR
     CDNscripts 'www.wbur.org'
