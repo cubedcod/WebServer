@@ -306,8 +306,8 @@ thumbs.ebaystatic.com).map{|host| GET host }
     GET 'www.instagram.com', RootIndex
 
     Populate 'www.instagram.com', -> r {
-      base = 'com/instagram/'
-      FileUtils.mkdir_p base
+      base = 'instagram/'
+      FileUtils.mkdir base
       names = {}
       `grep -E 'instagram.com/[[:alnum:]]+/? ' ../web.log`.each_line{|line|
         line.chomp.split(' ').map{|token|
@@ -451,9 +451,9 @@ firefox.settings.services.mozilla.com
     GotoReddit = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path + r.qs}, []]}
 
     Populate 'www.reddit.com', -> r {
-      FileUtils.mkdir_p 'com/reddit'
+      FileUtils.mkdir 'reddit'
       'Dorchester+Rad_Decentralization+SOLID+StallmanWasRight+boston+dancehall+darknetplan+fossdroid+massachusetts+roxbury+selfhosted+shortwave'.split('+').map{|n|
-        FileUtils.touch 'com/reddit/.' + n}}
+        FileUtils.touch 'reddit/.' + n}}
 
     %w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h|
       Allow h }
@@ -466,7 +466,7 @@ firefox.settings.services.mozilla.com
 
     Reddit = -> r {
       r.chrono_sort if r.parts[-1] == 'new' || r.path == '/'       # chrono-sort new posts
-      r = ('/r/'+ Pathname.glob('com/reddit/.??*').map{|n|n.basename.to_s[1..-1]}.join('+')+'/new').R r.env if r.path == '/' # subscriptions
+      r = ('/r/'+ Pathname.glob('reddit/.??*').map{|n|n.basename.to_s[1..-1]}.join('+')+'/new').R r.env if r.path == '/' # subscriptions
       r.desktopUI if r.parts[-1] == 'submit'                       # upstream UI for post submission
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? # upstream-representation preference
       r.env[:links][:prev] = 'https://old.reddit.com' + r.path + r.qs # page pointers
@@ -563,9 +563,9 @@ firefox.settings.services.mozilla.com
     GET 'trib.al', NoQuery
 
     Populate 'twitter.com', -> r {
-      FileUtils.mkdir_p 'com/twitter'
+      FileUtils.mkdir 'twitter'
       `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|n|
-        FileUtils.touch 'com/twitter/.' + n}}
+        FileUtils.touch 'twitter/.' + n}}
 
     GET 'twitter.com', -> r {
       r.desktopUA
@@ -573,7 +573,7 @@ firefox.settings.services.mozilla.com
         r.env[:links][:feed] = '/feed'
         RootIndex[r]
       elsif r.parts[0] == 'feed'
-        Pathname.glob('com/twitter/.??*').map{|n|n.basename.to_s[1..-1]}.shuffle.each_slice(18){|s|
+        Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}.shuffle.each_slice(18){|s|
           '/search'.R(r.env).fetch intermediate: true,
                                    noRDF: true,
                                    query: {vertical: :default, f: :tweets, q: s.map{|u|'from:'+u}.join('+OR+')}}
