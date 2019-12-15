@@ -707,18 +707,22 @@ media-mbst-pub-ue1.s3.amazonaws.com
         data = data[0]
         data = data[0..-2] if data[-1] == ';'
         Webize::HTML.webizeHash(::JSON.parse data){|hash|
+          # resource identifier
           id = '#ap_' + Digest::SHA2.hexdigest(rand.to_s)
+
           hash.map{|p, o|
+            # map datatypes
             p = MetaMap[p] || p
-            puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/
             if p == Type
               o = Image.R if o == 'Photo'
               o = Post.R if o == 'article'
             end
+            puts p unless p.to_s.match? /^(drop|http)/
+            # emit triples
             unless p == :drop
               case o.class.to_s
               when 'Array'
-                o.map{|o|
+                o.flatten.map{|o|
                   yield id, p, o unless o.class == 'Hash'}
               when 'Hash'
               else
