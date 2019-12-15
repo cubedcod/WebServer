@@ -72,14 +72,12 @@ image-src
       end
     end
 
-    def self.webizeHash h, &y
-      u = {}
-      if block_given?
-        yield h if h['__typename'] || h['type']
-      end
-      h.map{|k,v|
-        u[k] = webizeValue v, &y}
-      u
+    def self.webizeHash hash, &y
+      yield hash if block_given?
+      webized = {}
+      hash.map{|key, value|
+        webized[key] = webizeValue value, &y}
+      webized
     end
 
     def self.webizeString str, &y

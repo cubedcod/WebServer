@@ -110,7 +110,7 @@ class WebResource < RDF::URI
     def hostname; env && env['SERVER_NAME'] || host || 'localhost' end
     def hostpath; '/' + hostname.split('.').-(%w(com net org www)).reverse.join('/') end
 
-    # calculate URIs for index-storage, and store named-graph
+    # mint URIs for index locations and store the data
     def indexRDF
       return self unless env[:repository]
       
@@ -138,7 +138,7 @@ class WebResource < RDF::URI
             if dir = doc.dir
               dir.mkdir
               RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
-              print "\n🐢 \e[32;1mhttp://localhost:8000" + doc.path + "\e[0m "
+              print "\n🐢 \e[32;1m" + doc.path + "\e[0m "
             end
           end
         }

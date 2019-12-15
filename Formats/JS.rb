@@ -84,7 +84,7 @@ module Webize
           @base.send hostTriples, @json, &f
         end
 
-        # path-heuristic binding
+        # JSON-Feed
         if @base.parts.map{|part| part.split '.'}.flatten.member? 'feed'
           @base.env[:transform] = true
           self.JSONfeed &f

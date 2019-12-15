@@ -473,7 +473,7 @@ firefox.settings.services.mozilla.com
 
     GET 'old.reddit.com', -> r {
       r.desktopUI.fetch.yield_self{|status,head,body|
-        if r.parts[0] != 'r' || status.to_s.match?(/^30/)
+        if !%w(r u user).member?(r.parts[0]) || status.to_s.match?(/^30/)
           [status, head, body]
         else
           refs = []
@@ -706,8 +706,26 @@ media-mbst-pub-ue1.s3.amazonaws.com
       script.inner_text.scan(/window\['[-a-z]+'\] = ([^\n]+)/){|data|
         data = data[0]
         data = data[0..-2] if data[-1] == ';'
-        json = ::JSON.parse data
-        yield self, Content, HTML.render(HTML.keyval (Webize::HTML.webizeHash json), env)}}
+        Webize::HTML.webizeHash(::JSON.parse data){|hash|
+          id = '#ap_' + Digest::SHA2.hexdigest(rand.to_s)
+          hash.map{|p, o|
+            p = MetaMap[p] || p
+            puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/
+            if p == Type
+              o = Image.R if o == 'Photo'
+              o = Post.R if o == 'article'
+            end
+            unless p == :drop
+              case o.class.to_s
+              when 'Array'
+                o.map{|o|
+                  yield id, p, o unless o.class == 'Hash'}
+              when 'Hash'
+              else
+                yield id, p, o
+              end
+            end
+          }}}}
   end
 
   def AX doc
