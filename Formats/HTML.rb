@@ -48,14 +48,13 @@ image-src
           e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # identify node for traversal
           css = [:uri]; css.push :path if !ref.host || (ref.host == base.host)
           e['href'] = base.join e['href'] unless ref.host                               # resolve relative references
-          e['class'] = css.join ' '                                                     # node class for styling
+          e['class'] = css.join ' '                                                     # node CSS-class for styling
         elsif e['id']                                                                   # identified node w/ no target link
-          e.set_attribute 'class', 'identified'                                         # node class for styling
-          e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id']}</span> " # link to self
+          e.set_attribute 'class', 'identified'                                         # node CSS-class for styling
+          e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id']}</span> " # add link to target
         end
 
-        e['src'] = base.join e['src'] if e['src'] && !e['src'].R.host}                  # resolve image location
-
+        e['src'] = base.join e['src'] if e['src'] && !e['src'].R.host}                  # resolve image locations
 
       html.to_xhtml(:indent => 0)
     end
@@ -165,7 +164,7 @@ sidebar [class^='side']    [id^='side']
           # emit triples
           embeds.each_triple{|s,p,o|
             p = MetaMap[p.to_s] || p # predicate map
-            puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/ # show predicates not bound to a URI or dropped
+            puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/ # show unresolved property-names
             yield s, p, o unless p == :drop}
         end
 
@@ -219,7 +218,7 @@ sidebar [class^='side']    [id^='side']
             end}
           [*GlobalGunk,*SiteGunk[@base.host]].map{|s|body.css(s).map &:remove} # strip elements
           yield subject, Content, HTML.clean(body.inner_html, @base).gsub(/<\/?(center|noscript)[^>]*>/i, '')
-        else # body element missing
+        else # body element missing, emit entire document
           n.css('head').remove
           yield subject, Content, HTML.clean(n.inner_html, @base).gsub(/<\/?(center|noscript)[^>]*>/i, '')
         end
@@ -542,11 +541,11 @@ class WebResource
              title = title.to_s.sub(/\/u\/\S+ on /,'')
              unless env[:title] == title
                env[:title] = title
-               [{_: :a, id: 't' + Digest::SHA2.hexdigest(rand.to_s), class: 'title', type: 'node', href: uri, c: CGI.escapeHTML(title)}, " \n"]
+               [{_: :a, id: uri_hash, class: 'title', type: 'node', href: uri, c: CGI.escapeHTML(title)}, " \n"]
              end},
            abstracts,
-           {_: :a, class: 'id', c: '☚', href: uri}.update(titles.empty? ? {type: 'node'} : {}).update(uri ? {id: 'pt' + uri_hash} : {}), "\n",
-           ([{_: :a, class: :date, id: 'date' + uri_hash, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date}, "\n"] if date && uri_hash),
+           ({_: :a, id: 'pt' + uri_hash, class: 'id', c: '☚', href: uri} if uri && titles.empty?), "\n", # minimum pointer
+           ([{_: :a, class: :date, type: 'node', id: 'date' + uri_hash, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date}, "\n"] if date && uri_hash),
            images.map{|i| Markup[Image][i,env]},
            {_: :table, style: 'border-spacing: 0',
             c: {_: :tr,
@@ -558,7 +557,7 @@ class WebResource
                      c: [to.map{|f|Markup[To][f,env]},
                          post.delete(SIOC+'reply_of')],
                      class: :to}, "\n"]}}, "\n",
-           content, (["<br>\n", HTML.keyval(post,env)] unless post.keys.size < 1)]}.update(uri ? {id: uri_hash} : {})}
+           content, (["<br>\n", HTML.keyval(post,env)] unless post.keys.size < 1)]}}
 
     Markup[List] = -> list, env {
       {class: :list,
