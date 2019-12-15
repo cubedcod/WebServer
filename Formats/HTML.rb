@@ -349,7 +349,7 @@ class WebResource
       when Array
         x.map{|n|render n}.join
       when WebResource
-        render [{_: :a, href: x.uri, id: 'l' + Digest::SHA2.hexdigest(rand.to_s), c: (%w{gif ico jpeg jpg png webp}.member?(x.ext.downcase) ? {_: :img, src: x.uri} : CGI.escapeHTML((x.query || (x.basename && x.basename != '/' && x.basename) || (x.path && x.path != '/' && x.path) || x.host || x.to_s)[0..48]))}, ' ']
+        render [{_: :a, href: x.uri, c: (%w{gif ico jpeg jpg png webp}.member?(x.ext.downcase) ? {_: :img, src: x.uri} : CGI.escapeHTML((x.query || (x.basename && x.basename != '/' && x.basename) || (x.path && x.path != '/' && x.path) || x.host || x.to_s)[0..48]))}, ' ']
       when NilClass
         ''
       when FalseClass
@@ -545,7 +545,7 @@ class WebResource
                [{_: :a, class: 'title', type: 'node', href: uri, c: CGI.escapeHTML(title)}.update(identified ? {} : (identified = true; {id: uri_hash})), " \n"]
              end},
            abstracts,
-           ({_: :a, id: uri_hash, class: 'id', type: :node, c: '☚', href: uri} unless identified), "\n", # minimum pointer
+           ({_: :a, id: uri_hash, class: 'id', type: :node, c: '☚', href: uri} if uri && !identified), "\n", # minimum pointer
            ([{_: :a, class: :date, id: 'date' + uri_hash, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date}, "\n"] if date && uri_hash),
            images.map{|i| Markup[Image][i,env]},
            {_: :table, style: 'border-spacing: 0',
