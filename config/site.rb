@@ -456,7 +456,7 @@ firefox.settings.services.mozilla.com
         FileUtils.touch 'reddit/.' + n}}
 
     %w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h| Allow h }
-    %w(gateway gql oauth old www).map{|h|                                   Allow h + '.reddit.com' }
+    %w(gateway gql oauth old s www).map{|h|                                 Allow h + '.reddit.com' }
     %w(www.redditmedia.com).map{|host|      GET host, Desktop }
     %w(np.reddit.com reddit.com).map{|host| GET host, GotoReddit }
 
