@@ -47,6 +47,6 @@ table, div, li, svg {display: inline-block; border-spacing: 0}
 td.k {max-width: 28ex; overflow: hidden; text-align: right}
 table.tabular tr:nth-child(even) {background-color: #1c1c1c}
 table.tabular td {padding-top: .1em; vertical-align: top}
-table.tabular td p:first-letter {text-transform: uppercase}
+table.tabular td p:first-child:first-letter {font-weight: bold}
 tr[name="title"] > td.v {max-width: 86ex; overflow: hidden}
 video {min-width: 40ex}
