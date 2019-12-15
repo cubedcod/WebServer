@@ -2,7 +2,7 @@ module Webize
   module HTML
     class Reader
 
-      SiteGunk = {'www.google.com' => %w(div.logo h1 h2),
+      SiteGunk = {'www.google.com' => %w(div.logo h1 h2 #footcnt #top_nav),
                   'www.bostonmagazine.com' => %w(a[href*='scrapertrap']),
                   'www.theregister.co.uk' => %w(#hot #read_more_on #whitepapers),
                  }
@@ -455,14 +455,10 @@ firefox.settings.services.mozilla.com
       'Dorchester+Rad_Decentralization+SOLID+StallmanWasRight+boston+dancehall+darknetplan+fossdroid+massachusetts+roxbury+selfhosted+shortwave'.split('+').map{|n|
         FileUtils.touch 'reddit/.' + n}}
 
-    %w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h|
-      Allow h }
-    %w(gateway gql oauth www).map{|h|
-      Allow h + '.reddit.com' }
-    %w(www.redditmedia.com).map{|host|
-      GET host, Desktop }
-    %w(np.reddit.com reddit.com).map{|host|
-      GET host, GotoReddit }
+    %w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h| Allow h }
+    %w(gateway gql oauth old www).map{|h|                                   Allow h + '.reddit.com' }
+    %w(www.redditmedia.com).map{|host|      GET host, Desktop }
+    %w(np.reddit.com reddit.com).map{|host| GET host, GotoReddit }
 
     Reddit = -> r {
       r.chrono_sort if r.parts[-1] == 'new' || r.path == '/'       # chrono-sort new posts
@@ -477,7 +473,7 @@ firefox.settings.services.mozilla.com
 
     GET 'old.reddit.com', -> r {
       r.desktopUI.fetch.yield_self{|status,head,body|
-        if status.to_s.match? /^30/
+        if r.parts[0] != 'r' || status.to_s.match?(/^30/)
           [status, head, body]
         else
           refs = []
