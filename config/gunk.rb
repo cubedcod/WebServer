@@ -12,7 +12,7 @@ g(dpr|eo(ip|locat(e|ion))|igya|pt|tag|tm)|.*(
 header|pre)[-_]?bid.*|.*hubspot.*|[hp]b.?js|ima[0-9]?|
 impression|
 kr(ux|xd).*|
-log(event|g(er|ing))?|(app|s)?
+log(event|g(er|ing))|(app|s)?
 m(atomo|e(asurement|t(er|rics?))|ms|onitor(ing)?|odal|tr)|
 new(relic|sletters?)|.*notifications?.*|
 o(m(niture|tr)|nboarding|nesignal|ptanon|utbrain)|

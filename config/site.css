@@ -30,15 +30,15 @@ a {text-decoration: none}
 a.date {float: right; white-space: nowrap; color: #888; font-size: .8em; border-color: #222}
 a.id {float: right; color: #333; border-color: #222}
 a.idlink {color: #000; font-size: .72em; display: inline-block; vertical-align: bottom; border-radius: .28em .28em 0 0}
-a.uri > span.uri {font-size: 0.8em; color: #222; font-weight: normal}
-a.uri {background-color: #ddd; border-radius: .28em; color: #000; display: inline-block; max-width: 42ex; overflow: hidden; margin-right: .18em; margin-bottom: .18em; padding: .1em; font-weight: bold}
+a.uri > span.uri {font-size: 0.8em; color: #111; font-weight: normal}
+a.uri {background-color: #eee; border-radius: .28em; color: #000; display: inline-block; max-width: 42ex; overflow: hidden; margin-right: .18em; margin-bottom: .18em; padding: .1em; font-weight: bold}
 a.uri.path > span.uri {color: #fff}
 a.uri.path {background-color: #181818; color: #fff; border: 1px solid #333}
 a.uri:visited > span.uri {color: #ddd}
 a.uri:visited {background-color: #000; color: #fff}
 body {font-family: sans-serif; margin: 2.1em}
 body, .post, a.head, td.k a, td.v {background-color: #000; color: #fff}
-div.identified, p.identified, article.identified, section.identified {background-color: #000; color: #fff}
+div.identified, p.identified, article.identified, main.identified, section.identified {background-color: #000; color: #fff}
 h1,h2,h3,h4,h5,h6,p,pre {margin: 0}
 img, video {max-width: 100%}
 p, li, blockquote {max-width: 86ex}
