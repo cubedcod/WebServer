@@ -535,17 +535,18 @@ class WebResource
       uri_hash = 'r' + Digest::SHA2.hexdigest(uri) if uri
       cssname = 'post'
       cssname += ' main' if uri.R.path == env['REQUEST_PATH']
+      identified = false
       {class: cssname,
        c: ["\n",
            titles.map{|title|
              title = title.to_s.sub(/\/u\/\S+ on /,'')
              unless env[:title] == title
                env[:title] = title
-               [{_: :a, id: uri_hash, class: 'title', type: 'node', href: uri, c: CGI.escapeHTML(title)}, " \n"]
+               [{_: :a, class: 'title', type: 'node', href: uri, c: CGI.escapeHTML(title)}.update(identified ? {} : (identified = true; {id: uri_hash})), " \n"]
              end},
            abstracts,
-           ({_: :a, id: 'pt' + uri_hash, class: 'id', c: '☚', href: uri} if uri && titles.empty?), "\n", # minimum pointer
-           ([{_: :a, class: :date, type: 'node', id: 'date' + uri_hash, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date}, "\n"] if date && uri_hash),
+           ({_: :a, id: uri_hash, class: 'id', type: :node, c: '☚', href: uri} unless identified), "\n", # minimum pointer
+           ([{_: :a, class: :date, id: 'date' + uri_hash, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date}, "\n"] if date && uri_hash),
            images.map{|i| Markup[Image][i,env]},
            {_: :table, style: 'border-spacing: 0',
             c: {_: :tr,
