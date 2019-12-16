@@ -135,7 +135,7 @@ s.click.aliexpress.com
     Insecure 'bos.gl'
 
     # BrassRing
-    Cookies 'sjobs.brassring.com'
+    Allow 'sjobs.brassring.com'
     GET 'sjobs.brassring.com', Desktop
 
     # Brightcove
@@ -251,19 +251,20 @@ thumbs.ebaystatic.com).map{|host| GET host }
     # Google
     unless ENV.has_key? 'DEGOOGLE'
 
-      if ENV.has_key? 'GOOGLE'                                   # POST permissions
+      if ENV.has_key? 'GOOGLE'                          # POST capability
         (0..24).map{|i| h="#{i}.client-channel.google.com"; Allow h; GET h, Desktop}
         (0..24).map{|i| Allow "clients#{i}.google.com"}
       end
 
       GData = -> r {(r.env[:referer]||'').match?(/\.google\.com$/) ? NoGunk[r] : r.deny}
-      %w(ajax maps www).map{|h|GET h + '.googleapis.com', GData} # script/data hosts
-      %w(maps ssl www).map{|h|GET h + '.gstatic.com', GData}
-      (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com", GData}
-      (0..3).map{|i| GET "khms#{i}.google.com", GData }          # map tiles
-      (1..4).map{|i| GET "#{i}.bp.blogspot.com", NoJS }          # blog images
+      GET 'ajax.googleapis.com'                         # script/data hosts
+      %w(maps www).map{|h| GET h + '.googleapis.com', GData }
+      %w(maps ssl www).map{|h|GET h + '.gstatic.com', GData }
+      (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com", GData }
+      (0..3).map{|i| GET "khms#{i}.google.com", GData } # map tiles
+      (1..4).map{|i| GET "#{i}.bp.blogspot.com", NoJS } # blog images
 
-      Cookies 'www.google.com'                                   # search personalization
+      Cookies 'www.google.com'                          # search personalization
       %w(books docs drive images maps news scholar).map{|h|GET h + '.google.com' } # apps
       GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
       GET 'www.google.com', -> r {
