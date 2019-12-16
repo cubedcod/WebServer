@@ -656,7 +656,7 @@ class WebResource
     def nodeResponse fs_base=self
       nodes = fs_base.R(env).findNodes
       if nodes.size==1 && nodes[0].ext=='ttl' && selectFormat=='text/turtle'
-        nodes[0].fileResponse # nothing to merge or transform. return static node
+        nodes[0].fileResponse # nothing to merge or transform. return static-node
       else                    # merge and/or transform
         nodes.map{|n| n.load base_uri: self }
         indexRDF if env[:new]
