@@ -110,28 +110,30 @@ class WebResource < RDF::URI
     def hostname; env && env['SERVER_NAME'] || host || 'localhost' end
     def hostpath; '/' + hostname.split('.').-(%w(com net org www)).reverse.join('/') end
 
-    # mint URIs for index locations and store the data
     def indexRDF
       return self unless env[:repository]
-
+      # mint URIs for index locations
       env[:repository].each_graph.map{|graph|
         n = graph.name.R # named-graph resource
 
         docs = []        # storage references
 
-        unless n.uri.match?(/^(_|data):/) # blank node or data-URI only stored in context
-
-          # canonical document location
-          docs.push n.host ? (n.hostpath + (n.path ? (n.path[-1]=='/' ? (n.path + 'index') : n.path) : '')).R : n
-
-          # temporal index location
-          if timestamp = graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value       # find timestamp
-            docs.push ['/' + timestamp.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), # build hour-dir path
-                       %w{host path query fragment}.map{|a|n.send(a).yield_self{|p|p && p.split(/[\W_]/)}}]. # tokenize slugs
-                        flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.').R                     # apply slug skiplist
+        unless n.uri.match?(/^(_|data):/) # blank-nodes and data-URI appear in context of locatable graph
+          if n.host
+            # canonical path
+            docs.push (n.hostpath + (n.path ? (n.path[-1]=='/' ? (n.path + 'index') : n.path) : '')).R
+            # temporal-index path
+            if timestamp = graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value       # find timestamp
+              docs.push ['/' + timestamp.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), # build hour-dir path
+                         %w{host path query fragment}.map{|a|n.send(a).yield_self{|p|p && p.split(/[\W_]/)}}]. # tokenize slugs
+                          flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.').R                     # apply slug skiplist
+            end
+          else # local path
+            docs.push n
           end
         end
 
+        # store documents
         docs.map{|doc|
           turtle = doc.relPath + '.ttl'
           unless File.exist? turtle

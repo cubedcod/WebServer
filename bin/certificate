@@ -10,7 +10,7 @@ hash=$(openssl x509 -inform PEM -subject_hash_old -in $cert -noout)
 
 ## Install
 
-# Arch Linux
+# Arch
 which pacman && su -c "trust anchor --store $cert"
 
 # Debian
@@ -18,6 +18,7 @@ which apt-add-repository && su -c "cp $cert /usr/local/share/ca-certificates/CA.
 
 # Termux
 if [ -x "$(command -v pkg)" ]; then
+    su -c "mount -o rw,remount /"
     su -c "mount -o rw,remount /system"
     su -c "cp  $cert /system/etc/security/cacerts/$hash.0"
     su -c "chmod 644 /system/etc/security/cacerts/$hash.0"

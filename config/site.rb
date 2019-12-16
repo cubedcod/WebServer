@@ -134,6 +134,10 @@ s.click.aliexpress.com
     %w(apps www www3).map{|host| GET host + '.bostonglobe.com', NoJS}
     Insecure 'bos.gl'
 
+    # BrassRing
+    Cookies 'sjobs.brassring.com'
+    GET 'sjobs.brassring.com', Desktop
+
     # Brightcove
     %w(
 edge.api.brightcove.com
