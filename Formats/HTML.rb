@@ -106,7 +106,6 @@ image-src
         [class*='topbar']  [id*='topbar']
         [class^='promo']   [id^='promo']  [class^='Promo']  [id^='Promo']
 footer  [class^='footer']  [id^='footer']
-header  [class^='header']  [id^='header'] [class*='Header'] [id*='Header']
 nav     [class^='nav']     [id^='nav']
 sidebar [class^='side']    [id^='side']
 }
@@ -210,7 +209,9 @@ sidebar [class^='side']    [id^='side']
 
         # <body>
         if body = n.css('body')[0]
-          [*GlobalGunk, *SiteGunk[@base.host]].map{|s|body.css(s).map &:remove} # strip elements
+          [*GlobalGunk, *SiteGunk[@base.host]].map{|s| # strip elements
+            #body.css(s).map{|c| puts "🛑 "+s, c, "\n"*3}
+            body.css(s).map &:remove}
           yield subject, Content, HTML.clean(body.inner_html, @base).gsub(/<\/?(center|noscript)[^>]*>/i, '')
         else # <body> missing, emit doc - <head>
           puts "WARNING missing <body> in #{@base}"
