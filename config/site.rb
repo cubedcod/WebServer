@@ -714,16 +714,27 @@ media-mbst-pub-ue1.s3.amazonaws.com
             # map datatypes
             p = MetaMap[p] || p
             if p == Type
-              o = Image.R if o == 'Photo'
               o = Post.R if o == 'article'
+              if o == 'Photo'
+                o = Image.R
+                base = hash['gcsBaseUrl']
+                fmt = hash['imageFileExtension']
+                sizes = hash['imageRenderedSizes']
+                if base && fmt && sizes
+                  sizes.map{|size|
+                    img = base + size.to_s + fmt
+                    yield img.R, Type.R, Image.R
+                  }
+                end
+              end
             end
-            puts p unless p.to_s.match? /^(drop|http)/
+
             # emit triples
             unless p == :drop
               case o.class.to_s
               when 'Array'
                 o.flatten.map{|o|
-                  yield id, p, o unless o.class == 'Hash'}
+                  yield id, p, o unless o.class == Hash}
               when 'Hash'
               else
                 yield id, p, o
