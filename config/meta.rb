@@ -248,6 +248,8 @@ class WebResource
       'https://schema.org/headline' => Title,
       'https://schema.org/image' => Image,
       'https://schema.org/keywords' => Abstract,
+      'https://schema.org/name' => Title,
+      'https://schema.org/startDate' => Date,
       'https://schema.org/text' => Content,
       'https://schema.org/thumbnailUrl' => Image,
       'https://search.yahoo.com/mrss/content' => Content,

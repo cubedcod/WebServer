@@ -565,6 +565,11 @@ class WebResource
                     l.respond_to?(:uri) && env[:graph][l.uri] || (l.class == WebResource ? {'uri' => l.uri,
                                                                                              Title => [l.uri]} : l)}, env)}}
 
+    Markup[Title] = -> title, env {
+      if title.class == String
+        {_: :h3, class: :title, c: CGI.escapeHTML(title)}
+      end}
+
     Markup[LDP+'Container'] = -> dir , env {
       uri = dir.delete 'uri'
       [Type, Title, W3+'ns/posix/stat#mtime', W3+'ns/posix/stat#size'].map{|p|dir.delete p}
