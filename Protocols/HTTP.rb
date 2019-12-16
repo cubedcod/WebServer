@@ -112,7 +112,7 @@ class WebResource
           if %w(css eot otf ttf woff woff2).member?(ext) || path.match?(/204$/)
             print "🛑"
           else
-            print "\n" + (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "🛑 \e[31;1m") + (env[:referer] ? ("\e[7m" + env[:referer] + "\e[0m\e[31;1m → ") : '') + (env[:referer] == resource.host ? '' : resource.host) + "\e[7m" + resource.path + "\e[0m\e[31m" + resource.qs + "\e[0m "
+            print "\n" + (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "🛑 \e[31;1m") + (env[:referer] ? ("\e[7m" + env[:referer] + "\e[0m\e[31;1m → ") : '') + (env[:referer] == resource.host ? '' : ('http://' + resource.host)) + "\e[7m" + resource.path + "\e[0m\e[31m" + resource.qs + "\e[0m "
           end
 
         # OPTIONS
