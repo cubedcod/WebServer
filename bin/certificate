@@ -1,6 +1,7 @@
 #!/bin/sh
 
 ## Create
+
 certdir=$(realpath ~/.ssl)
 cert=$certdir/CA.pem
 [ -e $certdir ] || mkdir $certdir
@@ -8,13 +9,14 @@ cert=$certdir/CA.pem
 hash=$(openssl x509 -inform PEM -subject_hash_old -in $cert -noout)
 
 ## Install
-# Arch Linux
-which pacman && su -c "cp $cert /etc/ca-certificates/trust-source/anchors && update-ca-trust extract"
 
-# Debian & Ubuntu
+# Arch Linux
+which pacman && su -c "trust anchor --store $cert"
+
+# Debian
 which apt-add-repository && su -c "cp $cert /usr/local/share/ca-certificates/CA.crt && update-ca-certificates"
 
-# Android/Termux
+# Termux
 if [ -x "$(command -v pkg)" ]; then
     su -c "mount -o rw,remount /system"
     su -c "cp  $cert /system/etc/security/cacerts/$hash.0"
