@@ -210,13 +210,10 @@ sidebar [class^='side']    [id^='side']
 
         # <body>
         if body = n.css('body')[0]
-          %w{content-body entry-content}.map{|bsel|
-            if content = body.css('.' + bsel)[0]
-              yield subject, Content, HTML.clean(content.inner_html, @base)
-            end}
-          [*GlobalGunk,*SiteGunk[@base.host]].map{|s|body.css(s).map &:remove} # strip elements
+          [*GlobalGunk, *SiteGunk[@base.host]].map{|s|body.css(s).map &:remove} # strip elements
           yield subject, Content, HTML.clean(body.inner_html, @base).gsub(/<\/?(center|noscript)[^>]*>/i, '')
-        else # body element missing, emit entire document
+        else # <body> missing, emit doc - <head>
+          puts "WARNING missing <body> in #{@base}"
           n.css('head').remove
           yield subject, Content, HTML.clean(n.inner_html, @base).gsub(/<\/?(center|noscript)[^>]*>/i, '')
         end
