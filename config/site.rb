@@ -710,24 +710,22 @@ media-mbst-pub-ue1.s3.amazonaws.com
           # resource identifier
           id = '#ap_' + Digest::SHA2.hexdigest(rand.to_s)
 
-          hash.map{|p, o|
-            # map datatypes
-            p = MetaMap[p] || p
-            if p == Type
-              o = Post.R if o == 'article'
-              if o == 'Photo'
-                o = Image.R
-                base = hash['gcsBaseUrl']
-                fmt = hash['imageFileExtension']
-                sizes = hash['imageRenderedSizes']
-                if base && fmt && sizes
-                  sizes.map{|size|
-                    img = base + size.to_s + fmt
-                    yield img.R, Type.R, Image.R
-                  }
-                end
+          # image-post resources
+          if base = (hash.delete 'gcsBaseUrl')
+            hash['type'] = Post.R
+            if fmt = (hash.delete 'imageFileExtension')
+              if sizes = (hash.delete 'imageRenderedSizes')
+                sizes.map{|size|
+                  yield id, Image.R, (base + size.to_s + fmt).R}
               end
             end
+          end
+
+          # massage types
+          %w(contentType embedRatio ignoreClickOnElements order socialEmbeds shortId sponsored videoRenderedSizes).map{|p| hash.delete p}
+          hash.map{|p, o|
+            p = MetaMap[p] || p
+            o = Post.R if p == Type && o == 'article'
 
             # emit triples
             unless p == :drop
