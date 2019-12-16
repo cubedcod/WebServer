@@ -252,14 +252,15 @@ thumbs.ebaystatic.com).map{|host| GET host }
         (0..24).map{|i| Allow "clients#{i}.google.com"}
       end
 
+      GData = -> r {(r.env[:referer]||'').match?(/\.google\.com$/) ? NoGunk[r] : r.deny}
+      %w(ajax maps www).map{|h|GET h + '.googleapis.com', GData} # script/data hosts
+      %w(maps ssl www).map{|h|GET h + '.gstatic.com', GData}
+      (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com", GData}
+      (0..3).map{|i| GET "khms#{i}.google.com", GData }          # map tiles
       (1..4).map{|i| GET "#{i}.bp.blogspot.com", NoJS }          # blog images
-      (0..3).map{|i| GET "khms#{i}.google.com" }                 # earth tiles for map
-      (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com", NoJS } # misc static content
-      %w(books docs drive images maps news scholar).map{|h|GET h + '.google.com' } # web apps
-      %w(ajax maps www).map{|h|GET h + '.googleapis.com' }       # script/data hosts
-      %w(maps ssl www).map{|h| GET h + '.gstatic.com' }          # script/data hosts
 
-      Cookies 'www.google.com'                                   # search peronalization
+      Cookies 'www.google.com'                                   # search personalization
+      %w(books docs drive images maps news scholar).map{|h|GET h + '.google.com' } # apps
       GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
       GET 'www.google.com', -> r {
         case r.path
@@ -269,7 +270,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
         when '/url'
           GotoURL[r]
         else
-          r.env[:referer] == 'www.google.com' ? NoGunk[r] : r.deny
+          GData[r]
         end}
     end
 
