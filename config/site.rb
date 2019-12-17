@@ -469,10 +469,10 @@ firefox.settings.services.mozilla.com
     %w(np.reddit.com reddit.com).map{|host| GET host, GotoReddit }
 
     Reddit = -> r {
-      r.chrono_sort if r.parts[-1] == 'new' || r.path == '/'       # chrono-sort new posts
+      r.chrono_sort if r.parts[-1] == 'new' || r.path == '/'                                   # chrono-sort preference
       r = ('/r/'+ Pathname.glob('reddit/.??*').map{|n|n.basename.to_s[1..-1]}.join('+')+'/new').R r.env if r.path == '/' # subscriptions
-      r.desktopUI if r.parts[-1] == 'submit'                       # upstream UI for post submission
-      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? # upstream-representation preference
+      r.desktopUI if r.parts[-1] == 'submit'                                                   # upstream UI preference
+      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !r.parts.member?('wiki') # MIME preference
       r.env[:links][:prev] = 'https://old.reddit.com' + r.path + r.qs # page pointers
       r.env[:links][:up] = r.dirname unless r.path == '/'
       r.fetch options}
