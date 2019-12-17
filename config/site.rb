@@ -183,7 +183,7 @@ secure.brightcove.com
     GET 'clickserve.dartsearch.net', -> r {[301,{'Location' => r.env[:query]['ds_dest_url']}, []]}
 
     # Disqus
-    GET 'c.disquscdn.com'
+    #GET 'c.disquscdn.com'
 
     # DuckDuckGo
     GET 'duckduckgo.com', -> r {%w{ac}.member?(r.parts[0]) ? r.deny : r.fetch}
