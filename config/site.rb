@@ -817,7 +817,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
         subject = ts['href'] || self
         yield subject, Type, Post.R
         if body = comment.css('.comment-body')[0]
-          yield subject, Content, body.inner_html
+          yield subject, Content, Webize::HTML.clean(body.inner_html, self)
         end
         if time = comment.css('[datetime]')[0]
           yield subject, Date, time['datetime']
