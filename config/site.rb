@@ -128,10 +128,10 @@ s.click.aliexpress.com
     Cookies 'www.bloomberg.com'
 
     # Boston Globe
-    %w(bos.gl w.bos.gl).map{|short| GET short, NoQuery}
     GET 'bostonglobe-prod.cdn.arcpublishing.com', Resizer
-    %w(www).map{|host| GET host + '.boston.com', NoJS}
-    %w(apps www www3).map{|host| GET host + '.bostonglobe.com', NoJS}
+    %w(bos.gl w.bos.gl).map{|short| GET short, NoQuery }
+    %w(archive www).map{|h|   GET h + '.boston.com' }
+    %w(apps www www3).map{|h| GET h + '.bostonglobe.com' }
     Insecure 'bos.gl'
 
     # BrassRing
@@ -154,7 +154,7 @@ secure.brightcove.com
     GET 'cts.businesswire.com', GoIfURL
 
     # BuzzFeed
-    GET 'img.buzzfeed.com', NoJS
+    GET 'img.buzzfeed.com'
 
     # CBS
     GET 'www.cbsnews.com'
@@ -364,7 +364,7 @@ zoopps.com
     GET 'cloud.mail.ru'
     GET 'img.imgsmail.ru'
     GET 's.mail.ru'
-    GET 'thumb.cloud.mail.ru', NoJS
+    GET 'thumb.cloud.mail.ru'
 
     # MassLive
     GET 'i.masslive.com', Resizer
