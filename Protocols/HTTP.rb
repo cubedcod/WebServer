@@ -614,7 +614,8 @@ class WebResource
         options[:file_path] = self
         env[:repository].load relPath, options
       elsif directory?
-        container = options[:base_uri] + (options[:base_uri].to_s[-1] == '/' ? '' : '/')
+        puts "dir #{options[:base_uri]} #{self}"
+        container = options[:base_uri].join(basename) + '/'
         graph << RDF::Statement.new(container, Type.R, (W3+'ns/ldp#Container').R)
         graph << RDF::Statement.new(container, Title.R, basename)
         graph << RDF::Statement.new(container, Date.R, stat.mtime.iso8601)
@@ -809,7 +810,7 @@ class WebResource
     def querystring
       if env
         if env[:query]                                           # parsed query?
-          q = env[:query].dup                                    # load query
+          q = env[:query].dup                                    # read query
           LocalArgs.map{|a| q.delete a }                         # eat internal args
           return q.empty? ? '' : HTTP.qs(q)                      # stringify
         elsif env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # query-string in environment

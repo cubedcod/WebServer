@@ -551,6 +551,9 @@ firefox.settings.services.mozilla.com
     # Time
     GET 'ti.me', NoQuery
 
+    # Tumblr
+    GET 'springarden.tumblr.com', -> r {r.env[:query].has_key?('audio_file') ? [301, {'Location' => r.env[:query]['audio_file']}, []] : Desktop[r]}
+
     # TinyURL
     GET 'tinyurl.com', NoQuery
 
