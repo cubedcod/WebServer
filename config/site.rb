@@ -421,6 +421,7 @@ firefox.settings.services.mozilla.com
     CDNscripts 'nextdoor.com'
 
     # NOAA
+    Allow 'forecast.weather.gov'
     GET 'www.tsunami.gov', Desktop
 
     # NYTimes
