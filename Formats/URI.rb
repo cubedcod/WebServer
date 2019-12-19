@@ -85,6 +85,8 @@ class WebResource < RDF::URI
       Video => '🎞',
     }
 
+    def base; env[:base_uri] end
+
     def formatHint
       if basename.index('msg.')==0 || path.index('/sent/cur')==0
         # procmail doesnt allow suffix (like .eml extension), only prefix?
@@ -108,6 +110,7 @@ class WebResource < RDF::URI
     end
 
     def hostname; env && env['SERVER_NAME'] || host || 'localhost' end
+
     def hostpath; '/' + hostname.split('.').-(%w(com net org www)).reverse.join('/') end
 
     def indexRDF
@@ -166,12 +169,10 @@ class WebResource < RDF::URI
     def dir; dirname.R env if path end                              # DIRNAME(1)
     def directory?; node.directory? end
     def dirname; File.dirname path if path end                      # DIRNAME(1)
-    def du; `du -s #{shellPath}| cut -f 1`.chomp.to_i end           # DU(1)
     def exist?; node.exist? end
     def ext; File.extname( path || '' )[1..-1] || '' end
     def file?; node.file? end
     def find p; `find #{shellPath} -iname #{Shellwords.escape p}`.lines.map{|p|('/'+p.chomp).R} end # FIND(1)
-    def fsNode; fsPath.node end
     def fsPath; (hostpath + (path || '/')).R env end
     def glob; Pathname.glob(relPath).map{|p|('/'+p.to_s).R env} end # GLOB(7)
     def grep # URI -> file(s)                                       # GREP(1)
@@ -192,9 +193,9 @@ class WebResource < RDF::URI
       `#{cmd} | head -n 1024`.lines.map{|path|('/'+path.chomp).R}
     end
     def mkdir; FileUtils.mkdir_p relPath unless exist?; self end    # MKDIR(1)
-    def name; basename.sub GraphExt, '' end
-    def node; @node ||= (Pathname.new relPath) end
-    def parts; @parts ||= path ? path.split('/').-(['']) : [] end
+    def node; Pathname.new relPath end
+    def parts; path ? path.split('/').-(['']) : [] end
+    def relFrom source; node.relative_path_from source.node end
     def relPath; ['/','',nil].member?(path) ? '.' : (path[0]=='/' ? path[1..-1] : path) end
     def self.splitArgs args; args.shellsplit rescue args.split /\W/ end
     def shellPath; Shellwords.escape relPath.force_encoding 'UTF-8' end

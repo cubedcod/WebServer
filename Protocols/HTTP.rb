@@ -373,7 +373,7 @@ class WebResource
           format ||= (xt = ext.to_sym; puts "WARNING no MIME for #{uri}"  # extension -> format
                       RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
           reader = RDF::Reader.for content_type: format                   # select reader
-          reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|  # instantiate reader
+          reader.new(body, {base_uri: base, noRDF: options[:noRDF]}){|_|  # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader   # parse RDF
           fsPath.write body if CacheExt.member? ext.downcase              # cache static-data
           return self if options[:intermediate]                           # intermediate fetch - no direct HTTP caller
@@ -533,7 +533,7 @@ class WebResource
         when /^application\/atom+xml/
           feedDocument
         else
-          env[:repository].dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => env[:base_uri], :standard_prefixes => true
+          env[:repository].dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => base, :standard_prefixes => true
         end}
     end
 
@@ -606,13 +606,14 @@ class WebResource
     # node-RDF -> Repository
     def load
       graph = env[:repository] ||= RDF::Repository.new
-      options = {base_uri: env[:base_uri]}
       if file?
+        options = {base_uri: base}
         options[:format]  ||= formatHint
         options[:file_path] = self
         env[:repository].load relPath, options
       elsif directory?
-        container = env[:base_uri].join node.relative_path_from env[:base_uri].fsNode
+        container = base.join relFrom base.fsPath # container URI
+        container += '/' unless container.to_s[-1] == '/'
         graph << RDF::Statement.new(container, Type.R, (W3+'ns/ldp#Container').R)
         graph << RDF::Statement.new(container, Title.R, basename)
         graph << RDF::Statement.new(container, Date.R, stat.mtime.iso8601)
@@ -642,7 +643,6 @@ class WebResource
     end
 
     def localGraph
-      env[:links][:turtle] = (path[-1] == '/' ? 'index' : name) + '.ttl'
       env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
       dateMeta
       nodeResponse

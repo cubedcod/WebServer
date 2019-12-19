@@ -276,7 +276,6 @@ class WebResource
                                   {_: :a, class: 'basename breadcrumb', href: path, c: (CGI.escapeHTML URI.unescape basename)},
                                   link[:media, '🖼️'],
                                   link[:feed, FeedIcon],
-                                  link[:turtle, '🐢'],
                                  ]},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?
