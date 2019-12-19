@@ -325,7 +325,7 @@ class WebResource
         return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has static-data, return 304 response
         return fsPath.fileResponse if fsPath.file?                                                # server has static-data, return data
       end
-      return cachedGraph if offline?                                                              # offline, return cache
+      return cachedGraph if ENV.has_key? 'OFFLINE'                                                # offline, return cache
 
       # locator
       p = default_port? ? '' : (':' + env['SERVER_PORT'].to_s)
@@ -662,10 +662,6 @@ class WebResource
     def notfound
       dateMeta # nearby nodes may exist, add pointers
       [404, {'Content-Type' => 'text/html'}, [htmlDocument]]
-    end
-
-    def offline?
-      ENV.has_key? 'OFFLINE'
     end
 
     def OPTIONS
