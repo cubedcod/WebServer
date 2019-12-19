@@ -452,7 +452,7 @@ class WebResource
          env[:grep] = true                                     # GREP
          grep
        else                                                    # LS
-         [self]
+         [self, (join 'index.ttl').R]
        end
       else                                                     # files:
         if uri.match GlobChars                                 # GLOB - parametric
@@ -620,7 +620,7 @@ class WebResource
         node.children.map{|n|
           isDir = n.directory?
           name = n.basename.to_s + (isDir ? '/' : '')
-          unless name[0] == '.'
+          unless name[0] == '.' || name == 'index.ttl'
             item = container.join name
             graph << RDF::Statement.new(container, (W3+'ns/ldp#contains').R, item)
             if n.file?
