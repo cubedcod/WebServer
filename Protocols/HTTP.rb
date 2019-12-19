@@ -82,22 +82,19 @@ class WebResource
       self
     end
 
-    def cachePath format = nil
-      p = path || '/'
-      p += 'index' + (Rack::Mime::MIME_TYPES.invert[format] || '.bin') if format && p[-1] == '/' # find format-extension
-      (hostpath + p).R env
-    end
-
-    def cachedGraph; nodeResponse cachePath end
+    def cachedGraph; fsPath.nodeResponse end
 
     def self.call env
       return [405,{},[]] unless m=Methods[env['REQUEST_METHOD']] # method-handler lookup
       path = Pathname.new(env['REQUEST_PATH']).expand_path.to_s  # evaluate path expression
       path+='/' if env['REQUEST_PATH'][-1]=='/' && path[-1]!='/' # preserve trailing slash
-      env[:referer] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # find referring host
-      resource = ('//' + env['SERVER_NAME'] + path).R env.merge( # instantiate request
-       {resp:{}, links:{}, query: parseQs(env['QUERY_STRING'])}) # parse query
-      resource.send(m).yield_self{|status, head, body|           # dispatch request
+      resource = ('//' + env['SERVER_NAME'] + path).R            # requested resource
+      env[:base_uri] = resource
+      env[:referer] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # referring host
+      env[:resp] = {}                                            # response headers
+      env[:links] = {}                                           # response links
+      env[:query] = parseQs(env['QUERY_STRING'])                 # parse query
+      resource.bindEnv(env).send(m).yield_self{|status, head, body| # dispatch
 
         ext = resource.ext.downcase                              # log request
         mime = head['Content-Type'] || ''
@@ -325,10 +322,10 @@ class WebResource
 
       # cached results
       if (CacheExt - %w(html xml)).member?(ext.downcase) && !host.match?(DynamicImgHost)
-        return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE')     # client has static-data, return 304 response
-        return cachePath.fileResponse if cachePath.file?                                              # server has static-data, return data
+        return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has static-data, return 304 response
+        return fsPath.fileResponse if fsPath.file?                                                # server has static-data, return data
       end
-      return cachedGraph if offline?                                                                  # offline, return cache
+      return cachedGraph if offline?                                                              # offline, return cache
 
       # locator
       p = default_port? ? '' : (':' + env['SERVER_PORT'].to_s)
@@ -378,7 +375,7 @@ class WebResource
           reader = RDF::Reader.for content_type: format                   # select reader
           reader.new(body, {base_uri: self, noRDF: options[:noRDF]}){|_|  # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader   # parse RDF
-          cachePath(format).write body if CacheExt.member? ext.downcase   # cache static-data
+          fsPath.write body if CacheExt.member? ext.downcase              # cache static-data
           return self if options[:intermediate]                           # intermediate fetch - no direct HTTP caller
 
           # HTTP response
@@ -488,7 +485,7 @@ class WebResource
           [302, {'Location' => '/d/*/msg*?head&sort=date&view=table'}, []]
         elsif parts[0] == 'msg'     # (message -> path) map
           id = parts[1]
-          id ? (nodeResponse MID2PATH[URI.unescape id]) : [301, {'Location' => '/mail'}, []]
+          id ? MID2PATH[URI.unescape id].R(env).nodeResponse : [301, {'Location' => '/mail'}, []]
         elsif file?
           fileResponse              # static-data
         elsif directory? && qs.empty? && (index = (self + 'index.html').R env).exist? && selectFormat == 'text/html'
@@ -501,7 +498,7 @@ class WebResource
       elsif path.match? HourDir     # cache timeslice
         name = '*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*'
         dateMeta
-        nodeResponse (path + name)
+        (path + name).R(env).nodeResponse
       elsif handler = HostGET[host] # host handler
         Populator[host][self] if Populator[host] && !hostpath.R.exist?
         handler[self]
@@ -605,17 +602,16 @@ class WebResource
       HTTPHosts.has_key? host
     end
 
-    # node RDF -> Repository
-    def load options = {}
+    # node-RDF -> Repository
+    def load
       graph = env[:repository] ||= RDF::Repository.new
-      options[:base_uri] ||= self
+      options = {base_uri: env[:base_uri]}
       if file?
         options[:format]  ||= formatHint
         options[:file_path] = self
         env[:repository].load relPath, options
       elsif directory?
-        puts "dir #{options[:base_uri]} #{self}"
-        container = options[:base_uri].join(basename) + '/'
+        container = env[:base_uri].join node.relative_path_from env[:base_uri].fsNode
         graph << RDF::Statement.new(container, Type.R, (W3+'ns/ldp#Container').R)
         graph << RDF::Statement.new(container, Title.R, basename)
         graph << RDF::Statement.new(container, Date.R, stat.mtime.iso8601)
@@ -651,12 +647,12 @@ class WebResource
       nodeResponse
     end
 
-    def nodeResponse fs_base=self
-      nodes = fs_base.R(env).findNodes
-      if nodes.size==1 && nodes[0].ext=='ttl' && selectFormat=='text/turtle'
+    def nodeResponse
+      nodes = findNodes
+      if nodes.size == 1 && nodes[0].ext == 'ttl' && selectFormat == 'text/turtle'
         nodes[0].fileResponse # nothing to merge or transform. return static-node
       else                    # merge and/or transform
-        nodes.map{|n| n.load base_uri: self }
+        nodes.map &:load
         indexRDF if env[:new]
         graphResponse
       end

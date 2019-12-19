@@ -530,8 +530,9 @@ firefox.settings.services.mozilla.com
                 soundcloud.com
          secure.soundcloud.com
               w.soundcloud.com
-).map{|h| Allow h; GET h, Desktop}
-    GET 'soundcloud.com', -> r {r.path=='/' ? RootIndex[r] : Desktop[r]}
+).map{|host| Allow host
+               GET host}
+    GET 'soundcloud.com', RootIndex
 
     # Spotify
     %w(api apresolve embed guc-dealer guc-spclient open spclient.wg).map{|h|

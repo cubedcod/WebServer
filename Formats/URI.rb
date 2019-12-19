@@ -171,6 +171,8 @@ class WebResource < RDF::URI
     def ext; File.extname( path || '' )[1..-1] || '' end
     def file?; node.file? end
     def find p; `find #{shellPath} -iname #{Shellwords.escape p}`.lines.map{|p|('/'+p.chomp).R} end # FIND(1)
+    def fsNode; fsPath.node end
+    def fsPath; (hostpath + (path || '/')).R env end
     def glob; Pathname.glob(relPath).map{|p|('/'+p.to_s).R env} end # GLOB(7)
     def grep # URI -> file(s)                                       # GREP(1)
       args = POSIX.splitArgs (env[:query]['Q'] || env[:query]['q'])
@@ -193,7 +195,6 @@ class WebResource < RDF::URI
     def name; basename.sub GraphExt, '' end
     def node; @node ||= (Pathname.new relPath) end
     def parts; @parts ||= path ? path.split('/').-(['']) : [] end
-    def relFrom src; node.relative_path_from src.R.node end
     def relPath; ['/','',nil].member?(path) ? '.' : (path[0]=='/' ? path[1..-1] : path) end
     def self.splitArgs args; args.shellsplit rescue args.split /\W/ end
     def shellPath; Shellwords.escape relPath.force_encoding 'UTF-8' end

@@ -266,7 +266,7 @@ class WebResource
                             ]}, "\n",
                         {_: :body,
                          c: [{class: :toolbox,
-                              c: [(icon.cachePath.exist? && icon.cachePath.node.size != 0) ? {_: :a, href: '/', id: :host, c: {_: :img, src: icon.uri}} : hostname.split('.').-(%w(com net org www)).reverse.map{|h| {_: :a, class: :breadcrumb, href: '/', c: h}},
+                              c: [(icon.fsPath.exist? && icon.fsPath.node.size != 0) ? {_: :a, href: '/', id: :host, c: {_: :img, src: icon.uri}} : hostname.split('.').-(%w(com net org www)).reverse.map{|h| {_: :a, class: :breadcrumb, href: '/', c: h}},
                                  ({_: :a, id: :UX, class: :icon, style: 'color: #555', c: '⚗️', href: HTTP.qs((env[:query]||{}).merge({'UX' => 'upstream'}))} unless local?),
                                  ({_: :a, id: :tabular, class: :icon, style: 'color: #555', c: '↨',
                                     href: HTTP.qs((env[:query]||{}).merge({'view' => 'table', 'sort' => 'date'}))} unless env[:query] && env[:query]['view']=='table'),
