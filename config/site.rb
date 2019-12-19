@@ -552,7 +552,7 @@ firefox.settings.services.mozilla.com
     GET 'ti.me', NoQuery
 
     # Tumblr
-    GET 'springarden.tumblr.com', -> r {r.env[:query].has_key?('audio_file') ? [301, {'Location' => r.env[:query]['audio_file']}, []] : Desktop[r]}
+    GET '.tumblr.com', -> r {r.env[:query].has_key?('audio_file') ? [301, {'Location' => r.env[:query]['audio_file']}, []] : Desktop[r]}
 
     # TinyURL
     GET 'tinyurl.com', NoQuery

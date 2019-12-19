@@ -14,7 +14,7 @@ class WebResource
     LocalArgs = %w(allow view sort UX)
     Populator = {}
     Servers = {}
-    ServerKey = Digest::SHA2.hexdigest([`uname -a`, `hostname`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
+    ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
 
     # HTTP method map
     Methods = {
