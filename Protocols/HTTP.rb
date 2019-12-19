@@ -533,7 +533,7 @@ class WebResource
         when /^application\/atom+xml/
           feedDocument
         else
-          env[:repository].dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => self, :standard_prefixes => true
+          env[:repository].dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => env[:base_uri], :standard_prefixes => true
         end}
     end
 
@@ -568,7 +568,7 @@ class WebResource
         key = key.downcase if underscored
 
         # set values
-        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w{connection gunk host links path-info query query-modified query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forwarded-for}.member?(key.downcase)}
+        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w{base-uri connection gunk host links path-info query query-modified query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forwarded-for}.member?(key.downcase)}
 
       # Cookie
       unless allowCookies?
@@ -591,6 +591,7 @@ class WebResource
       head['User-Agent'] = 'curl/7.65.1' if host == 'po.st'
       head.delete 'User-Agent' if host == 't.co'
 
+      HTTP.print_header head if ENV.has_key? 'VERBOSE'
       head
     end
 
@@ -687,13 +688,6 @@ class WebResource
       # response
       r = HTTParty.options url, :headers => head, :body => body
       h = headers r.headers
-      if ENV.has_key? 'VERBOSE'
-        HTTP.print_header head
-        puts body
-        puts :__________________
-        HTTP.print_header h
-        puts r.body
-      end
       [r.code, h, [r.body]]
     end
 
@@ -736,14 +730,6 @@ class WebResource
       # origin response
       r = HTTParty.post url, :headers => head, :body => body
       h = headers r.headers
-      if ENV.has_key? 'VERBOSE'
-        puts '>'*32
-        HTTP.print_header head
-        puts body
-        puts '<'*32
-        HTTP.print_header h
-        puts r.body
-      end
       [r.code, h, [r.body]]
     end
 
@@ -770,6 +756,7 @@ class WebResource
     end
 
     def HTTP.print_header header
+      puts '_'*40
       header.map{|k, v| puts [k, v.to_s].join "\t"}
     end
 
