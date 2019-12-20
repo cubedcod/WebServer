@@ -357,7 +357,7 @@ class WebResource
     # Hash -> Markup
     def self.tabular graph, env
       graph = graph.values if graph.class == Hash
-      keys = graph.select{|r|r.respond_to? :keys}.map{|r|r.keys}.flatten.uniq - [Abstract, Content, DC+'hasFormat', DC+'identifier', Image, Video, SIOC+'reply_of', SIOC+'user_agent', Title, Type]
+      keys = graph.select{|r|r.respond_to? :keys}.map{|r|r.keys}.flatten.uniq - [Abstract, Content, DC+'hasFormat', DC+'identifier', Image, Link, Video, SIOC+'reply_of', SIOC+'user_agent', Title, Type]
       if env[:query] && env[:query].has_key?('sort')
         attr = env[:query]['sort']
         attr = Date if %w(date new).member? attr
@@ -384,9 +384,9 @@ class WebResource
                      end},
                    ({_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'id', type: 'node', c: '&#x1f517;'} if tCount == 0),
                    resource[Abstract] ? [resource[Abstract], '<br>'] : '',
-                   (resource[Image]||[]).map{|i| {style: 'max-width: 28em', c: Markup[Image][i,env]}},
-                   (resource[Video]||[]).map{|i| {style: 'max-width: 32em', c: Markup[Video][i,env]}},
-                   resource[Content]]
+                   [Image, Video].map{|t|(resource[t]||[]).map{|i| Markup[t][i,env]}},
+                   resource[Content],
+                   (resource[Link]||[]).map{|i| Markup[Link][i,env]}]
                 else
                   (resource[k]||[]).map{|v|value k, v, env }
                  end}}}}]}

@@ -18,7 +18,7 @@
 .post {border-radius: .38em; margin: .1em; max-width: 88ex; border: 1px solid #222}
 .quote {background-color: #ccc; color: #000}
 .thumb, svg {max-width: 28em}
-.title {background-color: #ddd; color: #000; min-width: 10em; display: block; font-size: 1.1em; vertical-align: top; border-radius: .28em}
+.title {background-color: #ddd; color: #000; min-width: 10em; display: block; font-size: 1.1em; vertical-align: top; border-radius: .2em}
 .title:visited {background-color: #fff; color: #000}
 .toolbox a.icon {font-size: 1.6em}
 .toolbox a.icon, .breadcrumb {text-shadow: 1px 1px #000000}
