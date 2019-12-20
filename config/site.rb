@@ -907,7 +907,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
         if text = h['edge_media_to_caption']['edges'][0]['node']['text']
           yield s, Abstract, CGI.escapeHTML(text).split(' ').map{|t|
                 if match = (t.match /^@([a-zA-Z0-9._]+)(.*)/)
-                  "<a href='https://www.instagram.com/#{match[1]}'>#{match[1]}</a>#{match[2]}"
+                  "<a id='u#{Digest::SHA2.hexdigest rand.to_s}' class='uri' href='https://www.instagram.com/#{match[1]}'>#{match[1]}</a>#{match[2]}"
                 else
                   t
                 end}.join(' ')

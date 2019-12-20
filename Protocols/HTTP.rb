@@ -169,8 +169,6 @@ class WebResource
       CDNscripter[host] = true
     end
 
-    def CDN?; host.match? CDNhost end
-
     def self.Cookies host
       CookieHosts[host] = true
     end
@@ -502,7 +500,7 @@ class WebResource
       elsif handler = HostGET[host] # host handler
         Populator[host][self] if Populator[host] && !hostpath.R.exist?
         handler[self]
-      elsif self.CDN?               # content-pool
+      elsif host.match? CDNhost     # content-pool
         if AllowedHosts.has_key?(host) || CDNscripter.has_key?(env[:referer]) || env[:query]['allow'] == ServerKey
           fetch                     # allowed static-content host
         else
