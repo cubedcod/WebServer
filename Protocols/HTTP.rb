@@ -189,7 +189,7 @@ class WebResource
       [303, env[:resp].update({'Location' => loc + parts[1..-1].join('/') + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '')}), []]
     end
 
-    def dateMeta
+    def timeMeta
       n = nil # next page
       p = nil # prev page
       # date parts
@@ -495,7 +495,8 @@ class WebResource
         R204
       elsif path.match? HourDir     # cache timeslice
         name = '*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*'
-        dateMeta
+        timeMeta
+        env[:links][:time] = 'http://localhost:8000' + path + '*.ttl?head&view=table' if env['REMOTE_ADDR'] == '127.0.0.1'
         (path + name).R(env).nodeResponse
       elsif handler = HostGET[host] # host handler
         Populator[host][self] if Populator[host] && !hostpath.R.exist?
@@ -642,7 +643,7 @@ class WebResource
 
     def localGraph
       env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
-      dateMeta
+      timeMeta
       nodeResponse
     end
 
@@ -658,7 +659,7 @@ class WebResource
     end
 
     def notfound
-      dateMeta # nearby nodes may exist, add pointers
+      timeMeta # nearby nodes may exist, add pointers
       [404, {'Content-Type' => 'text/html'}, [htmlDocument]]
     end
 

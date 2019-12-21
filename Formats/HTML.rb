@@ -274,8 +274,7 @@ class WebResource
                                     [{_: :a, class: :breadcrumb, href: bc += p + '/', c: (CGI.escapeHTML URI.unescape p),
                                       id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
                                   {_: :a, class: 'basename breadcrumb', href: path, c: (CGI.escapeHTML URI.unescape base.basename)},
-                                  link[:media, '🖼️'],
-                                  link[:feed, FeedIcon],
+                                  link[:media, '🖼️'], link[:feed, FeedIcon], link[:time, '🕒'],
                                  ]},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?
