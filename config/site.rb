@@ -183,7 +183,6 @@ secure.brightcove.com
     GET 'clickserve.dartsearch.net', -> r {[301,{'Location' => r.env[:query]['ds_dest_url']}, []]}
 
     # Disqus
-    #GET 'c.disquscdn.com'
 
     # DuckDuckGo
     GET 'duckduckgo.com', -> r {%w{ac}.member?(r.parts[0]) ? r.deny : r.fetch}
@@ -619,9 +618,6 @@ firefox.settings.services.mozilla.com
     # WaPo
     GET 'www.washingtonpost.com', -> r {(r.parts[0]=='resizer' ? Resizer : NoJS)[r]}
 
-    # WaTi
-    #Cookies 'twt-thumbs.washtimes.com'
-
     # WBUR
     CDNscripts 'www.wbur.org'
 
@@ -735,10 +731,11 @@ media-mbst-pub-ue1.s3.amazonaws.com
             end
           end
 
-          # massage types
+          # massage data
           %w(contentType embedRatio ignoreClickOnElements order socialEmbeds shortId sponsored videoRenderedSizes).map{|p| hash.delete p}
           hash.map{|p, o|
             p = MetaMap[p] || p
+            o = Webize::HTML.clean o, self if p == Content && o.class == String
             o = Post.R if p == Type && o == 'article'
 
             # emit triples
