@@ -167,11 +167,9 @@ class WebResource < RDF::URI
     GlobChars = /[\*\{\[]/
     def basename; File.basename ( path || '/' ) end                 # BASENAME(1)
     def dir; dirname.R env if path end                              # DIRNAME(1)
-    def directory?; node.directory? end
     def dirname; File.dirname path if path end                      # DIRNAME(1)
     def exist?; node.exist? end
     def ext; File.extname( path || '' )[1..-1] || '' end
-    def file?; node.file? end
     def find p; `find #{shellPath} -iname #{Shellwords.escape p}`.lines.map{|p|('/'+p.chomp).R} end # FIND(1)
     def fsPath; (hostpath + (path || '/')).R env end
     def glob; Pathname.glob(relPath).map{|p|('/'+p.to_s).R env} end # GLOB(7)

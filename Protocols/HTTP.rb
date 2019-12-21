@@ -321,7 +321,7 @@ class WebResource
       # cached results
       if (CacheExt - %w(html xml)).member?(ext.downcase) && !host.match?(DynamicImgHost)
         return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has static-data, return 304 response
-        return fsPath.fileResponse if fsPath.file?                                                # server has static-data, return data
+        return fsPath.fileResponse if fsPath.node.file?                                           # server has static-data, return data
       end
       return cachedGraph if ENV.has_key? 'OFFLINE'                                                # offline, return cache
 
@@ -441,7 +441,7 @@ class WebResource
     end
 
     def findNodes
-      (if directory?                                           # directory:
+      (if node.directory?                                      # directory:
        if env[:query].has_key?('f') && path != '/'             # FIND
           find env[:query]['f'] unless env[:query]['f'].empty? #  pedantic
        elsif env[:query].has_key?('find') && path != '/'       #  easy mode
@@ -484,9 +484,9 @@ class WebResource
         elsif parts[0] == 'msg'     # (message -> path) map
           id = parts[1]
           id ? MID2PATH[URI.unescape id].R(env).nodeResponse : [301, {'Location' => '/mail'}, []]
-        elsif file?
+        elsif node.file?
           fileResponse              # static-data
-        elsif directory? && qs.empty? && (index = (self + 'index.html').R env).exist? && selectFormat == 'text/html'
+        elsif node.directory? && qs.empty? && (index = (self + 'index.html').R env).exist? && selectFormat == 'text/html'
           index.fileResponse        # static dir-index
         else                        # transformable graph-data
           localGraph
@@ -605,24 +605,24 @@ class WebResource
     # node-RDF -> Repository
     def load
       graph = env[:repository] ||= RDF::Repository.new
-      if file?
+      if node.file?
         options = {base_uri: base}
         options[:format]  ||= formatHint
         options[:file_path] = self
         env[:repository].load relPath, options
-      elsif directory?
+      elsif node.directory?
         container = base.join relFrom base.fsPath # container URI
         container += '/' unless container.to_s[-1] == '/'
         graph << RDF::Statement.new(container, Type.R, (W3+'ns/ldp#Container').R)
         graph << RDF::Statement.new(container, Title.R, basename)
         graph << RDF::Statement.new(container, Date.R, stat.mtime.iso8601)
         node.children.map{|n|
-          isDir = n.directory?
+          isDir = n.node.directory?
           name = n.basename.to_s + (isDir ? '/' : '')
           unless name[0] == '.' || name == 'index.ttl'
             item = container.join name
             graph << RDF::Statement.new(container, (W3+'ns/ldp#contains').R, item)
-            if n.file?
+            if n.node.file?
               graph << RDF::Statement.new(item, Type.R, (W3+'ns/posix/stat#File').R)
               graph << RDF::Statement.new(item, (W3+'ns/posix/stat#size').R, n.size)
             elsif isDir
