@@ -617,12 +617,12 @@ class WebResource
         graph << RDF::Statement.new(container, Title.R, basename)
         graph << RDF::Statement.new(container, Date.R, stat.mtime.iso8601)
         node.children.map{|n|
-          isDir = n.node.directory?
+          isDir = n.directory?
           name = n.basename.to_s + (isDir ? '/' : '')
           unless name[0] == '.' || name == 'index.ttl'
             item = container.join name
             graph << RDF::Statement.new(container, (W3+'ns/ldp#contains').R, item)
-            if n.node.file?
+            if n.file?
               graph << RDF::Statement.new(item, Type.R, (W3+'ns/posix/stat#File').R)
               graph << RDF::Statement.new(item, (W3+'ns/posix/stat#size').R, n.size)
             elsif isDir
