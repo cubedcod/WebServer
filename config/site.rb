@@ -58,7 +58,6 @@ class WebResource
 
     CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|github|googleapis|netdna.*)\.(com|io|net)$/
     CookieHost = /\.bandcamp\.com$/
-    DesktopUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
     DynamicImgHost = /(noaa|weather)\.gov$/
     POSThost = /^video.*.ttvnw.net$/
 
@@ -82,8 +81,6 @@ class WebResource
     # Adobe
     Allow 'entitlement.auth.adobe.com'
     Allow 'sp.auth.adobe.com'
-    GET 'entitlement.auth.adobe.com', Desktop
-    GET 'sp.auth.adobe.com', Desktop
 
     # AliBaba
     %w(ae01.alicdn.com
@@ -104,9 +101,7 @@ s.click.aliexpress.com
 
     # Apple
     %w{amp-api.music api.music audio-ssl.itunes embed.music itunes js-cdn.music music www xp}.map{|h|
-      host = h + '.apple.com'
-      Allow host
-      GET host, Desktop}
+      Allow h + '.apple.com'}
 
     # Appspot
     %w(xmountwashington).map{|h| Allow h + '.appspot.com'}
@@ -121,9 +116,6 @@ s.click.aliexpress.com
     Allow 'balamii-parse.herokuapp.com'
     Allow 'player.balamii.com'
 
-    # Blocks
-    GET 'bl.ocks.org', Desktop
-
     # Bloomberg
     Cookies 'www.bloomberg.com'
 
@@ -136,7 +128,6 @@ s.click.aliexpress.com
 
     # BrassRing
     Allow 'sjobs.brassring.com'
-    GET 'sjobs.brassring.com', Desktop
 
     # Brightcove
     %w(
@@ -144,8 +135,7 @@ edge.api.brightcove.com
 players.brightcove.net
 secure.brightcove.com
 ).map{|h|
-      Allow h
-        GET h, Desktop}
+      Allow h}
 
     # Brightspot
     GET 'ca-times.brightspotcdn.com', GoIfURL
@@ -201,9 +191,6 @@ thumbs.ebaystatic.com).map{|host| GET host }
     # Economist
     GET 'www.economist.com'
 
-    # Embedly
-    GET 'cdn.embedly.com', Desktop
-
     # ESPN
     %w(api-app broadband media.video-cdn secure site.api site.web.api watch.auth.api watch.graph.api www).map{|h|
       Allow h + '.espn.com' }
@@ -234,7 +221,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
     GET 'thumbs.gfycat.com'
 
     # GitHub
-    GET 'api.github.com', Desktop
+    GET 'api.github.com'
     GET 'gist.github.com'
     GET 'github.com'
     %w(avatars0 avatars1 avatars2 avatars3 raw).map{|h|
@@ -251,7 +238,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
     unless ENV.has_key? 'DEGOOGLE'
 
       if ENV.has_key? 'GOOGLE'                          # POST capability
-        (0..24).map{|i| h="#{i}.client-channel.google.com"; Allow h; GET h, Desktop}
+        (0..24).map{|i| h="#{i}.client-channel.google.com"; Allow h}
         (0..24).map{|i| Allow "clients#{i}.google.com"}
       end
 
@@ -286,7 +273,6 @@ thumbs.ebaystatic.com).map{|host| GET host }
 
     # HFU
     Allow 'chat.hfunderground.com'
-    GET 'chat.hfunderground.com', Desktop
 
     # Hubspot
     GET 'hubs.ly', NoQuery
@@ -298,7 +284,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
 
     # Imgur
     Allow 'api.imgur.com'
-    %w(i.imgur.com i.stack.imgur.com).map{|host| GET host, Desktop }
+    %w(i.imgur.com i.stack.imgur.com).map{|host| GET host }
 
     %w(imgur.com
      m.imgur.com
@@ -421,7 +407,6 @@ firefox.settings.services.mozilla.com
 
     # NOAA
     Allow 'forecast.weather.gov'
-    GET 'www.tsunami.gov', Desktop
 
     # NYTimes
     %w(cooking www).map{|host|
@@ -448,30 +433,21 @@ firefox.settings.services.mozilla.com
     # Patch
     GET 'patch.com', NoQuery
 
-    # Patriot Ledger
-    GET 'www.patriotledger.com', -> r {NoGunk[r.env[:query].has_key?('template') ? r.desktopUI : r]}
-
-    # Rarbg
-    Allow 'rarbg.to'
-    GET 'rarbg.to', -> r {r.desktopUI.fetch}
-
     # Reddit
-    GotoReddit = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path + r.qs}, []]}
-
     Populate 'www.reddit.com', -> r {
       FileUtils.mkdir 'reddit'
       'Dorchester+Rad_Decentralization+SOLID+StallmanWasRight+boston+dancehall+darknetplan+fossdroid+massachusetts+roxbury+selfhosted+shortwave'.split('+').map{|n|
         FileUtils.touch 'reddit/.' + n}}
 
+    GotoReddit = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path + r.qs}, []]}
     %w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h| Allow h }
     %w(gateway gql oauth old s www).map{|h|                                 Allow h + '.reddit.com' }
-    %w(www.redditmedia.com).map{|host|      GET host, Desktop }
     %w(np.reddit.com reddit.com).map{|host| GET host, GotoReddit }
 
     Reddit = -> r {
       r.chrono_sort if r.parts[-1] == 'new' || r.path == '/'                                   # chrono-sort preference
       r = ('/r/'+ Pathname.glob('reddit/.??*').map{|n|n.basename.to_s[1..-1]}.join('+')+'/new').R r.env if r.path == '/' # subscriptions
-      r.desktopUI if r.parts[-1] == 'submit'                                                   # upstream UI preference
+      r.upstreamUI if r.parts[-1] == 'submit'                                                  # upstream UI preference
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !r.parts.member?('wiki') # MIME preference
       r.env[:links][:prev] = 'https://old.reddit.com' + r.path + r.qs # page pointers
       r.env[:links][:up] = r.dirname unless r.path == '/'
@@ -480,7 +456,7 @@ firefox.settings.services.mozilla.com
     GET 'www.reddit.com', Reddit
 
     GET 'old.reddit.com', -> r {
-      r.desktopUI.fetch.yield_self{|status,head,body|
+      r.fetch.yield_self{|status,head,body|
         if !%w(r u user).member?(r.parts[0]) || status.to_s.match?(/^30/)
           [status, head, body]
         else
@@ -535,15 +511,13 @@ firefox.settings.services.mozilla.com
 
     # Spotify
     %w(api apresolve embed guc-dealer guc-spclient open spclient.wg).map{|h|
-      host = h + '.spotify.com'
-      Allow host; GET host, Desktop}
+      Allow h + '.spotify.com'}
 
     # StarTribune
     Allow 'comments.startribune.com'
 
     # Tableau
     Allow 'public.tableau.com'
-    GET   'public.tableau.com', Desktop
 
     # Technology Review
     GET 'cdn.technologyreview.com', NoQuery
@@ -551,14 +525,10 @@ firefox.settings.services.mozilla.com
     # Time
     GET 'ti.me', NoQuery
 
-    # Tumblr
-    GET '.tumblr.com', -> r {r.env[:query].has_key?('audio_file') ? [301, {'Location' => r.env[:query]['audio_file']}, []] : Desktop[r]}
-
     # TinyURL
     GET 'tinyurl.com', NoQuery
 
     # Twitch
-    GET 'www.twitch.tv', Desktop
     %w( api gql irc-ws.chat panels-images pubsub-edge www ).map{|h|Allow h + '.twitch.tv'}
     GET 'static.twitchcdn.net', Fetch
 
@@ -577,7 +547,6 @@ firefox.settings.services.mozilla.com
         FileUtils.touch 'twitter/.' + n}}
 
     GET 'twitter.com', -> r {
-      r.desktopUA
       if !r.path || r.path == '/'
         r.env[:links][:feed] = '/feed'
         RootIndex[r]
@@ -608,9 +577,6 @@ firefox.settings.services.mozilla.com
     # Viglink
     GET 'redirect.viglink.com', GotoU
 
-    # Vimeo
-    %w(f.vimeocdn.com player.vimeo.com vimeo.com).map{|host| GET host, Desktop }
-
     # VRT
     CDNscripts 'www.vrt.be'
     Allow 'media-services-public.vrt.be'
@@ -624,9 +590,6 @@ firefox.settings.services.mozilla.com
     # Weather
     Allow 'api.weather.com'
     Allow 'profile.wunderground.com'
-
-    # WCVB
-    GET 'www.wcvb.com', Desktop
 
     # WGBH
     GET 'wgbh.brightspotcdn.com', GoIfURL
@@ -675,7 +638,6 @@ media-mbst-pub-ue1.s3.amazonaws.com
     GET 'youtube.com', -> r {[301, {'Location' =>  'https://www.youtube.com' + r.path + r.qs}, []]}
     GET 'm.youtube.com', -> r {%w(channel feed playlist results user watch watch_comment yts).member?(r.parts[0]) ? r.upstreamUI.fetch : r.deny}
     GET 'img.youtube.com', NoJS
-    %w(s.ytimg.com www.youtube-nocookie.com).map{|host| GET host, Desktop }
 
     GET 'www.youtube.com', -> r {
       fn = r.parts[0]

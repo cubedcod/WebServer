@@ -26,7 +26,6 @@ class WebResource
     }
 
     # handler lambdas
-    Desktop = -> r {NoGunk[r.desktopUI]}
     Fetch = -> r {r.fetch}
     GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : NoGunk[r]}
     GotoBasename = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
@@ -278,10 +277,6 @@ class WebResource
       [202, {'Access-Control-Allow-Credentials' => 'true',
              'Access-Control-Allow-Origin' => allowedOrigin}, []]
     end
-
-    def desktopUI; upstreamUI; desktopUA end
-
-    def desktopUA; env['HTTP_USER_AGENT'] = DesktopUA; self end
 
     def entity generator = nil
       entities = env['HTTP_IF_NONE_MATCH']&.strip&.split /\s*,\s*/
