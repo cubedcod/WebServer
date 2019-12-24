@@ -368,16 +368,18 @@ class WebResource
           reader = RDF::Reader.for content_type: format                   # select reader
           reader.new(body, {base_uri: base, noRDF: options[:noRDF]}){|_|  # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader   # parse RDF
-          fsPath.write body if CacheExt.member? ext.downcase              # cache static-data
-          return self if options[:intermediate]                           # intermediate fetch - no direct HTTP caller
-
-          # HTTP response
-          indexRDF                                                        # cache graph-data
+          storage = fsPath                                                # storage location
+          storage += 'index' if path[-1] == '/'                           #  index file
+          suffix = Rack::Mime::MIME_TYPES.invert[format]                  #  MIME suffix
+          storage += suffix if suffix != ('.' + ext)
+          storage.R.write body                                            # cache body
+          return self if options[:intermediate]                           # intermediate fetch. return w/o HTTP response
+          indexRDF                                                        # index metadata
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
-            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}             # upstream metadata -> downstream metadata
+            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}             # preserved upstream metadata
           env[:resp]['Content-Length'] = body.bytesize.to_s
           env[:resp]['Set-Cookie'] = h['set-cookie'] if h['set-cookie'] && allowCookies?
-          (fixedFormat? format) ? [200,env[:resp],[body]] : graphResponse
+          (fixedFormat? format) ? [200,env[:resp],[body]] : graphResponse # HTTP response
         end
       end
     rescue Exception => e
