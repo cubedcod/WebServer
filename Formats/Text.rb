@@ -223,7 +223,7 @@ module Webize
  html index local medium
  net news org p php post
  r rss rssfeed
- sports source story
+ sports source status story
  t the threads topic
  uk utm www}
 

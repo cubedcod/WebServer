@@ -574,6 +574,9 @@ firefox.settings.services.mozilla.com
     # Viglink
     GET 'redirect.viglink.com', GotoU
 
+    # Vimeo
+    GET 'f.vimeocdn.com'
+
     # VRT
     CDNscripts 'www.vrt.be'
     Allow 'media-services-public.vrt.be'
