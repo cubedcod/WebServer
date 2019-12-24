@@ -26,7 +26,7 @@
 .toolbox svg {height: 1em; width: 1em}
 .toolbox { position: fixed; top: 0; z-index: 2 }
 :target {background-color: #0f0 !important; color: #000 !important}
-.tree {border: 1px dotted;border-radius: .0em; margin: .2em}
+.tree {border: 1px dotted; border-radius: .1em; margin: .2em}
 .tree > span.name {font-size: .8em}
 a {text-decoration: none}
 a.date {float: right; white-space: nowrap; color: #888; font-size: .8em; border-color: #222}
@@ -48,7 +48,7 @@ pre {white-space: pre-wrap}
 table, div, li, svg {display: inline-block; border-spacing: 0}
 td.k {max-width: 28ex; overflow: hidden; text-align: right}
 table.tabular tr:nth-child(even) {background-color: #111}
-table.tabular td {padding-top: .1em; vertical-align: top}
+table.tabular td, .tree {padding-top: .1em; vertical-align: top}
 table.tabular td p:first-child:first-letter {font-weight: bold}
 tr[name="title"] > td.v {max-width: 86ex; overflow: hidden}
 video {min-width: 40ex}

@@ -434,11 +434,6 @@ firefox.settings.services.mozilla.com
     GET 'patch.com', NoQuery
 
     # Reddit
-    Populate 'www.reddit.com', -> r {
-      FileUtils.mkdir 'reddit'
-      'Dorchester+QuincyMa+Rad_Decentralization+SOLID+StallmanWasRight+boston+dancehall+darknetplan+fossdroid+massachusetts+roxbury+selfhosted+shortwave'.split('+').map{|n|
-        FileUtils.touch 'reddit/.' + n}
-}
     GotoReddit = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path + r.qs}, []]}
     %w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h| Allow h }
     %w(gateway gql oauth old s www).map{|h|                                 Allow h + '.reddit.com' }
@@ -446,7 +441,7 @@ firefox.settings.services.mozilla.com
 
     Reddit = -> r {
       r.chrono_sort if r.parts[-1] == 'new' || r.path == '/'                                   # chrono-sort preference
-      r = ('/r/'+ Pathname.glob('reddit/.??*').map{|n|n.basename.to_s[1..-1]}.join('+')+'/new').R r.env if r.path == '/' # subscriptions
+      r = ('/r/Dorchester+QuincyMa+Rad_Decentralization+SOLID+StallmanWasRight+boston+dancehall+darknetplan+fossdroid+massachusetts+roxbury+selfhosted+shortwave/new').R r.env if r.path == '/' # subscriptions
       r.upstreamUI if r.parts[-1] == 'submit'                                                  # upstream UI preference
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !r.parts.member?('wiki') # MIME preference
       r.env[:links][:prev] = 'https://old.reddit.com' + r.path + r.qs # page pointers
