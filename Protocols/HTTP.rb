@@ -359,6 +359,7 @@ class WebResource
       open(uri, headers.merge({redirect: false})) do |response| print '🌍🌎🌏🌐'[rand 4]
         h = response.meta                                                 # upstream metadata
         if response.status.to_s.match? /206/                              # partial response
+          h['Access-Control-Allow-Origin'] = allowedOrigin unless h['Access-Control-Allow-Origin'] || h['access-control-allow-origin']
           [206, h, [response.read]]                                       # part to downstream
         else
           body = HTTP.decompress h, response.read                         # decompress body
@@ -377,6 +378,7 @@ class WebResource
           indexRDF                                                        # index metadata
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}             # preserved upstream metadata
+          env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
           env[:resp]['Content-Length'] = body.bytesize.to_s
           env[:resp]['Set-Cookie'] = h['set-cookie'] if h['set-cookie'] && allowCookies?
           (fixedFormat? format) ? [200,env[:resp],[body]] : graphResponse # HTTP response
@@ -460,9 +462,8 @@ class WebResource
        end).flatten.compact.uniq.select(&:exist?).map{|n|n.bindEnv env}
     end
 
-    # transform allowed explicitly, or implicitly w/ Atom, RSS or HTML and local UI
     def fixedFormat? format = nil
-      return true if upstreamUI?
+      return true if upstreamUI? || format.match?(/dash.xml/)
       return false if ENV.has_key?('TRANSFORM') || env[:query].has_key?('TRANSFORM') || env[:transform] || !format || format.match?(/atom|html|rss|xml/i)
       return true
     end

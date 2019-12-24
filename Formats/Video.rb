@@ -57,9 +57,7 @@ end
 class WebResource
   module HTML
     Markup[Video] = -> video, env {
-      src = if video.class == WebResource
-              video.to_s
-            elsif video.class == String && video.match?(/^http/)
+      src = if video.class == WebResource || (video.class == String && video.match?(/^http/))
               video
             else
               video['https://schema.org/url'] || video[Schema+'contentURL'] || video[Schema+'url'] || video[Link] || video['uri']
@@ -69,18 +67,23 @@ class WebResource
         src = src[0]
       end
       src = src.to_s
-      src = src + '/DASH_480' if src.match /v.redd.it/
+      if src.match /v.redd.it/
+        src += '/DASHPlaylist.mpd'
+        dash = true
+      end
+      v = src.R
       if env[:images][src]
-       # deduplicate
+       # duplicate
       else
         env[:images][src] = true
         if src.match /youtu/
-          id = (HTTP.parseQs src.R.query)['v'] || src.R.parts[-1]
+          id = (HTTP.parseQs v.query)['v'] || v.parts[-1]
           {_: :iframe, width: 560, height: 315, src: "https://www.youtube.com/embed/#{id}", frameborder: 0, gesture: "media", allow: "encrypted-media", allowfullscreen: :true}
         else
-          {class: :video,
-           c: [{_: :video, src: src, controls: :true}, '<br>',
-               {_: :a, href: src, c: src.R.basename}]}
+          [dash ? '<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>' : nil,
+           {class: :video,
+           c: [{_: :video, src: src, controls: :true}.update(dash ? {'data-dashjs-player' => 1} : {}), '<br>',
+               {_: :a, href: src, c: v.basename}]}]
         end
       end}
   end
