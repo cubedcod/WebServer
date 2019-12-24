@@ -436,9 +436,9 @@ firefox.settings.services.mozilla.com
     # Reddit
     Populate 'www.reddit.com', -> r {
       FileUtils.mkdir 'reddit'
-      'Dorchester+Rad_Decentralization+SOLID+StallmanWasRight+boston+dancehall+darknetplan+fossdroid+massachusetts+roxbury+selfhosted+shortwave'.split('+').map{|n|
-        FileUtils.touch 'reddit/.' + n}}
-
+      'Dorchester+QuincyMa+Rad_Decentralization+SOLID+StallmanWasRight+boston+dancehall+darknetplan+fossdroid+massachusetts+roxbury+selfhosted+shortwave'.split('+').map{|n|
+        FileUtils.touch 'reddit/.' + n}
+}
     GotoReddit = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path + r.qs}, []]}
     %w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h| Allow h }
     %w(gateway gql oauth old s www).map{|h|                                 Allow h + '.reddit.com' }
@@ -456,6 +456,7 @@ firefox.settings.services.mozilla.com
     GET 'www.reddit.com', Reddit
 
     GET 'old.reddit.com', -> r {
+      r.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
       r.fetch.yield_self{|status,head,body|
         if !%w(r u user).member?(r.parts[0]) || status.to_s.match?(/^30/)
           [status, head, body]
