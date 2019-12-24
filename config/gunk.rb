@@ -23,7 +23,8 @@ s?s(a(fe[-_]?browsing|ilthru)|cheduler|erv(edby|ice[-_]?worker)|i(ftscience|gnal
 t(aboola|(arget|rack)(ers?|ing)|ampering|ealium|elemetry|inypass|ra?c?k?ing(data)?|rend(ing|s)|ricorder|ypeface)|autotrack|
 u(psell|rchin|ser[-_]?(context|location)|tm)|
 viral|
-wp-rum)
+wp-rum|
+xiti)
 ([-.:_\/?&=~]|$)|
 \.(eot|gif\?|otf|ttf|woff2?))xi
 
