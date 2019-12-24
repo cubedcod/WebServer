@@ -389,7 +389,7 @@ class WebResource
                    resource[Abstract] ? [resource[Abstract], '<br>'] : '',
                    [Image, Video].map{|t|(resource[t]||[]).map{|i| Markup[t][i,env]}},
                    resource[Content],
-                   (resource[Link]||[]).map{|i| Markup[Link][i,env]}]
+                   {class: :links, c: (resource[Link]||[]).map{|i| Markup[Link][i,env]}}]
                 else
                   (resource[k]||[]).map{|v|value k, v, env }
                  end}}}}]}

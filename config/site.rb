@@ -441,7 +441,7 @@ firefox.settings.services.mozilla.com
 
     Reddit = -> r {
       r.chrono_sort if r.parts[-1] == 'new' || r.path == '/'                                   # chrono-sort preference
-      r = ('/r/Dorchester+QuincyMa+Rad_Decentralization+SOLID+StallmanWasRight+boston+dancehall+darknetplan+fossdroid+massachusetts+roxbury+selfhosted+shortwave/new').R r.env if r.path == '/' # subscriptions
+      r = ('/r/Dorchester+QuincyMa+Rad_Decentralization+SOLID+StallmanWasRight+boston+dancehall+darknetplan+fossdroid+massachusetts+roxbury+selfhosted+shortwave/new/').R r.env if r.path == '/' # subscriptions
       r.upstreamUI if r.parts[-1] == 'submit'                                                  # upstream UI preference
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !r.parts.member?('wiki') # MIME preference
       r.env[:links][:prev] = 'https://old.reddit.com' + r.path + r.qs # page pointers
