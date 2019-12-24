@@ -235,6 +235,10 @@ class WebResource
       "color: black; background-color: #{color}; border-color: #{color}"
     end
 
+    def self.colorizeFG color = '#%06x' % (rand 16777216)
+      "background-color: black; color: #{color}; border-color: #{color}"
+    end
+
     # JSON-graph -> HTML
     def htmlDocument graph=nil
       graph ||= treeFromGraph
@@ -394,12 +398,16 @@ class WebResource
     # Hash -> Markup
     def self.tree t, env, name=nil
       url = t[:RDF]['uri'] if t[:RDF]
-      css = {style: "border: .08em solid #{'#%06x' % rand(16777216)}"} if name && t.keys.size > 1
-      ["\n",
-       {class: :tree,
-        c: [(["\n",{_: :a, href: url, c: CGI.escapeHTML(name.to_s[0..85])},"\n"] if name && url),
-            t.map{|_name, _t|
-              _name == :RDF ? (value nil, _t, env) : (tree _t, env, _name)}]}.update(css ? css : {})]
+      {class: :tree, style: env[:colors][name] ||= HTML.colorizeFG,
+       c: [(if url
+            {_: :a, href: url, c: CGI.escapeHTML((name||url).to_s[0..78])}
+           elsif name
+             {_: :span, class: :name, c: CGI.escapeHTML(name)}
+           else
+             ''
+            end),
+           t.map{|_name, _t|
+             _name == :RDF ? (value nil, _t, env) : (tree _t, env, _name)}]}
     end
 
     # RDF::Graph -> URI-indexed Hash
@@ -456,7 +464,7 @@ class WebResource
         re = (node['uri'] || '').R
         # traverse
         cursor = tree
-        [re.host ? re.host.split('.').reverse : nil, re.parts, re.qs, re.fragment].flatten.compact.map{|name|
+        [re.host ? re.host.split('.').reverse : nil, re.parts, re.qs, re.fragment].flatten.compact.-(Webize::Plaintext::BasicSlugs).map{|name|
           cursor = cursor[name] ||= {}}
         if cursor[:RDF] # merge to existing node
           node.map{|k,v|

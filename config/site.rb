@@ -455,12 +455,13 @@ firefox.settings.services.mozilla.com
 
     GET 'www.reddit.com', Reddit
 
+    # use this site just to get the next-page pointer from the old HTML UI - missing in HTTP Headers (either UI) and HTML (new UI)
     GET 'old.reddit.com', -> r {
       r.upstreamUI.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
       r.fetch.yield_self{|status,head,body|
-        if !%w(r u user).member?(r.parts[0]) || status.to_s.match?(/^30/)
+        if !%w(r u user).member?(r.parts[0]) || status.to_s.match?(/^30/) # return redirects and wiki pages
           [status, head, body]
-        else
+        else # find page pointer and redirect
           refs = []
           body[0].scan(/href="([^"]+after=[^"]+)/){|l| refs << l[0] }
           if refs.empty?
