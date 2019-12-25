@@ -57,7 +57,7 @@ class WebResource
   module HTTP
 
     CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|github|googleapis|netdna.*)\.(com|io|net)$/
-    CookieHost = /\.bandcamp\.com$/
+    CookieHost = /\.(bandcamp|ttvnw)\.(com|net)$/
     DynamicImgHost = /(noaa|weather)\.gov$/
     POSThost = /^video.*.ttvnw.net$/
 
@@ -527,7 +527,7 @@ firefox.settings.services.mozilla.com
 
     # Twitch
     %w( api gql irc-ws.chat panels-images pubsub-edge www ).map{|h|Allow h + '.twitch.tv'}
-    GET 'static.twitchcdn.net', Fetch
+    GET 'static.twitchcdn.net'
 
     # Twitter
     Allow 'api.twitter.com'
