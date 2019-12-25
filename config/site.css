@@ -19,8 +19,8 @@
 .post {border-radius: .38em; margin: .1em; max-width: 88ex; border: 1px solid #222}
 .quote {background-color: #ccc; color: #000}
 .thumb, svg {max-width: 28em}
-.title {background-color: #000; color: #fff; min-width: 18ex; font-size: 1.08em; font-weight: bold; vertical-align: top; border-width: 0 0 0 .4em; border-color: #000; border-style: solid }
-.title:visited {border-color: #fff}
+.title {background-color: #fff; color: #000; min-width: 18ex; font-size: 1.08em; font-weight: bold; vertical-align: top; border-width: 0 0 0 .4em; border-color: #fff; border-style: solid }
+.title:visited {border-color: #0f0}
 .toolbox a.icon {font-size: 1.6em}
 .toolbox a.icon, .breadcrumb {text-shadow: 1px 1px #000000}
 .toolbox a:target {text-shadow: 0px 0px #000000}

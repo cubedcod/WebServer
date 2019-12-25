@@ -4,6 +4,9 @@ gemini https://tildegit.org/solderpunk/AV-98 https://github.com/michael-lazar/je
 gopher
 dokieli
 databrowser
+'first seen' hosts unified across unicorn workers
+filename too long https://pics.knifecenter.com/eyJidWNrZXQiOiAiZmlsZXMua25pZmVjZW50ZXIuY29tIiwia2V5IjogImtuaWZlY2VudGVyL25hZ2FvLWhpZ29ub2thbWkvaW1hZ2VzL0hJR08xN3QuanBnIiwiZWRpdHMiOiB7InJlc2l6ZSI6IHsid2lkdGgiOiAyMjAsImhlaWdodCI6IDIyMCwiZml0IjogImNvbnRhaW4iLCJiYWNrZ3JvdW5kIjogeyJyIjogMjU1LCJnIjogMjU1LCJiIjogMjU1LCJhbHBoYSI6IDF9fX19
+LDN / notifications / inter-host message-passing
 send mail from browser
 custom slugs for timeline URI - IG user, reddit/mail post author
 more elegant blank-node handling for Dokieli RDFa
