@@ -406,14 +406,9 @@ class WebResource
                  else
                    ''
                  end
-      if multi
-        {class: :tree,
-         style: (name && !name.empty?) ? (env[:colors][name] ||= HTML.send(multi ? :colorize : :colorizeFG)) : 'border-width: 0',
-         c: [nameHTML, t.map{|_name, _t| _name == :RDF ? (value nil, _t, env) : (tree _t, env, _name)}]}
-      else
-        [{_: :span, c: [nameHTML, '›']},
-         t.map{|_name, _t| _name == :RDF ? ['<br>', (value nil, _t, env)] : (tree _t, env, _name)}]
-      end
+      {class: :tree,
+       style: (multi && name && !name.empty?) ? (env[:colors][name] ||= HTML.colorize) : '',
+       c: [nameHTML, t.map{|_name, _t| _name == :RDF ? (value nil, _t, env) : (tree _t, env, _name)}]}
     end
 
     # RDF::Graph -> URI-indexed Hash
