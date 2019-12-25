@@ -408,7 +408,7 @@ class WebResource
                  end
       {class: :tree,
        style: (multi && name && !name.empty?) ? (env[:colors][name] ||= HTML.colorize) : '',
-       c: [nameHTML, t.map{|_name, _t| _name == :RDF ? (value nil, _t, env) : (tree _t, env, _name)}]}
+       c: [nameHTML, ' ', t.map{|_name, _t| _name == :RDF ? (value nil, _t, env) : (tree _t, env, _name)}]}
     end
 
     # RDF::Graph -> URI-indexed Hash
