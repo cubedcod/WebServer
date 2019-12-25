@@ -6,7 +6,7 @@ class WebResource
     include URIs
 
     AllowedHosts = {}
-    CDNscripter = {}
+    CDNuser = {}
     CookieHosts = {}
     HostGET = {}
     HostPOST = {}
@@ -164,8 +164,8 @@ class WebResource
                                                             (HTML.keyval (Webize::HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
     end
 
-    def self.CDNscripts host
-      CDNscripter[host] = true
+    def self.CDNexec host
+      CDNuser[host] = true
     end
 
     def self.Cookies host
@@ -499,17 +499,17 @@ class WebResource
       elsif handler = HostGET[host] # host handler
         Populator[host][self] if Populator[host] && !hostpath.R.exist?
         handler[self]
-      elsif host.match? CDNhost     # content-pool
-        if AllowedHosts.has_key?(host) || CDNscripter.has_key?(env[:referer]) || env[:query]['allow'] == ServerKey
-          fetch                     # allowed static-content host
-        else
+      elsif host.match? CDNhost     # allow all content on CDN
+        if AllowedHosts.has_key?(host) || CDNuser.has_key?(env[:referer]) || env[:query]['allow'] == ServerKey || ENV.has_key?('CDN')
+          fetch
+        else                        # allow non-script non-gunk content
           if (CacheExt - %w(html js)).member?(ext.downcase) && !gunkURI
-            fetch                   # allowed static-content type
+            fetch
           else
-            deny                    # blocked CDN-pool content
+            deny                    # blocked content
           end
         end
-      elsif gunkHost || gunkURI     # gunk
+      elsif gunkHost || gunkURI     # blocked gunk
         deny
       else
         env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'

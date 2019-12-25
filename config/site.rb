@@ -56,7 +56,7 @@ class WebResource
   end
   module HTTP
 
-    CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|github|googleapis|netdna.*)\.(com|io|net)$/
+    CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|github|googleapis|netdna.*|w(ord)?p(ress)?)\.(com|io|net)$/
     CookieHost = /\.(bandcamp|ttvnw)\.(com|net)$/
     DynamicImgHost = /(noaa|weather)\.gov$/
     POSThost = /^video.*.ttvnw.net$/
@@ -403,7 +403,7 @@ firefox.settings.services.mozilla.com
 
     # Nextdoor
     Cookies 'nextdoor.com'
-    CDNscripts 'nextdoor.com'
+    CDNexec 'nextdoor.com'
 
     # NOAA
     Allow 'forecast.weather.gov'
@@ -578,14 +578,14 @@ firefox.settings.services.mozilla.com
     GET 'f.vimeocdn.com'
 
     # VRT
-    CDNscripts 'www.vrt.be'
+    CDNexec 'www.vrt.be'
     Allow 'media-services-public.vrt.be'
 
     # WaPo
     GET 'www.washingtonpost.com', -> r {(r.parts[0]=='resizer' ? Resizer : NoJS)[r]}
 
     # WBUR
-    CDNscripts 'www.wbur.org'
+    CDNexec 'www.wbur.org'
 
     # Weather
     Allow 'api.weather.com'
@@ -606,8 +606,6 @@ firefox.settings.services.mozilla.com
 public-api.wordpress.com
 videos.files.wordpress.com
 ).map{|host| GET host, Fetch}
-    (0..7).map{|i| GET "i#{i}.wp.com", NoQuery}
-    (0..2).map{|i| GET "s#{i}.wp.com"}
 
     # WSJ
     %w(images m s).map{|h| GET h + '.wsj.net' }
@@ -629,7 +627,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
       end}
 
     # Yelp
-    CDNscripts 'www.yelp.com'
+    CDNexec'www.yelp.com'
     GET 'www.yelp.com', -> r {r.env[:query]['redirect_url'] ? [301, {'Location' => r.env[:query]['redirect_url']},[]] : r.fetch}
 
     # YouTube
