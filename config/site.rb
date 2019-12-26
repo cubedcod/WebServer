@@ -64,9 +64,7 @@ class WebResource
     Resizer = -> r {
       if r.parts[0] == 'resizer'
         parts = r.path.split /\/\d+x\d+\/((filter|smart)[^\/]*\/)?/
-        parts.size > 1 ? [302,
-                          {'Location' => 'https://' + parts[-1] #+ '?allow='+ServerKey
-                          }, []] : NoJS[r]
+        parts.size > 1 ? [302, {'Location' => 'https://' + parts[-1]}, []] : NoJS[r]
       else
         NoJS[r]
       end}
