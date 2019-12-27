@@ -214,6 +214,7 @@ sidebar [class^='side']    [id^='side']
             body.css(s).map &:remove}
           yield subject, Content, HTML.clean(body.inner_html, @base).gsub(/<\/?(center|noscript)[^>]*>/i, '')
         else # <body> missing, emit doc - <head>
+
           n.css('head').remove
           yield subject, Content, HTML.clean(n.inner_html, @base).gsub(/<\/?(center|noscript)[^>]*>/i, '')
         end
@@ -228,6 +229,7 @@ class WebResource
     def chrono_sort
       env[:query].update 'sort' => 'date',
                          'view' => 'table'
+      self
     end
 
     def self.colorize color = '#%06x' % (rand 16777216)
@@ -573,7 +575,7 @@ class WebResource
       uri = dir.delete 'uri'
       [Type, Title, W3+'ns/posix/stat#mtime', W3+'ns/posix/stat#size'].map{|p|dir.delete p}
       {class: :container,
-       c: [{_: :a, id: 'container' + Digest::SHA2.hexdigest(rand.to_s), class: :label, href: uri, type: :node, c: uri.R.basename}, '<br>',
+       c: [{_: :a, id: 'container' + Digest::SHA2.hexdigest(rand.to_s), class: :title, href: uri, type: :node, c: uri.R.basename},
            {class: :body, c: HTML.keyval(dir, env)}]}}
 
     Markup[Stat+'File'] = -> file, env {

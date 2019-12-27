@@ -52,7 +52,13 @@ class WebResource
       else
         [301, {'Location' => r.env['REQUEST_PATH']}, []]
       end}
-    RootIndex = -> r { r.path == '/' ? r.cachedGraph : NoGunk[r] }
+    RootIndex = -> r {
+      if r.path == '/'
+        r.cachedGraph
+      else
+        r.chrono_sort if r.parts.size == 1
+        NoGunk[r]
+      end}
 
     # no-content responses
     R204 = [204, {}, []]
