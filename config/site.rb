@@ -174,7 +174,16 @@ secure.brightcove.com
     # Disqus
 
     # DuckDuckGo
-    GET 'duckduckgo.com', -> r {%w{ac}.member?(r.parts[0]) ? r.deny : r.fetch}
+    GET 'duckduckgo.com', -> r {
+      sel = r.parts[0]
+      if %w{ac}.member? sel
+        r.deny
+      elsif sel == 'l' && r.env[:query].has_key?('uddg')
+        [301, {'Location' => r.env[:query]['uddg']}, []]
+      else
+        NoGunk[r]
+      end}
+
     GET 'proxy.duckduckgo.com', -> r {%w{iu}.member?(r.parts[0]) ? [301, {'Location' => r.env[:query]['u']}, []] : r.fetch}
 
     # eBay
