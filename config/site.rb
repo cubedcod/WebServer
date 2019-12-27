@@ -449,7 +449,7 @@ firefox.settings.services.mozilla.com
 
     GET 'www.reddit.com', Reddit
 
-    # use this site just to get the next-page pointer from the old HTML UI - missing in HTTP Headers (either UI) and HTML (new UI)
+    # this host provides a next-page pointer, missing in HTTP Headers (either UI) and HTML (new UI)
     GET 'old.reddit.com', -> r {
       r.upstreamUI.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
       r.fetch.yield_self{|status,head,body|
@@ -547,10 +547,11 @@ firefox.settings.services.mozilla.com
         r.env[:links][:feed] = '/feed'
         RootIndex[r]
       elsif r.parts[0] == 'feed'
+        r.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/8.3 (KHTML, like Gecko) Chrome/80.0 Safari/8.3'
         Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}.shuffle.each_slice(18){|s|
           '/search'.R(r.env).fetch intermediate: true,
                                    noRDF: true,
-                                   query: {vertical: :default, f: :tweets, q: s.map{|u|'from:'+u}.join('+OR+')}}
+                                   query: {vertical: :default, f: :tweets, q: s.map{|u|'from:' + u}.join('+OR+')}}
         r.chrono_sort
         r.indexRDF.graphResponse
       elsif r.parts[-1] == 'status'
@@ -849,6 +850,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
 
   def InstagramJSON tree, &b
     Webize::HTML.webizeHash(tree){|h|
+      yield ('https://www.instagram.com/' + h['username']).R, Type, Person.R if h['username']
       if h['shortcode']
         s = 'https://www.instagram.com/p/' + h['shortcode']
         yield s, Type, Post.R
@@ -868,7 +870,8 @@ media-mbst-pub-ue1.s3.amazonaws.com
                   t
                 end}.join(' ')
         end rescue nil
-      end}
+      end
+    }
   end
 
   def LWN doc
