@@ -259,7 +259,7 @@ class WebResource
         end}
       htmlGrep if env[:graph] && env[:grep]
 
-      # Markup -> HTML
+      # Markup -> HTML string
       HTML.render ["<!DOCTYPE html>\n",
                    {_: :html,
                     c: [{_: :head,
@@ -290,8 +290,7 @@ class WebResource
                                HTML.tree Treeize[graph], env
                              end,
                              link[:down,'&#9660;'],
-                             {_: :script, c: ["\n", SiteJS]}, "\n"
-                            ]}]}]
+                             {_: :script, c: SiteJS}]}]}]
     end
 
     def htmlGrep
