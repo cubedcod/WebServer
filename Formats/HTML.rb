@@ -214,7 +214,6 @@ sidebar [class^='side']    [id^='side']
             body.css(s).map &:remove}
           yield subject, Content, HTML.clean(body.inner_html, @base).gsub(/<\/?(center|noscript)[^>]*>/i, '')
         else # <body> missing, emit doc - <head>
-          puts "WARNING missing <body> in #{@base}"
           n.css('head').remove
           yield subject, Content, HTML.clean(n.inner_html, @base).gsub(/<\/?(center|noscript)[^>]*>/i, '')
         end

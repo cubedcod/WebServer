@@ -4,6 +4,7 @@ module Webize
 
       SiteGunk = {'www.google.com' => %w(div.logo h1 h2 #footcnt #top_nav),
                   'www.bostonmagazine.com' => %w(a[href*='scrapertrap']),
+                  'www.msn.com' => %w(#aside #filmstripouter #header-common #sticky-footer),
                   'www.theregister.co.uk' => %w(#hot #read_more_on #whitepapers),
                  }
 
