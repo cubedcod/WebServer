@@ -15,6 +15,7 @@ class WebResource
     Populator = {}
     Servers = {}
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
+    Internal_Headers = %w(base-uri connection gunk host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rdf remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forwarded-for)
 
     # HTTP method map
     Methods = {
@@ -470,7 +471,7 @@ class WebResource
 
     def fixedFormat? format = nil
       return true if upstreamUI? || format.match?(/dash.xml/)
-      return false if ENV.has_key?('TRANSFORM') || env[:query].has_key?('TRANSFORM') || env[:transform] || !format || format.match?(/atom|html|rss|xml/i)
+      return false if env[:query].has_key?('rdf') || env[:transform] || !format || format.match?(/atom|html|rss|xml/i)
       return true
     end
 
@@ -571,7 +572,7 @@ class WebResource
         key = key.downcase if underscored
 
         # set values
-        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w{base-uri connection gunk host links path-info query query-modified query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forwarded-for}.member?(key.downcase)}
+        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless Internal_Headers.member?(key.downcase)}
 
       # Cookie
       unless allowCookies?

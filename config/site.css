@@ -32,7 +32,7 @@ a.date {float: right; white-space: nowrap; color: #888; font-size: .8em; border-
 a.id {float: right; color: #333; border-color: #222}
 a.idlink {color: #000; font-size: .72em; display: inline-block; vertical-align: bottom; border-radius: .28em .28em 0 0}
 a.uri > span.uri {font-size: 0.8em; color: #111; font-weight: normal}
-a.uri {background-color: #ccc; border-radius: .28em; color: #000; display: inline-block; border-style: solid; border-color: #eee; border-width: 0 0 0 .3em; max-width: 42ex; overflow: hidden; margin: .1em; font-weight: bold}
+a.uri {background-color: #c8c8c8; border-radius: .28em; color: #000; display: inline-block; border-style: solid; border-color: #eee; border-width: 0 0 0 .3em; max-width: 42ex; overflow: hidden; margin: .1em; font-weight: bold}
 a.uri.path > span.uri {color: #fff}
 a.uri.path {background-color: #181818; color: #fff; border-color: #333}
 a.uri:visited > span.uri {color: #ddd}
