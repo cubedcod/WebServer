@@ -409,16 +409,16 @@ class WebResource
     def self.tree t, env, name=nil
       url = t[:RDF]['uri'] if t[:RDF]
       multi = t.keys.size > 1
-      nameHTML = if url
-                   {_: :a, href: url, c: CGI.escapeHTML((name||url).to_s[0..78])}
-                 elsif name
-                   {_: :span, class: :name, c: CGI.escapeHTML(name)}
-                 else
-                   ''
-                 end
       {class: :tree,
        style: (multi && name && !name.empty?) ? (env[:colors][name] ||= HTML.colorize) : '',
-       c: [nameHTML, ' ', t.map{|_name, _t| _name == :RDF ? (value nil, _t, env) : (tree _t, env, _name)}]}
+       c: [(if url
+            {_: :a, href: url, c: CGI.escapeHTML((name||url).to_s[0..78])}
+           elsif name
+             {_: :span, class: :name, c: CGI.escapeHTML(name.split('_').join ' ')}
+           else
+             ''
+            end), ' ',
+           t.map{|_name, _t| _name == :RDF ? (value nil, _t, env) : (tree _t, env, _name)}]}
     end
 
     # RDF::Graph -> URI-indexed Hash

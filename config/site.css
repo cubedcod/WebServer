@@ -44,7 +44,7 @@ h1,h2,h3,h4,h5,h6,p,pre {margin: 0}
 img, video {max-width: 100%}
 p, li, blockquote {max-width: 86ex}
 pre {white-space: pre-wrap}
-span.name {font-size: .8em}
+span.name {font-size: .8em; max-width: 22ex; display: inline-block}
 table, div, li, svg {display: inline-block; border-spacing: 0}
 table.tabular td p:first-child:first-letter {font-weight: bold}
 table.tabular tr:nth-child(even) {background-color: #111}
