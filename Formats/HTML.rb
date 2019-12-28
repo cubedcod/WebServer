@@ -375,7 +375,6 @@ class WebResource
         attr = env[:query]['sort']
         attr = Date if %w(date new).member? attr
         attr = Content if attr == 'content'
-        #attr = Title if attr == 'uri'
         graph = graph.sort_by{|r| (r[attr]||'').to_s}.reverse
       end
       {_: :table, class: :tabular,
@@ -391,7 +390,7 @@ class WebResource
                   tCount = 0
                   [(resource[Title]||[]).map{|title|
                      title = title.to_s.sub(/\/u\/\S+ on /, '').sub /^Re: /, ''
-                     unless env[:title] == title # show topic if changed from prior post
+                     unless env[:title] == title # show topic if changed from previous post
                        env[:title] = title; tCount += 1
                        {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'title', type: 'node', c: CGI.escapeHTML(title)}
                      end},
@@ -414,7 +413,7 @@ class WebResource
        c: [(if url
             {_: :a, href: url, c: CGI.escapeHTML((name||url).to_s[0..78])}
            elsif name
-             {_: :span, class: :name, c: CGI.escapeHTML(name.split(/_-/).join ' ')}
+             {_: :span, class: :name, c: CGI.escapeHTML(name.split(/[-_]/).join ' ')}
            else
              ''
             end), ' ',

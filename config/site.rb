@@ -152,7 +152,7 @@ secure.brightcove.com
     GET 'circleci.com', -> r {r.parts[0] == 'blog' ? r.fetch : r.deny}
 
     # Cloudflare
-    GET 'cdnjs.cloudflare.com', Fetch
+    GET 'cdnjs.cloudflare.com'
 
     # Complex
     %w(images www).map{|h| GET h + '.complex.com' }
@@ -206,8 +206,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
     %w(api-app broadband media.video-cdn secure site.api site.web.api watch.auth.api watch.graph.api www).map{|h|
       Allow h + '.espn.com' }
 
-    %w(a a1 a2 a3 a4).map{|a|
-      GET a + '.espncdn.com' }
+    %w(a a1 a2 a3 a4).map{|a| GET a + '.espncdn.com' }
 
     # Facebook
     if ENV.has_key?('FACEBOOK')
@@ -215,8 +214,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
       %w(facebook.com business.facebook.com edge-chat.facebook.com m.facebook.com static.xx.fbcdn.net www.facebook.com).map{|host| Allow host }
     end
 
-    %w(l.facebook.com lm.facebook.com).map{|host|
-      GET host, GotoU}
+    %w(l.facebook.com lm.facebook.com).map{|host| GET host, GotoU}
 
     # FDroid
     Cookies 'f-droid.org'
@@ -232,14 +230,9 @@ thumbs.ebaystatic.com).map{|host| GET host }
     GET 'thumbs.gfycat.com'
 
     # GitHub
-    GET 'api.github.com'
-    GET 'gist.github.com'
     GET 'github.com'
-    %w(avatars0 avatars1 avatars2 avatars3 raw).map{|h|
-      GET h + '.githubusercontent.com', NoJS }
-
-    # GitLab
-    GET 'assets.gitlab-static.net', Fetch
+    %w(api gist).map{|h| GET h + '.github.com'}
+    %w(avatars0 avatars1 avatars2 avatars3 raw).map{|h| GET h + '.githubusercontent.com', NoJS }
 
     # Gitter
     Allow 'gitter.im'
