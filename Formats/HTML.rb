@@ -99,15 +99,25 @@ image-src
       format Format
 
       GlobalGunk = %w{
-        [class*='cookie']  [id*='cookie']
-        [class*='related'] [id*='related']
-        [class*='share']   [id*='share']
-        [class*='social']  [id*='social']
-        [class*='topbar']  [id*='topbar']
-        [class^='promo']   [id^='promo']  [class^='Promo']  [id^='Promo']
-footer  [class^='footer']  [id^='footer']
-nav     [class^='nav']     [id^='nav']
-sidebar [class^='side']    [id^='side']
+footer nav sidebar
+[class*='cookie']
+[class*='related']
+[class*='share']
+[class*='social']
+[class*='topbar']
+[class^='promo']
+[class^='footer']
+[class^='nav']
+[class^='side']
+[id*='cookie']
+[id^='nav']
+[id^='side']
+[id*='related']
+[id*='share']
+[id*='social']
+[id*='topbar']
+[id^='promo']  [class^='Promo']  [id^='Promo']
+[id^='footer']
 }
 
       def initialize(input = $stdin, options = {}, &block)
@@ -210,11 +220,11 @@ sidebar [class^='side']    [id^='side']
         # <body>
         if body = n.css('body')[0]
           [*GlobalGunk, *SiteGunk[@base.host]].map{|s| # strip elements
-            #body.css(s).map{|c| puts "🛑 "+s, c, "\n"*3}
+            puts "🛑 "+s, body.css(s)
             body.css(s).map &:remove}
           yield subject, Content, HTML.clean(body.inner_html, @base).gsub(/<\/?(center|noscript)[^>]*>/i, '')
         else # <body> missing, emit doc - <head>
-
+          puts "#{@base} missing <body> element"
           n.css('head').remove
           yield subject, Content, HTML.clean(n.inner_html, @base).gsub(/<\/?(center|noscript)[^>]*>/i, '')
         end
