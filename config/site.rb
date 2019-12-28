@@ -171,6 +171,9 @@ secure.brightcove.com
     # DartSearch
     GET 'clickserve.dartsearch.net', -> r {[301,{'Location' => r.env[:query]['ds_dest_url']}, []]}
 
+    # DI.fm
+    Allow 'www.di.fm'
+
     # Disqus
 
     # DuckDuckGo

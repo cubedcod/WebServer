@@ -425,16 +425,15 @@ class WebResource
     def treeFromGraph
       return {} unless env[:repository]
       tree = {}
-      head = env && env[:query] && env[:query].has_key?('head')
       env[:repository].each_triple{|s,p,o| s = s.to_s;  p = p.to_s
-        unless p == 'http://www.w3.org/1999/xhtml/vocab#role' || (head && p == Content)
-          o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object URI or literal
-          tree[s] ||= {'uri' => s}                      # subject
-          tree[s][p] ||= []                             # predicate
+        unless p == 'http://www.w3.org/1999/xhtml/vocab#role' # TODO investigate RDF::Vocab options
+          o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object: URI or literal
+          tree[s] ||= {'uri' => s}                      # subject URI
+          tree[s][p] ||= []                             # predicate URI
           if tree[s][p].class == Array
-            tree[s][p].push o unless tree[s][p].member? o # object
+            tree[s][p].push o unless tree[s][p].member? o # add to object-array
           else
-            tree[s][p] = [tree[s][p],o] unless tree[s][p] == o
+            tree[s][p] = [tree[s][p],o] unless tree[s][p] == o # new object-array
           end
         end}
       env[:graph] = tree

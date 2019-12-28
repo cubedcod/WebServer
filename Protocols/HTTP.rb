@@ -485,7 +485,7 @@ class WebResource
         if %w{y year m month d day h hour}.member? parts[0]
           dateDir                   # time-segment
         elsif path == '/mail'       # inbox redirect
-          [302, {'Location' => '/d/*/msg*?head&sort=date&view=table'}, []]
+          [302, {'Location' => '/d/*/msg*?sort=date&view=table'}, []]
         elsif parts[0] == 'msg'     # (message -> path) map
           id = parts[1]
           id ? MID2PATH[URI.unescape id].R(env).nodeResponse : [301, {'Location' => '/mail'}, []]
@@ -501,7 +501,7 @@ class WebResource
       elsif path.match? HourDir     # cache timeslice
         name = '*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*'
         timeMeta
-        env[:links][:time] = 'http://localhost:8000' + path + '*.ttl?head&view=table' if env['REMOTE_ADDR'] == '127.0.0.1'
+        env[:links][:time] = 'http://localhost:8000' + path + '*.ttl?view=table' if env['REMOTE_ADDR'] == '127.0.0.1'
         (path + name).R(env).nodeResponse
       elsif handler = HostGET[host] # host handler
         Populator[host][self] if Populator[host] && !hostpath.R.exist?
