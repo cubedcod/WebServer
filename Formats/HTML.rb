@@ -220,7 +220,7 @@ footer nav sidebar
         # <body>
         if body = n.css('body')[0]
           [*GlobalGunk, *SiteGunk[@base.host]].map{|s| # strip elements
-            puts "🛑 "+s, body.css(s)
+            #puts "🛑 "+s, body.css(s)
             body.css(s).map &:remove}
           yield subject, Content, HTML.clean(body.inner_html, @base).gsub(/<\/?(center|noscript)[^>]*>/i, '')
         else # <body> missing, emit doc - <head>

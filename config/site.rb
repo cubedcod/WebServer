@@ -447,11 +447,11 @@ firefox.settings.services.mozilla.com
     %w(gateway gql oauth old s www).map{|h|                                 Allow h + '.reddit.com' }
     %w(np.reddit.com reddit.com).map{|host| GET host, GotoReddit }
 
-    Reddit = -> r {
-      r.chrono_sort if r.parts[-1] == 'new' || r.path == '/'                                   # chrono-sort preference
+    Reddit = -> r { parts = r.parts
+      r.chrono_sort if r.path == '/' || parts[-1] == 'new' || parts.size == 5                # chrono-sort preference
       r = ('/r/Bostonmusic+Dorchester+QuincyMa+Rad_Decentralization+SOLID+StallmanWasRight+boston+dancehall+darknetplan+fossdroid+massachusetts+roxbury+selfhosted+shortwave/new/').R r.env if r.path == '/' # subscriptions
-      r.upstreamUI if r.parts[-1] == 'submit'                                                  # upstream UI preference
-      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !r.parts.member?('wiki') # MIME preference
+      r.upstreamUI if parts[-1] == 'submit'                                                  # upstream UI preference
+      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !parts.member?('wiki') # MIME preference
       r.env[:links][:prev] = 'https://old.reddit.com' + r.path + r.qs # page pointers
       r.env[:links][:up] = r.dirname unless r.path == '/'
       r.fetch options}
