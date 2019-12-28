@@ -414,7 +414,7 @@ class WebResource
        c: [(if url
             {_: :a, href: url, c: CGI.escapeHTML((name||url).to_s[0..78])}
            elsif name
-             {_: :span, class: :name, c: CGI.escapeHTML(name.split('_').join ' ')}
+             {_: :span, class: :name, c: CGI.escapeHTML(name.split(/_-/).join ' ')}
            else
              ''
             end), ' ',
@@ -555,13 +555,13 @@ class WebResource
            ({_: :a, id: uri_hash, class: 'id', type: :node, c: '☚', href: uri} if uri && !identified), "\n", # minimum pointer
            ([{_: :a, class: :date, id: 'date' + uri_hash, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date}, "\n"] if date && uri_hash),
            images.map{|i| Markup[Image][i,env]},
-           {_: :table, style: 'border-spacing: 0',
+           {_: :table,
             c: {_: :tr,
-                c: [{_: :td, style: 'padding: 0',
+                c: [{_: :td,
                      c: from.map{|f|Markup[Creator][f,env]},
                      class: :from}, "\n",
                     {_: :td, c: '&rarr;'},
-                    {_: :td, style: 'padding: 0',
+                    {_: :td,
                      c: [to.map{|f|Markup[To][f,env]},
                          post.delete(SIOC+'reply_of')],
                      class: :to}, "\n"]}}, "\n",
