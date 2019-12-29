@@ -413,7 +413,7 @@ class WebResource
        c: [(if url
             {_: :a, href: url, c: CGI.escapeHTML((name||url).to_s[0..78])}
            elsif name
-             {_: :span, class: :name, c: CGI.escapeHTML(name.split(/[-_]/).join ' ')}
+             {_: :span, class: :name, c: CGI.escapeHTML(name.split(/[-+_]/).join ' ')}
            else
              ''
             end), ' ',

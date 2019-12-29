@@ -213,6 +213,12 @@ thumbs.ebaystatic.com).map{|host| GET host }
       GET 'www.facebook.com', Fetch
       %w(facebook.com business.facebook.com edge-chat.facebook.com m.facebook.com static.xx.fbcdn.net www.facebook.com).map{|host| Allow host }
     end
+    GET 'external.fbed1-2.fna.fbcdn.net', -> r {
+      if r.path == '/safe_image.php'
+        GotoURL[r]
+      else
+        NoGunk[r]
+      end}
 
     %w(l.facebook.com lm.facebook.com).map{|host| GET host, GotoU}
 
