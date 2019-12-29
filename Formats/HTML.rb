@@ -521,9 +521,11 @@ class WebResource
                (host && host.sub(/\.com$/,'')) ||
                'user'
         avatar = nil
-        [{_: :a, href: u.to_s, id: 'a' + Digest::SHA2.hexdigest(rand.to_s),
-          style: avatar ? '' : (env[:colors][name] ||= HTML.colorize),
-          c: avatar ? {_: :img, class: :avatar, src: avatar} : name}.update(avatar ? {class: :avatar} : {}), ' ']
+        {_: :a, href: u.to_s,
+         id: 'a' + Digest::SHA2.hexdigest(rand.to_s),
+         class: avatar ? :avatar : :fromto,
+         style: avatar ? '' : (env[:colors][name] ||= HTML.colorize),
+         c: avatar ? {_: :img, class: :avatar, src: avatar} : name}
       else
         CGI.escapeHTML (c||'')
       end}
