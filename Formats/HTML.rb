@@ -20,7 +20,8 @@ image-src
       html = Nokogiri::HTML.fragment body
 
       # strip elements
-      %w{iframe link[rel='stylesheet'] style link[type='text/javascript'] link[as='script'] script}.map{|s| html.css(s).remove}
+      %w{iframe link[rel='stylesheet'] style link[type='text/javascript'] link[as='script'] script}.map{|s|
+        html.css(s).remove}
       html.css('a[href^="javascript"]').map{|a| a.remove }
       %w{clickability counter.ru quantserve scorecardresearch}.map{|co| html.css('img[src*="' + co + '"]').map{|img| img.remove }}
 
@@ -35,7 +36,6 @@ footer nav sidebar
 [class*='share']
 [class*='side']
 [class*='social']
-[class*='top']
 [id*='cookie']
 [id*='foot']
 [id*='nav']
@@ -44,7 +44,6 @@ footer nav sidebar
 [id*='share']
 [id*='side']
 [id*='social']
-[id*='top']
 }, *SiteGunk[base.host]].map{|selector|
         html.css(selector).map{|node|
           node['class'] = 'site'}}
@@ -228,7 +227,6 @@ footer nav sidebar
         if body = n.css('body')[0]
           yield subject, Content, HTML.clean(body.inner_html, @base).gsub(/<\/?noscript[^>]*>/i, '')
         else # no <body> element
-          n.css('head').remove
           yield subject, Content, HTML.clean(n.inner_html, @base).gsub(/<\/?noscript[^>]*>/i, '')
         end
       end
