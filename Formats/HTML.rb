@@ -15,15 +15,39 @@ data-original
 data-src
 image-src
 )
-    StripAttrs = %w(bgcolor class height http-equiv layout ping role style tabindex target theme width)
 
     def self.clean body, base
       html = Nokogiri::HTML.fragment body
 
-      # stripped elements
+      # strip elements
       %w{iframe link[rel='stylesheet'] style link[type='text/javascript'] link[as='script'] script}.map{|s| html.css(s).remove}
       html.css('a[href^="javascript"]').map{|a| a.remove }
       %w{clickability counter.ru quantserve scorecardresearch}.map{|co| html.css('img[src*="' + co + '"]').map{|img| img.remove }}
+
+      # tag site/nav elements
+      [*%w{
+footer nav sidebar
+[class*='cookie']
+[class*='foot']
+[class*='nav']
+[class*='promo']
+[class*='related']
+[class*='share']
+[class*='side']
+[class*='social']
+[class*='top']
+[id*='cookie']
+[id*='foot']
+[id*='nav']
+[id*='promo']
+[id*='related']
+[id*='share']
+[id*='side']
+[id*='social']
+[id*='top']
+}, *SiteGunk[base.host]].map{|selector|
+        html.css(selector).map{|node|
+          node['class'] = 'site'}}
 
       # images
       # CSS:background-image → <img>
@@ -40,7 +64,8 @@ image-src
         e.attribute_nodes.map{|a| # visit attributes
           e.set_attribute 'src', a.value if LazySRC.member? a.name            # @src map
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name # @srcset
-          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || StripAttrs.member?(a.name)} # strip attrs
+          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) ||
+                      %w(bgcolor height http-equiv layout ping role style tabindex target theme width).member?(a.name)} # strip attrs
 
         if e['href']
           ref = e['href'].R
@@ -97,28 +122,6 @@ image-src
     class Reader < RDF::Reader
       include WebResource::URIs
       format Format
-
-      GlobalGunk = %w{
-footer nav sidebar
-[class*='cookie']
-[class*='related']
-[class*='share']
-[class*='social']
-[class*='topbar']
-[class^='promo']
-[class^='footer']
-[class^='nav']
-[class^='side']
-[id*='cookie']
-[id^='nav']
-[id^='side']
-[id*='related']
-[id*='share']
-[id*='social']
-[id*='topbar']
-[id^='promo']  [class^='Promo']  [id^='Promo']
-[id^='footer']
-}
 
       def initialize(input = $stdin, options = {}, &block)
         @opts = options
@@ -219,14 +222,10 @@ footer nav sidebar
 
         # <body>
         if body = n.css('body')[0]
-          [*GlobalGunk, *SiteGunk[@base.host]].map{|s| # strip elements
-            #puts "🛑 "+s, body.css(s)
-            body.css(s).map &:remove}
-          yield subject, Content, HTML.clean(body.inner_html, @base).gsub(/<\/?(center|noscript)[^>]*>/i, '')
-        else # <body> missing, emit doc - <head>
-          puts "#{@base} missing <body> element"
+          yield subject, Content, HTML.clean(body.inner_html, @base).gsub(/<\/?noscript[^>]*>/i, '')
+        else # no <body> element
           n.css('head').remove
-          yield subject, Content, HTML.clean(n.inner_html, @base).gsub(/<\/?(center|noscript)[^>]*>/i, '')
+          yield subject, Content, HTML.clean(n.inner_html, @base).gsub(/<\/?noscript[^>]*>/i, '')
         end
       end
     end
@@ -275,7 +274,7 @@ class WebResource
                     c: [{_: :head,
                          c: [{_: :meta, charset: 'utf-8'},
                             ({_: :title, c: CGI.escapeHTML(graph[titleRes][Title].map(&:to_s).join ' ')} if titleRes),
-                             {_: :style, c: ["\n", SiteCSS, ".idlink, .identified {", HTML.colorize, '}']}, "\n",
+                             {_: :style, c: ["\n", SiteCSS]}, "\n",
                              (env[:links] || {}).map{|type,uri|
                                {_: :link, rel: type, href: CGI.escapeHTML(uri.to_s)}}
                             ]}, "\n",

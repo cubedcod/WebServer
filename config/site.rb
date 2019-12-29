@@ -1,12 +1,12 @@
 module Webize
   module HTML
-    class Reader
 
-      SiteGunk = {'www.google.com' => %w(div.logo h1 h2 #footcnt #top_nav),
-                  'www.bostonmagazine.com' => %w(a[href*='scrapertrap']),
-                  'www.msn.com' => %w(#aside #filmstripouter #header-common #sticky-footer),
-                  'www.theregister.co.uk' => %w(#hot #read_more_on #whitepapers),
-                 }
+    SiteGunk = {'www.google.com' => %w(div.logo h1 h2 #footcnt #top_nav),
+                'www.bostonmagazine.com' => %w(a[href*='scrapertrap']),
+                'www.msn.com' => %w(#aside #filmstripouter #header-common #sticky-footer),
+                'www.theregister.co.uk' => %w(#hot #read_more_on #whitepapers)}
+
+    class Reader
 
       # host HTML -> RDF
       Triplr = {
