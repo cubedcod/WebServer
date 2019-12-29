@@ -179,6 +179,10 @@ footer nav sidebar
         end
 
         # <link>
+        n.css('frame, iframe').map{|frame|
+          if src = frame.attr('src')
+            yield subject, Link, src.R
+          end}
         n.css('head link[rel]').map{|m|
           if k = m.attr("rel") # predicate
             if v = m.attr("href") # object
