@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
     // keyboard control
     document.querySelector('#showMain').addEventListener('click',function(e){
+	this.style.display = 'none';
 	document.querySelectorAll('.site').map(function(l){
 	    this.style.display = 'none';
 	});
