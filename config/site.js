@@ -32,6 +32,11 @@ document.addEventListener("DOMContentLoaded", function(){
     };
 
     // keyboard control
+    document.querySelector('#showMain').addEventListener('click',function(e){
+	document.querySelectorAll('.site').map(function(l){
+	    this.style.display = 'none';
+	});
+    });
     document.querySelectorAll('input').map(function(i){
 	this.addEventListener("keydown",function(e){
 	    e.stopPropagation();
