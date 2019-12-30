@@ -306,6 +306,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
     Allow 'dev.inrupt.net'
 
     # Instagram
+    #Cookies 'www.instagram.com'
     GET 'l.instagram.com', GotoU
     GET 'www.instagram.com', RootIndex
 
@@ -865,7 +866,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
       if tl = h['edge_owner_to_timeline_media']
         end_cursor = tl['page_info']['end_cursor']
         uid = tl["edges"][0]["node"]["owner"]["id"]
-        env[:links][:next] ||= '/graphql/query/' + HTTP.qs({query_hash: :e769aa130647d2354c40ea6a439bfc08, rdf: :rdf, variables: {id: uid, first: 12, after: end_cursor}.to_json})
+        env[:links][:prev] ||= '/graphql/query/' + HTTP.qs({query_hash: :e769aa130647d2354c40ea6a439bfc08, rdf: :rdf, variables: {id: uid, first: 12, after: end_cursor}.to_json})
       end
       yield ('https://www.instagram.com/' + h['username']).R, Type, Person.R if h['username']
       if h['shortcode']
