@@ -54,7 +54,7 @@ class WebResource
         [301, {'Location' => r.env['REQUEST_PATH']}, []]
       end}
     RootIndex = -> r {
-      if r.path == '/'
+      if r.path == '/' || r.uri.match?(GlobChars)
         r.cachedGraph
       else
         r.chrono_sort if r.parts.size == 1
@@ -420,6 +420,7 @@ class WebResource
         print "\n🚫403 " + uri + ' '
         options[:intermediate] ? self : cachedGraph
       when /404/ # Not Found
+        print "\n❓ #{uri} "
         if options[:intermediate]
           self
         elsif upstreamUI?
