@@ -562,11 +562,9 @@ firefox.settings.services.mozilla.com
       elsif r.parts[0] == 'feed'
         r.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/8.3 (KHTML, like Gecko) Chrome/80.0 Safari/8.3'
         Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}.shuffle.each_slice(18){|s|
-          '/search'.R(r.env).fetch intermediate: true,
-                                   noRDF: true,
+          '/search'.R(r.env).fetch intermediate: true, noRDF: true,
                                    query: {vertical: :default, f: :tweets, q: s.map{|u|'from:' + u}.join('+OR+')}}
-        r.chrono_sort
-        r.indexRDF.graphResponse
+        r.indexRDF.chrono_sort.graphResponse
       elsif r.parts[-1] == 'status'
         r.cachedGraph
       elsif r.gunkURI
