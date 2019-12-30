@@ -46,7 +46,7 @@ footer nav sidebar
 [id*='social']
 }, *SiteGunk[base.host]].map{|selector|
         html.css(selector).map{|node|
-          base.env[:gunked] ||= true
+          base.env[:site_chrome] ||= true
           node['class'] = 'site'}}
 
       # images
@@ -292,7 +292,7 @@ class WebResource
                                       id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
                                   {_: :a, class: 'basename breadcrumb', href: path, c: (CGI.escapeHTML URI.unescape base.basename)},
                                   link[:media, '🖼️'], link[:feed, FeedIcon], link[:time, '🕒'],
-                                  ({_: :a, id: :showMain, href: '#body'} if env[:gunked])
+                                  ([' ',{_: :a, id: :showMain, href: '#body'}] if env[:site_chrome])
                                  ]},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?

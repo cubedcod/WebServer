@@ -3,7 +3,7 @@
 #next {right: 0}
 #prev {left: 0}
 #prev, #next {position: fixed; height: 100%; font-size: 1.9em; color: #eee}
-#showMain {background: repeating-linear-gradient(135deg, #000, #000 .4em, #fff .4em, #fff .8em) !important; height: 1.2em; width: 1.2em; display: inline-block; border: 1px solid white}
+#showMain {background: repeating-linear-gradient(135deg, #000, #000 .4em, #fff .4em, #fff .8em); height: 1.2em; width: 1.2em; display: inline-block; border: 1px solid white}
 .avatar {max-height: 2em; background-color: #000}
 .breadcrumb {border-width: 0 0 0 .08em; border-color: #444; border-style: solid; border-radius: 0; color: #ddd}
 .breadcrumb.basename {color: #fff; font-weight: bold}
@@ -19,7 +19,7 @@
 .main.post {background-color: #fff; color: #000; border-width: 0; padding: .2em}
 .post {border-radius: .28em; max-width: 88ex}
 .quote {background-color: #ccc; color: #000}
-.site {background: repeating-linear-gradient(45deg, #000, #000 4em, #fff 4em, #fff 8em) !important; border: 1px solid white}
+.site {background: repeating-linear-gradient(45deg, #000, #000 4em, #fff 4em, #fff 8em); border: 1px solid white; border-radius: .3em; color: #ccc}
 .thumb, svg {max-width: 28em}
 .title {background-color: #fff; color: #000; font-size: 1.08em; font-weight: bold; vertical-align: top; border-width: 0 0 0 .4em; border-color: #fff; border-style: solid; border-radius: .18em }
 .title:visited {border-color: #0f0}
