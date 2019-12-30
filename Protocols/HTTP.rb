@@ -471,7 +471,7 @@ class WebResource
     end
 
     def fixedFormat? format = nil
-      return true if upstreamUI? || format.match?(/dash.xml/)
+      return true if upstreamUI? || format.to_s.match?(/dash.xml/)
       return false if env[:query].has_key?('rdf') || env[:transform] || !format || format.match?(/atom|html|rss|xml/i)
       return true
     end

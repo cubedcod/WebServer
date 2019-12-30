@@ -280,6 +280,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
 
     # Guardian
     GET 'i.guim.co.uk'
+    GET 'assets.guim.co.uk'
     GET 'www.theguardian.com'
 
     # HFU
@@ -306,7 +307,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
     Allow 'dev.inrupt.net'
 
     # Instagram
-    #Cookies 'www.instagram.com'
+    Cookies 'www.instagram.com'
     GET 'l.instagram.com', GotoU
     GET 'www.instagram.com', RootIndex
 
@@ -862,9 +863,9 @@ media-mbst-pub-ue1.s3.amazonaws.com
   def InstagramJSON tree, &b
     Webize::HTML.webizeHash(tree){|h|
       if tl = h['edge_owner_to_timeline_media']
-        end_cursor = tl['page_info']['end_cursor']
-        uid = tl["edges"][0]["node"]["owner"]["id"]
-        env[:links][:prev] ||= '/graphql/query/' + HTTP.qs({query_hash: :e769aa130647d2354c40ea6a439bfc08, rdf: :rdf, variables: {id: uid, first: 12, after: end_cursor}.to_json})
+        end_cursor = tl['page_info']['end_cursor'] rescue nil
+        uid = tl["edges"][0]["node"]["owner"]["id"] rescue nil
+        env[:links][:prev] ||= '/graphql/query/' + HTTP.qs({query_hash: :e769aa130647d2354c40ea6a439bfc08, rdf: :rdf, variables: {id: uid, first: 12, after: end_cursor}.to_json}) if uid && end_cursor
       end
       yield ('https://www.instagram.com/' + h['username']).R, Type, Person.R if h['username']
       if h['shortcode']
