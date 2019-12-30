@@ -447,29 +447,6 @@ class WebResource
       entity
     end
 
-    def findNodes
-      (if node.directory?                                      # directory:
-       if env[:query].has_key?('f') && path != '/'             # FIND
-          find env[:query]['f'] unless env[:query]['f'].empty? #  pedantic
-       elsif env[:query].has_key?('find') && path != '/'       #  easy mode
-          find '*' + env[:query]['find'] + '*' unless env[:query]['find'].empty?
-       elsif (env[:query].has_key?('Q') || env[:query].has_key?('q')) && path != '/'
-         env[:grep] = true                                     # GREP
-         grep
-       else                                                    # LS
-         [self, (join 'index.ttl').R]
-       end
-      else                                                     # files:
-        if uri.match GlobChars                                 # GLOB - parametric
-          env[:grep] = true if env && env[:query].has_key?('q')
-          glob
-        else                                                   # GLOB - default graph-storage
-          files =        (self + '.*').R.glob                  #  basename + extension match
-          files.empty? ? (self +  '*').R.glob : files          #  prefix match
-        end
-       end).flatten.compact.uniq.select(&:exist?).map{|n|n.bindEnv env}
-    end
-
     def fixedFormat? format = nil
       return true if upstreamUI? || format.to_s.match?(/dash.xml/)
       return false if env[:query].has_key?('rdf') || env[:transform] || !format || format.match?(/atom|html|rss|xml/i)
@@ -654,7 +631,27 @@ class WebResource
     end
 
     def nodeResponse
-      nodes = findNodes
+      nodes = (if node.directory?                                      # directory:
+               if env[:query].has_key?('f') && path != '/'             # FIND
+                 find env[:query]['f'] unless env[:query]['f'].empty? #  pedantic
+               elsif env[:query].has_key?('find') && path != '/'       #  easy mode
+                 find '*' + env[:query]['find'] + '*' unless env[:query]['find'].empty?
+               elsif (env[:query].has_key?('Q') || env[:query].has_key?('q')) && path != '/'
+                 env[:grep] = true                                     # GREP
+                 grep
+               else                                                    # LS
+                 [self, (join 'index.ttl').R]
+               end
+              else                                                     # files:
+                if uri.match GlobChars                                 # GLOB - parametric
+                  env[:grep] = true if env && env[:query].has_key?('q')
+                  glob
+                else                                                   # GLOB - default graph-storage
+                  files =        (self + '.*').R.glob                  #  basename + extension match
+                  files.empty? ? (self +  '*').R.glob : files          #  prefix match
+                end
+               end).flatten.compact.uniq.select(&:exist?).map{|n|n.bindEnv env}
+
       if nodes.size == 1 && nodes[0].ext == 'ttl' && selectFormat == 'text/turtle'
         nodes[0].fileResponse # nothing to merge or transform. return static-node
       else                    # merge and/or transform
