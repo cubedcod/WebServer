@@ -388,7 +388,7 @@ class WebResource
               icon = Icons[p.uri] || slug
               {_: :td, c: (env[:query]||{})['sort'] == p.uri ? icon : {_: :a, class: :head, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}}},
            graph.map{|resource|
-             {_: :tr, about: resource['uri'], c: keys.map{|k|
+             {_: :tr, resource: resource['uri'], c: keys.map{|k|
                 {_: :td, property: k,
                  c: if k == 'uri'
                   tCount = 0

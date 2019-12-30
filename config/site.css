@@ -28,7 +28,7 @@
 .toolbox a:target {text-shadow: 0px 0px #000000}
 .toolbox svg {height: 1em; width: 1em}
 .toolbox { position: fixed; top: 0; z-index: 2 }
-.tree {border-color: #222; border-width: 1px 0 0 1px; border-style: solid; background-color: #111; color: #aaa; border-radius: .28em; max-width: 100%; margin: 0; padding: 0; vertical-align: top}
+.tree {border-color: #222; border-width: 1px 0 0 1px; border-style: solid; background-color: #111; color: #aaa; border-radius: .28em; display: inline-block; max-width: 100%; margin: 0; padding: 0; vertical-align: top}
 :target {background-color: #0f0 !important; color: #000 !important}
 a {text-decoration: none; border-radius: .14em}
 a.date {float: right; white-space: nowrap; color: #888; font-size: .8em; border-color: #222}

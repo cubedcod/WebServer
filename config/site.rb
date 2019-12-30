@@ -223,6 +223,9 @@ thumbs.ebaystatic.com).map{|host| GET host }
 
     %w(l.facebook.com lm.facebook.com).map{|host| GET host, GotoU}
 
+    # Feedburner
+    GET 'feeds.feedburner.com', NoQuery
+
     # FDroid
     Cookies 'f-droid.org'
 
