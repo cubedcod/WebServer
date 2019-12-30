@@ -20,7 +20,7 @@
 .post {border-radius: .28em; max-width: 88ex}
 .quote {background-color: #ccc; color: #000}
 .site {background: repeating-linear-gradient(45deg, #000, #000 4em, #fff 4em, #fff 8em); border: 1px solid white; border-radius: .3em; color: #aaa}
-.thumb, svg {max-width: 28em}
+.thumb, svg {display: inline-block; max-width: 28em}
 .title {background-color: #fff; color: #000; font-size: 1.08em; font-weight: bold; vertical-align: top; border-width: 0 0 0 .4em; border-color: #fff; border-style: solid; border-radius: .18em }
 .title:visited {border-color: #0f0}
 .toolbox a.icon {font-size: 1.6em}
@@ -47,9 +47,9 @@ img, video {max-width: 100%}
 p, li, blockquote {max-width: 86ex}
 pre {white-space: pre-wrap}
 span.name {font-size: .8em; max-width: 22ex; display: inline-block}
-table, div, li, svg {display: inline-block}
 table.tabular td p:first-child:first-letter {font-weight: bold}
 table.tabular tr:nth-child(even) {background-color: #111}
 td {overflow: hidden; border-radius: .2em}
+td[property="uri"] {max-width: 100ex}
 td.k {max-width: 28ex; text-align: right}
 video {min-width: 40ex}

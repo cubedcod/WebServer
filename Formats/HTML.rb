@@ -374,6 +374,7 @@ class WebResource
     def self.tabular graph, env
       graph = graph.values if graph.class == Hash
       keys = graph.select{|r|r.respond_to? :keys}.map{|r|r.keys}.flatten.uniq - [Abstract, Content, DC+'hasFormat', DC+'identifier', Image, Link, Video, SIOC+'reply_of', SIOC+'user_agent', Title, Type]
+      keys = [Creator, *(keys - [Creator])] if keys.member? Creator
       if env[:query] && env[:query].has_key?('sort')
         attr = env[:query]['sort']
         attr = Date if %w(date new).member? attr
@@ -387,8 +388,8 @@ class WebResource
               icon = Icons[p.uri] || slug
               {_: :td, c: (env[:query]||{})['sort'] == p.uri ? icon : {_: :a, class: :head, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}}},
            graph.map{|resource|
-             {_: :tr, c: keys.map{|k|
-                {_: :td,
+             {_: :tr, about: resource['uri'], c: keys.map{|k|
+                {_: :td, property: k,
                  c: if k == 'uri'
                   tCount = 0
                   [(resource[Title]||[]).map{|title|
