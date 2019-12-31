@@ -88,7 +88,7 @@ class WebResource
       self
     end
 
-    def cachedGraph; fsPath.nodeResponse end
+    def cachedGraph; fsPath.nodeRequest end
 
     def self.call env
       return [405,{},[]] unless m=Methods[env['REQUEST_METHOD']] # method-handler lookup
@@ -466,12 +466,10 @@ class WebResource
           [302, {'Location' => '/d/*/msg*?sort=date&view=table'}, []]
         elsif parts[0] == 'msg'     # (message -> path) map
           id = parts[1]
-          id ? MID2PATH[URI.unescape id].R(env).nodeResponse : [301, {'Location' => '/mail'}, []]
+          id ? MID2PATH[URI.unescape id].R(env).nodeRequest : [301, {'Location' => '/mail'}, []]
         elsif node.file?
-          fileResponse              # static-data
-        elsif node.directory? && qs.empty? && (index = (self + 'index.html').R env).exist? && selectFormat == 'text/html'
-          index.fileResponse        # static dir-index
-        else                        # transformable graph-data
+          fileResponse              # static data
+        else                        # transformable data
           localGraph
         end                         # remote resource:
       elsif path.match? /^.gen(erate)?_?204$/ # connectivity check
@@ -480,7 +478,7 @@ class WebResource
         name = '*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*'
         timeMeta
         env[:links][:time] = 'http://localhost:8000' + path + '*.ttl?view=table' if env['REMOTE_ADDR'] == '127.0.0.1'
-        (path + name).R(env).nodeResponse
+        (path + name).R(env).nodeRequest
       elsif handler = HostGET[host] # host handler
         Populator[host][self] if Populator[host] && !hostpath.R.exist?
         handler[self]
@@ -627,10 +625,10 @@ class WebResource
     def localGraph
       env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
       timeMeta
-      nodeResponse
+      nodeRequest
     end
 
-    def nodeResponse
+    def nodeRequest
       nodes = (if node.directory?                                      # directory:
                if env[:query].has_key?('f') && path != '/'             # FIND
                  find env[:query]['f'] unless env[:query]['f'].empty? #  pedantic
@@ -640,7 +638,7 @@ class WebResource
                  env[:grep] = true                                     # GREP
                  grep
                else                                                    # LS
-                 [self, (join 'index.ttl').R]
+                 [self, (join 'index.html').R,  (join 'index.ttl').R]
                end
               else                                                     # files:
                 if uri.match GlobChars                                 # GLOB - parametric
@@ -652,8 +650,8 @@ class WebResource
                 end
                end).flatten.compact.uniq.select(&:exist?).map{|n|n.bindEnv env}
 
-      if nodes.size == 1 && nodes[0].ext == 'ttl' && selectFormat == 'text/turtle'
-        nodes[0].fileResponse # nothing to merge or transform. return static-node
+      if nodes.size==1 && RDF::Format.file_extensions[nodes[0].ext.to_sym][0].content_type.member?(selectFormat) # one node in preferred format
+        nodes[0].fileResponse # nothing to merge/transform: static-node hit
       else                    # merge and/or transform
         nodes.map &:load
         indexRDF if env[:new]
