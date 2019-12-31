@@ -582,7 +582,6 @@ firefox.settings.services.mozilla.com
     Allow 'media-services-public.vrt.be'
 
     # WaPo
-    Allow 'www.washingtonpost.com'
     GET 'www.washingtonpost.com', -> r {(r.parts[0]=='resizer' ? Resizer : NoGunk)[r]}
 
     # WBUR

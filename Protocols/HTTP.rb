@@ -44,7 +44,7 @@ class WebResource
           elsif !format || format.match?(/script/) # response with script source
             r.deny                                 # drop response
           elsif format.match?(/html/) && r.upstreamUI? # upstream HTML source
-            doc = Nokogiri::HTML.fragment b[0]     # parse body
+            doc = Nokogiri::HTML.parse b[0]        # parse body
             doc.css(Webize::HTML::ScriptSelector).remove # drop JS
             body = doc.to_html                     # serialize body
             h['Content-Length']=body.bytesize.to_s # update body-size
@@ -385,7 +385,7 @@ class WebResource
           format ||= (xt = ext.to_sym; puts "WARNING no MIME for #{uri}"  # extension -> format
                       RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
           if format == 'text/html'                                        # upstream HTML doc
-            doc = Nokogiri::HTML.fragment body                            # parse body
+            doc = Nokogiri::HTML.parse body                               # parse body
             doc.css(Webize::HTML::ScriptSelector).map{|s|
               s.remove if s.inner_text.match? Webize::HTML::ScriptGunk}   # drop script-gunk
             body = doc.to_html                                            # serialize body

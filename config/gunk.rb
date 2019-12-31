@@ -49,7 +49,6 @@ image-src
 end
 class WebResource
   module URIs
-
     GunkURI = %r([-.:_\/?&=~]
 ((block|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|frame|id|rotat[eo]r?|slots?|tech|tools?|types?|units?|words?|zones?)?|akismet|alerts?|.*analytics.*|appnexus|audience|(app|smart)?
 b(anner|eacon|reakingnew)s?|
@@ -76,6 +75,5 @@ wp-rum|
 xiti)
 ([-.:_\/?&=~]|$)|
 \.(eot|gif\?|otf|ttf|woff2?))xi
-
   end
 end
