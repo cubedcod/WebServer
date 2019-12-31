@@ -1,3 +1,52 @@
+module Webize
+  module HTML
+
+    NavGunk = %w{
+footer nav sidebar
+[class*='cookie']
+[class*='foot']
+[class*='nav']
+[class*='promo']
+[class*='related']
+[class*='share']
+[class*='side']
+[class*='social']
+[id*='cookie']
+[id*='foot']
+[id*='nav']
+[id*='promo']
+[id*='related']
+[id*='share']
+[id*='side']
+[id*='social']
+}
+
+    SiteGunk = {'www.google.com' => %w(div.logo h1 h2 #footcnt #top_nav),
+                'www.bostonmagazine.com' => %w(a[href*='scrapertrap']),
+                'www.msn.com' => %w(#aside #filmstripouter #header-common #sticky-footer),
+                'www.theregister.co.uk' => %w(#hot #read_more_on #whitepapers)}
+
+    ScriptGunk = /_0x|boomr|comscore|criteo|google(ad|api|tag)|rubicon|trustx|wpad/i
+
+    ScriptSelector = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script"
+
+    SRCnotSRC = %w(
+data-baseurl
+data-delayed-url
+data-hi-res-src
+data-img-src
+data-lazy-img
+data-lazy-src
+data-menuimg
+data-native-src
+data-original
+data-raw-src
+data-src
+image-src
+)
+
+  end
+end
 class WebResource
   module URIs
 
@@ -16,7 +65,7 @@ log(event|g(er|ing))|(app|s)?
 m(atomo|e(asurement|t(er|rics?))|ms|onitor(ing)?|odal|tr)|
 new(relic|sletters?)|.*notifications?.*|
 o(m(niture|tr)|nboarding|nesignal|ptanon|utbrain)|
-p(aywall|er(imeter-?x|sonali[sz](ation|e))|i(wik|xel(propagate)?)|lacement|op(down|over|up)|orpoiseant|repopulator|ro(fitwell|m(o(tion)?s?|pt))|ubmatic)|/pv|
+p(aywall|er(imeter-?x|sonali[sz](ation|e))|i(wik|xel(propagate)?)|lacement|op(down|over|up)|orpoiseant|owaboot|repopulator|ro(fitwell|m(o(tion)?s?|pt))|ubmatic)|/pv|
 quantcast|
 record(event|stats?)|re?t(ar)?ge?t(ing)?|(rich)?relevance|remote[-_]?(control)?|rpc|
 s?s(a(fe[-_]?browsing|ilthru)|cheduler|erv(edby|ice[-_]?worker)|i(ftscience|gnalr|tenotice)|o(cial(shar(e|ing))?|urcepoint)|ponsor(ed)?|tat(istic)?s?|ubscri(ber?|ptions?)|urvey|w.js|yn(c|dicat(ed|ion)))|_static|

@@ -2,51 +2,16 @@
 module Webize
   module HTML
 
-    LazySRC = %w(
-data-baseurl
-data-delayed-url
-data-hi-res-src
-data-img-src
-data-lazy-img
-data-lazy-src
-data-menuimg
-data-native-src
-data-original
-data-raw-src
-data-src
-image-src
-)
-
-    Script = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script"
-
     def self.clean body, base
       html = Nokogiri::HTML.fragment body
 
       # strip elements
-      html.css('iframe, style, ' + Script).remove
+      html.css('iframe, style, ' + ScriptSelector).remove
       %w{clickability counter.ru quantserve scorecardresearch}.map{|co|
         html.css('img[src*="' + co + '"]').map{|img| img.remove }}
 
       # tag site/nav elements
-      [*%w{
-footer nav sidebar
-[class*='cookie']
-[class*='foot']
-[class*='nav']
-[class*='promo']
-[class*='related']
-[class*='share']
-[class*='side']
-[class*='social']
-[id*='cookie']
-[id*='foot']
-[id*='nav']
-[id*='promo']
-[id*='related']
-[id*='share']
-[id*='side']
-[id*='social']
-}, *SiteGunk[base.host]].map{|selector|
+      [*NavGunk, *SiteGunk[base.host]].map{|selector|
         html.css(selector).map{|node|
           base.env[:site_chrome] ||= true
           node['class'] = 'site'}}
@@ -64,7 +29,7 @@ footer nav sidebar
 
       html.traverse{|e| # visit nodes
         e.attribute_nodes.map{|a| # visit attributes
-          e.set_attribute 'src', a.value if LazySRC.member? a.name            # @src map
+          e.set_attribute 'src', a.value if SRCnotSRC.member? a.name          # @src map
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name # @srcset
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) ||
                       %w(bgcolor height http-equiv layout ping role style tabindex target theme width).member?(a.name)} # strip attrs

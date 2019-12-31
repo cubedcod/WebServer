@@ -45,7 +45,7 @@ class WebResource
             r.deny                                 # drop response
           elsif format.match?(/html/) && r.upstreamUI? # upstream HTML source
             doc = Nokogiri::HTML.fragment b[0]     # parse body
-            doc.css(Webize::HTML::Script).remove   # drop scripts
+            doc.css(Webize::HTML::ScriptSelector).remove # drop JS
             body = doc.to_html                     # serialize body
             h['Content-Length']=body.bytesize.to_s # update body-size
             [s, h, [body]]                         # cleaned response
@@ -384,6 +384,12 @@ class WebResource
           format = h['content-type'].split(/;/)[0] if h['content-type']   # HTTP header -> format
           format ||= (xt = ext.to_sym; puts "WARNING no MIME for #{uri}"  # extension -> format
                       RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
+          if format == 'text/html'                                        # upstream HTML doc
+            doc = Nokogiri::HTML.fragment body                            # parse body
+            doc.css(Webize::HTML::ScriptSelector).map{|s|
+              s.remove if s.inner_text.match? Webize::HTML::ScriptGunk}   # drop script-gunk
+            body = doc.to_html                                            # serialize body
+          end
           reader = RDF::Reader.for content_type: format                   # select reader
           reader.new(body, {base_uri: base, noRDF: options[:noRDF]}){|_|  # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader   # parse RDF
@@ -395,11 +401,15 @@ class WebResource
           return self if options[:intermediate]                           # intermediate fetch. return w/o HTTP response
           indexRDF                                                        # index metadata
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
-            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}             # preserved upstream metadata
-          env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
-          env[:resp]['Content-Length'] = body.bytesize.to_s
+            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}             # provide upstream metadata
+          env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin     # update CORS header
           env[:resp]['Set-Cookie'] = h['set-cookie'] if h['set-cookie'] && allowCookies?
-          (fixedFormat? format) ? [200,env[:resp],[body]] : graphResponse # HTTP response
+          if fixedFormat? format                                          # upstream format choice
+            env[:resp]['Content-Length'] = body.bytesize.to_s             # update size
+            [200, env[:resp], [body]]                                     # cleaned upstream doc
+          else
+            graphResponse                                                 # locally-generated doc
+          end
         end
       end
     rescue Exception => e

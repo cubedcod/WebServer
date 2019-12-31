@@ -1,15 +1,7 @@
 # coding: utf-8
 module Webize
   module HTML
-
-    SiteGunk = {'www.google.com' => %w(div.logo h1 h2 #footcnt #top_nav),
-                'www.bostonmagazine.com' => %w(a[href*='scrapertrap']),
-                'www.msn.com' => %w(#aside #filmstripouter #header-common #sticky-footer),
-                'www.theregister.co.uk' => %w(#hot #read_more_on #whitepapers)}
-
     class Reader
-
-      # host HTML -> RDF
       Triplr = {
         'apnews.com' => :AP,
         'boards.4channel.org' => :FourChannel,
@@ -28,12 +20,9 @@ module Webize
         'www.universalhub.com' => :UHub,
         'www.youtube.com' => :YouTubeHTML,
       }
-
     end
   end
   module JSON
-
-    # host JSON -> RDF
     Triplr = {
       'gateway.reddit.com' => :RedditJSON,
       'outline.com' => :Outline,
@@ -42,7 +31,6 @@ module Webize
       'www.instagram.com' => :InstagramJSON,
       'www.youtube.com' => :YouTubeJSON,
     }
-
   end
 end
 class WebResource
@@ -66,9 +54,9 @@ class WebResource
     Resizer = -> r {
       if r.parts[0] == 'resizer'
         parts = r.path.split /\/\d+x\d+\/((filter|smart)[^\/]*\/)?/
-        parts.size > 1 ? [302, {'Location' => 'https://' + parts[-1]}, []] : NoJS[r]
+        parts.size > 1 ? [302, {'Location' => 'https://' + parts[-1]}, []] : NoGunk[r]
       else
-        NoJS[r]
+        NoGunk[r]
       end}
 
     # ABC
@@ -594,7 +582,8 @@ firefox.settings.services.mozilla.com
     Allow 'media-services-public.vrt.be'
 
     # WaPo
-    GET 'www.washingtonpost.com', -> r {(r.parts[0]=='resizer' ? Resizer : NoJS)[r]}
+    Allow 'www.washingtonpost.com'
+    GET 'www.washingtonpost.com', -> r {(r.parts[0]=='resizer' ? Resizer : NoGunk)[r]}
 
     # WBUR
     CDNexec 'www.wbur.org'
