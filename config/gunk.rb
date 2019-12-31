@@ -5,6 +5,7 @@ module Webize
 footer nav sidebar
 [class*='cookie']
 [class*='foot']
+[class*='head']
 [class*='nav']
 [class*='promo']
 [class*='related']
@@ -13,6 +14,7 @@ footer nav sidebar
 [class*='social']
 [id*='cookie']
 [id*='foot']
+[id*='head']
 [id*='nav']
 [id*='promo']
 [id*='related']
@@ -21,12 +23,11 @@ footer nav sidebar
 [id*='social']
 }
 
-    SiteGunk = {'www.google.com' => %w(div.logo h1 h2 #footcnt #top_nav),
+    SiteGunk = {'www.google.com' => %w(div.logo h1 h2),
                 'www.bostonmagazine.com' => %w(a[href*='scrapertrap']),
-                'www.msn.com' => %w(#aside #filmstripouter #header-common #sticky-footer),
                 'www.theregister.co.uk' => %w(#hot #read_more_on #whitepapers)}
 
-    ScriptGunk = /_0x|boomr|comscore|criteo|google(ad|api|tag)|rubicon|trustx|wpad/i
+    ScriptGunk = /_0x|boomr|comscore|criteo|rubicon|trustx|wpad/i
 
     ScriptSelector = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script"
 
