@@ -12,18 +12,20 @@ data-lazy-src
 data-menuimg
 data-native-src
 data-original
+data-raw-src
 data-src
 image-src
 )
+
+    Script = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script"
 
     def self.clean body, base
       html = Nokogiri::HTML.fragment body
 
       # strip elements
-      %w{iframe link[rel='stylesheet'] style link[type='text/javascript'] link[as='script'] script}.map{|s|
-        html.css(s).remove}
-      html.css('a[href^="javascript"]').map{|a| a.remove }
-      %w{clickability counter.ru quantserve scorecardresearch}.map{|co| html.css('img[src*="' + co + '"]').map{|img| img.remove }}
+      html.css('iframe, style, ' + Script).remove
+      %w{clickability counter.ru quantserve scorecardresearch}.map{|co|
+        html.css('img[src*="' + co + '"]').map{|img| img.remove }}
 
       # tag site/nav elements
       [*%w{
@@ -72,14 +74,14 @@ footer nav sidebar
           e.add_child " <span class='uri'>#{CGI.escapeHTML e['href'].sub(/^https?:..(www.)?/,'')[0..127]}</span> " # show full(er) URL
           e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # identify node for traversal
           css = [:uri]; css.push :path if !ref.host || (ref.host == base.host)
-          e['href'] = base.join e['href'] unless ref.host                               # resolve relative references
-          e['class'] = css.join ' '                                                     # node CSS-class for styling
-        elsif e['id']                                                                   # identified node w/ no target link
-          e.set_attribute 'class', 'identified'                                         # node CSS-class for styling
-          e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id']}</span> " # add link to target
+          e['href'] = base.join e['href'] unless ref.host              # resolve relative references
+          e['class'] = css.join ' '                                    # node CSS-class for styling
+        elsif e['id']                                                  # identified node w/ no target link
+          e.set_attribute 'class', 'identified'                        # node CSS-class for styling
+          e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id']}</span> " # id link
         end
 
-        e['src'] = base.join e['src'] if e['src'] && !e['src'].R.host}                  # resolve image locations
+        e['src'] = base.join e['src'] if e['src'] && !e['src'].R.host} # resolve image locations
 
       html.to_xhtml(:indent => 0)
     end
@@ -239,8 +241,8 @@ class WebResource
   module HTML
 
     def chrono_sort
-      env[:query].update 'sort' => 'date',
-                         'view' => 'table'
+      env[:query]['sort'] ||= 'date'
+      env[:query]['view'] ||= 'table'
       self
     end
 

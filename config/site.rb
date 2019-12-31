@@ -487,9 +487,6 @@ firefox.settings.services.mozilla.com
     # ResearchGate
     Cookies 'www.researchgate.net'
 
-    # Responsys
-    GET 'static.cdn.responsys.net', NoJS
-
     # Reuters
     GET 'feeds.reuters.com', NoQuery
     (0..5).map{|i|

@@ -34,25 +34,36 @@ class WebResource
     GotoURL = -> r {[301, {'Location' => (r.env[:query]['url']||r.env[:query]['q'])}, []]}
     NoGunk  = -> r {r.gunkURI ? r.deny : r.fetch}
     NoJS    = -> r {
-      if r.ext == 'js'
-        r.deny
+      if r.ext == 'js'                             # request for script file
+        r.deny                                     # drop request
       else
-        NoGunk[r].yield_self{|s,h,b|
-          if (h['content-type'] || h['Content-Type'] || 'maybescript').match? /script/
-            r.deny
-          else
+        NoGunk[r].yield_self{|s,h,b|               # inspect response
+          format = h['content-type'] || h['Content-Type']
+          if s.to_s.match? /^3/                    # redirected
             [s,h,b]
+          elsif !format || format.match?(/script/) # response with script source
+            r.deny                                 # drop response
+          elsif format.match?(/html/) && r.upstreamUI? # upstream HTML source
+            doc = Nokogiri::HTML.fragment b[0]     # parse body
+            doc.css(Webize::HTML::Script).remove   # drop scripts
+            body = doc.to_xhtml                    # serialize body
+            h['Content-Length']=body.bytesize.to_s # update body-size
+            [s, h, [body]]                         # cleaned response
+          else
+            [s,h,b]                                # untouched response
           end}
       end}
+
     NoQuery = -> r {
-      if r.qs.empty?
-        NoGunk[r].yield_self{|s,h,b|
-          h.keys.map{|k|
+      if r.qs.empty?                               # request without qs
+        NoGunk[r].yield_self{|s,h,b|               # inspect response
+          h.keys.map{|k|                           # strip qs from location
             h[k] = h[k].split('?')[0] if k.downcase == 'location' && h[k].match?(/\?/)}
-          [s,h,b]}
-      else
-        [301, {'Location' => r.env['REQUEST_PATH']}, []]
+          [s,h,b]}                                 # cleaned response
+      else                                         # request with qs
+        [302, {'Location' => r.env['REQUEST_PATH']}, []] # redirect to path
       end}
+
     RootIndex = -> r {
       if r.path == '/' || r.uri.match?(GlobChars)
         r.cachedGraph
