@@ -46,7 +46,7 @@ class WebResource
           elsif format.match?(/html/) && r.upstreamUI? # upstream HTML source
             doc = Nokogiri::HTML.fragment b[0]     # parse body
             doc.css(Webize::HTML::Script).remove   # drop scripts
-            body = doc.to_xhtml                    # serialize body
+            body = doc.to_html                     # serialize body
             h['Content-Length']=body.bytesize.to_s # update body-size
             [s, h, [body]]                         # cleaned response
           else
