@@ -6,7 +6,7 @@ module Webize
       html = Nokogiri::HTML.fragment body
 
       # strip elements
-      html.css('iframe, style, ' + ScriptSelector).remove
+      html.css('iframe, style, ' + ScriptSel).remove
       %w{clickability counter.ru quantserve scorecardresearch}.map{|co|
         html.css('img[src*="' + co + '"]').map{|img| img.remove }}
 

@@ -29,7 +29,7 @@ footer nav sidebar
 
     ScriptGunk = /_0x|boomr|comscore|criteo|rubicon|trustx|wpad/i
 
-    ScriptSelector = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script"
+    ScriptSel = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script"
 
     SRCnotSRC = %w(
 data-baseurl

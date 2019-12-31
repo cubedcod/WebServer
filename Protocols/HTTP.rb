@@ -45,7 +45,7 @@ class WebResource
             r.deny                                 # drop response
           elsif format.match?(/html/) && r.upstreamUI? # upstream HTML source
             doc = Nokogiri::HTML.parse b[0]        # parse body
-            doc.css(Webize::HTML::ScriptSelector).remove # drop JS
+            doc.css(Webize::HTML::ScriptSel).remove# drop JS
             body = doc.to_html                     # serialize body
             h['Content-Length']=body.bytesize.to_s # update body-size
             [s, h, [body]]                         # cleaned response
@@ -386,8 +386,8 @@ class WebResource
                       RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
           if format == 'text/html'                                        # upstream HTML doc
             doc = Nokogiri::HTML.parse body                               # parse body
-            doc.css(Webize::HTML::ScriptSelector).map{|s|
-              s.remove if s.inner_text.match? Webize::HTML::ScriptGunk}   # drop script-gunk
+            doc.css("[class*='cookie'], [id*='cookie']").map &:remove     # clean up doc
+            doc.css(Webize::HTML::ScriptSel).map{|s|s.remove if s.inner_text.match? Webize::HTML::ScriptGunk}
             body = doc.to_html                                            # serialize body
           end
           reader = RDF::Reader.for content_type: format                   # select reader
