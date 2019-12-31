@@ -384,12 +384,6 @@ class WebResource
           format = h['content-type'].split(/;/)[0] if h['content-type']   # HTTP header -> format
           format ||= (xt = ext.to_sym; puts "WARNING no MIME for #{uri}"  # extension -> format
                       RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
-          if format == 'text/html'                                        # upstream HTML doc
-            doc = Nokogiri::HTML.parse body                               # parse body
-            doc.css("[class*='cookie'], [id*='cookie']").map &:remove     # clean up doc
-            doc.css(Webize::HTML::ScriptSel).map{|s|s.remove if s.inner_text.match? Webize::HTML::ScriptGunk}
-            body = doc.to_html                                            # serialize body
-          end
           reader = RDF::Reader.for content_type: format                   # select reader
           reader.new(body, {base_uri: base, noRDF: options[:noRDF]}){|_|  # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader   # parse RDF
@@ -399,12 +393,19 @@ class WebResource
           storage += suffix if suffix != ('.' + ext)
           storage.R.write body                                            # cache body
           return self if options[:intermediate]                           # intermediate fetch. return w/o HTTP response
+
           indexRDF                                                        # index metadata
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}             # provide upstream metadata
           env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin     # update CORS header
           env[:resp]['Set-Cookie'] = h['set-cookie'] if h['set-cookie'] && allowCookies?
           if fixedFormat? format                                          # upstream format choice
+            if format == 'text/html'                                      # upstream HTML doc
+              doc = Nokogiri::HTML.parse body                             # parse body
+              doc.css("[class*='cookie'], [id*='cookie']").map &:remove   # clean up doc
+              doc.css(Webize::HTML::ScriptSel).map{|s|s.remove if s.inner_text.match? Webize::HTML::ScriptGunk}
+              body = doc.to_html                                          # serialize body
+            end
             env[:resp]['Content-Length'] = body.bytesize.to_s             # update size
             [200, env[:resp], [body]]                                     # cleaned upstream doc
           else
