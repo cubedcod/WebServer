@@ -340,7 +340,7 @@ class WebResource
     # Hash -> Markup
     def self.tabular graph, env
       graph = graph.values if graph.class == Hash
-      keys = graph.select{|r|r.respond_to? :keys}.map{|r|r.keys}.flatten.uniq - [Abstract, Content, DC+'hasFormat', DC+'identifier', Image, Link, Video, SIOC+'reply_of', SIOC+'user_agent', Title, Type]
+      keys = graph.select{|r|r.respond_to? :keys}.map{|r|r.keys}.flatten.uniq - [Abstract, Content, DC+'hasFormat', DC+'identifier', Image, Link, Video, SIOC+'reply_of', SIOC+'user_agent', Title]
       keys = [Creator, *(keys - [Creator])] if keys.member? Creator
       if env[:query] && env[:query].has_key?('sort')
         attr = env[:query]['sort']

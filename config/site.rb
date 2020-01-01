@@ -214,12 +214,6 @@ thumbs.ebaystatic.com).map{|host| GET host }
     # Feedburner
     GET 'feeds.feedburner.com', NoQuery
 
-    # FDroid
-    Cookies 'f-droid.org'
-
-    # Flickr
-    GET 'combo.staticflickr.com', -> r {r.path=='/zz/combo' ? r.fetch : NoGunk[r]}
-
     # Forbes
     GET 'thumbor.forbes.com', -> r {[301, {'Location' => URI.unescape(r.parts[-1])}, []]}
 
