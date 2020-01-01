@@ -672,8 +672,8 @@ class WebResource
                 end
                end).flatten.compact.uniq.select(&:exist?).map{|n|n.bindEnv env}
 
-      if nodes.size==1 && RDF::Format.file_extensions[nodes[0].ext.to_sym][0].content_type.member?(selectFormat) # one node in preferred format
-        nodes[0].fileResponse # nothing to merge/transform: static-node hit
+      if nodes.size==1 && (xt=nodes[0].ext) && (fmt=RDF::Format.file_extensions[xt.to_sym]) && fmt[0].content_type.member?(selectFormat) # one node in preferred format
+        nodes[0].fileResponse # nothing to merge/transform, static-node hit
       else                    # merge and/or transform
         nodes.map &:load
         indexRDF if env[:new]
