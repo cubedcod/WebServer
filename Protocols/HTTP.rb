@@ -402,8 +402,8 @@ class WebResource
           if fixedFormat? format                                          # upstream doc
             if format == 'text/html' && host != 'www.youtube.com'         # upstream HTML
               doc = Nokogiri::HTML.parse body                             # parse body
-              doc.css("[class*='cookie'], [id*='cookie']").map &:remove   # clean body
-              doc.css(Webize::HTML::ScriptSel).map{|s|
+              doc.css("link[href*='font'], link[rel*='prefetch'], [class*='cookie'], [id*='cookie']").map &:remove
+              doc.css(Webize::HTML::ScriptSel).map{|s|                    # clean body
                 s.remove if s.inner_text.match?(Gunk) || (s['src'] && s['src'].match?(Gunk))}
               body = doc.to_html                                          # serialize body
             end

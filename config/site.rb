@@ -291,6 +291,9 @@ thumbs.ebaystatic.com).map{|host| GET host }
     # Inrupt
     Allow 'dev.inrupt.net'
 
+    # Invisible Books
+    Insecure 'www.invisiblebooks.com'
+
     # Instagram
     Cookies 'www.instagram.com'
     GET 'l.instagram.com', GotoU
