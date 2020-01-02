@@ -392,12 +392,11 @@ class WebResource
           suffix = Rack::Mime::MIME_TYPES.invert[format]                  #  MIME suffix
           storage += suffix if suffix != ('.' + ext)
           storage.R.write body                                            # cache body
-          return self if options[:intermediate]                           # intermediate fetch. return w/o HTTP response
-
+          return self if options[:intermediate]                           # intermediate fetch, return w/o HTTP-response
           indexRDF                                                        # index metadata
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
-            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}             # provide upstream metadata
-          env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin     # update CORS header
+            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}             # upstream metadata
+          env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin     # CORS header
           env[:resp]['Set-Cookie'] = h['set-cookie'] if h['set-cookie'] && allowCookies?
           if fixedFormat? format                                          # upstream doc
             if format == 'text/html' && host != 'www.youtube.com'         # upstream HTML
@@ -407,10 +406,10 @@ class WebResource
                 s.remove if s.inner_text.match?(Gunk) || (s['src'] && s['src'].match?(Gunk))}
               body = doc.to_html                                          # serialize body
             end
-            env[:resp]['Content-Length'] = body.bytesize.to_s             # update size
+            env[:resp]['Content-Length'] = body.bytesize.to_s             # size
             [200, env[:resp], [body]]                                     # cleaned upstream doc
           else
-            graphResponse                                                 # locally-generated doc
+            graphResponse                                                 # local doc
           end
         end
       end
@@ -505,11 +504,11 @@ class WebResource
       elsif handler = HostGET[host] # host handler
         Populator[host][self] if Populator[host] && !hostpath.R.exist?
         handler[self]
-      elsif host.match? CDNhost     # allow all content on CDN
+      elsif host.match? CDNhost
         if AllowedHosts.has_key?(host) || CDNuser.has_key?(env[:referer]) || env[:query]['allow'] == ServerKey || ENV.has_key?('CDN')
-          fetch
-        else                        # allow non-script non-gunk content
-          if (CacheExt - %w(html js)).member?(ext.downcase) && !gunkURI
+          fetch                     # allow all content
+        else                        # allow non-script/gunk content
+          if (CacheExt - %w(html js)).member?(ext.downcase) && !path.match?(Gunk)
             fetch
           else
             deny                    # blocked content
@@ -541,12 +540,11 @@ class WebResource
     end
 
     def gunkHost
-      return false if (env && env[:query]['allow'] == ServerKey) || AllowedHosts.has_key?(host)
-      env && env.has_key?('HTTP_GUNK')
+      return false if env[:query]['allow'] == ServerKey || AllowedHosts.has_key?(host)
+      env.has_key? 'HTTP_GUNK'
     end
 
     def gunkURI
-      return false if env && env[:query]['allow'] == ServerKey
       ('/' + hostname + (env && env['REQUEST_URI'] || path || '/')).match? Gunk
     end
 
