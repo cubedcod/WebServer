@@ -27,7 +27,7 @@ footer nav sidebar
                 'www.bostonmagazine.com' => %w(a[href*='scrapertrap']),
                 'www.theregister.co.uk' => %w(#hot #read_more_on #whitepapers)}
 
-    ScriptGunk = /_0x|boomr|comscore|criteo|rubicon|trustx|wpad/i
+    ScriptGunk = /_0x|analytic|boomr|comscore|criteo|rubicon|tracker|trustx|wpad/i
 
     ScriptSel = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script"
 

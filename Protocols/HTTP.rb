@@ -43,9 +43,9 @@ class WebResource
             [s,h,b]
           elsif !format || format.match?(/script/) # response with script source
             r.deny                                 # drop response
-          elsif format.match?(/html/) && r.upstreamUI? # upstream HTML source
-            doc = Nokogiri::HTML.parse b[0]        # parse body
-            doc.css(Webize::HTML::ScriptSel).remove# drop JS
+          elsif format.match?(/html/) && r.upstreamUI?
+            doc = Nokogiri::HTML.parse b[0]        # parse HTML
+            doc.css(Webize::HTML::ScriptSel).remove# drop JS-gunk
             body = doc.to_html                     # serialize body
             h['Content-Length']=body.bytesize.to_s # update body-size
             [s, h, [body]]                         # cleaned response
@@ -399,8 +399,8 @@ class WebResource
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}             # provide upstream metadata
           env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin     # update CORS header
           env[:resp]['Set-Cookie'] = h['set-cookie'] if h['set-cookie'] && allowCookies?
-          if fixedFormat? format                                          # upstream format choice
-            if format == 'text/html'                                      # upstream HTML doc
+          if fixedFormat? format                                          # upstream doc
+            if format == 'text/html' && host != 'www.youtube.com'         # upstream HTML
               doc = Nokogiri::HTML.parse body                             # parse body
               doc.css("[class*='cookie'], [id*='cookie']").map &:remove   # clean up doc
               doc.css(Webize::HTML::ScriptSel).map{|s|s.remove if s.inner_text.match? Webize::HTML::ScriptGunk}
