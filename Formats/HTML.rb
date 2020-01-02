@@ -391,13 +391,13 @@ class WebResource
            t.map{|_name, _t| _name == :RDF ? (value nil, _t, env) : (tree _t, env, _name)}]}
     end
 
-    # RDF::Graph -> URI-indexed Hash
+    # Graph -> Hash
     def treeFromGraph
       return {} unless env[:repository]
       tree = {}
       env[:repository].each_triple{|s,p,o| s = s.to_s;  p = p.to_s
-        unless p == 'http://www.w3.org/1999/xhtml/vocab#role' # TODO investigate RDF::Vocab options
-          o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object: URI or literal
+        #unless p == 'http://www.w3.org/1999/xhtml/vocab#role' # TODO investigate RDF::Vocab verbosity
+          o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object URI or literal
           tree[s] ||= {'uri' => s}                      # subject URI
           tree[s][p] ||= []                             # predicate URI
           if tree[s][p].class == Array
@@ -405,7 +405,8 @@ class WebResource
           else
             tree[s][p] = [tree[s][p],o] unless tree[s][p] == o # new object-array
           end
-        end}
+        #end
+      }
       env[:graph] = tree
     end
 
