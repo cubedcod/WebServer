@@ -402,16 +402,9 @@ class WebResource
           if fixedFormat? format                                          # upstream doc
             if format == 'text/html' && host != 'www.youtube.com'         # upstream HTML
               doc = Nokogiri::HTML.parse body                             # parse body
-              doc.css("[class*='cookie'], [id*='cookie']").map &:remove   # clean up doc
+              doc.css("[class*='cookie'], [id*='cookie']").map &:remove   # clean body
               doc.css(Webize::HTML::ScriptSel).map{|s|
-                if s.inner_text.match?(Gunk) || (s['src'] && s['src'].match?(Gunk))
-                  if s['src']
-                    puts "-script #{s['src']}"
-                  else
-                    puts ["-script (inline, #{s.inner_text.size} chars) ", s.inner_text.gsub("\n","")[0..127]].join
-                  end
-                  s.remove
-                end}
+                s.remove if s.inner_text.match?(Gunk) || (s['src'] && s['src'].match?(Gunk))}
               body = doc.to_html                                          # serialize body
             end
             env[:resp]['Content-Length'] = body.bytesize.to_s             # update size
@@ -668,7 +661,7 @@ class WebResource
                  env[:grep] = true                                     # GREP
                  grep
                else                                                    # LS
-                 [self, (join 'index.html').R,  (join 'index.ttl').R]
+                 [self, (join 'index.html').R]
                end
               else                                                     # files:
                 if uri.match GlobChars                                 # GLOB - parametric
@@ -681,7 +674,7 @@ class WebResource
                end).flatten.compact.uniq.select(&:exist?).map{|n|n.bindEnv env}
 
       if nodes.size==1 && (xt=nodes[0].ext) && (fmt=RDF::Format.file_extensions[xt.to_sym]) && fmt[0].content_type.member?(selectFormat) # one node in preferred format
-        nodes[0].fileResponse # nothing to merge/transform, static-node hit
+        nodes[0].fileResponse # nothing to merge/transform. static-node
       else                    # merge and/or transform
         nodes.map &:load
         indexRDF if env[:new]
