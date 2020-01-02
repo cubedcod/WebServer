@@ -504,7 +504,7 @@ class WebResource
       elsif handler = HostGET[host] # host handler
         Populator[host][self] if Populator[host] && !hostpath.R.exist?
         handler[self]
-      elsif host.match? CDNhost
+      elsif host.match? CDNhost     # CDN content-pool
         if AllowedHosts.has_key?(host) || CDNuser.has_key?(env[:referer]) || env[:query]['allow'] == ServerKey || ENV.has_key?('CDN')
           fetch                     # allow all content
         else                        # allow non-script/gunk content
@@ -518,7 +518,7 @@ class WebResource
         deny
       else
         env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
-        fetch                       # remote resource
+        fetch                       # generic remote
       end
     end
 
