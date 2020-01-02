@@ -403,7 +403,15 @@ class WebResource
             if format == 'text/html' && host != 'www.youtube.com'         # upstream HTML
               doc = Nokogiri::HTML.parse body                             # parse body
               doc.css("[class*='cookie'], [id*='cookie']").map &:remove   # clean up doc
-              doc.css(Webize::HTML::ScriptSel).map{|s|s.remove if s.inner_text.match? Webize::HTML::ScriptGunk}
+              doc.css(Webize::HTML::ScriptSel).map{|s|
+                if s.inner_text.match?(Gunk) || (s['src'] && s['src'].match?(Gunk))
+                  if s['src']
+                    puts "-script #{s['src']}"
+                  else
+                    puts ["-script (inline, #{s.inner_text.size} chars) ", s.inner_text.gsub("\n","")[0..127]].join
+                  end
+                  s.remove
+                end}
               body = doc.to_html                                          # serialize body
             end
             env[:resp]['Content-Length'] = body.bytesize.to_s             # update size
@@ -546,7 +554,7 @@ class WebResource
 
     def gunkURI
       return false if env && env[:query]['allow'] == ServerKey
-      ('/' + hostname + (env && env['REQUEST_URI'] || path || '/')).match? GunkURI
+      ('/' + hostname + (env && env['REQUEST_URI'] || path || '/')).match? Gunk
     end
 
     def HEAD
