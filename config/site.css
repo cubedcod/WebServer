@@ -20,14 +20,14 @@
 .post {border-radius: .28em; max-width: 88ex}
 .quote {background-color: #ccc; color: #000}
 .site {background: repeating-linear-gradient(45deg, #000, #000 4em, #fff 4em, #fff 8em); border: 1px solid white; border-radius: .3em; color: #aaa}
-.thumb, svg {display: inline-block; max-width: 28em}
+.thumb, svg, img[src*="svg"] {display: inline-block; max-width: 22em}
 .title {background-color: #fff; color: #000; font-size: 1.08em; font-weight: bold; vertical-align: top; border-width: 0 0 0 .4em; border-color: #fff; border-style: solid; border-radius: .18em }
 .title:visited {border-color: #0f0}
 .toolbox a.icon {font-size: 1.6em}
 .toolbox a.icon, .breadcrumb {text-shadow: 1px 1px #000000}
 .toolbox a:target {text-shadow: 0px 0px #000000}
 .toolbox svg {height: 1em; width: 1em}
-.toolbox { position: fixed; top: 0; width: 100%; z-index: 2 }
+.toolbox { display: inline-block; position: fixed; top: 0; z-index: 2 }
 .tree {border-color: #222; border-width: 1px 0 0 1px; border-style: solid; background-color: #111; color: #aaa; border-radius: .28em; display: inline-block; max-width: 100%; margin: 0; padding: 0; vertical-align: top}
 :target {background-color: #0f0 !important; color: #000 !important}
 a {text-decoration: none; border-radius: .14em}
