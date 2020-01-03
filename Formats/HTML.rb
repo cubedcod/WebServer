@@ -5,18 +5,18 @@ module Webize
     def self.clean body, base
       html = Nokogiri::HTML.fragment body
 
-      # strip elements
-      html.css('iframe, style, ' + ScriptSel).remove
-      %w{clickability counter.ru quantserve scorecardresearch}.map{|co|
-        html.css('img[src*="' + co + '"]').map{|img| img.remove }}
+      # strip embeds, stylesheets, scripts, and tracking images
+      html.css('iframe, style, link[rel="stylesheet"], ' + ScriptSel).remove
+      %w{clickability counter.ru quantserve scorecardresearch}.map{|t| # TODO apply gunk_hosts list
+        html.css('img[src*="' + t + '"]').map &:remove}
 
-      # tag site/nav elements
+      # tag site-nav elements
       [*NavGunk, *SiteGunk[base.host]].map{|selector|
         html.css(selector).map{|node|
           base.env[:site_chrome] ||= true
           node['class'] = 'site'}}
 
-      # images
+      # image-reference normalize
       # CSS:background-image → <img>
       html.css('[style*="background-image"]').map{|node|
         node['style'].match(/url\(['"]*([^\)'"]+)['"]*\)/).yield_self{|url|
@@ -27,8 +27,8 @@ module Webize
       html.css("div[class*='image'][data-src]").map{|div|
         div.add_child "<img src=\"#{div['data-src']}\">"}
 
-      html.traverse{|e| # visit nodes
-        e.attribute_nodes.map{|a| # visit attributes
+      html.traverse{|e| # each node
+        e.attribute_nodes.map{|a| # each attribute
           e.set_attribute 'src', a.value if SRCnotSRC.member? a.name          # @src map
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name # @srcset
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) ||
