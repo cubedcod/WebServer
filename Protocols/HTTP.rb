@@ -374,7 +374,7 @@ class WebResource
     end
 
     def fetchHTTP options={}
-      open(uri, headers.merge({redirect: false})) do |response| print '🌍🌎🌏🌐'[rand 4]
+      URI.open(uri, headers.merge({redirect: false})) do |response| print '🌍🌎🌏🌐'[rand 4]
         h = response.meta                                                 # upstream metadata
         if response.status.to_s.match? /206/                              # partial response
           h['Access-Control-Allow-Origin'] = allowedOrigin unless h['Access-Control-Allow-Origin'] || h['access-control-allow-origin']
@@ -481,44 +481,42 @@ class WebResource
     alias_method :get, :fetch
 
     def GETresource
-      if local?                     # local resource:
+      if local?
         if %w{y year m month d day h hour}.member? parts[0]
-          dateDir                   # time-segment
-        elsif path == '/mail'       # inbox redirect
+          dateDir                   # timeline-segment redirection
+        elsif path == '/mail'       # inbox to timeline-glob redirection
           [302, {'Location' => '/d/*/msg*?sort=date&view=table'}, []]
-        elsif parts[0] == 'msg'     # (message -> path) map
+        elsif parts[0] == 'msg'     # Message-ID <> URI map
           id = parts[1]
-          id ? MID2PATH[URI.unescape id].R(env).nodeRequest : [301, {'Location' => '/mail'}, []]
+          id ? MID2PATH[URI.unescape id].R(env).nodeRequest : notfound
         elsif node.file?
-          fileResponse              # static data
-        else                        # transformable data
-          localGraph
-        end                         # remote resource:
+          fileResponse              # local static data
+        else
+          localGraph                # local transformable/graph data
+        end
       elsif path.match? /^.gen(erate)?_?204$/ # connectivity check
         R204
-      elsif path.match? HourDir     # cache timeslice
+      elsif path.match? HourDir     # timeline segment
         name = '*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*'
         timeMeta
         env[:links][:time] = 'http://localhost:8000' + path + '*.ttl?view=table' if env['REMOTE_ADDR'] == '127.0.0.1'
         (path + name).R(env).nodeRequest
-      elsif handler = HostGET[host] # host handler
+      elsif handler = HostGET[host] # host lambda
         Populator[host][self] if Populator[host] && !hostpath.R.exist?
         handler[self]
       elsif host.match? CDNhost     # CDN content-pool
-        if AllowedHosts.has_key?(host) || CDNuser.has_key?(env[:referer]) || env[:query]['allow'] == ServerKey || ENV.has_key?('CDN')
-          fetch                     # allow all content
-        else                        # allow non-script/gunk content
-          if (CacheExt - %w(html js)).member?(ext.downcase) && !path.match?(Gunk)
-            fetch
-          else
-            deny                    # blocked content
-          end
+        if AllowedHosts.has_key?(host) ||
+           CDNuser.has_key?(env[:referer]) ||
+           ((CacheExt - %w(html js)).member?(ext.downcase) && !path.match?(Gunk))
+          fetch                     # allowed CDN content
+        else
+          deny                      # blocked CDN content
         end
-      elsif gunkHost || gunkURI     # blocked gunk
+      elsif gunk?                   # blocked content
         deny
       else
         env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
-        fetch                       # generic remote
+        fetch                       # generic remote resource
       end
     end
 
@@ -539,8 +537,13 @@ class WebResource
         end}
     end
 
+    def gunk?
+      return false if env[:query]['allow'] == ServerKey
+      gunkHost || gunkURI
+    end
+
     def gunkHost
-      return false if env[:query]['allow'] == ServerKey || AllowedHosts.has_key?(host)
+      return false if AllowedHosts.has_key? host
       env.has_key? 'HTTP_GUNK'
     end
 
