@@ -3,6 +3,7 @@
 #next {right: 0}
 #prev {left: 0}
 #prev, #next {position: fixed; height: 100%; font-size: 1.9em; color: #eee}
+#prev:hover, #next:hover {background-color: #333}
 #showMain {background: repeating-linear-gradient(135deg, #000, #000 .4em, #fff .4em, #fff .8em); height: 1.2em; width: 1.2em; display: inline-block; border: 1px solid white}
 .avatar {max-height: 2em; background-color: #000}
 .breadcrumb {border-width: 0 0 0 .08em; border-color: #444; border-style: solid; border-radius: 0; color: #ddd}

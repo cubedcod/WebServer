@@ -10,6 +10,8 @@ LDN / notifications / inter-host message-passing
 send mail from browser
 custom slugs for timeline URI - IG user, reddit/mail post author
 more elegant blank-node handling for Dokieli RDFa
+port ruby view-code to RDFa templates
+collect feed URLs in container
 POST logging / rdfication (index in sent folder)
 highlight new posts in view after fetch/index
 mbox parser 
