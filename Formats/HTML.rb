@@ -204,6 +204,33 @@ end
 
 class WebResource
   module HTML
+    include URIs
+
+    # single-character representation of URI
+    Icons = {
+      'https://twitter.com' => '🐦',
+      Abstract => '✍',
+      Audio => '🔊',
+      Content => '✏',
+      Creator => '👤',
+      DC + 'hasFormat' => '≈',
+      DC + 'identifier' => '☸',
+      Date => '⌚',
+      Image => '🖼',
+      LDP + 'contains' => '📁',
+      Link => '☛',
+      SIOC + 'attachment' => '✉',
+      SIOC + 'generator' => '⚙',
+      SIOC + 'reply_of' => '↩',
+      Schema + 'height' => '↕',
+      Schema + 'width' => '↔',
+      Stat + 'File' => '📄',
+      To => '☇',
+      Type => '📕',
+      Video => '🎞',
+    }
+
+    Markup = {} # markup-generator lambdas
 
     def chrono_sort
       env[:query]['sort'] ||= 'date'
@@ -463,25 +490,25 @@ class WebResource
 
     Markup['uri'] = -> uri, env=nil {uri.R}
 
-    Markup[Type] = -> t, env=nil {
-      if t.class == WebResource
-        {_: :a, href: t.uri, c: Icons[t.uri] || t.fragment || t.basename}.update(Icons[t.uri] ? {class: :icon} : {})
-      else
-        CGI.escapeHTML t.to_s
-      end}
+    Markup[Audio] = -> audio, env {
+      src = (if audio.class == WebResource
+             audio
+            elsif audio.class == String && audio.match?(/^http/)
+              audio
+            else
+              audio['https://schema.org/url'] || audio[Schema+'contentURL'] || audio[Schema+'url'] || audio[Link] || audio['uri']
+             end).to_s
+       {class: :audio,
+           c: [{_: :audio, src: src, controls: :true}, '<br>',
+               {_: :a, href: src, c: src.R.basename}]}
+    }
 
-    Markup[Date] = -> date, env=nil {{_: :a, class: :date, c: date, href: '/' + date[0..13].gsub(/[-T:]/,'/')}}
-
-    Markup[Link] = -> ref, env=nil {
-      u = ref.to_s
-      [{_: :a,
-        c: u.sub(/^https?.../,'')[0..79],
-        href: u,
-        id: 'l' + Digest::SHA2.hexdigest(rand.to_s),
-        style: env[:colors][u.R.host] ||= HTML.colorize,
-        title: u,
-       },
-       " \n"]}
+    Markup[LDP+'Container'] = -> dir , env {
+      uri = dir.delete 'uri'
+      [Type, Title, W3+'ns/posix/stat#mtime', W3+'ns/posix/stat#size'].map{|p|dir.delete p}
+      {class: :container,
+       c: [{_: :a, id: 'container' + Digest::SHA2.hexdigest(rand.to_s), class: :title, href: uri, type: :node, c: uri.R.basename},
+           {class: :body, c: HTML.keyval(dir, env)}]}}
 
     Markup[Creator] = Markup[To] = -> c, env {
       if c.class == Hash || c.respond_to?(:uri)
@@ -501,6 +528,26 @@ class WebResource
       else
         CGI.escapeHTML (c||'')
       end}
+
+    Markup[Date] = -> date, env=nil {{_: :a, class: :date, c: date, href: '/' + date[0..13].gsub(/[-T:]/,'/')}}
+
+    Markup[Link] = -> ref, env=nil {
+      u = ref.to_s
+      [{_: :a,
+        c: u.sub(/^https?.../,'')[0..79],
+        href: u,
+        id: 'l' + Digest::SHA2.hexdigest(rand.to_s),
+        style: env[:colors][u.R.host] ||= HTML.colorize,
+        title: u,
+       },
+       " \n"]}
+
+    Markup[List] = -> list, env {
+      {class: :list,
+       c: tabular((list[Schema+'itemListElement']||list[Schema+'ListItem']||
+                   list['https://schema.org/itemListElement']||[]).map{|l|
+                    l.respond_to?(:uri) && env[:graph][l.uri] || (l.class == WebResource ? {'uri' => l.uri,
+                                                                                             Title => [l.uri]} : l)}, env)}}
 
     Markup[Post] = -> post, env {
       post.delete Type
@@ -540,30 +587,55 @@ class WebResource
                      class: :to}, "\n"]}}, "\n",
            content, (["<br>\n", HTML.keyval(post,env)] unless post.keys.size < 1)]}}
 
-    Markup[List] = -> list, env {
-      {class: :list,
-       c: tabular((list[Schema+'itemListElement']||list[Schema+'ListItem']||
-                   list['https://schema.org/itemListElement']||[]).map{|l|
-                    l.respond_to?(:uri) && env[:graph][l.uri] || (l.class == WebResource ? {'uri' => l.uri,
-                                                                                             Title => [l.uri]} : l)}, env)}}
-
-    Markup[Title] = -> title, env {
-      if title.class == String
-        {_: :h3, class: :title, c: CGI.escapeHTML(title)}
-      end}
-
-    Markup[LDP+'Container'] = -> dir , env {
-      uri = dir.delete 'uri'
-      [Type, Title, W3+'ns/posix/stat#mtime', W3+'ns/posix/stat#size'].map{|p|dir.delete p}
-      {class: :container,
-       c: [{_: :a, id: 'container' + Digest::SHA2.hexdigest(rand.to_s), class: :title, href: uri, type: :node, c: uri.R.basename},
-           {class: :body, c: HTML.keyval(dir, env)}]}}
-
     Markup[Stat+'File'] = -> file, env {
       [({class: :file,
          c: [{_: :a, href: file['uri'], class: :icon, c: Icons[Stat+'File']},
              {_: :span, class: :name, c: file['uri'].R.basename}]} if file['uri']),
        (HTML.keyval file, env)]}
 
+    Markup[Title] = -> title, env {
+      if title.class == String
+        {_: :h3, class: :title, c: CGI.escapeHTML(title)}
+      end}
+
+    Markup[Type] = -> t, env=nil {
+      if t.class == WebResource
+        {_: :a, href: t.uri, c: Icons[t.uri] || t.fragment || t.basename}.update(Icons[t.uri] ? {class: :icon} : {})
+      else
+        CGI.escapeHTML t.to_s
+      end}
+
+    Markup[Video] = -> video, env {
+      src = if video.class == WebResource || (video.class == String && video.match?(/^http/))
+              video
+            else
+              video['https://schema.org/url'] || video[Schema+'contentURL'] || video[Schema+'url'] || video[Link] || video['uri']
+            end
+      if src.class == Array
+        puts "multiple video-src found:", src if src.size > 1
+        src = src[0]
+      end
+      src = src.to_s
+      if src.match /v.redd.it/
+        src += '/DASHPlaylist.mpd'
+        dash = true
+      end
+      v = src.R
+      if env[:images][src]
+       # duplicate
+      else
+        env[:images][src] = true
+        if src.match /youtu/
+          id = (HTTP.parseQs v.query)['v'] || v.parts[-1]
+          {_: :iframe, width: 560, height: 315, src: "https://www.youtube.com/embed/#{id}", frameborder: 0, gesture: "media", allow: "encrypted-media", allowfullscreen: :true}
+        else
+          [dash ? '<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>' : nil,
+           {class: :video,
+           c: [{_: :video, src: src, controls: :true}.update(dash ? {'data-dashjs-player' => 1} : {}), '<br>',
+               {_: :a, href: src, c: v.basename}]}]
+        end
+      end}
   end
+
+  include HTML
 end

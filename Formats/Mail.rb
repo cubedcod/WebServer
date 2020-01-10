@@ -19,7 +19,7 @@ module Webize
     class Reader < RDF::Reader
       include WebResource::URIs
       format Format
-      MailDir = (Pathname.new ENV['HOME'] + '/.mail').relative_path_from(PWD).to_s
+      MailDir = (Pathname.new ENV['HOME'] + '/.mail').relative_path_from(Pathname.new Dir.pwd).to_s
 
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri]

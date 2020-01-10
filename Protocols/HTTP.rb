@@ -496,7 +496,7 @@ class WebResource
         end
       elsif path.match? /^.gen(erate)?_?204$/ # connectivity check
         R204
-      elsif path.match? HourDir     # timeline segment
+      elsif path.match? /^\/\d\d\d\d\/\d\d\/\d\d\/\d\d\/$/ # hour-dir pagination of cached remote
         name = '*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*'
         timeMeta
         env[:links][:time] = 'http://localhost:8000' + path + '*.ttl?view=table' if env['REMOTE_ADDR'] == '127.0.0.1'
@@ -598,7 +598,7 @@ class WebResource
       HTTP.print_header head if ENV.has_key? 'VERBOSE'
       head
     end
-
+    
     def self.Insecure host
       HTTPHosts[host] = true
     end
@@ -612,7 +612,25 @@ class WebResource
       graph = env[:repository] ||= RDF::Repository.new
       if node.file?
         options = {base_uri: base}
-        options[:format]  ||= formatHint
+        options[:format] ||= if basename.index('msg.')==0 || path.index('/sent/cur')==0
+                               # procmail doesnt allow suffix (like .eml extension), only prefix?
+                               # presumably this is due to maildir suffix-rewrites to denote state
+                               :mail
+                             elsif ext.match? /^html?$/
+                               :html
+                             elsif ext == 'nfo'
+                               :nfo
+                             elsif %w(Cookies).member? basename
+                               :sqlite
+                             elsif %w(changelog gophermap gophertag license makefile readme todo).member?(basename.downcase) || %w(cls gophermap old plist service socket sty textile xinetd watchr).member?(ext.downcase)
+                               :plaintext
+                             elsif %w(markdown).member? ext.downcase
+                               :markdown
+                             elsif %w(gemfile rakefile).member?(basename.downcase) || %w(gemspec).member?(ext.downcase)
+                               :sourcecode
+                             elsif %w(bash c cpp h hs pl py rb sh).member? ext.downcase
+                               :sourcecode
+                             end
         options[:file_path] = self
         env[:repository].load relPath, options
       elsif node.directory?
@@ -641,9 +659,10 @@ class WebResource
       self
     end
 
+    LocalAddress = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
     def local?
       name = hostname
-      LocalAddr.member?(name) || ENV['SERVER_NAME'] == name
+      LocalAddress.member?(name) || ENV['SERVER_NAME'] == name
     end
 
     def localGraph
@@ -660,9 +679,23 @@ class WebResource
                  find '*' + env[:query]['find'] + '*' unless env[:query]['find'].empty?
                elsif (env[:query].has_key?('Q') || env[:query].has_key?('q')) && path != '/'
                  env[:grep] = true                                     # GREP
-                 grep
+                 args = POSIX.splitArgs (env[:query]['Q'] || env[:query]['q'])
+                 case args.size
+                 when 0
+                   return []
+                 when 2 # two unordered terms
+                   cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -il #{Shellwords.escape args[1]}"
+                 when 3 # three unordered terms
+                   cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -il #{Shellwords.escape args[2]}"
+                 when 4 # four unordered terms
+                   cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -ilZ #{Shellwords.escape args[2]} | xargs -0 grep -il #{Shellwords.escape args[3]}"
+                 else # N ordered terms
+                   pattern = args.join '.*'
+                   cmd = "grep -ril -- #{Shellwords.escape pattern} #{shellPath}"
+                 end
+                 `#{cmd} | head -n 1024`.lines.map{|path| ('/' + path.chomp).R }
                else                                                    # LS
-                 [self, (join 'index.html').R]
+                 [self]
                end
               else                                                     # files:
                 if uri.match GlobChars                                 # GLOB - parametric
