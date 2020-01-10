@@ -18,7 +18,6 @@ class WebResource
     def parts; path ? path.split('/').-(['']) : [] end
     def relFrom source; node.relative_path_from source.node end
     def relPath; ['/','',nil].member?(path) ? '.' : (path[0]=='/' ? path[1..-1] : path) end
-    def self.splitArgs args; args.shellsplit rescue args.split /\W/ end
     def shellPath; Shellwords.escape relPath.force_encoding 'UTF-8' end
     def stat; node.stat end
     def write o; dir.mkdir; File.open(relPath,'w'){|f|f << o.force_encoding('UTF-8')}; self end

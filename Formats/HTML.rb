@@ -304,7 +304,7 @@ class WebResource
       graph = env[:graph]
       q = env[:query]['Q'] || env[:query]['q']
       wordIndex = {}
-      args = POSIX.splitArgs q
+      args = q.shellsplit rescue q.split(/\W/)
       args.each_with_index{|arg,i| wordIndex[arg] = i }
       pattern = /(#{args.join '|'})/i
 

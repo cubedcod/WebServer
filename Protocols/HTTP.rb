@@ -2,7 +2,6 @@
 %w(brotli cgi httparty open-uri rack).map{|_| require _}
 class WebResource
   module HTTP
-    include POSIX
     include URIs
 
     AllowedHosts = {}
@@ -679,7 +678,8 @@ class WebResource
                  find '*' + env[:query]['find'] + '*' unless env[:query]['find'].empty?
                elsif (env[:query].has_key?('Q') || env[:query].has_key?('q')) && path != '/'
                  env[:grep] = true                                     # GREP
-                 args = POSIX.splitArgs (env[:query]['Q'] || env[:query]['q'])
+                 q = env[:query]['Q'] || env[:query]['q']
+                 args = q.shellsplit rescue q.split(/\W/)
                  case args.size
                  when 0
                    return []
