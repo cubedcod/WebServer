@@ -93,6 +93,8 @@ class WebResource
       end
     end
 
+    def base; env[:base_uri] end
+
     def bindEnv e
       @env = e
       self
@@ -637,7 +639,7 @@ class WebResource
         container += '/' unless container.to_s[-1] == '/'
         graph << RDF::Statement.new(container, Type.R, (W3+'ns/ldp#Container').R)
         graph << RDF::Statement.new(container, Title.R, basename)
-        graph << RDF::Statement.new(container, Date.R, stat.mtime.iso8601)
+        graph << RDF::Statement.new(container, Date.R, node.stat.mtime.iso8601)
         node.children.map{|n|
           isDir = n.directory?
           name = n.basename.to_s + (isDir ? '/' : '')
