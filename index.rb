@@ -19,5 +19,5 @@ class WebResource < RDF::URI
   alias_method :uri, :to_s
 end
 %w(RDF Audio Calendar Feed HTML Image JS Mail PDF Text Video).map{|f| require_relative 'Formats/' + f } # Formats
-%w(HTTP POSIX).map{|p| require_relative 'Protocols/' + p }                                              # Protocols
+%w(POSIX HTTP).map{|p| require_relative 'Protocols/' + p }                                              # Protocols
 %w(gunk meta site).map{|config| require_relative 'config/' + config }                                   # Config

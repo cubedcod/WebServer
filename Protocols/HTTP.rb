@@ -7,6 +7,7 @@ class WebResource
     AllowedHosts = {}
     CDNuser = {}
     CookieHosts = {}
+    GlobChars = /[\*\{\[]/
     HostGET = {}
     HostPOST = {}
     HTTPHosts = {}
