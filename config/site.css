@@ -33,7 +33,7 @@
 :target {background-color: #0f0 !important; color: #000 !important}
 a {text-decoration: none; border-radius: .14em}
 a.date {float: right; white-space: nowrap; color: #888; font-size: .8em; border-color: #222}
-a.id {float: right; color: #333; border-color: #222}
+a.id {float: right}
 a.idlink {color: #000; background-color: #aaa; font-size: .72em; display: inline-block; vertical-align: bottom; border-radius: .28em .28em 0 0}
 a.uri > span.uri {font-size: 0.8em; color: #111; font-weight: normal}
 a.uri {background-color: #c8c8c8; border-radius: .28em; color: #000; display: inline-block; border-style: solid; border-color: #eee; border-width: 0 0 0 .3em; max-width: 42ex; overflow: hidden; margin: .1em; font-weight: bold}

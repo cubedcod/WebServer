@@ -32,7 +32,7 @@ class WebResource
     GotoBasename = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
     GotoU   = -> r {[301, {'Location' =>  r.env[:query]['u']}, []]}
     GotoURL = -> r {[301, {'Location' => (r.env[:query]['url']||r.env[:query]['q'])}, []]}
-    NoGunk  = -> r {r.gunkURI ? r.deny : r.fetch}
+    NoGunk  = -> r {r.gunkURI && r.env[:query]['allow'] != ServerKey && r.deny || r.fetch}
     NoJS    = -> r {
       if r.ext == 'js'                             # request for script file
         r.deny                                     # drop request
@@ -305,7 +305,7 @@ class WebResource
       else
         body = generator ? generator.call : self # generate resource
         if body.class == WebResource             # resource reference
-          Rack::File.new(nil).serving(Rack::Request.new(env), body.relPath).yield_self{|s,h,b|
+          Rack::File.new('.').serving(Rack::Request.new(env), body.relPath).yield_self{|s,h,b|
             if 304 == s
               R304                               # unmodified resource
             else                                 # file reference
@@ -406,7 +406,7 @@ class WebResource
               doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
               doc.css(Webize::HTML::ScriptSel).map{|s|                    # clean body
                 if s['src'] && s['src'].match?(Gunk)
-                  
+                  print "\n🚫 \e[31;7;1m" + s['src'] + "\e[0m "
                   s.remove
                 end}
               body = doc.to_html                                          # serialize body

@@ -572,7 +572,7 @@ class WebResource
                [{_: :a, class: 'title', type: 'node', href: uri, c: CGI.escapeHTML(title)}.update(identified ? {} : (identified = true; {id: uri_hash})), " \n"]
              end},
            abstracts,
-           ({_: :a, id: uri_hash, class: 'id', type: :node, c: '☚', href: uri} if uri && !identified), "\n", # minimum pointer
+           ({_: :a, id: uri_hash, class: 'id', type: :node, c: '🔗', href: uri} if uri && !identified), "\n", # minimum pointer
            ([{_: :a, class: :date, id: 'date' + uri_hash, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date}, "\n"] if date && uri_hash),
            images.map{|i| Markup[Image][i,env]},
            {_: :table,

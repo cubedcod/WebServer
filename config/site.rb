@@ -82,7 +82,7 @@ s.click.aliexpress.com
       GET host}
 
     # Amazon
-    AmazonHost = -> r {%w(www.amazon.com www.imdb.com).member?(r.env[:referer]) ? NoGunk[r] : r.deny}
+    AmazonHost = -> r {(%w(www.amazon.com www.imdb.com).member?(r.env[:referer]) || r.env[:query]['allow'] == ServerKey) ? NoGunk[r] : r.deny}
     %w(amazon.com www.amazon.com).map{|host| GET host}
     GET 'images-na.ssl-images-amazon.com', AmazonHost
     GET 'm.media-amazon.com', AmazonHost
