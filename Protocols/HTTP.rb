@@ -507,7 +507,7 @@ class WebResource
         Populator[host][self] if Populator[host] && !hostpath.R.exist?
         handler[self]
       elsif host.match? CDNhost     # CDN content-pool
-        if AllowedHosts.has_key?(host) ||
+        if AllowedHosts.has_key?(host) || env[:query]['allow'] == ServerKey ||
            CDNuser.has_key?(env[:referer]) ||
            ((CacheExt - %w(html js)).member?(ext.downcase) && !path.match?(Gunk))
           fetch                     # allowed CDN content
@@ -704,7 +704,7 @@ class WebResource
                 if uri.match GlobChars                                 # GLOB - parametric
                   env[:grep] = true if env && env[:query].has_key?('q')
                   glob
-                else                                                   # GLOB - default graph-storage
+                else                                                   # GLOB - default graph
                   files =        (self + '.*').R.glob                  #  basename + extension match
                   files.empty? ? (self +  '*').R.glob : files          #  prefix match
                 end
