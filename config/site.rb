@@ -215,7 +215,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
     GET 'feeds.feedburner.com', NoQuery
 
     # Forbes
-    GET 'thumbor.forbes.com', -> r {[301, {'Location' => URI.unescape(r.parts[-1])}, []]}
+    GET 'thumbor.forbes.com', -> r {[301, {'Location' => Rack::Utils.unescape(r.parts[-1])}, []]}
 
     # Gfycat
     GET 'gfycat.com'

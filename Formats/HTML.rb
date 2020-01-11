@@ -282,9 +282,9 @@ class WebResource
                                  ({_: :a, id: :tabular, class: :icon, style: 'color: #555', c: '↨',
                                     href: HTTP.qs((env[:query]||{}).merge({'view' => 'table', 'sort' => 'date'}))} unless env[:query] && env[:query]['view']=='table'),
                                   base.dir.parts.map{|p|
-                                    [{_: :a, class: :breadcrumb, href: bc += p + '/', c: (CGI.escapeHTML URI.unescape p),
+                                    [{_: :a, class: :breadcrumb, href: bc += p + '/', c: (CGI.escapeHTML Rack::Utils.unescape p),
                                       id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
-                                  {_: :a, class: 'basename breadcrumb', href: path, c: (CGI.escapeHTML URI.unescape base.basename)},
+                                  {_: :a, class: 'basename breadcrumb', href: path, c: (CGI.escapeHTML Rack::Utils.unescape base.basename)},
                                   link[:media, '🖼️'], link[:feed, FeedIcon], link[:time, '🕒'],
                                   ([' ',{_: :a, id: :showMain, href: '#body'}] if env[:site_chrome])
                                  ]},

@@ -50,7 +50,7 @@ module Webize
         # Message resource
         id = m.message_id || m.resent_message_id || Digest::SHA2.hexdigest(rand.to_s)
         graph = MID2PATH[id].R
-        mail = ('/msg/' + URI.escape(id)).R
+        mail = ('/msg/' + Rack::Utils.escape_path(id)).R
 
         yield mail, Type, (SIOC + 'MailMessage').R, graph
 
@@ -147,7 +147,7 @@ module Webize
         %w{in_reply_to references}.map{|ref|
           m.send(ref).yield_self{|rs|
             (rs.class == Array ? rs : [rs]).compact.map{|r|
-              msg = ('/msg/' + URI.escape(r)).R
+              msg = ('/msg/' + Rack::Utils.escape_path(r)).R
               yield mail, SIOC + 'reply_of', msg, graph
               yield msg, SIOC + 'has_reply', mail, (MID2PATH[r] + '.' + Digest::SHA2.hexdigest(id)).R
             }}}

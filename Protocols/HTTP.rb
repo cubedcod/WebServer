@@ -305,7 +305,7 @@ class WebResource
       else
         body = generator ? generator.call : self # generate resource
         if body.class == WebResource             # resource reference
-          Rack::File.new('.').serving(Rack::Request.new(env), body.relPath).yield_self{|s,h,b|
+          Rack::Files.new('.').serving(Rack::Request.new(env), body.relPath).yield_self{|s,h,b|
             if 304 == s
               R304                               # unmodified resource
             else                                 # file reference
@@ -387,7 +387,7 @@ class WebResource
           format ||= (xt = ext.to_sym; puts "WARNING no MIME for #{uri}"  # extension -> format
                       RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
           reader = RDF::Reader.for content_type: format                   # select reader
-          reader.new(body, {base_uri: base, noRDF: options[:noRDF]}){|_|  # instantiate reader
+          reader.new(body, base_uri: base, noRDF: options[:noRDF]){|_|  # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader   # parse RDF
           storage = fsPath                                                # storage location
           storage += 'index' if path[-1] == '/'                           #  index file
@@ -493,7 +493,7 @@ class WebResource
           [302, {'Location' => '/d/*/msg*?sort=date&view=table'}, []]
         elsif parts[0] == 'msg'     # Message-ID <> URI map
           id = parts[1]
-          id ? MID2PATH[URI.unescape id].R(env).nodeRequest : notfound
+          id ? MID2PATH[Rack::Utils.unescape_path id].R(env).nodeRequest : notfound
         elsif node.file?
           fileResponse              # local static data
         else
