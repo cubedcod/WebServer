@@ -1,5 +1,8 @@
 # coding: utf-8
-class WebResource
+require 'linkeddata'
+
+class WebResource < RDF::URI
+  def R env_=nil; env_ ? env(env_) : self end
 
   module URIs
     # URI constants
@@ -34,8 +37,9 @@ class WebResource
     Podcast  = 'http://www.itunes.com/dtds/podcast-1.0.dtd#'
     RSS      = 'http://purl.org/rss/1.0/'
     Schema   = 'http://schema.org/'
-
   end
+
+  alias_method :uri, :to_s
 
   def indexRDF
     return self unless env[:repository]
@@ -77,4 +81,16 @@ class WebResource
 
   include URIs
 
+end
+
+class RDF::URI
+  def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
+end
+
+class RDF::Node
+  def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
+end
+
+class String
+  def R env=nil; env ? WebResource.new(self).env(env) : WebResource.new(self) end
 end

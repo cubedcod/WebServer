@@ -1,5 +1,5 @@
 # coding: utf-8
-%w(brotli cgi httparty open-uri rack).map{|_| require _}
+%w(brotli cgi digest/sha2 httparty open-uri rack).map{|_| require _}
 class WebResource
   module HTTP
     include URIs

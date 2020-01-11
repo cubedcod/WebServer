@@ -1,3 +1,4 @@
+%w(fileutils pathname shellwords).map{|d| require d }
 class WebResource
   module POSIX
     def basename; File.basename( path || '/' ) end                      # BASENAME(1)
