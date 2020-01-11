@@ -405,7 +405,10 @@ class WebResource
               doc = Nokogiri::HTML.parse body                             # parse body
               doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
               doc.css(Webize::HTML::ScriptSel).map{|s|                    # clean body
-                s.remove if s.inner_text.match?(Gunk) || (s['src'] && s['src'].match?(Gunk))}
+                if s['src'] && s['src'].match?(Gunk)
+                  
+                  s.remove
+                end}
               body = doc.to_html                                          # serialize body
             end
             env[:resp]['Content-Length'] = body.bytesize.to_s             # size
@@ -675,12 +678,14 @@ class WebResource
 
     def nodeRequest
       nodes = (if node.directory?                                      # directory:
-               if env[:query].has_key?('f') && path != '/'             # FIND
-                 find env[:query]['f'] unless env[:query]['f'].empty? #  pedantic
-               elsif env[:query].has_key?('find') && path != '/'       #  easy mode
-                 find '*' + env[:query]['find'] + '*' unless env[:query]['find'].empty?
+               if env[:query].has_key? 'f'       # FIND full case-insensitive match
+                 q = env[:query]['f']
+                 `find #{shellPath} -iname #{Shellwords.escape q}`.lines.map{|p|('/' + p.chomp).R} unless env[:query]['f'].empty? || path == '/'
+               elsif env[:query].has_key? 'find' # FIND substring match
+                 q = '*' + env[:query]['find'] + '*'
+                 `find #{shellPath} -iname #{Shellwords.escape q}`.lines.map{|p|('/' + p.chomp).R} unless env[:query]['find'].empty? || path == '/'
                elsif (env[:query].has_key?('Q') || env[:query].has_key?('q')) && path != '/'
-                 env[:grep] = true                                     # GREP
+                 env[:grep] = true               # GREP
                  q = env[:query]['Q'] || env[:query]['q']
                  args = q.shellsplit rescue q.split(/\W/)
                  case args.size
