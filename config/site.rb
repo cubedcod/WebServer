@@ -36,7 +36,7 @@ end
 class WebResource
   module URIs
     CacheExt = %w(css geojson gif html ico jpeg jpg js json m3u8 m4a md mp3 mp4 opus pdf png svg ts webm webp xml) # cached filetypes
-    SiteDir  = (Pathname.new __dir__).relative_path_from Pathname.new Dir.pwd
+    SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
     FeedIcon = SiteDir.join('feed.svg').read
     SiteFont = SiteDir.join('fonts/hack-regular-subset.woff2').read
     SiteGIF = SiteDir.join('site.gif').read
@@ -50,6 +50,10 @@ class WebResource
     CookieHost = /\.(bandcamp|ttvnw)\.(com|net)$/
     DynamicImgHost = /(noaa|weather)\.gov$/
     POSThost = /^video.*.ttvnw.net$/
+    GunkHosts = {}
+    SiteDir.join('gunk_hosts').each_line{|l|
+      cursor = GunkHosts
+      l.chomp.sub(/^\./,'').split('.').reverse.map{|name|cursor = cursor[name] ||= {}}}
 
     Resizer = -> r {
       if r.parts[0] == 'resizer'
