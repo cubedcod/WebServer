@@ -544,18 +544,18 @@ class WebResource
 
     def gunk?
       return false if env[:query]['allow'] == ServerKey
-      gunkHost || gunkURI
+      gunkDomainUpstream || gunkURI
     end
 
     def gunkDomain
       return false unless host
-      return false if AllowedHosts.has_key? host
+      return false if AllowedHosts.has_key?(host) || HostGET.has_key?(host)
       c = GunkHosts
       host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?}
     end
 
-    # same as above but tagged by frontend
-    def gunkHost
+    # tagged by frontend
+    def gunkDomainUpstream
       return false if AllowedHosts.has_key? host
       env.has_key? 'HTTP_GUNK'
     end
