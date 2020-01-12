@@ -1,6 +1,8 @@
 module Webize
   module HTML
 
+    GunkScript = /_0x[0-9a-f]|google.?(a[dn]|tag)|\.(bing|chartbeat|cloudfront|disqus|doubleclick|evidon|facebook|hotjar|krxd|licdn|linkedin|marketo|newrelic|newsmaxfeednetwork|quantserve|revcontent|scorecardresearch|sophi|sumo|tiqcdn|twitter|yimg|zergnet|zopim|zqtk)\./i
+
     NavGunk = %w{
 footer nav sidebar
 [class*='cookie']
@@ -49,7 +51,7 @@ end
 class WebResource
   module URIs
     Gunk= %r([-.:_\/?&=~'"%\s]
-((block|load|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|frame|id|obetm.*|rotat[eo]r?|slots?|tech|tools?|types?|units?|words?|zones?)?|akismet|alerts?|.*analytics?.*|appnexus|audience|(app|smart)?
+((block|load|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|frame|id|obe|rotat[eo]r?|slots?|tech|tools?|types?|units?|words?|zones?)?|akismet|alerts?|.*analytics?.*|appnexus|audience|(app|smart)?
 b(anner|eacon|lueconic|ouncee?x.*|reakingnew)s?|.*bid(d(er|ing)|s).*|
 c(ampaigns?|edexis|hartbeat.*|loudfront|mp|ollector|omscore|on(sent|version)|ookie(c(hoice|onsent)|law|notice)?s?|riteo|se)|
 de(als|t(ect|roitchicago))|.*dfp.*|dis(neyid|qus)|doubleclick|

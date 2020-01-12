@@ -59,7 +59,7 @@ module Webize
         if s['src'] && (s['src'].match?(WebResource::URIs::Gunk) || s['src'].R.gunkDomain)
           print "\n🚫 \e[31;7;1m" + s['src'] + "\e[0m "
           s.remove # script links
-        elsif s.inner_text.match? /_0x[0-9a-f]|google.?(a[dn]|tag)|\.(bing|chartbeat|cloudfront|doubleclick|evidon|facebook|hotjar|krxd|licdn|marketo|newrelic|quantserve|revcontent|scorecardresearch|sophi|sumo|tiqcdn|twitter|yimg|zergnet|zopim|zqtk)\./i
+        elsif s.inner_text.match? GunkScript
           print "\n🚫 #{s.inner_text.size} \e[31;1m" + s.inner_text.gsub(/[\n\t]+/,'').gsub(/\s\s+/,' ')[0..200] + "\e[0m "
           s.remove # inline scripts
         end}
