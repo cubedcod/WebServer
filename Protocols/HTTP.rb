@@ -405,9 +405,9 @@ class WebResource
               doc = Nokogiri::HTML.parse body                             # parse body
               doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
               doc.css(Webize::HTML::ScriptSel).map{|s|                    # clean body
-                if s['src'] && s['src'].match?(Gunk)
-                  print "\n🚫 \e[31;7;1m" + s['src'] + "\e[0m "
-                  s.remove
+                if s['src'] && (s['src'].match?(Gunk) || s['src'].R.gunkDomain)
+                    print "\n🚫 \e[31;7;1m" + s['src'] + "\e[0m "
+                    s.remove
                 end}
               body = doc.to_html                                          # serialize body
             end
@@ -547,6 +547,14 @@ class WebResource
       gunkHost || gunkURI
     end
 
+    def gunkDomain
+      return false unless host
+      return false if AllowedHosts.has_key? host
+      c = GunkHosts
+      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?}
+    end
+
+    # same as above but tagged by frontend
     def gunkHost
       return false if AllowedHosts.has_key? host
       env.has_key? 'HTTP_GUNK'
