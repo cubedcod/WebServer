@@ -56,12 +56,12 @@ module Webize
       doc = Nokogiri::HTML.parse body          # parse body
       doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
       doc.css(Webize::HTML::ScriptSel).map{|s| # clean body
-        if s['src'] && (s['src'].match?(WebResource::URIs::Gunk) || s['src'].R.gunkDomain) # script links
+        if s['src'] && (s['src'].match?(WebResource::URIs::Gunk) || s['src'].R.gunkDomain)
           print "\n🚫 \e[31;7;1m" + s['src'] + "\e[0m "
-          s.remove
-        elsif s.inner_text.match? /_0x[0-9a-f]|google.?(a[dn]|tag)|\.licdn\./i             # script elements
+          s.remove # script links
+        elsif s.inner_text.match? /_0x[0-9a-f]|google.?(a[dn]|tag)|\.(krxd|licdn|revcontent|sophi)\./i
           print "\n🚫 #{s.inner_text.size} \e[31;1m" + s.inner_text.gsub(/[\n\t]+/,'').gsub(/\s\s+/,' ')[0..200] + "\e[0m "
-          s.remove
+          s.remove # inline scripts
         end}
       doc.to_html                              # write body
     end

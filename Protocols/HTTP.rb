@@ -386,8 +386,9 @@ class WebResource
           format = h['content-type'].split(/;/)[0] if h['content-type']   # HTTP header -> format
           format ||= (xt = ext.to_sym; puts "WARNING no MIME for #{uri}"  # extension -> format
                       RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
+          body = Webize::HTML.strip_gunk body if format == 'text/html'    # clean upstream HTML
           reader = RDF::Reader.for content_type: format                   # select reader
-          reader.new(body, base_uri: base, noRDF: options[:noRDF]){|_|  # instantiate reader
+          reader.new(body, base_uri: base, noRDF: options[:noRDF]){|_|    # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader   # parse RDF
           storage = fsPath                                                # storage location
           storage += 'index' if path[-1] == '/'                           #  index file
@@ -401,7 +402,6 @@ class WebResource
           env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin     # CORS header
           env[:resp]['Set-Cookie'] = h['set-cookie'] if h['set-cookie'] && allowCookies?
           if fixedFormat? format                                          # upstream doc
-            body = Webize::HTML.strip_gunk body if format == 'text/html'  # clean upstream HTML
             env[:resp]['Content-Length'] = body.bytesize.to_s             # size
             [200, env[:resp], [body]]
           else
