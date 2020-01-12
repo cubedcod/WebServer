@@ -401,18 +401,9 @@ class WebResource
           env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin     # CORS header
           env[:resp]['Set-Cookie'] = h['set-cookie'] if h['set-cookie'] && allowCookies?
           if fixedFormat? format                                          # upstream doc
-            if format == 'text/html' && host != 'www.youtube.com'         # upstream HTML
-              doc = Nokogiri::HTML.parse body                             # parse body
-              doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
-              doc.css(Webize::HTML::ScriptSel).map{|s|                    # clean body
-                if s['src'] && (s['src'].match?(Gunk) || s['src'].R.gunkDomain)
-                    print "\n🚫 \e[31;7;1m" + s['src'] + "\e[0m "
-                    s.remove
-                end}
-              body = doc.to_html                                          # serialize body
-            end
+            body = Webize::HTML.strip_gunk body if format == 'text/html'  # clean upstream HTML
             env[:resp]['Content-Length'] = body.bytesize.to_s             # size
-            [200, env[:resp], [body]]                                     # cleaned upstream doc
+            [200, env[:resp], [body]]
           else
             graphResponse                                                 # local doc
           end

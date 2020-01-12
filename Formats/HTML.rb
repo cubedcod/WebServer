@@ -2,6 +2,7 @@
 module Webize
   module HTML
 
+    # full reformat to local conventions
     def self.clean body, base
       html = Nokogiri::HTML.fragment body
 
@@ -49,6 +50,20 @@ module Webize
         e['src'] = base.join e['src'] if e['src'] && !e['src'].R.host} # resolve image locations
 
       html.to_xhtml(:indent => 0)
+    end
+
+    def self.strip_gunk body
+      doc = Nokogiri::HTML.parse body          # parse body
+      doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
+      doc.css(Webize::HTML::ScriptSel).map{|s| # clean body
+        if s['src'] && (s['src'].match?(WebResource::URIs::Gunk) || s['src'].R.gunkDomain) # script links
+          print "\n🚫 \e[31;7;1m" + s['src'] + "\e[0m "
+          s.remove
+        elsif s.inner_text.match? /google.?(a[dn]|tag)|\.licdn\./i                         # script elements
+          print "\n🚫 \e[31;1m" + s.inner_text.gsub(/[\n\t]+/,'').gsub(/\s\s+/,' ')[0..222] + "\e[0m "
+          s.remove
+        end}
+      doc.to_html                              # write body
     end
 
     def self.webizeValue v, &y
