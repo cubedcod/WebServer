@@ -59,8 +59,8 @@ module Webize
         if s['src'] && (s['src'].match?(WebResource::URIs::Gunk) || s['src'].R.gunkDomain) # script links
           print "\n🚫 \e[31;7;1m" + s['src'] + "\e[0m "
           s.remove
-        elsif s.inner_text.match? /google.?(a[dn]|tag)|\.licdn\./i                         # script elements
-          print "\n🚫 \e[31;1m" + s.inner_text.gsub(/[\n\t]+/,'').gsub(/\s\s+/,' ')[0..222] + "\e[0m "
+        elsif s.inner_text.match? /_0x[0-9a-f]|google.?(a[dn]|tag)|\.licdn\./i             # script elements
+          print "\n🚫 #{s.inner_text.size} \e[31;1m" + s.inner_text.gsub(/[\n\t]+/,'').gsub(/\s\s+/,' ')[0..200] + "\e[0m "
           s.remove
         end}
       doc.to_html                              # write body

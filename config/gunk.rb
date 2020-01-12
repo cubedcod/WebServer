@@ -48,7 +48,7 @@ image-src
 end
 class WebResource
   module URIs
-    Gunk= %r([-.:_\/?&=~'"\s]
+    Gunk= %r([-.:_\/?&=~'"%\s]
 ((block|load|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|frame|id|obetm.*|rotat[eo]r?|slots?|tech|tools?|types?|units?|words?|zones?)?|akismet|alerts?|.*analytics?.*|appnexus|audience|(app|smart)?
 b(anner|eacon|lueconic|ouncee?x.*|reakingnew)s?|.*bid(d(er|ing)|s).*|
 c(ampaigns?|edexis|hartbeat.*|loudfront|mp|ollector|omscore|on(sent|version)|ookie(c(hoice|onsent)|law|notice)?s?|riteo|se)|
@@ -73,7 +73,7 @@ viral|
 wp-?(ad.*|rum)|
 xiti|_0x.*|
 zerg(net)?)
-([-.:_\/?&=~'"\s]|$)|
+([-.:_\/?&=~'"%\s]|$)|
 \.(eot|gif\?|otf|ttf|woff2?))xi
   end
 end
