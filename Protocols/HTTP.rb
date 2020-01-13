@@ -45,7 +45,7 @@ class WebResource
             r.deny                                 # drop response
           elsif format.match?(/html/) && r.upstreamUI?
             doc = Nokogiri::HTML.parse b[0]        # parse HTML
-            doc.css(Webize::HTML::ScriptSel).remove# drop JS-gunk
+            doc.css(Webize::HTML::Scripts).remove# drop JS-gunk
             body = doc.to_html                     # serialize body
             h['Content-Length']=body.bytesize.to_s # update body-size
             [s, h, [body]]                         # cleaned response
