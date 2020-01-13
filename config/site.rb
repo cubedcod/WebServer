@@ -130,7 +130,8 @@ secure.brightcove.com
       Allow h}
 
     # Brightspot
-    GET 'ca-times.brightspotcdn.com', GoIfURL
+    %w(ca-times ewscripps wgbh).map{|h|
+      GET h + '.brightspotcdn.com', GoIfURL}
 
     # BusinessWire
     GET 'cts.businesswire.com', GoIfURL
@@ -591,9 +592,6 @@ firefox.settings.services.mozilla.com
 
     # WebMD
     GET 'img.webmd.com', NoJS
-
-    # WGBH
-    GET 'wgbh.brightspotcdn.com', GoIfURL
 
     # Wiley
     Cookies 'agupubs.onlinelibrary.wiley.com'

@@ -2,7 +2,7 @@
 module Webize
   module HTML
 
-    GunkScript = /_0x[0-9a-f]|google.?(a[dn]|tag)|\.(3gl|bing|bounceexchange|chartbeat|clickability|cloudfront|disqus|doubleclick|ensighten|evidon|facebook|hotjar|krxd|licdn|linkedin|marketo|newrelic|newsmaxfeednetwork|ntv|outbrain|parsely|quantserve|quora|revcontent|scorecardresearch|sophi|sumo|taboola|tinypass|tiqcdn|twitter|tynt|yieldmo|yimg|zergnet|zopim|zqtk)\./i
+    GunkScript = /_0x[0-9a-f]|google.?(a[dn]|tag)|\.(3gl|bing|bounceexchange|chartbeat|clickability|cloudfront|disqus|doubleclick|ensighten|evidon|facebook|hotjar|krxd|licdn|linkedin|marketo|moatads|newrelic|newsmaxfeednetwork|ntv|outbrain|parsely|petametrics|pressboard|quantserve|quora|revcontent|scorecardresearch|sophi|sumo|taboola|tinypass|tiqcdn|twitter|tynt|visualwebsiteoptimizer|yieldmo|yimg|zergnet|zopim|zqtk)\./i
 
     NavGunk = %w{
 footer nav sidebar
