@@ -6,10 +6,8 @@ module Webize
     def self.clean body, base
       html = Nokogiri::HTML.fragment body
 
-      # strip embeds, stylesheets, scripts, and tracking images
+      # strip iframes, stylesheets, and scripts
       html.css('iframe, style, link[rel="stylesheet"], ' + ScriptSel).remove
-      %w{clickability counter.ru quantserve scorecardresearch}.map{|t| # TODO apply gunk_hosts list
-        html.css('img[src*="' + t + '"]').map &:remove}
 
       # tag site-nav elements
       [*NavGunk, *SiteGunk[base.host]].map{|selector|
@@ -17,7 +15,7 @@ module Webize
           base.env[:site_chrome] ||= true
           node['class'] = 'site'}}
 
-      # image-reference normalize
+      # map image references
       # CSS:background-image → <img>
       html.css('[style*="background-image"]').map{|node|
         node['style'].match(/url\(['"]*([^\)'"]+)['"]*\)/).yield_self{|url|
@@ -28,13 +26,18 @@ module Webize
       html.css("div[class*='image'][data-src]").map{|div|
         div.add_child "<img src=\"#{div['data-src']}\">"}
 
-      html.traverse{|e| # each node
-        e.attribute_nodes.map{|a| # each attribute
-          e.set_attribute 'src', a.value if SRCnotSRC.member? a.name          # @src map
-          e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name # @srcset
-          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) ||
-                      %w(bgcolor height http-equiv layout ping role style tabindex target theme width).member?(a.name)} # strip attrs
+      html.traverse{|e| # visit node
+        e.attribute_nodes.map{|a| # visit attribute
 
+          # map media references
+          e.set_attribute 'src', a.value if SRCnotSRC.member? a.name
+          e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
+
+          # strip attrs
+          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) ||
+                      %w(bgcolor height http-equiv layout ping role style tabindex target theme width).member?(a.name)}
+
+        # annotate hrefs
         if e['href']
           ref = e['href'].R
           e.add_child " <span class='uri'>#{CGI.escapeHTML e['href'].sub(/^https?:..(www.)?/,'')[0..127]}</span> " # show full(er) URL
@@ -42,25 +45,26 @@ module Webize
           css = [:uri]; css.push :path if !ref.host || (ref.host == base.host)
           e['href'] = base.join e['href'] unless ref.host              # resolve relative references
           e['class'] = css.join ' '                                    # node CSS-class for styling
-        elsif e['id']                                                  # identified node w/ no target link
+        elsif e['id']                                                  # identified node w/ no href
           e.set_attribute 'class', 'identified'                        # node CSS-class for styling
-          e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id']}</span> " # id link
+          e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id']}</span> " # link to identified node
         end
 
         e['src'] = base.join e['src'] if e['src'] && !e['src'].R.host} # resolve image locations
 
-      html.to_xhtml(:indent => 0)
+      html.to_xhtml indent: 0
     end
 
+    # TODO rename this to :clean and above to :strip
     def self.strip_gunk body
       doc = Nokogiri::HTML.parse body          # parse body
-      doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
+      doc.css("iframe[src*='facebook'] link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
       doc.css(Webize::HTML::ScriptSel).map{|s| # clean body
         if s['src'] && (s['src'].match?(WebResource::URIs::Gunk) || s['src'].R.gunkDomain)
           print "\n🚫 \e[31;7;1m" + s['src'] + "\e[0m "
           s.remove # script links
         elsif s.inner_text.match? GunkScript
-          print "\n🚫 #{s.inner_text.size} \e[31;1m" + s.inner_text.gsub(/[\n\t]+/,'').gsub(/\s\s+/,' ')[0..200] + "\e[0m "
+          print "\n🚫 #{s.inner_text.size} \e[31;1m" + s.inner_text.gsub(/[\n\r\t]+/,'').gsub(/\s\s+/,' ')[0..200] + "\e[0m "
           s.remove # inline scripts
         end}
       doc.to_html                              # write body
