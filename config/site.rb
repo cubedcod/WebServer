@@ -589,6 +589,9 @@ firefox.settings.services.mozilla.com
     Allow 'api.weather.com'
     Allow 'profile.wunderground.com'
 
+    # WebMD
+    GET 'img.webmd.com', NoJS
+
     # WGBH
     GET 'wgbh.brightspotcdn.com', GoIfURL
 
