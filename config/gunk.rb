@@ -2,7 +2,7 @@
 module Webize
   module HTML
 
-    GunkScript = /_0x[0-9a-f]|google.?(a[dn]|tag)|\.(3gl|bing|bounceexchange|chartbeat|clickability|cloudfront|disqus|doubleclick|ensighten|evidon|facebook|hotjar|krxd|licdn|linkedin|marketo|moatads|newrelic|newsmaxfeednetwork|ntv|outbrain|parsely|petametrics|pressboard|quantserve|quora|revcontent|scorecardresearch|sophi|sumo|taboola|tinypass|tiqcdn|twitter|tynt|visualwebsiteoptimizer|yieldmo|yimg|zergnet|zopim|zqtk)\./i
+    GunkScript = /_0x[0-9a-f]|google.?(a[dn]|tag)|\.(3gl|bing|bounceexchange|chartbeat|clickability|cloudfront|disqus|doubleclick|ensighten|evidon|facebook|go-mpulse|hotjar|krxd|licdn|linkedin|marketo|moatads|newrelic|newsmaxfeednetwork|ntv|outbrain|parsely|petametrics|pressboard|quantserve|quora|revcontent|scorecardresearch|sophi|sumo|taboola|tinypass|tiqcdn|twitter|tynt|visualwebsiteoptimizer|yieldmo|yimg|zergnet|zopim|zqtk)\./i
 
     NavGunk = %w{
 footer nav sidebar
@@ -100,8 +100,7 @@ image-src
       html.to_xhtml indent: 0
     end
 
-    # TODO rename this to :clean and above to :strip
-    def self.strip_gunk body, verbose=true
+    def self.degunk body, verbose=true
       doc = Nokogiri::HTML.parse body          # parse body
       doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
       doc.css('iframe, img, ' + Scripts).map{|s| # clean body
