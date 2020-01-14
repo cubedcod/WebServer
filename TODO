@@ -21,3 +21,4 @@ figure out 401 errors on wildly long twitch m3u8 URLs
 fs link to RDF-contained resources outside fs-container http://universalhub.com/2019/christmas-cumbies containing http://universalhub.com/comment/761175#comment-761175
 OCR on images.. https://twitter.com/ViolenceNBoston/status/1210394863990169600
 index.ttl update on dir change http://l/2019/12/28/10/
+get encoding out of doc header  https://wenku.baidu.com/view/57436112d4d8d15abe234ed1.html <meta http-equiv="Content-Type" content="text/html; charset=gb2312"> to fix ArgumentError invalid byte sequence in UTF-8 in #strip

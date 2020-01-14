@@ -92,8 +92,8 @@ s.click.aliexpress.com
     GET 'm.media-amazon.com', AmazonHost
 
     # Apple
-    %w{amp-api.music api.music audio-ssl.itunes embed.music itunes js-cdn.music music www xp}.map{|h|
-      Allow h + '.apple.com'}
+    %w(amp-api.music api.music audio-ssl.itunes embed.music itunes js-cdn.music music www xp).map{|h|Allow h + '.apple.com'}
+    %w(store.storeimages).map{|h| GET h + '.cdn-apple.com'}
 
     # Appspot
     %w(xmountwashington).map{|h| Allow h + '.appspot.com'}
@@ -601,10 +601,7 @@ firefox.settings.services.mozilla.com
     GET 'static.wixstatic.com'
 
     # WordPress
-    %w(
-public-api.wordpress.com
-videos.files.wordpress.com
-).map{|host| GET host, Fetch}
+    %w(s0 s1 s2).map{|h| GET h + '.wp.com' }
 
     # WSJ
     %w(images m s).map{|h| GET h + '.wsj.net' }
