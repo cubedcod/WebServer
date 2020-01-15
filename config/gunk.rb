@@ -76,12 +76,13 @@ data-src
 image-src
 )
 
-    # full reformat to local conventions
+    # degunk and full reformat
     def self.clean body, base
       html = Nokogiri::HTML.fragment body
 
-      # strip iframes, stylesheets, and scripts
+      # strip iframes, stylesheets, scripts and misc gunk
       html.css('iframe, style, link[rel="stylesheet"], ' + Scripts).remove
+      degunk_doc html
 
       # tag site-nav elements
       SiteNav.map{|selector|
@@ -130,7 +131,12 @@ image-src
     end
 
     def self.degunk body, verbose=true
-      doc = Nokogiri::HTML.parse body          # parse body
+      doc = Nokogiri::HTML.parse body # parse
+      degunk_doc doc                  # degunk
+      doc.to_html                     # serialize
+    end
+
+    def self.degunk_doc doc
       doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
       doc.css('iframe, img, ' + Scripts).map{|s| # clean body
         if s['src'] && (s['src'].match?(Gunk) || s['src'].R.gunkDomain)
@@ -140,7 +146,7 @@ image-src
           print "\n🚫 #{s.inner_text.size} \e[31;1m" + s.inner_text.gsub(/[\n\r\t]+/,'').gsub(/\s\s+/,' ')[0..200] + "\e[0m " if verbose
           s.remove # inline scripts
         end}
-      doc.to_html                              # write body
     end
+
   end
 end
