@@ -12,21 +12,13 @@ class WebResource
     HostPOST = {}
     HTTPHosts = {}
     LocalArgs = %w(allow view sort UX)
+    Methods = %w(GET HEAD OPTIONS POST PUT)
     Populator = {}
     Servers = {}
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Internal_Headers = %w(base-uri connection gunk host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rdf remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software site-chrome transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forwarded-for)
 
-    # HTTP method map
-    Methods = {
-      'GET'     => :GETresource,
-      'HEAD'    => :HEAD,
-      'OPTIONS' => :OPTIONS,
-      'POST'    => :POSTresource,
-      'PUT'     => :PUT
-    }
-
-    # handler lambdas
+    # handlers
     Fetch = -> r {r.fetch}
     GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : NoGunk[r]}
     GotoBasename = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
@@ -72,7 +64,6 @@ class WebResource
         NoGunk[r]
       end}
 
-    # no-content responses
     R204 = [204, {}, []]
     R304 = [304, {}, []]
 
@@ -96,36 +87,29 @@ class WebResource
 
     def base; env[:base_uri] end
 
-    def bindEnv e
-      @env = e
-      self
-    end
-
     def cachedGraph; fsPath.nodeRequest end
 
     def self.call env
-      return [405,{},[]] unless m=Methods[env['REQUEST_METHOD']] # method-handler lookup
-      path = Pathname.new(env['REQUEST_PATH']).expand_path.to_s  # evaluate path expression
-      path+='/' if env['REQUEST_PATH'][-1]=='/' && path[-1]!='/' # preserve trailing slash
-      resource = ('//' + env['SERVER_NAME'] + path).R            # requested resource
-      env[:base_uri] = resource
+      return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']              # only handle HTTP methods
+      resource = RDF::URI('//'+env['SERVER_NAME']).join(env['REQUEST_PATH']).R env # instantiate request
+      env[:base_uri] = resource                                                 # resource URI
       env[:referer] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # referring host
-      env[:resp] = {}                                            # response headers
-      env[:links] = {}                                           # response links
-      env[:query] = parseQs(env['QUERY_STRING'])                 # parse query
-      resource.bindEnv(env).send(m).yield_self{|status, head, body| # dispatch
+      env[:resp] = {}                                                           # response HEAD storage
+      env[:links] = {}                                                          # response Link storage
+      env[:query] = parseQs(env['QUERY_STRING'])                           # parse query
+      resource.send(env['REQUEST_METHOD']).yield_self{|status, head, body| # dispatch
 
-        ext = resource.ext.downcase                              # log request
+        ext = resource.ext.downcase                                        # log request
         mime = head['Content-Type'] || ''
 
-        # highlight host on first encounter
+        # highlight host on first-visit of this server run
         unless (Servers.has_key? env['SERVER_NAME']) || resource.env[:deny]
           Servers[env['SERVER_NAME']] = true
           print "\n➕ \e[1;7;32mhttps://" + env['SERVER_NAME'] + "\e[0m "
         end
 
         if resource.env[:deny]
-          if %w(css eot otf ttf woff woff2).member?(ext) || path.match?(/204$/)
+          if %w(css eot otf ttf woff woff2).member?(ext) || resource.path.match?(/204$/)
             print "🛑"
           else
             print "\n" + (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "🛑 \e[31;1m") + (env[:referer] ? ("\e[7m" + env[:referer] + "\e[0m\e[31;1m → ") : '') + (env[:referer] == resource.host ? '' : ('http://' + resource.host)) + "\e[7m" + resource.path + "\e[0m\e[31m" + resource.qs + "\e[0m "
@@ -475,9 +459,8 @@ class WebResource
     def self.GET arg, lambda = NoGunk
       HostGET[arg] = lambda
     end
-    alias_method :get, :fetch
 
-    def GETresource
+    def GET
       if local?
         if %w{y year m month d day h hour}.member? parts[0]
           dateDir                   # timeline-segment redirection
@@ -516,6 +499,8 @@ class WebResource
         fetch                       # generic remote resource
       end
     end
+
+    alias_method :get, :fetch
 
     def graphResponse
       return notfound if !env.has_key?(:repository) || env[:repository].empty?
@@ -557,7 +542,8 @@ class WebResource
     end
 
     def HEAD
-      send(Methods['GET']).yield_self{|s,h,_| [s,h,[]] } # return-code & header
+      self.GET.yield_self{|s,h,_|
+                          [s,h,[]]} # return header
     end
 
     # headers formatted and filtered
@@ -773,7 +759,7 @@ class WebResource
       HostPOST[host] = lambda
     end
 
-    def POSTresource
+    def POST
       if handler = HostPOST[host]
         handler[self]
       elsif AllowedHosts.has_key?(host) || POSThost.match?(host)
