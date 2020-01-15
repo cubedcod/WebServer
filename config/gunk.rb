@@ -37,8 +37,7 @@ module Webize
 
     GunkScript = /_0x[0-9a-f]|google.?(a[dn]|tag)|\.(3gl|amazon.[a-z]+|bing|bounceexchange|chartbeat|clickability|cloudfront|disqus|doubleclick|ensighten|evidon|facebook|feedbackify|go-mpulse|googleapis|hotjar|krxd|licdn|linkedin|mar(feel|keto)|moatads|newrelic|newsmaxfeednetwork|npttech|ntv|outbrain|parsely|petametrics|pinimg|pressboard|quantserve|quora|revcontent|scorecardresearch|sophi|sumo|taboola|tinypass|tiqcdn|([a-z]+-)?twitter|tynt|visualwebsiteoptimizer|yieldmo|yimg|zergnet|zopim|zqtk)\./i
 
-    SiteGunk = {'www.google.com' => %w(div.logo h1 h2),
-                'www.bostonmagazine.com' => %w(a[href*='scrapertrap'])}
+    Scripts = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script"
 
     SiteNav = %w{
 footer nav sidebar
@@ -61,8 +60,6 @@ footer nav sidebar
 [id*='side']
 [id*='social']
 }
-
-    Scripts = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script"
 
     SRCnotSRC = %w(
 data-baseurl
@@ -87,7 +84,7 @@ image-src
       html.css('iframe, style, link[rel="stylesheet"], ' + Scripts).remove
 
       # tag site-nav elements
-      [*SiteNav, *SiteGunk[base.host]].map{|selector|
+      SiteNav.map{|selector|
         html.css(selector).map{|node|
           base.env[:site_chrome] ||= true
           node['class'] = 'site'}}

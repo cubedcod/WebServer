@@ -387,7 +387,7 @@ class WebResource
           format ||= (xt = ext.to_sym; puts "WARNING no MIME for #{uri}"  # extension -> format
                       RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
           static = fixedFormat? format
-          body = Webize::HTML.degunk body,static if format == 'text/html' # clean HTML
+          body = Webize::HTML.degunk body,static if format == 'text/html' && !AllowedHosts.has_key?(host) # clean HTML
           reader = RDF::Reader.for content_type: format                   # select reader
           reader.new(body, base_uri: base, noRDF: options[:noRDF]){|_|    # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader   # parse RDF
