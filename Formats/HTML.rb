@@ -172,6 +172,7 @@ class WebResource
       LDP + 'contains' => '📁',
       Link => '☛',
       SIOC + 'attachment' => '✉',
+      SIOC + 'BlogPost' => '📝',
       SIOC + 'generator' => '⚙',
       SIOC + 'reply_of' => '↩',
       Schema + 'height' => '↕',

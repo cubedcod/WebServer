@@ -637,7 +637,7 @@ class WebResource
                                :sourcecode
                              end
         options[:file_path] = self
-        env[:repository].load relPath, options
+        env[:repository].load relPath, **options
       elsif node.directory?
         container = base.join relFrom base.fsPath # container URI
         container += '/' unless container.to_s[-1] == '/'

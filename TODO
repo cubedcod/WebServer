@@ -1,14 +1,12 @@
 date from HTTP header https://therevisionist.org/bio-hacking/guide-to-deep-sleep/
-nntp
-gemini https://tildegit.org/solderpunk/AV-98 https://github.com/michael-lazar/jetforce
-gopher
-dokieli
+more protocols: nntp, gemini, gopher
+dokieli for POST authoring
 databrowser
 'first seen' hosts unified across unicorn workers
 filename too long https://pics.knifecenter.com/eyJidWNrZXQiOiAiZmlsZXMua25pZmVjZW50ZXIuY29tIiwia2V5IjogImtuaWZlY2VudGVyL25hZ2FvLWhpZ29ub2thbWkvaW1hZ2VzL0hJR08xN3QuanBnIiwiZWRpdHMiOiB7InJlc2l6ZSI6IHsid2lkdGgiOiAyMjAsImhlaWdodCI6IDIyMCwiZml0IjogImNvbnRhaW4iLCJiYWNrZ3JvdW5kIjogeyJyIjogMjU1LCJnIjogMjU1LCJiIjogMjU1LCJhbHBoYSI6IDF9fX19
 LDN / notifications / inter-host message-passing
 send mail from browser
-custom slugs for timeline URI - IG user, reddit/mail post author
+custom slugs in timeline URI
 more elegant blank-node handling for Dokieli RDFa
 port ruby view-code to RDFa templates
 collect feed URLs in container
@@ -16,7 +14,7 @@ POST logging / rdfication (index in sent folder)
 highlight new posts in view after fetch/index
 mbox parser 
 bring avatars back
-feeds
+feed fetch - JS / curl
 figure out 401 errors on wildly long twitch m3u8 URLs
 fs link to RDF-contained resources outside fs-container http://universalhub.com/2019/christmas-cumbies containing http://universalhub.com/comment/761175#comment-761175
 OCR on images.. https://twitter.com/ViolenceNBoston/status/1210394863990169600
