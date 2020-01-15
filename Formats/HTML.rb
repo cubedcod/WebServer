@@ -1,6 +1,7 @@
 # coding: utf-8
 module Webize
   module HTML
+    include WebResource::URIs
 
     def self.webizeValue v, &y
       case v.class.to_s

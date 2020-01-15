@@ -111,6 +111,9 @@ s.click.aliexpress.com
     # Bloomberg
     Cookies 'www.bloomberg.com'
 
+    # Bootstrap
+    GET 'maxcdn.bootstrapcdn.com'
+
     # Boston Globe
     GET 'bostonglobe-prod.cdn.arcpublishing.com', Resizer
     %w(bos.gl w.bos.gl).map{|short| GET short, NoQuery }
