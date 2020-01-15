@@ -699,7 +699,7 @@ class WebResource
                   files =        (self + '.*').R.glob                  #  basename + extension match
                   files.empty? ? (self +  '*').R.glob : files          #  prefix match
                 end
-               end).flatten.compact.uniq.select(&:exist?).map{|n|n.bindEnv env}
+               end).flatten.compact.uniq.map{|n|n.R env}
 
       if nodes.size==1 && (xt=nodes[0].ext) && (fmt=RDF::Format.file_extensions[xt.to_sym]) && fmt[0].content_type.member?(selectFormat) # one node in preferred format
         nodes[0].fileResponse # nothing to merge/transform. static-node
