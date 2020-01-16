@@ -173,6 +173,7 @@ secure.brightcove.com
 
     # Disqus
     GET 'c.disquscdn.com'
+    GET 'disq.us', GoIfURL
 
     # DuckDuckGo
     GET 'duckduckgo.com', -> r {
