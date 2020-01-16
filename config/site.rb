@@ -607,7 +607,7 @@ firefox.settings.services.mozilla.com
     GET 'static.wixstatic.com'
 
     # WordPress
-    %w(s0 s1 s2).map{|h| GET h + '.wp.com' }
+    %w(i0 i1 i2 s0 s1 s2).map{|h| GET h + '.wp.com' }
 
     # WSJ
     %w(images m s).map{|h| GET h + '.wsj.net' }
