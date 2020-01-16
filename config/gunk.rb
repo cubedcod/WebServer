@@ -6,7 +6,7 @@ class WebResource
 ((block|load|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|frame|id|obe|rotat[eo]r?|slots?|system|tech|tools?|types?|units?|words?|zones?)?|akismet|alerts?|.*analytics?.*|appnexus|audience|(app|smart)?
 b(anner|eacon|lueconic|ouncee?x.*)s?|.*bid(d(er|ing)|s).*|
 c(ampaigns?|edexis|hartbeat.*|loudfront|mp|ollector|omscore|on(sent|version)|ookie(c(hoice|onsent)|law|notice)?s?|riteo|se)|
-de(als|t(ect|roitchicago))|.*dfp.*|dis(neyid|qus)|doubleclick|
+de(als|t(ect|roitchicago))|.*dfp.*|disney(id)?|doubleclick|
 e(moji.*\.js|ndscreen|nsighten|proof|scenic|vidon|zoic)|
 firebase|(web)?fonts?(awesome)?|
 g(dpr|eo(ip|locat(e|ion))|igya|pt|tag|tm)|.*(
@@ -35,7 +35,7 @@ end
 module Webize
   module HTML
 
-    GunkScript = /_0x[0-9a-f]|google.?(a[dn]|tag)|\.(3gl|amazon.[a-z]+|bing|bounceexchange|chartbeat|clickability|cloudfront|doubleclick|ensighten|evidon|facebook|feedbackify|go-mpulse|googleapis|hotjar|krxd|licdn|linkedin|mar(feel|keto)|moatads|newrelic|newsmaxfeednetwork|npttech|ntv|outbrain|parsely|petametrics|pinimg|pressboard|quantserve|quora|revcontent|scorecardresearch|sophi|sumo|taboola|tinypass|tiqcdn|([a-z]+-)?twitter|tynt|visualwebsiteoptimizer|yieldmo|yimg|zergnet|zopim|zqtk)\./i
+    GunkScript = /_0x[0-9a-f]|google.?(a[dn]|tag)|\.(3gl|amazon.[a-z]+|bing|bounceexchange|chartbeat|clickability|cloudfront|doubleclick|ensighten|evidon|facebook|feedbackify|go-mpulse|googleapis|hotjar|krxd|licdn|linkedin|mar(feel|keto)|moatads|newrelic|newsmaxfeednetwork|npttech|ntv|outbrain|parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|sail-horizon|scorecardresearch|sophi|sumo|taboola|tinypass|tiqcdn|([a-z]+-)?twitter|tynt|visualwebsiteoptimizer|yieldmo|yimg|zergnet|zopim|zqtk)\./i
 
     Scripts = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script"
 

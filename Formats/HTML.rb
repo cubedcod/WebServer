@@ -423,8 +423,17 @@ class WebResource
       tree = {}
       # visit nodes
       (graph.class == Array ? graph : graph.values).map{|node|
-        re = (node['uri'] || '').R
-        # traverse
+        # node identifier
+        id = node['uri'] || ''
+        if id.class == Array
+          if id.size > 1
+            puts "multiple identifiers found:" + id.join(', ') + " . using " + id[0].to_s
+          end
+          id = id[0]
+        end
+        re = id.R
+
+        # traverse and insert
         cursor = tree
         [re.host ? re.host.split('.').reverse : nil, re.parts, re.qs, re.fragment].flatten.compact.-(Webize::Plaintext::BasicSlugs).map{|name|
           cursor = cursor[name] ||= {}}
@@ -440,6 +449,7 @@ class WebResource
         else
           cursor[:RDF] = node # new node
         end}
+
       tree }
 
     Markup['uri'] = -> uri, env=nil {uri.R}

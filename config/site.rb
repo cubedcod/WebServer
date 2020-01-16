@@ -172,6 +172,7 @@ secure.brightcove.com
     Allow 'www.di.fm'
 
     # Disqus
+    GET 'c.disquscdn.com'
 
     # DuckDuckGo
     GET 'duckduckgo.com', -> r {
