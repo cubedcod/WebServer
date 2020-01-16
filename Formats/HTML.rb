@@ -160,7 +160,6 @@ class WebResource
 
     # single-character representation of URI
     Icons = {
-      'https://twitter.com' => '🐦',
       Abstract => '✍',
       Audio => '🔊',
       Content => '✏',
@@ -171,8 +170,10 @@ class WebResource
       Image => '🖼',
       LDP + 'contains' => '📁',
       Link => '☛',
-      SIOC + 'attachment' => '✉',
       SIOC + 'BlogPost' => '📝',
+      SIOC + 'MailMessage' => '✉️',
+      SIOC + 'MicroblogPost' => '🐦',
+      SIOC + 'attachment' => '✉',
       SIOC + 'generator' => '⚙',
       SIOC + 'reply_of' => '↩',
       Schema + 'height' => '↕',
