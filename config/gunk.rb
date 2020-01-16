@@ -48,7 +48,7 @@ footer nav sidebar
 [class*='promo']
 [class*='related']
 [class*='share']
-[class*='side']
+[class*='sidebar']
 [class*='social']
 [id*='cookie']
 [id*='foot']
@@ -57,7 +57,7 @@ footer nav sidebar
 [id*='promo']
 [id*='related']
 [id*='share']
-[id*='side']
+[id*='sidebar']
 [id*='social']
 }
 
