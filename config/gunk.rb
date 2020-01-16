@@ -41,23 +41,17 @@ module Webize
 
     SiteNav = %w{
 footer nav sidebar
-[class*='cookie']
 [class*='foot']
 [class*='head']
 [class*='nav']
-[class*='promo']
 [class*='related']
 [class*='share']
-[class*='sidebar']
 [class*='social']
-[id*='cookie']
 [id*='foot']
 [id*='head']
 [id*='nav']
-[id*='promo']
 [id*='related']
 [id*='share']
-[id*='sidebar']
 [id*='social']
 }
 
