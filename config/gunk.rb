@@ -82,7 +82,7 @@ image-src
 
       # strip iframes, stylesheets, scripts and misc gunk
       html.css('iframe, style, link[rel="stylesheet"], ' + Scripts).remove
-      degunk_doc html
+      degunkDoc html
 
       # tag site-nav elements
       SiteNav.map{|selector|
@@ -132,14 +132,14 @@ image-src
 
     def self.degunk body, verbose = true
       doc = Nokogiri::HTML.parse body # parse
-      degunk_doc doc, verbose         # degunk
+      degunkDoc doc, verbose         # degunk
       doc.to_html                     # serialize
     end
 
-    def self.degunk_doc doc, verbose = true
+    def self.degunkDoc doc, verbose = true
       doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
       doc.css('iframe, img, ' + Scripts).map{|s| # clean body
-        if s['src'] && (s['src'].match?(Gunk) || s['src'].R.gunkDomain)
+        if s['src'] && (s['src'].match?(Gunk) || s['src'].R.gunkDomain?)
           print "\n🚫 \e[31;7;1m" + s['src'] + "\e[0m " if verbose
           s.remove # script links
         elsif s['type'] != 'application/ld+json' && s.inner_text.match?(GunkScript) && !s.inner_text.match?(/initial.?state/i)

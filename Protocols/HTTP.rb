@@ -521,18 +521,17 @@ class WebResource
 
     def gunk?
       return false if env[:query]['allow'] == ServerKey
-      gunkDomainUpstream || gunkURI
+      gunkTag? || gunkURI
     end
 
-    def gunkDomain
+    def gunkDomain?
       return false unless host
-      return false if AllowedHosts.has_key?(host) || HostGET.has_key?(host)
+      return false if AllowedHosts.has_key?(host) || HostGET.has_key?(host) || host.match?(CDNhost)
       c = GunkHosts
-      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?}
+      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # leaf node found in gunk-domain tree
     end
 
-    # tagged by frontend
-    def gunkDomainUpstream
+    def gunkTag?
       return false if AllowedHosts.has_key? host
       env.has_key? 'HTTP_GUNK'
     end

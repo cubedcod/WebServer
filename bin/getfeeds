@@ -1,3 +1,3 @@
 #!/bin/sh
 feeds=$(dirname $0)/../config/feeds.u
-cat $feeds | parallel -P 8 curl_ -I http:{}
+cat $feeds | parallel -P 8 curl_ -IL http:{}
