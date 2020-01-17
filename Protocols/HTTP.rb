@@ -545,7 +545,7 @@ class WebResource
                           [s,h,[]]} # return header
     end
 
-    # headers formatted and filtered
+    # headers formatted and filtered for export w/ capability check
     def headers hdrs = nil
       head = {} # header storage
 
@@ -564,24 +564,18 @@ class WebResource
         # set values
         head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless Internal_Headers.member?(key.downcase)}
 
-      # Cookie
+      # Cookies / Referer / User-Agent
       unless allowCookies?
         head.delete 'Cookie'
         head.delete 'Set-Cookie'
-
-      # Referer
         head.delete 'Referer'
       end
-      if env && env['SERVER_NAME']
-        case env['SERVER_NAME']
-        when /wsj\.com$/
-          head['Referer'] = 'http://drudgereport.com/'
-        when /youtube.com$/
-          head['Referer'] = 'https://www.youtube.com/'
-        end
-      end
-
-      # User-Agent
+      case env['SERVER_NAME']
+      when /wsj\.com$/
+        head['Referer'] = 'http://drudgereport.com/'
+      when /youtube.com$/
+        head['Referer'] = 'https://www.youtube.com/'
+      end if env['SERVER_NAME']
       head['User-Agent'] = 'curl/7.65.1' if host == 'po.st'
       head.delete 'User-Agent' if host == 't.co'
 

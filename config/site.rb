@@ -47,7 +47,7 @@ class WebResource
   module HTTP
 
     CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|github|googleapis|netdna.*|w(ord)?p(ress)?)\.(com|io|net)$/
-    CookieHost = /\.(bandcamp|ttvnw)\.(com|net)$/
+    CookieHost = /\.(akamai(hd)?|bandcamp|ttvnw)\.(com|net)$/
     DynamicImgHost = /(noaa|weather)\.gov$/
     POSThost = /^video.*.ttvnw.net$/
     GunkHosts = {}
