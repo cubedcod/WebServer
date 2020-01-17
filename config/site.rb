@@ -208,13 +208,15 @@ thumbs.ebaystatic.com).map{|host| GET host }
     %w(a a1 a2 a3 a4).map{|a| GET a + '.espncdn.com' }
 
     # Facebook
-    %w(facebook.com business.facebook.com edge-chat.facebook.com m.facebook.com static.xx.fbcdn.net www.facebook.com).map{|host| Allow host } if ENV.has_key?('FACEBOOK')
-    GET 'external.fbed1-2.fna.fbcdn.net', -> r {
-      if r.path == '/safe_image.php'
-        GotoURL[r]
-      else
-        NoGunk[r]
-      end}
+    if ENV.has_key?('FACEBOOK')
+      %w(facebook.com business.facebook.com edge-chat.facebook.com m.facebook.com static.xx.fbcdn.net www.facebook.com).map{|host| Allow host }
+      GET 'external.fbed1-2.fna.fbcdn.net', -> r {
+        if r.path == '/safe_image.php'
+          GotoURL[r]
+        else
+          NoGunk[r]
+        end}
+    end
 
     %w(l.facebook.com lm.facebook.com).map{|host| GET host, GotoU}
 
