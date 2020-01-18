@@ -222,6 +222,7 @@ class WebResource
       DC + 'identifier' => '☸',
       Date => '⌚',
       Image => '🖼',
+      LDP + 'Container' => '📁',
       LDP + 'contains' => '📁',
       Link => '☛',
       SIOC + 'BlogPost' => '📝',

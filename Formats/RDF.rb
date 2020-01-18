@@ -44,6 +44,7 @@ class WebResource < RDF::URI
     graph ||= env[:repository] ||= RDF::Repository.new
     if node.file?
       options = {base_uri: base}
+      # format-hint when name-suffix (extension) isn't enough to determine type
       options[:format] ||= if basename.index('msg.')==0 || path.index('/sent/cur')==0
                              # procmail doesnt allow suffix (like .eml extension), only prefix?
                              # presumably this is due to maildir suffix-rewrites to denote state
@@ -63,6 +64,7 @@ class WebResource < RDF::URI
                            elsif %w(bash c cpp h hs pl py rb sh).member? ext.downcase
                              :sourcecode
                            end unless ext == 'ttl'
+
       options[:file_path] = self
       graph.load relPath, **options
     elsif node.directory?
