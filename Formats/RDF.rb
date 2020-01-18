@@ -68,23 +68,24 @@ class WebResource < RDF::URI
     elsif node.directory?
       container = base.join relFrom base.fsPath # container URI
       container += '/' unless container.to_s[-1] == '/'
+
       graph << RDF::Statement.new(container, Type.R, (W3+'ns/ldp#Container').R)
       graph << RDF::Statement.new(container, Title.R, basename)
       graph << RDF::Statement.new(container, Date.R, node.stat.mtime.iso8601)
+
       node.children.map{|n|
         isDir = n.directory?
         name = n.basename.to_s + (isDir ? '/' : '')
-        unless name[0] == '.' || name == 'index.ttl'
-          item = container.join name
-          graph << RDF::Statement.new(container, (W3+'ns/ldp#contains').R, item)
-          if n.file?
-            graph << RDF::Statement.new(item, Type.R, (W3+'ns/posix/stat#File').R)
-            graph << RDF::Statement.new(item, (W3+'ns/posix/stat#size').R, n.size)
-          elsif isDir
-            graph << RDF::Statement.new(item, Type.R, (W3+'ns/ldp#Container').R)
+        unless name[0] == '.' # elide invisible nodes
+          if n.file?          # summary of contained file
+            graph.load n.R.summarized
+          elsif isDir         # listing of contained directory
+            subdir = container.join name
+            graph << RDF::Statement.new(container, (W3+'ns/ldp#contains').R, subdir)
+            graph << RDF::Statement.new(subdir, Type.R, (W3+'ns/ldp#Container').R)
+            graph << RDF::Statement.new(subdir, Title.R, name)
+            graph << RDF::Statement.new(subdir, Date.R, n.mtime.iso8601)
           end
-          graph << RDF::Statement.new(item, Title.R, name)
-          graph << RDF::Statement.new(item, Date.R, n.mtime.iso8601) rescue nil
         end
       }
     end
@@ -139,11 +140,12 @@ class WebResource < RDF::URI
 
     treeFromGraph(fullGraph).values.map{|resource|  # subject
       subject = (resource['uri'] || '').R
-      [Abstract,Creator,Date,Title,To,Type].map{|p| # predicate
+      [Abstract,Creator,Date,Image,Link,Title,To,Type,Video].map{|p| # predicate
         if o = resource[p]
           (o.class == Array ? o : [o]).map{|o|      # object
             miniGraph << RDF::Statement.new(subject, p.R, o)} # triple to summary graph
         end}}
+
     RDF::Writer.for(:turtle).open(summary){|f|f << miniGraph} # write summary graph
     summary                                                   # summary graph
   end
@@ -176,6 +178,10 @@ class WebResource < RDF::URI
 
   include URIs
 
+end
+
+class Pathname
+  def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
 end
 
 class RDF::URI

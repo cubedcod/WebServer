@@ -11,6 +11,7 @@ class WebResource
     HostGET = {}
     HostPOST = {}
     HTTPHosts = {}
+    LocalAddress = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
     LocalArgs = %w(allow view sort UX)
     Methods = %w(GET HEAD OPTIONS POST PUT)
     Populator = {}
@@ -556,8 +557,6 @@ class WebResource
       HTTPHosts.has_key? host
     end
 
-
-    LocalAddress = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
     def local?
       name = hostname
       LocalAddress.member?(name) || ENV['SERVER_NAME'] == name
