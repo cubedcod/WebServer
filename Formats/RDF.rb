@@ -42,8 +42,8 @@ class WebResource < RDF::URI
   alias_method :uri, :to_s
 
   # node -> Repository
-  def loadRDF
-    graph = env[:repository] ||= RDF::Repository.new
+  def loadRDF graph = nil
+    graph ||= env[:repository] ||= RDF::Repository.new
     if node.file?
       options = {base_uri: base}
       options[:format] ||= if basename.index('msg.')==0 || path.index('/sent/cur')==0
@@ -66,7 +66,7 @@ class WebResource < RDF::URI
                              :sourcecode
                            end
       options[:file_path] = self
-      env[:repository].load relPath, **options
+      graph.load relPath, **options
     elsif node.directory?
       container = base.join relFrom base.fsPath # container URI
       container += '/' unless container.to_s[-1] == '/'
@@ -128,25 +128,32 @@ class WebResource < RDF::URI
     self
   end
 
+  def summarize
+    full = RDF::Repository.new
+    summary = RDF::Repository.new
+    loadRDF full
+    puts full.size
+    puts summary.size
+  end
+
   # Repository -> Hash
   def treeFromGraph graph = nil
     graph ||= env[:repository]
     return {} unless graph
-    tree = {}
-    graph.each_triple{|s,p,o| s = s.to_s;  p = p.to_s
-      #unless p == 'http://www.w3.org/1999/xhtml/vocab#role' # TODO investigate RDF::Vocab verbosity
-      o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object URI or literal
-      tree[s] ||= {'uri' => s}                      # subject URI
-      tree[s][p] ||= []                             # predicate URI
-      if tree[s][p].class == Array
-        tree[s][p].push o unless tree[s][p].member? o # add to object-array
-          else
-            tree[s][p] = [tree[s][p],o] unless tree[s][p] == o # new object-array
-      end
-      #end
-    }
 
-    env[:graph] = tree if env
+    tree = {}
+
+    graph.each_triple{|s,p,o|
+      s = s.to_s               # subject URI
+      p = p.to_s               # predicate URI
+      o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object URI or literal
+      tree[s] ||= {'uri' => s} # insert subject
+      tree[s][p] ||= []        # insert predicate
+      if tree[s][p].class == Array
+        tree[s][p].push o unless tree[s][p].member? o # insert in object array
+          else
+            tree[s][p] = [tree[s][p],o] unless tree[s][p] == o # new object array
+      end}
 
     tree
   end
