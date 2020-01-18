@@ -5,8 +5,7 @@ class WebResource
     def dir; dirname.R env if path end                                  # DIRNAME(1)
     def dirname; File.dirname path if path end                          # DIRNAME(1)
     def ext; File.extname( path || '' )[1..-1] || '' end
-    # host + path -> local-storage path
-    def fsPath
+    def fsPath # host+path -> local-storage reference
       (hostpath + if !path
        '/'
       elsif path.size > 512 || parts.find{|p|p.size > 127}

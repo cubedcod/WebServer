@@ -4,8 +4,7 @@ require 'linkeddata'
 class WebResource < RDF::URI
   def R env_=nil; env_ ? env(env_) : self end
 
-  module URIs
-    # URI constants
+  module URIs # URI constants
     W3       = 'http://www.w3.org/'
     Atom     = W3 + '2005/Atom#'
     LDP      = W3 + 'ns/ldp#'
@@ -41,7 +40,6 @@ class WebResource < RDF::URI
 
   alias_method :uri, :to_s
 
-  # node -> Repository
   def loadRDF graph = nil
     graph ||= env[:repository] ||= RDF::Repository.new
     if node.file?
@@ -98,7 +96,7 @@ class WebResource < RDF::URI
     env[:repository].each_graph.map{|graph|
       n = (graph.name || env[:base_uri]).R # graph identity
       docs = []                            # storage refs
-      unless n.uri.match?(/^(_|data):/)    # blank-nodes and data-URIs only stored in context of locatable graph
+      unless n.uri.match?(/^(_|data):/)    # blank-nodes/data-URIs stored in context of identified graph
         if n.host
           # canonical path
           docs.push (n.hostpath + (n.path ? (n.path[-1]=='/' ? (n.path + 'index') : n.path) : '')).R
@@ -128,12 +126,30 @@ class WebResource < RDF::URI
     self
   end
 
-  def summarize
-    full = RDF::Repository.new
-    summary = RDF::Repository.new
-    loadRDF full
-    puts full.size
-    puts summary.size
+  def summarized
+    summary = summaryFile
+
+    puts "#{summary} up to date" if summary.node.exist? && summary.node.mtime >= node.mtime
+    return summary if summary.node.exist? && summary.node.mtime >= node.mtime
+
+    summary.dir.mkdir
+    doc = path[-1] == '/' ? (self + 'index.ttl').R : self  # document to summarize
+    fullGraph = RDF::Repository.new; doc.loadRDF fullGraph # full graph
+    miniGraph = RDF::Repository.new                        # summary graph
+
+    treeFromGraph(fullGraph).values.map{|resource|  # subject
+      subject = (resource['uri'] || '').R
+      [Abstract,Creator,Date,Title,To,Type].map{|p| # predicate
+        if o = resource[p]
+          (o.class == Array ? o : [o]).map{|o|      # object
+            miniGraph << RDF::Statement.new(subject, p.R, o)} # triple to summary graph
+        end}}
+    RDF::Writer.for(:turtle).open(summary){|f|f << miniGraph} # write summary graph
+    summary                                                   # summary graph
+  end
+
+  def summaryFile
+    ('../.cache/RDF/' + relPath + (path[-1] == '/' ? 'index' : '') + (ext == 'ttl' ? '' : '.ttl')).R env
   end
 
   # Repository -> Hash

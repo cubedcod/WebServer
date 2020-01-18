@@ -85,7 +85,7 @@ class WebResource
       end
     end
 
-    def base; env[:base_uri] end
+    def base; env && env[:base_uri] || ''.R end
 
     def cachedGraph; fsPath.nodeRequest end
 
@@ -190,43 +190,6 @@ class WebResource
                           else
                           end)
       [303, env[:resp].update({'Location' => loc + parts[1..-1].join('/') + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '')}), []]
-    end
-
-    def timeMeta
-      n = nil # next page
-      p = nil # prev page
-      # date parts
-      dp = []; ps = parts
-      dp.push ps.shift.to_i while ps[0] && ps[0].match(/^[0-9]+$/)
-      case dp.length
-      when 1 # Y
-        year = dp[0]
-        n = '/' + (year + 1).to_s
-        p = '/' + (year - 1).to_s
-      when 2 # Y-m
-        year = dp[0]
-        m = dp[1]
-        n = m >= 12 ? "/#{year + 1}/#{01}" : "/#{year}/#{'%02d' % (m + 1)}"
-        p = m <=  1 ? "/#{year - 1}/#{12}" : "/#{year}/#{'%02d' % (m - 1)}"
-      when 3 # Y-m-d
-        day = ::Date.parse "#{dp[0]}-#{dp[1]}-#{dp[2]}" rescue nil
-        if day
-          p = (day-1).strftime('/%Y/%m/%d')
-          n = (day+1).strftime('/%Y/%m/%d')
-        end
-      when 4 # Y-m-d-H
-        day = ::Date.parse "#{dp[0]}-#{dp[1]}-#{dp[2]}" rescue nil
-        if day
-          hour = dp[3]
-          p = hour <=  0 ? (day - 1).strftime('/%Y/%m/%d/23') : (day.strftime('/%Y/%m/%d/')+('%02d' % (hour-1)))
-          n = hour >= 23 ? (day + 1).strftime('/%Y/%m/%d/00') : (day.strftime('/%Y/%m/%d/')+('%02d' % (hour+1)))
-        end
-      end
-      remainder = ps.empty? ? '' : ['', *ps].join('/')
-      remainder += '/' if env['REQUEST_PATH'] && env['REQUEST_PATH'][-1] == '/'
-      q = env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || ''
-      env[:links][:prev] = p + remainder + q + '#prev' if p && p.R.node.exist?
-      env[:links][:next] = n + remainder + q + '#next' if n && n.R.node.exist?
     end
 
     def HTTP.decompress head, body
@@ -472,7 +435,9 @@ class WebResource
         elsif node.file?
           fileResponse              # local static data
         else
-          localGraph                # local transformable/graph data
+          env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
+          timeMeta
+          nodeRequest               # local transformable/graph data
         end
       elsif path.match? /^.gen(erate)?_?204$/ # connectivity check
         R204
@@ -598,12 +563,6 @@ class WebResource
       LocalAddress.member?(name) || ENV['SERVER_NAME'] == name
     end
 
-    def localGraph
-      env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
-      timeMeta
-      nodeRequest
-    end
-
     def nodeRequest
       nodes = (if node.directory?                                      # directory:
                if env[:query].has_key? 'f'       # FIND full case-insensitive match
@@ -636,7 +595,7 @@ class WebResource
               else                                                     # files:
                 if uri.match GlobChars                                 # GLOB - parametric
                   env[:grep] = true if env && env[:query].has_key?('q')
-                  glob
+                  glob.map &:summarized
                 else                                                   # GLOB - default graph
                   files =        (self + '.*').R.glob                  #  basename + extension match
                   files.empty? ? (self +  '*').R.glob : files          #  prefix match
@@ -810,6 +769,43 @@ class WebResource
             ['application/atom+xml','text/html'].member?(f)}} # non-RDF via writer definition
 
       default                                                 # default
+    end
+
+    def timeMeta
+      n = nil # next page
+      p = nil # prev page
+      # date parts
+      dp = []; ps = parts
+      dp.push ps.shift.to_i while ps[0] && ps[0].match(/^[0-9]+$/)
+      case dp.length
+      when 1 # Y
+        year = dp[0]
+        n = '/' + (year + 1).to_s
+        p = '/' + (year - 1).to_s
+      when 2 # Y-m
+        year = dp[0]
+        m = dp[1]
+        n = m >= 12 ? "/#{year + 1}/#{01}" : "/#{year}/#{'%02d' % (m + 1)}"
+        p = m <=  1 ? "/#{year - 1}/#{12}" : "/#{year}/#{'%02d' % (m - 1)}"
+      when 3 # Y-m-d
+        day = ::Date.parse "#{dp[0]}-#{dp[1]}-#{dp[2]}" rescue nil
+        if day
+          p = (day-1).strftime('/%Y/%m/%d')
+          n = (day+1).strftime('/%Y/%m/%d')
+        end
+      when 4 # Y-m-d-H
+        day = ::Date.parse "#{dp[0]}-#{dp[1]}-#{dp[2]}" rescue nil
+        if day
+          hour = dp[3]
+          p = hour <=  0 ? (day - 1).strftime('/%Y/%m/%d/23') : (day.strftime('/%Y/%m/%d/')+('%02d' % (hour-1)))
+          n = hour >= 23 ? (day + 1).strftime('/%Y/%m/%d/00') : (day.strftime('/%Y/%m/%d/')+('%02d' % (hour+1)))
+        end
+      end
+      remainder = ps.empty? ? '' : ['', *ps].join('/')
+      remainder += '/' if env['REQUEST_PATH'] && env['REQUEST_PATH'][-1] == '/'
+      q = env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || ''
+      env[:links][:prev] = p + remainder + q + '#prev' if p && p.R.node.exist?
+      env[:links][:next] = n + remainder + q + '#next' if n && n.R.node.exist?
     end
 
     def upstreamUI; env[:UX] = true; self end
