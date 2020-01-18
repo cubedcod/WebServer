@@ -45,7 +45,7 @@ class WebResource < RDF::URI
     return self unless env[:repository]
     # mint URIs for index locations
     env[:repository].each_graph.map{|graph|
-      n = graph.name.R # named-graph resource
+      n = (graph.name || env[:base_uri]).R # named-graph resource
 
       docs = []        # storage references
 
