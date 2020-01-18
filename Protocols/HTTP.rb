@@ -381,7 +381,7 @@ class WebResource
           storage += suffix if suffix != ('.' + ext)
           storage.R.write body                                            # cache body
           return self if options[:intermediate]                           # intermediate fetch, return w/o HTTP-response
-          indexRDF                                                        # index metadata
+          storeRDF                                                        # index metadata
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}             # upstream metadata
           env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin     # CORS header
@@ -698,7 +698,7 @@ class WebResource
         nodes[0].fileResponse # nothing to merge/transform. static-node
       else                    # merge and/or transform
         nodes.map &:load
-        indexRDF if env[:new]
+        storeRDF if env[:new]
         graphResponse
       end
     end

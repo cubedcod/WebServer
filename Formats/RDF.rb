@@ -41,15 +41,12 @@ class WebResource < RDF::URI
 
   alias_method :uri, :to_s
 
-  def indexRDF
+  def storeRDF
     return self unless env[:repository]
-    # mint URIs for index locations
     env[:repository].each_graph.map{|graph|
-      n = (graph.name || env[:base_uri]).R # named-graph resource
-
-      docs = []        # storage references
-
-      unless n.uri.match?(/^(_|data):/) # blank-nodes and data-URI appear in context of locatable graph
+      n = (graph.name || env[:base_uri]).R # graph identity
+      docs = []                            # storage refs
+      unless n.uri.match?(/^(_|data):/)    # blank-nodes and data-URIs only stored in context of locatable graph
         if n.host
           # canonical path
           docs.push (n.hostpath + (n.path ? (n.path[-1]=='/' ? (n.path + 'index') : n.path) : '')).R
