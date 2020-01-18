@@ -80,7 +80,7 @@ class WebResource < RDF::URI
         name = n.basename.to_s + (isDir ? '/' : '')
         unless name[0] == '.' # elide invisible nodes
           if n.file?          # summarize contained document
-            graph.load n.R.summarized
+            graph.load n.R(env).summarized
           elsif isDir         # list contained directory
             subdir = container.join name
             graph << RDF::Statement.new(container, (W3+'ns/ldp#contains').R, subdir)

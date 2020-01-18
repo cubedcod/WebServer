@@ -906,7 +906,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
     %w{grid-tweet tweet}.map{|tweetclass|
       doc.css('.' + tweetclass).map{|tweet|
         s = 'https://twitter.com' + (tweet.css('.js-permalink').attr('href') || tweet.attr('data-permalink-path') || '')
-        yield s, Type, Post.R
+        yield s, Type, (SIOC + 'MicroblogPost').R
         yield s, To, 'https://twitter.com'.R
 
         authorName = if b = tweet.css('.username b')[0]

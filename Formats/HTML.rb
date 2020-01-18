@@ -507,7 +507,7 @@ class WebResource
       uri = dir.delete 'uri'
       [Type, Title, W3+'ns/posix/stat#mtime', W3+'ns/posix/stat#size'].map{|p|dir.delete p}
       {class: :container,
-       c: [{_: :a, id: 'container' + Digest::SHA2.hexdigest(rand.to_s), class: :title, href: uri, type: :node, c: uri.R.basename},
+       c: [({_: :a, id: 'container' + Digest::SHA2.hexdigest(rand.to_s), class: :title, href: uri, type: :node, c: uri.R.basename} if uri),
            {class: :body, c: HTML.keyval(dir, env)}]}}
 
     Markup[Creator] = Markup[To] = -> c, env {
