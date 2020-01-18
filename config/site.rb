@@ -260,9 +260,9 @@ thumbs.ebaystatic.com).map{|host| GET host }
       GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
       GET 'www.google.com', -> r {
         case r.path
-        when /^.(images|maps)/
+        when /^.(images|maps|xjs)/
           r.fetch
-        when /^.search/
+        when /^.search/ # somehow full URLs are getting sent to search on Android Chrome. redirect to URL
           q = r.env[:query]['q']
           q && q.match?(/^(https?:|l(ocalhost)?(:8000)?)\//) && [301,{'Location'=>q.sub(/^l/,'http://l')},[]] || r.fetch
         when '/url'
