@@ -760,12 +760,11 @@ media-mbst-pub-ue1.s3.amazonaws.com
 
   def FourChannel doc
   end
-
   GHgraph = /__gh__coreData.content=(.*?);?\s*__gh__coreData.content.bylineFormat/m
   def GateHouse doc
     doc.css('script').map{|script|
-      if data = script.inner_text.match(GHgraph)
-        graph = ::JSON.parse data[1] #rescue {}
+      if data = script.inner_text.gsub(/[,\s]+\]/m,']').match(GHgraph)
+        graph = ::JSON.parse data[1]
         Webize::HTML.webizeHash(graph){|h|
           if h['type'] == 'gallery'
             h['items'].map{|i|
