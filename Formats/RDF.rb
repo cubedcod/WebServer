@@ -62,7 +62,7 @@ class WebResource < RDF::URI
                              :sourcecode
                            elsif %w(bash c cpp h hs pl py rb sh).member? ext.downcase
                              :sourcecode
-                           end
+                           end unless ext == 'ttl'
       options[:file_path] = self
       graph.load relPath, **options
     elsif node.directory?
@@ -77,9 +77,9 @@ class WebResource < RDF::URI
         isDir = n.directory?
         name = n.basename.to_s + (isDir ? '/' : '')
         unless name[0] == '.' # elide invisible nodes
-          if n.file?          # summary of contained file
+          if n.file?          # summarize contained document
             graph.load n.R.summarized
-          elsif isDir         # listing of contained directory
+          elsif isDir         # list contained directory
             subdir = container.join name
             graph << RDF::Statement.new(container, (W3+'ns/ldp#contains').R, subdir)
             graph << RDF::Statement.new(subdir, Type.R, (W3+'ns/ldp#Container').R)
@@ -129,8 +129,7 @@ class WebResource < RDF::URI
 
   def summarized
     summary = summaryFile
-
-    puts "#{summary} up to date" if summary.node.exist? && summary.node.mtime >= node.mtime
+    puts "summarize #{path} -> #{summary}"
     return summary if summary.node.exist? && summary.node.mtime >= node.mtime
 
     summary.dir.mkdir
