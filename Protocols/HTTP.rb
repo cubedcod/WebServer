@@ -259,7 +259,7 @@ class WebResource
                         ['image/gif', SiteGIF]
                       elsif type == :script || ext == 'js'
                         source = SiteDir.join 'alternatives/' + host + path
-                        ['application/javascript', source.node.exist? ? source.read : '//']
+                        ['application/javascript', source.exist? ? source.read : '//']
                       elsif type == :JSON || ext == 'json'
                         ['application/json','{}']
                       else
@@ -591,57 +591,6 @@ class WebResource
       HTTPHosts.has_key? host
     end
 
-    # node-RDF -> Repository
-    def load
-      graph = env[:repository] ||= RDF::Repository.new
-      if node.file?
-        options = {base_uri: base}
-        options[:format] ||= if basename.index('msg.')==0 || path.index('/sent/cur')==0
-                               # procmail doesnt allow suffix (like .eml extension), only prefix?
-                               # presumably this is due to maildir suffix-rewrites to denote state
-                               :mail
-                             elsif ext.match? /^html?$/
-                               :html
-                             elsif ext == 'nfo'
-                               :nfo
-                             elsif %w(Cookies).member? basename
-                               :sqlite
-                             elsif %w(changelog gophermap gophertag license makefile readme todo).member?(basename.downcase) || %w(cls gophermap old plist service socket sty textile xinetd watchr).member?(ext.downcase)
-                               :plaintext
-                             elsif %w(markdown).member? ext.downcase
-                               :markdown
-                             elsif %w(gemfile rakefile).member?(basename.downcase) || %w(gemspec).member?(ext.downcase)
-                               :sourcecode
-                             elsif %w(bash c cpp h hs pl py rb sh).member? ext.downcase
-                               :sourcecode
-                             end
-        options[:file_path] = self
-        env[:repository].load relPath, **options
-      elsif node.directory?
-        container = base.join relFrom base.fsPath # container URI
-        container += '/' unless container.to_s[-1] == '/'
-        graph << RDF::Statement.new(container, Type.R, (W3+'ns/ldp#Container').R)
-        graph << RDF::Statement.new(container, Title.R, basename)
-        graph << RDF::Statement.new(container, Date.R, node.stat.mtime.iso8601)
-        node.children.map{|n|
-          isDir = n.directory?
-          name = n.basename.to_s + (isDir ? '/' : '')
-          unless name[0] == '.' || name == 'index.ttl'
-            item = container.join name
-            graph << RDF::Statement.new(container, (W3+'ns/ldp#contains').R, item)
-            if n.file?
-              graph << RDF::Statement.new(item, Type.R, (W3+'ns/posix/stat#File').R)
-              graph << RDF::Statement.new(item, (W3+'ns/posix/stat#size').R, n.size)
-            elsif isDir
-              graph << RDF::Statement.new(item, Type.R, (W3+'ns/ldp#Container').R)
-            end
-            graph << RDF::Statement.new(item, Title.R, name)
-            graph << RDF::Statement.new(item, Date.R, n.mtime.iso8601) rescue nil
-          end
-        }
-      end
-      self
-    end
 
     LocalAddress = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
     def local?
@@ -697,7 +646,7 @@ class WebResource
       if nodes.size==1 && (xt=nodes[0].ext) && (fmt=RDF::Format.file_extensions[xt.to_sym]) && fmt[0].content_type.member?(selectFormat) # one node in preferred format
         nodes[0].fileResponse # nothing to merge/transform. static-node
       else                    # merge and/or transform
-        nodes.map &:load
+        nodes.map &:loadRDF
         storeRDF if env[:new]
         graphResponse
       end

@@ -41,6 +41,58 @@ class WebResource < RDF::URI
 
   alias_method :uri, :to_s
 
+  # node -> Repository
+  def loadRDF
+    graph = env[:repository] ||= RDF::Repository.new
+    if node.file?
+      options = {base_uri: base}
+      options[:format] ||= if basename.index('msg.')==0 || path.index('/sent/cur')==0
+                             # procmail doesnt allow suffix (like .eml extension), only prefix?
+                             # presumably this is due to maildir suffix-rewrites to denote state
+                             :mail
+                           elsif ext.match? /^html?$/
+                             :html
+                           elsif ext == 'nfo'
+                             :nfo
+                           elsif %w(Cookies).member? basename
+                             :sqlite
+                           elsif %w(changelog gophermap gophertag license makefile readme todo).member?(basename.downcase) || %w(cls gophermap old plist service socket sty textile xinetd watchr).member?(ext.downcase)
+                             :plaintext
+                           elsif %w(markdown).member? ext.downcase
+                             :markdown
+                           elsif %w(gemfile rakefile).member?(basename.downcase) || %w(gemspec).member?(ext.downcase)
+                             :sourcecode
+                           elsif %w(bash c cpp h hs pl py rb sh).member? ext.downcase
+                             :sourcecode
+                           end
+      options[:file_path] = self
+      env[:repository].load relPath, **options
+    elsif node.directory?
+      container = base.join relFrom base.fsPath # container URI
+      container += '/' unless container.to_s[-1] == '/'
+      graph << RDF::Statement.new(container, Type.R, (W3+'ns/ldp#Container').R)
+      graph << RDF::Statement.new(container, Title.R, basename)
+      graph << RDF::Statement.new(container, Date.R, node.stat.mtime.iso8601)
+      node.children.map{|n|
+        isDir = n.directory?
+        name = n.basename.to_s + (isDir ? '/' : '')
+        unless name[0] == '.' || name == 'index.ttl'
+          item = container.join name
+          graph << RDF::Statement.new(container, (W3+'ns/ldp#contains').R, item)
+          if n.file?
+            graph << RDF::Statement.new(item, Type.R, (W3+'ns/posix/stat#File').R)
+            graph << RDF::Statement.new(item, (W3+'ns/posix/stat#size').R, n.size)
+          elsif isDir
+            graph << RDF::Statement.new(item, Type.R, (W3+'ns/ldp#Container').R)
+          end
+          graph << RDF::Statement.new(item, Title.R, name)
+          graph << RDF::Statement.new(item, Date.R, n.mtime.iso8601) rescue nil
+        end
+      }
+    end
+    self
+  end
+
   def storeRDF
     return self unless env[:repository]
     env[:repository].each_graph.map{|graph|
@@ -74,6 +126,29 @@ class WebResource < RDF::URI
       }
     }
     self
+  end
+
+  # Repository -> Hash
+  def treeFromGraph graph = nil
+    graph ||= env[:repository]
+    return {} unless graph
+    tree = {}
+    graph.each_triple{|s,p,o| s = s.to_s;  p = p.to_s
+      #unless p == 'http://www.w3.org/1999/xhtml/vocab#role' # TODO investigate RDF::Vocab verbosity
+      o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object URI or literal
+      tree[s] ||= {'uri' => s}                      # subject URI
+      tree[s][p] ||= []                             # predicate URI
+      if tree[s][p].class == Array
+        tree[s][p].push o unless tree[s][p].member? o # add to object-array
+          else
+            tree[s][p] = [tree[s][p],o] unless tree[s][p] == o # new object-array
+      end
+      #end
+    }
+
+    env[:graph] = tree if env
+
+    tree
   end
 
   include URIs
