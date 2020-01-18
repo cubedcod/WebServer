@@ -92,7 +92,7 @@ class WebResource < RDF::URI
     self
   end
 
-  def storeRDF
+  def saveRDF
     return self unless env[:repository]
     env[:repository].each_graph.map{|graph|
       n = (graph.name || env[:base_uri]).R # graph identity
@@ -129,7 +129,6 @@ class WebResource < RDF::URI
 
   def summarized
     summary = summaryFile
-    puts "summarize #{path} -> #{summary}"
     return summary if summary.node.exist? && summary.node.mtime >= node.mtime
 
     summary.dir.mkdir

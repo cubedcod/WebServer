@@ -437,7 +437,7 @@ firefox.settings.services.mozilla.com
         elsif r.env['REQUEST_PATH'][1..5] == 'https'
           options[:query] = {source_url: r.env['REQUEST_PATH'][1..-1]}
           '/article'.R(r.env).fetch options
-         end).storeRDF.graphResponse
+         end).saveRDF.graphResponse
       end}
 
     # Patch
@@ -559,7 +559,7 @@ firefox.settings.services.mozilla.com
         Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}.shuffle.each_slice(18){|s|
           '/search'.R(r.env).fetch intermediate: true, noRDF: true,
                                    query: {vertical: :default, f: :tweets, q: s.map{|u|'from:' + u}.join('+OR+')}}
-        r.storeRDF.chrono_sort.graphResponse
+        r.saveRDF.chrono_sort.graphResponse
       elsif r.parts[-1] == 'status'
         r.cachedGraph
       elsif r.gunkURI
