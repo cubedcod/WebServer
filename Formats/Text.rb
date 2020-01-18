@@ -90,6 +90,46 @@ module Webize
     end
   end
 
+  module MSWord
+    class Format < RDF::Format
+      content_type 'application/msword', extension: :docx
+      content_encoding 'utf-8'
+      reader { Reader }
+    end
+
+    class Reader < RDF::Reader
+      include WebResource::URIs
+      format Format
+
+      def initialize(input = $stdin, options = {}, &block)
+        @base = options[:base_uri].R
+        @path = options[:file_path]
+         if block_given?
+          case block.arity
+          when 0 then instance_eval(&block)
+          else block.call(self)
+          end
+        end
+        nil
+      end
+
+      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
+
+      def each_statement &fn
+        source_tuples{|p,o|
+          fn.call RDF::Statement.new(@path, p, o, :graph_name => @path)}
+      end
+
+      def source_tuples
+        yield Type.R, (Schema + 'Document').R
+        yield Title.R, @path.basename
+        html = RDF::Literal `docx2txt #{@path.shellPath}`
+        html.datatype = RDF.XMLLiteral
+        yield Content.R, html
+      end
+    end
+  end
+
   module Sourcecode
     class Format < RDF::Format
       content_type 'application/*'
