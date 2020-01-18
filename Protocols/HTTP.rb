@@ -225,8 +225,8 @@ class WebResource
       remainder = ps.empty? ? '' : ['', *ps].join('/')
       remainder += '/' if env['REQUEST_PATH'] && env['REQUEST_PATH'][-1] == '/'
       q = env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || ''
-      env[:links][:prev] = p + remainder + q + '#prev' if p && p.R.exist?
-      env[:links][:next] = n + remainder + q + '#next' if n && n.R.exist?
+      env[:links][:prev] = p + remainder + q + '#prev' if p && p.R.node.exist?
+      env[:links][:next] = n + remainder + q + '#next' if n && n.R.node.exist?
     end
 
     def HTTP.decompress head, body
@@ -259,7 +259,7 @@ class WebResource
                         ['image/gif', SiteGIF]
                       elsif type == :script || ext == 'js'
                         source = SiteDir.join 'alternatives/' + host + path
-                        ['application/javascript', source.exist? ? source.read : '//']
+                        ['application/javascript', source.node.exist? ? source.read : '//']
                       elsif type == :JSON || ext == 'json'
                         ['application/json','{}']
                       else
@@ -482,7 +482,7 @@ class WebResource
         env[:links][:time] = 'http://localhost:8000' + path + '*.ttl?view=table' if env['REMOTE_ADDR'] == '127.0.0.1'
         (path + name).R(env).nodeRequest
       elsif handler = HostGET[host] # host lambda
-        Populator[host][self] if Populator[host] && !hostpath.R.exist?
+        Populator[host][self] if Populator[host] && !hostpath.R.node.exist?
         handler[self]
       elsif host.match? CDNhost     # CDN content-pool
         if AllowedHosts.has_key?(host) || env[:query]['allow'] == ServerKey ||
