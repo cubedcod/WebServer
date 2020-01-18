@@ -336,14 +336,14 @@ class WebResource
                       RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
           static = fixedFormat? format
           body = Webize::HTML.degunk body,static if format == 'text/html' && !AllowedHosts.has_key?(host) # clean HTML
-          reader = RDF::Reader.for content_type: format                   # select reader
-          reader.new(body, base_uri: base, noRDF: options[:noRDF]){|_|    # instantiate reader
-            (env[:repository] ||= RDF::Repository.new) << _ } if reader   # parse RDF
           storage = fsPath                                                # storage location
           storage += 'index' if path[-1] == '/'                           #  index file
           suffix = Rack::Mime::MIME_TYPES.invert[format]                  #  MIME suffix
           storage += suffix if suffix != ('.' + ext)
           storage.R.write body                                            # cache body
+          reader = RDF::Reader.for content_type: format                   # select reader
+          reader.new(body, base_uri: base, noRDF: options[:noRDF]){|_|    # instantiate reader
+            (env[:repository] ||= RDF::Repository.new) << _ } if reader   # parse RDF
           return self if options[:intermediate]                           # intermediate fetch, return w/o HTTP-response
           saveRDF                                                         # index metadata
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
@@ -601,8 +601,8 @@ class WebResource
                 end
                end).flatten.compact.uniq.map{|n|n.R env}
 
-      if nodes.size==1 && (xt=nodes[0].ext) && (fmt=RDF::Format.file_extensions[xt.to_sym]) && fmt[0].content_type.member?(selectFormat) # one node in preferred format
-        nodes[0].fileResponse # nothing to merge/transform. static-node
+      if nodes.size==1 && nodes[0].ext == 'ttl' && selectFormat == 'text/turtle'
+        nodes[0].fileResponse # nothing to webize. return static graph-data
       else                    # merge and/or transform
         nodes.map &:loadRDF
         saveRDF if env[:new]
