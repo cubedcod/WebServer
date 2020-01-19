@@ -4,10 +4,10 @@ class WebResource
     def basename; File.basename path end
     def ext; File.extname(path)[1..-1] || '' end
     def fsPath
-      (if host
-       host.split('.').-(%w(com net org www)).reverse.join('/')
+      (if !host || %w(l localhost).member?(host)
+       '.'
       else
-        '.'
+        host.split('.').-(%w(com net org www)).reverse.join('/')
        end) +
         (if !path
          '/'
