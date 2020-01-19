@@ -40,10 +40,9 @@ class WebResource < RDF::URI
 
   alias_method :uri, :to_s
 
-  def loadRDF graph = nil
-    graph ||= env[:repository] ||= RDF::Repository.new
+  def loadRDF options = {}
+    graph = options[:repository] || env[:repository] ||= RDF::Repository.new
     if node.file?
-      options = {base_uri: base}
       # format-hint when name-suffix (extension) isn't enough to determine type
       options[:format] ||= if basename.index('msg.')==0 || path.index('/sent/cur')==0
                              # procmail doesnt allow suffix (like .eml extension), only prefix?
@@ -68,7 +67,7 @@ class WebResource < RDF::URI
       options[:file_path] = self
       graph.load relPath, **options
     elsif node.directory?
-      container = base.join relFrom base.fsPath # container URI
+      container = options[:base_uri] || self
       container += '/' unless container.to_s[-1] == '/'
 
       graph << RDF::Statement.new(container, Type.R, (W3+'ns/ldp#Container').R)
@@ -80,7 +79,7 @@ class WebResource < RDF::URI
         name = n.basename.to_s + (isDir ? '/' : '')
         unless name[0] == '.' # elide invisible nodes
           if n.file?          # summarize contained document
-            graph.load n.R(env).summarized
+            graph.load n.R(env).summary
           elsif isDir         # list contained directory
             subdir = container.join name
             graph << RDF::Statement.new(container, (W3+'ns/ldp#contains').R, subdir)
@@ -100,54 +99,47 @@ class WebResource < RDF::URI
       n = (graph.name || env[:base_uri]).R # graph identity
       docs = []                            # storage refs
       unless n.uri.match?(/^(_|data):/)    # blank-nodes/data-URIs stored in context of identified graph
-        if n.host
-          # canonical path
-          docs.push (n.hostpath + (n.path ? (n.path[-1]=='/' ? (n.path + 'index') : n.path) : '')).R
-          # temporal-index path
-          if timestamp = graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value       # find timestamp
+        docs.push n
+        if n.host && timestamp = graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value # find timestamp
             docs.push ['/' + timestamp.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), # build hour-dir path
                        %w{host path query fragment}.map{|a|n.send(a).yield_self{|p|p && p.split(/[\W_]/)}}]. # tokenize slugs
                         flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.').R                     # apply slug skiplist
-          end
-        else # local path
-          docs.push n
         end
       end
 
       # store documents
       docs.map{|doc|
-        turtle = doc.relPath + '.ttl'
+        turtle = doc.fsPath + '.ttl'
         unless File.exist? turtle
-          if dir = doc.dir
-            dir.mkdir
-            RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
-            print "\n🐢 \e[32;1m" + doc.path + "\e[0m "
-          end
+          FileUtils.mkdir_p doc.node.dirname
+          RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
+          print "\n🐢 \e[32;1m" + doc.fsPath + "\e[0m "
         end
       }
     }
     self
   end
 
-  def summarized
-    summary = summaryFile
-    return summary if summary.node.exist? && summary.node.mtime >= node.mtime
-
-    summary.dir.mkdir
-    doc = path[-1] == '/' ? (self + 'index.ttl').R : self  # document to summarize
-    fullGraph = RDF::Repository.new; doc.loadRDF fullGraph # full graph
-    miniGraph = RDF::Repository.new                        # summary graph
-
-    treeFromGraph(fullGraph).values.map{|resource|  # subject
+  def summary
+    sf = summaryFile
+    return sf if sf.node.exist? && sf.node.mtime >= node.mtime
+    doc = path[-1] == '/' ? (self + 'index.ttl').R : self # document to summarize
+    fullGraph = RDF::Repository.new                       # full graph
+    miniGraph = RDF::Repository.new                       # summary graph
+    puts "summarize #{self} to #{sf}, using data from #{doc}"
+    doc.loadRDF repository: fullGraph    # load document
+    treeFromGraph(fullGraph).values.map{|resource|        # subject
       subject = (resource['uri'] || '').R
-      [Abstract,Creator,Date,Image,Link,Title,To,Type,Video].map{|p| # predicate
-        if o = resource[p]
-          (o.class == Array ? o : [o]).map{|o|      # object
-            miniGraph << RDF::Statement.new(subject, p.R, o)} # triple to summary graph
+      puts subject,:_________
+      [Abstract,Creator,Date,Image,Link,Title,To,Type,Video].map{|p|
+        if o = resource[p] ; p = p.R                      # predicate
+          (o.class == Array ? o : [o]).map{|o|            # object
+            miniGraph << RDF::Statement.new(subject,p,o)} # triple to summary graph
         end}}
-
-    RDF::Writer.for(:turtle).open(summary){|f|f << miniGraph} # write summary graph
-    summary                                                   # summary graph
+puts miniGraph.triples
+    sf.dir.mkdir                                          # containing dir
+    RDF::Writer.for(:turtle).open(sf){|f|f << miniGraph}  # write summary graph
+    sf                                                    # summary file
   end
 
   def summaryFile

@@ -286,15 +286,13 @@ class WebResource
                             ]}, "\n",
                         {_: :body,
                          c: [{class: :toolbox,
-                              c: [(icon.fsPath.node.exist? && icon.fsPath.node.size != 0) ? {_: :a, href: '/', id: :host, c: {_: :img, src: icon.uri}} : hostname.split('.').-(%w(com net org www)).reverse.map{|h| {_: :a, class: :breadcrumb, href: '/', c: h}},
+                              c: [(icon.node.exist? && icon.node.size != 0) ? {_: :a, href: '/', id: :host, c: {_: :img, src: icon.uri}} : host.split('.').-(%w(com net org www)).reverse.map{|h| {_: :a, class: :breadcrumb, href: '/', c: h}},
                                  ({_: :a, id: :UX, class: :icon, style: 'color: #555', c: '⚗️', href: HTTP.qs((env[:query]||{}).merge({'UX' => 'upstream'}))} unless local?),
                                  ({_: :a, id: :tabular, class: :icon, style: 'color: #555', c: '↨',
                                     href: HTTP.qs((env[:query]||{}).merge({'view' => 'table', 'sort' => 'date'}))} unless env[:query] && env[:query]['view']=='table'),
-                                  base.dir.parts.map{|p|
-                                    [{_: :a, class: :breadcrumb, href: bc += p + '/', c: (CGI.escapeHTML Rack::Utils.unescape p),
-                                      id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
-                                  {_: :a, class: 'basename breadcrumb', href: path, c: (CGI.escapeHTML Rack::Utils.unescape base.basename)},
-                                  link[:media, '🖼️'], link[:feed, FeedIcon], link[:time, '🕒'],
+                                 env[:base_uri].parts.map{|p|
+                                    [{_: :a, class: :breadcrumb, href: bc += p + '/', c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
+                                 link[:media, '🖼️'], link[:feed, FeedIcon], link[:time, '🕒'],
                                   ([' ',{_: :a, id: :showMain, href: '#body'}] if env[:site_chrome])
                                  ]},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],

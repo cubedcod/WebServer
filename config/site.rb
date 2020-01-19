@@ -560,8 +560,6 @@ firefox.settings.services.mozilla.com
           '/search'.R(r.env).fetch intermediate: true, noRDF: true,
                                    query: {vertical: :default, f: :tweets, q: s.map{|u|'from:' + u}.join('+OR+')}}
         r.saveRDF.chrono_sort.graphResponse
-      elsif r.parts[-1] == 'status'
-        r.cachedGraph
       elsif r.gunkURI
         r.deny
       else

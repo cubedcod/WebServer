@@ -7,7 +7,6 @@
 #showMain {background: repeating-linear-gradient(135deg, #000, #000 .4em, #fff .4em, #fff .8em); height: 1.2em; width: 1.2em; display: inline-block; border: 1px solid white}
 .avatar {max-height: 2em; background-color: #000}
 .breadcrumb {border-width: 0 0 0 .08em; border-color: #444; border-style: solid; border-radius: 0; color: #ddd}
-.breadcrumb.basename {color: #fff; font-weight: bold}
 .container > .body {border-radius: 0 .2em .2em .2em; background-color: #fff; color: #000; width: 100%}
 .container > .title {border-radius: .4em .4em 0 0; display: inline-block; padding-right: .1em}
 .file > .icon {font-size: 4.2em; background-color: #000; color: #fff}

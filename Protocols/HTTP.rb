@@ -59,7 +59,7 @@ class WebResource
 
     RootIndex = -> r {
       if r.path == '/' || r.uri.match?(GlobChars)
-        r.cachedGraph
+        r.nodeRequest
       else
         r.chrono_sort if r.parts.size == 1
         NoGunk[r]
@@ -85,10 +85,6 @@ class WebResource
         '*'
       end
     end
-
-    def base; env && env[:base_uri] || ''.R end
-
-    def cachedGraph; fsPath.nodeRequest end
 
     def self.call env
       return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']              # only handle HTTP methods
@@ -253,7 +249,7 @@ class WebResource
       else
         body = generator ? generator.call : self # generate resource
         if body.class == WebResource             # resource reference
-          Rack::Files.new('.').serving(Rack::Request.new(env), body.relPath).yield_self{|s,h,b|
+          Rack::Files.new('.').serving(Rack::Request.new(env), body.fsPath).yield_self{|s,h,b|
             if 304 == s
               R304                               # unmodified resource
             else                                 # file reference
@@ -284,15 +280,15 @@ class WebResource
       # cached results
       if (CacheExt - %w(html xml)).member?(ext.downcase) && !host.match?(DynamicImgHost)
         return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has static-data, return 304 response
-        return fsPath.fileResponse if fsPath.node.file?                                           # server has static-data, return data
+        return fileResponse if node.file?                                           # server has static-data, return data
       end
-      return cachedGraph if ENV.has_key? 'OFFLINE'                                                # offline, return cache
+      return nodeRequest if ENV.has_key? 'OFFLINE'                                                # offline, return cache
 
       # locator
       p = default_port? ? '' : (':' + env['SERVER_PORT'].to_s)
-      u = '//'+hostname+p+path+(options[:suffix]||'')+(options[:query] ? HTTP.qs(options[:query]) : qs) # base locator
-      primary  = ('http' + (insecure? ? '' : 's') + ':' + u).R env                                      # primary scheme
-      fallback = ('http' + (insecure? ? 's' : '') + ':' + u).R env                                      # fallback scheme
+      u = '//'+host+p+path+(options[:suffix]||'')+(options[:query] ? HTTP.qs(options[:query]) : qs) # base locator
+      primary  = ('http' + (insecure? ? '' : 's') + ':' + u).R env                                  # primary scheme
+      fallback = ('http' + (insecure? ? 's' : '') + ':' + u).R env                                  # fallback scheme
 
       # network fetch
       primary.fetchHTTP options
@@ -323,7 +319,7 @@ class WebResource
       end
     end
 
-    def fetchHTTP options={}
+    def fetchHTTP options = {}
       URI.open(uri, headers.merge({redirect: false})) do |response| print '🌍🌎🌏🌐'[rand 4]
         h = response.meta                                                 # upstream metadata
         if response.status.to_s.match? /206/                              # partial response
@@ -336,13 +332,13 @@ class WebResource
                       RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
           static = fixedFormat? format
           body = Webize::HTML.degunk body,static if format == 'text/html' && !AllowedHosts.has_key?(host) # clean HTML
-          storage = fsPath                                                # storage location
+          storage = self                                                  # storage location
           storage += 'index' if path[-1] == '/'                           #  index file
           suffix = Rack::Mime::MIME_TYPES.invert[format]                  #  MIME suffix
           storage += suffix if suffix != ('.' + ext)
-          storage.R.write body                                            # cache body
+          storage.write body                                              # cache body
           reader = RDF::Reader.for content_type: format                   # select reader
-          reader.new(body, base_uri: base, noRDF: options[:noRDF]){|_|    # instantiate reader
+          reader.new(body,base_uri: env[:base_uri],noRDF: options[:noRDF]){|_| # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader   # parse RDF
           return self if options[:intermediate]                           # intermediate fetch, return w/o HTTP-response
           saveRDF                                                         # index metadata
@@ -382,10 +378,10 @@ class WebResource
         R304
       when /401/ # Unauthorized
         print "\n🚫401 " + uri + ' '
-        options[:intermediate] ? self : cachedGraph
+        options[:intermediate] ? self : nodeRequest
       when /403/ # Forbidden
         print "\n🚫403 " + uri + ' '
-        options[:intermediate] ? self : cachedGraph
+        options[:intermediate] ? self : nodeRequest
       when /404/ # Not Found
         print "\n❓ #{uri} "
         if options[:intermediate]
@@ -393,11 +389,11 @@ class WebResource
         elsif upstreamUI?
           [404, (headers e.io.meta), [e.io.read]]
         else
-          cachedGraph
+          nodeRequest
         end
       when /410/ # Gone
         print "\n❌ " + uri + ' '
-        options[:intermediate] ? self : cachedGraph
+        options[:intermediate] ? self : nodeRequest
       when /(500|999)/ # upstream error
         [500, (headers e.io.meta), [e.io.read]]
       when /503/
@@ -436,7 +432,8 @@ class WebResource
         elsif node.file?
           fileResponse              # local static data
         else
-          env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
+          dir = File.dirname path
+          env[:links][:up] = dir + (dir == '/' ? '' : '/') + qs unless !path || path == '/'
           timeMeta
           nodeRequest               # local transformable/graph data
         end
@@ -448,7 +445,7 @@ class WebResource
         env[:links][:time] = 'http://localhost:8000' + path + '*.ttl?view=table' if env['REMOTE_ADDR'] == '127.0.0.1'
         (path + name).R(env).nodeRequest
       elsif handler = HostGET[host] # host lambda
-        Populator[host][self] if Populator[host] && !hostpath.R.node.exist?
+        Populator[host][self] if Populator[host] && !join('/').R.node.exist?
         handler[self]
       elsif host.match? CDNhost     # CDN content-pool
         if AllowedHosts.has_key?(host) || env[:query]['allow'] == ServerKey ||
@@ -461,7 +458,8 @@ class WebResource
       elsif gunk?                   # blocked content
         deny
       else
-        env[:links][:up] = dirname + (dirname == '/' ? '' : '/') + qs unless !path || path == '/'
+        dir = File.dirname path
+        env[:links][:up] = dir + (dir == '/' ? '' : '/') + qs unless !path || path == '/'
         fetch                       # generic remote resource
       end
     end
@@ -481,7 +479,7 @@ class WebResource
         when /^application\/atom+xml/
           feedDocument
         else
-          env[:repository].dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => base, :standard_prefixes => true
+          env[:repository].dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => env[:base_uri], :standard_prefixes => true
         end}
     end
 
@@ -503,7 +501,7 @@ class WebResource
     end
 
     def gunkURI
-      ('/' + hostname + (env && env['REQUEST_URI'] || path || '/')).match? Gunk
+      ('/' + host + (env && env['REQUEST_URI'] || path || '/')).match? Gunk
     end
 
     def HEAD
@@ -558,8 +556,7 @@ class WebResource
     end
 
     def local?
-      name = hostname
-      LocalAddress.member?(name) || ENV['SERVER_NAME'] == name
+      LocalAddress.member? env['SERVER_NAME']
     end
 
     def nodeRequest
@@ -594,10 +591,9 @@ class WebResource
               else                                                     # files:
                 if uri.match GlobChars                                 # GLOB - parametric
                   env[:grep] = true if env && env[:query].has_key?('q')
-                  glob.map &:summarized
-                else                                                   # GLOB - default graph
-                  files =        (self + '.*').R.glob                  #  basename + extension match
-                  files.empty? ? (self +  '*').R.glob : files          #  prefix match
+                  env[:query].has_key?('full') ? Pathname.glob(fsPath) : Pathname.glob(fsPath).map(&:summary)
+                else                                                   # GLOB - default graph-data
+                  Pathname.glob (self + '.*').R.fsPath
                 end
                end).flatten.compact.uniq.map{|n|n.R env}
 
@@ -803,14 +799,13 @@ class WebResource
       remainder = ps.empty? ? '' : ['', *ps].join('/')
       remainder += '/' if env['REQUEST_PATH'] && env['REQUEST_PATH'][-1] == '/'
       q = env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || ''
-      env[:links][:prev] = p + remainder + q + '#prev' if p && p.R.node.exist?
-      env[:links][:next] = n + remainder + q + '#next' if n && n.R.node.exist?
+      env[:links][:prev] = p + remainder + q + '#prev' if p
+      env[:links][:next] = n + remainder + q + '#next' if n
     end
 
     def upstreamUI; env[:UX] = true; self end
     def upstreamUI?
-      env.has_key?(:UX)  ||      # request environment
-      ENV.has_key?('UX') ||      # global environment
+      env.has_key?(:UX) || ENV.has_key?('UX') ||      # environment
       parts.member?('embed') || env[:query].has_key?('UX') # URL parameter
     end
 
