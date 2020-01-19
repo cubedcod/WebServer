@@ -4,7 +4,7 @@
 which apk && su -c 'apk add alpine-sdk iptables ip6tables graphicsmagick ruby ruby-dev python python3-dev py3-cffi py3-pip openssl-dev rsync libexif-dev libxslt-dev tmux squid'
 
 # Arch https://www.archlinux.org/ Manjaro https://manjaro.org/
-which pacman && su -c 'pacman -S graphicsmagick git base-devel ruby ruby-bundler ruby-rdoc python-pip pkg-config tmux squid make rsync'
+which pacman && su -c 'pacman -S graphicsmagick git base-devel ruby ruby-bundler ruby-rdoc python-pip pkg-config pygmentize tmux squid make rsync'
 which pacman && su -c '/usr/lib/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB'
 
 # Debian https://www.debian.org/

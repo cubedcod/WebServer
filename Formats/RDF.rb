@@ -96,6 +96,8 @@ class WebResource < RDF::URI
       }
     end
     self
+  rescue RDF::FormatError => e
+    puts [e.class, e.message].join ' '
   end
 
   def saveRDF

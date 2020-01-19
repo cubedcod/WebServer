@@ -334,7 +334,7 @@ class WebResource
           body = Webize::HTML.degunk body,static if format == 'text/html' && !AllowedHosts.has_key?(host) # clean HTML
           storagePath = path                                              # storage location
           storagePath += 'index' if storagePath[-1] == '/'                #  index file
-          suffix = Rack::Mime::MIME_TYPES.invert[format]                  #  MIME suffix
+          suffix = Rack::Mime::MIME_TYPES.invert[format] || {'text/xml' => '.rss'}[format] #  MIME suffix
           storagePath += suffix if suffix && suffix != ('.' + ext)
           ('//' + host + storagePath).R.write body                        # cache body
           reader = RDF::Reader.for content_type: format                   # select reader
