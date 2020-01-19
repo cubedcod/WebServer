@@ -225,6 +225,7 @@ class WebResource
       LDP + 'Container' => '📁',
       LDP + 'contains' => '📁',
       Link => '☛',
+      Post => '📝',
       SIOC + 'BlogPost' => '📝',
       SIOC + 'MailMessage' => '✉️',
       SIOC + 'MicroblogPost' => '🐦',

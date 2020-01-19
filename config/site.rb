@@ -249,7 +249,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
 
       GData = -> r {(r.env[:referer]||'').match?(/\.google\.com$/) ? NoGunk[r] : r.deny}
       GET 'ajax.googleapis.com'                         # script/data hosts
-      GET 'feedproxy.google.com'
+      GET 'feedproxy.google.com', NoQuery
       %w(maps www).map{|h| GET h + '.googleapis.com', GData }
       %w(maps ssl www).map{|h|GET h + '.gstatic.com', GData }
       (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com", GData }
