@@ -596,7 +596,6 @@ class WebResource
                   (self + '.*').R.glob
                 end
                end).flatten.compact.uniq.map{|n|n.R env}
-
       if nodes.size==1 && nodes[0].ext == 'ttl' && selectFormat == 'text/turtle'
         nodes[0].fileResponse # nothing to webize. return static graph-data
       else                    # merge and/or transform
