@@ -332,11 +332,11 @@ class WebResource
                       RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
           static = fixedFormat? format
           body = Webize::HTML.degunk body,static if format == 'text/html' && !AllowedHosts.has_key?(host) # clean HTML
-          storage = self                                                  # storage location
-          storage += 'index' if path[-1] == '/'                           #  index file
+          storagePath = path                                              # storage location
+          storagePath += 'index' if storagePath[-1] == '/'                #  index file
           suffix = Rack::Mime::MIME_TYPES.invert[format]                  #  MIME suffix
-          storage += suffix if suffix != ('.' + ext)
-          storage.R.write body                                            # cache body
+          storagePath += suffix if suffix != ('.' + ext)
+          ('//' + host + storagePath).R.write body                        # cache body
           reader = RDF::Reader.for content_type: format                   # select reader
           reader.new(body,base_uri: env[:base_uri],noRDF: options[:noRDF]){|_| # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader   # parse RDF
