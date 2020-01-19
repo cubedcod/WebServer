@@ -43,7 +43,7 @@ class WebResource < RDF::URI
   def loadRDF options = {}
     graph = options[:repository] || env[:repository] ||= RDF::Repository.new
     options[:base_uri] ||= self
-      puts "loading #{uri} from #{fsPath} base #{options[:base_uri]}"
+    #puts "loading #{uri} from #{fsPath} base #{options[:base_uri]}"
     if node.file?
       # format-hint when name-suffix (extension) isn't enough to determine type
       options[:format] ||= if basename.index('msg.')==0 || path.index('/sent/cur')==0
