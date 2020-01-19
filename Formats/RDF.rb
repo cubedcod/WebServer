@@ -67,7 +67,7 @@ class WebResource < RDF::URI
                              :markdown
                            elsif %w(gemfile rakefile).member?(basename.downcase) || %w(gemspec).member?(ext.downcase)
                              :sourcecode
-                           elsif %w(bash c cpp h hs pl py rb sh).member? ext.downcase
+                           elsif %w(bash c cpp h hs js pl py rb sh).member? ext.downcase
                              :sourcecode
                            end unless ext == 'ttl'
       graph.load fsPath, **options
