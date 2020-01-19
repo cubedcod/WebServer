@@ -72,6 +72,15 @@ image-src
 
     def self.degunk body, verbose = true
       doc = Nokogiri::HTML.parse body # parse
+      if content_type = doc.css('meta[http-equiv="Content-Type"]')[0]
+        if content = content_type['content']
+          if charset_tag = content.split(';')[1]
+            if charset = charset_tag.split('=')[1]
+              doc = Nokogiri::HTML.parse body.force_encoding(charset).encode('UTF-8')
+            end
+          end
+        end
+      end
       degunkDoc doc, verbose         # degunk
       doc.to_html                     # serialize
     end
