@@ -135,7 +135,11 @@ class WebResource < RDF::URI
     doc.loadRDF repository: fullGraph    # load document
     treeFromGraph(fullGraph).values.map{|resource|        # subject
       subject = (resource['uri'] || '').R
-      [Abstract,Creator,Date,Image,Link,Title,To,Type,Video].map{|p|
+      ps = [Abstract, Creator, Date, Image, Link, Title, To, Type, Video]
+      type = resource[Type]
+      type = [type] unless type.class == Array
+      ps.push Content if type.member? (SIOC + 'MicroblogPost').R
+      ps.map{|p|
         if o = resource[p] ; p = p.R                      # predicate
           (o.class == Array ? o : [o]).map{|o|            # object
             miniGraph << RDF::Statement.new(subject,p,o)} # triple to summary graph
