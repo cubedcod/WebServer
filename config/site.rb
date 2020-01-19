@@ -550,9 +550,6 @@ firefox.settings.services.mozilla.com
 
     GET 'twitter.com', -> r {
       if !r.path || r.path == '/'
-        r.env[:links][:feed] = '/feed'
-        RootIndex[r]
-      elsif r.parts[0] == 'feed'
         r.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/8.3 (KHTML, like Gecko) Chrome/80.0 Safari/8.3'
         Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}.shuffle.each_slice(18){|s|
           '//twitter.com/search'.R(r.env).fetch intermediate: true, noRDF: true,
