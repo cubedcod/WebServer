@@ -15,7 +15,7 @@ class WebResource
          end)
     end
     def glob
-      Pathname.glob(fsPath).map{|p|join p.relative_path_from fsPath}
+      Pathname.glob(fsPath).map{|p|join(p.relative_path_from fsPath).R env}
     end
     def node; Pathname.new fsPath end
     def parts; path ? (path.split('/') - ['']) : [] end

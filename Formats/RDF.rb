@@ -42,6 +42,7 @@ class WebResource < RDF::URI
 
   def loadRDF options = {}
     graph = options[:repository] || env[:repository] ||= RDF::Repository.new
+    options[:base_uri] ||= self
     if node.file?
       # format-hint when name-suffix (extension) isn't enough to determine type
       options[:format] ||= if basename.index('msg.')==0 || path.index('/sent/cur')==0
@@ -63,11 +64,9 @@ class WebResource < RDF::URI
                            elsif %w(bash c cpp h hs pl py rb sh).member? ext.downcase
                              :sourcecode
                            end unless ext == 'ttl'
-
-      options[:file_path] = self
       graph.load fsPath, **options
     elsif node.directory?
-      container = options[:base_uri] || self
+      container = self
       container += '/' unless container.to_s[-1] == '/'
 
       graph << RDF::Statement.new(container, Type.R, (W3+'ns/ldp#Container').R)
@@ -77,10 +76,10 @@ class WebResource < RDF::URI
       node.children.map{|n|
         isDir = n.directory?
         name = n.basename.to_s + (isDir ? '/' : '')
-        item = container.join name
+        item = container.join(name).R env
         unless name[0] == '.' # elide invisible nodes
           if n.file?          # summarize contained document
-            graph.load item.R.summary
+            graph.load item.summary
           elsif isDir         # list contained directory
             graph << RDF::Statement.new(container, (W3+'ns/ldp#contains').R, item)
             graph << RDF::Statement.new(item, Type.R, (W3+'ns/ldp#Container').R)
