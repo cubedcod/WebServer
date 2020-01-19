@@ -65,7 +65,7 @@ class WebResource < RDF::URI
                            end unless ext == 'ttl'
 
       options[:file_path] = self
-      graph.load relPath, **options
+      graph.load fsPath, **options
     elsif node.directory?
       container = options[:base_uri] || self
       container += '/' unless container.to_s[-1] == '/'
@@ -77,15 +77,15 @@ class WebResource < RDF::URI
       node.children.map{|n|
         isDir = n.directory?
         name = n.basename.to_s + (isDir ? '/' : '')
+        item = container.join name
         unless name[0] == '.' # elide invisible nodes
           if n.file?          # summarize contained document
-            graph.load n.R(env).summary
+            graph.load item.R.summary
           elsif isDir         # list contained directory
-            subdir = container.join name
-            graph << RDF::Statement.new(container, (W3+'ns/ldp#contains').R, subdir)
-            graph << RDF::Statement.new(subdir, Type.R, (W3+'ns/ldp#Container').R)
-            graph << RDF::Statement.new(subdir, Title.R, name)
-            graph << RDF::Statement.new(subdir, Date.R, n.mtime.iso8601)
+            graph << RDF::Statement.new(container, (W3+'ns/ldp#contains').R, item)
+            graph << RDF::Statement.new(item, Type.R, (W3+'ns/ldp#Container').R)
+            graph << RDF::Statement.new(item, Title.R, name)
+            graph << RDF::Statement.new(item, Date.R, n.mtime.iso8601)
           end
         end
       }
@@ -121,29 +121,23 @@ class WebResource < RDF::URI
   end
 
   def summary
-    sf = summaryFile
-    return sf if sf.node.exist? && sf.node.mtime >= node.mtime
+    sf = '../.cache/RDF/' + fsPath + (path[-1] == '/' ? 'index' : '') + (ext == 'ttl' ? '' : '.ttl')
+    sNode = Pathname.new sf
+    return sf if sNode.exist? && sNode.mtime >= node.mtime
     doc = path[-1] == '/' ? (self + 'index.ttl').R : self # document to summarize
     fullGraph = RDF::Repository.new                       # full graph
     miniGraph = RDF::Repository.new                       # summary graph
-    puts "summarize #{self} to #{sf}, using data from #{doc}"
     doc.loadRDF repository: fullGraph    # load document
     treeFromGraph(fullGraph).values.map{|resource|        # subject
       subject = (resource['uri'] || '').R
-      puts subject,:_________
       [Abstract,Creator,Date,Image,Link,Title,To,Type,Video].map{|p|
         if o = resource[p] ; p = p.R                      # predicate
           (o.class == Array ? o : [o]).map{|o|            # object
             miniGraph << RDF::Statement.new(subject,p,o)} # triple to summary graph
         end}}
-puts miniGraph.triples
-    sf.dir.mkdir                                          # containing dir
+    FileUtils.mkdir_p sNode.dirname                       # containing dir
     RDF::Writer.for(:turtle).open(sf){|f|f << miniGraph}  # write summary graph
     sf                                                    # summary file
-  end
-
-  def summaryFile
-    ('../.cache/RDF/' + relPath + (path[-1] == '/' ? 'index' : '') + (ext == 'ttl' ? '' : '.ttl')).R env
   end
 
   # Repository -> Hash

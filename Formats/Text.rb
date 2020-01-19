@@ -351,7 +351,7 @@ module Webize
       end
 
       def vtt_triples
-        webvtt = @base.host ? WebVTT.from_blob(@doc) : WebVTT.read(@base.relPath)
+        webvtt = @base.host ? WebVTT.from_blob(@doc) : WebVTT.read(@base.fsPath)
         line = 0
         webvtt.cues.each do |cue|
           subject = @base.join '#l' + line.to_s; line += 1

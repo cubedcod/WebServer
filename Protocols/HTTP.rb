@@ -58,7 +58,7 @@ class WebResource
       end}
 
     RootIndex = -> r {
-      if r.path == '/' || r.uri.match?(GlobChars)
+      if r.path == '/' || r.path.match?(GlobChars)
         r.nodeRequest
       else
         r.chrono_sort if r.parts.size == 1
@@ -336,7 +336,7 @@ class WebResource
           storage += 'index' if path[-1] == '/'                           #  index file
           suffix = Rack::Mime::MIME_TYPES.invert[format]                  #  MIME suffix
           storage += suffix if suffix != ('.' + ext)
-          storage.write body                                              # cache body
+          storage.R.write body                                            # cache body
           reader = RDF::Reader.for content_type: format                   # select reader
           reader.new(body,base_uri: env[:base_uri],noRDF: options[:noRDF]){|_| # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader   # parse RDF
@@ -591,9 +591,9 @@ class WebResource
               else                                                     # files:
                 if uri.match GlobChars                                 # GLOB - parametric
                   env[:grep] = true if env && env[:query].has_key?('q')
-                  env[:query].has_key?('full') ? Pathname.glob(fsPath) : Pathname.glob(fsPath).map(&:summary)
+                  glob
                 else                                                   # GLOB - default graph-data
-                  Pathname.glob (self + '.*').R.fsPath
+                  (self + '.*').R.glob
                 end
                end).flatten.compact.uniq.map{|n|n.R env}
 
