@@ -8,7 +8,7 @@ class WebResource
         host.split('.').-(%w(com net org www)).reverse.join('/')
        end) +
         (if !path
-         '/'
+         ''
         elsif path.size > 512 || parts.find{|p|p.size > 127}
           hash = Digest::SHA2.hexdigest path
           ['',hash[0..1],hash[2..-1]].join '/'

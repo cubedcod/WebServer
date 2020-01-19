@@ -557,6 +557,8 @@ firefox.settings.services.mozilla.com
         r.saveRDF.chrono_sort.graphResponse
       elsif r.gunkURI
         r.deny
+      elsif r.path.match? GlobChars
+        r.nodeRequest
       else
         r.env[:links][:up]    = '/' if r.parts.size == 1
         r.env[:links][:up]    = '/' + r.parts[0] if r.path.match? /\/status\/\d+\/?$/

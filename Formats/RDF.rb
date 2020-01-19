@@ -114,7 +114,8 @@ class WebResource < RDF::URI
 
       # store documents
       docs.map{|doc|
-        turtle = doc.fsPath + (doc.path[-1] == '/' ? 'index' : '') + '.ttl'
+        #puts "doc #{doc} -> #{doc.fsPath}"
+        turtle = doc.fsPath + (doc.path && doc.path[-1] == '/' && 'index' || '') + '.ttl'
         unless File.exist? turtle
           FileUtils.mkdir_p File.dirname turtle
           RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
