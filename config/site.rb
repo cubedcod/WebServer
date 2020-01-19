@@ -195,7 +195,7 @@ secure.brightcove.com
     ir.ebaystatic.com
 thumbs.ebaystatic.com).map{|host| GET host }
 
-    GET 'i.ebayimg.com', -> r {r.basename.match?(/s-l(64|96|200|225).jpg/) ? [301, {'Location' => r.dirname + '/s-l1600.jpg'}, []] : r.fetch}
+    GET 'i.ebayimg.com', -> r {r.basename.match?(/s-l(64|96|200|225).jpg/) ? [301, {'Location' => File.dirname(r.path) + '/s-l1600.jpg'}, []] : r.fetch}
     GET 'rover.ebay.com', -> r {r.env[:query].has_key?('mpre') ? [301, {'Location' => r.env[:query]['mpre']}, []] : r.deny}
 
     # Economist
@@ -449,16 +449,14 @@ firefox.settings.services.mozilla.com
     %w(gateway gql oauth old s www).map{|h|                                 Allow h + '.reddit.com' }
     %w(np.reddit.com reddit.com).map{|host| GET host, GotoReddit }
 
-    Reddit = -> r { parts = r.parts
+    GET 'www.reddit.com', -> r { parts = r.parts
       r.chrono_sort if r.path == '/' || parts[-1] == 'new' || parts.size == 5                # chrono-sort preference
-      r = ('/r/Bostonmusic+Dorchester+QuincyMa+Rad_Decentralization+SOLID+StallmanWasRight+boston+dancehall+darknetplan+fossdroid+massachusetts+roxbury+selfhosted+shortwave/new/').R r.env if r.path == '/' # subscriptions
+      r = ('//www.reddit.com/r/Bostonmusic+Dorchester+QuincyMa+Rad_Decentralization+SOLID+StallmanWasRight+boston+dancehall+darknetplan+fossdroid+massachusetts+roxbury+selfhosted+shortwave/new/').R r.env if r.path == '/' # subscriptions
       r.upstreamUI if parts[-1] == 'submit'                                                  # upstream UI preference
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !parts.member?('wiki') # MIME preference
       r.env[:links][:prev] = 'https://old.reddit.com' + r.path + r.qs # page pointers
-      r.env[:links][:up] = r.dirname unless r.path == '/'
+      r.env[:links][:up] = File.dirname r.path unless r.path == '/'
       r.fetch options}
-
-    GET 'www.reddit.com', Reddit
 
     # this host provides a next-page pointer, missing in HTTP Headers (either UI) and HTML (new UI)
     GET 'old.reddit.com', -> r {
