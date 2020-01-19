@@ -511,7 +511,7 @@ class WebResource
     Markup[Creator] = Markup[To] = -> c, env {
       if c.class == Hash || c.respond_to?(:uri)
         u = c.R
-        basename = u.basename
+        basename = u.basename if u.path
         host = u.host
         name = u.fragment ||
                (basename && !['','/'].member?(basename) && basename) ||
