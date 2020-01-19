@@ -1,8 +1,6 @@
 %w(fileutils pathname shellwords).map{|d| require d }
 class WebResource
   module POSIX
-    def basename; File.basename path end
-    def ext; File.extname(path)[1..-1] || '' end
     def fsPath
       (if !host || %w(l localhost).member?(host)
        '.'
@@ -25,7 +23,6 @@ class WebResource
       }
     end
     def node; Pathname.new fsPath end
-    def parts; path ? (path.split('/') - ['']) : [] end
     def shellPath; Shellwords.escape fsPath.force_encoding 'UTF-8' end
     def write o
       FileUtils.mkdir_p node.dirname

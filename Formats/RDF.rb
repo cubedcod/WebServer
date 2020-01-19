@@ -36,6 +36,11 @@ class WebResource < RDF::URI
     Podcast  = 'http://www.itunes.com/dtds/podcast-1.0.dtd#'
     RSS      = 'http://purl.org/rss/1.0/'
     Schema   = 'http://schema.org/'
+
+    def basename; File.basename path end
+    def ext; File.extname(path)[1..-1] || '' end
+    def parts; path ? (path.split('/') - ['']) : [] end
+
   end
 
   alias_method :uri, :to_s
