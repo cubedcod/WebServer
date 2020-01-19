@@ -338,7 +338,7 @@ class WebResource
        c: t.map{|k,vs|
          vs = (vs.class == Array ? vs : [vs]).compact
          type = (k ? k.to_s : '#notype').R
-         ([{_: :tr, name: type.fragment || type.basename,
+         ([{_: :tr, name: type.fragment || (type.path && type.basename),
             c: ["\n",
                 {_: :td, class: 'k', c: Markup[Type][type]}, "\n",
                 {_: :td, class: 'v', c: vs.map{|v|
@@ -361,7 +361,7 @@ class WebResource
       when Array
         x.map{|n|render n}.join
       when WebResource
-        render [{_: :a, href: x.uri, c: (%w{gif ico jpeg jpg png webp}.member?(x.ext.downcase) ? {_: :img, src: x.uri} : CGI.escapeHTML((x.query || (x.basename && x.basename != '/' && x.basename) || (x.path && x.path != '/' && x.path) || x.host || x.to_s)[0..48]))}, ' ']
+        render [{_: :a, href: x.uri, c: (%w{gif ico jpeg jpg png webp}.member?(x.path && x.ext.downcase) ? {_: :img, src: x.uri} : CGI.escapeHTML((x.query || (x.path && x.basename != '/' && x.basename) || (x.path && x.path != '/' && x.path) || x.host || x.to_s)[0..48]))}, ' ']
       when NilClass
         ''
       when FalseClass
@@ -442,7 +442,7 @@ class WebResource
          (unseen = types - shown ; puts "#{v['uri']} no renderers defined for: " + unseen.join(' ') unless unseen.empty?),
          (keyval v, env if shown.empty?)] # fallback renderer
       elsif v.class == WebResource # resource reference
-        if %w{jpeg jpg JPG png PNG webp}.member? v.ext
+        if v.path && %w{jpeg jpg JPG png PNG webp}.member?(v.ext)
           Markup[Image][v, env]    # image reference
         else
           v                        # generic reference
@@ -598,7 +598,7 @@ class WebResource
 
     Markup[Type] = -> t, env=nil {
       if t.class == WebResource
-        {_: :a, href: t.uri, c: Icons[t.uri] || t.fragment || t.basename}.update(Icons[t.uri] ? {class: :icon} : {})
+        {_: :a, href: t.uri, c: Icons[t.uri] || t.fragment || (t.path && t.basename)}.update(Icons[t.uri] ? {class: :icon} : {})
       else
         CGI.escapeHTML t.to_s
       end}

@@ -67,9 +67,9 @@ module Webize
                 re = link.R
                 a.set_attribute 'href', link
                 # emit hyperlinks as RDF
-                if %w{gif jpeg jpg png webp}.member? re.ext.downcase
+                if re.path && %w{gif jpeg jpg png webp}.member?(re.ext.downcase)
                   yield s, Image, re
-                elsif (%w{mp4 webm}.member? re.ext.downcase) || (re.host && re.host.match(/v.redd.it|vimeo|youtu/))
+                elsif re.path && (%w{mp4 webm}.member? re.ext.downcase) || (re.host && re.host.match(/v.redd.it|vimeo|youtu/))
                   yield s, Video, re
                 elsif re != subject
                   yield s, DC+'link', re
