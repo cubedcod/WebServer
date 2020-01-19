@@ -4,13 +4,17 @@ class WebResource
     def basename; File.basename path end
     def ext; File.extname(path)[1..-1] || '' end
     def fsPath
-      host.split('.').-(%w(com net org www)).reverse.join('/') +
+      (if host
+       host.split('.').-(%w(com net org www)).reverse.join('/')
+      else
+        '.'
+       end) +
         (if !path
-          '/'
-         elsif path.size > 512 || parts.find{|p|p.size > 127}
+         '/'
+        elsif path.size > 512 || parts.find{|p|p.size > 127}
           hash = Digest::SHA2.hexdigest path
           ['',hash[0..1],hash[2..-1]].join '/'
-         else
+        else
           path
          end)
     end
