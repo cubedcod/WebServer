@@ -604,7 +604,6 @@ firefox.settings.services.mozilla.com
 
     # Wix
     GET 'static.parastorage.com'
-    GET 'static.wixstatic.com'
 
     # WordPress
     %w(i0 i1 i2 s0 s1 s2).map{|h| GET h + '.wp.com' }

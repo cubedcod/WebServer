@@ -386,7 +386,7 @@ class WebResource
       {_: :table, class: :tabular,
        c: [{_: :tr, c: keys.map{|p|
               p = p.R
-              slug = p.fragment || p.basename
+              slug = p.fragment || (p.path && p.basename) || ' '
               icon = Icons[p.uri] || slug
               {_: :td, c: (env[:query]||{})['sort'] == p.uri ? icon : {_: :a, class: :head, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}}},
            graph.map{|resource|
