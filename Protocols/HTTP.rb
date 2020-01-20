@@ -17,6 +17,8 @@ class WebResource
     Populator = {}
     Servers = {}
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
+    Suffixes = {'audio/mpeg' => '.mp3',
+                'text/xml' => '.rss'}
     Internal_Headers = %w(base-uri connection gunk host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rdf remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software site-chrome transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forwarded-for)
 
     # handlers
@@ -334,7 +336,7 @@ class WebResource
           body = Webize::HTML.degunk body,static if format == 'text/html' && !AllowedHosts.has_key?(host) # clean HTML
           storagePath = path                                              # storage location
           storagePath += 'index' if storagePath[-1] == '/'                #  index file
-          suffix = Rack::Mime::MIME_TYPES.invert[format] || {'text/xml' => '.rss'}[format] #  MIME suffix
+          suffix = Suffixes[format] || Rack::Mime::MIME_TYPES.invert[format] #  MIME suffix
           storagePath += suffix if suffix && suffix != ('.' + ext)
           ('//' + host + storagePath).R.writeFile body                    # cache body
           reader = RDF::Reader.for content_type: format                   # select reader
