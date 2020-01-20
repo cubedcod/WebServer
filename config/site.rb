@@ -537,7 +537,7 @@ firefox.settings.services.mozilla.com
     GotoTwitter = -> r {[301,{'Location' => 'https://twitter.com' + r.path },[]]}
     %w(mobile.twitter.com tweettunnel.com www.twitter.com).map{|host| GET host, GotoTwitter }
     GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : NoQuery[r]}
-    GET 'trib.al', NoQuery
+    GET 'bit.ly', NoQuery; GET 'trib.al', NoQuery
 
     Populate 'twitter.com', -> r {
       FileUtils.mkdir 'twitter'

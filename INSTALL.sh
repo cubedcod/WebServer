@@ -1,5 +1,7 @@
 #!/bin/sh
 
+mkdir ~/web
+
 # Alpine https://www.alpinelinux.org/
 which apk && su -c 'apk add alpine-sdk iptables ip6tables graphicsmagick ruby ruby-dev python python3-dev py3-cffi py3-pip openssl-dev rsync libexif-dev libxslt-dev tmux squid'
 

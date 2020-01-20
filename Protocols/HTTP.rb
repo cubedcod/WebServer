@@ -124,7 +124,7 @@ class WebResource
 
         # non-content response
         elsif [301, 302, 303].member? status
-          print "\nhttps:", resource.uri ," ➡️ ", head['Location'] # redirection
+          print "\nhttps:", resource.uri ," ➡️  ", head['Location'] # redirection
         elsif [204, 304].member? status
           print '✅'                    # up-to-date
         elsif status == 404
