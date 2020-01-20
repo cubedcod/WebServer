@@ -336,7 +336,7 @@ class WebResource
           storagePath += 'index' if storagePath[-1] == '/'                #  index file
           suffix = Rack::Mime::MIME_TYPES.invert[format] || {'text/xml' => '.rss'}[format] #  MIME suffix
           storagePath += suffix if suffix && suffix != ('.' + ext)
-          ('//' + host + storagePath).R.write body                        # cache body
+          ('//' + host + storagePath).R.writeFile body                    # cache body
           reader = RDF::Reader.for content_type: format                   # select reader
           reader.new(body,base_uri: env[:base_uri],noRDF: options[:noRDF]){|_| # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader   # parse RDF
@@ -809,6 +809,12 @@ class WebResource
     def upstreamUI?
       env.has_key?(:UX) || ENV.has_key?('UX') ||      # environment
       parts.member?('embed') || env[:query].has_key?('UX') # URL parameter
+    end
+
+    def writeFile o
+      FileUtils.mkdir_p node.dirname
+      File.open(fsPath,'w'){|f|f << o.force_encoding('UTF-8')}
+      self
     end
 
   end

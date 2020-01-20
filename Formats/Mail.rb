@@ -60,7 +60,7 @@ module Webize
         htmlFiles.map{|p|
           html = (graph.path + ".#{htmlCount}.html").R # HTML-file
           yield mail, DC + 'hasFormat', html, graph   # reference
-          html.write p.decoded unless html.node.exist? # store
+          html.writeFile p.decoded unless html.node.exist? # store
           htmlCount += 1 } # increment count
 
         # plaintext message
@@ -127,7 +127,7 @@ module Webize
         yield mail, Date, timestamp, graph
 
         mailFile = ('mail/cur/' + timestamp.gsub(/\D/,'.') + Digest::SHA2.hexdigest(id) + '.eml').R
-        mailFile.write body unless mailFile.node.exist?
+        mailFile.writeFile body unless mailFile.node.exist?
 
         # index addresses
         [*from, *to].map{|addr|
@@ -159,7 +159,7 @@ module Webize
                  (Digest::SHA2.hexdigest(rand.to_s) + (Rack::Mime::MIME_TYPES.invert[p.mime_type] || '.bin').to_s) # generate name
           file = (graph.path + '.' + name).R   # file location
           unless file.node.exist?              # store file
-            file.write p.body.decoded.force_encoding 'UTF-8'
+            file.writeFile p.body.decoded.force_encoding 'UTF-8'
           end
           yield mail, SIOC+'attachment', file, graph # attachment pointer
           if p.main_type == 'image'           # image attachments
