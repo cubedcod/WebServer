@@ -5,6 +5,7 @@ module Webize
       Triplr = {
         'apnews.com' => :AP,
         'github.com' => :GitHub,
+        'gitter.im' => :Gitter,
         'lwn.net' => :LWN,
         'news.ycombinator.com' => :HackerNews,
         'twitter.com' => :TwitterHTML,
@@ -782,6 +783,12 @@ media-mbst-pub-ue1.s3.amazonaws.com
         yield subject, To, self
         comment.remove
       end
+    }
+  end
+
+  def Gitter doc
+    doc.css('.chat-item').map{|msg|
+      
     }
   end
 
