@@ -889,11 +889,10 @@ media-mbst-pub-ue1.s3.amazonaws.com
 
   def TwitterHTML doc, &b
 
-    # page pointers
+    # page pointer
     doc.css('.stream-container').map{|stream|
       if position = stream['data-min-position']
-        user = parts[0] == 'i' ? parts[3] : parts[0]
-        env[:links][:prev] = '/i/profiles/show/' + user + '/timeline/tweets?include_available_features=1&include_entities=1&max_position=' + position + '&reset_error_state=false&rdf&view=table&sort=date'
+        env[:links][:prev] = '/i/profiles/show/' + parts[0] + '/timeline/tweets?include_available_features=1&include_entities=1&max_position=' + position + '&reset_error_state=false&rdf&view=table&sort=date'
       end}
 
     # tweets
@@ -943,6 +942,11 @@ media-mbst-pub-ue1.s3.amazonaws.com
   end
 
   def TwitterJSON tree, &b
+    # page pointer
+    if position = tree['min_position']
+      env[:links][:prev] = '/i/profiles/show/' + parts[3] + '/timeline/tweets?include_available_features=1&include_entities=1&max_position=' + position + '&reset_error_state=false&rdf&view=table&sort=date'
+    end
+    # tweets
     if html = tree['items_html']
       TwitterHTML Nokogiri::HTML.fragment(html), &b
     end
