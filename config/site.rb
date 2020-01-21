@@ -888,6 +888,15 @@ media-mbst-pub-ue1.s3.amazonaws.com
   end
 
   def TwitterHTML doc, &b
+
+    # page pointers
+    doc.css('.stream-container').map{|stream|
+      if position = stream['data-min-position']
+        user = parts[0] == 'i' ? parts[3] : parts[0]
+        env[:links][:prev] = '/i/profiles/show/' + user + '/timeline/tweets?include_available_features=1&include_entities=1&max_position=' + position + '&reset_error_state=false&rdf&view=table&sort=date'
+      end}
+
+    # tweets
     %w{grid-tweet tweet}.map{|tweetclass|
       doc.css('.' + tweetclass).map{|tweet|
         s = 'https://twitter.com' + (tweet.css('.js-permalink').attr('href') || tweet.attr('data-permalink-path') || '')
