@@ -891,8 +891,9 @@ media-mbst-pub-ue1.s3.amazonaws.com
 
     # page pointer
     doc.css('.stream-container').map{|stream|
-      if position = stream['data-min-position']
-        env[:links][:prev] = '/i/profiles/show/' + parts[0] + '/timeline/tweets?include_available_features=1&include_entities=1&max_position=' + position + '&reset_error_state=false&rdf&view=table&sort=date'
+      user = parts[0]
+      if user && position = stream['data-min-position']
+        env[:links][:prev] = '/i/profiles/show/' + user + '/timeline/tweets?include_available_features=1&include_entities=1&max_position=' + position + '&reset_error_state=false&rdf&view=table&sort=date'
       end}
 
     # tweets
