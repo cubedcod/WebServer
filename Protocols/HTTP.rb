@@ -364,15 +364,10 @@ class WebResource
         dest = e.io.meta['location'].R env
         same_path = (path || '/') == (dest.path || '/')
         same_host = host == dest.host
-        same_scheme = scheme == dest.scheme
         scheme_downgrade = scheme == 'https' && dest.scheme == 'http'
         if same_path && same_host && scheme_downgrade
-          puts "WARNING HTTPS redirected to HTTP at #{uri}"
-          dest.fetchHTTP options # transport-scheme downgrade
-        elsif same_path && same_host && same_scheme
-          puts qs, dest.qs
-          puts "ERROR #{uri} redirects to #{dest}"
-          notfound
+          puts "WARNING HTTPS downgraded to HTTP at #{uri}"
+          dest.fetchHTTP options
         else
           [302, {'Location' => dest.uri}, []]
         end

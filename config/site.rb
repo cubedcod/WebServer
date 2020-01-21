@@ -4,7 +4,6 @@ module Webize
     class Reader
       Triplr = {
         'apnews.com' => :AP,
-        'boards.4channel.org' => :FourChannel,
         'github.com' => :GitHub,
         'lwn.net' => :LWN,
         'news.ycombinator.com' => :HackerNews,
@@ -747,8 +746,6 @@ media-mbst-pub-ue1.s3.amazonaws.com
     ['#fixed_sidebar'].map{|s|doc.css(s).map &:remove}
   end
 
-  def FourChannel doc
-  end
   GHgraph = /__gh__coreData.content=(.*?);?\s*__gh__coreData.content.bylineFormat/m
   def GateHouse doc
     doc.css('script').map{|script|
