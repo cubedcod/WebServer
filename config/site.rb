@@ -256,8 +256,9 @@ thumbs.ebaystatic.com).map{|host| GET host }
       GET 'www.google.com', -> r {
         case r.path
         when /^.(images|maps|xjs)/
+          r.upstreamUI.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
           r.fetch
-        when /^.search/ # somehow full URLs are getting sent to search on Android Chrome. redirect to URL
+        when /^.search/ # full URLs are getting sent to /search on Android/Chrome. redirect to URL
           q = r.env[:query]['q']
           q && q.match?(/^(https?:|l(ocalhost)?(:8000)?)\//) && [301,{'Location'=>q.sub(/^l/,'http://l')},[]] || r.fetch
         when '/url'

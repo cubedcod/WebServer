@@ -11,7 +11,7 @@ class WebResource
        end) +                                   ## path
         (if !path                                # none
          []
-        elsif path.size > 512                    # long path, hash it
+        elsif path.size > 512 || parts.find{|p|p.size > 255} # long path, hash it
           hash = Digest::SHA2.hexdigest path
           [hash[0..1], hash[2..-1]]
         else                                     # direct-mapped path
