@@ -18,6 +18,7 @@ class WebResource
     Servers = {}
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Suffixes = {'audio/mpeg' => '.mp3',
+                'image/x-icon' => '.ico',
                 'text/xml' => '.rss'}
     Internal_Headers = %w(base-uri connection gunk host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rdf remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software site-chrome transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forwarded-for)
 
@@ -334,7 +335,7 @@ class WebResource
                       RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
           static = fixedFormat? format
           body = Webize::HTML.degunk body,static if format == 'text/html' && !AllowedHosts.has_key?(host) # clean HTML
-          formatExt = Suffixes[format] || Rack::Mime::MIME_TYPES.invert[format] # MIME to suffix mapping
+          formatExt = Suffixes[format] || Rack::Mime::MIME_TYPES.invert[format] || (puts 'WARNING suffix undefined for ' + format;'') # MIME to suffix mapping
           suffix = formatExt == extension && '' || formatExt              # append MIME-suffix if incorrect or missing
           (fsPath + suffix).R.writeFile body                              # cache body
           reader = RDF::Reader.for content_type: format                   # select reader
