@@ -98,7 +98,7 @@ class WebResource
       env[:query] = parseQs(env['QUERY_STRING'])                           # parse query
       resource.send(env['REQUEST_METHOD']).yield_self{|status, head, body| # dispatch
 
-        ext = resource.ext.downcase                                        # log request
+        ext = resource.path ? resource.ext.downcase : ''                   # log request
         mime = head['Content-Type'] || ''
 
         # highlight host on first-visit of this server run
@@ -429,8 +429,10 @@ class WebResource
         elsif node.file?
           fileResponse              # local static data
         else
-          dir = File.dirname path
-          env[:links][:up] = dir + (dir == '/' ? '' : '/') + qs unless !path || path == '/'
+          unless !path || path == '/'
+            dir = File.dirname path
+            env[:links][:up] = dir + (dir[-1] == '/' ? '' : '/') + qs
+          end
           timeMeta
           nodeRequest               # local transformable/graph data
         end
