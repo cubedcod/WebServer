@@ -39,6 +39,7 @@ class WebResource < RDF::URI
 
     def basename; File.basename path end
     def ext; File.extname(path)[1..-1] || '' end
+    def extension; '.' + ext end
     def parts; path ? (path.split('/') - ['']) : [] end
 
   end

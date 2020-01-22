@@ -334,16 +334,14 @@ class WebResource
                       RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
           static = fixedFormat? format
           body = Webize::HTML.degunk body,static if format == 'text/html' && !AllowedHosts.has_key?(host) # clean HTML
-          storagePath = path                                              # storage location
-          storagePath += 'index' if storagePath[-1] == '/'                # container -> file mapping
-          suffix = Suffixes[format] || Rack::Mime::MIME_TYPES.invert[format] # MIME to suffix mapping
-          storagePath += suffix if suffix && suffix != ('.' + ext)        # append MIME suffix
-          ('//' + host + storagePath).R.writeFile body                    # cache body
+          formatExt = Suffixes[format] || Rack::Mime::MIME_TYPES.invert[format] # MIME to suffix mapping
+          suffix = formatExt == extension && '' || formatExt              # append MIME-suffix if incorrect or missing
+          (fsPath + suffix).R.writeFile body                              # cache body
           reader = RDF::Reader.for content_type: format                   # select reader
           reader.new(body,base_uri: env[:base_uri],noRDF: options[:noRDF]){|_| # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader   # parse RDF
           return self if options[:intermediate]                           # intermediate fetch, return w/o HTTP-response
-          saveRDF                                                         # store RDF
+          saveRDF                                                         # cache RDF
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}             # expose upstream metadata to downstream
           env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin     # CORS header
