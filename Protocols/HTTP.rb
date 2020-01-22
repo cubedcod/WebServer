@@ -335,22 +335,22 @@ class WebResource
           static = fixedFormat? format
           body = Webize::HTML.degunk body,static if format == 'text/html' && !AllowedHosts.has_key?(host) # clean HTML
           storagePath = path                                              # storage location
-          storagePath += 'index' if storagePath[-1] == '/'                #  index file
-          suffix = Suffixes[format] || Rack::Mime::MIME_TYPES.invert[format] #  MIME suffix
-          storagePath += suffix if suffix && suffix != ('.' + ext)
+          storagePath += 'index' if storagePath[-1] == '/'                # container -> file mapping
+          suffix = Suffixes[format] || Rack::Mime::MIME_TYPES.invert[format] # MIME to suffix mapping
+          storagePath += suffix if suffix && suffix != ('.' + ext)        # append MIME suffix
           ('//' + host + storagePath).R.writeFile body                    # cache body
           reader = RDF::Reader.for content_type: format                   # select reader
           reader.new(body,base_uri: env[:base_uri],noRDF: options[:noRDF]){|_| # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader   # parse RDF
           return self if options[:intermediate]                           # intermediate fetch, return w/o HTTP-response
-          saveRDF                                                         # index metadata
+          saveRDF                                                         # store RDF
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
-            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}             # upstream metadata
+            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}             # expose upstream metadata to downstream
           env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin     # CORS header
           env[:resp]['Set-Cookie'] = h['set-cookie'] if h['set-cookie'] && allowCookies?
-          if static                                                       # upstream doc
-            env[:resp]['Content-Length'] = body.bytesize.to_s             # size
-            [200, env[:resp], [body]]
+          if static
+            env[:resp]['Content-Length'] = body.bytesize.to_s             # size header
+            [200, env[:resp], [body]]                                     # upstream doc
           else
             graphResponse                                                 # local doc
           end
@@ -491,7 +491,7 @@ class WebResource
       return false unless host
       return false if AllowedHosts.has_key?(host) || HostGET.has_key?(host) || host.match?(CDNhost)
       c = GunkHosts
-      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # leaf node found in gunk-domain tree
+      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # find leaf on gunk-domain tree
     end
 
     def gunkTag?
@@ -504,8 +504,8 @@ class WebResource
     end
 
     def HEAD
-      self.GET.yield_self{|s,h,_|
-                          [s,h,[]]} # return header
+      self.GET.yield_self{|s, h, _|
+                          [s, h, []]} # return header
     end
 
     # headers formatted and filtered for export w/ capability check
