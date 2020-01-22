@@ -559,11 +559,13 @@ class WebResource
     end
 
     def nodeRequest
-      nodes = (if node.directory?                                      # directory:
+      nodes = (if node.directory?                # directory:
                if env[:query].has_key? 'f'       # FIND full case-insensitive match
+                 summarize = true
                  q = env[:query]['f']
                  `find #{shellPath} -iname #{Shellwords.escape q}`.lines.map{|p|('/' + p.chomp).R} unless env[:query]['f'].empty? || path == '/'
                elsif env[:query].has_key? 'find' # FIND substring match
+                 summarize = true
                  q = '*' + env[:query]['find'] + '*'
                  `find #{shellPath} -iname #{Shellwords.escape q}`.lines.map{|p|('/' + p.chomp).R} unless env[:query]['find'].empty? || path == '/'
                elsif (env[:query].has_key?('Q') || env[:query].has_key?('q')) && path != '/'
@@ -597,10 +599,10 @@ class WebResource
                   (self + '.*').R.glob
                 end
                end).flatten.compact.uniq.map{|n|n.R env}
-      #puts :nodes, nodes.join(' ')
       if nodes.size==1 && nodes[0].ext == 'ttl' && selectFormat == 'text/turtle'
         nodes[0].fileResponse # nothing to webize. return static graph-data
       else                    # merge and/or transform
+        nodes = nodes.map &:summary if summarize
         nodes.map &:loadRDF
         saveRDF if env[:new]
         graphResponse

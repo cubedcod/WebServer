@@ -3,20 +3,20 @@ class WebResource
   module POSIX
 
     # filesystem storage-path for resource
-    def fsPath                                             ## host
-      (if !host || %w(l localhost).member?(host)             # localhost at pwd
-       '.'
-      else                                                   # host directory
-        host.split('.').-(%w(com net org www)).reverse.join('/')
-       end) +                                               ## path
-        (if !path                                            # no path
-         ''
-        elsif path.size > 512 || parts.find{|p|p.size > 127} # long path, hash it
+    def fsPath                                  ## host
+      (if !host || %w(l localhost).member?(host) # localhost
+       ''
+      else                                       # host directory
+        host.split('.').-(%w(com net org www)).reverse.join('/') + '/'
+       end) +                                   ## path
+        (if !path                                # none
+         []
+        elsif path.size > 512                    # long path, hash it
           hash = Digest::SHA2.hexdigest path
-          ['',hash[0..1],hash[2..-1]].join '/'
-        else                                                 # directly-mapped path
-          path
-         end)
+          [hash[0..1], hash[2..-1]]
+        else                                     # direct-mapped path
+          parts
+         end).join('/')
     end
 
     # glob-pattern results mapped to URI space

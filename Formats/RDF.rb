@@ -48,9 +48,9 @@ class WebResource < RDF::URI
   def loadRDF options = {}
     graph = options[:repository] || env[:repository] ||= RDF::Repository.new
     options[:base_uri] ||= self
-    #puts "loading #{uri} from #{fsPath} base #{options[:base_uri]}"
+    #puts  "loading #{uri} data from #{fsPath}"
     if node.file?
-      # format-hint when name-suffix (extension) isn't enough to determine type
+      # further path-derived format hints for when suffix (extension) is too ambiguous to determine type
       options[:format] ||= if basename.index('msg.')==0 || path.index('/sent/cur')==0
                              # procmail doesnt allow suffix (like .eml extension), only prefix?
                              # presumably this is due to maildir suffix-rewrites to denote state
@@ -85,7 +85,7 @@ class WebResource < RDF::URI
         item = container.join(name).R env
         unless name[0] == '.' # elide invisible nodes
           if n.file?          # summarize contained document
-            graph.load item.summary
+            graph.load item.summary.uri
           elsif isDir         # list contained directory
             graph << RDF::Statement.new(container, (W3+'ns/ldp#contains').R, item)
             graph << RDF::Statement.new(item, Type.R, (W3+'ns/ldp#Container').R)
@@ -116,7 +116,6 @@ class WebResource < RDF::URI
 
       # store documents
       docs.map{|doc|
-        #puts "doc #{doc} -> #{doc.fsPath}"
         turtle = doc.fsPath + (doc.path && doc.path[-1] == '/' && 'index' || '') + '.ttl'
         unless File.exist? turtle
           FileUtils.mkdir_p File.dirname turtle
@@ -129,28 +128,30 @@ class WebResource < RDF::URI
   end
 
   def summary
-    sf = '../.cache/RDF/' + fsPath + (path[-1] == '/' ? 'index' : '') + (ext == 'ttl' ? '' : '.ttl')
-    sNode = Pathname.new sf
-    return sf if sNode.exist? && sNode.mtime >= node.mtime
+    sPath = '../.cache/RDF/' + fsPath + (ext == 'ttl' ? '' : '.ttl')
+    summary = sPath.R env
+    sNode = Pathname.new sPath
+    return summary if sNode.exist? && sNode.mtime >= node.mtime # summary exists and up to date
     doc = path[-1] == '/' ? (self + 'index.ttl').R : self # document to summarize
     fullGraph = RDF::Repository.new                       # full graph
     miniGraph = RDF::Repository.new                       # summary graph
-    doc.loadRDF repository: fullGraph    # load document
-    treeFromGraph(fullGraph).values.map{|resource|        # subject
+    doc.loadRDF repository: fullGraph                     # load graph to summarize
+    treeFromGraph(fullGraph).values.map{|resource|        # each subject
       subject = (resource['uri'] || '').R
       ps = [Abstract, Creator, Date, Image, Link, Title, To, Type, Video]
       type = resource[Type]
       type = [type] unless type.class == Array
       ps.push Content if type.member? (SIOC + 'MicroblogPost').R
-      ps.map{|p|
-        if o = resource[p] ; p = p.R                      # predicate
-          (o.class == Array ? o : [o]).map{|o|            # object
-            miniGraph << RDF::Statement.new(subject,p,o)} # triple to summary graph
+      ps.map{|p|                                          # each predicate
+        if o = resource[p] ; p = p.R
+          (o.class == Array ? o : [o]).map{|o|            # each object
+            miniGraph << RDF::Statement.new(subject,p,o)} # add triple to summary graph
         end}}
-    FileUtils.mkdir_p sNode.dirname                       # containing dir
-    RDF::Writer.for(:turtle).open(sf){|f|f << miniGraph}  # write summary graph
-    sf                                                    # summary file
+    FileUtils.mkdir_p sNode.dirname                       # create containing dir
+    RDF::Writer.for(:turtle).open(sPath){|f|f << miniGraph} # write graph
+    summary
   end
+  alias_method :summarize, :summary
 
   # Repository -> Hash
   def treeFromGraph graph = nil
