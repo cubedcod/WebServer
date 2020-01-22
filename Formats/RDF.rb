@@ -116,7 +116,7 @@ class WebResource < RDF::URI
 
       # store documents
       docs.map{|doc|
-        turtle = doc.fsPath + (doc.path && doc.path[-1] == '/' && 'index' || '') + '.ttl'
+        turtle = doc.fsPath + '.ttl'
         unless File.exist? turtle
           FileUtils.mkdir_p File.dirname turtle
           RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
@@ -132,10 +132,9 @@ class WebResource < RDF::URI
     summary = sPath.R env
     sNode = Pathname.new sPath
     return summary if sNode.exist? && sNode.mtime >= node.mtime # summary exists and up to date
-    doc = path[-1] == '/' ? (self + 'index.ttl').R : self # document to summarize
     fullGraph = RDF::Repository.new                       # full graph
     miniGraph = RDF::Repository.new                       # summary graph
-    doc.loadRDF repository: fullGraph                     # load graph to summarize
+    loadRDF repository: fullGraph                         # load RDF
     treeFromGraph(fullGraph).values.map{|resource|        # each subject
       subject = (resource['uri'] || '').R
       ps = [Abstract, Creator, Date, Image, Link, Title, To, Type, Video]
