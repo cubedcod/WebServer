@@ -593,6 +593,7 @@ class WebResource
                end
               else                                                     # files:
                 if uri.match GlobChars                                 # GLOB - parametric
+                  summarize = true
                   env[:grep] = true if env && env[:query].has_key?('q')
                   glob
                 else                                                   # GLOB - default graph-data

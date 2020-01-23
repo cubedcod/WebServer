@@ -105,14 +105,11 @@ class WebResource < RDF::URI
     return self unless env[:repository]
     env[:repository].each_graph.map{|graph|
       n = (graph.name || env[:base_uri]).R # graph identity
-      docs = []                            # storage refs
-      unless n.uri.match?(/^(_|data):/)    # blank-nodes/data-URIs stored in context of identified graph
-        docs.push n
-        if n.host && timestamp = graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value # find timestamp
-            docs.push ['/' + timestamp.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), # build hour-dir path
-                       %w{host path query fragment}.map{|a|n.send(a).yield_self{|p|p && p.split(/[\W_]/)}}]. # tokenize slugs
-                        flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.').R                     # apply slug skiplist
-        end
+      docs = [n]                           # storage nodes
+      if timestamp = graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value     # find timestamp
+        docs.push ['/'+timestamp.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), # build hour-dir path
+                   %w{host path query}.map{|a|n.send(a).yield_self{|p|p && p.split(/[\W_]/)}}].        # tokenize slugs
+                    flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.').R                   # apply slug skiplist
       end
 
       # store documents
@@ -122,9 +119,7 @@ class WebResource < RDF::URI
           FileUtils.mkdir_p File.dirname turtle
           RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
           print "\n🐢 \e[32;1m" + doc.fsPath + "\e[0m "
-        end
-      }
-    }
+        end}}
     self
   end
 

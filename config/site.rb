@@ -526,6 +526,9 @@ firefox.settings.services.mozilla.com
     # TinyURL
     GET 'tinyurl.com', NoQuery
 
+    # Tumblr
+    GET 'springarden.tumblr.com', -> r {r.env[:query].has_key?('audio_file') ? [301, {'Location' => r.env[:query]['audio_file']}, []] : NoGunk[r]}
+    
     # Twitch
     %w( api gql irc-ws.chat panels-images pubsub-edge www ).map{|h|Allow h + '.twitch.tv'}
     GET 'static.twitchcdn.net'
