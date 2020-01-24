@@ -101,18 +101,15 @@ class WebResource < RDF::URI
     puts [e.class, e.message].join ' '
   end
 
-  def saveRDF
-    return self unless env[:repository]
-    env[:repository].each_graph.map{|graph|
+  def saveRDF repository = nil
+    (repository || env[:repository]).each_graph.map{|graph|
       n = (graph.name || env[:base_uri]).R # graph identity
       docs = [n]                           # storage nodes
-      if timestamp = graph.query(RDF::Query::Pattern.new(:s,(WebResource::Date).R,:o)).first_value     # find timestamp
-        docs.push ['/'+timestamp.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), # build hour-dir path
-                   %w{host path query}.map{|a|n.send(a).yield_self{|p|p && p.split(/[\W_]/)}}].        # tokenize slugs
-                    flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.').R                   # apply slug skiplist
+      if ts = graph.query(RDF::Query::Pattern.new(:s, (WebResource::Date).R, :o)).first_value   # timestamp query
+        docs.push ['/'+ts.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), # build hour-dir path
+                   %w{host path query}.map{|a|n.send(a).yield_self{|p|p && p.split(/[\W_]/)}}]. # tokenize slugs
+                    flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.').R            # apply slug skiplist
       end
-
-      # store documents
       docs.map{|doc|
         turtle = doc.fsPath + '.ttl'
         unless File.exist? turtle
@@ -124,13 +121,15 @@ class WebResource < RDF::URI
   end
 
   def summary
-    sPath = '../.cache/RDF/' + fsPath + (ext == 'ttl' ? '' : '.ttl')
+    rdfized = ext == 'ttl'
+    sPath = '../.cache/RDF/' + fsPath + (rdfized ? '' : '.ttl')
     summary = sPath.R env
     sNode = Pathname.new sPath
     return summary if sNode.exist? && sNode.mtime >= node.mtime # summary exists and up to date
     fullGraph = RDF::Repository.new                       # full graph
     miniGraph = RDF::Repository.new                       # summary graph
-    loadRDF repository: fullGraph                         # load RDF
+    loadRDF repository: fullGraph                         # read RDF
+    saveRDF fullGraph unless rdfized                      # store RDF-ized graph(s)
     treeFromGraph(fullGraph).values.map{|resource|        # each subject
       subject = (resource['uri'] || '').R
       ps = [Abstract, Creator, Date, Image, Link, Title, To, Type, Video]
@@ -143,7 +142,7 @@ class WebResource < RDF::URI
             miniGraph << RDF::Statement.new(subject,p,o)} # add triple to summary graph
         end}}
     FileUtils.mkdir_p sNode.dirname                       # create containing dir
-    RDF::Writer.for(:turtle).open(sPath){|f|f << miniGraph} # write graph
+    RDF::Writer.for(:turtle).open(sPath){|f|f << miniGraph} # write summary
     summary
   end
   alias_method :summarize, :summary

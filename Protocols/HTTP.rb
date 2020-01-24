@@ -605,7 +605,6 @@ class WebResource
       else                    # graph data
         nodes = nodes.map &:summary if summarize
         nodes.map &:loadRDF
-        saveRDF if env[:new]
         graphResponse
       end
     end
