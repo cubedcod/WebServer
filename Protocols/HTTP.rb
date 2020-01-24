@@ -535,12 +535,12 @@ class WebResource
       end
       case env['SERVER_NAME']
       when /wsj\.com$/
-        head['Referer'] = 'http://drudgereport.com/'
+        head['Referer'] = 'http://drudgereport.com/' # thanks, Matt
       when /youtube.com$/
-        head['Referer'] = 'https://www.youtube.com/'
+        head['Referer'] = 'https://www.youtube.com/' # make 3rd-party embeds work
       end if env['SERVER_NAME']
-      head['User-Agent'] = 'curl/7.65.1' if host == 'po.st'
-      head.delete 'User-Agent' if host == 't.co'
+      head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # we want redirection in HTTP HEAD-Location not Javascript
+      head.delete 'User-Agent' if host == 't.co'            # so advertise a 'dumb' user-agent
 
       HTTP.print_header head if ENV.has_key? 'VERBOSE'
       head
@@ -601,8 +601,8 @@ class WebResource
                 end
                end).flatten.compact.uniq.map{|n|n.R env}
       if nodes.size==1 && nodes[0].ext == 'ttl' && selectFormat == 'text/turtle'
-        nodes[0].fileResponse # nothing to webize. return static graph-data
-      else                    # merge and/or transform
+        nodes[0].fileResponse # nothing to transform. return static data
+      else                    # graph data
         nodes = nodes.map &:summary if summarize
         nodes.map &:loadRDF
         saveRDF if env[:new]
