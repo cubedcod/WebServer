@@ -63,7 +63,7 @@ module Webize
 
   module JPEG
     class Format < RDF::Format
-      content_type 'image/jpeg', :extension => :jpg
+      content_type 'image/jpeg', extensions: [:jpeg, :jpg]
       reader { Reader }
     end
 

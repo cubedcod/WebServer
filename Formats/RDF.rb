@@ -49,7 +49,6 @@ class WebResource < RDF::URI
   def loadRDF options = {}
     graph = options[:repository] || env[:repository] ||= RDF::Repository.new
     options[:base_uri] ||= self
-    #puts  "loading #{uri} data from #{fsPath}"
     if node.file?
       # further path-derived format hints for when suffix (extension) is too ambiguous to determine type
       options[:format] ||= if basename.index('msg.')==0 || path.index('/sent/cur')==0
@@ -71,6 +70,7 @@ class WebResource < RDF::URI
                            elsif %w(bash c cpp h hs js pl py rb sh).member? ext.downcase
                              :sourcecode
                            end unless ext == 'ttl'
+      #puts  "loading #{uri} RDF from #{fsPath} #{options[:format]}"
       graph.load fsPath, **options
     elsif node.directory?
       container = self
