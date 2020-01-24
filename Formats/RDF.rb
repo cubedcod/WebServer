@@ -12,7 +12,6 @@ class WebResource < RDF::URI
     RDFs     = W3 + '2000/01/rdf-schema#'
     Stat     = W3 + 'ns/posix/stat#'
     Type     = W3 + '1999/02/22-rdf-syntax-ns#type'
-
     DC       = 'http://purl.org/dc/terms/'
     Abstract = DC + 'abstract'
     Audio    = DC + 'Audio'
@@ -21,16 +20,13 @@ class WebResource < RDF::URI
     Link     = DC + 'link'
     Title    = DC + 'title'
     Video    = DC + 'Video'
-
     SIOC     = 'http://rdfs.org/sioc/ns#'
     Content  = SIOC + 'content'
     Creator  = SIOC + 'has_creator'
     To       = SIOC + 'addressed_to'
     Post     = SIOC + 'Post'
-
     FOAF     = 'http://xmlns.com/foaf/0.1/'
     Person   = FOAF + 'Person'
-
     DOAP     = 'http://usefulinc.com/ns/doap#'
     OG       = 'http://ogp.me/ns#'
     Podcast  = 'http://www.itunes.com/dtds/podcast-1.0.dtd#'
@@ -50,7 +46,7 @@ class WebResource < RDF::URI
     graph = options[:repository] || env[:repository] ||= RDF::Repository.new
     options[:base_uri] ||= self
     if node.file?
-      # further path-derived format hints for when suffix (extension) is too ambiguous to determine type
+      # path-derived format hints when suffix (extension) is ambiguous for determining format
       options[:format] ||= if basename.index('msg.')==0 || path.index('/sent/cur')==0
                              # procmail doesnt allow suffix (like .eml extension), only prefix?
                              # presumably this is due to maildir suffix-rewrites to denote state
@@ -142,7 +138,7 @@ class WebResource < RDF::URI
             miniGraph << RDF::Statement.new(subject,p,o)} # add triple to summary graph
         end}}
     FileUtils.mkdir_p sNode.dirname                       # create containing dir
-    RDF::Writer.for(:turtle).open(sPath){|f|f << miniGraph} # write summary
+    RDF::Writer.for(:turtle).open(sPath){|f|f << miniGraph} # write summary graph
     summary
   end
   alias_method :summarize, :summary
