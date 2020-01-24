@@ -343,7 +343,7 @@ class WebResource
           reader.new(body,base_uri: env[:base_uri],noRDF: options[:noRDF]){|_| # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader   # parse RDF
           return self if options[:intermediate]                           # intermediate fetch, return w/o HTTP-response
-          saveRDF                                                         # cache RDF
+          saveRDF if reader; puts "no reader for " + format unless reader # store RDF
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}             # expose upstream metadata to downstream
           env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin     # CORS header
