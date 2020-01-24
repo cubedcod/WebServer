@@ -339,6 +339,7 @@ class WebResource
           formatExt = Suffixes[format] || Rack::Mime::MIME_TYPES.invert[format] || (puts "WARNING suffix undefined for #{format}";'') # MIME to suffix mapping
           suffix = formatExt == extension && '' || formatExt              # append MIME-suffix if incorrect or missing
           (fsPath + suffix).R.writeFile body                              # cache body
+          (fsPath + '.' + Time.now.iso8601 + suffix).R.writeFile body if suffix == '.json' # cache body - version
           reader = RDF::Reader.for content_type: format                   # select reader
           reader.new(body,base_uri: env[:base_uri],noRDF: options[:noRDF]){|_| # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader   # parse RDF
