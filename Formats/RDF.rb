@@ -98,6 +98,7 @@ class WebResource < RDF::URI
   end
 
   def saveRDF repository = nil
+    return self unless repository || env[:repository]
     (repository || env[:repository]).each_graph.map{|graph|
       n = (graph.name || env[:base_uri]).R # graph identity
       docs = [n]                           # storage nodes

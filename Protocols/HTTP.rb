@@ -336,7 +336,7 @@ class WebResource
                       RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
           static = fixedFormat? format
           body = Webize::HTML.degunk body,static if format == 'text/html' && !AllowedHosts.has_key?(host) # clean HTML
-          formatExt = Suffixes[format] || Rack::Mime::MIME_TYPES.invert[format] || (puts 'WARNING suffix undefined for ' + format;'') # MIME to suffix mapping
+          formatExt = Suffixes[format] || Rack::Mime::MIME_TYPES.invert[format] || (puts "WARNING suffix undefined for #{format}";'') # MIME to suffix mapping
           suffix = formatExt == extension && '' || formatExt              # append MIME-suffix if incorrect or missing
           (fsPath + suffix).R.writeFile body                              # cache body
           reader = RDF::Reader.for content_type: format                   # select reader
