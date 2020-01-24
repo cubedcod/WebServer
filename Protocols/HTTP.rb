@@ -241,7 +241,7 @@ class WebResource
 
     def denyPOST
       env[:deny] = true
-      hd = headers
+      HTTP.print_body headers, env['rack.input'].read if ENV.has_key? 'VERBOSE'
       [202, {'Access-Control-Allow-Credentials' => 'true',
              'Access-Control-Allow-Origin' => allowedOrigin}, []]
     end
