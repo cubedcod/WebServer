@@ -76,7 +76,11 @@ image-src
         if content = content_type['content']
           if charset_tag = content.split(';')[1]
             if charset = charset_tag.split('=')[1]
-              doc = Nokogiri::HTML.parse body.force_encoding(charset).encode('UTF-8') # in-band charset tag found. re-read document
+              # in-band charset tag found
+              unless charset.match? /utf.?8/i
+                puts "charset specified in <head> :: #{charset}"
+                doc = Nokogiri::HTML.parse body.force_encoding(charset).encode('UTF-8')
+              end
             end
           end
         end
