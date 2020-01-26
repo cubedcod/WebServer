@@ -437,7 +437,7 @@ class WebResource
           timeMeta
           nodeRequest               # local transformable/graph data
         end
-      elsif path.match? /^.gen(erate)?_?204$/ # connectivity check
+      elsif path.match? /gen(erate)?_?204$/ # connectivity check
         R204
       elsif path.match? /^\/\d\d\d\d\/\d\d\/\d\d\/\d\d\/$/ # hour-dir pagination of cached remote
         name = '*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*'
