@@ -131,7 +131,11 @@ module Webize
 
   module Sourcecode
     class Format < RDF::Format
-      content_type 'application/*'
+      content_type 'application/javascript',
+                   aliases: %w(
+                   application/x-javascript;q=0.8
+                   text/javascript;q=0.8),
+                   extensions: [:bash, :c, :cpp, :gemspec, :h, :hs, :js, :pl, :py, :rb, :sh]
       content_encoding 'utf-8'
       reader { Reader }
     end
@@ -172,7 +176,7 @@ module Webize
 
   module Markdown
     class Format < RDF::Format
-      content_type 'text/markdown', :extension => :md
+      content_type 'text/markdown', :extensions => [:markdown, :md]
       content_encoding 'utf-8'
       reader { Reader }
     end

@@ -46,26 +46,20 @@ class WebResource < RDF::URI
     graph = options[:repository] || env[:repository] ||= RDF::Repository.new
     options[:base_uri] ||= self
     if node.file?
-      # path-derived format hints when suffix (extension) is ambiguous for determining format
+      # path-derived format hints when suffix is ambiguous or missing
       options[:format] ||= if basename.index('msg.')==0 || path.index('/sent/cur')==0
                              # procmail doesnt allow suffix (like .eml extension), only prefix?
                              # presumably this is due to maildir suffix-rewrites to denote state
                              :mail
-                           elsif ext.match? /^html?$/
+                           elsif ext.match? /^html?$/ # use our HTML rdfizer and allow .htm pathnames
                              :html
-                           elsif ext == 'nfo'
-                             :nfo
-                           elsif %w(Cookies).member? basename
+                           elsif %w(Bookmarks Cookies History).member? basename
                              :sqlite
-                           elsif %w(changelog gophermap gophertag license makefile readme todo).member?(basename.downcase) || %w(cls gophermap old plist service socket sty textile xinetd watchr).member?(ext.downcase)
+                           elsif %w(changelog license readme todo).member? basename.downcase
                              :plaintext
-                           elsif %w(markdown).member? ext.downcase
-                             :markdown
-                           elsif %w(gemfile rakefile).member?(basename.downcase) || %w(gemspec).member?(ext.downcase)
+                           elsif %w(gemfile rakefile).member? basename.downcase
                              :sourcecode
-                           elsif %w(bash c cpp h hs js pl py rb sh).member? ext.downcase
-                             :sourcecode
-                           end unless ext == 'ttl'
+                           end
       #puts  "loading #{uri} RDF from #{fsPath} #{options[:format]}"
       graph.load fsPath, **options
     elsif node.directory?
