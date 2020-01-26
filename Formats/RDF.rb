@@ -60,7 +60,7 @@ class WebResource < RDF::URI
                            elsif %w(gemfile rakefile).member? basename.downcase
                              :sourcecode
                            end
-      puts  "LOADRDF #{uri} < #{fsPath} #{options[:format]}"
+      #puts  "LOADRDF #{uri} < #{fsPath} #{options[:format]}"
       graph.load fsPath, **options
     elsif node.directory?
       container = self
