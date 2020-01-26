@@ -238,21 +238,32 @@ thumbs.ebaystatic.com).map{|host| GET host }
     Allow 'gitter.im'
     Allow 'ws.gitter.im'
 
-    # Google
+    # Google - set DEGOOGLE env-var to opt out
     unless ENV.has_key? 'DEGOOGLE'
-      if ENV.has_key? 'GOOGLE'  # allow POSTs
+
+      # POST capability
+      Allow 'groups.google.com'
+      if ENV.has_key? 'GOOGLE'
         (0..24).map{|i| h="#{i}.client-channel.google.com"; Allow h}
         (0..24).map{|i| Allow "clients#{i}.google.com"}
       end
-      Cookies 'www.google.com'  # personalization
-      GData = -> r {(r.env[:referer]||'').match?(/\.google\.com$/) ? NoGunk[r] : r.deny}
-      GET 'ajax.googleapis.com'
-      GET 'feedproxy.google.com', NoQuery
-      %w(maps www).map{|h| GET h + '.googleapis.com', GData }
-      %w(maps ssl www).map{|h|GET h + '.gstatic.com', GData }
+
+      # restrict static-hosts to google referer
+      GData = -> r {(r.env[:referer]||'').match?(/\.(blog(ger|spot)|google(apis)?|gstatic)\.com$/) ? NoGunk[r] : r.deny}
+      %w(maps ssl www).map{|h| GET h + '.googleapis.com', GData }
+      %w(maps ssl www).map{|h| GET h + '.gstatic.com', GData }
       (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com", GData }
       (0..3).map{|i| GET "khms#{i}.google.com", GData }
+
+      # JS libraries, allow anyone
+      GET 'ajax.googleapis.com'
+
+      # misc hosts
+      GET 'feedproxy.google.com', NoQuery
+
+      # main Google site, allow personalization
       GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
+      Cookies 'www.google.com'
       GET 'www.google.com', -> r {
         case r.path
         when /^.(images|maps|xjs)/
