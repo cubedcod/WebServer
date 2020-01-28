@@ -326,13 +326,13 @@ class WebResource
 
     def fetchHTTP options = {}
       URI.open(uri, headers.merge({redirect: false})) do |response| print '🌍🌎🌏🌐'[rand 4]
-        h = response.meta                                               # upstream metadata
-        if response.status.to_s.match? /206/                            # partial response
+        h = response.meta                                             # upstream metadata
+        if response.status.to_s.match? /206/                          # partial response
           h['Access-Control-Allow-Origin'] = allowedOrigin unless h['Access-Control-Allow-Origin'] || h['access-control-allow-origin']
-          [206, h, [response.read]]                                     # return part downstream
+          [206, h, [response.read]]                                   # return part downstream
         else
-          body = HTTP.decompress h, response.read                       # decompress body
-          format = if path == '/feed'                                   # content-type
+          body = HTTP.decompress h, response.read                     # decompress body
+          format = if path == '/feed'                                 # content-type
                      'application/atom+xml'
                    elsif h.has_key? 'content-type'
                      h['content-type'].split(/;/)[0]
@@ -340,26 +340,26 @@ class WebResource
                      puts "ENOTYPE on #{uri} , pathname determines MIME"
                      RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
                    end
-          static = fixedFormat? format                                  # rewritable format?
+          static = fixedFormat? format                                # rewritable format?
           body = Webize::HTML.degunk body, static if format == 'text/html' && !AllowedHosts.has_key?(host) # clean HTML
           formatExt = Suffixes[format] || Suffixes_Rack[format] || (puts "ENOSUFFIX #{format} #{uri}";'') # filename-extension for format
-          puts "WARNING format #{format} has suffix #{extension}, expected #{formatExt}"
-          storage = (fsPath + (formatExt == extension && '' || formatExt)).R # storage location
-          storage.writeFile body                                        # cache body
-          reader = RDF::Reader.for content_type: format                 # select reader
+          storage = fsPath                                            # storage location
+          storage += (puts "WARNING format #{format} has suffix #{extension}, expected #{formatExt}";formatExt) unless extension == formatExt
+          storage.R.writeFile body                                    # cache body
+          reader = RDF::Reader.for content_type: format               # select reader
           reader.new(body,base_uri: env[:base_uri],noRDF: options[:noRDF]){|_| # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader # parse RDF
-          return self if options[:intermediate]                         # intermediate fetch, return w/o HTTP-response
-          reader ? saveRDF : (puts "ENORDF for #{format} #{uri}")       # store RDF
+          return self if options[:intermediate]                       # intermediate fetch, return w/o HTTP-response
+          reader ? saveRDF : (puts "ENORDF for #{format} #{uri}")     # store RDF
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
-            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}           # expose upstream metadata to downstream
-          env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin   # CORS header
+            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # expose upstream metadata to downstream
+          env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin # CORS header
           env[:resp]['Set-Cookie'] = h['set-cookie'] if h['set-cookie'] && allowCookies?
           if static
-            env[:resp]['Content-Length'] = body.bytesize.to_s           # size header
-            [200, env[:resp], [body]]                                   # upstream doc
+            env[:resp]['Content-Length'] = body.bytesize.to_s         # size header
+            [200, env[:resp], [body]]                                 # upstream doc
           else
-            graphResponse                                               # local doc
+            graphResponse                                             # local doc
           end
         end
       end
