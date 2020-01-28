@@ -18,7 +18,7 @@ class WebResource
     Servers = {}
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Suffixes = {
-      'application/x-javascript' => '.js', 'audio/mpeg' => '.mp3',
+      'application/x-javascript' => '.js', 'application/x-mpegURL' => '.m3u8', 'audio/mpeg' => '.mp3',
       'image/x-icon' => '.ico', 'image/webp' => '.webp',
       'text/javascript' => '.js', 'text/turtle' => '.ttl', 'text/xml' => '.rss'}
     Internal_Headers = %w(base-uri connection gunk host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rdf remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software site-chrome transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forwarded-for)
@@ -331,9 +331,14 @@ class WebResource
           [206, h, [response.read]]                                     # return part downstream
         else
           body = HTTP.decompress h, response.read                       # decompress body
-          format = h['content-type'].split(/;/)[0] if h['content-type'] # HTTP header -> format
-          format ||= (xt = ext.to_sym; puts "no MIME header on #{uri}"  # extension -> format
-                      RDF::Format.file_extensions.has_key?(xt) && RDF::Format.file_extensions[xt][0].content_type[0])
+          format = if path == '/feed'                                   # content-type
+                     'application/atom+xml'
+                   elsif h.has_key? 'content-type'
+                     h['content-type'].split(/;/)[0]
+                   elsif RDF::Format.file_extensions.has_key? ext.to_sym
+                     puts "ENOTYPE on #{uri}. using pathname -> MIME mapping"
+                     RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
+                   end
           static = fixedFormat? format                                  # rewritable format?
           body = Webize::HTML.degunk body,static if format == 'text/html' && !AllowedHosts.has_key?(host) # clean HTML
           formatExt = Suffixes[format] || Rack::Mime::MIME_TYPES.invert[format] || (puts "WARNING suffix undefined for #{format}";'') # MIME to suffix mapping
