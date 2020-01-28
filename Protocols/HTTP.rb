@@ -19,8 +19,9 @@ class WebResource
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Suffixes = {
       'application/x-javascript' => '.js', 'application/x-mpegURL' => '.m3u8', 'audio/mpeg' => '.mp3',
-      'image/x-icon' => '.ico', 'image/webp' => '.webp',
+      'image/svg+xml' => '.svg', 'image/x-icon' => '.ico', 'image/webp' => '.webp',
       'text/javascript' => '.js', 'text/turtle' => '.ttl', 'text/xml' => '.rss'}
+    Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
     Internal_Headers = %w(base-uri connection gunk host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rdf remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software site-chrome transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forwarded-for)
 
     # handlers
@@ -336,20 +337,20 @@ class WebResource
                    elsif h.has_key? 'content-type'
                      h['content-type'].split(/;/)[0]
                    elsif RDF::Format.file_extensions.has_key? ext.to_sym
-                     puts "ENOTYPE on #{uri}. using pathname -> MIME mapping"
+                     puts "ENOTYPE on #{uri} , pathname determines MIME"
                      RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
                    end
           static = fixedFormat? format                                  # rewritable format?
-          body = Webize::HTML.degunk body,static if format == 'text/html' && !AllowedHosts.has_key?(host) # clean HTML
-          formatExt = Suffixes[format] || Rack::Mime::MIME_TYPES.invert[format] || (puts "WARNING suffix undefined for #{format}";'') # MIME to suffix mapping
-          suffix = formatExt == extension && '' || formatExt            # append MIME-suffix if incorrect or missing
-          (fsPath + suffix).R.writeFile body                            # cache body
-          (fsPath + '.' + Time.now.iso8601 + suffix).R.writeFile body if suffix == '.json' # cache body - version
+          body = Webize::HTML.degunk body, static if format == 'text/html' && !AllowedHosts.has_key?(host) # clean HTML
+          formatExt = Suffixes[format] || Suffixes_Rack[format] || (puts "ENOSUFFIX #{format} #{uri}";'') # filename-extension for format
+          puts "WARNING format #{format} has suffix #{extension}, expected #{formatExt}"
+          storage = (fsPath + (formatExt == extension && '' || formatExt)).R # storage location
+          storage.writeFile body                                        # cache body
           reader = RDF::Reader.for content_type: format                 # select reader
           reader.new(body,base_uri: env[:base_uri],noRDF: options[:noRDF]){|_| # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader # parse RDF
           return self if options[:intermediate]                         # intermediate fetch, return w/o HTTP-response
-          saveRDF if reader; puts "ENORDF for #{format}" unless reader  # store RDF
+          reader ? saveRDF : (puts "ENORDF for #{format} #{uri}")       # store RDF
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}           # expose upstream metadata to downstream
           env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin   # CORS header
