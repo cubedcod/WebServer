@@ -20,7 +20,7 @@ class WebResource
     Suffixes = {
       'application/x-javascript' => '.js', 'application/x-mpegURL' => '.m3u8', 'audio/mpeg' => '.mp3',
       'image/svg+xml' => '.svg', 'image/x-icon' => '.ico', 'image/webp' => '.webp',
-      'text/javascript' => '.js', 'text/turtle' => '.ttl', 'text/xml' => '.rss'}
+      'text/javascript' => '.js', 'text/json' => '.json', 'text/turtle' => '.ttl', 'text/xml' => '.rss'}
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
     Internal_Headers = %w(base-uri connection gunk host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rdf remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software site-chrome transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forwarded-for)
 
