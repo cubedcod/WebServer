@@ -344,7 +344,7 @@ class WebResource
           body = Webize::HTML.degunk body, static if format == 'text/html' && !AllowedHosts.has_key?(host) # clean HTML
           formatExt = Suffixes[format] || Suffixes_Rack[format] || (puts "ENOSUFFIX #{format} #{uri}";'') # filename-extension for format
           storage = fsPath                                            # storage location
-          storage += (puts "WARNING format #{format} has suffix #{extension}, expected #{formatExt}";formatExt) unless extension == formatExt
+          storage += formatExt unless extension == formatExt
           storage.R.writeFile body                                    # cache body
           reader = RDF::Reader.for content_type: format               # select reader
           reader.new(body,base_uri: env[:base_uri],noRDF: options[:noRDF]){|_| # instantiate reader

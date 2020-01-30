@@ -316,17 +316,18 @@ class WebResource
       args.each_with_index{|arg,i| wordIndex[arg] = i }
       pattern = /(#{args.join '|'})/i
 
-      # find matches
+      # reduce graph to matching resources
       graph.map{|k,v|
         graph.delete k unless (k.to_s.match pattern) || (v.to_s.match pattern)}
 
-      # highlight matches in exerpt
+      # reduce content to highlighted matching lines
       graph.values.map{|r|
         (r[Content]||r[Abstract]||[]).map{|v|v.respond_to?(:lines) ? v.lines : nil}.flatten.compact.grep(pattern).yield_self{|lines|
-          r[Abstract] = lines[0..5].map{|l|
+          r[Abstract] = lines[0..7].map{|l|
             l.gsub(/<[^>]+>/,'')[0..512].gsub(pattern){|g| # matches
               HTML.render({_: :span, class: "w#{wordIndex[g.downcase]}", c: g}) # wrap in styled node
-            }} if lines.size > 0 }}
+            }} if lines.size > 0 }
+        r.delete Content }
 
       # CSS
       graph['#abstracts'] = {Abstract => [HTML.render({_: :style, c: wordIndex.values.map{|i|
