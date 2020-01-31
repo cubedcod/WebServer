@@ -60,7 +60,7 @@ class WebResource < RDF::URI
                            elsif %w(gemfile rakefile).member? basename.downcase
                              :sourcecode
                            end
-      #puts  "LOADRDF #{uri} < #{fsPath} #{options[:format]}"
+      puts  "LOADRDF #{uri} < #{fsPath} #{options[:format]}"
       graph.load fsPath, **options
     elsif node.directory?
       container = self
@@ -110,7 +110,6 @@ class WebResource < RDF::URI
         # TODO Write updated version
           puts "doc exists: #{doc.fsPath}" if verbose
         else
-          puts "saving doc: #{doc.fsPath}" if verbose
           FileUtils.mkdir_p File.dirname turtle
           RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
           print "\n🐢 \e[32;1m" + doc.fsPath + "\e[0m "

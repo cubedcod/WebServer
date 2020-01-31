@@ -92,7 +92,7 @@ module Webize
 
   module MSWord
     class Format < RDF::Format
-      content_type 'application/msword', extension: :docx
+      content_type 'application/msword', extensions: [:doc, :docx]
       content_encoding 'utf-8'
       reader { Reader }
     end
@@ -122,7 +122,8 @@ module Webize
       def source_tuples
         yield Type.R, (Schema + 'Document').R
         yield Title.R, @base.basename
-        html = RDF::Literal `docx2txt #{@base.shellPath}`
+        converter = @base.ext == 'doc' ? :antiword : :docx2txt
+        html = RDF::Literal '<pre>' + `#{converter} #{@base.shellPath}` + '</pre>'
         html.datatype = RDF.XMLLiteral
         yield Content.R, html
       end
