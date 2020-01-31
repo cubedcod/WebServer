@@ -134,7 +134,7 @@ module Webize
           @base.send hostTriplr, n, &f
         end
 
-        # embedded RDF in RDFa and JSON-LD
+        # embedded RDF in RDFa and JSON-LD # TODO move this out of each_statement to make blank-node handling easier? 
         unless @opts[:noRDF]
           embeds = RDF::Graph.new
           # JSON-LD

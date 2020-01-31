@@ -595,9 +595,6 @@ firefox.settings.services.mozilla.com
     # WaPo
     GET 'www.washingtonpost.com', -> r {(r.parts[0]=='resizer' ? Resizer : NoGunk)[r]}
 
-    # WaTi
-    Allow 'twt-thumbs.washtimes.com' # TODO figure out why images are 403
-
     # WBUR
     CDNexec 'www.wbur.org'
 

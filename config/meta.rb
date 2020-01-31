@@ -2,7 +2,7 @@ class WebResource
   module URIs
 
     MarkupMap = {
-      'article' => Post, # TODO resolve all types to URIs at ingestion/RDFization points
+      'article' => Post,
       'http://schema.org/Comment' => Post,
       'http://schema.org/ProfilePage' => Person,
       'https://schema.org/BreadcrumbList' => List,
