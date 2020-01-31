@@ -15,13 +15,15 @@ class WebResource
           hash = Digest::SHA2.hexdigest path
           [hash[0..1], hash[2..-1]]
         else                                     # direct-mapped path
-          parts
+          parts.map{|p| Rack::Utils.unescape p}
          end).join('/')
     end
 
     # glob-pattern results mapped to URI space
     def glob
-      Pathname.glob(fsPath).map{|match| join(match.relative_path_from node.dirname).R env}
+      Pathname.glob(fsPath).map{|match|
+        (join Rack::Utils.escape match.relative_path_from(node.dirname).to_s ).R env
+      }
     end
 
     # Pathname instance (for convenience)
