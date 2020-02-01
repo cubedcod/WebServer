@@ -606,6 +606,21 @@ class WebResource
         CGI.escapeHTML t.to_s
       end}
 
+    Markup[Image] = -> image,env {
+      src = if image.class == WebResource
+              image.to_s
+            elsif image.class == String && image.match?(/^([\/]|http)/)
+              image
+            else
+              image['https://schema.org/url'] || image[Schema+'url'] || image[Link] || image['uri']
+            end
+      puts "no img-src found:", image.class, image unless src
+      if src.class == Array
+        puts "multiple img-src found:", src if src.size > 1
+        src = src[0]
+      end
+      {class: :thumb, c: {_: :a, href: src, c: {_: :img, src: src}}}}
+
     Markup[Video] = -> video, env {
       src = if video.class == WebResource || (video.class == String && video.match?(/^http/))
               video

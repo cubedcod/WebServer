@@ -182,21 +182,3 @@ module Webize
     end
   end
 end
-class WebResource
-  module HTML
-    Markup[Image] = -> image,env {
-      src = if image.class == WebResource
-              image.to_s
-            elsif image.class == String && image.match?(/^([\/]|http)/)
-              image
-            else
-              image['https://schema.org/url'] || image[Schema+'url'] || image[Link] || image['uri']
-            end
-      puts "no img-src found:", image.class, image unless src
-      if src.class == Array
-        puts "multiple img-src found:", src if src.size > 1
-        src = src[0]
-      end
-      {class: :thumb, c: {_: :a, href: src, c: {_: :img, src: src}}}}
-  end
-end

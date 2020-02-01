@@ -22,7 +22,7 @@ class WebResource
     # glob-pattern results mapped to URI space
     def glob
       Pathname.glob(fsPath).map{|match|
-        (join Rack::Utils.escape match.relative_path_from(node.dirname).to_s ).R env
+        (join match.relative_path_from(node.dirname).to_s.gsub(':','%3A').gsub('#','%23') ).R env
       }
     end
 
