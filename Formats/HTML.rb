@@ -293,7 +293,7 @@ class WebResource
                                     href: HTTP.qs((env[:query]||{}).merge({'view' => 'table', 'sort' => 'date'}))} unless env[:query] && env[:query]['view']=='table'),
                                  env[:base_uri].parts.map{|p|
                                     [{_: :a, class: :breadcrumb, href: bc += p + '/', c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
-                                 link[:media, '🖼️'], link[:feed, FeedIcon], link[:time, '🕒'],
+                                 link[:feed, FeedIcon], link[:time, '🕒'],
                                   ([' ',{_: :a, id: :showMain, href: '#body'}] if env[:site_chrome])
                                  ]},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],

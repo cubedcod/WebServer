@@ -26,8 +26,6 @@ module Webize
       'gateway.reddit.com' => :RedditJSON,
       'outline.com' => :Outline,
       'outlineapi.com' => :Outline,
-      'twitter.com' => :TwitterJSON,
-      'api.twitter.com' => :TwitterJSON,
       'www.instagram.com' => :InstagramJSON,
       'www.youtube.com' => :YouTubeJSON,
     }
@@ -545,11 +543,8 @@ firefox.settings.services.mozilla.com
     GET 'static.twitchcdn.net'
 
     # Twitter
-    Allow 'api.twitter.com'
-    Allow 'mobile.twitter.com'
-    Allow 'proxsee.pscp.tv'
-    GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : NoQuery[r]}
     %w(bit.ly trib.al).map{|shortener| GET shortener, NoQuery }
+    GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : NoQuery[r]}
 
     Populate 'twitter.com', -> r {
       FileUtils.mkdir 'twitter'
@@ -557,8 +552,6 @@ firefox.settings.services.mozilla.com
         FileUtils.touch 'twitter/.' + n}}
 
     GET 'twitter.com', -> r {
-      r.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'
-      #r.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (X11; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0'
       if !r.path || r.path == '/'
         Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}.shuffle.each_slice(18){|s|
           '//twitter.com/search'.R(r.env).fetch intermediate: true, noRDF: true,
@@ -569,8 +562,7 @@ firefox.settings.services.mozilla.com
       elsif r.path.match? GlobChars
         r.nodeRequest
       else
-        r.env[:links][:media] = '/' + r.parts[0] + '/media' unless %w(i media search).member? r.parts[1]
-        r.fetch noRDF: true
+        r.fetch
       end}
 
     # Ubuntu
@@ -901,72 +893,6 @@ media-mbst-pub-ue1.s3.amazonaws.com
 
   def RedditJSON tree
     puts tree.keys
-  end
-
-  def TwitterHTML doc, &b
-
-    # page pointer
-    doc.css('.stream-container').map{|stream|
-      user = parts[0]
-      if user && position = stream['data-min-position']
-        env[:links][:prev] = '/i/profiles/show/' + user + '/timeline/tweets?include_available_features=1&include_entities=1&max_position=' + position + '&reset_error_state=false&rdf&view=table&sort=date'
-      end}
-
-    # tweets
-    %w{grid-tweet tweet}.map{|tweetclass|
-      doc.css('.' + tweetclass).map{|tweet|
-        s = 'https://twitter.com' + (tweet.css('.js-permalink').attr('href') || tweet.attr('data-permalink-path') || '')
-        yield s, Type, (SIOC + 'MicroblogPost').R
-        yield s, To, 'https://twitter.com'.R
-
-        authorName = if b = tweet.css('.username b')[0]
-                       b.inner_text
-                     else
-                       s.R.parts[0]
-                     end
-        author = ('https://twitter.com/' + authorName).R
-        yield s, Creator, author
-
-        ts = (if unixtime = tweet.css('[data-time]')[0]
-              Time.at(unixtime.attr('data-time').to_i)
-             else
-               Time.now
-              end).iso8601
-        yield s, Date, ts
-
-        content = tweet.css('.tweet-text')[0]
-        if content
-          content.css('a').map{|a|
-            a.set_attribute('id', 'l' + Digest::SHA2.hexdigest(rand.to_s))
-            a.set_attribute('href', 'https://twitter.com' + (a.attr 'href')) if (a.attr 'href').match /^\//
-            yield s, DC+'link', (a.attr 'href').R}
-          yield s, Content, Webize::HTML.clean(content.inner_html, self).gsub(/<\/?span[^>]*>/,'').gsub(/\n/,'').gsub(/\s+/,' ')
-        end
-
-        if img = tweet.attr('data-resolved-url-large')
-          yield s, Image, img.to_s.R
-        end
-        tweet.css('img').map{|img|
-          yield s, Image, img.attr('src').to_s.R}
-
-        tweet.css('.PlayableMedia-player').map{|player|
-          player['style'].match(/url\('([^']+)'/).yield_self{|url|
-            yield s, Video, url[1].sub('pbs','video').sub('_thumb','').sub('jpg','mp4')
-          }}}}
-
-    %w(link[rel="alternate"] meta[name="description"] title body).map{|sel|
-      doc.css(sel).remove}
-  end
-
-  def TwitterJSON tree, &b
-    # page pointer
-    if position = tree['min_position']
-      env[:links][:prev] = '/i/profiles/show/' + parts[3] + '/timeline/tweets?include_available_features=1&include_entities=1&max_position=' + position + '&reset_error_state=false&rdf&view=table&sort=date'
-    end
-    # tweets
-    if html = tree['items_html']
-      TwitterHTML Nokogiri::HTML.fragment(html), &b
-    end
   end
 
   def UHub doc

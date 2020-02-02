@@ -93,8 +93,6 @@ class WebResource < RDF::URI
 
   def saveRDF repository = nil
     return self unless repository || env[:repository]
-    size = (repository || env[:repository]).size
-    print ' 𑗘 ', size, ' ' unless size == 0
     (repository || env[:repository]).each_graph.map{|graph|
       n = (graph.name||env[:base_uri]).R # graph identity
       docs = [n]                         # graph storage node
@@ -108,11 +106,11 @@ class WebResource < RDF::URI
         turtle = doc.fsPath + '.ttl'
         if File.exist? turtle
         # TODO Write updated version
-          print "\n⚪ #{graph.size} #{doc.fsPath}"
+          print "\n⚪ 𑗘 #{graph.size} #{doc.fsPath}"
         else
           FileUtils.mkdir_p File.dirname turtle
           RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
-          print "\n🐢 #{graph.size} \e[32;1m" + doc.fsPath + "\e[0m "
+          print "\n🐢 𑗘 #{graph.size} \e[32;1m" + doc.fsPath + "\e[0m "
         end}}
     self
   end
