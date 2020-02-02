@@ -901,8 +901,19 @@ media-mbst-pub-ue1.s3.amazonaws.com
   def TwitterJSON tree, &b
     if objects = tree['globalObjects']
       if tweets = objects['tweets']
-        tweets.map{|tweet|
-          puts :______________,tweet
+        tweets.map{|id, tweet|
+          puts tweet.class, tweet
+          id = tweet['id_str']
+          if username = tweet['in_reply_to_screen_name']
+            user = 'https://twitter.com/' + username
+            uri = user + '/status/' + id
+            yield uri, Type, (SIOC + 'MicroblogPost').R
+            yield uri, To, 'https://twitter.com'.R
+            yield uri, Creator, user.R
+            yield uri, Content, tweet['full_text'].hrefs
+          else
+            puts "no username!", tweet
+          end
         }
       end
     end
