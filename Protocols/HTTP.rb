@@ -23,7 +23,7 @@ class WebResource
       'text/javascript' => '.js', 'text/json' => '.json', 'text/turtle' => '.ttl', 'text/xml' => '.rss',
       'video/MP2T' => '.ts'}
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
-    Internal_Headers = %w(base-uri connection gunk host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rdf remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software site-chrome transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forwarded-for)
+    Internal_Headers = %w(base-uri connection gunk host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software site-chrome transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forwarded-for)
 
     # handlers
     Fetch = -> r {r.fetch}
@@ -96,7 +96,7 @@ class WebResource
       return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']              # only handle HTTP methods
       resource = RDF::URI('//'+env['SERVER_NAME']).join(env['REQUEST_PATH']).R env # instantiate request
       env[:base_uri] = resource                                                 # resource URI
-      env[:referer] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # referring host
+      env[:refhost] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # referring host
       env[:resp] = {}                                                           # response HEAD storage
       env[:links] = {}                                                          # response Link storage
       env[:query] = parseQs(env['QUERY_STRING'])                           # parse query
@@ -115,7 +115,7 @@ class WebResource
           if %w(css eot otf ttf woff woff2).member?(ext) || resource.path.match?(/204$/)
             print "🛑"
           else
-            print "\n" + (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "🛑 \e[31;1m") + (env[:referer] ? ("\e[7m" + env[:referer] + "\e[0m\e[31;1m → ") : '') + (env[:referer] == resource.host ? '' : ('http://' + resource.host)) + "\e[7m" + resource.path + "\e[0m\e[31m" + resource.qs + "\e[0m "
+            print "\n" + (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "🛑 \e[31;1m") + (env[:refhost] ? ("\e[7m" + env[:refhost] + "\e[0m\e[31;1m → ") : '') + (env[:refhost] == resource.host ? '' : ('http://' + resource.host)) + "\e[7m" + resource.path + "\e[0m\e[31m" + resource.qs + "\e[0m "
           end
 
         # OPTIONS
@@ -138,7 +138,7 @@ class WebResource
         elsif ext == 'css'                                       # stylesheet
           print '🎨'
         elsif ext == 'js' || mime.match?(/script/)               # script
-          third_party = env[:referer] != resource.host
+          third_party = env[:refhost] != resource.host
           print "\n📜 \e[36#{third_party ? ';7' : ''};1mhttps://" + resource.host + resource.path + "\e[0m "
         elsif ext == 'json' || mime.match?(/json/)               # data
           print "\n🗒 https://" + resource.host + resource.path + resource.qs + ' '
@@ -153,7 +153,7 @@ class WebResource
 
         else # generic logger
           print "\n\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : (env['REQUEST_METHOD']+' ')) + (status == 200 ? '' : (status.to_s+' ')) +
-                (env[:referer] ? (env[:referer] + ' → ') : '') + "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + resource.qs + "\e[0m "
+                (env[:refhost] ? (env[:refhost] + ' → ') : '') + "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + resource.qs + "\e[0m "
         end
 
         [status, head, body]} # response
@@ -457,7 +457,7 @@ class WebResource
         handler[self]
       elsif host.match? CDNhost     # CDN content-pool
         if AllowedHosts.has_key?(host) || env[:query]['allow'] == ServerKey ||
-           CDNuser.has_key?(env[:referer]) ||
+           CDNuser.has_key?(env[:refhost]) ||
            ((CacheExt - %w(html js)).member?(ext.downcase) && !path.match?(Gunk))
           fetch                     # allowed CDN content
         else
@@ -517,24 +517,23 @@ class WebResource
                           [s, h, []]} # return header
     end
 
-    # headers formatted and filtered for export w/ capability check
-    def headers hdrs = nil
-      head = {} # header storage
+    # headers formatted and filtered
+    def headers raw = nil
+      raw ||= env || {} # default to request headers
+      HTTP.print_header raw if ENV.has_key? 'VERBOSE'
 
-      (hdrs || env || {}).map{|k,v| # raw headers
+      head = {} # clean headers
+      raw.map{|k,v| # raw headers
         k = k.to_s
-        underscored = k.match? /(_AP_|PASS_SFP)/i
-        key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|k| # strip HTTP prefix
-          if %w{cl dfe id spf utc xsrf}.member? k # acronyms
-            k = k.upcase       # acronymize
+        key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|t| # strip prefix, tokenize
+          if %w{cl dfe id spf utc xsrf}.member? t # acronym?
+            t = t.upcase                          # upcase
           else
-            k[0] = k[0].upcase # capitalize
+            t[0] = t[0].upcase                    # capitalize
           end
-          k }.join(underscored ? '_' : '-')
-        key = key.downcase if underscored
-
-        # set values
-        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless Internal_Headers.member?(key.downcase)}
+          t                                       # token
+        }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
+        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless Internal_Headers.member?(key.downcase)} # output value
 
       # Cookies / Referer / User-Agent
       unless allowCookies?

@@ -8,7 +8,6 @@ module Webize
         'gitter.im' => :Gitter,
         'lwn.net' => :LWN,
         'news.ycombinator.com' => :HackerNews,
-        'twitter.com' => :TwitterHTML,
         'universalhub.com' => :UHub,
         'www.aliexpress.com' => :AX,
         'www.apnews.com' => :AP,
@@ -28,6 +27,7 @@ module Webize
       'outline.com' => :Outline,
       'outlineapi.com' => :Outline,
       'twitter.com' => :TwitterJSON,
+      'api.twitter.com' => :TwitterJSON,
       'www.instagram.com' => :InstagramJSON,
       'www.youtube.com' => :YouTubeJSON,
     }
@@ -86,7 +86,7 @@ s.click.aliexpress.com
       GET host}
 
     # Amazon
-    AmazonHost = -> r {(%w(www.amazon.com www.imdb.com).member?(r.env[:referer]) || r.env[:query]['allow'] == ServerKey) ? NoGunk[r] : r.deny}
+    AmazonHost = -> r {(%w(www.amazon.com www.imdb.com).member?(r.env[:refhost]) || r.env[:query]['allow'] == ServerKey) ? NoGunk[r] : r.deny}
     %w(amazon.com www.amazon.com).map{|host| GET host}
     GET 'images-na.ssl-images-amazon.com', AmazonHost
     GET 'm.media-amazon.com', AmazonHost
@@ -249,7 +249,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
       end
 
       # restrict static-hosts to google referer
-      GData = -> r {(r.env[:referer]||'').match?(/\.(blog(ger|spot)|google(apis)?|gstatic)\.com$/) ? NoGunk[r] : r.deny}
+      GData = -> r {(r.env[:refhost]||'').match?(/\.(blog(ger|spot)|google(apis)?|gstatic)\.com$/) ? NoGunk[r] : r.deny}
       %w(maps ssl www).map{|h| GET h + '.googleapis.com', GData }
       %w(maps ssl www).map{|h| GET h + '.gstatic.com', GData }
       (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com", GData }
@@ -546,6 +546,7 @@ firefox.settings.services.mozilla.com
 
     # Twitter
     Allow 'api.twitter.com'
+    Allow 'mobile.twitter.com'
     Allow 'proxsee.pscp.tv'
 
     GotoTwitter = -> r {[301,{'Location' => 'https://twitter.com' + r.path },[]]}
@@ -571,8 +572,6 @@ firefox.settings.services.mozilla.com
       elsif r.path.match? GlobChars
         r.nodeRequest
       else
-        r.env[:links][:up]    = '/' if r.parts.size == 1
-        r.env[:links][:up]    = '/' + r.parts[0] if r.path.match? /\/status\/\d+\/?$/
         r.env[:links][:media] = '/' + r.parts[0] + '/media' unless %w(i media search).member? r.parts[1]
         r.fetch noRDF: true
       end}
