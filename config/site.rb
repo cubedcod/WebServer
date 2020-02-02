@@ -559,8 +559,9 @@ firefox.settings.services.mozilla.com
         FileUtils.touch 'twitter/.' + n}}
 
     GET 'twitter.com', -> r {
+      r.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'
+      #r.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (X11; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0'
       if !r.path || r.path == '/'
-        r.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/8.3 (KHTML, like Gecko) Chrome/80.0 Safari/8.3'
         Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}.shuffle.each_slice(18){|s|
           '//twitter.com/search'.R(r.env).fetch intermediate: true, noRDF: true,
                                                 query: {vertical: :default, f: :tweets, q: s.map{|u|'from:' + u}.join('+OR+')}}
