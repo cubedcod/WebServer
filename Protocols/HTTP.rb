@@ -284,7 +284,7 @@ class WebResource
       options ||= {}
 
       # cached results
-      if (CacheExt - %w(html xml)).member?(ext.downcase) && !host.match?(DynamicImgHost)
+      if (CacheExt - %w(json html xml)).member?(ext.downcase) && !host.match?(DynamicImgHost)
         return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has static-data, return 304 response
         return fileResponse if node.file?                                           # server has static-data, return data
       end
