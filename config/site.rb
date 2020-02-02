@@ -548,11 +548,8 @@ firefox.settings.services.mozilla.com
     Allow 'api.twitter.com'
     Allow 'mobile.twitter.com'
     Allow 'proxsee.pscp.tv'
-
-    GotoTwitter = -> r {[301,{'Location' => 'https://twitter.com' + r.path },[]]}
-    %w(mobile.twitter.com tweettunnel.com www.twitter.com).map{|host| GET host, GotoTwitter }
     GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : NoQuery[r]}
-    GET 'bit.ly', NoQuery; GET 'trib.al', NoQuery
+    %w(bit.ly trib.al).map{|shortener| GET shortener, NoQuery }
 
     Populate 'twitter.com', -> r {
       FileUtils.mkdir 'twitter'
