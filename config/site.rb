@@ -23,6 +23,7 @@ module Webize
   end
   module JSON
     Triplr = {
+      'api.twitter.com' => :TwitterJSON,
       'gateway.reddit.com' => :RedditJSON,
       'outline.com' => :Outline,
       'outlineapi.com' => :Outline,
@@ -895,6 +896,16 @@ media-mbst-pub-ue1.s3.amazonaws.com
 
   def RedditJSON tree
     puts tree.keys
+  end
+
+  def TwitterJSON tree, &b
+    if objects = tree['globalObjects']
+      if tweets = objects['tweets']
+        tweets.map{|tweet|
+          puts :______________,tweet
+        }
+      end
+    end
   end
 
   def UHub doc
