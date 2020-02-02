@@ -543,7 +543,8 @@ firefox.settings.services.mozilla.com
     GET 'static.twitchcdn.net'
 
     # Twitter
-    %w(bit.ly trib.al).map{|shortener| GET shortener, NoQuery }
+    %w(bit.ly trib.al).map{|shortener|
+      GET shortener, NoQuery }
     GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : NoQuery[r]}
 
     Populate 'twitter.com', -> r {
@@ -551,6 +552,7 @@ firefox.settings.services.mozilla.com
       `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|n|
         FileUtils.touch 'twitter/.' + n}}
 
+    Allow 'api.twitter.com'
     GET 'twitter.com', -> r {
       if !r.path || r.path == '/'
         Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}.shuffle.each_slice(18){|s|
