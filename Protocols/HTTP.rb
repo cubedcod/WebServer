@@ -327,6 +327,7 @@ class WebResource
 
     def fetchHTTP options = {}
       # TODO set if-modified-since/etag headers based on local cache contents
+      puts "FETCH #{uri}" if ENV.has_key? 'VERBOSE'
       URI.open(uri, headers.merge({redirect: false})) do |response| print '🌍🌎🌏🌐'[rand 4]
         h = response.meta                                             # upstream metadata
         if response.status.to_s.match? /206/                          # partial response
@@ -352,7 +353,7 @@ class WebResource
           reader.new(body,base_uri: env[:base_uri],noRDF: options[:noRDF]){|_| # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader # read RDF
           return self if options[:intermediate]                       # intermediate fetch, return w/o HTTP-response
-          reader ? saveRDF : (puts "ENORDF for #{format} #{uri}")    # cache RDF
+          reader ? saveRDF : (puts "ENORDF #{format} #{uri}")         # cache RDF
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # expose upstream metadata to downstream
           env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin # CORS header
