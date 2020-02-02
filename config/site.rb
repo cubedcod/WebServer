@@ -902,18 +902,43 @@ media-mbst-pub-ue1.s3.amazonaws.com
     if objects = tree['globalObjects']
       if tweets = objects['tweets']
         tweets.map{|id, tweet|
-          puts tweet.class, tweet
+          #puts ::JSON.pretty_generate tweet
           id = tweet['id_str']
-          if username = tweet['in_reply_to_screen_name']
-            user = 'https://twitter.com/' + username
-            uri = user + '/status/' + id
-            yield uri, Type, (SIOC + 'MicroblogPost').R
-            yield uri, To, 'https://twitter.com'.R
-            yield uri, Creator, user.R
-            yield uri, Content, tweet['full_text'].hrefs
-          else
-            puts "no username!", tweet
-          end
+          username = tweet['in_reply_to_screen_name'] || tweet['user_id_str']
+          user = 'https://twitter.com/' + username
+          uri = user + '/status/' + id
+          yield uri, Type, (SIOC + 'MicroblogPost').R
+          yield uri, To, 'https://twitter.com'.R
+          yield uri, Date, Time.parse(tweet['created_at']).iso8601
+          yield uri, Creator, user.R
+          yield uri, Content, tweet['full_text'].hrefs
+          %w(entities extended_entities).map{|entity_type|
+            if entities = tweet[entity_type]
+              if media = entities['media']
+                media.map{|m|
+                  case m['type']
+                  when 'photo'
+                    yield uri, Image, m['media_url'].R
+                  when /animated_gif|video/
+                    yield uri, Image, m['media_url'].R
+                    if info = m['video_info']
+                      if variants = info['variants']
+                        variants.map{|variant|
+                          yield uri, Video, variant['url'].R if variant['content_type'] == 'video/mp4'
+                        }
+                      end
+                    end
+                  else
+                    puts "media: ", ::JSON.pretty_generate(m)
+                  end
+                }
+              end
+              if urls = entities['urls']
+                urls.map{|url|
+                  yield uri, Link, url['expanded_url'].R}
+              end
+            end
+          }
         }
       end
     end
