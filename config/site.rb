@@ -563,6 +563,7 @@ firefox.settings.services.mozilla.com
           q = sub.map{|u|'from%3A' + u}.join('%2BOR%2B')
           apiURL = 'https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&q=' + q + '&vertical=default&count=40&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2CcameraMoment'
           puts 'https://twitter.com/search?UX=upstream&q=' + q
+          puts apiURL
           apiURL.R(r.env).fetch intermediate: true
         }
         r.saveRDF.chrono_sort.graphResponse
@@ -582,7 +583,7 @@ firefox.settings.services.mozilla.com
           end
         end
         apiURL = 'https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment'
-        #[302, {'Location' => apiURL}, []]
+        puts apiURL
         apiURL.R(r.env).fetch intermediate: true
         r.saveRDF.chrono_sort.graphResponse
       else
@@ -925,13 +926,13 @@ media-mbst-pub-ue1.s3.amazonaws.com
         tweets.map{|id, tweet|
           #puts ::JSON.pretty_generate tweet
           id = tweet['id_str']
-          username = tweet['in_reply_to_screen_name'] || tweet['user_id_str']
-          user = 'https://twitter.com/' + username
-          uri = user + '/status/' + id
+          username = tweet['in_reply_to_screen_name']
+          user = 'https://twitter.com/' + username if username
+          uri =  (user || '#') + '/status/' + id
           yield uri, Type, (SIOC + 'MicroblogPost').R
           yield uri, To, 'https://twitter.com'.R
           yield uri, Date, Time.parse(tweet['created_at']).iso8601
-          yield uri, Creator, user.R
+          yield uri, Creator, user.R if user
           yield uri, Content, tweet['full_text'].hrefs
           %w(entities extended_entities).map{|entity_type|
             if entities = tweet[entity_type]
