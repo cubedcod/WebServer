@@ -243,6 +243,7 @@ class WebResource
     Markup = {} # markup-generator lambdas
 
     def chrono_sort
+      env[:query] ||= {}
       env[:query]['sort'] ||= 'date'
       env[:query]['view'] ||= 'table'
       self
