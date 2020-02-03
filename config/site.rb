@@ -544,8 +544,10 @@ firefox.settings.services.mozilla.com
     GET 'static.twitchcdn.net'
 
     # Twitter
-    %w(bit.ly trib.al).map{|shortener|
-      GET shortener, NoQuery }
+    Allow 'api.twitter.com'
+
+    %w(bit.ly trib.al).map{|shortener| GET shortener, NoQuery }
+
     GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : NoQuery[r]}
 
     Populate 'twitter.com', -> r {
@@ -553,7 +555,6 @@ firefox.settings.services.mozilla.com
       `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|n|
         FileUtils.touch 'twitter/.' + n}}
 
-    Allow 'api.twitter.com'
     GET 'twitter.com', -> r {
       if !r.path || r.path == '/'
         subscriptions = Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}
@@ -562,10 +563,8 @@ firefox.settings.services.mozilla.com
         subscriptions.shuffle.each_slice(18){|sub|
           q = sub.map{|u|'from%3A' + u}.join('%2BOR%2B')
           apiURL = 'https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&q=' + q + '&vertical=default&count=40&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2CcameraMoment'
-          puts 'https://twitter.com/search?UX=upstream&q=' + q
-          puts apiURL
-          apiURL.R(r.env).fetch intermediate: true
-        }
+          #puts 'https://twitter.com/search?UX=upstream&q=' + q
+          apiURL.R(r.env).fetch intermediate: true}
         r.saveRDF.chrono_sort.graphResponse
       elsif r.gunkURI
         r.deny
@@ -583,15 +582,11 @@ firefox.settings.services.mozilla.com
           end
         end
         apiURL = 'https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment'
-        puts apiURL
         apiURL.R(r.env).fetch intermediate: true
         r.saveRDF.chrono_sort.graphResponse
       else
         r.upstreamUI.fetch
       end}
-
-    # Ubuntu
-    GET 'us.archive.ubuntu.com'
 
     # USAtoday
     GET 'rssfeeds.usatoday.com', NoQuery
