@@ -557,11 +557,14 @@ firefox.settings.services.mozilla.com
     GET 'twitter.com', -> r {
       if !r.path || r.path == '/'
         subscriptions = Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}
-        puts :subscriptions, subscriptions
         r.env.delete :query
         r.env.delete 'QUERY_STRING'
-        subscriptions[0..15].shuffle.each_slice(18){|sub|
-          ('https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&q=' + sub.map{|u|'from%3A' + u}.join('%2BOR%2B') + '&vertical=default&count=40&query_source=&cursor=refresh%3AthGAVUV0VFVBYBFoDghY-10dH6IRIYtAESY8LrAAAB9D-AYk3S8an8AAAAFBD7NVphV7ABEPz4NUfW4AIQ9TJr4NewCBD3g1rEF9ACEPd0P5QWAAAQ92U1pleQARD4wmilFgAAEPckyyzX0AAQ-T3XJlfQARD3vSol1pABEPeC-2oWkAMQ-LTsyhYABBD7ViAY1uAAEPZg-FdXsAIQ94OYfxawABD7UMidF-AAEPaNHe9WkAEQ_PVo2ddQABD7is7s1-AAEPj1VIFXsBEVABUAFQAVABUAERXIhXoVgIl6GAdERUZBVUxUFQAVAAA%3D&pc=1&spelling_corrections=1&ext=mediaStats%2CcameraMoment&view=table&sort=date').R(r.env).fetch intermediate: true}
+        subscriptions.shuffle.each_slice(18){|sub|
+          q = sub.map{|u|'from%3A' + u}.join('%2BOR%2B')
+          apiURL = 'https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&q=' + q + '&vertical=default&count=40&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2CcameraMoment'
+          puts 'https://twitter.com/search?UX=upstream&q=' + q
+          apiURL.R(r.env).fetch intermediate: true
+        }
         r.saveRDF.chrono_sort.graphResponse
       elsif r.gunkURI
         r.deny
@@ -580,7 +583,6 @@ firefox.settings.services.mozilla.com
         end
         apiURL = 'https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment'
         #[302, {'Location' => apiURL}, []]
-        puts apiURL
         apiURL.R(r.env).fetch intermediate: true
         r.saveRDF.chrono_sort.graphResponse
       else
