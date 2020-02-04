@@ -419,7 +419,6 @@ firefox.settings.services.mozilla.com
 
     # Nextdoor
     Cookies 'nextdoor.com'
-    CDNexec 'nextdoor.com'
 
     # NOAA
     Allow 'forecast.weather.gov'
@@ -547,8 +546,7 @@ firefox.settings.services.mozilla.com
     TwitterBear = {'authorization' => 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA'}
     Allow 'api.twitter.com'
 
-    %w(bit.ly trib.al).map{|shortener| GET shortener, NoQuery }
-
+    %w(bit.ly trib.al).map{|short| GET short, NoQuery }
     GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : NoQuery[r]}
 
     Populate 'twitter.com', -> r {
@@ -598,15 +596,8 @@ firefox.settings.services.mozilla.com
     # Vimeo
     GET 'f.vimeocdn.com'
 
-    # VRT
-    CDNexec 'www.vrt.be'
-    Allow 'media-services-public.vrt.be'
-
     # WaPo
     GET 'www.washingtonpost.com', -> r {(r.parts[0]=='resizer' ? Resizer : NoGunk)[r]}
-
-    # WBUR
-    CDNexec 'www.wbur.org'
 
     # Weather
     Allow 'api.weather.com'
@@ -644,7 +635,6 @@ media-mbst-pub-ue1.s3.amazonaws.com
       end}
 
     # Yelp
-    CDNexec'www.yelp.com'
     GET 'www.yelp.com', -> r {r.env[:query]['redirect_url'] ? [301, {'Location' => r.env[:query]['redirect_url']},[]] : r.fetch}
 
     # YouTube

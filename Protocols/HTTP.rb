@@ -5,7 +5,6 @@ class WebResource
     include URIs
 
     AllowedHosts = {}
-    CDNuser = {}
     CookieHosts = {}
     GlobChars = /[\*\{\[]/
     HostGET = {}
@@ -171,10 +170,6 @@ class WebResource
                                                             (HTML.keyval (Webize::HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
     end
 
-    def self.CDNexec host
-      CDNuser[host] = true
-    end
-
     def self.Cookies host
       CookieHosts[host] = true
     end
@@ -327,7 +322,7 @@ class WebResource
 
     def fetchHTTP options = {}
       # TODO set if-modified-since/etag headers based on local cache contents
-      puts "FETCH #{uri}" #if ENV.has_key? 'VERBOSE'
+      puts "FETCH #{uri}" if ENV.has_key? 'VERBOSE'
       URI.open(uri, headers.merge({redirect: false})) do |response| print '🌍🌎🌏🌐'[rand 4]
         h = response.meta                                             # upstream metadata
         if response.status.to_s.match? /206/                          # partial response
@@ -458,7 +453,6 @@ class WebResource
         handler[self]
       elsif host.match? CDNhost     # CDN content-pool
         if AllowedHosts.has_key?(host) || env[:query]['allow'] == ServerKey ||
-           CDNuser.has_key?(env[:refhost]) ||
            ((CacheExt - %w(html js)).member?(ext.downcase) && !path.match?(Gunk))
           fetch                     # allowed CDN content
         else
