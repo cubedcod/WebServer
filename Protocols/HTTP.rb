@@ -567,8 +567,9 @@ class WebResource
       LocalAddress.member? env['SERVER_NAME']
     end
 
+    # URI -> storage node(s) -> RDF graph -> HTTP response
     def nodeRequest
-      nodes = (if node.directory?                # directory:
+      nodes = (if node.directory?
                if env[:query].has_key? 'f'       # FIND full case-insensitive match
                  summarize = true
                  q = env[:query]['f']
@@ -600,7 +601,7 @@ class WebResource
                  ls.concat((self + '.*').R.glob) if path[-1] != '/'
                  ls
                end
-              else                                                     # files:
+              else
                 if uri.match GlobChars                                 # GLOB - parametric
                   summarize = true
                   env[:grep] = true if env && env[:query].has_key?('q')
@@ -610,7 +611,7 @@ class WebResource
                 end
                end).flatten.compact.uniq.map{|n|n.R env}
       if nodes.size==1 && nodes[0].ext == 'ttl' && selectFormat == 'text/turtle'
-        nodes[0].fileResponse # nothing to transform. return static data
+        nodes[0].fileResponse # nothing to merge or transform. return static-node
       else                    # graph data
         nodes = nodes.map &:summary if summarize
         nodes.map &:loadRDF
