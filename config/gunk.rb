@@ -5,7 +5,7 @@ class WebResource
     Gunk = %r([-.:_\/?&=~'"%\s]
 ((block|load|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|frame|id|obe|rotat[eo]r?|slots?|system|tech|tools?|types?|units?|words?|zones?)?|akismet|alerts?|.*analytics?.*|appnexus|audience|(app|smart)?
 b(eacon|lueconic|ouncee?x.*)s?|.*bid(d(er|ing)|s).*|
-c(ampaigns?|edexis|hartbeat.*|loudfront|mp|ollector|omscore|on(sent|version)|ookie(c(hoice|onsent)|law|notice)?s?|riteo|se)|
+c(ampaigns?|edexis|hartbeat.*|mp|ollector|omscore|on(sent|version)|ookie(c(hoice|onsent)|law|notice)?s?|riteo|se)|
 de(als|t(ect|roitchicago))|.*dfp.*|disney(id)?|doubleclick|
 e(moji.*\.js|ndscreen|nsighten|proof|scenic|vidon|zoic)|
 firebase|(web)?fonts?(awesome)?|
@@ -35,7 +35,7 @@ end
 module Webize
   module HTML
 
-    GunkScript = /_0x[0-9a-f]|google.?(a[dn]|tag)|\.(3gl|amazon.[a-z]+|bing|bounceexchange|chartbeat|clickability|cloudfront|crwdcntrl|doubleclick|ensighten|evidon|facebook|feedbackify|go-mpulse|googleapis|hotjar|indexww|krxd|licdn|linkedin|mar(feel|keto)|moatads|newrelic|newsmaxfeednetwork|npttech|ntv|outbrain|parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|sail-horizon|scorecardresearch|sophi|sumo|taboola|tinypass|tiqcdn|([a-z]+-)?twitter|tynt|visualwebsiteoptimizer|yieldmo|yimg|zergnet|zopim|zqtk)\./i
+    GunkExec = /_0x[0-9a-f]|google.?(a[dn]|tag)|\.(3gl|amazon.[a-z]+|bing|bounceexchange|chartbeat|clickability|cloudfront|crwdcntrl|doubleclick|ensighten|evidon|facebook|feedbackify|go-mpulse|googleapis|hotjar|indexww|krxd|licdn|linkedin|mar(feel|keto)|moatads|newrelic|newsmaxfeednetwork|npttech|ntv|outbrain|parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|sail-horizon|scorecardresearch|sophi|sumo|taboola|tinypass|tiqcdn|([a-z]+-)?twitter|tynt|visualwebsiteoptimizer|yieldmo|yimg|zergnet|zopim|zqtk)\./i
 
     Scripts = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script"
 
@@ -93,12 +93,19 @@ image-src
       doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
       doc.css('iframe, img, ' + Scripts).map{|s| # clean body
         text = s.inner_text
-        if s['src'] && (s['src'].match?(Gunk) || s['src'].R.gunkDomain?)
-          print "\n🚫 \e[31;7;1m" + s['src'] + "\e[0m " if verbose
-          s.remove # script links
-        elsif s['type'] != 'application/ld+json' && text.size < 4096 && text.match?(GunkScript) && !text.match?(/initial.?state/i)
+        if s['src']
+          # content pointer
+          src = s['src'].R
+
+          if src.uri.match?(Gunk) || (src.gunkDomain? && !src.allowCDN?)
+            print "\n🚫 \e[31;7;1m" + src.uri + "\e[0m " if verbose
+            s.remove
+          end
+
+        # inline content
+        elsif s['type'] != 'application/ld+json' && text.size < 4096 && text.match?(GunkExec) && !text.match?(/initial.?state/i)
           print "\n🚫 #{text.size} \e[31;1m" + text.gsub(/[\n\r\t]+/,'').gsub(/\s\s+/,' ')[0..200] + "\e[0m " if verbose
-          s.remove # inline scripts
+          s.remove
         end}
     end
 

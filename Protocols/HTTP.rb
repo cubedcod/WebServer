@@ -81,6 +81,10 @@ class WebResource
       @cookies || AllowedHosts.has_key?(host) || CookieHosts.has_key?(host) || CookieHost.match?(host)
     end
 
+    def allowCDN?
+      (CacheExt - %w(html js)).member?(ext.downcase) && !path.match?(Gunk)
+    end
+
     def allowedOrigin
       if env['HTTP_ORIGIN']
         env['HTTP_ORIGIN']
@@ -452,8 +456,7 @@ class WebResource
         Populator[host][self] if Populator[host] && !join('/').R.node.exist?
         handler[self]
       elsif host.match? CDNhost     # CDN content-pool
-        if AllowedHosts.has_key?(host) || env[:query]['allow'] == ServerKey ||
-           ((CacheExt - %w(html js)).member?(ext.downcase) && !path.match?(Gunk))
+        if AllowedHosts.has_key?(host) || env[:query]['allow'] == ServerKey || allowCDN?
           fetch                     # allowed CDN content
         else
           deny                      # blocked CDN content
