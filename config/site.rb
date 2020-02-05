@@ -100,24 +100,13 @@ s.click.aliexpress.com
     # Anvato
     Allow 'tkx.apis.anvato.net'
 
-    # Atlassian
-    Allow 'zerotier.atlassian.net'
-
     # Balamii
     Allow 'balamii-parse.herokuapp.com'
     Allow 'player.balamii.com'
 
-    # Bloomberg
-    Cookies 'www.bloomberg.com'
-
-    # Bootstrap
-    GET 'maxcdn.bootstrapcdn.com'
-
     # Boston Globe
     GET 'bostonglobe-prod.cdn.arcpublishing.com', Resizer
     %w(bos.gl w.bos.gl).map{|short| GET short, NoQuery }
-    %w(archive www).map{|h|   GET h + '.boston.com' }
-    %w(apps www www3).map{|h| GET h + '.bostonglobe.com' }
     Insecure 'bos.gl'
 
     # BrassRing
