@@ -35,7 +35,7 @@ end
 module Webize
   module HTML
     # narrow gunk pattern, matched inside executable scripts
-    GunkExec = /_0x[0-9a-f]|google.?[at]|[._](3gl|amazon.[a-z]+|bing|bounceexchange|chartbeat|clickability|cloudfront|crwdcntrl|doubleclick|driftt|ensighten|evidon|facebook|feedbackify|go-mpulse|googleapis|hotjar|indexww|krxd|licdn|linkedin|mar(feel|keto)|moatads|newrelic|newsmaxfeednetwork|npttech|ntv|outbrain|parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|sail-horizon|scorecardresearch|sophi|sumo|taboola|tinypass|tiqcdn|([a-z]+-)?twitter|tynt|visualwebsiteoptimizer|yieldmo|yimg|zergnet|zopim|zqtk)[._]/i
+    GunkExec = /_0x[0-9a-f]|google.?[at]|wp.?emoji|[-._\/](3gl|6sc|amazon.[a-z]+|bing|bounceexchange|chartbeat|clickability|cloudfront|crwdcntrl|doubleclick|driftt|ensighten|evidon|facebook|feedbackify|go-mpulse|googleapis|hotjar|hs-analytics|indexww|krxd|licdn|linkedin|mar(feel|keto)|moatads|newrelic|newsmaxfeednetwork|npttech|ntv|outbrain|parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|sail-horizon|scorecardresearch|sophi|sumo|survicate|taboola|tinypass|tiqcdn|([a-z]+-)?twitter|tynt|visualwebsiteoptimizer|yieldmo|yimg|zergnet|zopim|zqtk)[-._]/i
 
     # CSS selector for script elements
     Scripts = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script"
@@ -109,7 +109,7 @@ image-src
 
         # inline content
         elsif s['type'] != 'application/ld+json' && text.size < 4096 && text.match?(GunkExec) && !text.match?(/initial.?state/i)
-          print "\n🚫 #{text.size} \e[31;1m" + text.gsub(/[\n\r\t]+/,'').gsub(/\s\s+/,' ')[0..200] + "\e[0m " if verbose
+          print "\n🚫 #{text.size} \e[31;1m" + text.gsub(/[\n\r\t]+/,'').gsub(/\s\s+/,' ') + "\e[0m " if verbose
           s.remove
         end}
     end
