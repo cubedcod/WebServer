@@ -1,7 +1,7 @@
 # coding: utf-8
 class WebResource
   module URIs
-
+    # general gunk pattern, primarily matched against URIs
     Gunk = %r([-.:_\/?&=~'"%\s]
 ((block|load|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|frame|id|obe|rotat[eo]r?|slots?|system|tech|tools?|types?|units?|words?|zones?)?|akismet|alerts?|.*analytics?.*|appnexus|audience|(app|smart)?
 b(eacon|lueconic|ouncee?x.*)s?|.*bid(d(er|ing)|s).*|
@@ -34,11 +34,13 @@ zerg(net)?)
 end
 module Webize
   module HTML
+    # narrow gunk pattern, matched inside executable scripts
+    GunkExec = /_0x[0-9a-f]|google.?[at]|[._](3gl|amazon.[a-z]+|bing|bounceexchange|chartbeat|clickability|cloudfront|crwdcntrl|doubleclick|driftt|ensighten|evidon|facebook|feedbackify|go-mpulse|googleapis|hotjar|indexww|krxd|licdn|linkedin|mar(feel|keto)|moatads|newrelic|newsmaxfeednetwork|npttech|ntv|outbrain|parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|sail-horizon|scorecardresearch|sophi|sumo|taboola|tinypass|tiqcdn|([a-z]+-)?twitter|tynt|visualwebsiteoptimizer|yieldmo|yimg|zergnet|zopim|zqtk)[._]/i
 
-    GunkExec = /_0x[0-9a-f]|google.?(a[dn]|tag)|\.(3gl|amazon.[a-z]+|bing|bounceexchange|chartbeat|clickability|cloudfront|crwdcntrl|doubleclick|ensighten|evidon|facebook|feedbackify|go-mpulse|googleapis|hotjar|indexww|krxd|licdn|linkedin|mar(feel|keto)|moatads|newrelic|newsmaxfeednetwork|npttech|ntv|outbrain|parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|sail-horizon|scorecardresearch|sophi|sumo|taboola|tinypass|tiqcdn|([a-z]+-)?twitter|tynt|visualwebsiteoptimizer|yieldmo|yimg|zergnet|zopim|zqtk)\./i
-
+    # CSS selector for script elements
     Scripts = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script"
 
+    # CSS selectors for site-navigation elements
     SiteNav = %w{
 footer nav sidebar
 [class*='foot']
@@ -55,6 +57,7 @@ footer nav sidebar
 [id*='social']
 }
 
+    # alternatives to the src attribute
     SRCnotSRC = %w(
 data-baseurl
 data-delayed-url
@@ -70,6 +73,7 @@ data-src
 image-src
 )
 
+    # degunk HTML string
     def self.degunk body, verbose = true
       doc = Nokogiri::HTML.parse body # parse
       if content_type = doc.css('meta[http-equiv="Content-Type"]')[0]
@@ -89,9 +93,10 @@ image-src
       doc.to_html                    # serialize
     end
 
+    # degunk parsed HTML (nokogiri/nokogumbo) document
     def self.degunkDoc doc, verbose = true
       doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
-      doc.css('iframe, img, ' + Scripts).map{|s| # clean body
+      doc.css('iframe, img, ' + Scripts).map{|s|
         text = s.inner_text
         if s['src']
           # content pointer
