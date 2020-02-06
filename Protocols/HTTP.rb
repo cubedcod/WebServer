@@ -739,7 +739,7 @@ class WebResource
     def HTTP.qs h
       return '' unless h
       '?' + h.map{|k,v|
-        k.to_s + '=' + (v ? (CGI.escape [*v][0].to_s) : '')
+        k.to_s + (v ? ('=' + CGI.escape([*v][0].to_s)) : '')
       }.join("&")
     end
 
