@@ -104,13 +104,14 @@ class WebResource < RDF::URI
       end
       docs.map{|doc|
         turtle = doc.fsPath + '.ttl'
+        triples = ('%3d' % graph.size) + '⋮'
         if File.exist? turtle
         # TODO Write updated version
-          print "\n⚪ #{graph.size}𑗘  #{doc.fsPath}"
+          print "\n⚪ #{triples} #{doc.fsPath}"
         else
           FileUtils.mkdir_p File.dirname turtle
           RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
-          print "\n🐢 #{graph.size}𑗘  \e[32;1m" + doc.fsPath + "\e[0m "
+          print "\n🐢 #{triples} \e[32;1m" + doc.fsPath + "\e[0m "
         end}}
     self
   end
