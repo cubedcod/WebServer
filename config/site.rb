@@ -232,6 +232,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
       # POST capability
       Allow 'groups.google.com'
       if ENV.has_key? 'GOOGLE'
+        Allow 'android.clients.google.com'
         (0..24).map{|i| h="#{i}.client-channel.google.com"; Allow h}
         (0..24).map{|i| Allow "clients#{i}.google.com"}
       end
