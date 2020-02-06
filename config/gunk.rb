@@ -1,7 +1,7 @@
 # coding: utf-8
 class WebResource
   module URIs
-    # general gunk pattern, primarily matched against URIs
+    # general gunk pattern
     Gunk = %r([-.:_\/?&=~'"%\s]
 ((block|load|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|frame|id|obe|rotat[eo]r?|slots?|system|tech|tools?|types?|units?|words?|zones?)?|akismet|alerts?|.*analytics?.*|appnexus|audience|(app|smart)?
 b(eacon|lueconic|ouncee?x.*)s?|.*bid(d(er|ing)|s).*|
@@ -14,7 +14,7 @@ header|pre)[-_]?bid.*|hotjar|.*hubspot.*|[hp]b.?js|ima[0-9]?|
 impression|indexww|
 kr(ux|xd).*|
 log(event|g(er|ing))|(app|s)?
-m(atomo|e(asurement|t(er|rics?))|ms|onitor(ing)?|odal|tr)|
+m(atomo|e(asurement|t(er|rics?))|ms|onitor(ing)?|odal|pulse|tr)|
 newrelic|.*notifications?.*|
 o(m(niture|tr)|nboarding|nesignal|ptanon|utbrain)|
 p(aywall|er(imeter-?x|sonali[sz](ation|e))|i(wik|xel(propagate)?)|lacement|op(down|over|up)|orpoiseant|owaboot|repopulator|ro(fitwell|m(o(tion)?s?|pt))|ubmatic)|/pv|
