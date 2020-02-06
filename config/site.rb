@@ -610,7 +610,9 @@ firefox.settings.services.mozilla.com
     GET 'static.parastorage.com'
 
     # WordPress
-    %w(i0 i1 i2 s0 s1 s2).map{|h| GET h + '.wp.com' }
+    %w(i0 i1 i2 s0 s1 s2).map{|h| host = h + '.wp.com'
+      Cookies host
+      GET host }
 
     # WSJ
     %w(images m s).map{|h| GET h + '.wsj.net' }

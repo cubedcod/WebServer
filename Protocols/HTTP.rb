@@ -281,18 +281,19 @@ class WebResource
     def fetch options=nil
       options ||= {}
 
-      # cached results
+      # cached results TODO Find static resource when ext changed due to erroneous upstream MIME or extension
       if (CacheExt - %w(json html xml)).member?(ext.downcase) && !host.match?(DynamicImgHost)
         return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has static-data, return 304 response
-        return fileResponse if node.file?                                           # server has static-data, return data
+        return fileResponse if node.file?                            # server has static-data, return data
       end
-      return nodeRequest if ENV.has_key? 'OFFLINE'                                                # offline, return cache
+      return nodeRequest if ENV.has_key? 'OFFLINE'                   # offline, return cache
 
-      # locator
-      p = default_port? ? '' : (':' + env['SERVER_PORT'].to_s)
-      u = '//'+host+p+path+(options[:suffix]||'')+(options[:query] ? HTTP.qs(options[:query]) : qs) # base locator
-      primary  = ('http' + (insecure? ? '' : 's') + ':' + u).R env                                  # primary scheme
-      fallback = ('http' + (insecure? ? 's' : '') + ':' + u).R env                                  # fallback scheme
+      # construct locator
+      portNum = default_port? ? '' : (':' + env['SERVER_PORT'].to_s) # port number
+      u = '//' + host + portNum + path + (options[:suffix]||'') +    # base locator sans scheme
+          (options[:query] ? HTTP.qs(options[:query]) : querystring)
+      primary  = ('http' + (insecure? ? '' : 's') + ':' + u).R env   # primary-scheme locator
+      fallback = ('http' + (insecure? ? 's' : '') + ':' + u).R env   # fallback-scheme locator
 
       # network fetch
       primary.fetchHTTP options
@@ -739,21 +740,28 @@ class WebResource
     def HTTP.qs h
       return '' unless h
       '?' + h.map{|k,v|
-        k.to_s + (v ? ('=' + CGI.escape([*v][0].to_s)) : '')
+        puts "WARNING query key #{k} has multiple vals: #{v.join ' '}, using #{v[0]}" if v.class == Array && v.size > 1
+        # homegrown escaping as URI/CGI functions ancient/semibroken/undefined&RFC-mismatch-behaviors/overly-escapey
+        # see TODO below. eventually only our own qs args (guaranteed clean) should use this
+        k.to_s.gsub(' ','+').gsub('#','%23').gsub('&','%26').gsub('=','%3D') +
+          (v ? ('=' + [*v][0].to_s.gsub(' ','+').gsub('#','%23').gsub('&','%26').gsub('=','%3D')) : '')
       }.join("&")
     end
 
     def querystring
-      if env
-        if env[:query]                                           # parsed query?
-          q = env[:query].dup                                    # read query
-          LocalArgs.map{|a| q.delete a }                         # eat internal args
-          return q.empty? ? '' : HTTP.qs(q)                      # stringify
-        elsif env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # query-string in environment
+      # TODO use unmodified QUERY_STRING rack-var if not:
+      #  local (client<>proxy(this)) query-args in use
+      #  query-args intentionally updated/changed
+      if env # dynamic takes precedence over static, query may have been updated
+        if env[:query]                                           # parsed query in request environment:
+          q = env[:query].dup                                    #  read query
+          LocalArgs.map{|a| q.delete a }                         #  select external symbols
+          return q.empty? ? '' : HTTP.qs(q)                      #  serialize
+        elsif env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # unparsed query in request environment:
           return '?' + env['QUERY_STRING']
         end
       end
-      query && !query.empty? && ('?' + query) || ''              # query-string in URI
+      query && !query.empty? && ('?' + query) || ''              # query in URI
     end
     alias_method :qs, :querystring
 
