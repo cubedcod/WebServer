@@ -326,7 +326,7 @@ class WebResource
 
     def fetchHTTP options = {}
       # TODO set if-modified-since/etag headers based on local cache contents
-      print "\n🐕  #{uri} " if ENV.has_key? 'VERBOSE'
+      print "\n🐕  #{uri} " #if ENV.has_key? 'VERBOSE'
       URI.open(uri, headers.merge({redirect: false})) do |response| print '🌍🌎🌏🌐'[rand 4]
         h = response.meta                                             # upstream metadata
         if response.status.to_s.match? /206/                          # partial response
@@ -418,7 +418,7 @@ class WebResource
 
     def fixedFormat? format = nil
       return true if upstreamUI? || format.to_s.match?(/dash.xml/)
-      return false if env[:query].has_key?('rdf') || env[:transform] || !format || format.match?(/atom|html|rss|xml/i)
+      return false if (env[:query]||{}).has_key?('rdf') || env[:transform] || !format || format.match?(/atom|html|rss|xml/i)
       return true
     end
 
@@ -816,8 +816,7 @@ class WebResource
 
     def upstreamUI; env[:UX] = true; self end
     def upstreamUI?
-      env.has_key?(:UX) || ENV.has_key?('UX') ||      # environment
-      parts.member?('embed') || env[:query].has_key?('UX') # URL parameter
+      env.has_key?(:UX) || ENV.has_key?('UX') || parts.member?('embed') || env[:query]&.has_key?('UX') # URL parameter
     end
 
     def writeFile o

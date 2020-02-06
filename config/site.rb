@@ -539,7 +539,7 @@ firefox.settings.services.mozilla.com
         r.env['authorization'] = 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA'
         attrs = {}
         cookie.split(';').map{|attr|
-          k,v = attr.split '='
+          k , v = attr.split('=').map &:strip
           attrs[k] = v}
         if ctoken = attrs['ct0']
           r.env['x-csrf-token'] = ctoken
