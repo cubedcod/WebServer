@@ -333,7 +333,7 @@ class WebResource
           [206, h, [response.read]]                                   # return part downstream
         else
           body = HTTP.decompress h, response.read                     # decompress body
-          format = if path == '/feed'                                 # content-type
+          format = if path == '/feed' || env[:query]['mime']=='xml'   # content-type
                      'application/atom+xml'
                    elsif h.has_key? 'content-type'
                      h['content-type'].split(/;/)[0]
