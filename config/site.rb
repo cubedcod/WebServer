@@ -466,6 +466,7 @@ firefox.settings.services.mozilla.com
 
     # Reuters
     GET 'feeds.reuters.com', NoQuery
+    GET 'reut.rs', NoQuery
     (0..5).map{|i|
       GET "s#{i}.reutersmedia.net", -> r {
         if r.env[:query].has_key? 'w'

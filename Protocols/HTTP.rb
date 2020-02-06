@@ -816,7 +816,7 @@ class WebResource
 
     def upstreamUI; env[:UX] = true; self end
     def upstreamUI?
-      env.has_key?(:UX) || ENV.has_key?('UX') || parts.member?('embed') || env[:query]&.has_key?('UX') # URL parameter
+      env.has_key?(:UX) || ENV.has_key?('UX') || parts.member?('embed') || env[:query]&.has_key?('UX')
     end
 
     def writeFile o
