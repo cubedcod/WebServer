@@ -1,7 +1,7 @@
 # coding: utf-8
 class WebResource
   module URIs
-    # general gunk pattern, primarily matched against URIs
+    # general gunk pattern
     Gunk = %r([-.:_\/?&=~'"%\s]
 ((block|load|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|frame|id|obe|rotat[eo]r?|slots?|system|tech|tools?|types?|units?|words?|zones?)?|akismet|alerts?|.*analytics?.*|appnexus|audience|(app|smart)?
 b(eacon|lueconic|ouncee?x.*)s?|.*bid(d(er|ing)|s).*|
@@ -14,7 +14,7 @@ header|pre)[-_]?bid.*|hotjar|.*hubspot.*|[hp]b.?js|ima[0-9]?|
 impression|indexww|
 kr(ux|xd).*|
 log(event|g(er|ing))|(app|s)?
-m(atomo|e(asurement|t(er|rics?))|ms|onitor(ing)?|odal|tr)|
+m(atomo|e(asurement|t(er|rics?))|ms|onitor(ing)?|odal|pulse|tr)|
 newrelic|.*notifications?.*|
 o(m(niture|tr)|nboarding|nesignal|ptanon|utbrain)|
 p(aywall|er(imeter-?x|sonali[sz](ation|e))|i(wik|xel(propagate)?)|lacement|op(down|over|up)|orpoiseant|owaboot|repopulator|ro(fitwell|m(o(tion)?s?|pt))|ubmatic)|/pv|
@@ -35,7 +35,7 @@ end
 module Webize
   module HTML
     # narrow gunk pattern, matched inside executable scripts
-    GunkExec = /_0x[0-9a-f]|google.?[at]|wp.?emoji|[-._\/](3gl|6sc|amazon.[a-z]+|bing|bounceexchange|chartbeat|clickability|cloudfront|crwdcntrl|doubleclick|driftt|ensighten|evidon|facebook|feedbackify|go-mpulse|googleapis|hotjar|hs-analytics|indexww|krxd|licdn|linkedin|mar(feel|keto)|moatads|newrelic|newsmaxfeednetwork|npttech|ntv|outbrain|parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|sail-horizon|scorecardresearch|sophi|sumo|survicate|taboola|tinypass|tiqcdn|([a-z]+-)?twitter|tynt|visualwebsiteoptimizer|yieldmo|yimg|zergnet|zopim|zqtk)[-._]/i
+    GunkExec = /_0x[0-9a-f]|google.?[at]|wp.?emoji|[-._\/'"](3gl|6sc|amazon.[a-z]+|bing|bounceexchange|chartbeat|clickability|cloudfront|crwdcntrl|doubleclick|driftt|ensighten|evidon|facebook|feedbackify|go-mpulse|googleapis|hotjar|hs-analytics|indexww|krxd|licdn|linkedin|mar(feel|keto)|moatads|newrelic|newsmaxfeednetwork|npttech|ntv|outbrain|parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|sail-horizon|scorecardresearch|segment|snapkit|sophi|sumo|survicate|taboola|tinypass|tiqcdn|([a-z]+-)?twitter|tynt|visualwebsiteoptimizer|yieldmo|yimg|zergnet|zopim|zqtk)[-._]/i
 
     # CSS selector for script elements
     Scripts = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script"
@@ -108,7 +108,7 @@ image-src
           end
 
         # inline content
-        elsif s['type'] != 'application/ld+json' && text.size < 4096 && text.match?(GunkExec) && !text.match?(/initial.?state/i)
+        elsif s['type'] != 'application/ld+json' && text.size < 5000 && text.match?(GunkExec) && !text.match?(/initial.?state/i)
           print "\n🚫 #{text.size} \e[31;1m" + text.gsub(/[\n\r\t]+/,'').gsub(/\s\s+/,' ') + "\e[0m " if verbose
           s.remove
         end}
