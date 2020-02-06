@@ -108,7 +108,7 @@ class WebResource
         ext = resource.path ? resource.ext.downcase : ''                   # log request
         mime = head['Content-Type'] || ''
 
-        # highlight host on first-visit of this server run
+        # highlight host on first visit of server run
         unless (Servers.has_key? env['SERVER_NAME']) || resource.env[:deny]
           Servers[env['SERVER_NAME']] = true
           print "\n➕ \e[1;7;32mhttps://" + env['SERVER_NAME'] + "\e[0m "
@@ -154,11 +154,10 @@ class WebResource
         elsif ext == 'ttl' || mime == 'text/turtle; charset=utf-8'
           print '🐢'                                             # turtle
 
-        else # generic logger
-          print "\n\e[7m" + (env['REQUEST_METHOD'] == 'GET' ? '' : (env['REQUEST_METHOD']+' ')) + (status == 200 ? '' : (status.to_s+' ')) +
-                (env[:refhost] ? (env[:refhost] + ' → ') : '') + "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + resource.qs + "\e[0m "
+        else # generic log
+          print "\n" + (env[:repository] ? (('%6d' % env[:repository].size) + '⋮ ') : '') + "\e[7m" + (status == 200 ? '' : (status.to_s+' ')) + (env[:refhost] ? (env[:refhost] + ' → ') : '') + "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + resource.qs + "\e[0m "
         end
-
+        
         [status, head, body]} # response
     rescue Exception => e
       uri = 'https://' + env['SERVER_NAME'] + (env['REQUEST_URI']||'')
@@ -326,7 +325,7 @@ class WebResource
 
     def fetchHTTP options = {}
       # TODO set if-modified-since/etag headers based on local cache contents
-      print "\n🐕  #{uri} " #if ENV.has_key? 'VERBOSE'
+      print "\n🐕  #{uri} " if ENV.has_key? 'VERBOSE'
       URI.open(uri, headers.merge({redirect: false})) do |response| print '🌍🌎🌏🌐'[rand 4]
         h = response.meta                                             # upstream metadata
         if response.status.to_s.match? /206/                          # partial response
@@ -485,7 +484,7 @@ class WebResource
         when /^application\/atom+xml/
           feedDocument
         else
-          env[:repository].dump (RDF::Writer.for :content_type => format).to_sym, :base_uri => env[:base_uri], :standard_prefixes => true
+          env[:repository].dump (RDF::Writer.for :content_type => format).to_sym, :standard_prefixes => true, :base_uri => env[:base_uri]
         end}
     end
 
