@@ -8,6 +8,7 @@ module Webize
         'gitter.im' => :Gitter,
         'lwn.net' => :LWN,
         'news.ycombinator.com' => :HackerNews,
+        'twitter.com' => :TwitterHTML,
         'universalhub.com' => :UHub,
         'www.apnews.com' => :AP,
         'www.city-data.com' => :CityData,
@@ -22,6 +23,7 @@ module Webize
   end
   module JSON
     Triplr = {
+      'twitter.com' => :TwitterHTMLinJSON,
       'api.twitter.com' => :TwitterJSON,
       'gateway.reddit.com' => :RedditJSON,
       'outline.com' => :Outline,
@@ -521,7 +523,7 @@ firefox.settings.services.mozilla.com
     GET 'static.twitchcdn.net'
 
     # Twitter
-    TwitterBear = {'authorization' => 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA'}
+    Allow 'twitter.com'
     Allow 'api.twitter.com'
 
     %w(bit.ly trib.al).map{|short| GET short, NoQuery }
@@ -533,6 +535,19 @@ firefox.settings.services.mozilla.com
         FileUtils.touch 'twitter/.' + n}}
 
     GET 'twitter.com', -> r {
+      if cookie = r.env['HTTP_COOKIE']
+        r.env['authorization'] = 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA'
+        attrs = {}
+        cookie.split(';').map{|attr|
+          k,v = attr.split '='
+          attrs[k] = v}
+        if ctoken = attrs['ct0']
+          r.env['x-csrf-token'] = ctoken
+        end
+        if gtoken = attrs['gt']
+          r.env['x-guest-token'] = gtoken
+        end
+      end
       if !r.path || r.path == '/'
         subscriptions = Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}
         r.env.delete :query
@@ -552,17 +567,17 @@ firefox.settings.services.mozilla.com
         if user.match? /^\d+$/
           uid = user
         else
-          URI.open('https://api.twitter.com/graphql/G6Lk7nZ6eEKd7LBBZw9MYw/UserByScreenName?variables=%7B%22screen_name%22%3A%22' + user + '%22%2C%22withHighlightedLabel%22%3Afalse%7D', r.headers.merge(TwitterBear)) do |response|
+          URI.open('https://api.twitter.com/graphql/G6Lk7nZ6eEKd7LBBZw9MYw/UserByScreenName?variables=%7B%22screen_name%22%3A%22' + user + '%22%2C%22withHighlightedLabel%22%3Afalse%7D', r.headers) do |response|
             body = HTTP.decompress response.meta, response.read
             json = ::JSON.parse body
             uid = json['data']['user']['rest_id']
           end
         end
         apiURL = 'https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment'
-        apiURL.R(r.env.merge TwitterBear).fetch intermediate: true
+        apiURL.R(r.env).fetch intermediate: true
         r.saveRDF.chrono_sort.graphResponse
       else
-        r.upstreamUI.fetch
+        r.fetch
       end}
 
     # USAtoday
@@ -876,6 +891,72 @@ media-mbst-pub-ue1.s3.amazonaws.com
 
   def RedditJSON tree
     puts tree.keys
+  end
+
+  def TwitterHTML doc, &b
+
+    # page pointer
+    doc.css('.stream-container').map{|stream|
+      user = parts[0]
+      if user && position = stream['data-min-position']
+        env[:links][:prev] = '/i/profiles/show/' + user + '/timeline/tweets?include_available_features=1&include_entities=1&max_position=' + position + '&reset_error_state=false&rdf&view=table&sort=date'
+      end}
+
+    # tweets
+    %w{grid-tweet tweet}.map{|tweetclass|
+      doc.css('.' + tweetclass).map{|tweet|
+        s = 'https://twitter.com' + (tweet.css('.js-permalink').attr('href') || tweet.attr('data-permalink-path') || '')
+        yield s, Type, (SIOC + 'MicroblogPost').R
+        yield s, To, 'https://twitter.com'.R
+
+        authorName = if b = tweet.css('.username b')[0]
+                       b.inner_text
+                     else
+                       s.R.parts[0]
+                     end
+        author = ('https://twitter.com/' + authorName).R
+        yield s, Creator, author
+
+        ts = (if unixtime = tweet.css('[data-time]')[0]
+              Time.at(unixtime.attr('data-time').to_i)
+             else
+               Time.now
+              end).iso8601
+        yield s, Date, ts
+
+        content = tweet.css('.tweet-text')[0]
+        if content
+          content.css('a').map{|a|
+            a.set_attribute('id', 'l' + Digest::SHA2.hexdigest(rand.to_s))
+            a.set_attribute('href', 'https://twitter.com' + (a.attr 'href')) if (a.attr 'href').match /^\//
+            yield s, DC+'link', (a.attr 'href').R}
+          yield s, Content, Webize::HTML.clean(content.inner_html, self).gsub(/<\/?span[^>]*>/,'').gsub(/\n/,'').gsub(/\s+/,' ')
+        end
+
+        if img = tweet.attr('data-resolved-url-large')
+          yield s, Image, img.to_s.R
+        end
+        tweet.css('img').map{|img|
+          yield s, Image, img.attr('src').to_s.R}
+
+        tweet.css('.PlayableMedia-player').map{|player|
+          player['style'].match(/url\('([^']+)'/).yield_self{|url|
+            yield s, Video, url[1].sub('pbs','video').sub('_thumb','').sub('jpg','mp4')
+          }}}}
+
+    %w(link[rel="alternate"] meta[name="description"] title body).map{|sel|
+      doc.css(sel).remove}
+  end
+
+  def TwitterHTMLinJSON tree, &b
+    # page pointer
+    if position = tree['min_position']
+      env[:links][:prev] = '/i/profiles/show/' + parts[3] + '/timeline/tweets?include_available_features=1&include_entities=1&max_position=' + position + '&reset_error_state=false&rdf&view=table&sort=date'
+    end
+    # tweets
+    if html = tree['items_html']
+      TwitterHTML Nokogiri::HTML.fragment(html), &b
+    end
   end
 
   def TwitterJSON tree, &b

@@ -326,7 +326,7 @@ class WebResource
 
     def fetchHTTP options = {}
       # TODO set if-modified-since/etag headers based on local cache contents
-      puts "FETCH #{uri}" if ENV.has_key? 'VERBOSE'
+      print "\n🐕  #{uri} " if ENV.has_key? 'VERBOSE'
       URI.open(uri, headers.merge({redirect: false})) do |response| print '🌍🌎🌏🌐'[rand 4]
         h = response.meta                                             # upstream metadata
         if response.status.to_s.match? /206/                          # partial response
@@ -518,7 +518,7 @@ class WebResource
     # headers formatted and filtered
     def headers raw = nil
       raw ||= env || {} # default to request headers
-      HTTP.print_header raw if ENV.has_key? 'VERBOSE'
+      #HTTP.print_header raw if ENV.has_key? 'VERBOSE'
 
       head = {} # clean headers
       raw.map{|k,v| # raw headers
@@ -709,8 +709,9 @@ class WebResource
     end
 
     def HTTP.print_header header
-      puts '_'*40
-      header.map{|k, v| puts [k, v.to_s].join "\t"}
+      header.map{|k, v|
+        print "\n", [k, v.to_s].join("\t"), ' '}
+      puts '_' * 42
     end
 
     def PUT
