@@ -711,7 +711,7 @@ class WebResource
     def HTTP.print_header header
       header.map{|k, v|
         print "\n", [k, v.to_s].join("\t"), ' '}
-      puts '_' * 42
+      print "\n", '_' * 80, ' '
     end
 
     def PUT
