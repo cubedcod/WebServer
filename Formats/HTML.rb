@@ -328,7 +328,7 @@ class WebResource
             l.gsub(/<[^>]+>/,'')[0..512].gsub(pattern){|g| # matches
               HTML.render({_: :span, class: "w#{wordIndex[g.downcase]}", c: g}) # wrap in styled node
             }} if lines.size > 0 }
-        r.delete Content if graph.size > 8
+        r.delete Content if graph.size > 10
       }
 
       # CSS

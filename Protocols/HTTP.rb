@@ -17,7 +17,7 @@ class WebResource
     Servers = {}
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Suffixes = {
-      'application/x-javascript' => '.js', 'application/x-mpegURL' => '.m3u8', 'audio/mpeg' => '.mp3',
+      'application/x-javascript' => '.js', 'application/x-mpegURL' => '.m3u8', 'application/x-rss+xml' => '.rss', 'audio/mpeg' => '.mp3',
       'image/svg+xml' => '.svg', 'image/x-icon' => '.ico', 'image/webp' => '.webp',
       'text/javascript' => '.js', 'text/json' => '.json', 'text/turtle' => '.ttl', 'text/xml' => '.rss',
       'video/MP2T' => '.ts'}
@@ -609,7 +609,7 @@ class WebResource
       if nodes.size==1 && nodes[0].ext == 'ttl' && selectFormat == 'text/turtle'
         nodes[0].fileResponse # nothing to merge or transform. return static-node
       else                    # graph data
-        nodes = nodes.map &:summary if summarize
+        nodes = nodes.map &:summary if summarize && !env[:query].has_key?('full')
         nodes.map &:loadRDF
         graphResponse
       end

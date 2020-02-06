@@ -6,6 +6,7 @@ module Webize
                    extensions: [:atom, :rss],
                    aliases: %w(
                    application/atom+xml;q=0.8
+                   application/x-rss+xml;q=0.2
                    application/xml;q=0.2
                    text/xml;q=0.2)
 
