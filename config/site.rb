@@ -443,7 +443,7 @@ firefox.settings.services.mozilla.com
       r.env[:links][:up] = File.dirname r.path unless r.path == '/'
       r.fetch options}
 
-    # this host provides a next-page pointer, missing in HTTP Headers (either UI) and HTML (new UI)
+    # this host provides a next-page pointer, missing in HTTP Headers (either UI-host) and HTML/RSS (new/main UI host)
     GET 'old.reddit.com', -> r {
       r.upstreamUI.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
       r.fetch.yield_self{|status,head,body|
@@ -537,17 +537,13 @@ firefox.settings.services.mozilla.com
 
     GET 'twitter.com', -> r {
       if cookie = r.env['HTTP_COOKIE']
-        r.env['authorization'] = 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA'
         attrs = {}
         cookie.split(';').map{|attr|
           k , v = attr.split('=').map &:strip
           attrs[k] = v}
-        if ctoken = attrs['ct0']
-          r.env['x-csrf-token'] = ctoken
-        end
-        if gtoken = attrs['gt']
-          r.env['x-guest-token'] = gtoken
-        end
+        r.env['authorization'] = 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA'
+        r.env['x-csrf-token'] = attrs['ct0'] if attrs['ct0']
+        r.env['x-guest-token'] = attrs['gt'] if attrs['gt']
       end
 
       if !r.path || r.path == '/'
@@ -573,7 +569,7 @@ firefox.settings.services.mozilla.com
         user = r.parts[0]
         if user.match? /^\d+$/
           uid = user
-        else
+        else # find uid
           URI.open('https://api.twitter.com/graphql/G6Lk7nZ6eEKd7LBBZw9MYw/UserByScreenName?variables=%7B%22screen_name%22%3A%22' + user + '%22%2C%22withHighlightedLabel%22%3Afalse%7D', r.headers) do |response|
             body = HTTP.decompress response.meta, response.read
             json = ::JSON.parse body
@@ -588,7 +584,7 @@ firefox.settings.services.mozilla.com
         r.fetch
       end}
 
-    # USAtoday
+    # USA Today
     GET 'rssfeeds.usatoday.com', NoQuery
 
     # Viglink

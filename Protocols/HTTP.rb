@@ -154,8 +154,8 @@ class WebResource
         elsif ext == 'ttl' || mime == 'text/turtle; charset=utf-8'
           print '🐢'                                             # turtle
 
-        else # generic log
-          print "\n" + (env[:repository] ? (('%6d' % env[:repository].size) + '⋮ ') : '') + "\e[7m" + (status == 200 ? '' : (status.to_s+' ')) + (env[:refhost] ? (env[:refhost] + ' → ') : '') + "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + resource.qs + "\e[0m "
+        else # default log
+          print "\n" + (mime.match?(/html/) ? '📃' : mime) + (env[:repository] ? (('%5d' % env[:repository].size) + '⋮ ') : '') + "\e[7m" + (status == 200 ? '' : (status.to_s+' ')) + "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + resource.qs + "\e[0m "
         end
         
         [status, head, body]} # response

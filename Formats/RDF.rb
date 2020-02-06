@@ -42,6 +42,7 @@ class WebResource < RDF::URI
 
   alias_method :uri, :to_s
 
+  # Turtle file(s) -> RDF::Repository
   def loadRDF options = {}
     graph = options[:repository] || env[:repository] ||= RDF::Repository.new
     options[:base_uri] ||= self
@@ -90,6 +91,7 @@ class WebResource < RDF::URI
     puts [e.class, e.message].join ' '
   end
 
+  # RDF::Repository -> Turtle file(s)
   def saveRDF repository = nil
     return self unless repository || env[:repository]
     (repository || env[:repository]).each_graph.map{|graph|
@@ -110,11 +112,12 @@ class WebResource < RDF::URI
         else
           FileUtils.mkdir_p File.dirname turtle
           RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
-          print "\n🐢 #{triples} \e[32;1m" + doc.fsPath + "\e[0m "
+          print "\n🐢 \e[32m#{triples} \e[1m" + doc.fsPath + "\e[0m "
         end}}
     self
   end
 
+  # Turtle file -> Turtle file
   def summary
     rdfized = ext == 'ttl'
     sPath = '../.cache/RDF/' + fsPath + (rdfized ? '' : '.ttl')
@@ -141,28 +144,6 @@ class WebResource < RDF::URI
     summary
   end
   alias_method :summarize, :summary
-
-  # Repository -> Hash
-  def treeFromGraph graph = nil
-    graph ||= env[:repository]
-    return {} unless graph
-
-    tree = {}
-
-    graph.each_triple{|s,p,o|
-      s = s.to_s               # subject URI
-      p = p.to_s               # predicate URI
-      o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object URI or literal
-      tree[s] ||= {'uri' => s} # insert subject
-      tree[s][p] ||= []        # insert predicate
-      if tree[s][p].class == Array
-        tree[s][p].push o unless tree[s][p].member? o # insert in object array
-          else
-            tree[s][p] = [tree[s][p],o] unless tree[s][p] == o # new object array
-      end}
-
-    tree
-  end
 
   include URIs
 
