@@ -9,7 +9,6 @@ module Webize
         'lwn.net' => :LWN,
         'news.ycombinator.com' => :HackerNews,
         'universalhub.com' => :UHub,
-        'www.aliexpress.com' => :AX,
         'www.apnews.com' => :AP,
         'www.city-data.com' => :CityData,
         'www.google.com' => :GoogleHTML,
@@ -72,17 +71,6 @@ class WebResource
     # Adobe
     Allow 'entitlement.auth.adobe.com'
     Allow 'sp.auth.adobe.com'
-
-    # AliBaba
-    %w(ae01.alicdn.com
-     assets.alicdn.com
-          i.alicdn.com
-       www.alibaba.com
-  chuwi.aliexpress.com
-s.click.aliexpress.com
-    www.aliexpress.com
-).map{|host|
-      GET host}
 
     # Amazon
     AmazonHost = -> r {(%w(www.amazon.com www.imdb.com).member?(r.env[:refhost]) || r.env[:query]['allow'] == ServerKey) ? NoGunk[r] : r.deny}
@@ -707,12 +695,6 @@ media-mbst-pub-ue1.s3.amazonaws.com
               end
             end
           }}}}
-  end
-
-  def AX doc
-    doc.css('script').map{|script|
-      script.inner_text.scan(/"(http[^"]+\.(jpg|png|webp)[^"]*)"/){|img| yield self, Image, img[0].R }
-      script.inner_text.scan(/"(http[^"]+\.(mp4|webm)[^"]*)"/){|img| yield self, Video, img[0].R }}
   end
 
   def CityData doc
