@@ -4,8 +4,10 @@ module Webize
   module JSON
     class Format < RDF::Format
       content_type 'application/json',
-                   :extension => :json,
-                   aliases: %w(text/javascript;q=0.8)
+                   extension: :json,
+                   aliases: %w(
+                    application/manifest+json;q=0.8
+                    text/javascript;q=0.8)
       content_encoding 'utf-8'
       reader { Reader }
     end

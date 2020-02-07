@@ -96,7 +96,7 @@ image-src
     # degunk parsed HTML (nokogiri/nokogumbo) document
     def self.degunkDoc doc, verbose = true
       doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
-      doc.css('iframe, img, ' + Scripts).map{|s|
+      doc.css("iframe, img, [type='image']," + Scripts).map{|s|
         text = s.inner_text
         if s['src']
           # content pointer

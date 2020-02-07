@@ -94,10 +94,11 @@ class WebResource < RDF::URI
   # RDF::Repository -> Turtle file(s)
   def saveRDF repository = nil
     return self unless repository || env[:repository]
+
     (repository || env[:repository]).each_graph.map{|graph|
-      n = (graph.name||env[:base_uri]).R # graph identity
-      docs = [n]                         # graph storage node
-      # link to timeline TODO hardlink? other locations?
+      n = (graph.name||env[:base_uri]).R # graph identifier
+      docs = [n] # canonical location
+      # doc on timeline TODO hard/symlink? other locations?
       if ts = graph.query(RDF::Query::Pattern.new(:s, (WebResource::Date).R, :o)).first_value   # timestamp query
         docs.push ['/'+ts.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), # build hour-dir path
                    %w{host path query}.map{|a|n.send(a).yield_self{|p|p && p.split(/[\W_]/)}}]. # tokenize slugs
@@ -107,12 +108,12 @@ class WebResource < RDF::URI
         turtle = doc.fsPath + '.ttl'
         triples = ('%4d' % graph.size) + '⋮'
         if File.exist? turtle
-        # TODO Write version
+        # TODO write version? (or continue requiring new URI for that)
           print "\n⚪ #{triples} #{doc.fsPath}" if ENV.has_key? 'VERBOSE'
         else
           FileUtils.mkdir_p File.dirname turtle
           RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
-          print "\n🐢 \e[32m#{triples} \e[1m" + doc.fsPath + "\e[0m "
+          print "\n🐢 \e[32m#{triples} \e[1m" + doc.fsPath + "\e[0m " if doc == docs[0] # log primary-location
         end}}
     self
   end

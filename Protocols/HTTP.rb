@@ -17,7 +17,7 @@ class WebResource
     Servers = {}
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Suffixes = {
-      'application/x-javascript' => '.js', 'application/x-mpegURL' => '.m3u8', 'application/x-rss+xml' => '.rss', 'audio/mpeg' => '.mp3',
+      'application/manifest+json' => '.json', 'application/x-javascript' => '.js', 'application/x-mpegURL' => '.m3u8', 'application/x-rss+xml' => '.rss', 'audio/mpeg' => '.mp3',
       'image/jpg' => '.jpg', 'image/svg+xml' => '.svg', 'image/x-icon' => '.ico', 'image/webp' => '.webp',
       'text/javascript' => '.js', 'text/json' => '.json', 'text/turtle' => '.ttl', 'text/xml' => '.rss',
       'video/MP2T' => '.ts'}
