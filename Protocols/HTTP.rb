@@ -111,7 +111,7 @@ class WebResource
         # highlight host on first visit of server run
         unless (Servers.has_key? env['SERVER_NAME']) || resource.env[:deny]
           Servers[env['SERVER_NAME']] = true
-          print "\n➕ \e[1;7;32mhttps://" + env['SERVER_NAME'] + "\e[0m "
+          print "\n     ➕  \e[1;7;32mhttps://" + env['SERVER_NAME'] + "\e[0m "
         end
 
         if resource.env[:deny]
@@ -325,9 +325,13 @@ class WebResource
     end
 
     def fetchHTTP options = {}
-      # TODO set if-modified-since/etag headers based on local cache contents
-      print "\n🐕  #{uri} " if ENV.has_key? 'VERBOSE'
-      URI.open(uri, headers.merge({redirect: false})) do |response| print '🌍🌎🌏🌐'[rand 4]
+      if ENV.has_key? 'VERBOSE'
+        print "\n🐕  #{uri} "
+      else
+        print '🌍🌎🌏🌐'[rand 4] if options[:intermediate] # give some feedback a fetch occured in intermediate-mode
+      end
+      # TODO set if-modified-since/etag headers from local cache contents (eattr support sufficient for etag metadata?)
+      URI.open(uri, headers.merge({redirect: false})) do |response|
         h = response.meta                                             # upstream metadata
         if response.status.to_s.match? /206/                          # partial response
           h['Access-Control-Allow-Origin'] = allowedOrigin unless h['Access-Control-Allow-Origin'] || h['access-control-allow-origin']
