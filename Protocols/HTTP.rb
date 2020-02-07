@@ -18,7 +18,7 @@ class WebResource
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Suffixes = {
       'application/x-javascript' => '.js', 'application/x-mpegURL' => '.m3u8', 'application/x-rss+xml' => '.rss', 'audio/mpeg' => '.mp3',
-      'image/svg+xml' => '.svg', 'image/x-icon' => '.ico', 'image/webp' => '.webp',
+      'image/jpg' => '.jpg', 'image/svg+xml' => '.svg', 'image/x-icon' => '.ico', 'image/webp' => '.webp',
       'text/javascript' => '.js', 'text/json' => '.json', 'text/turtle' => '.ttl', 'text/xml' => '.rss',
       'video/MP2T' => '.ts'}
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
@@ -111,7 +111,7 @@ class WebResource
         # highlight host on first visit of server run
         unless (Servers.has_key? env['SERVER_NAME']) || resource.env[:deny]
           Servers[env['SERVER_NAME']] = true
-          print "\n     ➕  \e[1;7;32mhttps://" + env['SERVER_NAME'] + "\e[0m "
+          print "\n      ➕ \e[1;7;32mhttps://" + env['SERVER_NAME'] + "\e[0m "
         end
 
         if resource.env[:deny]
