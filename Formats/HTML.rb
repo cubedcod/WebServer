@@ -266,10 +266,8 @@ class WebResource
     Markup = {} # markup-generator lambdas
 
     def chrono_sort
-      q = query_values || {}
-      q['sort'] ||= 'date'
-      q['view'] ||= 'table'
-      query_values = q
+      env[:sort] = 'date'
+      env[:view] = 'table'
       self
     end
 
@@ -324,7 +322,7 @@ class WebResource
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?
                                HTML.keyval (Webize::HTML.webizeHash env), env
-                             elsif query_values && query_values['view']=='table'
+                             elsif (env[:view] || (query_values||{})['view']) == 'table'
                                HTML.tabular graph, env
                              else
                                HTML.tree Treeize[graph], env
@@ -405,8 +403,8 @@ class WebResource
       graph = graph.values if graph.class == Hash
       keys = graph.select{|r|r.respond_to? :keys}.map{|r|r.keys}.flatten.uniq - [Abstract, Content, DC+'hasFormat', DC+'identifier', Image, Link, Video, SIOC+'reply_of', SIOC+'user_agent', Title]
       keys = [Creator, *(keys - [Creator])] if keys.member? Creator
-      if env[:base_uri].query_values&.has_key? 'sort'
-        attr = env[:base_uri].query_values['sort']
+      if env[:sort] || env[:base_uri].query_values&.has_key?('sort')
+        attr = env[:sort] || env[:base_uri].query_values['sort']
         attr = Date if %w(date new).member? attr
         attr = Content if attr == 'content'
         graph = graph.sort_by{|r| (r[attr]||'').to_s}.reverse
