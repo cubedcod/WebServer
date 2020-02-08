@@ -77,7 +77,11 @@ class WebResource
     end
 
     def allowCDN?
-      (CacheExt - %w(html js)).member?(ext.downcase) && !path.match?(Gunk)
+      if host.match? /github.io$/
+        env[:refhost]&.match? /github.io$/
+      else
+        (CacheExt - %w(html js)).member?(ext.downcase) && !path.match?(Gunk)
+      end
     end
 
     def allowedOrigin
