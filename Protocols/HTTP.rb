@@ -17,7 +17,21 @@ class WebResource
     Servers = {}
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
-    Internal_Headers = %w(base-uri connection gunk host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software site-chrome transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forwarded-for)
+    Internal_Headers = %w(
+base-uri
+connection
+gunk
+host keep-alive
+links
+path-info
+query-string
+rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version
+rdf refhost remote-addr repository request-method request-path request-uri resp
+script-name server-name server-port server-protocol server-software site-chrome
+te transfer-encoding
+unicorn.socket
+upgrade upgrade-insecure-requests ux version x-forwarded-for
+)
 
     # handlers
     Fetch = -> r {r.fetch}
@@ -111,7 +125,7 @@ class WebResource
         # log host on first visit
         unless (Servers.has_key? env['SERVER_NAME']) || resource.env[:deny]
           Servers[env['SERVER_NAME']] = true
-          print "\n      ➕ \e[1;7;32mhttps://" + env['SERVER_NAME'] + "\e[0m " unless ENV.has_key? 'QUIET'
+          print "\n      ➕ \e[30;45mhttps://" + env['SERVER_NAME'] + "\e[0m " unless ENV.has_key? 'QUIET'
         end
 
         if resource.env[:deny]
