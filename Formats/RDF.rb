@@ -34,7 +34,7 @@ class WebResource < RDF::URI
     Schema   = 'http://schema.org/'
 
     def basename; File.basename path end
-    def ext; File.extname(path)[1..-1] || '' end
+    def ext; path ? (File.extname(path)[1..-1] || '') : '' end
     def extension; '.' + ext end
     def parts; path ? (path.split('/') - ['']) : [] end
 
