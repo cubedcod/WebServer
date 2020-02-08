@@ -107,7 +107,7 @@ class WebResource
         # log host on first visit
         unless (Servers.has_key? env['SERVER_NAME']) || resource.env[:deny]
           Servers[env['SERVER_NAME']] = true
-          print "\n      ➕ \e[1;7;32mhttps://" + env['SERVER_NAME'] + "\e[0m "
+          print "\n      ➕ \e[1;7;32mhttps://" + env['SERVER_NAME'] + "\e[0m " unless ENV.has_key? 'QUIET'
         end
 
         if resource.env[:deny]
@@ -522,11 +522,9 @@ class WebResource
 
     # headers formatted and filtered
     def headers raw = nil
-      raw ||= env || {} # default to request headers
-      #HTTP.print_header raw if ENV.has_key? 'VERBOSE'
-
-      head = {} # clean headers
-      raw.map{|k,v| # raw headers
+      raw ||= env || {} # raw headers
+      head = {}         # clean headers
+      raw.map{|k,v|     # inspect headers
         k = k.to_s
         key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|t| # strip prefix, tokenize
           if %w{cl dfe id spf utc xsrf}.member? t # acronym?

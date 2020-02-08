@@ -37,7 +37,7 @@ module Webize
 
           # strip attrs
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) ||
-                      %w(bgcolor height http-equiv layout ping role style tabindex target theme width).member?(a.name)}
+                      %w(bgcolor class height http-equiv layout ping role style tabindex target theme width).member?(a.name)}
 
         # annotate hrefs
         if e['href']

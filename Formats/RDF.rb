@@ -113,7 +113,7 @@ class WebResource < RDF::URI
         else
           FileUtils.mkdir_p File.dirname turtle
           RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
-          print "\n🐢 \e[32m#{triples} \e[1m" + doc.fsPath + "\e[0m " if doc == docs[0] # log primary-location
+          print "\n🐢 \e[32m#{triples} \e[1m#{doc}\e[0m " if doc == docs[0]
         end}}
     self
   end

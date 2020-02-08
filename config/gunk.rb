@@ -74,7 +74,7 @@ image-src
 )
 
     # degunk HTML string
-    def self.degunk body, verbose = true
+    def self.degunk body, verbose = false
       doc = Nokogiri::HTML.parse body # parse
       if content_type = doc.css('meta[http-equiv="Content-Type"]')[0]
         if content = content_type['content']
@@ -94,7 +94,7 @@ image-src
     end
 
     # degunk parsed HTML (nokogiri/nokogumbo) document
-    def self.degunkDoc doc, verbose = true
+    def self.degunkDoc doc, verbose = false
       doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
       doc.css("iframe, img, [type='image']," + Scripts).map{|s|
         text = s.inner_text
