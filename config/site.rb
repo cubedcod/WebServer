@@ -149,7 +149,7 @@ secure.brightcove.com
     Allow 'www.di.fm'
 
     # Disqus
-    GET 'c.disquscdn.com'
+    GET 'c.disquscdn.com', GoIfURL
     GET 'disq.us', GoIfURL
 
     # DuckDuckGo
