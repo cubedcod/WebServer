@@ -494,8 +494,7 @@ class WebResource
     end
 
     def gunkDomain?
-      return false unless host
-      return false if AllowedHosts.has_key?(host) || HostGET.has_key?(host) || host.match?(CDNhost)
+      return false if !host || AllowedHosts.has_key?(host) || HostGET.has_key?(host)
       c = GunkHosts
       host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # find leaf on gunk-domain tree
     end
