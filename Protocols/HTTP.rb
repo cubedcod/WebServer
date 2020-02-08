@@ -16,11 +16,6 @@ class WebResource
     Populator = {}
     Servers = {}
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
-    Suffixes = {
-      'application/manifest+json' => '.json', 'application/x-javascript' => '.js', 'application/x-mpegURL' => '.m3u8', 'application/x-rss+xml' => '.rss', 'audio/mpeg' => '.mp3',
-      'image/jpg' => '.jpg', 'image/svg+xml' => '.svg', 'image/x-icon' => '.ico', 'image/webp' => '.webp',
-      'text/javascript' => '.js', 'text/json' => '.json', 'text/turtle' => '.ttl', 'text/xml' => '.rss',
-      'video/MP2T' => '.ts'}
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
     Internal_Headers = %w(base-uri connection gunk host links path-info query query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software site-chrome transfer-encoding unicorn.socket upgrade-insecure-requests ux version via x-forwarded-for)
 

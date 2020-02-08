@@ -1,8 +1,8 @@
 # coding: utf-8
 class WebResource
   module URIs
-    # general gunk pattern
-    Gunk = %r([-.:_\/?&=~'"%\s]
+
+    Gunk = %r([-._\/'"\s:?&=~%]
 ((block|load|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|frame|id|obe|rotat[eo]r?|slots?|system|tech|tools?|types?|units?|words?|zones?)?|akismet|alerts?|.*analytics?.*|appnexus|audience|(app|smart)?
 b(eacon|lueconic|ouncee?x.*)s?|.*bid(d(er|ing)|s).*|
 c(ampaigns?|edexis|hartbeat.*|mp|ollector|omscore|on(sent|version)|ookie(c(hoice|onsent)|law|notice)?s?|riteo|se)|
@@ -27,15 +27,15 @@ viral|
 wp-?(ad.*|rum)|
 xiti|_0x.*|
 zerg(net)?)
-([-.:_\/?&=~'"%\s]|$)|
+([-._\/'"\s:?&=~%]|$)|
 \.(eot|gif\?|otf|ttf|woff2?))xi
+
+    GunkExec = /_0x[0-9a-f]|3gl|6sc|amazon|analytics|bing|bouncee?x|chartbeat|clickability|cloudfront|crwdcntrl|doubleclick|driftt|ensighten|evidon|facebook|feedbackify|google|hotjar|indexww|krxd|licdn|linkedin|mar(feel|keto)|moatads|mpulse|newrelic|newsmax|npttech|ntv|outbrain|parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|sail-horizon|scorecard|segment|snapkit|sophi|sumo|survicate|taboola|tinypass|tiqcdn|track|twitter|tynt|visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk/i
 
   end
 end
 module Webize
   module HTML
-    # narrow gunk pattern, matched inside executable scripts
-    GunkExec = /_0x[0-9a-f]|google.?[at]|wp.?emoji|[-._\/'"](3gl|6sc|amazon.[a-z]+|bing|bounceexchange|chartbeat|clickability|cloudfront|crwdcntrl|doubleclick|driftt|ensighten|evidon|facebook|feedbackify|go-mpulse|googleapis|hotjar|hs-analytics|indexww|krxd|licdn|linkedin|mar(feel|keto)|moatads|newrelic|newsmaxfeednetwork|npttech|ntv|outbrain|parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|sail-horizon|scorecardresearch|segment|snapkit|sophi|sumo|survicate|taboola|tinypass|tiqcdn|([a-z]+-)?twitter|tynt|visualwebsiteoptimizer|yieldmo|yimg|zergnet|zopim|zqtk)[-._]/i
 
     # CSS selector for script elements
     Scripts = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script"
