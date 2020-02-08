@@ -21,11 +21,11 @@ class WebResource
 
     # handlers
     Fetch = -> r {r.fetch}
-    GoIfURL = -> r {r.env[:query].has_key?('url') ? GotoURL[r] : NoGunk[r]}
+    GoIfURL = -> r {r.query_values&.has_key?('url') ? GotoURL[r] : NoGunk[r]}
     GotoBasename = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
-    GotoU   = -> r {[301, {'Location' =>  r.env[:query]['u']}, []]}
-    GotoURL = -> r {[301, {'Location' => (r.env[:query]['url']||r.env[:query]['q'])}, []]}
-    NoGunk  = -> r {r.gunkURI && r.env[:query]['allow'] != ServerKey && r.deny || r.fetch}
+    GotoU   = -> r {[301, {'Location' =>  r.query_values['u']}, []]}
+    GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['q'])}, []]}
+    NoGunk  = -> r {r.gunkURI && (r.query_values || {})['allow'] != ServerKey && r.deny || r.fetch}
     NoJS    = -> r {
       if r.ext == 'js'                             # request for script file
         r.deny                                     # drop request
@@ -48,13 +48,13 @@ class WebResource
       end}
 
     NoQuery = -> r {
-      if r.qs.empty?                               # request without qs
-        NoGunk[r].yield_self{|s,h,b|               # inspect response
-          h.keys.map{|k|                           # strip qs from location
+      if !r.query                         # request without query
+        NoGunk[r].yield_self{|s,h,b|      #  inspect response
+          h.keys.map{|k|                  #  strip query from new location
             h[k] = h[k].split('?')[0] if k.downcase == 'location' && h[k].match?(/\?/)}
-          [s,h,b]}                                 # cleaned response
-      else                                         # request with qs
-        [302, {'Location' => r.env['REQUEST_PATH']}, []] # redirect to path
+          [s,h,b]}                        #  response
+      else                                # request with query
+        [302, {'Location' => r.path}, []] #  redirect to path
       end}
 
     RootIndex = -> r {
@@ -91,19 +91,20 @@ class WebResource
     end
 
     def self.call env
-      return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']              # only handle HTTP methods
-      resource = RDF::URI('//'+env['SERVER_NAME']).join(env['REQUEST_PATH']).R env # instantiate request
-      env[:base_uri] = resource                                                 # resource URI
+      return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']           # allow HTTP methods
+      uri = RDF::URI('https://' + env['SERVER_NAME']).join env['REQUEST_PATH']
+      uri.query = env['QUERY_STRING'] if env['QUERY_STRING'] && !env['QUERY_STRING'].empty?
+      resource = uri.R env                                                      # instantiate request
+      env[:base_uri] = resource                                                 # request URI
       env[:refhost] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # referring host
-      env[:resp] = {}                                                           # response HEAD storage
-      env[:links] = {}                                                          # response Link storage
-      env[:query] = parseQs(env['QUERY_STRING'])                           # parse query
-      resource.send(env['REQUEST_METHOD']).yield_self{|status, head, body| # dispatch
+      env[:resp] = {}                                                           # HEAD storage
+      env[:links] = {}                                                          # Link storage
+      resource.send(env['REQUEST_METHOD']).yield_self{|status, head, body|      # dispatch
 
-        ext = resource.path ? resource.ext.downcase : ''                   # log request
+        ext = resource.path ? resource.ext.downcase : ''                        # log
         mime = head['Content-Type'] || ''
 
-        # highlight host on first visit of server run
+        # log host on first visit
         unless (Servers.has_key? env['SERVER_NAME']) || resource.env[:deny]
           Servers[env['SERVER_NAME']] = true
           print "\n      ➕ \e[1;7;32mhttps://" + env['SERVER_NAME'] + "\e[0m "
@@ -113,7 +114,7 @@ class WebResource
           if %w(css eot otf ttf woff woff2).member?(ext) || resource.path.match?(/204$/)
             print "🛑"
           else
-            print "\n" + (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "🛑 \e[31;1m") + (env[:refhost] ? ("\e[7m" + env[:refhost] + "\e[0m\e[31;1m → ") : '') + (env[:refhost] == resource.host ? '' : ('http://' + resource.host)) + "\e[7m" + resource.path + "\e[0m\e[31m" + resource.qs + "\e[0m "
+            print "\n" + (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "🛑 \e[31;1m") + (env[:refhost] ? ("\e[7m" + env[:refhost] + "\e[0m\e[31;1m → ") : '') + (env[:refhost] == resource.host ? '' : ('http://' + resource.host)) + "\e[7m" + resource.path + "\e[0m\e[31m" + "\e[0m "
           end
 
         # OPTIONS
@@ -139,7 +140,7 @@ class WebResource
           third_party = env[:refhost] != resource.host
           print "\n📜 \e[36#{third_party ? ';7' : ''};1mhttps://" + resource.host + resource.path + "\e[0m "
         elsif ext == 'json' || mime.match?(/json/)               # data
-          print "\n🗒 https://" + resource.host + resource.path + resource.qs + ' '
+          print "\n🗒 https://" + resource.host + resource.path + (resource.query ? ('?' + resource.query) : '') + ' '
         elsif %w(gif jpeg jpg png svg webp).member?(ext) || mime.match?(/^image/)
           print '🖼️'                                              # image
         elsif %w(aac flac m4a mp3 ogg opus).member?(ext) || mime.match?(/^audio/)
@@ -150,7 +151,7 @@ class WebResource
           print '🐢'                                             # turtle
 
         else # default log
-          print "\n" + (mime.match?(/html/) ? '📃' : mime) + (env[:repository] ? (('%5d' % env[:repository].size) + '⋮ ') : '') + "\e[7m" + (status == 200 ? '' : (status.to_s+' ')) + "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + resource.qs + "\e[0m "
+          print "\n" + (mime.match?(/html/) ? '📃' : mime) + (env[:repository] ? (('%5d' % env[:repository].size) + '⋮ ') : '') + "\e[7m" + (status == 200 ? '' : (status.to_s+' ')) + "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + (resource.query ? ('?' + resource.query) : '') + "\e[0m "
         end
         
         [status, head, body]} # response
@@ -222,10 +223,10 @@ class WebResource
                       elsif type == :JSON || ext == 'json'
                         ['application/json','{}']
                       else
-                        env[:query]['allow'] = ServerKey
-                        href = qs.match?(/campaign|[iu]tm_/) ? '?' : HTTP.qs(env[:query])
+                        q = query_values || {}
+                        q['allow'] = ServerKey
                         ['text/html; charset=utf-8',
-                         "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center'><a href='#{href}' style='color: #fff; font-size: 22em; font-weight: bold; text-decoration: none'>⌘</a></body></html>"]
+                         "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center'><a href='#{HTTP.qs q}' style='color: #fff; font-size: 22em; font-weight: bold; text-decoration: none'>⌘</a></body></html>"]
                       end
       [status,
        {'Access-Control-Allow-Credentials' => 'true',
@@ -285,8 +286,14 @@ class WebResource
 
       # construct locator
       portNum = default_port? ? '' : (':' + env['SERVER_PORT'].to_s) # port number
-      u = '//' + host + portNum + path + (options[:suffix]||'') +    # base locator sans scheme
-          (options[:query] ? HTTP.qs(options[:query]) : querystring)
+      qs = if options[:query]                                        # query string
+             HTTP.qs options[:query]
+           elsif query
+             '?' + query
+           else
+             ''
+           end
+      u = ['//', host, portNum, path, options[:suffix], qs].join     # locator sans scheme
       primary  = ('http' + (insecure? ? '' : 's') + ':' + u).R env   # primary-scheme locator
       fallback = ('http' + (insecure? ? 's' : '') + ':' + u).R env   # fallback-scheme locator
 
@@ -333,7 +340,7 @@ class WebResource
           [206, h, [response.read]]                                   # return part downstream
         else
           body = HTTP.decompress h, response.read                     # decompress body
-          format = if path == '/feed' || env[:query]['mime']=='xml'   # content-type
+          format = if path == '/feed' || (query_values||{})['mime']=='xml'   # content-type
                      'application/atom+xml'
                    elsif h.has_key? 'content-type'
                      h['content-type'].split(/;/)[0]
@@ -417,7 +424,7 @@ class WebResource
 
     def fixedFormat? format = nil
       return true if upstreamUI? || format.to_s.match?(/dash.xml/)
-      return false if (env[:query]||{}).has_key?('rdf') || env[:transform] || !format || format.match?(/atom|html|rss|xml/i)
+      return false if (query_values||{}).has_key?('rdf') || env[:transform] || !format || format.match?(/atom|html|rss|xml/i)
       return true
     end
 
@@ -439,7 +446,7 @@ class WebResource
         else
           unless !path || path == '/'
             dir = File.dirname path
-            env[:links][:up] = dir + (dir[-1] == '/' ? '' : '/') + qs
+            env[:links][:up] = dir + (dir[-1] == '/' ? '' : '/') + (query ? ('?' + query) : '')
           end
           timeMeta
           nodeRequest               # local transformable/graph data
@@ -455,7 +462,7 @@ class WebResource
         Populator[host][self] if Populator[host] && !join('/').R.node.exist?
         handler[self]
       elsif host.match? CDNhost     # CDN content-pool
-        if AllowedHosts.has_key?(host) || env[:query]['allow'] == ServerKey || allowCDN?
+        if AllowedHosts.has_key?(host) || (query_values||{})['allow'] == ServerKey || allowCDN?
           fetch                     # allowed CDN content
         else
           deny                      # blocked CDN content
@@ -464,7 +471,7 @@ class WebResource
         deny
       else
         dir = File.dirname path
-        env[:links][:up] = dir + (dir == '/' ? '' : '/') + qs unless !path || path == '/'
+        env[:links][:up] = dir + (dir == '/' ? '' : '/') + (query ? ('?' + query) : '') unless !path || path == '/'
         fetch                       # generic remote resource
       end
     end
@@ -489,7 +496,7 @@ class WebResource
     end
 
     def gunk?
-      return false if env[:query]['allow'] == ServerKey
+      return false if (query_values||{})['allow'] == ServerKey
       gunkTag? || gunkURI
     end
 
@@ -564,18 +571,19 @@ class WebResource
 
     # URI -> storage node(s) -> RDF graph -> HTTP response
     def nodeRequest
+      qs = query_values || {}
       nodes = (if node.directory?
-               if env[:query].has_key? 'f'       # FIND full case-insensitive match
+               if qs.has_key? 'f'       # FIND full case-insensitive match
                  summarize = true
-                 q = env[:query]['f']
-                 `find #{shellPath} -iname #{Shellwords.escape q}`.lines.map{|p|('/' + p.chomp).R} unless env[:query]['f'].empty? || path == '/'
-               elsif env[:query].has_key? 'find' # FIND substring match
+                 q = qs['f']
+                 `find #{shellPath} -iname #{Shellwords.escape q}`.lines.map{|p|('/' + p.chomp).R} unless qs['f'].empty? || path == '/'
+               elsif qs.has_key? 'find' # FIND substring match
                  summarize = true
-                 q = '*' + env[:query]['find'] + '*'
-                 `find #{shellPath} -iname #{Shellwords.escape q}`.lines.map{|p|('/' + p.chomp).R} unless env[:query]['find'].empty? || path == '/'
-               elsif (env[:query].has_key?('Q') || env[:query].has_key?('q')) && path != '/'
+                 q = '*' + qs['find'] + '*'
+                 `find #{shellPath} -iname #{Shellwords.escape q}`.lines.map{|p|('/' + p.chomp).R} unless qs['find'].empty? || path == '/'
+               elsif (qs.has_key?('Q') || qs.has_key?('q')) && path != '/'
                  env[:grep] = true               # GREP
-                 q = env[:query]['Q'] || env[:query]['q']
+                 q = qs['Q'] || qs['q']
                  args = q.shellsplit rescue q.split(/\W/)
                  case args.size
                  when 0
@@ -599,7 +607,7 @@ class WebResource
               else
                 if uri.match GlobChars                                 # GLOB - parametric
                   summarize = true
-                  env[:grep] = true if env && env[:query].has_key?('q')
+                  env[:grep] = true if env && qs.has_key?('q')
                   glob
                 else                                                   # GLOB - default graph-data
                   (self + '.*').R.glob
@@ -608,7 +616,7 @@ class WebResource
       if nodes.size==1 && nodes[0].ext == 'ttl' && selectFormat == 'text/turtle'
         nodes[0].fileResponse # nothing to merge or transform. return static-node
       else                    # graph data
-        nodes = nodes.map &:summary if summarize && !env[:query].has_key?('full')
+        nodes = nodes.map &:summary if summarize && !qs.has_key?('full')
         nodes.map &:loadRDF
         graphResponse
       end
@@ -632,27 +640,8 @@ class WebResource
     end
 
     def OPTIONSthru
-      # request
-      url = 'https://' + host + path + qs
-      head = headers
-      body = env['rack.input'].read
-      # response
-      r = HTTParty.options url, :headers => head, :body => body
-      h = headers r.headers
-      [r.code, h, [r.body]]
-    end
-
-    # String -> Hash
-    def HTTP.parseQs querystring
-      if querystring
-        table = {}
-        querystring.split(/&/).map{|e|
-          k, v = e.split(/=/,2).map{|x|CGI.unescape x}
-          table[k] = v if k}
-        table
-      else
-        {}
-      end
+      r = HTTParty.options uri, headers: headers, body: env['rack.input'].read
+      [r.code, (headers r.headers), [r.body]]
     end
 
     def self.Populate host, lambda
@@ -674,27 +663,14 @@ class WebResource
     end
 
     def POSTthru
-      # origin request
-      url = 'https://' + host + path + qs
-      head = headers
-      body = env['rack.input'].read
-      # origin response
-      r = HTTParty.post url, :headers => head, :body => body
-      h = headers r.headers
-      [r.code, h, [r.body]]
+      r = HTTParty.post uri, headers: headers, body: env['rack.input'].read
+      [r.code, (headers r.headers), [r.body]]
     end
 
     def HTTP.print_body head, body
       type = head['Content-Type'] || head['content-type']
       puts type
       puts case type
-           when 'application/x-www-form-urlencoded'
-             form = parseQs body
-             ::JSON.pretty_generate(if form['message']
-                                     ::JSON.parse form['message']
-                                    else
-                                     form
-                                    end)
            when 'application/json'
              json = ::JSON.parse body rescue {}
              ::JSON.pretty_generate json
@@ -725,43 +701,18 @@ class WebResource
     end
 
     def PUTthru
-      # request
-      url = 'https://' + host + path + qs
-      body = env['rack.input'].read
-      puts "PUT #{url}", body
-      # response
-      r = HTTParty.put url, :headers => headers, :body => body
+      r = HTTParty.put uri, headers: headers, body: env['rack.input'].read
       [r.code, (headers r.headers), [r.body]]
     end
 
     # Hash -> querystring
     def HTTP.qs h
-      return '' unless h
+      return '' if !h || h.empty?
       '?' + h.map{|k,v|
         puts "WARNING query key #{k} has multiple vals: #{v.join ' '}, using #{v[0]}" if v.class == Array && v.size > 1
-        # homegrown escaping as URI/CGI functions ancient/semibroken/undefined&RFC-mismatch-behaviors/overly-escapey
-        # see TODO below. eventually only our own qs args (guaranteed clean) should use this
-        k.to_s.gsub(' ','+').gsub('#','%23').gsub('&','%26').gsub('=','%3D') +
-          (v ? ('=' + [*v][0].to_s.gsub(' ','+').gsub('#','%23').gsub('&','%26').gsub('=','%3D')) : '')
+        CGI.escape(k.to_s) + (v ? ('=' + CGI.escape([*v][0].to_s)) : '')
       }.join("&")
     end
-
-    def querystring
-      # TODO use unmodified QUERY_STRING rack-var if not:
-      #  local (client<>proxy(this)) query-args in use
-      #  query-args intentionally updated/changed
-      if env # dynamic takes precedence over static, query may have been updated
-        if env[:query]                                           # parsed query in request environment:
-          q = env[:query].dup                                    #  read query
-          LocalArgs.map{|a| q.delete a }                         #  select external symbols
-          return q.empty? ? '' : HTTP.qs(q)                      #  serialize
-        elsif env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # unparsed query in request environment:
-          return '?' + env['QUERY_STRING']
-        end
-      end
-      query && !query.empty? && ('?' + query) || ''              # query in URI
-    end
-    alias_method :qs, :querystring
 
     def selectFormat default = 'text/html'
       return default unless env && env.has_key?('HTTP_ACCEPT') # default via no specification
@@ -821,7 +772,7 @@ class WebResource
 
     def upstreamUI; env[:UX] = true; self end
     def upstreamUI?
-      env.has_key?(:UX) || ENV.has_key?('UX') || parts.member?('embed') || env[:query]&.has_key?('UX')
+      env.has_key?(:UX) || ENV.has_key?('UX') || parts.member?('embed') || query_values&.has_key?('UX')
     end
 
     def writeFile o

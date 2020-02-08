@@ -130,7 +130,7 @@ module Webize
 
         # host bindings
         if hostTriplr = Triplr[@base.host] ||
-                        Triplr[@base.respond_to?(:env) && @base.env && @base.env[:query] && @base.env[:query]['host']]
+                        Triplr[@base.respond_to?(:env) && @base.env && @base.query_values && @base.query_values['host']]
           @base.send hostTriplr, n, &f
         end
 
@@ -266,9 +266,10 @@ class WebResource
     Markup = {} # markup-generator lambdas
 
     def chrono_sort
-      env[:query] ||= {}
-      env[:query]['sort'] ||= 'date'
-      env[:query]['view'] ||= 'table'
+      q = query_values || {}
+      q['sort'] ||= 'date'
+      q['view'] ||= 'table'
+      query_values = q
       self
     end
 
@@ -312,9 +313,9 @@ class WebResource
                         {_: :body,
                          c: [{class: :toolbox,
                               c: [(icon.node.exist? && icon.node.size != 0) ? {_: :a, href: '/', id: :host, c: {_: :img, src: icon.uri}} : (host || 'localhost').split('.').-(%w(com net org www)).reverse.map{|h| {_: :a, class: :breadcrumb, href: '/', c: h}},
-                                  {_: :a, id: :UX, class: :icon, style: 'color: #555', c: '⚗️', href: HTTP.qs((env[:query]||{}).merge({'UX' => 'upstream'}))},
+                                  {_: :a, id: :UX, class: :icon, style: 'color: #555', c: '⚗️', href: HTTP.qs((query_values||{}).merge({'UX' => 'upstream'}))},
                                  ({_: :a, id: :tabular, class: :icon, style: 'color: #555', c: '↨',
-                                    href: HTTP.qs((env[:query]||{}).merge({'view' => 'table', 'sort' => 'date'}))} unless env[:query] && env[:query]['view']=='table'),
+                                    href: HTTP.qs((query_values||{}).merge({'view' => 'table', 'sort' => 'date'}))} unless query_values && query_values['view']=='table'),
                                  env[:base_uri].parts.map{|p|
                                     [{_: :a, class: :breadcrumb, href: bc += p + '/', c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
                                  link[:feed, FeedIcon], link[:time, '🕒'],
@@ -323,7 +324,7 @@ class WebResource
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?
                                HTML.keyval (Webize::HTML.webizeHash env), env
-                             elsif env[:query] && env[:query]['view']=='table'
+                             elsif query_values && query_values['view']=='table'
                                HTML.tabular graph, env
                              else
                                HTML.tree Treeize[graph], env
@@ -334,7 +335,8 @@ class WebResource
 
     def htmlGrep
       graph = env[:graph]
-      q = env[:query]['Q'] || env[:query]['q']
+      qv = query_values || {}
+      q = qv['Q'] || qv['q']
       wordIndex = {}
       args = q.shellsplit rescue q.split(/\W/)
       args.each_with_index{|arg,i| wordIndex[arg] = i }
@@ -403,8 +405,8 @@ class WebResource
       graph = graph.values if graph.class == Hash
       keys = graph.select{|r|r.respond_to? :keys}.map{|r|r.keys}.flatten.uniq - [Abstract, Content, DC+'hasFormat', DC+'identifier', Image, Link, Video, SIOC+'reply_of', SIOC+'user_agent', Title]
       keys = [Creator, *(keys - [Creator])] if keys.member? Creator
-      if env[:query] && env[:query].has_key?('sort')
-        attr = env[:query]['sort']
+      if query_values && query_values.has_key?('sort')
+        attr = query_values['sort']
         attr = Date if %w(date new).member? attr
         attr = Content if attr == 'content'
         graph = graph.sort_by{|r| (r[attr]||'').to_s}.reverse
@@ -414,7 +416,7 @@ class WebResource
               p = p.R
               slug = p.fragment || (p.path && p.basename) || ' '
               icon = Icons[p.uri] || slug
-              {_: :td, c: (env[:query]||{})['sort'] == p.uri ? icon : {_: :a, class: :head, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}}},
+              {_: :td, c: (query_values||{})['sort'] == p.uri ? icon : {_: :a, class: :head, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}}},
            graph.map{|resource|
              {_: :tr, resource: resource['uri'], c: keys.map{|k|
                 {_: :td, property: k,
@@ -496,7 +498,7 @@ class WebResource
 
         # traverse and insert
         cursor = tree
-        [re.host ? re.host.split('.').reverse : nil, re.parts, re.qs, re.fragment].flatten.compact.-(Webize::Plaintext::BasicSlugs).map{|name|
+        [re.host ? re.host.split('.').reverse : nil, re.parts, re.fragment].flatten.compact.-(Webize::Plaintext::BasicSlugs).map{|name|
           cursor = cursor[name] ||= {}}
         if cursor[:RDF] # merge to existing node
           node.map{|k,v|
@@ -666,7 +668,7 @@ class WebResource
       else
         env[:images][src] = true
         if src.match /youtu/
-          id = (HTTP.parseQs v.query)['v'] || v.parts[-1]
+          id = (v.query_values||{})['v'] || v.parts[-1]
           {_: :iframe, width: 560, height: 315, src: "https://www.youtube.com/embed/#{id}", frameborder: 0, gesture: "media", allow: "encrypted-media", allowfullscreen: :true}
         else
           [dash ? '<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>' : nil,

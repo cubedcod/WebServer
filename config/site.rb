@@ -75,7 +75,7 @@ class WebResource
     Allow 'sp.auth.adobe.com'
 
     # Amazon
-    AmazonHost = -> r {(%w(www.amazon.com www.imdb.com).member?(r.env[:refhost]) || r.env[:query]['allow'] == ServerKey) ? NoGunk[r] : r.deny}
+    AmazonHost = -> r {(%w(www.amazon.com www.imdb.com).member?(r.env[:refhost]) || (r.query_values||{})['allow'] == ServerKey) ? NoGunk[r] : r.deny}
     %w(amazon.com www.amazon.com).map{|host| GET host}
     GET 'images-na.ssl-images-amazon.com', AmazonHost
     GET 'm.media-amazon.com', AmazonHost
@@ -143,7 +143,7 @@ secure.brightcove.com
     GET 'rss.cnn.com', NoQuery
 
     # DartSearch
-    GET 'clickserve.dartsearch.net', -> r {[301,{'Location' => r.env[:query]['ds_dest_url']}, []]}
+    GET 'clickserve.dartsearch.net', -> r {[301,{'Location' => r.query_values['ds_dest_url']}, []]}
 
     # DI.fm
     Allow 'www.di.fm'
@@ -153,17 +153,7 @@ secure.brightcove.com
     GET 'disq.us', GoIfURL
 
     # DuckDuckGo
-    GET 'duckduckgo.com', -> r {
-      sel = r.parts[0]
-      if %w{ac}.member? sel
-        r.deny
-      elsif sel == 'l' && r.env[:query].has_key?('uddg')
-        [301, {'Location' => r.env[:query]['uddg']}, []]
-      else
-        NoGunk[r]
-      end}
-
-    GET 'proxy.duckduckgo.com', -> r {%w{iu}.member?(r.parts[0]) ? [301, {'Location' => r.env[:query]['u']}, []] : r.fetch}
+    GET 'proxy.duckduckgo.com', -> r {%w{iu}.member?(r.parts[0]) ? [301, {'Location' => r.query_values['u']}, []] : r.fetch}
 
     # eBay
     Allow 'www.ebay.com'
@@ -173,7 +163,7 @@ secure.brightcove.com
 thumbs.ebaystatic.com).map{|host| GET host }
 
     GET 'i.ebayimg.com', -> r {r.basename.match?(/s-l(64|96|200|225).jpg/) ? [301, {'Location' => File.dirname(r.path) + '/s-l1600.jpg'}, []] : r.fetch}
-    GET 'rover.ebay.com', -> r {r.env[:query].has_key?('mpre') ? [301, {'Location' => r.env[:query]['mpre']}, []] : r.deny}
+    GET 'rover.ebay.com', -> r {(r.query_values||{}).has_key?('mpre') ? [301, {'Location' => r.query_values['mpre']}, []] : r.deny}
 
     # Economist
     GET 'www.economist.com'
@@ -249,7 +239,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
           r.upstreamUI.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
           r.fetch
         when /^.search/ # full URLs are getting sent to /search on Android/Chrome. redirect to URL
-          q = r.env[:query]['q']
+          q = (r.query_values||{})['q']
           q && q.match?(/^(https?:|l(ocalhost)?(:8000)?)\//) && [301,{'Location'=>q.sub(/^l/,'http://l')},[]] || r.fetch
         when '/url'
           GotoURL[r]
@@ -429,7 +419,7 @@ firefox.settings.services.mozilla.com
     GET 'patch.com', NoQuery
 
     # Reddit
-    GotoReddit = -> r {[301, {'Location' =>  'https://www.reddit.com' + r.path + r.qs}, []]}
+    GotoReddit = -> r {[301, {'Location' => ['https://www.reddit.com', r.path, '?', r.query].join}, []]}
     %w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h| Allow h }
     %w(gateway gql oauth old s www).map{|h|                                 Allow h + '.reddit.com' }
     %w(np.reddit.com reddit.com).map{|host| GET host, GotoReddit }
@@ -439,7 +429,7 @@ firefox.settings.services.mozilla.com
       r = ('//www.reddit.com/r/Bostonmusic+Dorchester+QuincyMa+Rad_Decentralization+SOLID+StallmanWasRight+boston+dancehall+darknetplan+fossdroid+massachusetts+roxbury+selfhosted+shortwave/new/').R r.env if r.path == '/' # subscriptions
       r.upstreamUI if parts[-1] == 'submit'                                                  # upstream UI preference
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !parts.member?('wiki') # MIME preference
-      r.env[:links][:prev] = 'https://old.reddit.com' + r.path + r.qs # page pointers
+      r.env[:links][:prev] = ['https://old.reddit.com', r.path, '?', r.query].join # page pointers
       r.env[:links][:up] = File.dirname r.path unless r.path == '/'
       r.fetch options}
 
@@ -456,7 +446,7 @@ firefox.settings.services.mozilla.com
             GotoReddit[r]
           else
             page = refs[-1].R
-            [302, {'Location' => 'https://www.reddit.com' + page.path + page.qs}, []]
+            [302, {'Location' => ['https://www.reddit.com', page.path, '?', page.query].join}, []]
           end
         end
       }}
@@ -469,8 +459,8 @@ firefox.settings.services.mozilla.com
     GET 'reut.rs', NoQuery
     (0..5).map{|i|
       GET "s#{i}.reutersmedia.net", -> r {
-        if r.env[:query].has_key? 'w'
-          [301, {'Location' =>  r.env['REQUEST_PATH'] + HTTP.qs(r.env[:query].reject{|k,_|k=='w'})}, []]
+        if (r.query_values||{}).has_key? 'w'
+          [301, {'Location' =>  r.env['REQUEST_PATH'] + HTTP.qs(r.query_values.reject{|k,_|k=='w'})}, []]
         else
           r.fetch
         end}}
@@ -517,7 +507,7 @@ firefox.settings.services.mozilla.com
     GET 'tinyurl.com', NoQuery
 
     # Tumblr
-    GET 'springarden.tumblr.com', -> r {r.env[:query].has_key?('audio_file') ? [301, {'Location' => r.env[:query]['audio_file']}, []] : NoGunk[r]}
+    GET '.tumblr.com', -> r {(r.query_values||{}).has_key?('audio_file') ? [301, {'Location' => r.query_values['audio_file']}, []] : NoGunk[r]}
     
     # Twitch
     %w( api gql irc-ws.chat panels-images pubsub-edge www ).map{|h|Allow h + '.twitch.tv'}
@@ -634,22 +624,22 @@ media-mbst-pub-ue1.s3.amazonaws.com
       end}
 
     # Yelp
-    GET 'www.yelp.com', -> r {r.env[:query]['redirect_url'] ? [301, {'Location' => r.env[:query]['redirect_url']},[]] : r.fetch}
+    GET 'www.yelp.com', -> r {(r.query_values||{})['redirect_url'] ? [301, {'Location' => r.query_values['redirect_url']},[]] : r.fetch}
 
     # YouTube
     Cookies 'm.youtube.com'
     Allow 'www.youtube.com'
-    GET 'youtube.com', -> r {[301, {'Location' =>  'https://www.youtube.com' + r.path + r.qs}, []]}
+    GET 'youtube.com', -> r {[301, {'Location' => ['https://www.youtube.com', r.path, '?', r.query].join}, []]}
     GET 'm.youtube.com', -> r {%w(channel feed playlist results user watch watch_comment yts).member?(r.parts[0]) ? r.upstreamUI.fetch : r.deny}
     GET 'img.youtube.com', NoJS
 
     GET 'www.youtube.com', -> r {
       fn = r.parts[0]
       if %w{attribution_link redirect}.member? fn
-        [301, {'Location' =>  r.env[:query]['q'] || r.env[:query]['u']}, []]
+        [301, {'Location' =>  r.query_values['q'] || r.query_values['u']}, []]
       elsif !fn
         [301, {'Location' => '/feed/subscriptions'}, []]
-      elsif r.env[:query]['allow'] == ServerKey
+      elsif (r.query_values||{})['allow'] == ServerKey
         r.fetch
       elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results signin user watch watch_videos yts).member? fn
         r.upstreamUI.fetch
