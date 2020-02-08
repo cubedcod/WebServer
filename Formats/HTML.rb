@@ -405,8 +405,8 @@ class WebResource
       graph = graph.values if graph.class == Hash
       keys = graph.select{|r|r.respond_to? :keys}.map{|r|r.keys}.flatten.uniq - [Abstract, Content, DC+'hasFormat', DC+'identifier', Image, Link, Video, SIOC+'reply_of', SIOC+'user_agent', Title]
       keys = [Creator, *(keys - [Creator])] if keys.member? Creator
-      if query_values && query_values.has_key?('sort')
-        attr = query_values['sort']
+      if env[:base_uri].query_values&.has_key? 'sort'
+        attr = env[:base_uri].query_values['sort']
         attr = Date if %w(date new).member? attr
         attr = Content if attr == 'content'
         graph = graph.sort_by{|r| (r[attr]||'').to_s}.reverse
@@ -416,7 +416,7 @@ class WebResource
               p = p.R
               slug = p.fragment || (p.path && p.basename) || ' '
               icon = Icons[p.uri] || slug
-              {_: :td, c: (query_values||{})['sort'] == p.uri ? icon : {_: :a, class: :head, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}}},
+              {_: :td, c: {_: :a, class: :head, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}}},
            graph.map{|resource|
              {_: :tr, resource: resource['uri'], c: keys.map{|k|
                 {_: :td, property: k,

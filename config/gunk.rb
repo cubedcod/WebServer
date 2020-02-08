@@ -30,7 +30,7 @@ zerg(net)?)
 ([-._\/'"\s:?&=~%]|$)|
 \.(eot|gif\?|otf|ttf|woff2?))xi
 
-    GunkExec = /(_0x[0-9a-f]|3gl|6sc|amazon|analytics|bing|bouncee?x|chartbeat|clickability|cloudfront|crwdcntrl|doubleclick|driftt|ensighten|evidon|facebook|feedbackify|google|hotjar|indexww|krxd|licdn|linkedin|mar(feel|keto)|moatads|mpulse|newrelic|newsmax|npttech|ntv.io|outbrain|parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|sail-horizon|scorecard|segment|snapkit|sophi|sumo|survicate|taboola|tinypass|tiqcdn|track|twitter|tynt|visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk)/i
+    GunkExec = /(_0x[0-9a-f]|3gl|6sc|amazon|analytics|bing|bouncee?x|chartbeat|clickability|cloudfront|consen|crazyegg|crwdcntrl|doubleclick|driftt|ensighten|evidon|facebook|feedbackify|google|hotjar|indexww|krxd|licdn|linkedin|mar(feel|keto)|moatads|mpulse|newrelic|newsmax|npttech|ntv.io|outbrain|parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|sail-horizon|scorecard|segment|snapkit|sophi|sumo|survicate|taboola|tinypass|tiqcdn|track|twitter|tynt|visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk)/i
 
   end
 end
