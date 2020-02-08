@@ -637,14 +637,8 @@ media-mbst-pub-ue1.s3.amazonaws.com
       fn = r.parts[0]
       if %w{attribution_link redirect}.member? fn
         [301, {'Location' =>  r.query_values['q'] || r.query_values['u']}, []]
-      elsif !fn
-        [301, {'Location' => '/feed/subscriptions'}, []]
-      elsif (r.query_values||{})['allow'] == ServerKey
-        r.fetch
       elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results signin user watch watch_videos yts).member? fn
-        r.upstreamUI.fetch
-      elsif ENV.has_key? 'GOOGLE'
-        r.fetch
+        NoGunk[r.upstreamUI]
       else
         r.deny
       end}
