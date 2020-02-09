@@ -30,7 +30,7 @@ zerg(net)?)
 ([-._\/'"\s:?&=~%]|$)|
 \.(eot|gif\?|otf|ttf|woff2?))xi
 
-    GunkExec = /(_0x[0-9a-f]|3gl|6sc|amazon|analytics|bing|bouncee?x|chartbeat|clickability|cloudfront|consen|crazyegg|crwdcntrl|doubleclick|driftt|ensighten|evidon|facebook|feedbackify|google|hotjar|indexww|krxd|licdn|linkedin|mar(feel|keto)|moatads|mpulse|newrelic|newsmax|npttech|ntv.io|outbrain|parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|sail-horizon|scorecard|segment|snapkit|sophi|sumo|survicate|taboola|tinypass|tiqcdn|track|twitter|tynt|visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk)/i
+    GunkExec = /(_0x[0-9a-f]|[\b_](d[fm]p|ssp)[\b_]|3gl|6sc|amazon|analytics|bid(d(er|ing)|s)|bing|bouncee?x|chartbeat|clickability|cloudfront|consen|crazyegg|crwdcntrl|doubleclick|driftt|ensighten|evidon|facebook|feedbackify|gdpr|google|hotjar|indexww|krxd|licdn|linkedin|mar(feel|keto)|moatads|mpulse|newrelic|newsmax|npttech|ntv.io|outbrain|parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|sail-horizon|scorecard|segment|snapkit|sophi|sumo|survicate|taboola|tinypass|tiqcdn|track(ers?|ing)?|twitter|tynt|visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk)/i
 
   end
 end
@@ -108,7 +108,7 @@ image-src
           end
 
         # inline content
-        elsif s['type'] != 'application/ld+json' && text.size < 5000 && text.match?(GunkExec) && !text.match?(/initial.?state/i)
+        elsif s['type'] != 'application/ld+json' && text.match?(GunkExec) && !text.match?(/initial.?state/i) # && text.size < 5000
           print "\n🚫 #{text.size} \e[30;1m" + text.gsub(/[\n\r\t]+/,'').gsub(/\s\s+/,' ').gsub(GunkExec,"\e[31m\\1\e[30m") + "\e[0m" if verbose
           s.remove
         end}
