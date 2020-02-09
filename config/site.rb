@@ -506,6 +506,11 @@ firefox.settings.services.mozilla.com
     # TinyURL
     GET 'tinyurl.com', NoQuery
 
+    # Tribal
+    %w(bit.ly
+      trib.al
+wired.trib.al).map{|short| GET short, NoQuery }
+
     # Tumblr
     GET '.tumblr.com', -> r {(r.query_values||{}).has_key?('audio_file') ? [301, {'Location' => r.query_values['audio_file']}, []] : NoGunk[r]}
     
@@ -516,8 +521,6 @@ firefox.settings.services.mozilla.com
     # Twitter
     Allow 'twitter.com'
     Allow 'api.twitter.com'
-
-    %w(bit.ly trib.al).map{|short| GET short, NoQuery }
     GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : NoQuery[r]}
 
     Populate 'twitter.com', -> r {
