@@ -225,7 +225,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
       (0..3).map{|i| GET "khms#{i}.google.com", GData }
 
       # JS libraries, allow anyone
-      GET 'ajax.googleapis.com'
+      GET 'ajax.googleapis.com', Fetch
 
       # misc hosts
       GET 'feedproxy.google.com', NoQuery

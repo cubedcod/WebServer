@@ -125,7 +125,7 @@ upgrade upgrade-insecure-requests ux version x-forwarded-for
         # log host on first visit
         unless (Servers.has_key? env['SERVER_NAME']) || resource.env[:deny]
           Servers[env['SERVER_NAME']] = true
-          print "\n      ➕ \e[30;45mhttps://" + env['SERVER_NAME'] + "\e[0m " unless ENV.has_key? 'QUIET'
+          print "\n      ➕ \e[35;1mhttps://" + env['SERVER_NAME'] + "\e[0m " unless ENV.has_key? 'QUIET'
         end
 
         if resource.env[:deny]
@@ -145,7 +145,7 @@ upgrade upgrade-insecure-requests ux version x-forwarded-for
 
         # non-content response
         elsif [301, 302, 303].member? status
-          print "\nhttps:", resource.uri ," ➡️  ", head['Location'] # redirection
+          print "\n", resource.uri ," ➡️  ", head['Location'] # redirection
         elsif [204, 304].member? status
           print '✅'                    # up-to-date
         elsif status == 404
@@ -158,7 +158,7 @@ upgrade upgrade-insecure-requests ux version x-forwarded-for
           third_party = env[:refhost] != resource.host
           print "\n📜 \e[36#{third_party ? ';7' : ''};1mhttps://" + resource.host + resource.path + "\e[0m "
         elsif ext == 'json' || mime.match?(/json/)               # data
-          print "\n🗒 https://" + resource.host + resource.path + (resource.query ? ('?' + resource.query) : '') + ' '
+          print "\n🗒 " + resource.uri
         elsif %w(gif jpeg jpg png svg webp).member?(ext) || mime.match?(/^image/)
           print '🖼️'                                              # image
         elsif %w(aac flac m4a mp3 ogg opus).member?(ext) || mime.match?(/^audio/)
@@ -169,7 +169,7 @@ upgrade upgrade-insecure-requests ux version x-forwarded-for
           print '🐢'                                             # turtle
 
         else # default log
-          print "\n" + (mime.match?(/html/) ? '📃' : mime) + (env[:repository] ? (('%5d' % env[:repository].size) + '⋮ ') : '') + "\e[7m" + (status == 200 ? '' : (status.to_s+' ')) + "https://" + env['SERVER_NAME'] + env['REQUEST_PATH'] + (resource.query ? ('?' + resource.query) : '') + "\e[0m "
+          print "\n" + (mime.match?(/html/) ? '📃' : mime) + (env[:repository] ? (('%5d' % env[:repository].size) + '⋮ ') : '') + "\e[7m" + (status == 200 ? '' : (status.to_s+' ')) + resource.uri + "\e[0m "
         end
         
         [status, head, body]} # response
