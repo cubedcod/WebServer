@@ -108,7 +108,7 @@ image-src
           end
 
         # inline content
-        elsif s['type'] != 'application/ld+json' && text.match?(GunkExec) && !text.match?(/(initial|preload(ed)?|shared).?(data|state)/i) # && text.size < 5000
+        elsif s['type'] != 'application/ld+json' && text.match?(GunkExec) && !text.match?(/(initial|preload(ed)?|shared).?(data|state)|SCRIPTS_LOADED/i)
           print "\n🚫 #{text.size} \e[30;1m" + text.gsub(/[\n\r\t]+/,'').gsub(/\s\s+/,' ').gsub(GunkExec,"\e[31m\\1\e[30m") + "\e[0m" if verbose
           s.remove
         end}

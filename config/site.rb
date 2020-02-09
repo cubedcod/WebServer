@@ -49,6 +49,7 @@ class WebResource
     CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|github|googleapis|netdna.*)\.(com|io|net)$/
     CookieHost = /\.(akamai(hd)?|bandcamp|ttvnw)\.(com|net)$/
     DynamicImgHost = /(noaa|weather)\.gov$/
+    MobileUA = 'Mozilla/5.0 (Linux; Android 9; SM-G960F Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.157 Mobile Safari/537.36'
     POSThost = /^video.*.ttvnw.net$/
     GunkHosts = {}
     SiteDir.join('gunk_hosts').each_line{|l|
@@ -520,7 +521,7 @@ wired.trib.al).map{|short| GET short, NoQuery }
 
     # Twitter
     Allow 'twitter.com'
-    Allow 'api.twitter.com'
+    %w(api mobile).map{|n| Allow n + '.twitter.com'}
     GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : NoQuery[r]}
 
     Populate 'twitter.com', -> r {
@@ -528,7 +529,8 @@ wired.trib.al).map{|short| GET short, NoQuery }
       `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|n|
         FileUtils.touch 'twitter/.' + n}}
 
-    GET 'twitter.com', -> r {
+    Twitter = -> r {
+      r.env['HTTP_USER_AGENT'] = MobileUA
       if cookie = r.env['HTTP_COOKIE']
         attrs = {}
         cookie.split(';').map{|attr|
@@ -541,9 +543,7 @@ wired.trib.al).map{|short| GET short, NoQuery }
 
       if !r.path || r.path == '/'
         subscriptions = Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}
-        r.env.delete :query
-        r.env.delete 'QUERY_STRING'
-        subscriptions.shuffle.each_slice(18){|sub|
+        subscriptions.shuffle[0..15].each_slice(18){|sub|
           q = sub.map{|u|'from%3A' + u}.join('%2BOR%2B')
           apiURL = 'https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&q=' + q + '&vertical=default&count=40&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2CcameraMoment'
           apiURL.R(r.env).fetch intermediate: true}
@@ -559,6 +559,7 @@ wired.trib.al).map{|short| GET short, NoQuery }
         r.nodeResponse
 =begin
       elsif r.parts.size == 1 && !r.upstreamUI? && !%w(favicon.ico manifest.json search).member?(r.parts[0])
+
         user = r.parts[0]
         if user.match? /^\d+$/
           uid = user
@@ -569,6 +570,7 @@ wired.trib.al).map{|short| GET short, NoQuery }
             uid = json['data']['user']['rest_id']
           end
         end
+
         apiURL = 'https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment'
         apiURL.R(r.env).fetch intermediate: true
         r.saveRDF.chrono_sort.graphResponse
@@ -576,6 +578,9 @@ wired.trib.al).map{|short| GET short, NoQuery }
       else
         r.fetch
       end}
+
+    GET 'twitter.com', Twitter
+    GET 'mobile.twitter.com', Twitter
 
     # USA Today
     GET 'rssfeeds.usatoday.com', NoQuery
