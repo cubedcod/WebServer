@@ -460,8 +460,6 @@ upgrade upgrade-insecure-requests ux version x-forwarded-for
         elsif parts[0] == 'msg'     # Message-ID <> URI mapping (TODO move this to #fsPath?)
           id = parts[1]
           id ? MID2PATH[Rack::Utils.unescape_path id].R(env).nodeResponse : notfound
-        elsif node.file?
-          fileResponse              # local static file
         else                        # local graph-node
           nodeResponse
         end                        ## remote
@@ -578,19 +576,21 @@ upgrade upgrade-insecure-requests ux version x-forwarded-for
 
     # URI -> storage node(s) -> RDF graph -> HTTP response
     def nodeResponse
-      timeMeta # add temporally-adjacent node pointers
-      qs = query_values || {}
-      nodes = (if node.directory?
-               if qs.has_key? 'f'       # FIND full case-insensitive match
+      return fileResponse if node.file? # static node response
+      qs = query_values || {}           # query arguments
+      timeMeta                          # find temporally-adjacent node pointers
+
+      nodes = (if node.directory?       # multi-node container
+               if qs.has_key? 'f'       # FIND name
                  summarize = true
                  q = qs['f']
                  `find #{shellPath} -iname #{Shellwords.escape q}`.lines.map{|p|('/' + p.chomp).R} unless qs['f'].empty? || path == '/'
-               elsif qs.has_key? 'find' # FIND substring match
+               elsif qs.has_key? 'find' # FIND substring
                  summarize = true
                  q = '*' + qs['find'] + '*'
                  `find #{shellPath} -iname #{Shellwords.escape q}`.lines.map{|p|('/' + p.chomp).R} unless qs['find'].empty? || path == '/'
                elsif (qs.has_key?('Q') || qs.has_key?('q')) && path != '/'
-                 env[:grep] = true               # GREP
+                 env[:grep] = true      # GREP
                  q = qs['Q'] || qs['q']
                  args = q.shellsplit rescue q.split(/\W/)
                  case args.size
@@ -607,32 +607,31 @@ upgrade upgrade-insecure-requests ux version x-forwarded-for
                    cmd = "grep -ril -- #{Shellwords.escape pattern} #{shellPath}"
                  end
                  `#{cmd} | head -n 1024`.lines.map{|path| ('/' + path.chomp).R }
-               else                                                    # LS
+               else                     # LS
                  ls = [self]
                  ls.concat((self + '.*').R.glob) if path[-1] != '/'
                  ls
                end
               else
-                if uri.match GlobChars                                 # GLOB - parametric
+                if uri.match GlobChars  # GLOB - parametric
                   summarize = true
                   env[:grep] = true if env && qs.has_key?('q')
                   glob
-                else                                                   # GLOB - default graph-data
+                else                    # GLOB - graph-storage
                   (self + '.*').R.glob
                 end
                end).flatten.compact.uniq.map{|n|n.R env}
+
       if nodes.size==1 && nodes[0].ext == 'ttl' && selectFormat == 'text/turtle'
-        nodes[0].fileResponse # nothing to merge or transform. return static-node
-      else                    # graph data
+        nodes[0].fileResponse           # static graph-node response
+      else                              # graph node(s) response
         nodes = nodes.map &:summary if summarize && !qs.has_key?('full')
         nodes.map &:loadRDF
         graphResponse
       end
     end
 
-    def notfound
-      [404, {'Content-Type' => 'text/html'}, [htmlDocument]]
-    end
+    def notfound; [404, {'Content-Type' => 'text/html'}, [htmlDocument]] end
 
     def OPTIONS
       if AllowedHosts.has_key?(host) || POSThost.match?(host)
