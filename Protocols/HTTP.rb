@@ -34,27 +34,6 @@ unicorn.socket upgrade upgrade-insecure-requests ux version x-forwarded-for
     GotoU   = -> r {[301, {'Location' =>  r.query_values['u']}, []]}
     GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['q'])}, []]}
     NoGunk  = -> r {r.gunkURI && (r.query_values || {})['allow'] != ServerKey && r.deny || r.fetch}
-    NoJS    = -> r {
-      if r.ext == 'js'                             # request for script file
-        r.deny                                     # drop request
-      else
-        NoGunk[r].yield_self{|s,h,b|               # inspect response
-          format = h['content-type'] || h['Content-Type']
-          if s.to_s.match? /^3/                    # redirected
-            [s,h,b]
-          elsif !format || format.match?(/script/) # response with script source
-            r.deny                                 # drop response
-          elsif format.match?(/html/) && r.upstreamUI?
-            doc = Nokogiri::HTML.parse b[0]        # parse HTML
-            doc.css(Webize::HTML::Scripts).remove# drop JS-gunk
-            body = doc.to_html                     # serialize body
-            h['Content-Length']=body.bytesize.to_s # update body-size
-            [s, h, [body]]                         # cleaned response
-          else
-            [s,h,b]                                # untouched response
-          end}
-      end}
-
     NoQuery = -> r {
       if !r.query                         # request without query
         NoGunk[r].yield_self{|s,h,b|      #  inspect response

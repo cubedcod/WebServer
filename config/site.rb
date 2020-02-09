@@ -66,7 +66,7 @@ class WebResource
 
     # ABC
     GET 'abcnews.go.com'
-    GET 's.abcnews.com', NoJS
+    GET 's.abcnews.com'
 
     # ACM
     Cookies 'dl.acm.org'
@@ -198,16 +198,11 @@ thumbs.ebaystatic.com).map{|host| GET host }
     GET 'gfycat.com'
     GET 'thumbs.gfycat.com'
 
-    # GitHub
-    GET 'github.com'
-    %w(api gist).map{|h| GET h + '.github.com'}
-    %w(avatars0 avatars1 avatars2 avatars3 raw).map{|h| GET h + '.githubusercontent.com', NoJS }
-
     # Gitter
     Allow 'gitter.im'
     Allow 'ws.gitter.im'
 
-    # Google - set DEGOOGLE env-var to opt out
+    # Google
     unless ENV.has_key? 'DEGOOGLE'
 
       # POST capability
@@ -225,8 +220,8 @@ thumbs.ebaystatic.com).map{|host| GET host }
       (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com", GData }
       (0..3).map{|i| GET "khms#{i}.google.com", GData }
 
-      # JS libraries, allow anyone
-      GET 'ajax.googleapis.com', Fetch
+      # JS libraries
+      GET 'ajax.googleapis.com'
 
       # misc hosts
       GET 'feedproxy.google.com', NoQuery
@@ -607,19 +602,14 @@ wired.trib.al).map{|short| GET short, NoQuery }
     %w(images m s).map{|h| GET h + '.wsj.net' }
 
     # Yahoo!
-    %w(finance.yahoo.com
-          news.yahoo.com
-       sg.news.yahoo.com
-media-mbst-pub-ue1.s3.amazonaws.com
-).map{|host|
-      GET host, NoJS}
+    %w(finance news www).map{|h| GET h + '.yahoo.com' }
 
     GET 's.yimg.com', -> r {
       parts = r.path.split /https?:\/+/
       if parts.size > 1
         [301, {'Location' => 'https://' + parts[-1]}, []]
       else
-        NoJS[r]
+        NoGunk[r]
       end}
 
     # Yelp
@@ -630,7 +620,7 @@ media-mbst-pub-ue1.s3.amazonaws.com
     Allow 'www.youtube.com'
     GET 'youtube.com', -> r {[301, {'Location' => ['https://www.youtube.com', r.path, '?', r.query].join}, []]}
     GET 'm.youtube.com', -> r {%w(channel feed playlist results user watch watch_comment yts).member?(r.parts[0]) ? r.upstreamUI.fetch : r.deny}
-    GET 'img.youtube.com', NoJS
+    GET 'img.youtube.com'
 
     GET 'www.youtube.com', -> r {
       fn = r.parts[0]
