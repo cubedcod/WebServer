@@ -316,8 +316,9 @@ class WebResource
                                     href: HTTP.qs((query_values||{}).merge({'view' => 'table', 'sort' => 'date'}))} unless query_values && query_values['view']=='table'),
                                  env[:base_uri].parts.map{|p|
                                     [{_: :a, class: :breadcrumb, href: bc += p + '/', c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
-                                 link[:feed, FeedIcon], link[:time, '🕒'],
-                                  ([' ',{_: :a, id: :showMain, href: '#body'}] if env[:site_chrome])
+                                 link[:feed, FeedIcon],
+                                 ([' ',{_: :a, id: :showMain, href: '#body'}] if env[:site_chrome]),
+                                  # '🕒'
                                  ]},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?

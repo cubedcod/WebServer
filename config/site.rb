@@ -553,7 +553,7 @@ firefox.settings.services.mozilla.com
       elsif r.gunkURI
         r.deny
       elsif r.path.match? GlobChars
-        r.nodeRequest
+        r.nodeResponse
 =begin
       elsif r.parts.size == 1 && !r.upstreamUI? && !%w(favicon.ico manifest.json search).member?(r.parts[0])
         user = r.parts[0]

@@ -14,6 +14,7 @@ class WebResource
     LocalArgs = %w(allow view sort UX)
     Methods = %w(GET HEAD OPTIONS POST PUT)
     Populator = {}
+    Req204 = /gen(erate)?_?204$/
     Servers = {}
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
@@ -73,7 +74,7 @@ upgrade upgrade-insecure-requests ux version x-forwarded-for
 
     RootIndex = -> r {
       if r.path == '/' || r.path.match?(GlobChars)
-        r.nodeRequest
+        r.nodeResponse
       else
         r.chrono_sort if r.parts.size == 1
         NoGunk[r]
@@ -300,7 +301,7 @@ upgrade upgrade-insecure-requests ux version x-forwarded-for
         return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has static-data, return 304 response
         return fileResponse if node.file?                            # server has static-data, return data
       end
-      return nodeRequest if ENV.has_key? 'OFFLINE'                   # offline, return cache
+      return nodeResponse if ENV.has_key? 'OFFLINE'                  # offline, return cache
 
       # construct locator
       portNum = default_port? ? '' : (':' + env['SERVER_PORT'].to_s) # port number
@@ -408,10 +409,10 @@ upgrade upgrade-insecure-requests ux version x-forwarded-for
         R304
       when /401/ # Unauthorized
         print "\n🚫401 " + uri + ' '
-        options[:intermediate] ? self : nodeRequest
+        options[:intermediate] ? self : nodeResponse
       when /403/ # Forbidden
         print "\n🚫403 " + uri + ' '
-        options[:intermediate] ? self : nodeRequest
+        options[:intermediate] ? self : nodeResponse
       when /404/ # Not Found
         print "\n❓ #{uri} "
         if options[:intermediate]
@@ -419,11 +420,11 @@ upgrade upgrade-insecure-requests ux version x-forwarded-for
         elsif upstreamUI?
           [404, (headers e.io.meta), [e.io.read]]
         else
-          nodeRequest
+          nodeResponse
         end
       when /410/ # Gone
         print "\n❌ " + uri + ' '
-        options[:intermediate] ? self : nodeRequest
+        options[:intermediate] ? self : nodeResponse
       when /(500|999)/ # upstream error
         [500, (headers e.io.meta), [e.io.read]]
       when /503/
@@ -451,46 +452,32 @@ upgrade upgrade-insecure-requests ux version x-forwarded-for
     end
 
     def GET
-      if local?
+      if local?                   ## local
         if %w{y year m month d day h hour}.member? parts[0]
-          dateDir                   # timeline-segment redirection
-        elsif path == '/mail'       # inbox to timeline-glob redirection
+          dateDir                   # timeline redirect
+        elsif path == '/mail'       # inbox redirect
           [302, {'Location' => '/d/*/msg*?sort=date&view=table'}, []]
-        elsif parts[0] == 'msg'     # Message-ID <> URI map
+        elsif parts[0] == 'msg'     # Message-ID <> URI mapping (TODO move this to #fsPath?)
           id = parts[1]
-          id ? MID2PATH[Rack::Utils.unescape_path id].R(env).nodeRequest : notfound
+          id ? MID2PATH[Rack::Utils.unescape_path id].R(env).nodeResponse : notfound
         elsif node.file?
-          fileResponse              # local static data
-        else
-          unless !path || path == '/'
-            dir = File.dirname path
-            env[:links][:up] = dir + (dir[-1] == '/' ? '' : '/') + (query ? ('?' + query) : '')
-          end
-          timeMeta
-          nodeRequest               # local transformable/graph data
-        end
-      elsif path.match? /gen(erate)?_?204$/ # connectivity check
+          fileResponse              # local static file
+        else                        # local graph-node
+          nodeResponse
+        end                        ## remote
+      elsif path.match? Req204      # connectivity check
         R204
-      elsif path.match? /^\/\d\d\d\d\/\d\d\/\d\d\/\d\d\/$/ # hour-dir pagination of cached remote
-        name = '*' + env['SERVER_NAME'].split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*'
-        timeMeta
-        env[:links][:time] = 'http://localhost:8000' + path + '*.ttl?view=table' if env['REMOTE_ADDR'] == '127.0.0.1'
-        (path + name).R(env).nodeRequest
-      elsif handler = HostGET[host] # host lambda
+      elsif path.match? HourDir     # browse cache of remote. remove this if remotes get hour-dirs for us
+        (path + '*' + host.split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*').R(env).nodeResponse
+      elsif handler = HostGET[host] # host handler
         Populator[host][self] if Populator[host] && !join('/').R.node.exist?
         handler[self]
-      elsif host.match? CDNhost     # CDN content-pool
-        if AllowedHosts.has_key?(host) || (query_values||{})['allow'] == ServerKey || allowCDN?
-          fetch                     # allowed CDN content
-        else
-          deny                      # blocked CDN content
-        end
-      elsif gunk?                   # blocked content
+      elsif host.match? CDNhost     # CDN handler
+        (AllowedHosts.has_key?(host) || (query_values||{})['allow'] == ServerKey || allowCDN?) ? fetch : deny
+      elsif gunk?                   # blocker handler
         deny
       else
-        dir = File.dirname path
-        env[:links][:up] = dir + (dir == '/' ? '' : '/') + (query ? ('?' + query) : '') unless !path || path == '/'
-        fetch                       # generic remote resource
+        fetch                       # remote graph-node
       end
     end
 
@@ -498,6 +485,10 @@ upgrade upgrade-insecure-requests ux version x-forwarded-for
 
     def graphResponse
       return notfound if !env.has_key?(:repository) || env[:repository].empty?
+      unless !path || path == '/'
+        dir = File.dirname path
+        env[:links][:up] = dir + (dir[-1] == '/' ? '' : '/') + (query ? ('?' + query) : '')
+      end
       format = selectFormat
       env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
       env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
@@ -586,7 +577,8 @@ upgrade upgrade-insecure-requests ux version x-forwarded-for
     end
 
     # URI -> storage node(s) -> RDF graph -> HTTP response
-    def nodeRequest
+    def nodeResponse
+      timeMeta # add temporally-adjacent node pointers
       qs = query_values || {}
       nodes = (if node.directory?
                if qs.has_key? 'f'       # FIND full case-insensitive match
@@ -639,7 +631,6 @@ upgrade upgrade-insecure-requests ux version x-forwarded-for
     end
 
     def notfound
-      timeMeta # nearby nodes may exist, add pointers
       [404, {'Content-Type' => 'text/html'}, [htmlDocument]]
     end
 

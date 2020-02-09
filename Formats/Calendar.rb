@@ -1,4 +1,11 @@
 %w(chronic date icalendar).map{|_| require _}
+
+class WebResource
+  module URIs
+    HourDir = /^\/\d\d\d\d\/\d\d\/\d\d\/\d\d\/$/
+  end
+end
+
 module Webize
   module Calendar
     class Format < RDF::Format
