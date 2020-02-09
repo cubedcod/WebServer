@@ -14,7 +14,7 @@ header|pre)[-_]?bid.*|hotjar|.*hubspot.*|[hp]b.?js|ima[0-9]?|
 impression|indexww|
 kr(ux|xd).*|
 log(event|g(er|ing))|(app|s)?
-m(atomo|e(asurement|t(er|rics?))|ms|onitor(ing)?|odal|pulse|tr)|
+m(atomo|e(asurement|t(er|rics?))|ms|odal|pulse|tr)|
 newrelic|.*notifications?.*|
 o(m(niture|tr)|nboarding|nesignal|ptanon|utbrain)|
 p(aywall|er(imeter-?x|sonali[sz](ation|e))|i(wik|xel(propagate)?)|lacement|op(down|over|up)|orpoiseant|owaboot|repopulator|ro(fitwell|m(o(tion)?s?|pt))|ubmatic)|/pv|
@@ -30,7 +30,7 @@ zerg(net)?)
 ([-._\/'"\s:?&=~%]|$)|
 \.(eot|gif\?|otf|ttf|woff2?))xi
 
-    GunkExec = /(_0x[0-9a-f]|[\b_](d[fm]p|ssp)[\b_]|3gl|6sc|([a-z]+)?analytic([a-z]+)?|[\b_]bid(d(er|ing)|s)?[\b_]|\bbing\b|bouncee?x|chartbeat|clickability|cloudfront|[\b_]consent[\b_]|crazyegg|crwdcntrl|doubleclick|driftt|ensighten|evidon|facebook|feedbackify|gdpr|google([a-z]+)?|hotjar|indexww|intercom|krxd|licdn|linkedin|mar(feel|keto)|moatads|mpulse|newrelic|newsmax|npttech|ntv.io|outbrain|parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|sail-horizon|scorecard|\bsegment\b|snapkit|sophi|sumo|survicate|taboola|tinypass|tiqcdn|([a-z]+)?track([a-z]+)?|twitter|tynt|visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk)/i
+    GunkExec = /(_0x[0-9a-f]|[\b_](d[fm]p|ssp)[\b_]|3gl|6sc|([a-z]+)?analytic([a-z]+)?|auction|[\b_]bid(d(er|ing)|s)?[\b_]|\bbing\b|bouncee?x|chartbeat|clickability|cloudfront|[\b_]consent[\b_]|crazyegg|crwdcntrl|doubleclick|driftt|ensighten|evidon|facebook|feedbackify|gdpr|google([a-z]+)?|hotjar|indexww|intercom|krxd|licdn|linkedin|mar(feel|keto)|moatads|mpulse|newrelic|newsmax|npttech|ntv.io|outbrain|parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|sail-horizon|scorecard|\bsegment\b|snapkit|sophi|sumo|survicate|taboola|targeting|tinypass|tiqcdn|([a-z]+)?track([a-z]+)?|twitter|tynt|visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk)/i
 
   end
 end
@@ -108,7 +108,7 @@ image-src
           end
 
         # inline content
-        elsif s['type'] != 'application/ld+json' && text.match?(GunkExec) && !text.match?(/initial.?state|shareddata/i) # && text.size < 5000
+        elsif s['type'] != 'application/ld+json' && text.match?(GunkExec) && !text.match?(/(initial|preload(ed)?|shared).?(data|state)/i) # && text.size < 5000
           print "\n🚫 #{text.size} \e[30;1m" + text.gsub(/[\n\r\t]+/,'').gsub(/\s\s+/,' ').gsub(GunkExec,"\e[31m\\1\e[30m") + "\e[0m" if verbose
           s.remove
         end}
