@@ -19,19 +19,12 @@ class WebResource
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
     Internal_Headers = %w(
-base-uri
-connection
-gunk
-host keep-alive
-links
-path-info
-query-string
+base-uri connection gunk keep-alive links path-info query-string
 rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version
 rdf refhost remote-addr repository request-method request-path request-uri resp
 script-name server-name server-port server-protocol server-software site-chrome
 te transfer-encoding
-unicorn.socket
-upgrade upgrade-insecure-requests ux version x-forwarded-for
+unicorn.socket upgrade upgrade-insecure-requests ux version x-forwarded-for
 )
 
     # handlers

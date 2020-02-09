@@ -580,6 +580,7 @@ wired.trib.al).map{|short| GET short, NoQuery }
       end}
 
     GET 'twitter.com', Twitter
+    GET 'api.twitter.com', Twitter
     GET 'mobile.twitter.com', Twitter
 
     # USA Today
@@ -593,16 +594,6 @@ wired.trib.al).map{|short| GET short, NoQuery }
 
     # WaPo
     GET 'www.washingtonpost.com', -> r {(r.parts[0]=='resizer' ? Resizer : NoGunk)[r]}
-
-    # Weather
-    Allow 'api.weather.com'
-    Allow 'profile.wunderground.com'
-
-    # WebMD
-    GET 'img.webmd.com', NoJS
-
-    # Wiley
-    Cookies 'agupubs.onlinelibrary.wiley.com'
 
     # Wix
     GET 'static.parastorage.com'
