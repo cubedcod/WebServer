@@ -68,9 +68,6 @@ class WebResource
     GET 'abcnews.go.com'
     GET 's.abcnews.com'
 
-    # ACM
-    Cookies 'dl.acm.org'
-
     # Adobe
     Allow 'entitlement.auth.adobe.com'
     Allow 'sp.auth.adobe.com'
@@ -80,13 +77,6 @@ class WebResource
     %w(amazon.com www.amazon.com).map{|host| GET host}
     GET 'images-na.ssl-images-amazon.com', AmazonHost
     GET 'm.media-amazon.com', AmazonHost
-
-    # Apple
-    %w(amp-api.music api.music audio-ssl.itunes embed.music itunes js-cdn.music music www xp).map{|h|Allow h + '.apple.com'}
-    %w(store.storeimages).map{|h| GET h + '.cdn-apple.com'}
-
-    # Appspot
-    %w(xmountwashington).map{|h| Allow h + '.appspot.com'}
 
     # Anvato
     Allow 'tkx.apis.anvato.net'
@@ -124,20 +114,8 @@ secure.brightcove.com
     # CBS
     GET 'www.cbsnews.com'
 
-    # CircleCI
-    GET 'circleci.com', -> r {r.parts[0] == 'blog' ? r.fetch : r.deny}
-
     # Cloudflare
     GET 'cdnjs.cloudflare.com'
-
-    # Complex
-    %w(images www).map{|h| GET h + '.complex.com' }
-
-    # Costco
-    Allow 'www.costco.com'
-
-    # CNet
-    GET 'www.cnet.com'
 
     # CNN
     GET 'dynaimage.cdn.cnn.com', GotoBasename
@@ -145,9 +123,6 @@ secure.brightcove.com
 
     # DartSearch
     GET 'clickserve.dartsearch.net', -> r {[301,{'Location' => r.query_values['ds_dest_url']}, []]}
-
-    # DI.fm
-    Allow 'www.di.fm'
 
     # Disqus
     GET 'c.disquscdn.com', GoIfURL
@@ -205,7 +180,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
     # Google
     unless ENV.has_key? 'DEGOOGLE'
 
-      # POST capability
+      # POST
       Allow 'groups.google.com'
       if ENV.has_key? 'GOOGLE'
         Allow 'android.clients.google.com'
@@ -213,7 +188,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
         (0..24).map{|i| Allow "clients#{i}.google.com"}
       end
 
-      # restrict static-hosts to google referer
+      # static-hosts for google referer
       GData = -> r {(r.env[:refhost]||'').match?(/\.(blog(ger|spot)|google(apis)?|gstatic)\.com$/) ? NoGunk[r] : r.deny}
       %w(maps ssl www).map{|h| GET h + '.googleapis.com', GData }
       %w(maps ssl www).map{|h| GET h + '.gstatic.com', GData }
@@ -254,26 +229,6 @@ thumbs.ebaystatic.com).map{|host| GET host }
 
     # Hubspot
     GET 'hubs.ly', NoQuery
-
-    # iHeart
-    Allow 'us.api.iheart.com'
-    Allow 'www.iheart.com'
-    GET 'i.iheart.com'
-
-    # Imgur
-    Allow 'api.imgur.com'
-    %w(i.imgur.com i.stack.imgur.com).map{|host| GET host }
-
-    %w(imgur.com
-     m.imgur.com
-     s.imgur.com
-).map{|host| GET host}
-
-    # Inrupt
-    Allow 'dev.inrupt.net'
-
-    # Invisible Books
-    Insecure 'www.invisiblebooks.com'
 
     # Instagram
     Cookies 'www.instagram.com'
@@ -336,50 +291,14 @@ zoopps.com
     # MassLive
     GET 'i.masslive.com', Resizer
 
-    # Mastodon
-    %w(
-assets.octodon.social
-     drive.nya.social
-files.mastodon.social
-      mastodon.art
-      mastodon.social
-           pdx.social
-           nya.social
-       octodon.social
-).map{|host|
-      GET host, Fetch}
-
-    # Medium
-    Allow 'medium.com'
-
     # Meetup
-    Allow 'www.meetup.com'
-    GET 'www.meetup.com', Fetch
+    GET 'www.meetup.com'
 
     # Meredith
     GET 'imagesvc.meredithcorp.io', GoIfURL
 
-    # Microsoft
-    GET 'www.bing.com'
-    GET 'www.msn.com'
-
     # Mixcloud
     %w(m www).map{|h| GET h + '.mixcloud.com' }
-
-    # Mozilla
-    %w(            addons.mozilla.org
-           addons-amo.cdn.mozilla.net
-               addons.cdn.mozilla.net
-                     aus5.mozilla.org
-firefox.settings.services.mozilla.com
-            getpocket.cdn.mozilla.net
-                    hacks.mozilla.org
-       incoming.telemetry.mozilla.org
-        location.services.mozilla.com
-          services.addons.mozilla.org
-          shavar.services.mozilla.com
-  tracking-protection.cdn.mozilla.net
-).map{|h| Allow h } if ENV.has_key? 'MOZILLA'
 
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
@@ -392,27 +311,6 @@ firefox.settings.services.mozilla.com
     # NYTimes
     %w(cooking www).map{|host|
       GET host+'.nytimes.com'}
-
-    # Outline
-    GET 'outline.com', -> r {
-      if r.parts[0] == 'favicon.ico'
-        r.deny
-      else
-        r.env['HTTP_ORIGIN'] = 'https://outline.com'
-        r.env['HTTP_REFERER'] = r.env['HTTP_ORIGIN'] + r.path
-        r.env['SERVER_NAME'] = 'outlineapi.com'
-        options = {cookies: true, intermediate: true}
-        (if r.parts.size == 1
-          options[:query] = {id: r.parts[0]}
-          '/v4/get_article'.R(r.env).fetch options
-        elsif r.env['REQUEST_PATH'][1..5] == 'https'
-          options[:query] = {source_url: r.env['REQUEST_PATH'][1..-1]}
-          '/article'.R(r.env).fetch options
-         end).saveRDF.graphResponse
-      end}
-
-    # Patch
-    GET 'patch.com', NoQuery
 
     # Reddit
     GotoReddit = -> r {[301, {'Location' => ['https://www.reddit.com', r.path, '?', r.query].join}, []]}
@@ -447,9 +345,6 @@ firefox.settings.services.mozilla.com
         end
       }}
 
-    # ResearchGate
-    Cookies 'www.researchgate.net'
-
     # Reuters
     GET 'feeds.reuters.com', NoQuery
     GET 'reut.rs', NoQuery
@@ -482,16 +377,6 @@ firefox.settings.services.mozilla.com
 ).map{|host| Allow host
                GET host}
     GET 'soundcloud.com', RootIndex
-
-    # Spotify
-    %w(api apresolve embed guc-dealer guc-spclient open spclient.wg).map{|h|
-      Allow h + '.spotify.com'}
-
-    # StarTribune
-    Allow 'comments.startribune.com'
-
-    # Tableau
-    Allow 'public.tableau.com'
 
     # Technology Review
     GET 'cdn.technologyreview.com', NoQuery
@@ -584,9 +469,6 @@ wired.trib.al).map{|short| GET short, NoQuery }
     # Viglink
     GET 'redirect.viglink.com', GotoU
 
-    # Vimeo
-    GET 'f.vimeocdn.com'
-
     # WaPo
     GET 'www.washingtonpost.com', -> r {(r.parts[0]=='resizer' ? Resizer : NoGunk)[r]}
 
@@ -640,13 +522,6 @@ wired.trib.al).map{|short| GET short, NoQuery }
       else
         r.denyPOST
       end}
-
-    # ZeroHedge
-    Allow 'talk.zerohedge.com'
-    GET 'www.zerohedge.com', Fetch
-
-    # Zillow
-    Allow 'www.zillow.com'
 
   end
 
