@@ -605,7 +605,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version x-forwarded-for
     def notfound; [404, {'Content-Type' => 'text/html'}, [htmlDocument]] end
 
     def offline?
-      ENV.has_key?('OFFLINE') || query_values.has_key?('OL')
+      ENV.has_key?('OFFLINE') || (query_values||{}).has_key?('OL')
     end
 
     def OPTIONS
