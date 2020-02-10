@@ -273,7 +273,6 @@ unicorn.socket upgrade upgrade-insecure-requests ux version x-forwarded-for
         return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has static-data, return 304 response
         return fileResponse if node.file?                            # server has static-data, return data
       end
-      return nodeResponse if ENV.has_key? 'OFFLINE'                  # offline, return cache
 
       # construct locator
       portNum = default_port? ? '' : (':' + env['SERVER_PORT'].to_s) # port number
@@ -424,7 +423,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version x-forwarded-for
     end
 
     def GET
-      if local?                   ## local
+      if local? || offline?        ## local
         if %w{y year m month d day h hour}.member? parts[0]
           dateDir                   # timeline redirect
         elsif path == '/mail'       # inbox redirect
@@ -604,6 +603,10 @@ unicorn.socket upgrade upgrade-insecure-requests ux version x-forwarded-for
     end
 
     def notfound; [404, {'Content-Type' => 'text/html'}, [htmlDocument]] end
+
+    def offline?
+      ENV.has_key?('OFFLINE') || query_values.has_key?('OL')
+    end
 
     def OPTIONS
       if AllowedHosts.has_key?(host) || POSThost.match?(host)
