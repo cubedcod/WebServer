@@ -74,7 +74,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
       if env['HTTP_ORIGIN']
         env['HTTP_ORIGIN']
       elsif referer = env['HTTP_REFERER']
-        'http' + (env['SERVER_NAME'] == 'localhost' ? '' : 's') + '://' + referer.R.host
+        'http' + (host == 'localhost' ? '' : 's') + '://' + referer.R.host
       else
         '*'
       end
@@ -94,9 +94,9 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
         mime = head['Content-Type'] || ''
 
         # log host on first visit
-        unless (Servers.has_key? env['SERVER_NAME']) || resource.env[:deny]
-          Servers[env['SERVER_NAME']] = true
-          print "\n      ➕ \e[35;1mhttps://" + env['SERVER_NAME'] + "\e[0m " unless ENV.has_key? 'QUIET'
+        unless (Servers.has_key? resource.host) || resource.env[:deny]
+          Servers[resource.host] = true
+          print "\n      ➕ \e[35;1mhttps://" + resource.host + "\e[0m "
         end
 
         if resource.env[:deny]
