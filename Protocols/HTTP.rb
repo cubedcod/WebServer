@@ -19,9 +19,9 @@ class WebResource
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
     Internal_Headers = %w(
-base-uri connection gunk host keep-alive links path-info query-string
+connection gunk host keep-alive links path-info query-string
 rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rdf refhost remote-addr repository request-method request-path request-uri resp
-script-name server-name server-port server-protocol server-software site-chrome
+script-name server-name server-port server-protocol server-software site-chrome sort
 te transfer-encoding
 unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
 )
@@ -85,7 +85,6 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
       uri = RDF::URI('https://' + env['SERVER_NAME']).join env['REQUEST_PATH']
       uri.query = env['QUERY_STRING'] if env['QUERY_STRING'] && !env['QUERY_STRING'].empty?
       resource = uri.R env                                                      # instantiate request
-      env[:base_uri] = resource                                                 # request URI
       env[:refhost] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # referring host
       env[:resp] = {}                                                           # HEAD storage
       env[:links] = {}                                                          # Link storage
@@ -344,7 +343,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
           storage += formatExt unless extension == formatExt
           storage.R.writeFile body                                    # cache body
           reader = RDF::Reader.for content_type: format               # select reader
-          reader.new(body,base_uri: env[:base_uri],noRDF: options[:noRDF]){|_| # instantiate reader
+          reader.new(body,base_uri: self,noRDFa: options[:noRDFa]){|_|# instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader # read RDF
           return self if options[:intermediate]                       # intermediate fetch, return w/o HTTP-response
           reader ? saveRDF : (puts "ENORDF #{format} #{uri}")         # cache RDF
@@ -468,7 +467,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
         when /^application\/atom+xml/
           feedDocument
         else
-          env[:repository].dump (RDF::Writer.for :content_type => format).to_sym, :standard_prefixes => true, :base_uri => env[:base_uri]
+          env[:repository].dump (RDF::Writer.for content_type: format).to_sym, standard_prefixes: true, base_uri: self
         end}
     end
 

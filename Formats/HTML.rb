@@ -100,7 +100,7 @@ module Webize
         @opts = options
         @doc = (input.respond_to?(:read) ? input.read : input).encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ')
         @base = options[:base_uri]
-        @opts[:noRDF] = true if @base.to_s.match? /\/feed|polymer.*html/ # don't look for RDF in templates
+        @opts[:noRDFa] = true if @base.to_s.match? /\/feed|polymer.*html/ # don't look for RDF in templates
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -135,7 +135,7 @@ module Webize
         end
 
         # embedded RDF in RDFa and JSON-LD # TODO move this out of each_statement to make blank-node handling easier? 
-        unless @opts[:noRDF]
+        unless @opts[:noRDFa]
           embeds = RDF::Graph.new
           # JSON-LD
           n.css('script[type="application/ld+json"]').map{|dataElement|
@@ -314,7 +314,7 @@ class WebResource
                                   {_: :a, id: :UX, class: :icon, style: 'color: #555', c: '⚗️', href: HTTP.qs((query_values||{}).merge({'UX' => 'upstream'}))},
                                  ({_: :a, id: :tabular, class: :icon, style: 'color: #555', c: '↨',
                                     href: HTTP.qs((query_values||{}).merge({'view' => 'table', 'sort' => 'date'}))} unless query_values && query_values['view']=='table'),
-                                 env[:base_uri].parts.map{|p|
+                                 parts.map{|p|
                                     [{_: :a, class: :breadcrumb, href: bc += p + '/', c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
                                  link[:feed, FeedIcon],
                                  ([' ',{_: :a, id: :showMain, href: '#body'}] if env[:site_chrome]),
@@ -324,6 +324,7 @@ class WebResource
                              if graph.empty?
                                HTML.keyval (Webize::HTML.webizeHash env), env
                              elsif (env[:view] || (query_values||{})['view']) == 'table'
+                               env[:sort] = query_values['sort'] if query_values
                                HTML.tabular graph, env
                              else
                                HTML.tree Treeize[graph], env
@@ -404,8 +405,8 @@ class WebResource
       graph = graph.values if graph.class == Hash
       keys = graph.select{|r|r.respond_to? :keys}.map{|r|r.keys}.flatten.uniq - [Abstract, Content, DC+'hasFormat', DC+'identifier', Image, Link, Video, SIOC+'reply_of', SIOC+'user_agent', Title]
       keys = [Creator, *(keys - [Creator])] if keys.member? Creator
-      if env[:sort] || env[:base_uri].query_values&.has_key?('sort')
-        attr = env[:sort] || env[:base_uri].query_values['sort']
+      if env[:sort]
+        attr = env[:sort]
         attr = Date if %w(date new).member? attr
         attr = Content if attr == 'content'
         graph = graph.sort_by{|r| (r[attr]||'').to_s}.reverse

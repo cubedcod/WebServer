@@ -173,7 +173,8 @@ thumbs.ebaystatic.com).map{|host| GET host }
     GET 'gfycat.com'
     GET 'thumbs.gfycat.com'
 
-    # Gitter
+    # Git
+    GET 'github.com'
     Allow 'gitter.im'
     Allow 'ws.gitter.im'
 
@@ -324,7 +325,6 @@ zoopps.com
       r.upstreamUI if parts[-1] == 'submit'                                                  # upstream UI preference
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !parts.member?('wiki') # MIME preference
       r.env[:links][:prev] = ['https://old.reddit.com', r.path, '?', r.query].join # page pointers
-      r.env[:links][:up] = File.dirname r.path unless r.path == '/'
       r.fetch options}
 
     # this host provides a next-page pointer, missing in HTTP Headers (either UI-host) and HTML/RSS (new/main UI host)
@@ -410,7 +410,7 @@ wired.trib.al).map{|short| GET short, NoQuery }
         FileUtils.touch 'twitter/.' + n}}
 
     Twitter = -> r {
-      r.env['HTTP_USER_AGENT'] = MobileUA
+      #r.env['HTTP_USER_AGENT'] = MobileUA
       newUI = true
 
       setTokens = -> {
@@ -424,24 +424,26 @@ wired.trib.al).map{|short| GET short, NoQuery }
           r.env['x-guest-token'] = attrs['gt'] if attrs['gt']
         end}
 
-      if newUI && (!r.path || r.path == '/') # feed from JSON representation
-        setTokens[]
-        subscriptions = Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}
-        subscriptions.shuffle[0..15].each_slice(18){|sub|
-          q = sub.map{|u|'from%3A' + u}.join('%2BOR%2B')
-          apiURL = 'https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&q=' + q + '&vertical=default&count=40&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2CcameraMoment'
-          apiURL.R(r.env).fetch intermediate: true}
-        r.saveRDF.chrono_sort.graphResponse
-      elsif !r.path || r.path == '/' # feed from HTML representation
-        Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}.shuffle.each_slice(18){|s|
-          '//twitter.com/search'.R(r.env).fetch intermediate: true, noRDF: true,
-                                                query: {vertical: :default, f: :tweets, q: s.map{|u|'from:' + u}.join('+OR+')}}
-        r.saveRDF.chrono_sort.graphResponse
+      if !r.path || r.path == '/'
+        if newUI # feed - JSON
+          setTokens[]
+          subscriptions = Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}
+          subscriptions.shuffle.each_slice(18){|sub|
+            q = sub.map{|u|'from%3A' + u}.join('%2BOR%2B')
+            apiURL = 'https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&q=' + q + '&vertical=default&count=40&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2CcameraMoment'
+            apiURL.R(r.env).fetch intermediate: true}
+          r.saveRDF.chrono_sort.graphResponse
+        else     # feed - HTML
+          Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}.shuffle.each_slice(18){|s|
+            '//twitter.com/search'.R(r.env).fetch intermediate: true, noRDFa: true,
+                                                  query: {vertical: :default, f: :tweets, q: s.map{|u|'from:' + u}.join('+OR+')}}
+          r.saveRDF.chrono_sort.graphResponse
+        end
       elsif r.gunkURI
         r.deny
       elsif r.path.match? GlobChars
         r.nodeResponse
-      elsif newUI && r.parts.size == 1 && !r.upstreamUI? && !%w(favicon.ico manifest.json search).member?(r.parts[0]) # user page - JSON
+      elsif newUI && r.parts.size == 1 && !r.upstreamUI? && !%w(favicon.ico manifest.json search).member?(r.parts[0]) # user - JSON
         setTokens[]
         user = r.parts[0]
         if user.match? /^\d+$/
@@ -458,7 +460,10 @@ wired.trib.al).map{|short| GET short, NoQuery }
           end
         end
         ('https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment').R(r.env).fetch reformat: true
-      else # any page - HTML
+      elsif r.parts.member? 'status' # tweet - JSON
+        setTokens[]
+        "https://api.twitter.com/2/timeline/conversation/#{r.parts[-1]}.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&count=20&ext=mediaStats%2CcameraMoment".R(r.env).fetch reformat: true
+      else # user/tweet - HTML
         setTokens[] if r.host == 'api.twitter.com'
         r.fetch
       end}

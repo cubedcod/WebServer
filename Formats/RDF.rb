@@ -96,7 +96,7 @@ class WebResource < RDF::URI
     return self unless repository || env[:repository]
 
     (repository || env[:repository]).each_graph.map{|graph|
-      n = (graph.name||env[:base_uri]).R # graph identifier
+      n = (graph.name || self).R # graph URI
       docs = [n] # canonical location
       # doc on timeline TODO hard/symlink? other locations?
       if ts = graph.query(RDF::Query::Pattern.new(:s, (WebResource::Date).R, :o)).first_value   # timestamp query
