@@ -411,6 +411,7 @@ wired.trib.al).map{|short| GET short, NoQuery }
 
     Twitter = -> r {
       r.env['HTTP_USER_AGENT'] = MobileUA
+      newUI = true
 
       setTokens = -> {
         if cookie = r.env['HTTP_COOKIE']
@@ -423,7 +424,7 @@ wired.trib.al).map{|short| GET short, NoQuery }
           r.env['x-guest-token'] = attrs['gt'] if attrs['gt']
         end}
 
-      if !r.path || r.path == '/'
+      if newUI && (!r.path || r.path == '/') # feed from JSON representation
         setTokens[]
         subscriptions = Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}
         subscriptions.shuffle[0..15].each_slice(18){|sub|
@@ -431,7 +432,7 @@ wired.trib.al).map{|short| GET short, NoQuery }
           apiURL = 'https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&q=' + q + '&vertical=default&count=40&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2CcameraMoment'
           apiURL.R(r.env).fetch intermediate: true}
         r.saveRDF.chrono_sort.graphResponse
-      elsif r.path == '/feed'
+      elsif !r.path || r.path == '/' # feed from HTML representation
         Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}.shuffle.each_slice(18){|s|
           '//twitter.com/search'.R(r.env).fetch intermediate: true, noRDF: true,
                                                 query: {vertical: :default, f: :tweets, q: s.map{|u|'from:' + u}.join('+OR+')}}
@@ -440,7 +441,7 @@ wired.trib.al).map{|short| GET short, NoQuery }
         r.deny
       elsif r.path.match? GlobChars
         r.nodeResponse
-      elsif r.parts.size == 1 && !r.upstreamUI? && !%w(favicon.ico manifest.json search).member?(r.parts[0])
+      elsif newUI && r.parts.size == 1 && !r.upstreamUI? && !%w(favicon.ico manifest.json search).member?(r.parts[0]) # user page - JSON
         setTokens[]
         user = r.parts[0]
         if user.match? /^\d+$/
@@ -456,8 +457,9 @@ wired.trib.al).map{|short| GET short, NoQuery }
             puts "found UID #{user} -> #{uid}"
           end
         end
-        ('https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment').R(r.env).fetch
-      else
+        ('https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment').R(r.env).fetch reformat: true
+      else # any page - HTML
+        setTokens[] if r.host == 'api.twitter.com'
         r.fetch
       end}
 

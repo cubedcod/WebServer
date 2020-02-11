@@ -337,7 +337,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
                      puts "ENOTYPE on #{uri} , pathname determines MIME"
                      RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
                    end
-          static = fixedFormat? format                                # rewritable format?
+          static = !options[:reformat] && (fixedFormat? format)       # rewritable format?
           body = Webize::HTML.degunk body, static if format == 'text/html' && !AllowedHosts.has_key?(host) # clean HTML
           formatExt = Suffixes[format] || Suffixes_Rack[format] || (puts "ENOSUFFIX #{format} #{uri}";'') # filename-extension for format
           storage = fsPath                                            # storage location
