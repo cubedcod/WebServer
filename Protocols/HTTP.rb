@@ -175,7 +175,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
                             '/%Y/%m/%d/%H/'
                           else
                           end)
-      [303, env[:resp].update({'Location' => loc + parts[1..-1].join('/') + (env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || '')}), []]
+      [303, env[:resp].update({'Location' => loc + parts[1..-1].join('/') + (query ? ('?'+query) : '')}), []]
     end
 
     def HTTP.decompress head, body
@@ -744,7 +744,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
       end
       remainder = ps.empty? ? '' : ['', *ps].join('/')
       remainder += '/' if env['REQUEST_PATH'] && env['REQUEST_PATH'][-1] == '/'
-      q = env['QUERY_STRING'] && !env['QUERY_STRING'].empty? && ('?'+env['QUERY_STRING']) || ''
+      q = query ? ('?'+query) : ''
       env[:links][:prev] = p + remainder + q + '#prev' if p
       env[:links][:next] = n + remainder + q + '#next' if n
     end
