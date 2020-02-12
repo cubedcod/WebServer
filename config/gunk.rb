@@ -30,7 +30,7 @@ zerg(net)?)
 ([-._\/'"\s:?&=~%]|$)|
 \.(eot|gif\?|otf|ttf|woff2?))xi
 
-    GunkExec = /(_0x[0-9a-f]|[\b_](d[fm]p|ssp)[\b_]|3gl|6sc|([a-z]+)?analytic([a-z]+)?|auction|[\b_]bid(d(er|ing)|s)?[\b_]|\bbing\b|bouncee?x|chartbeat|clickability|cloudfront|[\b_]consent[\b_]|crazyegg|crwdcntrl|doubleclick|driftt|ensighten|evidon|facebook|feedbackify|gdpr|google([a-z]+)?|[\b_]g(a|pt|tm)[\b_]|hotjar|indexww|intercom|krxd|licdn|linkedin|mar(feel|keto)|moatads|mpulse|newrelic|newsmax|npttech|nreum|ntv.io|outbrain|parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|sail-horizon|scorecard|\bsegment\b|snapkit|sophi|sumo|survicate|taboola|targeting|tinypass|tiqcdn|([a-z]+)?track([a-z]+)?|twitter|tynt|visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk)/i
+    GunkExec = /(_0x[0-9a-f]|[\b_](d[fm]p|ssp)[\b_]|3gl|6sc|[\b_]([a-z]+)?ad([a-z]+)?[\b_]|([a-z]+)?analytic([a-z]+)?|auction|[\b_]bid(d(er|ing)|s)?[\b_]|\bbing\b|bouncee?x|chartbeat|clickability|cloudfront|[\b_]consent[\b_]|crazyegg|crwdcntrl|doubleclick|driftt|ensighten|evidon|facebook|feedbackify|gdpr|google([a-z]+)?|[\b_]g(a|pt|tm)[\b_]|hotjar|indexww|intercom|krxd|licdn|linkedin|mar(feel|keto)|moatads|mpulse|newrelic|newsmax|npttech|nreum|ntv.io|outbrain|parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|sail-horizon|scorecard|\bsegment\b|snapkit|sophi|sumo|survicate|taboola|([a-z]+)?targeting([a-z]+)?|tinypass|tiqcdn|([a-z]+)?track([a-z]+)?|twitter|tynt|visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk)/i
 
   end
 end
