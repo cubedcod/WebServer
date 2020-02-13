@@ -284,11 +284,8 @@ class WebResource
       graph ||= env[:graph] = treeFromGraph
       env[:images] ||= {}
       env[:colors] ||= {}
-      titleRes = [ # title resource
-        '', path,
-        host && path && ('//' + host + path),
-        host && path && ('https://' + host + path),
-      ].compact.find{|u| graph[u] && graph[u][Title]}
+      chrono_sort if path.match? HourDir
+      titleRes = ['', path, host && path && ('https://' + host + path)].compact.find{|u| graph[u] && graph[u][Title]}
       bc = '/' # breadcrumb path
       icon = ('//' + (host || 'localhost') + '/favicon.ico').R # site icon
       link = -> key, content { # render Link reference
