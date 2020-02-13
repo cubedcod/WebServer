@@ -174,6 +174,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
     GET 'thumbs.gfycat.com'
 
     # Git
+    (0..3).map{|i| GET "avatars#{i}.githubusercontent.com" }
     GET 'github.com'
     Allow 'gitter.im'
     Allow 'ws.gitter.im'
@@ -812,7 +813,7 @@ zoopps.com
   end
 
   def TwitterJSON tree, &b
-    if objects = tree['globalObjects']
+    if objects = (tree.class != Array) && tree['globalObjects']
       users = objects['users'] || {}
       (objects['tweets'] || {}).map{|id, tweet|
         id = tweet['id_str']
