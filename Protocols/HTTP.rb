@@ -64,7 +64,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
 
     def allowCDN?
       if host.match? /github.io$/
-        env[:refhost]&.match? /github.io$/
+        env && env[:refhost] && env[:refhost].match?(/github.io$/)
       else
         (CacheExt - %w(html js)).member?(ext.downcase) && !path.match?(Gunk)
       end
@@ -86,8 +86,14 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
       uri.query = env['QUERY_STRING'] if env['QUERY_STRING'] && !env['QUERY_STRING'].empty?
       resource = uri.R env                                                      # instantiate request
       env[:refhost] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # referring host
-      env[:resp] = {}                                                           # HEAD storage
-      env[:links] = {}                                                          # Link storage
+      env[:resp] = {}                                                           # response-header storage
+      env[:links] = {}                                                          # Link response-header
+      unless resource.path == '/'
+        up = File.dirname resource.path
+        up += '/' unless up == '/'
+        up += '?' + resource.query if resource.query
+        env[:links][:up] = up
+      end
       resource.send(env['REQUEST_METHOD']).yield_self{|status, head, body|      # dispatch
 
         ext = resource.path ? resource.ext.downcase : ''                        # log
@@ -452,10 +458,6 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
 
     def graphResponse
       return notfound if !env.has_key?(:repository) || env[:repository].empty?
-      unless !path || path == '/'
-        dir = File.dirname path
-        env[:links][:up] = dir + (dir[-1] == '/' ? '' : '/') + (query ? ('?' + query) : '')
-      end
       format = selectFormat
       env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
       env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
