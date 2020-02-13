@@ -12,7 +12,7 @@ e(moji.*\.js|ndscreen|nsighten|proof|scenic|vidon|zoic)|
 firebase|(web)?fonts?(awesome)?|
 g(dpr|eo(ip|locat(e|ion))|igya|pt|tag|tm)|.*(
 header|pre)[-_]?bid.*|hotjar|.*hubspot.*|[hp]b.?js|ima[0-9]?|
-impression|incapsula|indexww|
+impression|indexww|
 kr(ux|xd).*|
 log(event|g(er|ing))|(app|s)?
 m(atomo|e(asurement|t(er|rics?))|ms|odal|pulse|tr)|

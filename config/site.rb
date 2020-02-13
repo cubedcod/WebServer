@@ -381,17 +381,6 @@ zoopps.com
     # Technology Review
     GET 'cdn.technologyreview.com', NoQuery
 
-    # Time
-    GET 'ti.me', NoQuery
-
-    # TinyURL
-    GET 'tinyurl.com', NoQuery
-
-    # Tribal
-    %w(bit.ly
-      trib.al
-wired.trib.al).map{|short| GET short, NoQuery }
-
     # Tumblr
     GET '.tumblr.com', -> r {(r.query_values||{}).has_key?('audio_file') ? [301, {'Location' => r.query_values['audio_file']}, []] : NoGunk[r]}
     
@@ -400,6 +389,8 @@ wired.trib.al).map{|short| GET short, NoQuery }
     GET 'static.twitchcdn.net'
 
     # Twitter
+    %w(bit.ly dlvr.it ti.me tinyurl.com trib.al wired.trib.al).map{|short| GET short, NoQuery }
+
     Allow 'twitter.com'
     %w(api mobile).map{|n| Allow n + '.twitter.com'}
     GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : NoQuery[r]}
