@@ -2,7 +2,7 @@
 class WebResource
   module URIs
 
-    # URI pattern
+    # URI gunk
     Gunk = %r([-._\/'"\s:?&=~%]
 ((block|load|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|frame|id|obe|rotat[eo]r?|slots?|system|tech|tools?|types?|units?|words?|zones?)?|akismet|alerts?|.*analytics?.*|appnexus|audience|(app|smart)?
 b(eacon|lueconic|ouncee?x.*)s?|.*bid(d(er|ing)|s).*|
@@ -31,15 +31,15 @@ zerg(net)?)
 ([-._\/'"\s:?&=~%]|$)|
 \.(eot|gif\?|otf|ttf|woff2?))xi
 
-    # executable-code pattern
+    # executable-code gunk
     GunkExec = %r(_0x[0-9a-f]|[\b_'"](
 3gl|6sc|
-[a-z]*analytic[a-z]*|auction|
+ad|[a-z]*analytic[a-z]*|auction|
 bid(d(er|ing)|s)?|bing|bouncee?x[a-z]*|
 chartbeat|clickability|cloudfront|consent|crazyegg|crwdcntrl|
 doubleclick|d[fm]p|driftt|
 ensighten|evidon|facebook|feedbackify|
-gdpr|google.?[a-z]*|g(a|pt|tm)|
+ga|gdpr|google.?[a-z]*|g(a|pt|tm)|
 hotjar|indexww|intercom|krxd|licdn|linkedin|
 mar(feel|keto)|moatads|mpulse|newrelic|newsmax|npttech|nreum|ntv.io|outbrain|
 parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|

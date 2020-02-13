@@ -753,7 +753,11 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
 
     def upstreamUI; env[:UX] = true; self end
     def upstreamUI?
-      env.has_key?(:UX) || ENV.has_key?('UX') || parts.member?('embed') || query_values&.has_key?('UX')
+      env.has_key?(:UX) ||
+        ENV.has_key?('UX') ||
+        parts.member?('embed') ||
+        %w(players.brightcove.net).member?(host) ||
+        query_values&.has_key?('UX')
     end
 
     def writeFile o
