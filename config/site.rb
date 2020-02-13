@@ -389,11 +389,9 @@ zoopps.com
     GET 'static.twitchcdn.net'
 
     # Twitter
-    %w(bit.ly dlvr.it ti.me tinyurl.com trib.al wired.trib.al).map{|short| GET short, NoQuery }
+    %w(bit.ly dlvr.it t.co ti.me tinyurl.com trib.al wired.trib.al).map{|short| GET short, NoQuery }
 
-    Allow 'twitter.com'
-    %w(api mobile).map{|n| Allow n + '.twitter.com'}
-    GET 't.co', -> r {r.parts[0] == 'i' ? r.deny : NoQuery[r]}
+    Allow 'twitter.com'; %w(api mobile).map{|n| Allow n + '.twitter.com'}
 
     Populate 'twitter.com', -> r {
       FileUtils.mkdir 'twitter'
