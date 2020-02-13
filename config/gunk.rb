@@ -2,6 +2,7 @@
 class WebResource
   module URIs
 
+    # URI pattern
     Gunk = %r([-._\/'"\s:?&=~%]
 ((block|load|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|frame|id|obe|rotat[eo]r?|slots?|system|tech|tools?|types?|units?|words?|zones?)?|akismet|alerts?|.*analytics?.*|appnexus|audience|(app|smart)?
 b(eacon|lueconic|ouncee?x.*)s?|.*bid(d(er|ing)|s).*|
@@ -30,7 +31,22 @@ zerg(net)?)
 ([-._\/'"\s:?&=~%]|$)|
 \.(eot|gif\?|otf|ttf|woff2?))xi
 
-    GunkExec = /(_0x[0-9a-f]|[\b_](d[fm]p|ssp)[\b_]|3gl|6sc|([a-z]+)?analytic([a-z]+)?|auction|[\b_]bid(d(er|ing)|s)?[\b_]|\bbing\b|bouncee?x|chartbeat|clickability|cloudfront|[\b_]consent[\b_]|crazyegg|crwdcntrl|doubleclick|driftt|ensighten|evidon|facebook|feedbackify|gdpr|google([a-z]+)?|[\b_]g(a|pt|tm)[\b_]|hotjar|indexww|intercom|krxd|licdn|linkedin|mar(feel|keto)|moatads|mpulse|newrelic|newsmax|npttech|nreum|ntv.io|outbrain|parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|sail-horizon|scorecard|\bsegment\b|snapkit|sophi|sumo|survicate|taboola|([a-z]+)?targeting([a-z]+)?|tinypass|tiqcdn|([a-z]+)?track([a-z]+)?|twitter|tynt|visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk)/i
+    # executable-code pattern
+    GunkExec = %r(_0x[0-9a-f]|[\b_'"](
+3gl|6sc|
+[a-z]*analytic[a-z]*|auction|
+bid(d(er|ing)|s)?|bing|bouncee?x[a-z]*|
+chartbeat|clickability|cloudfront|consent|crazyegg|crwdcntrl|
+doubleclick|d[fm]p|driftt|
+ensighten|evidon|facebook|feedbackify|
+gdpr|google.?[a-z]*|g(a|pt|tm)|
+hotjar|indexww|intercom|krxd|licdn|linkedin|
+mar(feel|keto)|moatads|mpulse|newrelic|newsmax|npttech|nreum|ntv.io|outbrain|
+parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|
+sail-horizon|scorecard|segment|snapkit|sophi|ssp|sumo|survicate|
+taboola|[a-z]*targeting[a-z]*|tinypass|tiqcdn|[a-z]*track[a-z]*|twitter|tynt|
+visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk
+)[\b_'"])xi
 
   end
 end
