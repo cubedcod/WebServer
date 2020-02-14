@@ -2,7 +2,7 @@
 class WebResource
   module URIs
 
-    # filesystem path for URI
+    # URI -> file path
     def fsPath      ## host
       (if localNode? # localhost
        ''
@@ -11,7 +11,7 @@ class WebResource
        end) +       ## path
         (if !path    # no path
          []
-        elsif localNode? && parts[0] == 'msg'
+        elsif localNode? && parts[0] == 'msg' # message-ID path
           MID2Path[Rack::Utils.unescape_path parts[1]]
         elsif path.size > 512 || parts.find{|p|p.size > 255} # long path, hash it
           hash = Digest::SHA2.hexdigest path
@@ -21,7 +21,6 @@ class WebResource
          end).join('/')
     end
 
-    # filesystem path for hostname
     def hostPath
       host.split('.').-(%w(com net org www)).reverse.join('/') + '/'
     end
@@ -89,8 +88,8 @@ class WebResource
 
       # map fs locations to URI space
       pathIndex = localNode? ? 0 : hostPath.size
-      nodes = paths.map{|p|
-        ((host ? ('https://' + host) : '') + '/' + p.to_s[pathIndex..-1].gsub(':','%3A').gsub('#','%23')).R env }
+      nodes = paths.map{|p| ((host ? ('https://' + host) : '') + '/' + p.to_s[pathIndex..-1].gsub(':','%3A').gsub('#','%23')).R env }
+      #puts nodes
 
       # return node-data in requested format
       if nodes.size==1 && nodes[0].ext == 'ttl' && selectFormat == 'text/turtle'

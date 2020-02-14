@@ -109,12 +109,11 @@ class WebResource < RDF::URI
         turtle = doc.fsPath + '.ttl'
         triples = ('%4d' % graph.size) + '⋮'
         if File.exist? turtle
-        # TODO write version? (or continue requiring new URI for that)
           print "\n⚪ #{triples} #{doc.fsPath}" if ENV.has_key? 'VERBOSE'
         else
           FileUtils.mkdir_p File.dirname turtle
           RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
-          print "\n🐢 \e[32m#{triples} \e[1m#{doc}\e[0m " if doc == docs[0]
+          print "\n🐢 \e[32m#{triples} \e[1m#{doc}\e[0m "
         end}}
     self
   end
@@ -172,9 +171,9 @@ class WebResource < RDF::URI
 
 end
 
-class Pathname
-  def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
-end
+#class Pathname
+#  def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
+#end
 
 class RDF::URI
   def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
