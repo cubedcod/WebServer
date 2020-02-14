@@ -88,10 +88,12 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
       env[:refhost] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # referring host
       env[:resp] = {}                                                           # response-header storage
       env[:links] = {}                                                          # Link response-header
-      unless resource.path == '/'
-        up = File.dirname resource.path
+      if uri.query_values&.has_key? 'full'
+        env[:links][:up] = '?'
+      elsif uri.path != '/'
+        up = File.dirname uri.path
         up += '/' unless up == '/'
-        up += '?' + resource.query if resource.query
+        up += '?' + uri.query if uri.query
         env[:links][:up] = up
       end
       resource.send(env['REQUEST_METHOD']).yield_self{|status, head, body|      # dispatch
@@ -456,23 +458,6 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
 
     alias_method :get, :fetch
 
-    def graphResponse
-      return notfound if !env.has_key?(:repository) || env[:repository].empty?
-      format = selectFormat
-      env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
-      env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
-      env[:resp].update({'Link' => env[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !env[:links] || env[:links].empty?
-      entity ->{
-        case format
-        when /^text\/html/
-          htmlDocument
-        when /^application\/atom+xml/
-          feedDocument
-        else
-          env[:repository].dump (RDF::Writer.for content_type: format).to_sym, standard_prefixes: true, base_uri: self
-        end}
-    end
-
     def gunk?
       return false if (query_values||{})['allow'] == ServerKey
       gunkTag? || gunkURI
@@ -543,65 +528,6 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
 
     def local?
       LocalAddress.member? env['SERVER_NAME']
-    end
-
-    # URI -> storage node(s) -> RDF graph -> HTTP response
-    def nodeResponse
-      return fileResponse if node.file? # static node response
-      qs = query_values || {}           # query arguments
-      timeMeta                          # find temporally-adjacent node pointers
-      summarize = !(qs.has_key? 'full') # default to summarize for multi-node requests
-
-      # find node locations on fs
-      paths = if node.directory?        # node container
-                if qs.has_key?('f') && !qs['f'].empty? && path != '/' # FIND full name (case-insensitive)
-                  `find #{shellPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
-                elsif qs.has_key?('find') && !qs['find'].empty? && path != '/'# FIND substring (case-insensitive)
-                  `find #{shellPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
-                elsif (qs.has_key?('Q') || qs.has_key?('q')) && path != '/'
-                  env[:grep] = true     # GREP
-                  q = qs['Q'] || qs['q']
-                  args = q.shellsplit rescue q.split(/\W/)
-                  case args.size
-                  when 0
-                    return []
-                  when 2 # two unordered terms
-                    cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -il #{Shellwords.escape args[1]}"
-                  when 3 # three unordered terms
-                    cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -il #{Shellwords.escape args[2]}"
-                  when 4 # four unordered terms
-                    cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -ilZ #{Shellwords.escape args[2]} | xargs -0 grep -il #{Shellwords.escape args[3]}"
-                  else # N ordered terms
-                    cmd = "grep -ril -- #{Shellwords.escape args.join '.*'} #{shellPath}"
-                  end
-                  `#{cmd} | head -n 1024`.lines.map &:chomp
-                else
-                  fsPath
-                end
-              else                      # nodes selected w/ GLOB
-                globPath = fsPath
-                if uri.match GlobChars  # parametric glob
-                  env[:grep] = true if qs.has_key? 'q' # enable grepping within glob results
-                else                    # graph-document glob
-                  summarize = false
-                  globPath += '.*'
-                end
-                Pathname.glob globPath
-              end
-
-      # map fs locations to URI space
-      index = localNode? ? 0 : hostPath.size
-      nodes = paths.map{|p|
-        ('https://' + host + '/' + p.to_s[index..-1].gsub(':','%3A').gsub('#','%23')).R env }
-
-      # return node-data in requested format
-      if nodes.size==1 && nodes[0].ext == 'ttl' && selectFormat == 'text/turtle'
-        nodes[0].fileResponse           # static node ready to go
-      else                              # transform/merge graph node(s)
-        nodes = nodes.map &:summary if summarize # summary nodes
-        nodes.map &:loadRDF             # node -> Graph
-        graphResponse                   # HTTP Response
-      end
     end
 
     def notfound; [404, {'Content-Type' => 'text/html'}, [htmlDocument]] end

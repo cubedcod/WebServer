@@ -123,7 +123,7 @@ document.addEventListener("DOMContentLoaded", function(){
 	    if(key==38) // [shift-up] up to parent
 		gotoLink('up');
 	    if(key==40) // [shift-down] show children
-		gotoLink('down');
+		gotoLink('full');
 	    if(key==80) // [shift-P] previous node
 		selectPrevNode();
 	    if(key==78) // [shift-N] next node

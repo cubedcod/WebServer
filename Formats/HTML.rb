@@ -239,12 +239,12 @@ class WebResource
     Icons = {
       Abstract => '✍',
       Audio => '🔊',
-      Content => '✏',
+      Content => '',
       Creator => '👤',
       DC + 'hasFormat' => '≈',
       DC + 'identifier' => '☸',
       Date => '⌚',
-      Image => '🖼',
+      Image => '🖼️',
       LDP + 'Container' => '📁',
       LDP + 'contains' => '📁',
       Link => '☛',
@@ -284,6 +284,12 @@ class WebResource
       graph ||= env[:graph] = treeFromGraph
       env[:images] ||= {}
       env[:colors] ||= {}
+      env[:links] ||= {}
+      if env[:summary]
+        expanded = HTTP.qs (query_values||{}).merge({'full' => nil})
+        env[:links][:full] = expanded
+        expander = {_: :a, id: :expand, c: '&#11206;', href: expanded}
+      end
       chrono_sort if path.match? HourDir
       titleRes = ['', path, host && path && ('https://' + host + path)].compact.find{|u| graph[u] && graph[u][Title]}
       bc = '/' # breadcrumb path
@@ -302,7 +308,7 @@ class WebResource
                          c: [{_: :meta, charset: 'utf-8'},
                             ({_: :title, c: CGI.escapeHTML(graph[titleRes][Title].map(&:to_s).join ' ')} if titleRes),
                              {_: :style, c: ["\n", SiteCSS]}, "\n",
-                             (env[:links] || {}).map{|type,uri|
+                             env[:links].map{|type,uri|
                                {_: :link, rel: type, href: CGI.escapeHTML(uri.to_s)}}
                             ]}, "\n",
                         {_: :body,
@@ -326,8 +332,7 @@ class WebResource
                              else
                                graph.values.map{|resource|
                                  HTML.value nil, resource, env}
-                             end,
-                             link[:down,'&#9660;'],
+                             end, expander,
                              {_: :script, c: SiteJS}]}]}]
     end
 
@@ -409,30 +414,32 @@ class WebResource
         graph = graph.sort_by{|r| (r[attr]||'').to_s}.reverse
       end
       {_: :table, class: :tabular,
-       c: [{_: :tr, c: keys.map{|p|
-              p = p.R
-              slug = p.fragment || (p.path && p.basename) || ' '
-              icon = Icons[p.uri] || slug
-              {_: :td, c: {_: :a, class: :head, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}}},
-           graph.map{|resource|
-             {_: :tr, resource: resource['uri'], c: keys.map{|k|
-                {_: :td, property: k,
-                 c: if k == 'uri'
-                  tCount = 0
-                  [(resource[Title]||[]).map{|title|
-                     title = title.to_s.sub(/\/u\/\S+ on /, '').sub /^Re: /, ''
-                     unless env[:title] == title # show topic if changed from previous post
-                       env[:title] = title; tCount += 1
-                       {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'title', type: 'node', c: CGI.escapeHTML(title)}
-                     end},
-                   ({_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'id', type: 'node', c: '&#x1f517;'} if tCount == 0),
-                   resource[Abstract] ? [resource[Abstract], '<br>'] : '',
-                   [Image, Video].map{|t|(resource[t]||[]).map{|i| Markup[t][i,env]}},
-                   resource[Content],
-                   {class: :links, c: (resource[Link]||[]).map{|i| Markup[Link][i,env]}}]
-                else
-                  (resource[k]||[]).map{|v|value k, v, env }
-                 end}}}}]}
+       c: [{_: :thead,
+            c: {_: :tr, c: keys.map{|p|
+                  p = p.R
+                  slug = p.fragment || (p.path && p.basename) || ' '
+                  icon = Icons[p.uri] || slug
+                  {_: :td, c: {_: :a, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}}}},
+           {_: :tbody,
+            c: graph.map{|resource|
+              {_: :tr, resource: resource['uri'], c: keys.map{|k|
+                 {_: :td, property: k,
+                  c: if k == 'uri'
+                   tCount = 0
+                   [(resource[Title]||[]).map{|title|
+                      title = title.to_s.sub(/\/u\/\S+ on /, '').sub /^Re: /, ''
+                      unless env[:title] == title # show topic if changed from previous post
+                        env[:title] = title; tCount += 1
+                        {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'title', type: 'node', c: CGI.escapeHTML(title)}
+                      end},
+                    ({_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'id', type: 'node', c: '&#x1f517;'} if tCount == 0),
+                    resource[Abstract] ? [resource[Abstract], '<br>'] : '',
+                    [Image, Video].map{|t|(resource[t]||[]).map{|i| Markup[t][i,env]}},
+                    resource[Content],
+                    {class: :links, c: (resource[Link]||[]).map{|i| Markup[Link][i,env]}}]
+                 else
+                   (resource[k]||[]).map{|v|value k, v, env }
+                  end}}}}}]}
     end
 
 
