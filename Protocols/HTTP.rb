@@ -550,16 +550,12 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
       return fileResponse if node.file? # static node response
       qs = query_values || {}           # query arguments
       timeMeta                          # find temporally-adjacent node pointers
-
-      nodes = (if node.directory?       # multi-node container
-               if qs.has_key? 'f'       # FIND name
-                 summarize = true
-                 q = qs['f']
-                 `find #{shellPath} -iname #{Shellwords.escape q}`.lines.map{|p|('/' + p.chomp).R} unless qs['f'].empty? || path == '/'
-               elsif qs.has_key? 'find' # FIND substring
-                 summarize = true
-                 q = '*' + qs['find'] + '*'
-                 `find #{shellPath} -iname #{Shellwords.escape q}`.lines.map{|p|('/' + p.chomp).R} unless qs['find'].empty? || path == '/'
+      summarize = !(qs.has_key? 'full') # default to summarize for multi-node requests
+      nodes = (if node.directory?       # node container
+               if qs.has_key?('f') && !qs['f'].empty? && path != '/' # FIND full name (case-insensitive)
+                 `find #{shellPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
+               elsif qs.has_key?('find') && !qs['find'].empty? && path != '/'# FIND substring (case-insensitive)
+                 `find #{shellPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
                elsif (qs.has_key?('Q') || qs.has_key?('q')) && path != '/'
                  env[:grep] = true      # GREP
                  q = qs['Q'] || qs['q']
@@ -574,31 +570,29 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
                  when 4 # four unordered terms
                    cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -ilZ #{Shellwords.escape args[2]} | xargs -0 grep -il #{Shellwords.escape args[3]}"
                  else # N ordered terms
-                   pattern = args.join '.*'
-                   cmd = "grep -ril -- #{Shellwords.escape pattern} #{shellPath}"
+                   cmd = "grep -ril -- #{Shellwords.escape args.join '.*'} #{shellPath}"
                  end
-                 `#{cmd} | head -n 1024`.lines.map{|path| ('/' + path.chomp).R }
-               else                     # LS
-                 ls = [self]
-                 ls.concat((self + '.*').R.glob) if path[-1] != '/'
-                 ls
+                 `#{cmd} | head -n 1024`.lines.map &:chomp
+               else                     # basic container
+                 [self]
                end
               else
-                if uri.match GlobChars  # GLOB - parametric
-                  summarize = true
+                if uri.match GlobChars  # GLOB nodes
                   env[:grep] = true if env && qs.has_key?('q')
                   glob
-                else                    # GLOB - graph-storage
+                else                    # default graph-node
+                  summarize = false
                   (self + '.*').R.glob
                 end
                end).flatten.compact.uniq.map{|n|n.R env}
 
       if nodes.size==1 && nodes[0].ext == 'ttl' && selectFormat == 'text/turtle'
-        nodes[0].fileResponse           # static graph-node response
-      else                              # graph node(s) response
-        nodes = nodes.map &:summary if summarize && !qs.has_key?('full')
-        nodes.map &:loadRDF
-        graphResponse
+        nodes[0].fileResponse           # static graph-node
+      else                              # graph node(s)
+        nodes = nodes.map &:summary if summarize # summary RDF
+        #puts nodes.join "\n"
+        nodes.map &:loadRDF             # load RDF
+        graphResponse                   # HTTP Response
       end
     end
 
