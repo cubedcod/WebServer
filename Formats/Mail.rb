@@ -2,7 +2,16 @@
 require 'mail'
 class WebResource
   module URIs
-    MID2PATH = -> id { id_hash = Digest::SHA2.hexdigest id; ['', '.msg', id_hash[0..1], id.gsub('/','')].join '/'} # Message-ID -> Pathname
+
+    # Message-ID -> pathname
+
+    MID2Path = -> id {
+      id = Digest::SHA2.hexdigest id
+      ['msg', id[0..1], id[2..-1]]}
+
+    MID2PATH = -> id {
+      ['', *MID2Path[id]].join '/'}
+
   end
 end
 module Webize

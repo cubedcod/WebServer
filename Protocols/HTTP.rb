@@ -429,30 +429,27 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
     end
 
     def GET
-      if local? || offline?        ## local
+      if local?                ## local
         if %w{y year m month d day h hour}.member? parts[0]
-          dateDir                   # timeline redirect
-        elsif path == '/mail'       # inbox redirect
+          dateDir               # timeline redirect
+        elsif path == '/mail'   # inbox redirect
           [302, {'Location' => '/d/*/msg*?sort=date&view=table'}, []]
-        elsif parts[0] == 'msg'     # Message-ID <> URI mapping (TODO move this to #fsPath?)
-          id = parts[1]
-          id ? MID2PATH[Rack::Utils.unescape_path id].R(env).nodeResponse : notfound
-        else                        # local graph-node
+        else                    # local node
           nodeResponse
-        end                        ## remote
-      elsif path.match? Req204      # connectivity check
+        end                    ## remote
+      elsif path.match? Req204  # connectivity check
         R204
-      elsif path.match? HourDir     # browse cache of remote. remove this if remotes get hour-dirs for us
+      elsif path.match? HourDir # cached remote - timeslice container
         (path + '*' + host.split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*').R(env).nodeResponse
-      elsif handler = HostGET[host] # host handler
+      elsif handler = HostGET[host] # host lambda
         Populator[host][self] if Populator[host] && !join('/').R.node.exist?
         handler[self]
-      elsif host.match? CDNhost     # CDN handler
+      elsif host.match? CDNhost # CDN handler
         (AllowedHosts.has_key?(host) || (query_values||{})['allow'] == ServerKey || allowCDN?) ? fetch : deny
-      elsif gunk?                   # blocker handler
+      elsif gunk?               # block handler
         deny
       else
-        fetch                       # remote graph-node
+        fetch                   # remote node
       end
     end
 

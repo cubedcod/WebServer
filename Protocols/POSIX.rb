@@ -11,6 +11,8 @@ class WebResource
        end) +       ## path
         (if !path    # no path
          []
+        elsif localNode? && parts[0] == 'msg'
+          MID2Path[Rack::Utils.unescape_path parts[1]]
         elsif path.size > 512 || parts.find{|p|p.size > 255} # long path, hash it
           hash = Digest::SHA2.hexdigest path
           [hash[0..1], hash[2..-1]]
@@ -88,7 +90,7 @@ class WebResource
       # map fs locations to URI space
       pathIndex = localNode? ? 0 : hostPath.size
       nodes = paths.map{|p|
-        ('https://' + host + '/' + p.to_s[pathIndex..-1].gsub(':','%3A').gsub('#','%23')).R env }
+        ((host ? ('https://' + host) : '') + '/' + p.to_s[pathIndex..-1].gsub(':','%3A').gsub('#','%23')).R env }
 
       # return node-data in requested format
       if nodes.size==1 && nodes[0].ext == 'ttl' && selectFormat == 'text/turtle'
