@@ -577,10 +577,10 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
                  [self]
                end
               else
-                if uri.match GlobChars  # GLOB nodes
+                if uri.match GlobChars  # GLOB
                   env[:grep] = true if env && qs.has_key?('q')
                   glob
-                else                    # default graph-node
+                else                    # graph node
                   summarize = false
                   (self + '.*').R.glob
                 end
