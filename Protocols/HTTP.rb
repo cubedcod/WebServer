@@ -551,47 +551,55 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
       qs = query_values || {}           # query arguments
       timeMeta                          # find temporally-adjacent node pointers
       summarize = !(qs.has_key? 'full') # default to summarize for multi-node requests
-      nodes = (if node.directory?       # node container
-               if qs.has_key?('f') && !qs['f'].empty? && path != '/' # FIND full name (case-insensitive)
-                 `find #{shellPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
-               elsif qs.has_key?('find') && !qs['find'].empty? && path != '/'# FIND substring (case-insensitive)
-                 `find #{shellPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
-               elsif (qs.has_key?('Q') || qs.has_key?('q')) && path != '/'
-                 env[:grep] = true      # GREP
-                 q = qs['Q'] || qs['q']
-                 args = q.shellsplit rescue q.split(/\W/)
-                 case args.size
-                 when 0
-                   return []
-                 when 2 # two unordered terms
-                   cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -il #{Shellwords.escape args[1]}"
-                 when 3 # three unordered terms
-                   cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -il #{Shellwords.escape args[2]}"
-                 when 4 # four unordered terms
-                   cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -ilZ #{Shellwords.escape args[2]} | xargs -0 grep -il #{Shellwords.escape args[3]}"
-                 else # N ordered terms
-                   cmd = "grep -ril -- #{Shellwords.escape args.join '.*'} #{shellPath}"
-                 end
-                 `#{cmd} | head -n 1024`.lines.map &:chomp
-               else                     # basic container
-                 [self]
-               end
-              else
-                if uri.match GlobChars  # GLOB
-                  env[:grep] = true if env && qs.has_key?('q')
-                  glob
-                else                    # graph node
-                  summarize = false
-                  (self + '.*').R.glob
-                end
-               end).flatten.compact.uniq.map{|n|n.R env}
 
+      # find node locations on fs
+      paths = if node.directory?        # node container
+                if qs.has_key?('f') && !qs['f'].empty? && path != '/' # FIND full name (case-insensitive)
+                  `find #{shellPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
+                elsif qs.has_key?('find') && !qs['find'].empty? && path != '/'# FIND substring (case-insensitive)
+                  `find #{shellPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
+                elsif (qs.has_key?('Q') || qs.has_key?('q')) && path != '/'
+                  env[:grep] = true     # GREP
+                  q = qs['Q'] || qs['q']
+                  args = q.shellsplit rescue q.split(/\W/)
+                  case args.size
+                  when 0
+                    return []
+                  when 2 # two unordered terms
+                    cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -il #{Shellwords.escape args[1]}"
+                  when 3 # three unordered terms
+                    cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -il #{Shellwords.escape args[2]}"
+                  when 4 # four unordered terms
+                    cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -ilZ #{Shellwords.escape args[2]} | xargs -0 grep -il #{Shellwords.escape args[3]}"
+                  else # N ordered terms
+                    cmd = "grep -ril -- #{Shellwords.escape args.join '.*'} #{shellPath}"
+                  end
+                  `#{cmd} | head -n 1024`.lines.map &:chomp
+                else
+                  fsPath
+                end
+              else                      # nodes selected w/ GLOB
+                globPath = fsPath
+                if uri.match GlobChars  # parametric glob
+                  env[:grep] = true if qs.has_key? 'q' # enable grepping within glob results
+                else                    # graph-document glob
+                  summarize = false
+                  globPath += '.*'
+                end
+                Pathname.glob globPath
+              end
+
+      # map fs locations to URI space
+      index = localNode? ? 0 : hostPath.size
+      nodes = paths.map{|p|
+        ('https://' + host + '/' + p.to_s[index..-1].gsub(':','%3A').gsub('#','%23')).R env }
+
+      # return node-data in requested format
       if nodes.size==1 && nodes[0].ext == 'ttl' && selectFormat == 'text/turtle'
-        nodes[0].fileResponse           # static graph-node
-      else                              # graph node(s)
-        nodes = nodes.map &:summary if summarize # summary RDF
-        #puts nodes.join "\n"
-        nodes.map &:loadRDF             # load RDF
+        nodes[0].fileResponse           # static node ready to go
+      else                              # transform/merge graph node(s)
+        nodes = nodes.map &:summary if summarize # summary nodes
+        nodes.map &:loadRDF             # node -> Graph
         graphResponse                   # HTTP Response
       end
     end

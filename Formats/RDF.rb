@@ -42,10 +42,10 @@ class WebResource < RDF::URI
 
   alias_method :uri, :to_s
 
-  # Turtle file(s) -> RDF::Repository
+  # file(s) -> RDF::Repository
   def loadRDF options = {}
     graph = options[:repository] || env[:repository] ||= RDF::Repository.new
-    options[:base_uri] ||= self
+    options[:base_uri] ||= uri.gsub(/\.ttl$/,'').R env
     if node.file?
       # path-derived format hints when suffix is ambiguous or missing
       formatHint = if ext != 'ttl' && (basename.index('msg.')==0 || path.index('/sent/cur')==0)
@@ -62,7 +62,6 @@ class WebResource < RDF::URI
                      :sourcecode
                    end
       options[:format] ||= formatHint if formatHint
-      puts :load, fsPath, options
       graph.load fsPath, **options
     elsif node.directory?
       container = self

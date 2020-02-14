@@ -324,7 +324,8 @@ class WebResource
                                env[:sort] = query_values['sort'] if query_values
                                HTML.tabular graph, env
                              else
-                               HTML.tree Treeize[graph], env
+                               graph.values.map{|resource|
+                                 HTML.value nil, resource, env}
                              end,
                              link[:down,'&#9660;'],
                              {_: :script, c: SiteJS}]}]}]
@@ -350,8 +351,7 @@ class WebResource
             l.gsub(/<[^>]+>/,'')[0..512].gsub(pattern){|g| # matches
               HTML.render({_: :span, class: "w#{wordIndex[g.downcase]}", c: g}) # wrap in styled node
             }} if lines.size > 0 }
-        r.delete Content if graph.size > 10
-      }
+        r.delete Content unless qv.has_key?('full')}
 
       # CSS
       graph['#abstracts'] = {Abstract => [HTML.render({_: :style, c: wordIndex.values.map{|i|
@@ -435,21 +435,6 @@ class WebResource
                  end}}}}]}
     end
 
-    # Hash -> Markup
-    def self.tree t, env, name=nil
-      url = t[:RDF]['uri'] if t[:RDF]
-      multi = t.keys.size > 1
-      {class: :tree,
-       style: (multi && name && !name.empty?) ? (env[:colors][name] ||= HTML.colorize) : '',
-       c: [(if url
-            {_: :a, href: url, c: CGI.escapeHTML((name||url).to_s[0..78])}
-           elsif name
-             {_: :span, class: :name, c: CGI.escapeHTML(name.split(/[-+_]/).join ' ')}
-           else
-             ''
-            end), ' ',
-           t.map{|_name, _t| _name == :RDF ? (value nil, _t, env) : (tree _t, env, _name)}]}
-    end
 
     # Value -> Markup
     def self.value type, v, env
@@ -477,40 +462,6 @@ class WebResource
         CGI.escapeHTML v.to_s
       end
     end
-
-    # Hash -> Hash nested according to URI path
-    Treeize = -> graph {
-      tree = {}
-      # visit nodes
-      (graph.class == Array ? graph : graph.values).map{|node|
-        # node identifier
-        id = node['uri'] || ''
-        if id.class == Array
-          if id.size > 1
-            puts "multiple identifiers found:" + id.join(', ') + " . using " + id[0].to_s
-          end
-          id = id[0]
-        end
-        re = id.R
-
-        # traverse and insert
-        cursor = tree
-        [re.host ? re.host.split('.').reverse : nil, re.parts, re.fragment].flatten.compact.-(Webize::Plaintext::BasicSlugs).map{|name|
-          cursor = cursor[name] ||= {}}
-        if cursor[:RDF] # merge to existing node
-          node.map{|k,v|
-            unless k == 'uri'
-              if cursor[:RDF][k]
-                cursor[:RDF][k].concat v # merge value-lists
-              else
-                cursor[:RDF][k] = v # new key
-              end
-            end}
-        else
-          cursor[:RDF] = node # new node
-        end}
-
-      tree }
 
     Markup['uri'] = -> uri, env=nil {uri.R}
 
