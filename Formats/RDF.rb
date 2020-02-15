@@ -171,10 +171,6 @@ class WebResource < RDF::URI
 
 end
 
-#class Pathname
-#  def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
-#end
-
 class RDF::URI
   def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
 end
