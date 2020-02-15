@@ -439,7 +439,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
         end                    ## remote
       elsif path.match? Req204  # connectivity check
         R204
-      elsif path.match? HourDir # cached remote - timeslice container
+      elsif path.match? HourDir # cached remote - timeslice
         (path + '*' + host.split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*').R(env).nodeResponse
       elsif handler = HostGET[host] # host lambda
         Populator[host][self] if Populator[host] && !join('/').R.node.exist?

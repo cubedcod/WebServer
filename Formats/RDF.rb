@@ -118,7 +118,7 @@ class WebResource < RDF::URI
     self
   end
 
-  # Turtle file -> Turtle file
+  # Turtle file (big) -> Turtle file (small)
   def summary
     rdfized = ext == 'ttl'
     sPath = '../.cache/RDF/' + fsPath + (rdfized ? '' : '.ttl')
