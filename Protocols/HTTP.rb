@@ -681,7 +681,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
       env.has_key?(:UX) ||                          # request environment
         ENV.has_key?('UX') ||                       # process environment
         parts.member?('embed') ||                   # embed URL
-        %w(players.brightcove.net).member?(host) || # embed host
+        UIhosts.member?(host) ||                    # UI host
         query_values&.has_key?('UX')                # request argument
     end
 
