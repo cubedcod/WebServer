@@ -119,12 +119,12 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
           print "\n📝 \e[32;1m#{resource.uri}\e[0m "
 
         # non-content response
-        elsif [301, 302, 303].member? status
-          print "\n", resource.uri ," ➡️  ", head['Location'] # redirection
-        elsif [204, 304].member? status
-          print '✅'                    # up-to-date
-        elsif status == 404
-          print "\n❓ #{resource.uri} " # not found
+        elsif [301, 302, 303].member? status                     # redirect
+          print "\n", resource.uri ," ➡️  ", head['Location']
+        elsif [204, 304].member? status                          # up-to-date
+          print '✅'
+        elsif status == 404                                      # not found
+          print "\n❓ #{resource.uri} " unless resource.path == '/favicon.ico'
 
         # content response
         elsif ext == 'css'                                       # stylesheet
@@ -319,11 +319,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
     end
 
     def fetchHTTP options = {}
-      if ENV.has_key? 'VERBOSE'
-        print "\n🐕  #{uri} "
-      else
-        print '🌍🌎🌏🌐'[rand 4] if options[:intermediate] # give some feedback a fetch occured in intermediate-mode
-      end
+      print "\n🐕  #{uri} " if ENV.has_key? 'VERBOSE'
       # TODO set if-modified-since/etag headers from local cache contents (eattr support sufficient for etag metadata?)
       URI.open(uri, headers.merge({redirect: false})) do |response|
         h = response.meta                                             # upstream metadata
@@ -387,7 +383,6 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
         print "\n🚫403 " + uri + ' '
         options[:intermediate] ? self : nodeResponse
       when /404/ # Not Found
-        print "\n❓ #{uri} "
         if options[:intermediate]
           self
         elsif upstreamUI?
