@@ -63,11 +63,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
     end
 
     def allowCDN?
-      if host.match? /github.io$/
-        env && env[:refhost] && env[:refhost].match?(/github.io$/)
-      else
-        (CacheExt - %w(html js)).member?(ext.downcase) && !path.match?(Gunk)
-      end
+      (CacheExt - %w(html js)).member?(ext.downcase) && !path.match?(Gunk)
     end
 
     def allowedOrigin

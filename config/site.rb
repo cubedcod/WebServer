@@ -46,7 +46,7 @@ class WebResource
   end
   module HTTP
 
-    CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|github|googleapis|netdna.*)\.(com|io|net)$/
+    CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|googleapis|netdna.*)\.(com|io|net)$/
     CookieHost = /\.(akamai(hd)?|bandcamp|ttvnw)\.(com|net)$/
     DynamicImgHost = /(noaa|weather)\.gov$/
     MobileUA = 'Mozilla/5.0 (Linux; Android 9; SM-G960F Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.157 Mobile Safari/537.36'
@@ -477,7 +477,7 @@ zoopps.com
       fn = r.parts[0]
       if %w{attribution_link redirect}.member? fn
         [301, {'Location' =>  r.query_values['q'] || r.query_values['u']}, []]
-      elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results signin user watch watch_videos yts).member? fn
+      elsif r.path=='/'  || %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results signin user watch watch_videos yts).member?(fn)
         NoGunk[r.upstreamUI]
       else
         r.deny
