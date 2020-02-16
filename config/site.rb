@@ -174,12 +174,6 @@ thumbs.ebaystatic.com).map{|host| GET host }
     GET 'gfycat.com'
     GET 'thumbs.gfycat.com'
 
-    # Git
-    (0..3).map{|i| GET "avatars#{i}.githubusercontent.com" }
-    GET 'github.com'
-    Allow 'gitter.im'
-    Allow 'ws.gitter.im'
-
     # Google
     unless ENV.has_key? 'DEGOOGLE'
 
