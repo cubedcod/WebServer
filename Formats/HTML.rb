@@ -261,6 +261,7 @@ class WebResource
       To => '☇',
       Type => '📕',
       Video => '🎞',
+      W3 + '2000/01/rdf-schema#Resource' => '🌐',
     }
 
     Markup = {} # markup-generator lambdas

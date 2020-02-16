@@ -400,9 +400,13 @@ module Webize
       def each_triple &block; each_statement{|s| block.call *s.to_triple} end
 
       def each_statement &fn
-        fn.call RDF::Statement.new(@base, Type.R, (Schema+'BreadcrumbList').R)
         @doc.lines.map(&:chomp).map{|line|
-          fn.call RDF::Statement.new @base, ('https://schema.org/itemListElement').R, line.R unless line.empty?
+          unless line.empty? || line.match?(/^#/)
+            resource = line.R
+            fn.call RDF::Statement.new @base, Link.R, resource
+            fn.call RDF::Statement.new resource, Type.R, (W3 + '2000/01/rdf-schema#Resource').R
+            fn.call RDF::Statement.new resource, Title.R, line
+          end
         }
       end
     end

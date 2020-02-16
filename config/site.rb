@@ -130,6 +130,7 @@ secure.brightcove.com
     GET 'disq.us', GoIfURL
 
     # DuckDuckGo
+    GET 'duckduckgo.com', -> r {NoGunk[r.upstreamUI]}
     GET 'proxy.duckduckgo.com', -> r {%w{iu}.member?(r.parts[0]) ? [301, {'Location' => r.query_values['u']}, []] : r.fetch}
 
     # eBay
