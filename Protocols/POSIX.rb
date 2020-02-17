@@ -26,7 +26,7 @@ class WebResource
     end
 
     def localNode?
-      !host || %w(l localhost).member?(host)
+      !host || LocalAddress.member?(host)
     end
 
     # local Pathname instance for resource

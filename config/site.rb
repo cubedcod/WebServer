@@ -36,6 +36,7 @@ end
 class WebResource
   module URIs
     CacheExt = %w(css geojson gif html ico jpeg jpg js json m3u8 m4a md mp3 mp4 opus pdf png svg ts webm webp xml) # cached filetypes
+    LocalAddress = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).concat(ENV.has_key?('SERVER_NAME') ? [ENV['SERVER_NAME']] : []).uniq
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
     FeedIcon = SiteDir.join('feed.svg').read
     SiteFont = SiteDir.join('fonts/hack-regular-subset.woff2').read

@@ -10,7 +10,6 @@ class WebResource
     HostGET = {}
     HostPOST = {}
     HTTPHosts = {}
-    LocalAddress = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).uniq
     LocalArgs = %w(allow view sort UX)
     Methods = %w(GET HEAD OPTIONS POST PUT)
     Populator = {}
@@ -419,7 +418,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
     end
 
     def GET
-      if local?                ## local
+      if localNode?            ## local
         if %w{y year m month d day h hour}.member? parts[0]
           dateDir               # timeline redirect
         elsif path == '/mail'   # inbox redirect
@@ -511,10 +510,6 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
 
     def insecure?
       HTTPHosts.has_key? host
-    end
-
-    def local?
-      LocalAddress.member? env['SERVER_NAME']
     end
 
     def notfound; [404, {'Content-Type' => 'text/html'}, [htmlDocument]] end
