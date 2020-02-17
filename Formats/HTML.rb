@@ -423,8 +423,8 @@ class WebResource
                   {_: :td, c: {_: :a, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}}}},
            {_: :tbody,
             c: graph.map{|resource|
-              {_: :tr, resource: resource['uri'], c: keys.map{|k|
-                 {_: :td, property: k,
+              [{_: :tr, resource: resource['uri'], c: keys.map{|k|
+                 [{_: :td, property: k,
                   c: if k == 'uri'
                    tCount = 0
                    [(resource[Title]||[]).map{|title|
@@ -440,7 +440,9 @@ class WebResource
                     {class: :links, c: (resource[Link]||[]).map{|i| Markup[Link][i,env]}}]
                  else
                    (resource[k]||[]).map{|v|value k, v, env }
-                  end}}}}}]}
+                   end}, "\n"
+                 ]}}, "\n"
+              ]}}]}
     end
 
 

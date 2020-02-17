@@ -376,11 +376,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
       when /304/ # Not Modified
         R304
       when /404/ # Not Found
-        if upstreamUI?
-          [404, (headers e.io.meta), [e.io.read]]
-        else
-          nodeResponse
-        end
+        upstreamUI? ? [404, (headers e.io.meta), [e.io.read]] : nodeResponse
       when /300|4(0[13]|10)|50[03]|999/
         [status.to_i, (headers e.io.meta), [e.io.read]]
       else
