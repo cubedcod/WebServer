@@ -124,6 +124,8 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
           print '✅'
         elsif status == 404                                      # not found
           print "\n❓ #{resource.uri} " unless resource.path == '/favicon.ico'
+        elsif status == 410
+          print "\n❌ #{resource.uri} "
 
         # content response
         elsif ext == 'css'                                       # stylesheet
@@ -358,10 +360,9 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
         end
       end
     rescue Exception => e
-      case e.message
-      when /300/ # Multiple Choices
-        [300, (headers e.io.meta), [e.io.read]]
-      when /30[12378]/ # Relocated
+      status = e.io.status[0]
+      case status
+      when /30[12378]/ # redirect
         dest = e.io.meta['location'].R env
         same_path = (path || '/') == (dest.path || '/')
         same_host = host == dest.host
@@ -374,28 +375,14 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
         end
       when /304/ # Not Modified
         R304
-      when /401/ # Unauthorized
-        print "\n🚫401 " + uri + ' '
-        options[:intermediate] ? self : nodeResponse
-      when /403/ # Forbidden
-        print "\n🚫403 " + uri + ' '
-        options[:intermediate] ? self : nodeResponse
       when /404/ # Not Found
-        if options[:intermediate]
-          self
-        elsif upstreamUI?
+        if upstreamUI?
           [404, (headers e.io.meta), [e.io.read]]
         else
           nodeResponse
         end
-      when /410/ # Gone
-        print "\n❌ " + uri + ' '
-        options[:intermediate] ? self : nodeResponse
-      when /(500|999)/ # upstream error
-        [500, (headers e.io.meta), [e.io.read]]
-      when /503/
-        @cookies = true
-        [503, (headers e.io.meta), [e.io.read]]
+      when /300|4(0[13]|10)|50[03]|999/
+        [status.to_i, (headers e.io.meta), [e.io.read]]
       else
         raise
       end
