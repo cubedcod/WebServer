@@ -51,6 +51,6 @@ span.name {font-size: .8em; display: inline-block}
 thead a {color: #eee}
 td {overflow: hidden; border-radius: .2em; vertical-align: top}
 td[property="uri"] {max-width: 100ex; text-align: left}
-tr[name="content"] > td.v {text-align: left}
+td[property="http://rdfs.org/sioc/ns#has_creator"] {text-align: center}
 td.k {max-width: 28ex; text-align: right}
 video {min-width: 40ex}

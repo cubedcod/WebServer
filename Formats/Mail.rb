@@ -1,19 +1,5 @@
 # coding: utf-8
 require 'mail'
-class WebResource
-  module URIs
-
-    # Message-ID -> pathname
-
-    MID2Path = -> id {
-      id = Digest::SHA2.hexdigest id
-      ['msg', id[0..1], id[2..-1]]}
-
-    MID2PATH = -> id {
-      ['', *MID2Path[id]].join '/'}
-
-  end
-end
 module Webize
   module Mail
     class Format < RDF::Format
@@ -57,8 +43,8 @@ module Webize
 
         # Message resource
         id = m.message_id || m.resent_message_id || Digest::SHA2.hexdigest(rand.to_s)
-        graph = MID2PATH[id].R
-        mail = ('/msg/' + Rack::Utils.escape_path(id)).R
+        graph = ('/msg/' + Rack::Utils.escape_path(id)).R
+        mail = (graph + '#msg').R
 
         yield mail, Type, (SIOC + 'MailMessage').R, graph
 
@@ -66,10 +52,10 @@ module Webize
         htmlFiles, parts = m.all_parts.push(m).partition{|p| p.mime_type == 'text/html' }
         htmlCount = 0
         htmlFiles.map{|p|
-          html = (graph.path + ".#{htmlCount}.html").R # HTML-file
+          html = ('/' + graph.fsPath + ".#{htmlCount}.html").R # HTML-file
           yield mail, DC + 'hasFormat', html, graph   # reference
           html.writeFile p.decoded unless html.node.exist? # store
-          htmlCount += 1 } # increment count
+          htmlCount += 1 }
 
         # plaintext message
         parts.select{|p|
@@ -157,7 +143,7 @@ module Webize
             (rs.class == Array ? rs : [rs]).compact.map{|r|
               msg = ('/msg/' + Rack::Utils.escape_path(r)).R
               yield mail, SIOC + 'reply_of', msg, graph
-              yield msg, SIOC + 'has_reply', mail, (MID2PATH[r] + '.' + Digest::SHA2.hexdigest(id)).R
+              yield msg, SIOC + 'has_reply', mail, graph
             }}}
 
         # attachments
@@ -165,7 +151,7 @@ module Webize
           ::Mail::Encodings.defined?(p.body.encoding)}.map{|p|     # decodability check
           name = p.filename && !p.filename.empty? && p.filename || # attachment name
                  (Digest::SHA2.hexdigest(rand.to_s) + (Rack::Mime::MIME_TYPES.invert[p.mime_type] || '.bin').to_s) # generate name
-          file = (graph.path + '.' + name).R   # file location
+          file = (graph.fsPath + '.' + name).R   # file location
           unless file.node.exist?              # store file
             file.writeFile p.body.decoded.force_encoding 'UTF-8'
           end
