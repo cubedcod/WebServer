@@ -1,7 +1,5 @@
 #!/bin/sh
 
-# TODO k3s/docker-compose + distro pkgbuilds
-
 mkdir ~/web
 
 # Alpine https://www.alpinelinux.org/

@@ -360,7 +360,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
         end
       end
     rescue Exception => e
-      status = e.io.status[0]
+      status = e.respond_to?(:io) ? e.io.status[0] : ''
       case status
       when /30[12378]/ # redirect
         dest = e.io.meta['location'].R env

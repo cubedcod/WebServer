@@ -64,7 +64,7 @@ class WebResource < RDF::URI
       options[:format] ||= formatHint if formatHint
       graph.load fsPath, **options
     elsif node.directory?
-      container = self
+      container = path.R env
       container += '/' unless container.to_s[-1] == '/'
 
       graph << RDF::Statement.new(container, Type.R, (W3+'ns/ldp#Container').R)
