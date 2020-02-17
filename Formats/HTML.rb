@@ -603,7 +603,7 @@ class WebResource
         puts "multiple img-src found:", src if src.size > 1
         src = src[0]
       end
-      {class: :thumb, c: {_: :a, href: src, c: {_: :img, src: src}}}}
+      [{class: :thumb, c: {_: :a, href: src, c: {_: :img, src: src}}}, " \n"]}
 
     Markup[Video] = -> video, env {
       src = if video.class == WebResource || (video.class == String && video.match?(/^http/))
