@@ -100,7 +100,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
         # log host on first visit
         unless (Servers.has_key? resource.host) || resource.env[:deny]
           Servers[resource.host] = true
-          print "\n      ➕ \e[35;1mhttps://" + resource.host + "\e[0m "
+          print "\n      ➕ \e[36;7;1mhttps://" + resource.host + "\e[0m "
         end
 
         if resource.env[:deny]
@@ -130,8 +130,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
         elsif ext == 'css'                                       # stylesheet
           print '🎨'
         elsif ext == 'js' || mime.match?(/script/)               # script
-          third_party = env[:refhost] != resource.host
-          print "\n📜 \e[36#{third_party ? ';7' : ''};1mhttps://" + resource.host + resource.path + "\e[0m "
+          print "\n📜 \e[36;1mhttps://" + resource.host + resource.path + "\e[0m "
         elsif ext == 'json' || mime.match?(/json/)               # data
           print "\n🗒 " + resource.uri
         elsif %w(gif jpeg jpg png svg webp).member?(ext) || mime.match?(/^image/)
