@@ -126,7 +126,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
         elsif ext == 'json' || mime.match?(/json/)               # data
           puts "🗒 " + resource.uri
         elsif %w(gif jpeg jpg png svg webp).member?(ext) || mime.match?(/^image/)
-          puts '🖼️ '  + resource.uri                              # image
+          puts "🖼️  \e[36;1m"  + resource.uri + "\e[0m "            # image
         elsif %w(aac flac m4a mp3 ogg opus).member?(ext) || mime.match?(/^audio/)
           puts '🔉 ' + resource.uri                              # audio
         elsif %w(mp4 webm).member?(ext) || mime.match?(/^video/)
@@ -266,7 +266,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
     end
 
     def fetchHTTP options = {}
-      puts "\n🐕  #{uri}" #if ENV.has_key? 'VERBOSE'
+      puts "🐕  \e[30;1m#{uri}\e[0m" #if ENV.has_key? 'VERBOSE'
       # TODO set if-modified-since/etag headers from local cache contents (eattr support sufficient for etag metadata?)
       URI.open(uri, headers.merge({redirect: false})) do |response|
         h = response.meta                                             # upstream metadata
@@ -307,6 +307,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
         end
       end
     rescue Exception => e
+      puts ["\e[31;1m", e.class, e.message, "\e[0m"].join ' '
       status = e.respond_to?(:io) ? e.io.status[0] : ''
       case status
       when /30[12378]/ # redirect
