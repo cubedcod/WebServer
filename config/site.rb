@@ -178,31 +178,21 @@ thumbs.ebaystatic.com).map{|host| GET host }
 
     # Google
     unless ENV.has_key? 'DEGOOGLE'
-
-      # POST
       Allow 'groups.google.com'
       if ENV.has_key? 'GOOGLE'
         Allow 'android.clients.google.com'
         (0..24).map{|i| h="#{i}.client-channel.google.com"; Allow h}
         (0..24).map{|i| Allow "clients#{i}.google.com"}
       end
-
-      # static-hosts for google referer
+      Cookies 'www.google.com'            # allow personalization
       GData = -> r {(r.env[:refhost]||'').match?(/\.(blog(ger|spot)|google(apis)?|gstatic)\.com$/) ? NoGunk[r] : r.deny}
       %w(maps ssl www).map{|h| GET h + '.googleapis.com', GData }
       %w(maps ssl www).map{|h| GET h + '.gstatic.com', GData }
       (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com", GData }
       (0..3).map{|i| GET "khms#{i}.google.com", GData }
-
-      # JS libraries
-      GET 'ajax.googleapis.com'
-
-      # misc hosts
+      GET 'ajax.googleapis.com'           # Javascript libraries
       GET 'feedproxy.google.com', NoQuery
-
-      # main Google site, allow personalization
       GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
-      Cookies 'www.google.com'
       GET 'www.google.com', -> r {
         case r.path
         when /^.(images|maps|xjs)/
@@ -325,13 +315,12 @@ zoopps.com
       r.env[:links][:prev] = ['https://old.reddit.com', r.path, '?', r.query].join # page pointers
       r.fetch options}
 
-    # this host provides a next-page pointer, missing in HTTP Headers (either UI-host) and HTML/RSS (new/main UI host)
-    GET 'old.reddit.com', -> r {
+    GET 'old.reddit.com', -> r { # find next-page pointer, missing in HTTP Headers (old/new UI) and HTML/RSS (new UI)
       r.upstreamUI.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
       r.fetch.yield_self{|status,head,body|
-        if !%w(r u user).member?(r.parts[0]) || status.to_s.match?(/^30/) # return redirects and wiki pages
+        if !%w(r u user).member?(r.parts[0]) || status.to_s.match?(/^30/)
           [status, head, body]
-        else # find page pointer and redirect
+        else # redirect to page
           refs = []
           body[0].scan(/href="([^"]+after=[^"]+)/){|l| refs << l[0] }
           if refs.empty?
