@@ -77,7 +77,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
 
     def self.call env
       return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']           # allow HTTP methods
-      uri = RDF::URI('https://' + env['SERVER_NAME']).join env['REQUEST_PATH']
+      uri = RDF::URI('https://' + env['HTTP_HOST']).join env['REQUEST_PATH']
       uri.query = env['QUERY_STRING'] if env['QUERY_STRING'] && !env['QUERY_STRING'].empty?
       resource = uri.R env                                                      # instantiate request
       env[:refhost] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # referring host
@@ -96,44 +96,41 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
         ext = resource.path ? resource.ext.downcase : ''                        # log
         mime = head['Content-Type'] || ''
 
-        # log host on first visit
+        print "\n"
         unless (Servers.has_key? resource.host) || resource.env[:deny]
           Servers[resource.host] = true
-          print "\n      ➕ \e[36;7;1mhttps://" + resource.host + "\e[0m "
+          print "➕ \e[36;7;1m" + resource.uri + "\e[0m "        # log host on first visit
         end
+        print status, ' ' unless status == 200
 
         if resource.env[:deny]
-          if %w(css eot otf ttf woff woff2).member?(ext) || resource.path.match?(/204$/)
-            print "🛑"
-          else
-            print "\n" + (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "🛑 \e[31;1m") + (env[:refhost] ? ("\e[7m" + env[:refhost] + "\e[0m\e[31;1m → ") : '') + (env[:refhost] == resource.host ? '' : ('http://' + resource.host)) + "\e[7m" + resource.path + "\e[0m\e[31m" + "\e[0m "
-          end
+          print (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "🛑 \e[31;1m") + (env[:refhost] ? ("\e[7m" + env[:refhost] + "\e[0m\e[31;1m → ") : '') + (env[:refhost] == resource.host ? '' : ('http://' + resource.host)) + "\e[7m" + resource.path + "\e[0m\e[31m" + "\e[0m "
 
         # OPTIONS
         elsif env['REQUEST_METHOD'] == 'OPTIONS'
-          print "\n🔧 \e[32;1m#{resource.uri}\e[0m "
+          print "🔧 \e[32;1m#{resource.uri}\e[0m "
 
         # POST
         elsif env['REQUEST_METHOD'] == 'POST'
-          print "\n📝 \e[32;1m#{resource.uri}\e[0m "
+          print "📝 \e[32;1m#{resource.uri}\e[0m "
 
         # non-content response
         elsif [301, 302, 303].member? status                     # redirect
-          print "\n", resource.uri ," ➡️  ", head['Location']
+          print resource.uri ," ➡️  ", head['Location']
         elsif [204, 304].member? status                          # up-to-date
           print '✅'
         elsif status == 404                                      # not found
-          print "\n❓ #{resource.uri} " unless resource.path == '/favicon.ico'
+          print "❓ #{resource.uri} " unless resource.path == '/favicon.ico'
         elsif status == 410
-          print "\n❌ #{resource.uri} "
+          print "❌ #{resource.uri} "
 
         # content response
         elsif ext == 'css'                                       # stylesheet
           print '🎨'
         elsif ext == 'js' || mime.match?(/script/)               # script
-          print "\n📜 \e[36;1mhttps://" + resource.host + resource.path + "\e[0m "
+          print "📜 \e[36;1mhttps://" + resource.host + resource.path + "\e[0m "
         elsif ext == 'json' || mime.match?(/json/)               # data
-          print "\n🗒 " + resource.uri
+          print "🗒 " + resource.uri
         elsif %w(gif jpeg jpg png svg webp).member?(ext) || mime.match?(/^image/)
           print '🖼️'                                              # image
         elsif %w(aac flac m4a mp3 ogg opus).member?(ext) || mime.match?(/^audio/)
@@ -144,12 +141,11 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
           print '🐢'                                             # turtle
 
         else # default log
-          print "\n" + (mime.match?(/html/) ? '📃' : mime) + (env[:repository] ? (('%5d' % env[:repository].size) + '⋮ ') : '') + "\e[7m" + (status == 200 ? '' : (status.to_s+' ')) + resource.uri + "\e[0m "
+          print (mime.match?(/html/) ? '📃' : mime) + (env[:repository] ? (('%5d' % env[:repository].size) + '⋮ ') : '') + "\e[7m" + resource.uri + "\e[0m "
         end
         
         [status, head, body]} # response
     rescue Exception => e
-      uri = 'https://' + env['SERVER_NAME'] + (env['REQUEST_URI']||'')
       msg = [uri, e.class, e.message].join " "
       trace = e.backtrace.join "\n"
       puts "\e[7;31m500\e[0m " + msg , trace
@@ -180,10 +176,6 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
     rescue Exception => e
       puts [e.class, e.message].join " "
       ''
-    end
-
-    def default_port?
-      [80, 443].member? (env['SERVER_PORT'] || 443).to_i
     end
 
     def deny status=200, type=nil
@@ -239,7 +231,6 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
       end
 
       # construct locator
-      portNum = default_port? ? '' : (':' + env['SERVER_PORT'].to_s) # port number
       qs = if options[:query]                                        # query string
              HTTP.qs options[:query]
            elsif query
@@ -247,9 +238,9 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
            else
              ''
            end
-      u = ['//', host, portNum, path, options[:suffix], qs].join     # locator sans scheme
-      primary  = ('http' + (insecure? ? '' : 's') + ':' + u).R env   # primary-scheme locator
-      fallback = ('http' + (insecure? ? 's' : '') + ':' + u).R env   # fallback-scheme locator
+      u = ['//', host, (port ? [':', port] : nil), path, options[:suffix], qs].join # base locator
+      primary  = ('https:' + u).R env # primary locator
+      fallback = ('http:' + u).R env  # fallback locator
 
       # network fetch
       primary.fetchHTTP options
@@ -281,7 +272,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
     end
 
     def fetchHTTP options = {}
-      print "\n🐕  #{uri} " if ENV.has_key? 'VERBOSE'
+      print "\n🐕  #{uri} " #if ENV.has_key? 'VERBOSE'
       # TODO set if-modified-since/etag headers from local cache contents (eattr support sufficient for etag metadata?)
       URI.open(uri, headers.merge({redirect: false})) do |response|
         h = response.meta                                             # upstream metadata
@@ -410,25 +401,17 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
         head.delete 'Set-Cookie'
         head.delete 'Referer'
       end
-      case env['SERVER_NAME']
+      case host
       when /wsj\.com$/
         head['Referer'] = 'http://drudgereport.com/' # thanks, Matt
       when /youtube.com$/
         head['Referer'] = 'https://www.youtube.com/' # make 3rd-party embeds work
-      end if env['SERVER_NAME']
+      end
       head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # we want redirection in HTTP HEAD-Location not Javascript
       head.delete 'User-Agent' if host == 't.co'            # so advertise a 'dumb' user-agent
 
       HTTP.print_header head if ENV.has_key? 'VERBOSE'
       head
-    end
-    
-    def self.Insecure host
-      HTTPHosts[host] = true
-    end
-
-    def insecure?
-      HTTPHosts.has_key? host
     end
 
     def notfound; [404, {'Content-Type' => 'text/html'}, [htmlDocument]] end
