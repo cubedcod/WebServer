@@ -14,7 +14,6 @@ class WebResource
     Methods = %w(GET HEAD OPTIONS POST PUT)
     Populator = {}
     Req204 = /gen(erate)?_?204$/
-    Servers = {}
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
     Internal_Headers = %w(
@@ -95,11 +94,6 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
 
         ext = resource.path ? resource.ext.downcase : ''                        # log
         mime = head['Content-Type'] || ''
-
-        unless (Servers.has_key? resource.host) || resource.env[:deny]
-          Servers[resource.host] = true
-          puts "➕ \e[36;7;1m" + resource.uri + "\e[0m"       # log host on first visit
-        end
 
         print status, ' ' unless [200, 204, 304].member? status
 
@@ -272,7 +266,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
     end
 
     def fetchHTTP options = {}
-      print "\n🐕  #{uri} " #if ENV.has_key? 'VERBOSE'
+      puts "\n🐕  #{uri}" #if ENV.has_key? 'VERBOSE'
       # TODO set if-modified-since/etag headers from local cache contents (eattr support sufficient for etag metadata?)
       URI.open(uri, headers.merge({redirect: false})) do |response|
         h = response.meta                                             # upstream metadata
