@@ -109,11 +109,11 @@ class WebResource < RDF::URI
         turtle = doc.fsPath + '.ttl'
         triples = ('%4d' % graph.size) + '⋮'
         if File.exist? turtle
-          print "\n⚪ #{triples} #{doc.fsPath}" if ENV.has_key? 'VERBOSE'
+          puts "⚪ #{triples} #{doc.fsPath}" if ENV.has_key? 'VERBOSE'
         else
           FileUtils.mkdir_p File.dirname turtle
           RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
-          print "\n🐢 \e[32m#{triples} \e[1m#{doc}\e[0m "
+          puts "🐢 \e[32m#{triples} \e[1m#{doc}\e[0m "
         end}}
     self
   end

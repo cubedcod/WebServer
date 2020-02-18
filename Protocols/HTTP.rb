@@ -79,7 +79,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
       return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']           # allow HTTP methods
       uri = RDF::URI('https://' + env['HTTP_HOST']).join env['REQUEST_PATH']
       uri.query = env['QUERY_STRING'] if env['QUERY_STRING'] && !env['QUERY_STRING'].empty?
-      resource = uri.R env                                                      # instantiate request
+      resource = uri.R env                                                      # instantiate web resource
       env[:refhost] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # referring host
       env[:resp] = {}                                                           # response-header storage
       env[:links] = {}                                                          # Link response-header
@@ -96,52 +96,52 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
         ext = resource.path ? resource.ext.downcase : ''                        # log
         mime = head['Content-Type'] || ''
 
-        print "\n"
         unless (Servers.has_key? resource.host) || resource.env[:deny]
           Servers[resource.host] = true
-          print "➕ \e[36;7;1m" + resource.uri + "\e[0m "        # log host on first visit
+          puts "➕ \e[36;7;1m" + resource.uri + "\e[0m"       # log host on first visit
         end
-        print status, ' ' unless status == 200
+
+        print status, ' ' unless [200, 204, 304].member? status
 
         if resource.env[:deny]
-          print (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "🛑 \e[31;1m") + (env[:refhost] ? ("\e[7m" + env[:refhost] + "\e[0m\e[31;1m → ") : '') + (env[:refhost] == resource.host ? '' : ('http://' + resource.host)) + "\e[7m" + resource.path + "\e[0m\e[31m" + "\e[0m "
+          puts (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "🛑 \e[31;1m") + (env[:refhost] ? ("\e[7m" + env[:refhost] + "\e[0m\e[31;1m → ") : '') + (env[:refhost] == resource.host ? '' : ('http://' + resource.host)) + "\e[7m" + resource.path + "\e[0m\e[31m" + "\e[0m "
 
         # OPTIONS
         elsif env['REQUEST_METHOD'] == 'OPTIONS'
-          print "🔧 \e[32;1m#{resource.uri}\e[0m "
+          puts "🔧 \e[32;1m#{resource.uri}\e[0m "
 
         # POST
         elsif env['REQUEST_METHOD'] == 'POST'
-          print "📝 \e[32;1m#{resource.uri}\e[0m "
+          puts "📝 \e[32;1m#{resource.uri}\e[0m "
 
         # non-content response
         elsif [301, 302, 303].member? status                     # redirect
-          print resource.uri ," ➡️  ", head['Location']
+          puts resource.uri ," ➡️  ", head['Location']
         elsif [204, 304].member? status                          # up-to-date
-          print '✅'
+          #puts '✅' + resource.uri
         elsif status == 404                                      # not found
-          print "❓ #{resource.uri} " unless resource.path == '/favicon.ico'
+          puts "❓ #{resource.uri} " unless resource.path == '/favicon.ico'
         elsif status == 410
-          print "❌ #{resource.uri} "
+          puts "❌ #{resource.uri} "
 
         # content response
         elsif ext == 'css'                                       # stylesheet
-          print '🎨'
+          #puts '🎨 ' + resource.uri
         elsif ext == 'js' || mime.match?(/script/)               # script
-          print "📜 \e[36;1mhttps://" + resource.host + resource.path + "\e[0m "
+          puts "📜 \e[36;1mhttps://" + resource.host + resource.path + "\e[0m "
         elsif ext == 'json' || mime.match?(/json/)               # data
-          print "🗒 " + resource.uri
+          puts "🗒 " + resource.uri
         elsif %w(gif jpeg jpg png svg webp).member?(ext) || mime.match?(/^image/)
-          print '🖼️'                                              # image
+          puts '🖼️ '  + resource.uri                              # image
         elsif %w(aac flac m4a mp3 ogg opus).member?(ext) || mime.match?(/^audio/)
-          print '🔉'                                             # audio
+          puts '🔉 ' + resource.uri                              # audio
         elsif %w(mp4 webm).member?(ext) || mime.match?(/^video/)
-          print '🎬'                                             # video
+          puts '🎬 ' + resource.uri                              # video
         elsif ext == 'ttl' || mime == 'text/turtle; charset=utf-8'
-          print '🐢'                                             # turtle
+          puts '🐢 ' + resource.uri                              # turtle
 
         else # default log
-          print (mime.match?(/html/) ? '📃' : mime) + (env[:repository] ? (('%5d' % env[:repository].size) + '⋮ ') : '') + "\e[7m" + resource.uri + "\e[0m "
+          puts (mime.match?(/html/) ? '📃' : mime) + (env[:repository] ? (('%5d' % env[:repository].size) + '⋮ ') : '') + "\e[7m" + resource.uri + "\e[0m "
         end
         
         [status, head, body]} # response
