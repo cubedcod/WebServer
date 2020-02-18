@@ -49,6 +49,31 @@ visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk
 )[\b_'"])xi
 
   end
+
+  module HTTP
+
+    def gunk?
+      return false if (query_values||{})['allow'] == ServerKey
+      gunkTag? || gunkURI
+    end
+
+    def gunkDomain?
+      return false if !host || AllowedHosts.has_key?(host) || HostGET.has_key?(host)
+      c = GunkHosts
+      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # find leaf on gunk-domain tree
+    end
+
+    def gunkTag?
+      return false if AllowedHosts.has_key? host
+      env.has_key? 'HTTP_GUNK'
+    end
+
+    def gunkURI
+      ('/' + host + (env && env['REQUEST_URI'] || path || '/')).match? Gunk
+    end
+
+  end
+
 end
 module Webize
   module HTML

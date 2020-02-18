@@ -37,9 +37,45 @@ class WebResource
     def shellPath; Shellwords.escape fsPath.force_encoding 'UTF-8' end
 
   end
+
+  def writeFile o
+    FileUtils.mkdir_p node.dirname
+    File.open(fsPath,'w'){|f|f << o.force_encoding('UTF-8')}
+    self
+  end
+
   module HTTP
 
-    # respond with graph data from filesystem nodes
+    # return lazily-generated file with Rack file-handle if needed by client
+    def entity generator = nil
+      entities = env['HTTP_IF_NONE_MATCH']&.strip&.split /\s*,\s*/
+      if entities && entities.include?(env[:resp]['ETag'])
+        R304                                     # unmodified resource
+      else
+        body = generator ? generator.call : self # generate resource
+        if body.class == WebResource             # resource reference
+          Rack::Files.new('.').serving(Rack::Request.new(env), body.fsPath).yield_self{|s,h,b|
+            if 304 == s
+              R304                               # unmodified resource
+            else                                 # file reference
+              h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type'] == 'application/javascript'
+              env[:resp]['Content-Length'] = body.node.size.to_s
+              [s, h.update(env[:resp]), b]       # file handler
+            end}
+        else
+          env[:resp]['Content-Length'] = body.bytesize.to_s
+          [200, env[:resp], [body]] # generated entity
+        end
+      end
+    end
+
+    def fileResponse
+      env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
+      env[:resp]['ETag'] ||= Digest::SHA2.hexdigest [uri, node.stat.mtime, node.size].join
+      entity
+    end
+
+    # merge data from multiple nodes to RDF document
     def nodeResponse
       return fileResponse if node.file? # static node hit, nothing to do
       qs = query_values || {}           # query arguments

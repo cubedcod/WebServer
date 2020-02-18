@@ -166,22 +166,6 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
       CookieHosts[host] = true
     end
 
-    def dateDir
-      time = Time.now
-      loc = time.strftime(case parts[0][0].downcase
-                          when 'y'
-                            '/%Y/'
-                          when 'm'
-                            '/%Y/%m/'
-                          when 'd'
-                            '/%Y/%m/%d/'
-                          when 'h'
-                            '/%Y/%m/%d/%H/'
-                          else
-                          end)
-      [303, env[:resp].update({'Location' => loc + parts[1..-1].join('/') + (query ? ('?'+query) : '')}), []]
-    end
-
     def HTTP.decompress head, body
       case (head['content-encoding']||head['Content-Encoding']).to_s
       when /^br(otli)?$/i
@@ -233,28 +217,6 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
       HTTP.print_body headers, env['rack.input'].read if ENV.has_key? 'VERBOSE'
       [202, {'Access-Control-Allow-Credentials' => 'true',
              'Access-Control-Allow-Origin' => allowedOrigin}, []]
-    end
-
-    def entity generator = nil
-      entities = env['HTTP_IF_NONE_MATCH']&.strip&.split /\s*,\s*/
-      if entities && entities.include?(env[:resp]['ETag'])
-        R304                                     # unmodified resource
-      else
-        body = generator ? generator.call : self # generate resource
-        if body.class == WebResource             # resource reference
-          Rack::Files.new('.').serving(Rack::Request.new(env), body.fsPath).yield_self{|s,h,b|
-            if 304 == s
-              R304                               # unmodified resource
-            else                                 # file reference
-              h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type'] == 'application/javascript'
-              env[:resp]['Content-Length'] = body.node.size.to_s
-              [s, h.update(env[:resp]), b]       # file handler
-            end}
-        else
-          env[:resp]['Content-Length'] = body.bytesize.to_s
-          [200, env[:resp], [body]] # generated entity
-        end
-      end
     end
 
     def env e = nil
@@ -384,12 +346,6 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
       end
     end
 
-    def fileResponse
-      env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
-      env[:resp]['ETag'] ||= Digest::SHA2.hexdigest [uri, node.stat.mtime, node.size].join
-      entity
-    end
-
     def fixedFormat? format = nil
       return true if upstreamUI? || format.to_s.match?(/dash.xml/)
       return false if (query_values||{}).has_key?('rdf') || env[:transform] || !format || format.match?(/atom|html|rss|xml/i)
@@ -426,26 +382,6 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
     end
 
     alias_method :get, :fetch
-
-    def gunk?
-      return false if (query_values||{})['allow'] == ServerKey
-      gunkTag? || gunkURI
-    end
-
-    def gunkDomain?
-      return false if !host || AllowedHosts.has_key?(host) || HostGET.has_key?(host)
-      c = GunkHosts
-      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # find leaf on gunk-domain tree
-    end
-
-    def gunkTag?
-      return false if AllowedHosts.has_key? host
-      env.has_key? 'HTTP_GUNK'
-    end
-
-    def gunkURI
-      ('/' + host + (env && env['REQUEST_URI'] || path || '/')).match? Gunk
-    end
 
     def HEAD
       self.GET.yield_self{|s, h, _|
@@ -607,56 +543,14 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
       default                                                 # default
     end
 
-    def timeMeta
-      n = nil # next page
-      p = nil # prev page
-      # date parts
-      dp = []; ps = parts
-      dp.push ps.shift.to_i while ps[0] && ps[0].match(/^[0-9]+$/)
-      case dp.length
-      when 1 # Y
-        year = dp[0]
-        n = '/' + (year + 1).to_s
-        p = '/' + (year - 1).to_s
-      when 2 # Y-m
-        year = dp[0]
-        m = dp[1]
-        n = m >= 12 ? "/#{year + 1}/#{01}" : "/#{year}/#{'%02d' % (m + 1)}"
-        p = m <=  1 ? "/#{year - 1}/#{12}" : "/#{year}/#{'%02d' % (m - 1)}"
-      when 3 # Y-m-d
-        day = ::Date.parse "#{dp[0]}-#{dp[1]}-#{dp[2]}" rescue nil
-        if day
-          p = (day-1).strftime('/%Y/%m/%d')
-          n = (day+1).strftime('/%Y/%m/%d')
-        end
-      when 4 # Y-m-d-H
-        day = ::Date.parse "#{dp[0]}-#{dp[1]}-#{dp[2]}" rescue nil
-        if day
-          hour = dp[3]
-          p = hour <=  0 ? (day - 1).strftime('/%Y/%m/%d/23') : (day.strftime('/%Y/%m/%d/')+('%02d' % (hour-1)))
-          n = hour >= 23 ? (day + 1).strftime('/%Y/%m/%d/00') : (day.strftime('/%Y/%m/%d/')+('%02d' % (hour+1)))
-        end
-      end
-      remainder = ps.empty? ? '' : ['', *ps].join('/')
-      remainder += '/' if env['REQUEST_PATH'] && env['REQUEST_PATH'][-1] == '/'
-      q = query ? ('?'+query) : ''
-      env[:links][:prev] = p + remainder + q + '#prev' if p
-      env[:links][:next] = n + remainder + q + '#next' if n
-    end
-
     def upstreamUI; env[:UX] = true; self end
+
     def upstreamUI?
       env.has_key?(:UX) ||                          # request environment
         ENV.has_key?('UX') ||                       # process environment
         parts.member?('embed') ||                   # embed URL
         UIhosts.member?(host) ||                    # UI host
         query_values&.has_key?('UX')                # request argument
-    end
-
-    def writeFile o
-      FileUtils.mkdir_p node.dirname
-      File.open(fsPath,'w'){|f|f << o.force_encoding('UTF-8')}
-      self
     end
 
   end
