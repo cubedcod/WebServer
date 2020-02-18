@@ -126,7 +126,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
         elsif ext == 'json' || mime.match?(/json/)               # data
           puts "🗒 " + resource.uri
         elsif %w(gif jpeg jpg png svg webp).member?(ext) || mime.match?(/^image/)
-          puts "🖼️  \e[36;1m"  + resource.uri + "\e[0m "            # image
+          puts "🖼️  \e[33m"  + resource.uri + "\e[0m "            # image
         elsif %w(aac flac m4a mp3 ogg opus).member?(ext) || mime.match?(/^audio/)
           puts '🔉 ' + resource.uri                              # audio
         elsif %w(mp4 webm).member?(ext) || mime.match?(/^video/)
@@ -216,25 +216,15 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
 
     # fetch node from cache or remote server
     def fetch options=nil
-      options ||= {}
-
-      # cached results TODO Find static resource when ext changed due to erroneous upstream MIME or extension
       if (CacheExt - %w(json html xml)).member?(ext.downcase) && !host.match?(DynamicImgHost)
         return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has static-data, return 304 response
         return fileResponse if node.file?                            # server has static-data, return data
       end
 
-      # construct locator
-      qs = if options[:query]                                        # query string
-             HTTP.qs options[:query]
-           elsif query
-             '?' + query
-           else
-             ''
-           end
-      u = ['//', host, (port ? [':', port] : nil), path, options[:suffix], qs].join # base locator
-      primary  = ('https:' + u).R env # primary locator
-      fallback = ('http:' + u).R env  # fallback locator
+      options ||= {}
+      location = ['//', host, (port ? [':', port] : nil), path, options[:suffix], (query ? ['?', query] : nil)].join
+      primary  = ('https:' + location).R env # primary locator
+      fallback = ('http:' + location).R env # fallback locator
 
       # network fetch
       primary.fetchHTTP options
@@ -266,7 +256,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
     end
 
     def fetchHTTP options = {}
-      puts "🐕  \e[30;1m#{uri}\e[0m" #if ENV.has_key? 'VERBOSE'
+      puts "🐕 \e[30;1m#{uri}\e[0m" #if ENV.has_key? 'VERBOSE'
       # TODO set if-modified-since/etag headers from local cache contents (eattr support sufficient for etag metadata?)
       URI.open(uri, headers.merge({redirect: false})) do |response|
         h = response.meta                                             # upstream metadata
