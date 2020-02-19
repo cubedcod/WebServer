@@ -9,20 +9,12 @@ class WebResource
     GlobChars = /[\*\{\[]/
     HostGET = {}
     HostPOST = {}
-    HTTPHosts = {}
-    LocalArgs = %w(allow view sort UX)
     Methods = %w(GET HEAD OPTIONS POST PUT)
     Populator = {}
     Req204 = /gen(erate)?_?204$/
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
-    SingleHop = %w(
-connection fetch gunk host keep-alive links path-info query-string
-rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rdf refhost remote-addr repository request-method request-path request-uri resp
-script-name server-name server-port server-protocol server-software site-chrome sort
-te transfer-encoding
-unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
-)
+    SingleHop = %w(connection fetch gunk host keep-alive links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software site-chrome sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for)
     R204 = [204, {}, []]
     R304 = [304, {}, []]
 
@@ -195,16 +187,14 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
         return R304 if env.has_key?('HTTP_IF_NONE_MATCH') || env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has file
         return fileResponse if node.file?                                                           # server has file
       end
-      return nodeResponse if ENV.has_key? 'OFFLINE'
+      return nodeResponse if ENV.has_key? 'OFFLINE'                                                 # offline cache
 
       options ||= {}
       location = ['//', host, (port ? [':', port] : nil), path, options[:suffix], (query ? ['?', query] : nil)].join
-      primary  = ('https:' + location).R env # primary locator
-      fallback = ('http:' + location).R env # fallback locator
-
-      # network fetch
+      primary  = ('https:' + location).R env                                                        # primary locator
+      fallback = ('http:' + location).R env                                                         # fallback locator
       env[:fetch] = true
-      primary.fetchHTTP options
+      primary.fetchHTTP options                                                                     # fetch
     rescue Exception => e
       case e.class.to_s
       when 'Errno::ECONNREFUSED'
