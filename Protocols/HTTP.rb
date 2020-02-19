@@ -27,7 +27,7 @@ class WebResource
     end
 
     def allowCDN?
-      (CacheExt - %w(html js)).member?(ext.downcase) && !path.match?(Gunk)
+      (CacheFormats - %w(html js)).member?(ext.downcase) && !path.match?(Gunk)
     end
 
     def allowedOrigin
@@ -183,18 +183,18 @@ class WebResource
 
     # fetch node from cache or remote server
     def fetch options=nil
-      if (CacheExt - %w(json html xml)).member?(ext.downcase) && !host.match?(DynamicImgHost)       # cachable file?
-        return R304 if env.has_key?('HTTP_IF_NONE_MATCH') || env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has file
-        return fileResponse if node.file?                                                           # server has file
+      if StaticFormats.member?(ext.downcase) && !host.match?(DynamicImgHost)                      # cachable file?
+        return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has file
+        return fileResponse if node.file?                                                         # server has file
       end
-      return nodeResponse if ENV.has_key? 'OFFLINE'                                                 # offline cache
+      return nodeResponse if ENV.has_key? 'OFFLINE'                                               # offline cache
 
       options ||= {}
       location = ['//', host, (port ? [':', port] : nil), path, options[:suffix], (query ? ['?', query] : nil)].join
-      primary  = ('https:' + location).R env                                                        # primary locator
-      fallback = ('http:' + location).R env                                                         # fallback locator
+      primary  = ('https:' + location).R env                                                      # primary locator
+      fallback = ('http:' + location).R env                                                       # fallback locator
       env[:fetch] = true
-      primary.fetchHTTP options                                                                     # fetch
+      primary.fetchHTTP options                                                                   # fetch
     rescue Exception => e
       case e.class.to_s
       when 'Errno::ECONNREFUSED'

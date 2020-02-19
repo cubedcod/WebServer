@@ -76,8 +76,7 @@ class WebResource
     end
 
     def nodeResponse
-      return fileResponse if node.file? # direct hit
-      # find indirect hits in filesystem
+      return fileResponse if StaticFormats.member?(ext.downcase) && node.file? # static node
       qs = query_values || {}           # query arguments
       summarize = !(qs.has_key? 'full') # default to summarize for multi-node requests
       paths = if node.directory?        # node container
@@ -112,10 +111,10 @@ class WebResource
               else                      # nodes selected w/ GLOB
                 globPath = fsPath
                 if uri.match GlobChars  # parametric glob
-                  env[:grep] = true if qs.has_key? 'q' # enable grepping within glob results
-                else                    # graph-document glob
+                  env[:grep] = true if qs.has_key? 'q' # enable grep within glob results
+                else                    # base-URI prefix glob
                   summarize = false
-                  globPath += '.*'
+                  globPath += '*'
                 end
                 Pathname.glob globPath
               end

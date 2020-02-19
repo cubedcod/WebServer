@@ -35,7 +35,8 @@ module Webize
 end
 class WebResource
   module URIs
-    CacheExt = %w(css geojson gif html ico jpeg jpg js json m3u8 m4a md mp3 mp4 opus pdf png svg ts webm webp xml) # cached filetypes
+    CacheFormats = %w(css geojson gif html ico jpeg jpg js json m3u8 m4a md mp3 mp4 opus pdf png svg ts webm webp xml) # cached filetypes
+    StaticFormats = CacheFormats - %w(json html xml)
     LocalAddress = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).concat(ENV.has_key?('HOSTNAME') ? [ENV['HOSTNAME']] : []).uniq
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
     FeedIcon = SiteDir.join('feed.svg').read
