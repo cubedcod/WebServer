@@ -397,7 +397,9 @@ zoopps.com
         r.env['x-csrf-token'] ||= attrs['ct0'] if attrs['ct0']
         r.env['x-guest-token'] ||= attrs['gt'] if attrs['gt']
       end
-      if r.path == '/'
+
+      # username index
+      if r.path == '/' || r.path.match?(GlobChars)
         r.env[:links][:feed] = '/feed'
         RootIndex[r]
 
@@ -411,7 +413,7 @@ zoopps.com
           apiURL.R(r.env).fetch intermediate: true}
         r.saveRDF.graphResponse
 
-      # user
+      # user page
       elsif localUI && r.parts.size == 1 && !%w(favicon.ico manifest.json search sw.js).member?(r.parts[0])
         uid = nil
         URI.open('https://api.twitter.com/graphql/G6Lk7nZ6eEKd7LBBZw9MYw/UserByScreenName?variables=%7B%22screen_name%22%3A%22' + r.parts[0] + '%22%2C%22withHighlightedLabel%22%3Afalse%7D', r.headers){|response| # find uid

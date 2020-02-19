@@ -121,7 +121,7 @@ class WebResource < RDF::URI
   # Turtle file (big) -> Turtle file (small)
   def summary
     rdfized = ext == 'ttl'
-    sPath = '../.cache/RDF/' + fsPath + (rdfized ? '' : '.ttl')
+    sPath = '../.cache/RDF/' + fsPath + (path == '/' ? 'index' : '') + (rdfized ? '' : '.ttl')
     summary = sPath.R env
     sNode = Pathname.new sPath
     return summary if sNode.exist? && sNode.mtime >= node.mtime # summary exists and up to date

@@ -127,7 +127,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
         elsif ext == 'json' || mime.match?(/json/)               # data
           puts "🗒 " + resource.uri
         elsif %w(gif jpeg jpg png svg webp).member?(ext) || mime.match?(/^image/)
-          puts "🖼️  \e[33m"  + resource.uri + "\e[0m "            # image
+          puts "🖼️  \e[33;1m"  + resource.uri + "\e[0m "            # image
         elsif %w(aac flac m4a mp3 ogg opus).member?(ext) || mime.match?(/^audio/)
           puts '🔉 ' + resource.uri                              # audio
         elsif %w(mp4 webm).member?(ext) || mime.match?(/^video/)
@@ -231,8 +231,6 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
       env[:fetch] = true
       primary.fetchHTTP options
     rescue Exception => e
-      puts ["\e[31m", e.class, e.message, "\e[0m"].join ' '
-
       case e.class.to_s
       when 'Errno::ECONNREFUSED'
         fallback.fetchHTTP options
