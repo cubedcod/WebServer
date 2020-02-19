@@ -124,10 +124,10 @@ class WebResource
       pathIndex = localNode? ? 0 : hostPath.size
       nodes = paths.map{|p| ((host ? ('https://' + host) : '') + '/' + p.to_s[pathIndex..-1].gsub(':','%3A').gsub('#','%23')).R env }
 
-      # return node-data in requested format
+      # return data in requested format
       if nodes.size==1 && nodes[0].ext == 'ttl' && selectFormat == 'text/turtle'
         nodes[0].fileResponse           # static node ready to go
-      else                              # transform/merge graph node(s)
+      else                              # transform/merge node(s)
         timeMeta                        # find temporally-adjacent node pointers
         if summarize                    # summarize nodes
           env[:summary] = true

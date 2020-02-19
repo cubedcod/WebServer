@@ -247,7 +247,7 @@ class WebResource
           reader = RDF::Reader.for content_type: format               # select reader
           reader.new(body, base_uri: self){|_|                        # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader # read RDF
-          return self if options[:intermediate]                       # intermediate fetch, return w/o HTTP-response
+          return self if options[:intermediate]                       # intermediate fetch, return w/o HTTP response
           reader ? saveRDF : (puts "ENORDF #{format} #{uri}")         # cache RDF
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # expose upstream metadata to downstream
