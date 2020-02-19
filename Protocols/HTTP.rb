@@ -231,6 +231,8 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
       env[:fetch] = true
       primary.fetchHTTP options
     rescue Exception => e
+      puts ["\e[31m", e.class, e.message, "\e[0m"].join ' '
+
       case e.class.to_s
       when 'Errno::ECONNREFUSED'
         fallback.fetchHTTP options
@@ -280,7 +282,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
           storage += formatExt unless extension == formatExt
           storage.R.writeFile body                                    # cache body
           reader = RDF::Reader.for content_type: format               # select reader
-          reader.new(body,base_uri: self,noRDFa: options[:noRDFa]){|_|# instantiate reader
+          reader.new(body, base_uri: self){|_|                        # instantiate reader
             (env[:repository] ||= RDF::Repository.new) << _ } if reader # read RDF
           return self if options[:intermediate]                       # intermediate fetch, return w/o HTTP-response
           reader ? saveRDF : (puts "ENORDF #{format} #{uri}")         # cache RDF
@@ -297,7 +299,6 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
         end
       end
     rescue Exception => e
-      puts ["\e[31;1m", e.class, e.message, "\e[0m"].join ' '
       status = e.respond_to?(:io) ? e.io.status[0] : ''
       case status
       when /30[12378]/ # redirect
@@ -395,7 +396,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
       head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # we want redirection in HTTP HEAD-Location not Javascript
       head.delete 'User-Agent' if host == 't.co'            # so advertise a 'dumb' user-agent
 
-      HTTP.print_header head if ENV.has_key? 'VERBOSE'
+      print_header head if ENV.has_key? 'VERBOSE'
       head
     end
 
@@ -460,7 +461,8 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
            end
     end
 
-    def HTTP.print_header header
+    def print_header header
+      print "\n🔗 " + uri
       header.map{|k, v|
         print "\n", [k, v.to_s].join("\t"), ' '}
       print "\n", '_' * 80, ' '
