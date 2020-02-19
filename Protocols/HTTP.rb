@@ -217,10 +217,11 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
 
     # fetch node from cache or remote server
     def fetch options=nil
-      if (CacheExt - %w(json html xml)).member?(ext.downcase) && !host.match?(DynamicImgHost)
-        return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has static-data, return 304 response
-        return fileResponse if node.file?                            # server has static-data, return data
+      if (CacheExt - %w(json html xml)).member?(ext.downcase) && !host.match?(DynamicImgHost)       # cachable file?
+        return R304 if env.has_key?('HTTP_IF_NONE_MATCH') || env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has file
+        return fileResponse if node.file?                                                           # server has file
       end
+      return nodeResponse if ENV.has_key? 'OFFLINE'
 
       options ||= {}
       location = ['//', host, (port ? [':', port] : nil), path, options[:suffix], (query ? ['?', query] : nil)].join
@@ -399,10 +400,6 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
     end
 
     def notfound; [404, {'Content-Type' => 'text/html'}, [htmlDocument]] end
-
-    def offline?
-      ENV.has_key?('OFFLINE') || (query_values||{}).has_key?('OL')
-    end
 
     def OPTIONS
       if AllowedHosts.has_key?(host) || POSThost.match?(host)

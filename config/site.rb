@@ -386,8 +386,11 @@ zoopps.com
         FileUtils.touch 'twitter/.' + n}}
 
     GET 'twitter.com', -> r {
+      # prefs
       localUI = !r.upstreamUI?
-      r.chrono_sort if localUI
+      r.chrono_sort
+
+      # auth
       if cookie = r.env['HTTP_COOKIE']
         attrs = {}
         cookie.split(';').map{|attr|

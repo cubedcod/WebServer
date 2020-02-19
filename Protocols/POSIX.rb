@@ -46,7 +46,7 @@ class WebResource
 
   module HTTP
 
-    # return lazily-generated file with Rack file-handle if needed by client
+    # return lazily-generated file, via Rack file-handler, if needed by client
     def entity generator = nil
       entities = env['HTTP_IF_NONE_MATCH']&.strip&.split /\s*,\s*/
       if entities && entities.include?(env[:resp]['ETag'])
@@ -75,14 +75,11 @@ class WebResource
       entity
     end
 
-    # merge data from multiple nodes to RDF document
     def nodeResponse
-      return fileResponse if node.file? # static node hit, nothing to do
+      return fileResponse if node.file? # direct hit
+      # find indirect hits in filesystem
       qs = query_values || {}           # query arguments
-      timeMeta                          # find temporally-adjacent node pointers
       summarize = !(qs.has_key? 'full') # default to summarize for multi-node requests
-
-      # find node locations on fs
       paths = if node.directory?        # node container
                 if qs.has_key?('f') && !qs['f'].empty? && path != '/' # FIND full name (case-insensitive)
                   `find #{shellPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
@@ -131,9 +128,10 @@ class WebResource
       if nodes.size==1 && nodes[0].ext == 'ttl' && selectFormat == 'text/turtle'
         nodes[0].fileResponse           # static node ready to go
       else                              # transform/merge graph node(s)
-        if summarize
+        timeMeta                        # find temporally-adjacent node pointers
+        if summarize                    # summarize nodes
           env[:summary] = true
-          nodes = nodes.map &:summary # summary nodes
+          nodes = nodes.map &:summary
         end
         nodes.map &:loadRDF             # node -> Graph
         graphResponse                   # HTTP Response
