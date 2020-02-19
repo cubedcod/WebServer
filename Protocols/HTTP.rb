@@ -16,8 +16,8 @@ class WebResource
     Req204 = /gen(erate)?_?204$/
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
-    Internal_Headers = %w(
-connection gunk host keep-alive links path-info query-string
+    SingleHop = %w(
+connection fetch gunk host keep-alive links path-info query-string
 rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rdf refhost remote-addr repository request-method request-path request-uri resp
 script-name server-name server-port server-protocol server-software site-chrome sort
 te transfer-encoding
@@ -96,17 +96,18 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
         mime = head['Content-Type'] || ''
 
         print status, ' ' unless [200, 204, 304].member? status
+        print env[:fetch] ? '🐕 ' : ' '
 
-        if resource.env[:deny]
-          puts (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "🛑 \e[31;1m") + (env[:refhost] ? ("\e[7m" + env[:refhost] + "\e[0m\e[31;1m → ") : '') + (env[:refhost] == resource.host ? '' : ('http://' + resource.host)) + "\e[7m" + resource.path + "\e[0m\e[31m" + "\e[0m "
+        if env[:deny]
+          puts (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "🛑 \e[31;1m") + (env[:refhost] ? ("\e[7m" + env[:refhost] + "\e[0m\e[31;1m → ") : '') + (env[:refhost] == resource.host ? '' : ('http://' + resource.host)) + "\e[7m" + resource.path + "\e[0m\e[31m" + "\e[0m"
 
         # OPTIONS
         elsif env['REQUEST_METHOD'] == 'OPTIONS'
-          puts "🔧 \e[32;1m#{resource.uri}\e[0m "
+          puts "🔧 \e[32;1m#{resource.uri}\e[0m"
 
         # POST
         elsif env['REQUEST_METHOD'] == 'POST'
-          puts "📝 \e[32;1m#{resource.uri}\e[0m "
+          puts "📝 \e[32;1m#{resource.uri}\e[0m"
 
         # non-content response
         elsif [301, 302, 303].member? status                     # redirect
@@ -135,7 +136,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
           puts '🐢 ' + resource.uri                              # turtle
 
         else # default log
-          puts (mime.match?(/html/) ? '📃' : mime) + (env[:repository] ? (('%5d' % env[:repository].size) + '⋮ ') : '') + "\e[7m" + resource.uri + "\e[0m "
+          puts (mime.match?(/html/) ? '📃' : mime) + (env[:repository] ? (('%5d' % env[:repository].size) + '⋮ ') : '') + "\e[7m" + resource.uri + "\e[0m"
         end
         
         [status, head, body]} # response
@@ -227,6 +228,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
       fallback = ('http:' + location).R env # fallback locator
 
       # network fetch
+      env[:fetch] = true
       primary.fetchHTTP options
     rescue Exception => e
       case e.class.to_s
@@ -256,8 +258,6 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
     end
 
     def fetchHTTP options = {}
-      puts "🐕 \e[30;1m#{uri}\e[0m" #if ENV.has_key? 'VERBOSE'
-      # TODO set if-modified-since/etag headers from local cache contents (eattr support sufficient for etag metadata?)
       URI.open(uri, headers.merge({redirect: false})) do |response|
         h = response.meta                                             # upstream metadata
         if response.status.to_s.match? /206/                          # partial response
@@ -378,7 +378,7 @@ unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
           end
           t                                       # token
         }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
-        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless Internal_Headers.member?(key.downcase)} # output value
+        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless SingleHop.member?(key.downcase)} # output value
 
       # Cookies / Referer / User-Agent
       unless allowCookies?
