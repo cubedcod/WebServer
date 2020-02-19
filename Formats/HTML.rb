@@ -328,7 +328,7 @@ class WebResource
                              if graph.empty?
                                HTML.keyval (Webize::HTML.webizeHash env), env
                              elsif (env[:view] || (query_values||{})['view']) == 'table'
-                               env[:sort] = query_values['sort'] if query_values
+                               env[:sort] ||= query_values['sort'] if query_values
                                HTML.tabular graph, env
                              else
                                graph.values.map{|resource|
@@ -414,6 +414,7 @@ class WebResource
         attr = Content if attr == 'content'
         graph = graph.sort_by{|r| (r[attr]||'').to_s}.reverse
       end
+
       {_: :table, class: :tabular,
        c: [{_: :thead,
             c: {_: :tr, c: keys.map{|p|

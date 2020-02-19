@@ -403,13 +403,13 @@ zoopps.com
     %w(bit.ly dlvr.it t.co ti.me tinyurl.com trib.al wired.trib.al).map{|short| GET short, NoQuery }
     Allow 'twitter.com'
     Allow 'api.twitter.com'
-
     Populate 'twitter.com', -> r {
       FileUtils.mkdir 'twitter'
       `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|n|
         FileUtils.touch 'twitter/.' + n}}
-
+    GET 'mobile.twitter.com', -> r {[301, {'Location' => 'https://twitter.com' + r.path}, []]}
     GET 'twitter.com', -> r {
+      r.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.116 Safari/537.36'
       r.chrono_sort
 
       # auth
