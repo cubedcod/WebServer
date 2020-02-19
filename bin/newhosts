@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+
+#File::Tail::Logfile.tail(filename, :backward => 10) do |line|
+#  puts line
+#end
+hosts = {}
+STDOUT.sync = true
+ARGF.each_line do |line|
+  print line
+end
