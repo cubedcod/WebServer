@@ -23,32 +23,6 @@ script-name server-name server-port server-protocol server-software site-chrome 
 te transfer-encoding
 unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for
 )
-
-    # handlers
-    Fetch = -> r {r.fetch}
-    GoIfURL = -> r {r.query_values&.has_key?('url') ? GotoURL[r] : NoGunk[r]}
-    GotoBasename = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
-    GotoU   = -> r {[301, {'Location' =>  r.query_values['u']}, []]}
-    GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['q'])}, []]}
-    NoGunk  = -> r {r.gunkURI && (r.query_values || {})['allow'] != ServerKey && r.deny || r.fetch}
-    NoQuery = -> r {
-      if !r.query                         # request without query
-        NoGunk[r].yield_self{|s,h,b|      #  inspect response
-          h.keys.map{|k|                  #  strip query from new location
-            h[k] = h[k].split('?')[0] if k.downcase == 'location' && h[k].match?(/\?/)}
-          [s,h,b]}                        #  response
-      else                                # request with query
-        [302, {'Location' => r.path}, []] #  redirect to path
-      end}
-
-    RootIndex = -> r {
-      if r.path == '/' || r.path.match?(GlobChars)
-        r.nodeResponse
-      else
-        r.chrono_sort if r.parts.size == 1
-        NoGunk[r]
-      end}
-
     R204 = [204, {}, []]
     R304 = [304, {}, []]
 
