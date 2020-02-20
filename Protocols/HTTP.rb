@@ -307,6 +307,7 @@ class WebResource
     end
 
     def GET
+      cookies
       if localNode?            ## local
         if %w{y year m month d day h hour}.member? parts[0]
           dateDir               # timeline redirect
@@ -321,7 +322,6 @@ class WebResource
         (path + '*' + host.split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*').R(env).nodeResponse
       elsif handler = HostGET[host] # host lambda
         Populator[host][self] if Populator[host] && !join('/').R.node.exist?
-        cookies
         handler[self]
       elsif host.match? CDNhost # CDN handler
         (AllowedHosts.has_key?(host) || (query_values||{})['allow'] == ServerKey || allowCDN?) ? fetch : deny

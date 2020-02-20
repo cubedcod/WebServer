@@ -85,13 +85,13 @@ module Webize
         if hostTriples = Triplr[@base.host]
           @base.send hostTriples, @json, &f
         end
-
+=begin
         # JSON-Feed
         if @base.parts.map{|part| part.split '.'}.flatten.member? 'feed'
           @base.env[:transform] = true
           self.JSONfeed &f
         end
-
+=end
       end
     end
   end
