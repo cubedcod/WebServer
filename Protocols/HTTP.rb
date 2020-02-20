@@ -14,7 +14,7 @@ class WebResource
     Req204 = /gen(erate)?_?204$/
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
-    SingleHop = %w(connection fetch gunk host keep-alive links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software site-chrome sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for)
+    SingleHop = %w(connection fetch gunk host keep-alive links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software site-chrome sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for)
     R204 = [204, {}, []]
     R304 = [304, {}, []]
 
@@ -370,7 +370,6 @@ class WebResource
       head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # we want redirection in HTTP HEAD-Location not Javascript
       head.delete 'User-Agent' if host == 't.co'            # so advertise a 'dumb' user-agent
 
-      print_header head if ENV.has_key? 'VERBOSE'
       head
     end
 
@@ -412,7 +411,11 @@ class WebResource
     end
 
     def POSTthru
-      r = HTTParty.post uri, headers: headers, body: env['rack.input'].read
+      head = headers
+      body = env['rack.input'].read
+      env.delete 'rack.input'
+      print_header head if ENV.has_key? 'VERBOSE'
+      r = HTTParty.post uri, headers: head, body: body
       [r.code, (headers r.headers), [r.body]]
     end
 
