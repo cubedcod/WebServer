@@ -413,9 +413,12 @@ zoopps.com
       r.chrono_sort
 
       # auth
-      if cookie = r.env['HTTP_COOKIE']
+      c = 'twitter/.cookie'.R
+      r.env['HTTP_COOKIE'] = c.node.read if !r.env.has_key?('HTTP_COOKIE') && c.node.exist?       # read cookie
+      if r.env.has_key? 'HTTP_COOKIE'
+        c.writeFile r.env['HTTP_COOKIE'] if !c.node.exist? || c.node.read != r.env['HTTP_COOKIE'] # update cookie
         attrs = {}
-        cookie.split(';').map{|attr|
+        r.env['HTTP_COOKIE'].split(';').map{|attr|
           k , v = attr.split('=').map &:strip
           attrs[k] = v}
         r.env['authorization'] ||= 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA'
