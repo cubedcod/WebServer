@@ -122,10 +122,11 @@ class WebResource
     def cookies
       cookie = (hostPath + '.cookie').R
       if cookie.node.exist?
-        env['HTTP_COOKIE'] = cookie.readFile
-      else
-        cookie.writeFile env['HTTP_COOKIE'] if env.has_key? 'HTTP_COOKIE'
+        env['HTTP_COOKIE'] = cookie.readFile # read cookie
+      elsif env.has_key? 'HTTP_COOKIE'
+        cookie.writeFile env['HTTP_COOKIE']  # write cookie
       end
+      self
     end
 
     def self.Cookies host
