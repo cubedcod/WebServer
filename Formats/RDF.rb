@@ -107,7 +107,7 @@ class WebResource < RDF::URI
       end
       docs.map{|doc|
         turtle = doc.fsPath + '.ttl'
-        triples = '%4d' % graph.size
+        triples = '%3d' % graph.size
         if File.exist? turtle
           puts "⚪ #{triples} #{doc.fsPath}" if ENV.has_key? 'VERBOSE'
         else

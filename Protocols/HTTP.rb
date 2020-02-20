@@ -98,7 +98,7 @@ class WebResource
           puts '🔉 ' + resource.uri                              # audio
         elsif %w(mp4 webm).member?(ext) || mime.match?(/^video/)
           puts '🎬 ' + resource.uri                              # video
-        elsif ext == 'ttl' || mime == 'text/turtle; charset=utf-8'
+        elsif ext == 'ttl' || mime.match?(/text\/turtle/)
           puts '🐢 ' + resource.uri                              # turtle
 
         else # default log
