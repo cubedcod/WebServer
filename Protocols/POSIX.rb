@@ -38,6 +38,8 @@ class WebResource
 
   end
 
+  def readFile; node.read end
+
   def writeFile o
     FileUtils.mkdir_p node.dirname
     File.open(fsPath,'w'){|f|f << o.force_encoding('UTF-8')}
