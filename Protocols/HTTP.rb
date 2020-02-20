@@ -119,6 +119,16 @@ class WebResource
                                                             (HTML.keyval (Webize::HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
     end
 
+    def cookies
+      cookie = (hostPath + '.cookie').R
+      jar = cookie.node.exist?
+      if env.has_key? 'HTTP_COOKIE'
+        cookie.writeFile env['HTTP_COOKIE'] unless jar && cookie.readFile == env['HTTP_COOKIE']
+      else
+        env['HTTP_COOKIE'] = cookie.readFile if jar
+      end
+    end
+
     def self.Cookies host
       CookieHosts[host] = true
     end
@@ -311,6 +321,7 @@ class WebResource
         (path + '*' + host.split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*').R(env).nodeResponse
       elsif handler = HostGET[host] # host lambda
         Populator[host][self] if Populator[host] && !join('/').R.node.exist?
+        cookies
         handler[self]
       elsif host.match? CDNhost # CDN handler
         (AllowedHosts.has_key?(host) || (query_values||{})['allow'] == ServerKey || allowCDN?) ? fetch : deny

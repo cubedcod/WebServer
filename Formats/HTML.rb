@@ -434,10 +434,10 @@ class WebResource
                         env[:title] = title; tCount += 1
                         {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'title', type: 'node', c: CGI.escapeHTML(title)}
                       end},
-                    ({_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'id', type: 'node', c: '&#x1f517;'} if tCount == 0),
                     resource[Abstract] ? [resource[Abstract], '<br>'] : '',
                     [Image, Video].map{|t|(resource[t]||[]).map{|i| Markup[t][i,env]}},
                     resource[Content],
+                    ({_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'id', type: 'node', c: '🔗'} if tCount == 0),
                     {class: :links, c: (resource[Link]||[]).map{|i| Markup[Link][i,env]}}]
                  else
                    (resource[k]||[]).map{|v|value k, v, env }

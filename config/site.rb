@@ -413,11 +413,7 @@ zoopps.com
       r.chrono_sort
 
       # auth
-      cookie = 'twitter/.cookie'.R
-      jar = cookie.node.exist?
-      r.env['HTTP_COOKIE'] = cookie.readFile if jar && !r.env.has_key?('HTTP_COOKIE')            # read cookie
       if r.env.has_key? 'HTTP_COOKIE'
-        cookie.writeFile r.env['HTTP_COOKIE'] if !jar || cookie.readFile != r.env['HTTP_COOKIE'] # write cookie
         attrs = {}
         r.env['HTTP_COOKIE'].split(';').map{|attr|
           k , v = attr.split('=').map &:strip
