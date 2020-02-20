@@ -14,7 +14,7 @@ class WebResource
     Req204 = /gen(erate)?_?204$/
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
-    SingleHop = %w(connection fetch gunk host keep-alive links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software site-chrome sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for)
+    SingleHop = %w(connection fetch gunk host keep-alive links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software site-chrome summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for)
     R204 = [204, {}, []]
     R304 = [304, {}, []]
 
@@ -61,7 +61,7 @@ class WebResource
         ext = resource.path ? resource.ext.downcase : ''                        # log
         mime = head['Content-Type'] || ''
 
-        print status, ' ' unless [200, 204, 304].member? status
+        print status, ' ' unless [200, 202, 204, 304].member? status
         print env[:fetch] ? '🐕 ' : ' '
 
         if env[:deny]
@@ -77,7 +77,7 @@ class WebResource
 
         # non-content response
         elsif [301, 302, 303].member? status                     # redirect
-          puts resource.uri ," ➡️  ", head['Location']
+          puts [resource.uri ,"➡️", head['Location']].join ' '
         elsif [204, 304].member? status                          # up-to-date
           #puts '✅' + resource.uri
         elsif status == 404                                      # not found
@@ -187,17 +187,18 @@ class WebResource
         @env = e
         self
       else
-        @env
+        @env #||= {}
       end
     end
 
     # fetch node from cache or remote server
     def fetch options=nil
-      if StaticFormats.member?(ext.downcase) && !host.match?(DynamicImgHost)                      # cachable file?
-        return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has file
-        return fileResponse if node.file?                                                         # server has file
+      return nodeResponse if ENV.has_key? 'OFFLINE'                                               # offline-only response
+      if StaticFormats.member? ext.downcase                                                       # static-cache formats:
+        return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client-cached node
+        return fileResponse if node.file?                                                         # server-cached node (direct hit)
       end
-      return nodeResponse if ENV.has_key? 'OFFLINE'                                               # offline cache
+      c = nodeSet ; return c[0].fileResponse if c.size == 1 && StaticFormats.member?(c[0].ext)    # server-cached node (indirect hit)
 
       options ||= {}
       location = ['//', host, (port ? [':', port] : nil), path, options[:suffix], (query ? ['?', query] : nil)].join
@@ -255,8 +256,8 @@ class WebResource
           storage += formatExt unless extension == formatExt
           storage.R.writeFile body                                    # cache body
           reader = RDF::Reader.for content_type: format               # select reader
-          reader.new(body, base_uri: self){|_|                        # instantiate reader
-            (env[:repository] ||= RDF::Repository.new) << _ } if reader # read RDF
+          reader.new(body, base_uri: self){|_|                        # read RDF
+            (env[:repository] ||= RDF::Repository.new) << _ } if reader && !%w(.jpg .png).member?(formatExt)
           return self if options[:intermediate]                       # intermediate fetch, return w/o HTTP response
           reader ? saveRDF : (puts "ENORDF #{format} #{uri}")         # cache RDF
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
