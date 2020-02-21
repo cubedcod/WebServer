@@ -120,14 +120,14 @@ class WebResource
     end
 
     def nodeResponse
-      return fileResponse if StaticFormats.member?(ext.downcase) && node.file? # static node hit
-      nodes = nodeSet                                                          # find nodes
+      return fileResponse if StaticFormats.member?(ext.downcase) && node.file? # direct node hit
+      nodes = nodeSet                                                          # find indirect nodes
       if nodes.size == 1 && (StaticFormats.member?(nodes[0].ext) || (selectFormat == 'text/turtle' && nodes[0].ext == 'ttl'))
-        nodes[0].fileResponse           # singular static node w/ no merging or transcoding required
-      else                              # transform/merge node(s)
-        timeMeta                        # reference temporally-adjacent nodes
+        nodes[0].fileResponse           # single node w/ no merging or transcoding
+      else                              # transform and/or merge nodes
         nodes = nodes.map &:summary if env[:summary] # summarize nodes
         nodes.map &:loadRDF             # node(s) -> Graph
+        timeMeta                        # reference temporally-adjacent nodes
         graphResponse                   # HTTP Response
       end
     end
