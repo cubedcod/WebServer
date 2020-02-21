@@ -58,8 +58,8 @@ class WebResource
       resource.send(env['REQUEST_METHOD']).yield_self{|status, head, body|      # dispatch
         ext = resource.path ? resource.ext.downcase : ''                        # log
         mime = head['Content-Type'] || ''
-        network_icon = env[:fetch] ? '🐕' : ' '
-        status_icon = env[:deny] && '🛑' || {200 => ' ', 204 => '🌐', 301 => '➡️', 302 => '➡️', 303 => '➡️', 304 => '✅', 401 => '🚫', 403 => '🚫', 404 => '❓', 410 => '❌',}[status] || status
+        network_icon = env[:fetch] ? '🐕' : nil
+        status_icon = env[:deny] && '🛑' || {204 => '🌐', 301 => '➡️', 302 => '➡️', 303 => '➡️', 304 => '✅', 401 => '🚫', 403 => '🚫', 404 => '❓', 410 => '❌',}[status] || (status == 200 ? nil : status)
         format_icon = if ext == 'css'
                         '🎨'
                       elsif ext == 'js' || mime.match?(/script/)
@@ -80,7 +80,7 @@ class WebResource
                         mime
                       end
         color = case format_icon
-                when '🖼️ '
+                when '🖼️'
                   '33;1'
                 when '📜'
                   '36;1'
@@ -101,7 +101,7 @@ class WebResource
           puts [resource.uri, status_icon, head['Location']].join ' '
         elsif [204, 304].member? status
         else
-          puts [network_icon, status_icon, format_icon, triple_count, "\e[#{color}m", resource.uri, "\e[0m"].join ' '
+          puts [network_icon, status_icon, format_icon, triple_count, "\e[#{color}m", resource.uri, "\e[0m"].compact.join ' '
         end
         
         [status, head, body]} # response
