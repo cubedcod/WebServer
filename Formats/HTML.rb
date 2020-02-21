@@ -239,13 +239,13 @@ class WebResource
     Icons = {
       Abstract => '✍',
       Audio => '🔊',
+      Container => '📁',
       Content => '',
       Creator => '👤',
       DC + 'hasFormat' => '≈',
       DC + 'identifier' => '☸',
       Date => '⌚',
       Image => '🖼️',
-      LDP + 'Container' => '📁',
       LDP + 'contains' => '📁',
       Link => '☛',
       Post => '📝',
@@ -489,7 +489,7 @@ class WebResource
                {_: :a, href: src, c: src.R.basename}]}
     }
 
-    Markup[LDP+'Container'] = -> dir , env {
+    Markup[Container] = -> dir , env {
       uri = dir.delete 'uri'
       [Type, Title, W3+'ns/posix/stat#mtime', W3+'ns/posix/stat#size'].map{|p|dir.delete p}
       {class: :container,

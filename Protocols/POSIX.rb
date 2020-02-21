@@ -104,9 +104,9 @@ class WebResource
          end
          `#{cmd} | head -n 1024`.lines.map &:chomp
        else     # basic container
-         if summarize
-           [node] # container listing
-         else     # container contents
+         if env[:summary]
+           [node] # directory listing
+         else     # directory contents
            [node, *node.children]
          end
        end
@@ -119,7 +119,7 @@ class WebResource
           globPath += '*'
         end
         Pathname.glob globPath
-       end).map{|p|             # bind paths to URI -space
+       end).map{|p|             # bind paths to URI-space
         ((host ? ('https://' + host) : '') + '/' + p.to_s[pathIndex..-1].gsub(':','%3A').gsub('#','%23')).R env }
     end
 

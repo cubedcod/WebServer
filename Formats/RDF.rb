@@ -20,6 +20,7 @@ class WebResource < RDF::URI
     Link     = DC + 'link'
     Title    = DC + 'title'
     Video    = DC + 'Video'
+    Container = LDP + 'Container'
     SIOC     = 'http://rdfs.org/sioc/ns#'
     Content  = SIOC + 'content'
     Creator  = SIOC + 'has_creator'
@@ -64,28 +65,9 @@ class WebResource < RDF::URI
       options[:format] ||= formatHint if formatHint
       graph.load fsPath, **options
     elsif node.directory?
-      container = path.R env
-      container += '/' unless container.to_s[-1] == '/'
-
-      graph << RDF::Statement.new(container, Type.R, (W3+'ns/ldp#Container').R)
-      graph << RDF::Statement.new(container, Title.R, basename)
-      graph << RDF::Statement.new(container, Date.R, node.stat.mtime.iso8601)
-
-      node.children.map{|n|
-        isDir = n.directory?
-        name = n.basename.to_s + (isDir ? '/' : '')
-        item = container.join(name).R env
-        unless name[0] == '.' # elide invisible nodes
-          if n.file?          # summarize contained document
-            graph.load item.summary.uri
-          elsif isDir         # list contained directory
-            graph << RDF::Statement.new(container, (W3+'ns/ldp#contains').R, item)
-            graph << RDF::Statement.new(item, Type.R, (W3+'ns/ldp#Container').R)
-            graph << RDF::Statement.new(item, Title.R, name)
-            graph << RDF::Statement.new(item, Date.R, n.mtime.iso8601)
-          end
-        end
-      }
+      graph << RDF::Statement.new(self, Type.R, Container.R)
+      graph << RDF::Statement.new(self, Title.R, basename)
+      graph << RDF::Statement.new(self, Date.R, node.stat.mtime.iso8601)
     end
     self
   rescue RDF::FormatError => e
@@ -125,6 +107,7 @@ class WebResource < RDF::URI
     summary = sPath.R env
     sNode = Pathname.new sPath
     return summary if sNode.exist? && sNode.mtime >= node.mtime # summary exists and up to date
+
     fullGraph = RDF::Repository.new                       # full graph
     miniGraph = RDF::Repository.new                       # summary graph
     loadRDF repository: fullGraph                         # read RDF
