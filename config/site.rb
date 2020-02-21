@@ -99,7 +99,7 @@ class WebResource
     Allow 'sp.auth.adobe.com'
 
     # Amazon
-    AmazonHost = -> r {(%w(www.amazon.com www.imdb.com).member?(r.env[:refhost]) || (r.query_values||{})['allow'] == ServerKey) ? NoGunk[r] : r.deny}
+    AmazonHost = -> r {(%w(www.amazon.com www.audible.com www.imdb.com).member?(r.env[:refhost]) || (r.query_values||{})['allow'] == ServerKey) ? NoGunk[r] : r.deny}
     %w(amazon.com www.amazon.com).map{|host| GET host}
     GET 'images-na.ssl-images-amazon.com', AmazonHost
     GET 'm.media-amazon.com', AmazonHost
