@@ -110,6 +110,8 @@ class WebResource
     Allow 'balamii-parse.herokuapp.com'
     Allow 'player.balamii.com'
 
+    Cookies 'www.bizjournals.com'
+
     # Boston Globe
     GET 'bostonglobe-prod.cdn.arcpublishing.com', Resizer
     %w(bos.gl w.bos.gl).map{|short| GET short, NoQuery }

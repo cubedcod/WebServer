@@ -56,52 +56,42 @@ class WebResource
         env[:links][:up] = up
       end
       resource.send(env['REQUEST_METHOD']).yield_self{|status, head, body|      # dispatch
-
         ext = resource.path ? resource.ext.downcase : ''                        # log
         mime = head['Content-Type'] || ''
-
-        print status, ' ' unless [200, 202, 204, 304].member? status
-        print env[:fetch] ? '🐕 ' : ' '
+        network_icon = env[:fetch] ? '🐕' : ' '
+        status_icon = env[:deny] && '🛑' || {200 => ' ', 204 => '🌐', 301 => '➡️', 302 => '➡️', 303 => '➡️', 304 => '✅', 401 => '🚫', 403 => '🚫', 404 => '❓', 410 => '❌',}[status] || status
+        format_icon = if ext == 'css'
+                        '🎨'
+                      elsif ext == 'js' || mime.match?(/script/)
+                        '📜'
+                      elsif ext == 'json' || mime.match?(/json/)
+                        '🗒'
+                      elsif %w(gif jpeg jpg png svg webp).member?(ext) || mime.match?(/^image/)
+                        '🖼️ '
+                      elsif %w(aac flac m4a mp3 ogg opus).member?(ext) || mime.match?(/^audio/)
+                        '🔉'
+                      elsif %w(mp4 webm).member?(ext) || mime.match?(/^video/)
+                        '🎬'
+                      elsif ext == 'ttl' || mime.match?(/text\/turtle/)
+                        '🐢'
+                      elsif %w(htm html).member?(ext) || mime.match?(/html/)
+                        '📃'
+                      else
+                        mime
+                      end
+        triple_count = env[:repository] ? ('%4d⋮' % env[:repository].size) : nil
 
         if env[:deny]
-          puts (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "🛑 \e[31;1m") + (env[:refhost] ? ("\e[7m" + env[:refhost] + "\e[0m\e[31;1m → ") : '') + (env[:refhost] == resource.host ? '' : ('http://' + resource.host)) + "\e[7m" + resource.path + "\e[0m\e[31m" + "\e[0m"
-
-        # OPTIONS
+          puts (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "#{status_icon} \e[31;1m") + (env[:refhost] ? ("\e[7m" + env[:refhost] + "\e[0m\e[31;1m → ") : '') + (env[:refhost] == resource.host ? '' : ('http://' + resource.host)) + "\e[7m" + resource.path + "\e[0m\e[31m" + "\e[0m"
         elsif env['REQUEST_METHOD'] == 'OPTIONS'
           puts "🔧 \e[32;1m#{resource.uri}\e[0m"
-
-        # POST
         elsif env['REQUEST_METHOD'] == 'POST'
           puts "📝 \e[32;1m#{resource.uri}\e[0m"
-
-        # non-content response
-        elsif [301, 302, 303].member? status                     # redirect
-          puts [resource.uri ,"➡️", head['Location']].join ' '
-        elsif [204, 304].member? status                          # up-to-date
-          #puts '✅' + resource.uri
-        elsif status == 404                                      # not found
-          puts "❓ #{resource.uri} " unless resource.path == '/favicon.ico'
-        elsif status == 410
-          puts "❌ #{resource.uri} "
-
-        # content response
-        elsif ext == 'css'                                       # stylesheet
-          #puts '🎨 ' + resource.uri
-        elsif ext == 'js' || mime.match?(/script/)               # script
-          puts "📜 \e[36;1mhttps://" + resource.host + resource.path + "\e[0m "
-        elsif ext == 'json' || mime.match?(/json/)               # data
-          puts "🗒 " + resource.uri
-        elsif %w(gif jpeg jpg png svg webp).member?(ext) || mime.match?(/^image/)
-          puts "🖼️  \e[33;1m"  + resource.uri + "\e[0m "            # image
-        elsif %w(aac flac m4a mp3 ogg opus).member?(ext) || mime.match?(/^audio/)
-          puts '🔉 ' + resource.uri                              # audio
-        elsif %w(mp4 webm).member?(ext) || mime.match?(/^video/)
-          puts '🎬 ' + resource.uri                              # video
-        elsif ext == 'ttl' || mime.match?(/text\/turtle/)
-          puts '🐢 ' + resource.uri                              # turtle
-
-        else # default log
-          puts (mime.match?(/html/) ? '📃' : mime) + (env[:repository] ? (('%5d' % env[:repository].size) + '⋮ ') : '') + "\e[7m" + resource.uri + "\e[0m"
+        elsif [301, 302, 303].member? status # redirect
+          puts [resource.uri, status_icon, head['Location']].join ' '
+        elsif [204, 304].member? status
+        else
+          puts [network_icon, status_icon, format_icon, triple_count, "\e[7m", resource.uri, "\e[0m"].join ' '
         end
         
         [status, head, body]} # response
