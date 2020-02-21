@@ -80,8 +80,8 @@ class WebResource
     def nodeSet
       pathIndex = localNode? ? 0 : hostPath.size
       qs = query_values || {}                                # query arguments
-      env[:summary] = !(qs.has_key? 'full')                  # summarize multi-node sets
-      (if node.directory?                                    # multi-node container
+      env[:summary] = !(qs.has_key? 'full')                  # summarize multi-node sets by default
+      (if node.directory?
        if qs.has_key?('f') && !qs['f'].empty? && path != '/' # FIND full name (case-insensitive)
          `find #{shellPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
        elsif qs.has_key?('find') && !qs['find'].empty? && path != '/'# FIND substring (case-insensitive)
@@ -103,7 +103,7 @@ class WebResource
            cmd = "grep -ril -- #{Shellwords.escape args.join '.*'} #{shellPath}"
          end
          `#{cmd} | head -n 1024`.lines.map &:chomp
-       else     # LS
+       else                     # LS
          [node, *node.children]
        end
       else                      # GLOB
