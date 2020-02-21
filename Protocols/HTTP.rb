@@ -178,7 +178,6 @@ class WebResource
 
     def denyPOST
       env[:deny] = true
-      HTTP.print_body headers, env['rack.input'].read if ENV.has_key? 'VERBOSE'
       [202, {'Access-Control-Allow-Credentials' => 'true',
              'Access-Control-Allow-Origin' => allowedOrigin}, []]
     end
@@ -418,10 +417,12 @@ class WebResource
       env.delete 'rack.input'
       print_header head if ENV.has_key? 'VERBOSE'
       r = HTTParty.post uri, headers: head, body: body
-      [r.code, (headers r.headers), [r.body]]
+      head = headers r.headers
+      print_header head if ENV.has_key? 'VERBOSE'
+      [r.code, head, [r.body]]
     end
 
-    def HTTP.print_body head, body
+    def print_body head, body
       type = head['Content-Type'] || head['content-type']
       puts type
       puts case type
