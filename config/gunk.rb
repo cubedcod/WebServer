@@ -7,7 +7,7 @@ class WebResource
 ((block|load|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|frame|id|obe|rotat[eo]r?|slots?|system|tech|tools?|types?|units?|words?|zones?)?|akismet|alerts?|.*analytics?.*|appnexus|audience|(app|smart)?
 b(lueconic|ouncee?x.*)s?|.*bid(d(er|ing)|s).*|
 c(ampaigns?|edexis|hartbeat.*|mp|ollector|omscore|on(sent|version)|ookie(c(hoice|onsent)|law|notice)?s?|riteo|se)|
-de(als|mandware|t(ect|roitchicago))|.*dfp.*|disney(id)?|doubleclick|
+de(als|mandware|t(ect|roitchicago))|disney(id)?|doubleclick|
 e(moji.*\.js|ndscreen|nsighten|proof|scenic|vidon|zoic)|
 firebase|(web)?fonts?(awesome)?|
 g(dpr|eo(ip|locat(e|ion))|igya|pt|tag|tm)|.*(
