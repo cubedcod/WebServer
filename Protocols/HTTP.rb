@@ -67,7 +67,7 @@ class WebResource
                       elsif ext == 'json' || mime.match?(/json/)
                         '🗒'
                       elsif %w(gif jpeg jpg png svg webp).member?(ext) || mime.match?(/^image/)
-                        '🖼️ '
+                        '🖼️'
                       elsif %w(aac flac m4a mp3 ogg opus).member?(ext) || mime.match?(/^audio/)
                         '🔉'
                       elsif %w(mp4 webm).member?(ext) || mime.match?(/^video/)
@@ -79,6 +79,16 @@ class WebResource
                       else
                         mime
                       end
+        color = case format_icon
+                when '🖼️ '
+                  '33;1'
+                when '📜'
+                  '36;1'
+                when '🐢'
+                  32
+                else
+                  7
+                end
         triple_count = env[:repository] ? ('%4d⋮' % env[:repository].size) : nil
 
         if env[:deny]
@@ -91,7 +101,7 @@ class WebResource
           puts [resource.uri, status_icon, head['Location']].join ' '
         elsif [204, 304].member? status
         else
-          puts [network_icon, status_icon, format_icon, triple_count, "\e[7m", resource.uri, "\e[0m"].join ' '
+          puts [network_icon, status_icon, format_icon, triple_count, "\e[#{color}m", resource.uri, "\e[0m"].join ' '
         end
         
         [status, head, body]} # response
