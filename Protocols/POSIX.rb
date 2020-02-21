@@ -103,12 +103,8 @@ class WebResource
            cmd = "grep -ril -- #{Shellwords.escape args.join '.*'} #{shellPath}"
          end
          `#{cmd} | head -n 1024`.lines.map &:chomp
-       else     # basic container
-         if env[:summary]
-           [node] # directory listing
-         else     # directory contents
-           [node, *node.children]
-         end
+       else     # LS
+         [node, *node.children]
        end
       else                      # GLOB
         globPath = fsPath

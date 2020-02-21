@@ -11,7 +11,6 @@ class WebResource
     HostPOST = {}
     Methods = %w(GET HEAD OPTIONS POST PUT)
     Populator = {}
-    Req204 = /gen(erate)?_?204$/
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
     SingleHop = %w(connection fetch gunk host keep-alive links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software site-chrome summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for)
@@ -317,7 +316,7 @@ class WebResource
         else                    # local node
           nodeResponse
         end                    ## remote
-      elsif path.match? Req204  # connectivity check
+      elsif path.match? /gen(erate)?_?204$/ # connectivity check
         R204
       elsif path.match? HourDir # cached remote - timeslice
         (path + '*' + host.split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*').R(env).nodeResponse
