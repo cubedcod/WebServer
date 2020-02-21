@@ -121,10 +121,10 @@ class WebResource
 
     def cookies
       cookie = (hostPath + '.cookie').R
-      if cookie.node.exist?
-        env['HTTP_COOKIE'] = cookie.readFile # read cookie
-      elsif env.has_key? 'HTTP_COOKIE'
-        cookie.writeFile env['HTTP_COOKIE']  # write cookie
+      if jar = cookie.readFile              # jar has cookie
+        env['HTTP_COOKIE'] = env[:resp]['Set-Cookie'] = jar unless env['HTTP_COOKIE'] == jar # give client and server jar-cookie
+      elsif env.has_key? 'HTTP_COOKIE'      # empty jar
+        cookie.writeFile env['HTTP_COOKIE'] # write cookie to jar
       end
       self
     end
@@ -263,7 +263,7 @@ class WebResource
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # expose upstream metadata to downstream
           env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin # CORS header
-          env[:resp]['Set-Cookie'] = h['set-cookie'] if h['set-cookie'] && allowCookies?
+          env[:resp]['Set-Cookie'] ||= h['set-cookie'] if h['set-cookie'] && allowCookies?
           if static
             env[:resp]['Content-Length'] = body.bytesize.to_s         # size header
             [200, env[:resp], [body]]                                 # upstream doc

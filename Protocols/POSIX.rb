@@ -38,7 +38,7 @@ class WebResource
 
   end
 
-  def readFile; node.read end
+  def readFile; node.exist? ? node.read : nil end
 
   def writeFile o
     FileUtils.mkdir_p node.dirname
