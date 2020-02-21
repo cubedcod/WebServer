@@ -98,7 +98,7 @@ class WebResource
         elsif env['REQUEST_METHOD'] == 'POST'
           puts "📝 \e[32;1m#{resource.uri}\e[0m"
         elsif [301, 302, 303].member? status # redirect
-          puts [resource.uri, status_icon, head['Location']].join ' '
+          puts [resource.uri, status_icon + ' ', head['Location']].join ' '
         elsif [204, 304].member? status
         else
           puts [network_icon, status_icon, format_icon, triple_count, "\e[#{color}m", resource.uri, "\e[0m"].compact.join ' '

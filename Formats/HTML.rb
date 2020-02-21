@@ -321,9 +321,7 @@ class WebResource
                                  parts.map{|p|
                                     [{_: :a, class: :breadcrumb, href: bc += p + '/', c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
                                  link[:feed, FeedIcon],
-                                 ([' ',{_: :a, id: :showMain, href: '#body'}] if env[:site_chrome]),
-                                  # '🕒'
-                                 ]},
+                                 ([' ',{_: :a, id: :showMain, href: '#body'}] if env[:site_chrome])]},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?
                                HTML.keyval (Webize::HTML.webizeHash env), env

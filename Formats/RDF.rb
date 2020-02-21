@@ -77,26 +77,26 @@ class WebResource < RDF::URI
   # RDF::Repository -> Turtle file(s)
   def saveRDF repository = nil
     return self unless repository || env[:repository]
-
     (repository || env[:repository]).each_graph.map{|graph|
-      n = (graph.name || self).R # graph URI
-      docs = [n] # canonical location
-      # doc on timeline TODO hard/symlink? other locations?
-      if ts = graph.query(RDF::Query::Pattern.new(:s, (WebResource::Date).R, :o)).first_value   # timestamp query
-        docs.push ['/'+ts.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), # build hour-dir path
-                   %w{host path query}.map{|a|n.send(a).yield_self{|p|p && p.split(/[\W_]/)}}]. # tokenize slugs
-                    flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.').R            # apply slug skiplist
-      end
-      docs.map{|doc|
-        turtle = doc.fsPath + '.ttl'
+      doc = (graph.name || self).R
+      turtle = doc.fsPath + '.ttl'
+      unless File.exist? turtle
+        FileUtils.mkdir_p File.dirname turtle
+        RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
         triples = '%3d' % graph.size
-        if File.exist? turtle
-          puts "⚪ #{triples} #{doc.fsPath}" if ENV.has_key? 'VERBOSE'
-        else
-          FileUtils.mkdir_p File.dirname turtle
-          RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
-          puts "\e[32m#{triples}🐢 \e[1m#{doc}\e[0m "
-        end}}
+        puts "\e[32m#{triples}🐢 \e[1m#{doc}\e[0m "
+      end
+      if timestamp = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value               # timestamp
+        tlink = [timestamp.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'),     # hour-dir
+                 %w{host path query}.map{|attr|
+                   doc.send(attr).yield_self{|p|p && p.split(/[\W_]/)}}, 'ttl']. # URI slugs
+                  flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join '.'  # apply slug skiplist
+        unless File.exist? tlink
+          puts '🕒 ' + tlink
+          FileUtils.mkdir_p File.dirname tlink
+          FileUtils.ln turtle, tlink
+        end
+      end}
     self
   end
 
