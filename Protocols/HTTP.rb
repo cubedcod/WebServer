@@ -14,8 +14,6 @@ class WebResource
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
     SingleHop = %w(connection fetch gunk host keep-alive links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software site-chrome summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for)
-    R204 = [204, {}, []]
-    R304 = [304, {}, []]
 
     def self.Allow host
       AllowedHosts[host] = true
@@ -194,7 +192,7 @@ class WebResource
     def fetch options=nil
       return nodeResponse if ENV.has_key? 'OFFLINE'                                               # offline-only response
       if StaticFormats.member? ext.downcase                                                       # static-cache formats:
-        return R304 if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client-cached node
+        return [304, {}, []] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client-cached node
         return fileResponse if node.file?                                                         # server-cached node (direct hit)
       end
       c = nodeSet ; return c[0].fileResponse if c.size == 1 && StaticFormats.member?(c[0].ext)    # server-cached node (indirect hit)
@@ -286,7 +284,7 @@ class WebResource
           [302, {'Location' => dest.uri}, []]
         end
       when /304/ # Not Modified
-        R304
+        [304, {}, []]
       when /404/ # Not Found
         upstreamUI? ? [404, (headers e.io.meta), [e.io.read]] : nodeResponse
       when /300|4(0[13]|10|29)|50[03]|999/
@@ -317,7 +315,7 @@ class WebResource
           nodeResponse
         end                    ## remote
       elsif path.match? /gen(erate)?_?204$/ # connectivity check
-        R204
+        [204, {}, []]
       elsif path.match? HourDir # cached remote - timeslice
         (path + '*' + host.split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*').R(env).nodeResponse
       elsif handler = HostGET[host] # host lambda

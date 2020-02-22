@@ -48,21 +48,21 @@ class WebResource
 
   module HTTP
 
-    # return lazily-generated file, via Rack file-handler, if needed by client
+    # return lazily-generated File or String, via Rack file-handler if File, if needed by client
     def entity generator = nil
       entities = env['HTTP_IF_NONE_MATCH']&.strip&.split /\s*,\s*/
       if entities && entities.include?(env[:resp]['ETag'])
-        R304                                     # unmodified resource
+        [304, {}, []]                            # unmodified
       else
-        body = generator ? generator.call : self # generate resource
+        body = generator ? generator.call : self # generate
         if body.class == WebResource             # resource reference
           Rack::Files.new('.').serving(Rack::Request.new(env), body.fsPath).yield_self{|s,h,b|
             if 304 == s
-              R304                               # unmodified resource
-            else                                 # file reference
+              [304, {}, []]                      # unmodified dereference
+            else
               h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type'] == 'application/javascript'
               env[:resp]['Content-Length'] = body.node.size.to_s
-              [s, h.update(env[:resp]), b]       # file handler
+              [s, h.update(env[:resp]), b]       # file
             end}
         else
           env[:resp]['Content-Length'] = body.bytesize.to_s
