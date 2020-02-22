@@ -72,28 +72,30 @@ class WebResource < RDF::URI
     puts [e.class, e.message].join ' '
   end
 
-  # RDF::Repository -> Turtle file(s)
+  # RDF::Repository -> file(s)
   def saveRDF repository = nil
     return self unless repository || env[:repository]
     (repository || env[:repository]).each_graph.map{|graph|
       doc = (graph.name || self).R
       turtle = doc.fsPath + '.ttl'
-      unless File.exist? turtle
+
+      unless File.exist? turtle # write document
         FileUtils.mkdir_p File.dirname turtle
         RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
-        triples = '%3d' % graph.size
-        puts "\e[32m#{triples}🐢 \e[1m#{doc}\e[0m "
+        puts "\e[32m#{graph.size}🐢 \e[1m#{doc}\e[0m" if doc.path != path
       end
-      if timestamp = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value               # timestamp
-        tlink = [timestamp.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'),     # hour-dir
+
+      if timestamp = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value            # timestamp
+        tlink = [timestamp.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), # hour-dir
                  %w{host path query}.map{|attr|
                    doc.send(attr).yield_self{|p|p && p.split(/[\W_]/)}}, 'ttl']. # URI slugs
                   flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join '.'  # apply slug skiplist
-        unless File.exist? tlink
-          #puts '🕒 ' + tlink
+
+        unless File.exist? tlink # link to timeline
           FileUtils.mkdir_p File.dirname tlink
           FileUtils.ln turtle, tlink
         end
+
       end}
     self
   end
