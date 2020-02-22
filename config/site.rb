@@ -202,24 +202,29 @@ thumbs.ebaystatic.com).map{|host| GET host }
 
     # Google
     unless ENV.has_key? 'DEGOOGLE'
-      Allow 'groups.google.com'
-      if ENV.has_key? 'GOOGLE'
+      if ENV.has_key? 'GOOGLE'            # POST hosts
         Allow 'android.clients.google.com'
+        Allow 'groups.google.com'
         (0..24).map{|i| h="#{i}.client-channel.google.com"; Allow h}
         (0..24).map{|i| Allow "clients#{i}.google.com"}
       end
-      Cookies 'www.google.com'            # allow personalization
+      Cookies 'www.google.com'            # personalization
+                                          # data hosts
       GData = -> r {(r.env[:refhost]||'').match?(/\.(blog(ger|spot)|google(apis)?|gstatic)\.com$/) ? NoGunk[r] : r.deny}
       %w(maps ssl www).map{|h| GET h + '.googleapis.com', GData }
       %w(maps ssl www).map{|h| GET h + '.gstatic.com', GData }
       (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com", GData }
       (0..3).map{|i| GET "khms#{i}.google.com", GData }
+
       GET 'ajax.googleapis.com'           # Javascript libraries
       GET 'feedproxy.google.com', NoQuery
       GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
       GET 'www.google.com', -> r {
         case r.path
-        when /^.(images|maps|xjs)/
+        when /^.complete/
+          r.query_values.map{|k,v| puts [k,v].join "\t"}
+          r.deny
+        when /^.(images|maps)/
           r.upstreamUI.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
           r.fetch
         when /^.search/ # full URLs are sent here on Android/Chrome. redirect to URL
@@ -310,9 +315,7 @@ zoopps.com
     # Meredith
     GET 'imagesvc.meredithcorp.io', GoIfURL
 
-    # Mixcloud
-    %w(m www).map{|h| GET h + '.mixcloud.com' }
-
+    # Mozilla
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # Nextdoor
@@ -339,13 +342,14 @@ zoopps.com
       r.env[:links][:prev] = ['https://old.reddit.com', r.path, '?', r.query].join # page pointers
       r.fetch options}
 
-    GET 'old.reddit.com', -> r { # find next-page pointer, missing in HTTP Headers (old/new UI) and HTML/RSS (new UI)
+    GET 'old.reddit.com', -> r {
       r.upstreamUI.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
       r.fetch.yield_self{|status,head,body|
         if !%w(r u user).member?(r.parts[0]) || status.to_s.match?(/^30/)
           [status, head, body]
-        else # redirect to page
+        else
           refs = []
+          # find next-page pointer, missing in HTTP Headers (old/new UI) and HTML/RSS (new UI)
           body[0].scan(/href="([^"]+after=[^"]+)/){|l| refs << l[0] }
           if refs.empty?
             GotoReddit[r]
@@ -353,8 +357,7 @@ zoopps.com
             page = refs[-1].R
             [302, {'Location' => ['https://www.reddit.com', page.path, '?', page.query].join}, []]
           end
-        end
-      }}
+        end}}
 
     # Reuters
     GET 'feeds.reuters.com', NoQuery
