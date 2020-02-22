@@ -18,7 +18,7 @@ class WebResource
           hash = Digest::SHA2.hexdigest path  # path too big, hash it
           [hash[0..1], hash[2..-1]]
         else                                  # direct path
-          parts.map{|p| Rack::Utils.unescape p}
+          parts.map{|p| Rack::Utils.unescape_path p}
          end).join('/')
     end
 
