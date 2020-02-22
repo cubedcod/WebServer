@@ -87,7 +87,7 @@ class WebResource
                 else
                   7
                 end
-        triple_count = env[:repository] ? ('%4d⋮' % env[:repository].size) : nil
+        triple_count = env[:repository] ? (env[:repository].size.to_s + '⋮') : nil
 
         if env[:deny]
           puts (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "#{status_icon} \e[31;1m") + (env[:refhost] ? ("\e[7m" + env[:refhost] + "\e[0m\e[31;1m → ") : '') + (env[:refhost] == resource.host ? '' : ('http://' + resource.host)) + "\e[7m" + resource.path + "\e[0m\e[31m" + "\e[0m"

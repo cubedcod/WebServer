@@ -503,10 +503,12 @@ zoopps.com
     GET 'img.youtube.com'
 
     GET 'www.youtube.com', -> r {
-      fn = r.parts[0]
-      if %w{attribution_link redirect}.member? fn
-        [301, {'Location' =>  r.query_values['q'] || r.query_values['u']}, []]
-      elsif r.path=='/'  || %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results signin user watch watch_videos yts).member?(fn)
+      path = r.parts[0]
+      if %w{attribution_link redirect}.member? path
+        [301, {'Location' => r.query_values['q'] || r.query_values['u']}, []]
+      elsif r.path == '/'
+        [301, {'Location' => '/feed/subscriptions'}, []]
+      elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results signin user watch watch_videos yts).member? path
         NoGunk[r.upstreamUI]
       else
         r.deny
