@@ -487,11 +487,12 @@ class WebResource
                {_: :a, href: src, c: src.R.basename}]}
     }
 
-    Markup[Container] = -> dir , env {
-      uri = dir.delete 'uri'
-      [Type, Title, W3+'ns/posix/stat#mtime', W3+'ns/posix/stat#size'].map{|p|dir.delete p}
+    Markup[Container] = -> dir , env { uri = (dir.delete('uri') || '').R
+      [Type, Title,
+       W3 + 'ns/posix/stat#mtime',
+       W3 + 'ns/posix/stat#size'].map{|p|dir.delete p}
       {class: :container,
-       c: [({_: :a, id: 'container' + Digest::SHA2.hexdigest(rand.to_s), class: :title, href: uri, type: :node, c: uri.R.basename} if uri),
+       c: [{_: :a, id: 'container' + Digest::SHA2.hexdigest(rand.to_s), class: :title, href: uri.path, type: :node, c: uri.basename},
            {class: :body, c: HTML.keyval(dir, env)}]}}
 
     Markup[Creator] = Markup[To] = -> c, env {
