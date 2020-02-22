@@ -120,22 +120,9 @@ module Webize
         timestamp = ([Time, DateTime].member?(date.class) ? date : Time.parse(date.to_s)).iso8601
         yield mail, Date, timestamp, graph
 
+        # write message to maildir
         mailFile = ('mail/cur/' + timestamp.gsub(/\D/,'.') + Digest::SHA2.hexdigest(id) + '.eml').R
         mailFile.writeFile body unless mailFile.node.exist?
-
-        # index addresses
-        [*from, *to].map{|addr|
-          user, domain = addr.split '@'
-          if user && domain
-            apath = '/mail/' + domain + '/' + user + '/' # address container
-            yield mail, from.member?(addr) ? Creator : To, apath.R, graph # To/From triple
-            if subject
-              slug = subject.scan(/[\w]+/).map(&:downcase).uniq.join('.')[0..63]
-              addrIndex = (apath + timestamp + '.' + slug).R
-              yield mail, Title, subject, addrIndex, graph if subject
-              yield mail, Date, timestamp, addrIndex, graph
-            end
-          end }
 
         # references
         %w{in_reply_to references}.map{|ref|

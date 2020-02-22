@@ -59,7 +59,7 @@ class WebResource
         ext = resource.path ? resource.ext.downcase : ''                        # log
         mime = head['Content-Type'] || ''
         network_icon = env[:fetch] ? '🐕' : nil
-        status_icon = env[:deny] && '🛑' || {204 => '🌐', 301 => '➡️', 302 => '➡️', 303 => '➡️', 304 => '✅', 401 => '🚫', 403 => '🚫', 404 => '❓', 410 => '❌',}[status] || (status == 200 ? nil : status)
+        status_icon = env[:deny] && '🛑' || {204 => '🌐', 301 => '➡️', 302 => '➡️', 303 => '➡️', 304 => '✅', 401 => '🚫', 403 => '🚫', 404 => '❓', 410 => '❌', 500 => '🚩'}[status] || (status == 200 ? nil : status)
         format_icon = if ext == 'css'
                         '🎨'
                       elsif ext == 'js' || mime.match?(/script/)

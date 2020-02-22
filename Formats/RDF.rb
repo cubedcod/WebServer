@@ -92,7 +92,7 @@ class WebResource < RDF::URI
                    doc.send(attr).yield_self{|p|p && p.split(/[\W_]/)}}, 'ttl']. # URI slugs
                   flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join '.'  # apply slug skiplist
         unless File.exist? tlink
-          puts '🕒 ' + tlink
+          #puts '🕒 ' + tlink
           FileUtils.mkdir_p File.dirname tlink
           FileUtils.ln turtle, tlink
         end

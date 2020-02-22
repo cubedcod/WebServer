@@ -7,7 +7,7 @@ class WebResource
 ((block|load|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|frame|id|obe|rotat[eo]r?|slots?|system|tech|tools?|types?|units?|words?|zones?)?|akismet|alerts?|.*analytics?.*|appnexus|audience|(app|smart)?
 b(lueconic|ouncee?x.*)s?|.*bid(d(er|ing)|s).*|
 c(ampaigns?|edexis|hartbeat.*|mp|ollector|omscore|on(sent|version)|ookie(c(hoice|onsent)|law|notice)?s?|riteo|se)|
-de(als|mandware|t(ect|roitchicago))|disney(id)?|doubleclick|
+de(als|mandware|t(ect|roitchicago))|dfp|disney(id)?|doubleclick|
 e(moji.*\.js|ndscreen|nsighten|proof|scenic|vidon|zoic)|
 firebase|(web)?fonts?(awesome)?|
 g(dpr|eo(ip|locat(e|ion))|igya|pt|tag|tm)|.*(
@@ -149,7 +149,7 @@ image-src
           end
 
         # inline content
-        elsif s['type'] != 'application/ld+json' && text.match?(GunkExec) && !text.match?(/(initial|preload(ed)?|shared).?(data|state)|SCRIPTS_LOADED|window.app/i)
+        elsif s['type'] != 'application/ld+json' && text.match?(GunkExec) && !text.match?(/(global|initial|preload(ed)?|shared).?(content|data|state)|SCRIPTS_LOADED|window.app/i)
           print "\n🛑 #{text.size} \e[30;1m" + text.gsub(/[\n\r\t]+/,'').gsub(/\s\s+/,' ').gsub(GunkExec,"\e[31m\\1\e[30m") + "\e[0m" if verbose
           s.remove
         end}
