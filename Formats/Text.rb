@@ -271,7 +271,7 @@ module Webize
  uk utm www}
 
     class Format < RDF::Format
-      content_type 'text/plain', :extension => :txt
+      content_type 'text/plain', :extensions => [:README, :txt]
       content_encoding 'utf-8'
       reader { Reader }
     end

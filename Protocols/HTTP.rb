@@ -243,7 +243,6 @@ class WebResource
                    elsif h.has_key? 'content-type'
                      h['content-type'].split(/;/)[0]
                    elsif RDF::Format.file_extensions.has_key? ext.to_sym
-                     puts "ENOTYPE on #{uri} , pathname determines MIME"
                      RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
                    end
           static = !options[:reformat] && (fixedFormat? format)       # rewritable format?
@@ -254,7 +253,7 @@ class WebResource
           storage.R.writeFile body                                    # cache body
           reader = RDF::Reader.for content_type: format               # select reader
           reader.new(body, base_uri: self){|_|                        # read RDF
-            (env[:repository] ||= RDF::Repository.new) << _ } if reader && !%w(.css .ico .jpg .js .png .svg).member?(formatExt)
+            (env[:repository] ||= RDF::Repository.new) << _ } if reader && !%w(.css .gif .ico .jpg .js .png .svg).member?(formatExt)
           return self if options[:intermediate]                       # intermediate fetch, return w/o HTTP response
           reader ? saveRDF : (puts "ENORDF #{format} #{uri}")         # cache RDF
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
