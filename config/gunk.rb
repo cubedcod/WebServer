@@ -144,13 +144,13 @@ image-src
           src = s['src'].R
 
           if src.uri.match?(Gunk) || (src.gunkDomain? && !src.allowCDN?)
-            print "\n🛑 \e[31;7;1m" + src.uri + "\e[0m " if verbose
+            puts "🚩\e[31;7;1m" + src.uri + "\e[0m " if verbose
             s.remove
           end
 
         # inline content
         elsif s['type'] != 'application/ld+json' && text.match?(GunkExec) && !text.match?(/(global|initial|preload(ed)?|shared).?(content|data|state)|SCRIPTS_LOADED|window.app/i)
-          print "\n🛑 #{text.size} \e[30;1m" + text.gsub(/[\n\r\t]+/,'').gsub(/\s\s+/,' ').gsub(GunkExec,"\e[31m\\1\e[30m") + "\e[0m" if verbose
+          puts "🚩#{text.size} \e[30;1m" + text.gsub(/[\n\r\t]+/,'').gsub(/\s\s+/,' ').gsub(GunkExec,"\e[31m\\1\e[30m") + "\e[0m" if verbose
           s.remove
         end}
     end

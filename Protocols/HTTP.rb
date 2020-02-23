@@ -58,7 +58,7 @@ class WebResource
         mime = head['Content-Type'] || ''
         network_icon = env[:fetch] ? '🐕' : nil
         status_icon = env[:deny] && '🛑' || {204 => '🌐', 301 => '➡️', 302 => '➡️', 303 => '➡️', 304 => '✅', 401 => '🚫', 403 => '🚫', 404 => '❓', 410 => '❌', 500 => '🚩'}[status] || (status == 200 ? nil : status)
-        format_icon = if ext == 'css'
+        format_icon = if ext == 'css' || mime.match?(/text\/css/)
                         '🎨'
                       elsif ext == 'js' || mime.match?(/script/)
                         '📜'
@@ -254,7 +254,7 @@ class WebResource
           storage.R.writeFile body                                    # cache body
           reader = RDF::Reader.for content_type: format               # select reader
           reader.new(body, base_uri: self){|_|                        # read RDF
-            (env[:repository] ||= RDF::Repository.new) << _ } if reader && !%w(.jpg .png).member?(formatExt)
+            (env[:repository] ||= RDF::Repository.new) << _ } if reader && !%w(.css .ico .jpg .js .png .svg).member?(formatExt)
           return self if options[:intermediate]                       # intermediate fetch, return w/o HTTP response
           reader ? saveRDF : (puts "ENORDF #{format} #{uri}")         # cache RDF
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|

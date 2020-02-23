@@ -391,6 +391,7 @@ zoopps.com
 ).map{|host| Allow host
                GET host}
     GET 'soundcloud.com', RootIndex
+    GET 'w.soundcloud.com', -> r {NoGunk[r.upstreamUI]}
 
     # Technology Review
     GET 'cdn.technologyreview.com', NoQuery
