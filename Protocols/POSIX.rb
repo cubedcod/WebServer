@@ -84,10 +84,9 @@ class WebResource
       (if node.directory?
        if qs.has_key?('f') && !qs['f'].empty? && path != '/' # FIND full name (case-insensitive)
          `find #{shellPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
-       elsif qs.has_key?('find') && !qs['find'].empty? && path != '/'# FIND substring (case-insensitive)
+       elsif qs.has_key?('find') && !qs['find'].empty? && path != '/' # FIND substring (case-insensitive)
          `find #{shellPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
-       elsif (qs.has_key?('Q') || qs.has_key?('q')) && path != '/'
-         env[:grep] = true                                   # GREP
+       elsif (qs.has_key?('Q') || qs.has_key?('q')) && path != '/' # GREP
          q = qs['Q'] || qs['q']
          args = q.shellsplit rescue q.split(/\W/)
          case args.size
@@ -108,10 +107,8 @@ class WebResource
        end
       else                      # GLOB
         globPath = fsPath
-        if uri.match GlobChars  # parametric glob
-          env[:grep] = true if qs.has_key? 'q' # enable grep within glob
-        else                    # base-URI glob
-          env[:summary] = false # default graph - show full content
+        unless globPath.match GlobChars # parametric glob
+          env[:summary] = false # default glob, canonical graph documents
           globPath += '*'
         end
         Pathname.glob globPath

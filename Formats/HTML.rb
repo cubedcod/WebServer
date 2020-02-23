@@ -283,11 +283,12 @@ class WebResource
     # JSON-graph -> HTML
     def htmlDocument graph=nil
       graph ||= env[:graph] = treeFromGraph
+      qs = query_values || {}
       env[:images] ||= {}
       env[:colors] ||= {}
       env[:links] ||= {}
       if env[:summary]
-        expanded = HTTP.qs (query_values||{}).merge({'full' => nil})
+        expanded = HTTP.qs qs.merge({'full' => nil})
         env[:links][:full] = expanded
         expander = {_: :a, id: :expand, c: '&#11206;', href: expanded}
       end
@@ -300,7 +301,7 @@ class WebResource
           [{_: :a, href: url, id: key, class: :icon, c: content},
            "\n"]
         end}
-      htmlGrep if env[:graph] && env[:grep]
+      htmlGrep
 
       # Markup -> HTML string
       HTML.render ["<!DOCTYPE html>\n",
@@ -315,9 +316,9 @@ class WebResource
                         {_: :body,
                          c: [{class: :toolbox,
                               c: [(icon.node.exist? && icon.node.size != 0) ? {_: :a, href: '/', id: :host, c: {_: :img, src: icon.uri}} : (host || 'localhost').split('.').-(%w(com net org www)).reverse.map{|h| {_: :a, class: :breadcrumb, href: '/', c: h}},
-                                  {_: :a, id: :UX, class: :icon, style: 'color: #555', c: '⚗️', href: HTTP.qs((query_values||{}).merge({'UX' => 'upstream'}))},
+                                  {_: :a, id: :UX, class: :icon, style: 'color: #555', c: '⚗️', href: HTTP.qs(qs.merge({'UX' => 'upstream'}))},
                                  ({_: :a, id: :tabular, class: :icon, style: 'color: #555', c: '↨',
-                                    href: HTTP.qs((query_values||{}).merge({'view' => 'table', 'sort' => 'date'}))} unless query_values && query_values['view']=='table'),
+                                    href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless qs['view'] == 'table'),
                                  parts.map{|p|
                                     [{_: :a, class: :breadcrumb, href: bc += p + '/', c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
                                  link[:feed, FeedIcon],
@@ -325,8 +326,8 @@ class WebResource
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?
                                HTML.keyval (Webize::HTML.webizeHash env), env
-                             elsif (env[:view] || (query_values||{})['view']) == 'table'
-                               env[:sort] ||= query_values['sort'] if query_values
+                             elsif (env[:view] || qs['view']) == 'table'
+                               env[:sort] ||= qs['sort']
                                HTML.tabular graph, env
                              else
                                graph.values.map{|resource|
@@ -337,25 +338,28 @@ class WebResource
 
     def htmlGrep
       graph = env[:graph]
-      qv = query_values || {}
-      q = qv['Q'] || qv['q']
+      qs = query_values || {}
+      q = qs['Q'] || qs['q']
+      return unless graph && q
+
+      # query
       wordIndex = {}
       args = q.shellsplit rescue q.split(/\W/)
       args.each_with_index{|arg,i| wordIndex[arg] = i }
       pattern = /(#{args.join '|'})/i
 
-      # reduce graph to matching resources
+      # trim graph to matching resources
       graph.map{|k,v|
         graph.delete k unless (k.to_s.match pattern) || (v.to_s.match pattern)}
 
-      # reduce content to highlighted matching lines
+      # trim content to matching lines
       graph.values.map{|r|
         (r[Content]||r[Abstract]||[]).map{|v|v.respond_to?(:lines) ? v.lines : nil}.flatten.compact.grep(pattern).yield_self{|lines|
           r[Abstract] = lines[0..7].map{|l|
             l.gsub(/<[^>]+>/,'')[0..512].gsub(pattern){|g| # matches
               HTML.render({_: :span, class: "w#{wordIndex[g.downcase]}", c: g}) # wrap in styled node
             }} if lines.size > 0 }
-        r.delete Content unless qv.has_key?('full')}
+        r.delete Content unless qs.has_key?('full')}
 
       # CSS
       graph['#abstracts'] = {Abstract => [HTML.render({_: :style, c: wordIndex.values.map{|i|
