@@ -301,7 +301,7 @@ class WebResource
           [{_: :a, href: url, id: key, class: :icon, c: content},
            "\n"]
         end}
-      htmlGrep
+      htmlGrep if localNode?
 
       # Markup -> HTML string
       HTML.render ["<!DOCTYPE html>\n",
