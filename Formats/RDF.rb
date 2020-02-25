@@ -82,7 +82,7 @@ class WebResource < RDF::URI
       unless File.exist? turtle # write document
         FileUtils.mkdir_p File.dirname turtle
         RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
-        puts "\e[32m#{graph.size}⋮ 🐢 \e[1m#{doc}\e[0m" if doc.path != path
+        puts "\e[32m#{'%2d' % graph.size}⋮🐢 \e[1m#{doc}\e[0m" if doc.path != path
       end
 
       if timestamp = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value            # timestamp
