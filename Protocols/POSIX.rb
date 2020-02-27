@@ -48,25 +48,24 @@ class WebResource
 
   module HTTP
 
-    # return lazily-generated File or String, via Rack file-handler if File, if needed by client
+    # if needed by client, return lazily-generated file or string, by Rack handler if file
     def entity generator = nil
-      entities = env['HTTP_IF_NONE_MATCH']&.strip&.split /\s*,\s*/
-      if entities && entities.include?(env[:resp]['ETag'])
-        [304, {}, []]                            # unmodified
+      if env['HTTP_IF_NONE_MATCH']&.strip&.split(/\s*,\s*/).include? env[:resp]['ETag']
+        [304, {}, []]                            # unmodified entity
       else
-        body = generator ? generator.call : self # generate
-        if body.class == WebResource             # resource reference
+        body = generator ? generator.call : self # generate entity
+        if body.class == WebResource             # entity file-reference?
           Rack::Files.new('.').serving(Rack::Request.new(env), body.fsPath).yield_self{|s,h,b|
             if 304 == s
-              [304, {}, []]                      # unmodified dereference
+              [304, {}, []]                      #  unmodified file
             else
               h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type'] == 'application/javascript'
               env[:resp]['Content-Length'] = body.node.size.to_s
-              [s, h.update(env[:resp]), b]       # file
+              [s, h.update(env[:resp]), b]       #  file
             end}
         else
           env[:resp]['Content-Length'] = body.bytesize.to_s
-          [200, env[:resp], [body]] # generated entity
+          [200, env[:resp], [body]]              # entity
         end
       end
     end
@@ -113,15 +112,15 @@ class WebResource
           globPath += '*'
         end
         Pathname.glob globPath
-       end).map{|p|             # bind paths to URI-space
+       end).map{|p|             # map path to URI-space
         ((host ? ('https://' + host) : '') + '/' + p.to_s[pathIndex..-1].gsub(':','%3A').gsub('#','%23')).R env }
     end
 
     def nodeResponse
-      return fileResponse if StaticFormats.member?(ext.downcase) && node.file? # direct node hit
+      return fileResponse if StaticFormats.member?(ext.downcase) && node.file? # direct node
       nodes = nodeSet                                                          # find indirect nodes
       if nodes.size == 1 && (StaticFormats.member?(nodes[0].ext) || (selectFormat == 'text/turtle' && nodes[0].ext == 'ttl'))
-        nodes[0].fileResponse           # single node w/ no merging or transcoding
+        nodes[0].fileResponse           # static node, no merging or transcoding
       else                              # transform and/or merge nodes
         nodes = nodes.map &:summary if env[:summary] # summarize nodes
         nodes.map &:loadRDF             # node(s) -> Graph
