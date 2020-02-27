@@ -80,7 +80,7 @@ class WebResource
     def nodeSet
       pathIndex = localNode? ? 0 : hostPath.size
       qs = query_values || {}                                # query arguments
-      env[:summary] = !(qs.has_key? 'full')                  # summarize multi-node sets by default
+      env[:summary] = !(qs.has_key? 'fullContent')           # summarize multi-node sets by default
       (if node.directory?
        if qs.has_key?('f') && !qs['f'].empty? && path != '/' # FIND full name (case-insensitive)
          `find #{shellPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp

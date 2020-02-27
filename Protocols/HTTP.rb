@@ -45,7 +45,7 @@ class WebResource
       env[:refhost] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # referring host
       env[:resp] = {}                                                           # response-header storage
       env[:links] = {}                                                          # Link response-header
-      if uri.query_values&.has_key? 'full'
+      if uri.query_values&.has_key? 'fullContent'
         env[:links][:up] = '?'
       elsif uri.path != '/'
         up = File.dirname uri.path

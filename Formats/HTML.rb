@@ -288,7 +288,7 @@ class WebResource
       env[:colors] ||= {}
       env[:links] ||= {}
       if env[:summary]
-        expanded = HTTP.qs qs.merge({'full' => nil})
+        expanded = HTTP.qs qs.merge({'fullContent' => nil})
         env[:links][:full] = expanded
         expander = {_: :a, id: :expand, c: '&#11206;', href: expanded}
       end
@@ -359,7 +359,7 @@ class WebResource
             l.gsub(/<[^>]+>/,'')[0..512].gsub(pattern){|g| # matches
               HTML.render({_: :span, class: "w#{wordIndex[g.downcase]}", c: g}) # wrap in styled node
             }} if lines.size > 0 }
-        r.delete Content unless qs.has_key?('full')}
+        r.delete Content unless qs.has_key?('fullContent')}
 
       # CSS
       graph['#abstracts'] = {Abstract => [HTML.render({_: :style, c: wordIndex.values.map{|i|
