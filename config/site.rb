@@ -89,10 +89,6 @@ class WebResource
         NoGunk[r]
       end}
 
-    # ABC
-    GET 'abcnews.go.com'
-    GET 's.abcnews.com'
-
     # Adobe
     Allow 'entitlement.auth.adobe.com'
     Allow 'sp.auth.adobe.com'
@@ -106,18 +102,9 @@ class WebResource
     # Anvato
     Allow 'tkx.apis.anvato.net'
 
-    # Balamii
-    Allow 'balamii-parse.herokuapp.com'
-    Allow 'player.balamii.com'
-
-    Cookies 'www.bizjournals.com'
-
     # Boston Globe
     GET 'bostonglobe-prod.cdn.arcpublishing.com', Resizer
     %w(bos.gl w.bos.gl).map{|short| GET short, NoQuery }
-
-    # BrassRing
-    Allow 'sjobs.brassring.com'
 
     # Brightcove
     %w(
@@ -134,12 +121,6 @@ secure.brightcove.com
     # BusinessWire
     GET 'cts.businesswire.com', GoIfURL
 
-    # BuzzFeed
-    GET 'img.buzzfeed.com'
-
-    # CBS
-    GET 'www.cbsnews.com'
-
     # Cloudflare
     GET 'cdnjs.cloudflare.com'
 
@@ -155,7 +136,6 @@ secure.brightcove.com
     GET 'disq.us', GoIfURL
 
     # DuckDuckGo
-    GET 'duckduckgo.com', -> r {NoGunk[r.upstreamUI]}
     GET 'proxy.duckduckgo.com', -> r {%w{iu}.member?(r.parts[0]) ? [301, {'Location' => r.query_values['u']}, []] : r.fetch}
 
     # eBay
@@ -167,9 +147,6 @@ thumbs.ebaystatic.com).map{|host| GET host }
 
     GET 'i.ebayimg.com', -> r {r.basename.match?(/s-l(64|96|200|225).jpg/) ? [301, {'Location' => File.dirname(r.path) + '/s-l1600.jpg'}, []] : r.fetch}
     GET 'rover.ebay.com', -> r {(r.query_values||{}).has_key?('mpre') ? [301, {'Location' => r.query_values['mpre']}, []] : r.deny}
-
-    # Economist
-    GET 'www.economist.com'
 
     # ESPN
     %w(api-app broadband media.video-cdn secure site.api site.web.api watch.auth.api watch.graph.api www).map{|h|
@@ -294,65 +271,33 @@ zoopps.com
     # JWPlayer
     GET 'ssl.p.jwpcdn.com'
 
-    # Linkedin
-    Cookies 'www.linkedin.com'
-    GET 'static-exp1.licdn.com'
-    GET 'media.licdn.com'
-    GET 'www.linkedin.com'
-
-    # Mail.ru
-    GET 'cloud.mail.ru'
-    GET 'img.imgsmail.ru'
-    GET 's.mail.ru'
-    GET 'thumb.cloud.mail.ru'
-
     # MassLive
     GET 'i.masslive.com', Resizer
-
-    # Meetup
-    GET 'www.meetup.com'
 
     # Meredith
     GET 'imagesvc.meredithcorp.io', GoIfURL
 
-    # Mozilla
-    GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
-
-    # Nextdoor
-    Cookies 'nextdoor.com'
-
-    # NOAA
-    Allow 'forecast.weather.gov'
-
     # NYTimes
-    %w(cooking www).map{|host|
-      GET host+'.nytimes.com'}
+    %w(cooking www).map{|host|GET host+'.nytimes.com'}
 
     # Reddit
-    GotoReddit = -> r {[301, {'Location' => ['https://www.reddit.com', r.path, '?', r.query].join}, []]}
-    %w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h| Allow h }
-    %w(gateway gql oauth old s www).map{|h|                                 Allow h + '.reddit.com' }
-    %w(np.reddit.com reddit.com).map{|host| GET host, GotoReddit }
-
     GET 'www.reddit.com', -> r { parts = r.parts
       r.chrono_sort if r.path == '/' || parts[-1] == 'new' || parts.size == 5                # chrono-sort preference
-      r = ('//www.reddit.com/r/Bostonmusic+Dorchester+QuincyMa+Rad_Decentralization+SOLID+StallmanWasRight+boston+dancehall+darknetplan+fossdroid+massachusetts+roxbury+selfhosted+shortwave/new/').R r.env if r.path == '/' # subscriptions
+      r = ('//www.reddit.com/r/Rad_Decentralization+SOLID+StallmanWasRight+dancehall+darknetplan+fossdroid+selfhosted+shortwave/new/').R r.env if r.path == '/' # subscriptions
       r.upstreamUI if parts[-1] == 'submit'                                                  # upstream UI preference
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !parts.member?('wiki') # MIME preference
       r.env[:links][:prev] = ['https://old.reddit.com', r.path, '?', r.query].join # page pointers
       r.fetch options}
-
     GET 'old.reddit.com', -> r {
       r.upstreamUI.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
       r.fetch.yield_self{|status,head,body|
         if !%w(r u user).member?(r.parts[0]) || status.to_s.match?(/^30/)
           [status, head, body]
-        else
+        else # find next-page pointer, missing in HTTP Headers (old/new UI) and HTML/RSS (new UI)
           refs = []
-          # find next-page pointer, missing in HTTP Headers (old/new UI) and HTML/RSS (new UI)
           body[0].scan(/href="([^"]+after=[^"]+)/){|l| refs << l[0] }
           if refs.empty?
-            GotoReddit[r]
+            [301, {'Location' => ['https://www.reddit.com', r.path, '?', r.query].join}, []]
           else
             page = refs[-1].R
             [302, {'Location' => ['https://www.reddit.com', page.path, '?', page.query].join}, []]
@@ -379,17 +324,6 @@ zoopps.com
 
     # Soundcloud
     GET 'gate.sc', GotoURL
-    %w(api-auth.soundcloud.com
-       api-mobi.soundcloud.com
-     api-mobile.soundcloud.com
-         api-v2.soundcloud.com
-     api-widget.soundcloud.com
-            api.soundcloud.com
-                soundcloud.com
-         secure.soundcloud.com
-              w.soundcloud.com
-).map{|host| Allow host
-               GET host}
     GET 'soundcloud.com', RootIndex
     GET 'w.soundcloud.com', -> r {NoGunk[r.upstreamUI]}
 
