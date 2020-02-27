@@ -198,37 +198,17 @@ class WebResource
       end
       c = nodeSet ; return c[0].fileResponse if c.size == 1 && StaticFormats.member?(c[0].ext)    # server-cached node (indirect hit)
 
+      # cache miss, network fetch
+
       options ||= {}
       location = ['//', host, (port ? [':', port] : nil), path, options[:suffix], (query ? ['?', query] : nil)].join
-      primary  = ('https:' + location).R env                                                      # primary locator
-      fallback = ('http:' + location).R env                                                       # fallback locator
+      primary  = ('https:' + location).R env
+      fallback = ('http:' + location).R env
+
       env[:fetch] = true
-      primary.fetchHTTP options                                                                   # fetch
-    rescue Exception => e
-      case e.class.to_s
-      when 'Errno::ECONNREFUSED'
-        fallback.fetchHTTP options
-      when 'Errno::ECONNRESET'
-        fallback.fetchHTTP options
-      when 'Errno::EHOSTUNREACH'
-        fallback.fetchHTTP options
-      when 'Errno::ENETUNREACH'
-        fallback.fetchHTTP options
-      when 'Net::OpenTimeout'
-        fallback.fetchHTTP options
-      when 'Net::ReadTimeout'
-        fallback.fetchHTTP options
-      when 'OpenSSL::SSL::SSLError'
-        fallback.fetchHTTP options
-      when 'OpenURI::HTTPError'
-        fallback.fetchHTTP options
-      when 'RuntimeError'
-        fallback.fetchHTTP options
-      when 'SocketError'
-        fallback.fetchHTTP options
-      else
-        raise
-      end
+      primary.fetchHTTP options
+    rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
+      fallback.fetchHTTP options
     end
 
     def fetchHTTP options = {}

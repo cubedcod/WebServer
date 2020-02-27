@@ -3,6 +3,7 @@ class WebResource
     # MIME to extension mapping, adjunct to Rack's list for obscure/new/nonstandard format-identities
     Suffixes = {
       'application/manifest+json' => '.json',
+      'application/x-www-form-urlencoded' => '.wwwform',
       'application/x-javascript' => '.js',
       'application/x-mpegURL' => '.m3u8',
       'application/x-rss+xml' => '.rss',
