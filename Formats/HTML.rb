@@ -341,6 +341,7 @@ class WebResource
       qs = query_values || {}
       q = qs['Q'] || qs['q']
       return unless graph && q
+      abbreviated = !qs.has_key?('fullContent')
 
       # query
       wordIndex = {}
@@ -355,11 +356,14 @@ class WebResource
       # trim content to matching lines
       graph.values.map{|r|
         (r[Content]||r[Abstract]||[]).map{|v|v.respond_to?(:lines) ? v.lines : nil}.flatten.compact.grep(pattern).yield_self{|lines|
-          r[Abstract] = lines[0..7].map{|l|
-            l.gsub(/<[^>]+>/,'')[0..512].gsub(pattern){|g| # matches
-              HTML.render({_: :span, class: "w#{wordIndex[g.downcase]}", c: g}) # wrap in styled node
-            }} if lines.size > 0 }
-        r.delete Content unless qs.has_key?('fullContent')}
+          r[Abstract] = lines[0..7].map{|line|
+            line.gsub(/<[^>]+>/,'')[0..512].gsub(pattern){|g| # mark up matches
+              HTML.render({_: :span, class: "w#{wordIndex[g.downcase]}", c: g})
+            }
+          } if lines.size > 0
+        }
+        r.delete Content if abbreviated
+      }
 
       # CSS
       graph['#abstracts'] = {Abstract => [HTML.render({_: :style, c: wordIndex.values.map{|i|

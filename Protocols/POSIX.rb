@@ -87,6 +87,7 @@ class WebResource
        elsif qs.has_key?('find') && !qs['find'].empty? && path != '/' # FIND substring (case-insensitive)
          `find #{shellPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
        elsif (qs.has_key?('Q') || qs.has_key?('q')) && path != '/' # GREP
+         env[:summary] = false # load full content for HTML highlighting
          q = qs['Q'] || qs['q']
          args = q.shellsplit rescue q.split(/\W/)
          case args.size
@@ -108,7 +109,7 @@ class WebResource
       else                      # GLOB
         globPath = fsPath
         unless globPath.match GlobChars # parametric glob
-          env[:summary] = false # default glob, canonical graph documents
+          env[:summary] = false # default graph-document set
           globPath += '*'
         end
         Pathname.glob globPath
