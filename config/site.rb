@@ -228,8 +228,6 @@ thumbs.ebaystatic.com).map{|host| GET host }
     # Instagram
     Cookies 'www.instagram.com'
     GET 'l.instagram.com', GotoU
-    GET 'www.instagram.com', RootIndex
-
     Populate 'www.instagram.com', -> r {
       base = 'instagram/'
       FileUtils.mkdir base
@@ -243,30 +241,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
               FileUtils.mkdir base + name
             end
           end}}}
-
-    IG  =  -> r {             [301, {'Location' => 'https://www.instagram.com'  + r.path},     []]         }
-    IG0 =  -> r {r.parts[0] ? [301, {'Location' => 'https://www.instagram.com/' + r.parts[0]}, []] : r.deny}
-    IG1 =  -> r {r.parts[1] ? [301, {'Location' => 'https://www.instagram.com/' + r.parts[1]}, []] : r.deny}
-
-    %w(instagram.com).map{|host| GET host, IG}
-
-    %w(
-deskgram.cc deskgram.net
-graphixto.com
-instapuma.com
-www.picimon.com picpanzee.com www.pictosee.com
-saveig.org
-www.toopics.com
-).map{|host| GET host, IG0}
-
-    %w(
-gramho.com
-insee.me instadigg.com www.instagimg.com
-jolygram.com
-pikdo.biz pikdo.net piknu.com publicinsta.com www.pictame.com
-rankersta.com
-zoopps.com
-).map{|host| GET host, IG1}
+    GET 'www.instagram.com', RootIndex
 
     # JWPlayer
     GET 'ssl.p.jwpcdn.com'
