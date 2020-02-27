@@ -118,10 +118,11 @@ class WebResource
 
     def cookies
       cookie = (hostPath + '.cookie').R
-      if jar = cookie.readFile              # jar has cookie
-        env['HTTP_COOKIE'] = env[:resp]['Set-Cookie'] = jar unless env['HTTP_COOKIE'] == jar # give client and server jar-cookie
-      elsif env.has_key? 'HTTP_COOKIE'      # empty jar
-        cookie.writeFile env['HTTP_COOKIE'] # write cookie to jar
+      if jar = cookie.readFile              # jar cookie. invalidate on your own, see Twitter example
+        env['HTTP_COOKIE'] = jar unless env['HTTP_COOKIE'] == jar
+      elsif env.has_key?('HTTP_COOKIE') && allowCookies?
+        puts '🍪 ' + env['HTTP_COOKIE']
+        cookie.writeFile env['HTTP_COOKIE'] # put cookie in jar
       end
       self
     end
