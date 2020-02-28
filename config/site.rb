@@ -298,8 +298,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
 
     # Twitter
     %w(bit.ly dlvr.it t.co ti.me tinyurl.com trib.al wired.trib.al).map{|short| GET short, NoQuery }
-    Allow 'twitter.com'
-    Allow 'api.twitter.com'
+    Allow 'twitter.com'; Allow 'api.twitter.com'
     Populate 'twitter.com', -> r {
       FileUtils.mkdir 'twitter'
       `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|n|
@@ -308,7 +307,6 @@ thumbs.ebaystatic.com).map{|host| GET host }
     GET 'twitter.com', -> r {
       r.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.116 Safari/537.36'
       r.chrono_sort
-      # auth
       if r.env.has_key? 'HTTP_COOKIE'
         attrs = {}
         r.env['HTTP_COOKIE'].split(';').map{|attr|
@@ -319,10 +317,14 @@ thumbs.ebaystatic.com).map{|host| GET host }
         r.env['x-guest-token'] ||= attrs['gt'] if attrs['gt']
       end
 
+      if r.parts[0] == 'i'
+        r.deny
+
       # username index
-      if r.path == '/' || r.path.match?(GlobChars)
+      elsif r.path == '/' || r.path.match?(GlobChars)
         r.env[:links][:feed] = '/feed'
         RootIndex[r]
+
       # feed
       elsif r.path == '/feed'
         subscriptions = Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}
@@ -332,8 +334,9 @@ thumbs.ebaystatic.com).map{|host| GET host }
           apiURL = 'https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&q=' + q + '&vertical=default&count=40&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2CcameraMoment'
           apiURL.R(r.env).fetch intermediate: true}
         r.saveRDF.graphResponse
+
       # user page
-      elsif r.parts.size == 1 && !%w(favicon.ico manifest.json search sw.js).member?(r.parts[0]) && !r.upstreamUI?
+      elsif r.parts.size == 1 && !%w(favicon.ico manifest.json push_service_worker.js search sw.js).member?(r.parts[0]) && !r.upstreamUI?
         uid = nil
         begin
         URI.open('https://api.twitter.com/graphql/G6Lk7nZ6eEKd7LBBZw9MYw/UserByScreenName?variables=%7B%22screen_name%22%3A%22' + r.parts[0] + '%22%2C%22withHighlightedLabel%22%3Afalse%7D', r.headers){|response| # find uid
@@ -342,15 +345,15 @@ thumbs.ebaystatic.com).map{|host| GET host }
           uid = json['data']['user']['rest_id']}
         ('https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment').R(r.env).fetch reformat: true
         rescue
-          puts "TWITTER API error, falling back to default UI"
+          puts "TWITTER API error on #{r.uri}, falling back to default UI"
           'twitter/.cookie'.R.node.delete # toss stale cookie
           r.upstreamUI.fetch              # load upstream UI for fresh tokens
         end
+
       # conversation
       elsif r.parts.member?('status') && !r.upstreamUI?
         convo = r.parts.find{|p| p.match? /^\d{8}\d+$/ }
-        "https://api.twitter.com/2/timeline/conversation/#{convo}.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&count=20&ext=mediaStats%2CcameraMoment".R(r.env).fetch(reformat: true).yield_self{|s,h,b|
-          [401,403,429].member?(s) ? ('twitter/.cookie'.R.node.delete; r.upstreamUI.fetch) : [s,h,b]} # refresh tokens
+        "https://api.twitter.com/2/timeline/conversation/#{convo}.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&count=20&ext=mediaStats%2CcameraMoment".R(r.env).fetch reformat: true
 
       else
         r.fetch
