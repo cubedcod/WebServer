@@ -44,15 +44,7 @@ class WebResource
       resource = uri.R env                                                      # instantiate web resource
       env[:refhost] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # referring host
       env[:resp] = {}                                                           # response-header storage
-      env[:links] = {}                                                          # Link response-header
-      if uri.query_values&.has_key? 'fullContent'
-        env[:links][:up] = '?'
-      elsif uri.path != '/'
-        up = File.dirname uri.path
-        up += '/' unless up == '/'
-        up += '?' + uri.query if uri.query
-        env[:links][:up] = up
-      end
+      env[:links] = {}                                                          # response-header links
       resource.send(env['REQUEST_METHOD']).yield_self{|status, head, body|      # dispatch
         ext = resource.path ? resource.ext.downcase : ''                        # log
         mime = head['Content-Type'] || ''
@@ -77,6 +69,7 @@ class WebResource
                       else
                         mime
                       end
+
         color = case format_icon
                 when '🖼️'
                   '33;1'
@@ -87,6 +80,7 @@ class WebResource
                 else
                   7
                 end
+
         triple_count = env[:repository] ? (env[:repository].size.to_s + '⋮') : nil
 
         if env[:deny]
@@ -286,6 +280,15 @@ class WebResource
 
     def GET
       cookies
+      if uri.query_values&.has_key? 'fullContent'
+        env[:links][:up] = '?'
+      elsif uri.path != '/'
+        up = File.dirname uri.path
+        up += '/' unless up == '/'
+        up += '?' + uri.query if uri.query
+        env[:links][:up] = up
+      end
+
       if localNode?            ## local
         if %w{y year m month d day h hour}.member? parts[0]
           dateDir               # timeline redirect
