@@ -24,7 +24,7 @@ class WebResource
     end
 
     def allowCDN?
-      (CacheFormats - %w(html js)).member?(ext.downcase) && !path.match?(Gunk)
+      (CacheFormats - %w(gif html js)).member?(ext.downcase) && !path.match?(Gunk)
     end
 
     def allowedOrigin
@@ -82,26 +82,28 @@ class WebResource
                         mime
                       end
 
-        color = case format_icon
-                when '🖼️'
-                  '33;1'
-                when '📜'
-                  '36;1'
-                when '🐢'
-                  32
+        color = if env[:deny]
+                  '31;7;1'
                 else
-                  7
+                  case format_icon
+                  when '🖼️'
+                    '33;1'
+                  when '📜'
+                    '36;1'
+                  when '🐢'
+                    32
+                  else
+                    7
+                  end
                 end
 
         triple_count = env[:repository] ? (env[:repository].size.to_s + '⋮') : nil
 
-        if env[:deny]
-          puts (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "#{status_icon} \e[31;1m") + (env[:refhost] ? ("\e[7m" + env[:refhost] + "\e[0m\e[31;1m → ") : '') + (env[:refhost] == resource.host ? '' : ('http://' + resource.host)) + "\e[7m" + resource.path + "\e[0m\e[31m" + "\e[0m"
-        elsif [204, 304].member? status
+        if [204, 304].member? status
         elsif [301, 302, 303].member? status # redirect
           puts [resource.uri, status_icon + ' ', head['Location']].join ' '
         else
-          puts [action_icon, status_icon, format_icon, triple_count, "\e[#{color}m", resource.uri, "\e[0m"].compact.join ' '
+          puts [action_icon, status_icon, format_icon, triple_count, env[:refhost] ? ["\e[#{color};7m", env[:refhost], "\e[0m→"] : nil, "\e[#{color}m", resource.uri, "\e[0m"].compact.join ' '
         end
         
         [status, head, body]} # response
