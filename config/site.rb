@@ -252,7 +252,6 @@ thumbs.ebaystatic.com).map{|host| GET host }
     GET 'www.reddit.com', -> r { parts = r.parts
       r.chrono_sort if r.path == '/' || parts[-1] == 'new' || parts.size == 5                # chrono-sort preference
       r = ('//www.reddit.com/r/Rad_Decentralization+SOLID+StallmanWasRight+dancehall+darknetplan+fossdroid+selfhosted+shortwave/new/').R r.env if r.path == '/' # subscriptions
-      r.upstreamUI if parts[-1] == 'submit'                                                  # upstream UI preference
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !parts.member?('wiki') # MIME preference
       r.env[:links][:prev] = ['https://old.reddit.com', r.path, '?', r.query].join # page pointers
       r.fetch options}
@@ -292,11 +291,6 @@ thumbs.ebaystatic.com).map{|host| GET host }
 
     # Soundcloud
     GET 'gate.sc', GotoURL
-    GET 'soundcloud.com', RootIndex
-    GET 'w.soundcloud.com', -> r {NoGunk[r.upstreamUI]}
-
-    # Technology Review
-    GET 'cdn.technologyreview.com', NoQuery
 
     # Tumblr
     GET '.tumblr.com', -> r {(r.query_values||{}).has_key?('audio_file') ? [301, {'Location' => r.query_values['audio_file']}, []] : NoGunk[r]}
