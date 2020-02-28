@@ -212,9 +212,6 @@ thumbs.ebaystatic.com).map{|host| GET host }
     GET 'assets.guim.co.uk'
     GET 'www.theguardian.com'
 
-    # HFU
-    Allow 'chat.hfunderground.com'
-
     # Hubspot
     GET 'hubs.ly', NoQuery
 
@@ -539,8 +536,21 @@ thumbs.ebaystatic.com).map{|host| GET host }
 
   def Gitter doc
     doc.css('.chat-item').map{|msg|
-      
-    }
+      id = msg.classes.grep(/^model-id/)[0].split('-')[-1] # find ID
+      subject = 'https://gitter.im' + path + '?at=' + id   # subject URI
+      yield subject, Type, Post.R
+      if from = msg.css('.chat-item__from')[0]
+        yield subject, Creator, from.inner_text
+      end
+      if username = msg.css('.chat-item__username')[0]
+        yield subject, Creator, ('https://github.com/' + username.inner_text.sub(/^@/,'')).R
+      end
+      yield subject, Content, msg.css('.chat-item__text')[0].inner_html
+      if image = msg.css('.avatar__image')[0]
+        yield subject, Image, image['src'].R
+      end
+      msg.remove }
+    doc.css('header').map &:remove
   end
 
   def GoogleHTML doc

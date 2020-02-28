@@ -444,7 +444,7 @@ class WebResource
       'twitter:player:stream' => Video,
       'twitter:player:stream:content_type' => :drop,
       'twitter:player:width' => :drop,
-      'twitter:site' => 'https://twitter.com',
+      'twitter:site' => Link,
       'twitter:text:title' => Title,
       'twitter:title' => Title,
       'twitter:url' => Link,
