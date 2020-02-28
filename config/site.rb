@@ -50,6 +50,7 @@ class WebResource
 
     CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|googleapis|netdna.*)\.(com|io|net)$/
     CookieHost = /\.(akamai(hd)?|bandcamp|ttvnw)\.(com|net)$/
+    DesktopUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
     MobileUA = 'Mozilla/5.0 (Linux; Android 9; SM-G960F Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.157 Mobile Safari/537.36'
     POSThost = /^video.*.ttvnw.net$/
     UIhosts = %w(players.brightcove.net www.redditmedia.com)
@@ -195,7 +196,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
           r.query_values.map{|k,v| puts [k,v].join "\t"}
           r.deny
         when /^.(images|maps)/
-          r.upstreamUI.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
+          r.upstreamUI.env['HTTP_USER_AGENT'] = DesktopUA
           r.fetch
         when /^.search/ # full URLs are sent here on Android/Chrome. redirect to URL
           q = (r.query_values||{})['q']
@@ -298,14 +299,14 @@ thumbs.ebaystatic.com).map{|host| GET host }
 
     # Twitter
     %w(bit.ly dlvr.it t.co ti.me tinyurl.com trib.al wired.trib.al).map{|short| GET short, NoQuery }
-    Allow 'twitter.com'; Allow 'api.twitter.com'
+    ['', 'api.', 'mobile.'].map{|h| Allow h + 'twitter.com'}
     Populate 'twitter.com', -> r {
       FileUtils.mkdir 'twitter'
       `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|n|
         FileUtils.touch 'twitter/.' + n}}
-    GET 'mobile.twitter.com', -> r {[301, {'Location' => 'https://twitter.com' + r.path}, []]}
-    GET 'twitter.com', -> r {
-      r.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.116 Safari/537.36'
+
+    Twitter = -> r {
+      r.env['HTTP_USER_AGENT'] = MobileUA
       r.chrono_sort
       if r.env.has_key? 'HTTP_COOKIE'
         attrs = {}
@@ -317,11 +318,8 @@ thumbs.ebaystatic.com).map{|host| GET host }
         r.env['x-guest-token'] ||= attrs['gt'] if attrs['gt']
       end
 
-      if r.parts[0] == 'i'
-        r.deny
-
       # username index
-      elsif r.path == '/' || r.path.match?(GlobChars)
+      if r.path == '/' || r.path.match?(GlobChars)
         r.env[:links][:feed] = '/feed'
         RootIndex[r]
 
@@ -356,8 +354,11 @@ thumbs.ebaystatic.com).map{|host| GET host }
         "https://api.twitter.com/2/timeline/conversation/#{convo}.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&count=20&ext=mediaStats%2CcameraMoment".R(r.env).fetch reformat: true
 
       else
-        r.fetch
+        NoGunk[r]
       end}
+
+    GET 'mobile.twitter.com', Twitter
+    GET 'twitter.com', Twitter
 
     # USA Today
     GET 'rssfeeds.usatoday.com', NoQuery
