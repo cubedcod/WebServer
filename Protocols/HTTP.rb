@@ -442,7 +442,6 @@ class WebResource
     def HTTP.qs h
       return '' if !h || h.empty?
       '?' + h.map{|k,v|
-        puts "WARNING query key #{k} has multiple vals: #{v.join ' '}, using #{v[0]}" if v.class == Array && v.size > 1
         CGI.escape(k.to_s) + (v ? ('=' + CGI.escape([*v][0].to_s)) : '')
       }.join("&")
     end
