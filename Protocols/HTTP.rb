@@ -101,7 +101,7 @@ class WebResource
 
         if [204, 304].member? status
         elsif [301, 302, 303].member? status # redirect
-          puts [resource.uri, status_icon + ' ', head['Location']].join ' '
+          puts ["\e[36m", resource.uri, status_icon + ' ', head['Location'], "\e[0m"].join ' '
         else
           puts [action_icon, status_icon, format_icon, triple_count, env[:refhost] ? ["\e[#{color};7m", env[:refhost], "\e[0m→"] : nil, "\e[#{color}m", resource.uri, "\e[0m"].compact.join ' '
         end
