@@ -306,7 +306,6 @@ thumbs.ebaystatic.com).map{|host| GET host }
         FileUtils.touch 'twitter/.' + n}}
 
     Twitter = -> r {
-      r.env['HTTP_USER_AGENT'] = MobileUA
       r.chrono_sort
       if r.env.has_key? 'HTTP_COOKIE'
         attrs = {}
