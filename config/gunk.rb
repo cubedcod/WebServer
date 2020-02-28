@@ -149,7 +149,7 @@ image-src
           end
 
         # inline content
-        elsif s['type'] != 'application/ld+json' && text.match?(GunkExec) && !text.match?(/(global|init(ial)?|preload(ed)?|shared).?(content|data|state)|SCRIPTS_LOADED|window.app/i)
+        elsif s['type'] != 'application/ld+json' && text.match?(GunkExec) && !text.match?(/(bootstrap|global|init(ial)?|preload(ed)?|shared).?(content|data|state)|SCRIPTS_LOADED|window.app/i)
           puts "🚩#{text.size} \e[30;1m" + text.gsub(/[\n\r\t]+/,'').gsub(/\s\s+/,' ').gsub(GunkExec,"\e[31m\\1\e[30m") + "\e[0m" if verbose
           s.remove
         end}

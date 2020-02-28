@@ -178,23 +178,16 @@ thumbs.ebaystatic.com).map{|host| GET host }
     GET 'thumbs.gfycat.com'
 
     # Google
-    unless ENV.has_key? 'DEGOOGLE'
-      if ENV.has_key? 'GOOGLE'            # POST hosts
-        Allow 'android.clients.google.com'
-        Allow 'groups.google.com'
-        (0..24).map{|i| h="#{i}.client-channel.google.com"; Allow h}
-        (0..24).map{|i| Allow "clients#{i}.google.com"}
-      end
-      Cookies 'www.google.com'            # personalization
-                                          # data hosts
-      GData = -> r {(r.env[:refhost]||'').match?(/\.(blog(ger|spot)|google(apis)?|gstatic)\.com$/) ? NoGunk[r] : r.deny}
-      %w(maps ssl www).map{|h| GET h + '.googleapis.com', GData }
-      %w(maps ssl www).map{|h| GET h + '.gstatic.com', GData }
-      (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com", GData }
-      (0..3).map{|i| GET "khms#{i}.google.com", GData }
+    GET 'ajax.googleapis.com'  # Javascript libraries
+    GET 'feedproxy.google.com', NoQuery
 
-      GET 'ajax.googleapis.com'           # Javascript libraries
-      GET 'feedproxy.google.com', NoQuery
+    if ENV.has_key? 'GOOGLE'
+      Cookies 'www.google.com' # personalization
+      %w(docs).map{|h| GET h + '.google.com' }
+      %w(maps ssl www).map{|h| GET h + '.googleapis.com' }
+      %w(maps ssl www).map{|h| GET h + '.gstatic.com' }
+      (0..3).map{|i|           GET "encrypted-tbn#{i}.gstatic.com" }
+      (0..3).map{|i|           GET "khms#{i}.google.com" }
       GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
       GET 'www.google.com', -> r {
         case r.path

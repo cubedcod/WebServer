@@ -50,7 +50,7 @@ class WebResource
 
     # if needed by client, return lazily-generated file or string, by Rack handler if file
     def entity generator = nil
-      if env['HTTP_IF_NONE_MATCH']&.strip&.split(/\s*,\s*/).include? env[:resp]['ETag']
+      if env['HTTP_IF_NONE_MATCH']&.strip&.split(/\s*,\s*/)&.include? env[:resp]['ETag']
         [304, {}, []]                            # unmodified entity
       else
         body = generator ? generator.call : self # generate entity
