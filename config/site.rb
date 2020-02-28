@@ -535,6 +535,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
   end
 
   def Gitter doc
+    position = 0
     doc.css('.chat-item').map{|msg|
       id = msg.classes.grep(/^model-id/)[0].split('-')[-1] # find ID
       subject = 'https://gitter.im' + path + '?at=' + id   # subject URI
@@ -549,6 +550,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
       if image = msg.css('.avatar__image')[0]
         yield subject, Image, image['src'].R
       end
+      yield subject, Date, '%03d' % position += 1
       msg.remove }
     doc.css('header').map &:remove
   end
