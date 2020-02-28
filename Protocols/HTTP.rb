@@ -40,7 +40,7 @@ class WebResource
     def self.call env
       return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']           # allow HTTP methods
       uri = RDF::URI('https://' + env['HTTP_HOST']).join env['REQUEST_PATH']
-      uri.query = env['QUERY_STRING'] if env['QUERY_STRING'] && !env['QUERY_STRING'].empty?
+      uri.query = env['QUERY_STRING'].sub(/^&/,'') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty?
       resource = uri.R env                                                      # instantiate web resource
       env[:refhost] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # referring host
       env[:resp] = {}                                                           # response-header storage
