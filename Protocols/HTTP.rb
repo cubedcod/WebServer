@@ -48,8 +48,20 @@ class WebResource
       resource.send(env['REQUEST_METHOD']).yield_self{|status, head, body|      # dispatch
         ext = resource.path ? resource.ext.downcase : ''                        # log
         mime = head['Content-Type'] || ''
-        network_icon = env[:fetch] ? '🐕' : nil
+
+        action_icon = case env['REQUEST_METHOD']
+                      when 'OPTIONS'
+                        '🔧'
+                      when 'POST'
+                        '📝'
+                      when 'GET'
+                        env[:fetch] ? '🐕' : nil
+                      else
+                        env['REQUEST_METHOD']
+                      end
+
         status_icon = env[:deny] && '🛑' || {204 => '🌐', 301 => '➡️', 302 => '➡️', 303 => '➡️', 304 => '✅', 401 => '🚫', 403 => '🚫', 404 => '❓', 410 => '❌', 500 => '🚩'}[status] || (status == 200 ? nil : status)
+
         format_icon = if ext == 'css' || mime.match?(/text\/css/)
                         '🎨'
                       elsif ext == 'js' || mime.match?(/script/)
@@ -85,15 +97,11 @@ class WebResource
 
         if env[:deny]
           puts (env['REQUEST_METHOD'] == 'POST' ? "\e[31;7;1m📝 " : "#{status_icon} \e[31;1m") + (env[:refhost] ? ("\e[7m" + env[:refhost] + "\e[0m\e[31;1m → ") : '') + (env[:refhost] == resource.host ? '' : ('http://' + resource.host)) + "\e[7m" + resource.path + "\e[0m\e[31m" + "\e[0m"
-        elsif env['REQUEST_METHOD'] == 'OPTIONS'
-          puts "🔧 \e[32;1m#{resource.uri}\e[0m"
-        elsif env['REQUEST_METHOD'] == 'POST'
-          puts "📝 \e[32;1m#{resource.uri}\e[0m"
+        elsif [204, 304].member? status
         elsif [301, 302, 303].member? status # redirect
           puts [resource.uri, status_icon + ' ', head['Location']].join ' '
-        elsif [204, 304].member? status
         else
-          puts [network_icon, status_icon, format_icon, triple_count, "\e[#{color}m", resource.uri, "\e[0m"].compact.join ' '
+          puts [action_icon, status_icon, format_icon, triple_count, "\e[#{color}m", resource.uri, "\e[0m"].compact.join ' '
         end
         
         [status, head, body]} # response
@@ -280,12 +288,12 @@ class WebResource
 
     def GET
       cookies
-      if uri.query_values&.has_key? 'fullContent'
+      if query_values&.has_key? 'fullContent'
         env[:links][:up] = '?'
-      elsif uri.path != '/'
-        up = File.dirname uri.path
+      elsif path != '/'
+        up = File.dirname path
         up += '/' unless up == '/'
-        up += '?' + uri.query if uri.query
+        up += '?' + query if query
         env[:links][:up] = up
       end
 
