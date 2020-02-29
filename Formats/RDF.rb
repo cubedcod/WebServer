@@ -145,7 +145,7 @@ class WebResource < RDF::URI
         when /^application\/atom+xml/
           feedDocument
         else
-          env[:repository].dump (RDF::Writer.for content_type: format).to_sym, standard_prefixes: true, base_uri: self
+          env[:repository].dump RDF::Writer.for(content_type: format).to_sym, base_uri: self
         end}
     end
 
