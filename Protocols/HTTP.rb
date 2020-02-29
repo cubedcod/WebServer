@@ -471,6 +471,9 @@ class WebResource
         index[i] ||= []                     # init index
         index[i].push format.strip}         # index on q-value
 
+      #puts env['HTTP_ACCEPT']
+      #puts ::JSON.pretty_generate index
+
       index.sort.reverse.map{|q,formats| # formats selected in descending q-value order
         formats.sort_by{|f|{'text/turtle'=>0}[f]||1}.map{|f|  # tiebreak with 🐢-preference
           return default if f == '*/*'                        # default via wildcard
