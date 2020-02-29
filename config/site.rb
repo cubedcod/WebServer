@@ -317,13 +317,8 @@ thumbs.ebaystatic.com).map{|host| GET host }
         r.env['x-guest-token'] ||= attrs['gt'] if attrs['gt']
       end
 
-      # username index
-      if r.path == '/' || r.path.match?(GlobChars)
-        r.env[:links][:feed] = '/feed'
-        RootIndex[r]
-
       # feed
-      elsif r.path == '/feed'
+      if r.path == '/'
         subscriptions = Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}
         subscriptions.shuffle.each_slice(18){|sub|
           print '🐦'

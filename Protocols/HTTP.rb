@@ -125,8 +125,10 @@ class WebResource
       if jar = cookie.readFile              # jar cookie. invalidate on your own, see Twitter example
         env['HTTP_COOKIE'] = jar unless env['HTTP_COOKIE'] == jar
       elsif env.has_key?('HTTP_COOKIE') && allowCookies?
-        puts '🍪 ' + env['HTTP_COOKIE']
-        cookie.writeFile env['HTTP_COOKIE'] # put cookie in jar
+        data = env['HTTP_COOKIE']
+        return if host == 'twitter.com' && !data.match?(/ct0/)
+        puts ['🍪 ', "\e[1m", host, "\e[0m", data].join  ' '
+        cookie.writeFile data # put cookie in jar
       end
       self
     end
