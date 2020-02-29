@@ -244,7 +244,7 @@ class WebResource
       Creator => '👤',
       DC + 'hasFormat' => '≈',
       DC + 'identifier' => '☸',
-      Date => '⌚',
+      Date => '⌚', 'http://purl.org/dc/terms/created' => '⌚', 'http://purl.org/dc/terms/modified' => '⌚',
       Image => '🖼️',
       LDP + 'contains' => '📁',
       Link => '☛',
@@ -523,7 +523,7 @@ class WebResource
       end}
 
     Markup[Date] = -> date, env=nil {{_: :a, class: :date, c: date, href: '/' + date[0..13].gsub(/[-T:]/,'/')}}
-    Markup['http://purl.org/dc/terms/created'] = Markup[Date]
+    Markup['http://purl.org/dc/terms/created'] = Markup['http://purl.org/dc/terms/modified'] = Markup[Date]
 
     Markup[Link] = -> ref, env=nil {
       u = ref.to_s

@@ -332,7 +332,7 @@ class WebResource
                           [s, h, []]} # return header
     end
 
-    # headers formatted and filtered
+    # headers cleaned/filtered for export
     def headers raw = nil
       raw ||= env || {} # raw headers
       head = {}         # clean headers
@@ -348,8 +348,7 @@ class WebResource
         }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
         head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless SingleHop.member?(key.downcase)} # output value
 
-
-      head['Accept'] = 'text/turtle' if ext == 'ttl'
+      head['Accept'] = ['text/turtle', head['Accept']].join ',' # accept Turtle
 
       unless allowCookies?
         head.delete 'Cookie'
