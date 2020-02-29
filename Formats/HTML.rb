@@ -281,14 +281,14 @@ class WebResource
       "background-color: black; color: #{color}; border-color: #{color}"
     end
 
-    # JSON-graph -> HTML
+    # Graph -> HTML
     def htmlDocument graph=nil
       graph ||= env[:graph] = treeFromGraph
       qs = query_values || {}
       env[:images] ||= {}
       env[:colors] ||= {}
       env[:links] ||= {}
-      if env[:summary]
+      if env[:summary] || (qs.has_key?('q') && !qs.has_key?('fullContent'))
         expanded = HTTP.qs qs.merge({'fullContent' => nil})
         env[:links][:full] = expanded
         expander = {_: :a, id: :expand, c: '&#11206;', href: expanded}
