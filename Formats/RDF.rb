@@ -102,16 +102,15 @@ class WebResource < RDF::URI
 
   # Turtle file (big) -> Turtle file (small)
   def summary
-    rdfized = ext == 'ttl'
-    sPath = '../.cache/RDF/' + fsPath + (path == '/' ? 'index' : '') + (rdfized ? '' : '.ttl')
-    summary = sPath.R env
-    sNode = Pathname.new sPath
+    isRDF = ext == 'ttl'
+    sPath = '../.cache/RDF/' + fsPath + (path == '/' ? 'index' : '') + (isRDF ? '' : '.ttl')
+    summary = sPath.R env                                 # summary name
+    sNode = Pathname.new sPath                            # summary node
     return summary if sNode.exist? && sNode.mtime >= node.mtime # summary exists and up to date
-
     fullGraph = RDF::Repository.new                       # full graph
     miniGraph = RDF::Repository.new                       # summary graph
     loadRDF repository: fullGraph                         # read RDF
-    saveRDF fullGraph unless rdfized                      # store RDF-ized graph(s)
+    saveRDF fullGraph unless isRDF                        # save RDF-ized graph(s)
     treeFromGraph(fullGraph).values.map{|resource|        # each subject
       subject = (resource['uri'] || '').R
       ps = [Abstract, Creator, Date, Image, Link, Title, To, Type, Video]
@@ -121,10 +120,10 @@ class WebResource < RDF::URI
       ps.map{|p|                                          # each predicate
         if o = resource[p] ; p = p.R
           (o.class == Array ? o : [o]).map{|o|            # each object
-            miniGraph << RDF::Statement.new(subject,p,o)} # add triple to summary graph
+            miniGraph << RDF::Statement.new(subject,p,o)} # triple to summary
         end}}
     FileUtils.mkdir_p sNode.dirname                       # create containing dir
-    RDF::Writer.for(:turtle).open(sPath){|f|f << miniGraph} # write summary graph
+    RDF::Writer.for(:turtle).open(sPath){|f|f << miniGraph} # write summary
     summary
   end
   alias_method :summarize, :summary
