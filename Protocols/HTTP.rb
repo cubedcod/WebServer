@@ -348,18 +348,22 @@ class WebResource
         }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
         head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless SingleHop.member?(key.downcase)} # output value
 
-      # Cookies / Referer / User-Agent
+
+      head['Accept'] = 'text/turtle' if ext == 'ttl'
+
       unless allowCookies?
         head.delete 'Cookie'
         head.delete 'Set-Cookie'
         head.delete 'Referer'
       end
+
       case host
       when /wsj\.com$/
-        head['Referer'] = 'http://drudgereport.com/' # thanks, Matt
+        head['Referer'] = 'http://drudgereport.com/'
       when /youtube.com$/
-        head['Referer'] = 'https://www.youtube.com/' # make 3rd-party embeds work
+        head['Referer'] = 'https://www.youtube.com/'
       end
+
       head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # we want redirection in HTTP HEAD-Location not Javascript
       head.delete 'User-Agent' if host == 't.co'            # so advertise a 'dumb' user-agent
 
