@@ -255,6 +255,7 @@ class WebResource
       SIOC + 'attachment' => '✉',
       SIOC + 'generator' => '⚙',
       SIOC + 'reply_of' => '↩',
+      SIOC + 'richContent' => '',
       Schema + 'height' => '↕',
       Schema + 'width' => '↔',
       Stat + 'File' => '📄',
@@ -455,21 +456,20 @@ class WebResource
 
     # Value -> Markup
     def self.value type, v, env
-      if Abstract == type || Content == type # inlined HTML content
-        v
-      elsif Markup[type] # render-type given as argument
+      if [Abstract, Content, 'http://rdfs.org/sioc/ns#richContent'].member? type
+        v                # HTML content
+      elsif Markup[type] # markup lambda
         Markup[type][v,env]
-      elsif v.class == Hash        # resource (with data)
-        types = (v[Type] || []).map{|t| MarkupMap[t.to_s] || t.to_s }
-        shown = []
+      elsif v.class == Hash
+        types = (v[Type] || []).map{|t| MarkupMap[t.to_s] || t.to_s } # find typetags
+        seen = false
         [types.map{|type|
-          if markup = Markup[type] # renderer found
-            shown.push type        # mark as shown
-            markup[v,env]          # show
+          if markup = Markup[type] # type renderer exists
+            seen = true
+            markup[v,env]          # render
           end},
-         (unseen = types - shown ; puts "#{v['uri']} no renderers defined for: " + unseen.join(' ') unless unseen.empty?),
-         (keyval v, env if shown.empty?)] # fallback renderer
-      elsif v.class == WebResource # resource reference
+         (keyval v, env unless seen)] # basic render
+      elsif v.class == WebResource
         if v.path && %w{jpeg jpg JPG png PNG webp}.member?(v.ext)
           Markup[Image][v, env]    # image reference
         else
@@ -503,7 +503,7 @@ class WebResource
        c: [{_: :a, id: 'container' + Digest::SHA2.hexdigest(rand.to_s), class: :title, href: uri.path, type: :node, c: uri.basename},
            {class: :body, c: HTML.keyval(dir, env)}]}}
 
-    Markup[Creator] = Markup[To] = -> c, env {
+    Markup[Creator] = Markup[To] = Markup['http://xmlns.com/foaf/0.1/maker'] = -> c, env {
       if c.class == Hash || c.respond_to?(:uri)
         u = c.R
         basename = u.basename if u.path
@@ -523,6 +523,7 @@ class WebResource
       end}
 
     Markup[Date] = -> date, env=nil {{_: :a, class: :date, c: date, href: '/' + date[0..13].gsub(/[-T:]/,'/')}}
+    Markup['http://purl.org/dc/terms/created'] = Markup[Date]
 
     Markup[Link] = -> ref, env=nil {
       u = ref.to_s
