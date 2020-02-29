@@ -81,12 +81,12 @@ class WebResource
       qs = query_values || {}                                # query arguments
       env[:summary] = !(qs.has_key? 'fullContent')           # summarize multi-node sets by default
       (if node.directory?
-       if qs.has_key?('f') && !qs['f'].empty? && path != '/' # FIND full name (case-insensitive)
+       if qs.has_key?('f') && !qs['f'].empty? && path != '/'          # FIND (case-insensitive)
          `find #{shellPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
-       elsif qs.has_key?('find') && !qs['find'].empty? && path != '/' # FIND substring (case-insensitive)
+       elsif qs.has_key?('find') && !qs['find'].empty? && path != '/' #  substring (case-insensitive)
          `find #{shellPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
-       elsif (qs.has_key?('Q') || qs.has_key?('q')) && path != '/' # GREP
-         env[:summary] = false # load full content for HTML highlighting
+       elsif (qs.has_key?('Q') || qs.has_key?('q')) && path != '/'    # GREP
+         env[:summary] = false # keep full content for HTML match-highlighting
          q = qs['Q'] || qs['q']
          args = q.shellsplit rescue q.split(/\W/)
          case args.size
@@ -108,11 +108,11 @@ class WebResource
       else                      # GLOB
         globPath = fsPath
         unless globPath.match GlobChars # parametric glob
-          env[:summary] = false # default graph-document set
+          env[:summary] = false # default graph-documents set
           globPath += '*'
         end
         Pathname.glob globPath
-       end).map{|p|             # map path to URI-space
+       end).map{|p|             # bind path to URI-space
         ((host ? ('https://' + host) : '') + '/' + p.to_s[pathIndex..-1].gsub(':','%3A').gsub('#','%23')).R env }
     end
 
