@@ -348,7 +348,7 @@ class WebResource
         }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
         head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless SingleHop.member?(key.downcase)} # output value
 
-      head['Accept'] = ['text/turtle', head['Accept']].join ',' # accept Turtle
+      head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head.has_key?('Accept') && head['Accept'].match?(/text\/turtle/)) || (query_values||{}).has_key?('html') # accept Turtle
 
       unless allowCookies?
         head.delete 'Cookie'
