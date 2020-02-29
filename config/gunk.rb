@@ -32,7 +32,7 @@ zerg(net)?)
 \.(eot|gif\?|otf|ttf|woff2?))xi
 
     # executable-code gunk
-    GunkExec = %r(_0x[0-9a-f]|[\b_'"](
+    GunkExec = %r(_0x[0-9a-f]|(\b|[_'"])(
 3gl|6sc|
 ad|[a-z]*analytic[a-z]*|auction|
 bid(d(er|ing)|s)?|bing|bouncee?x[a-z]*|
@@ -46,7 +46,9 @@ parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|
 sail-horizon|scorecard[a-z]*|segment|snapkit|sophi|ssp|sumo|survicate|
 taboola|[a-z]*targeting[a-z]*|tinypass|tiqcdn|[a-z]*track[a-z]*|twitter|tynt|
 visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk
-)[\b_'"])xi
+)(\b|[_'"]))xi
+
+    InitialState = /(bootstrap|global|init(ial)?|preload(ed)?|shared).?(content|data|state)|SCRIPTS_LOADED|window.app/i
 
   end
 
@@ -115,7 +117,7 @@ image-src
 )
 
     # degunk HTML string
-    def self.degunk body, verbose = false
+    def self.degunk body
       doc = Nokogiri::HTML.parse body # parse
       if content_type = doc.css('meta[http-equiv="Content-Type"]')[0]
         if content = content_type['content']
@@ -130,28 +132,20 @@ image-src
           end
         end
       end
-      degunkDoc doc, verbose         # degunk
-      doc.to_html                    # serialize
+      degunkDoc doc # degunk
+      doc.to_html   # serialize
     end
 
     # degunk parsed HTML (nokogiri/nokogumbo) document
-    def self.degunkDoc doc, verbose = false
+    def self.degunkDoc doc
       doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
       doc.css("iframe, img, [type='image']," + Scripts).map{|s|
-        text = s.inner_text
-        if s['src']
-          # content pointer
+        if s['src'] # reference
           src = s['src'].R
-
-          if src.uri.match?(Gunk) || (src.gunkDomain? && !src.allowCDN?)
-            puts "🚩\e[31;7;1m" + src.uri + "\e[0m " if verbose
-            s.remove
-          end
-
-        # inline content
-        elsif s['type'] != 'application/ld+json' && text.match?(GunkExec) && !text.match?(/(bootstrap|global|init(ial)?|preload(ed)?|shared).?(content|data|state)|SCRIPTS_LOADED|window.app/i)
-          puts "🚩#{text.size} \e[30;1m" + text.gsub(/[\n\r\t]+/,'').gsub(/\s\s+/,' ').gsub(GunkExec,"\e[31m\\1\e[30m") + "\e[0m" if verbose
-          s.remove
+          s.remove if src.uri.match?(Gunk) || (src.gunkDomain? && !src.allowCDN?)
+        else        # inline content
+          text = s.inner_text
+          s.remove if s['type'] != 'application/ld+json' && text.match?(GunkExec) && !text.match?(InitialState)
         end}
     end
 

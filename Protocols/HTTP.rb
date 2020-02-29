@@ -231,7 +231,7 @@ class WebResource
                      RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
                    end
           static = !options[:reformat] && (fixedFormat? format)       # rewritable format?
-          body = Webize::HTML.degunk body, static if format == 'text/html' && !AllowedHosts.has_key?(host) # clean HTML
+          body = Webize::HTML.degunk body if format == 'text/html' && !AllowedHosts.has_key?(host) # clean HTML
           formatExt = Suffixes[format] || Suffixes_Rack[format] || (puts "ENOSUFFIX #{format} #{uri}";'') # filename-extension for format
           storage = fsPath                                            # storage location
           storage += formatExt unless extension == formatExt

@@ -6,13 +6,13 @@ require 'file-tail'
 hosts = {}
 
 #ARGF.each_line do |line|
-File::Tail::Logfile.tail(ENV['HOME'] + '/web.log', :backward => 10) do |line|
+File::Tail::Logfile.tail(ENV['HOME'] + '/web.log') do |line|
   line.split(' ').grep(/^http/).map{|u|
     uri = u.R
     host = uri.host
     unless hosts.has_key? host
       hosts[host] = true
-      puts ["\e[30mhttps://\e[36;7m", host,
+      puts ["\e[30mhttps://\e[36;", uri.ext == 'js' ? '1;' : nil, "7m", host,
             "\e[0m\e[36;1m", uri.path,
             uri.query ? ["\e[0m\e[36m?", uri.query] : nil,
             "\e[0m"].join
