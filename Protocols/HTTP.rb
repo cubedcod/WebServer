@@ -270,9 +270,11 @@ class WebResource
           if links = h['link']
             links.split(',').map{|link|
               ref, type = link.split(';').map &:strip
-              ref = ref.sub(/^</,'').sub(/>$/,'')
-              type = type.sub(/^rel="?/,'').sub(/"$/,'')
-              env[:links][type.to_sym] = ref}
+              if ref && type
+                ref  =  ref.sub(/^</,'').sub      />$/,''
+                type = type.sub(/^rel="?/,'').sub /"$/,''
+                env[:links][type.to_sym] = ref
+              end}
           end
           env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
           env[:resp]['Set-Cookie'] ||= h['set-cookie'] if h['set-cookie'] && allowCookies?
