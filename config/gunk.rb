@@ -34,12 +34,12 @@ zerg(net)?)
     # executable-code gunk
     GunkExec = %r(_0x[0-9a-f]|(\b|[_'"])(
 3gl|6sc|
-ad|[a-z]*analytic[a-z]*|auction|
+ad(nxs)?|[a-z]*analytic[a-z]*|auction|
 bid(d(er|ing)|s)?|bing|bouncee?x[a-z]*|
 chartbeat|clickability|cloudfront|COMSCORE|consent|crazyegg|c(rss)?pxl?|crwdcntrl|
 doubleclick|d[fm]p|driftt|
 ensighten|evidon|facebook|feedbackify|
-ga|gdpr|google[a-z]*|g(a|pt|tm)|gu-web|gumgum|gwallet|
+ga|gdpr|google[a-z]*|g(a|pt|t(ag|m))|gu-web|gumgum|gwallet|
 hotjar|indexww|intercom|ipify|kr(ux|xd)|licdn|linkedin|
 mar(feel|keto)|ml314|moatads|mpulse|newrelic|newsmax|npttech|nreum|ntv.io|outbrain|
 parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|
@@ -139,15 +139,14 @@ image-src
     # degunk parsed HTML (nokogiri/nokogumbo) document
     def self.degunkDoc doc
       doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
-      doc.css("iframe, img, [type='image']," + Scripts).map{|s|
-        if s['src'] # reference
-          src = s['src'].R
-          s.remove if src.uri.match?(Gunk) || (src.gunkDomain? && !src.allowCDN?)
-        else        # inline content
-          text = s.inner_text
-          s.remove if s['type'] != 'application/ld+json' && text.match?(GunkExec) && !text.match?(InitialState)
-        end}
+      doc.css("iframe, img, [type='image'], link, script").map{|s|
+        text = s.inner_text     # inline content
+        s.remove if s['type'] != 'application/ld+json' && text.match?(GunkExec) && !text.match?(InitialState)
+        %w(href src).map{|attr| # references
+          if s[attr]
+            src = s[attr].R
+            s.remove if src.uri.match?(Gunk) || (src.gunkDomain? && !src.allowCDN?)
+          end}}
     end
-
   end
 end
