@@ -43,7 +43,7 @@ ga|gdpr|google[a-z]*|g(a|pt|tm)|gu-web|
 hotjar|indexww|intercom|krxd|licdn|linkedin|
 mar(feel|keto)|moatads|mpulse|newrelic|newsmax|npttech|nreum|ntv.io|outbrain|
 parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|
-sail-horizon|scorecard[a-z]*|segment|snapkit|sophi|ssp|sumo|survicate|
+sail-horizon|scorecard[a-z]*|segment|snapkit|sophi|sp-prod|ssp|sumo|survicate|
 taboola|[a-z]*targeting[a-z]*|tinypass|tiqcdn|[a-z]*track[a-z]*|twitter|tynt|
 visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk
 )(\b|[_'"]))xi

@@ -86,6 +86,8 @@ class WebResource
                   '31;7;1'
                 else
                   case format_icon
+                  when '🎨'
+                    '33;1'
                   when '🖼️'
                     '33;1'
                   when '📜'
