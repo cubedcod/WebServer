@@ -48,7 +48,7 @@ taboola|[a-z]*targeting[a-z]*|tinypass|tiqcdn|[a-z]*track[a-z]*|twitter|tynt|
 viglink|visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk
 )(\b|[_'"]))xi
 
-    InitialState = /(bootstrap|global|init(ial)?|preload(ed)?|shared).?(content|data|state)|SCRIPTS_LOADED|window.app/i
+    InitialState = /(bootstrap|global|init(ial)?|preload(ed)?|shared).?(content|data|prop|state)|SCRIPTS_LOADED|window.app/i
 
   end
 
