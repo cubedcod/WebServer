@@ -36,8 +36,16 @@ end
 class WebResource
   module URIs
     CacheFormats = %w(css geojson gif html ico jpeg jpg js json m3u8 m4a md mp3 mp4 opus pdf png svg ts webm webp xml) # cached filetypes
+    CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|googleapis|netdna.*)\.(com|io|net)$/
+    CookieHost = /\.(akamai(hd)?|bandcamp|ttvnw)\.(com|net)$/
+    GunkHosts = {}
+    POSThost = /^video.*.ttvnw.net$/
+    UIhosts = %w(players.brightcove.net www.redditmedia.com)
     StaticFormats = CacheFormats - %w(json html xml)
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
+    SiteDir.join('gunk_hosts').each_line{|l|
+      cursor = GunkHosts
+      l.chomp.sub(/^\./,'').split('.').reverse.map{|name|cursor = cursor[name] ||= {}}}
     FeedIcon = SiteDir.join('feed.svg').read
     SiteFont = SiteDir.join('fonts/hack-regular-subset.woff2').read
     SiteGIF = SiteDir.join('site.gif').read
@@ -46,16 +54,8 @@ class WebResource
     SiteJS  = SiteDir.join('site.js').read
   end
   module HTTP
-    CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|googleapis|netdna.*)\.(com|io|net)$/
-    CookieHost = /\.(akamai(hd)?|bandcamp|ttvnw)\.(com|net)$/
     DesktopUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
     MobileUA = 'Mozilla/5.0 (Linux; Android 9; SM-G960F Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.157 Mobile Safari/537.36'
-    POSThost = /^video.*.ttvnw.net$/
-    UIhosts = %w(players.brightcove.net www.redditmedia.com)
-    GunkHosts = {}
-    SiteDir.join('gunk_hosts').each_line{|l|
-      cursor = GunkHosts
-      l.chomp.sub(/^\./,'').split('.').reverse.map{|name|cursor = cursor[name] ||= {}}}
 
     # common handlers
     Fetch = -> r {r.fetch}
