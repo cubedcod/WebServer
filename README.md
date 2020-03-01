@@ -6,6 +6,7 @@ install dependencies:
 
     ./DEPENDENCIES.sh
 
-add bin/ to PATH and run 'session' to launch the proxy+daemon pair
+add bin/ to PATH. 'session' launches proxy (frontend) and daemon (backend), or:
 
+    ~/web squid -f ~/src/WebServer/config/squid.conf
     ~/web unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c ../src/WebServer/config/unicorn.rb ../src/WebServer/config/rack.ru

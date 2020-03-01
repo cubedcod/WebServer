@@ -288,9 +288,6 @@ thumbs.ebaystatic.com).map{|host| GET host }
     # Soundcloud
     GET 'gate.sc', GotoURL
 
-    # TikTok
-    GET 's16.tiktokcdn.com'
-
     # Tumblr
     GET '.tumblr.com', -> r {(r.query_values||{}).has_key?('audio_file') ? [301, {'Location' => r.query_values['audio_file']}, []] : NoGunk[r]}
     
