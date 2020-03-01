@@ -193,7 +193,7 @@ class WebResource
         @env = e
         self
       else
-        @env #||= {}
+        @env
       end
     end
 
@@ -220,6 +220,7 @@ class WebResource
     end
 
     def fetchHTTP options = {}
+      puts [:FETCH, uri].join ' ' if ENV.has_key? 'VERBOSE'
       URI.open(uri, headers.merge({redirect: false})) do |response|
         h = response.meta                                             # upstream metadata
         if response.status.to_s.match? /206/                          # partial response
@@ -476,11 +477,8 @@ class WebResource
         index[i] ||= []                     # init index
         index[i].push format.strip}         # index on q-value
 
-      #puts env['HTTP_ACCEPT']
-      #puts ::JSON.pretty_generate index
-
-      index.sort.reverse.map{|q,formats| # formats selected in descending q-value order
-        formats.sort_by{|f|{'text/turtle'=>0}[f]||1}.map{|f|  # tiebreak with 🐢-preference
+      index.sort.reverse.map{|q,formats| # formats sorted on descending q-value
+        formats.sort_by{|f|{'text/turtle'=>0}[f]||1}.map{|f|  # tiebreak with 🐢-winner
           return default if f == '*/*'                        # default via wildcard
           return f if RDF::Writer.for(:content_type => f) ||  # RDF via writer definition
             ['application/atom+xml','text/html'].member?(f)}} # non-RDF via writer definition

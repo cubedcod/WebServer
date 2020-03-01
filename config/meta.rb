@@ -216,6 +216,7 @@ class WebResource
       'hasImage' => :drop,
       'headline' => Title,
       'hostname' => :drop,
+      'hovercard-subject-tag' => :drop,
       'html-safe-nonce' => :drop,
       'http://data-vocabulary.org/summary' => Abstract,
       'http://data-vocabulary.org/startDate' => Date,

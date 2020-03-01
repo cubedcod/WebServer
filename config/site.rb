@@ -37,7 +37,6 @@ class WebResource
   module URIs
     CacheFormats = %w(css geojson gif html ico jpeg jpg js json m3u8 m4a md mp3 mp4 opus pdf png svg ts webm webp xml) # cached filetypes
     StaticFormats = CacheFormats - %w(json html xml)
-    LocalAddress = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).concat(ENV.has_key?('HOSTNAME') ? [ENV['HOSTNAME']] : []).uniq
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
     FeedIcon = SiteDir.join('feed.svg').read
     SiteFont = SiteDir.join('fonts/hack-regular-subset.woff2').read
@@ -47,7 +46,6 @@ class WebResource
     SiteJS  = SiteDir.join('site.js').read
   end
   module HTTP
-
     CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|googleapis|netdna.*)\.(com|io|net)$/
     CookieHost = /\.(akamai(hd)?|bandcamp|ttvnw)\.(com|net)$/
     DesktopUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
@@ -66,6 +64,7 @@ class WebResource
     GotoU   = -> r {[301, {'Location' =>  r.query_values['u']}, []]}
     GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['q'])}, []]}
     NoGunk  = -> r {r.gunkURI && (r.query_values || {})['allow'] != ServerKey && r.deny || r.fetch}
+
     NoQuery = -> r {
       if !r.query                         # request without query
         NoGunk[r].yield_self{|s,h,b|      #  inspect response
@@ -75,6 +74,7 @@ class WebResource
       else                                # request with query
         [302, {'Location' => r.path}, []] #  redirect to path
       end}
+
     RootIndex = -> r {
       if r.path == '/' || r.path.match?(GlobChars)
         r.nodeResponse
@@ -82,6 +82,7 @@ class WebResource
         r.chrono_sort if r.parts.size == 1
         NoGunk[r]
       end}
+
     Resizer = -> r {
       if r.parts[0] == 'resizer'
         parts = r.path.split /\/\d+x\d+\/((filter|smart)[^\/]*\/)?/
@@ -89,6 +90,8 @@ class WebResource
       else
         NoGunk[r]
       end}
+
+    %w(bit.ly dlvr.it t.co ti.me tinyurl.com trib.al wired.trib.al).map{|short| GET short, NoQuery }
 
     # Adobe
     Allow 'entitlement.auth.adobe.com'
@@ -253,8 +256,9 @@ thumbs.ebaystatic.com).map{|host| GET host }
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !parts.member?('wiki') # MIME preference
       r.env[:links][:prev] = ['https://old.reddit.com', r.path, '?', r.query].join # page pointers
       r.fetch options}
+
     GET 'old.reddit.com', -> r {
-      r.upstreamUI.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
+      r.upstreamUI.env['HTTP_USER_AGENT'] = DesktopUA
       r.fetch.yield_self{|status,head,body|
         if !%w(r u user).member?(r.parts[0]) || status.to_s.match?(/^30/)
           [status, head, body]
@@ -298,24 +302,23 @@ thumbs.ebaystatic.com).map{|host| GET host }
     GET 'static.twitchcdn.net'
 
     # Twitter
-    %w(bit.ly dlvr.it t.co ti.me tinyurl.com trib.al wired.trib.al).map{|short| GET short, NoQuery }
     ['', 'api.', 'mobile.'].map{|h| Allow h + 'twitter.com'}
+
     Populate 'twitter.com', -> r {
       FileUtils.mkdir 'twitter'
       `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|n|
         FileUtils.touch 'twitter/.' + n}}
 
+    GET 'api.twitter.com', -> r {
+      if r.env.keys.grep(/token/i).empty?
+        r.env['HTTP_COOKIE'] = 'twitter/.cookie'.R.readFile
+        r.TwitterAuth
+      end
+      r.fetch}
+
     Twitter = -> r {
       r.chrono_sort
-      if r.env.has_key? 'HTTP_COOKIE'
-        attrs = {}
-        r.env['HTTP_COOKIE'].split(';').map{|attr|
-          k , v = attr.split('=').map &:strip
-          attrs[k] = v}
-        r.env['authorization'] ||= 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA'
-        r.env['x-csrf-token'] ||= attrs['ct0'] if attrs['ct0']
-        r.env['x-guest-token'] ||= attrs['gt'] if attrs['gt']
-      end
+      r.TwitterAuth
 
       # feed
       if r.path == '/'
@@ -653,6 +656,17 @@ thumbs.ebaystatic.com).map{|host| GET host }
 
   def RedditJSON tree
     puts tree.keys
+  end
+
+  def TwitterAuth
+    return unless env.has_key? 'HTTP_COOKIE'
+    attrs = {}
+    env['HTTP_COOKIE'].split(';').map{|attr|
+      k , v = attr.split('=').map &:strip
+      attrs[k] = v}
+    env['authorization'] ||= 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA'
+    env['x-csrf-token'] ||= attrs['ct0'] if attrs['ct0']
+    env['x-guest-token'] ||= attrs['gt'] if attrs['gt']
   end
 
   def TwitterHTML doc, &b

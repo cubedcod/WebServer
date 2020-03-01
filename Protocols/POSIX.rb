@@ -2,6 +2,8 @@
 class WebResource
   module URIs
 
+    LocalAddress = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).concat(ENV.has_key?('HOSTNAME') ? [ENV['HOSTNAME']] : []).uniq
+
     # URI -> file path
     def fsPath      ## host
       (if localNode? # localhost
