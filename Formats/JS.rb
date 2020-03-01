@@ -81,17 +81,35 @@ module Webize
 
         ## JSON triplrs
 
-        # host binding
+        # host triplr
         if hostTriples = Triplr[@base.host]
           @base.send hostTriples, @json, &f
+        else # generic triplr
+          Webize::HTML.webizeValue(@json){|h|
+            if s = h['uri'] || h['url']
+              s = s.R
+              yield s, Type, Post.R if h.has_key? 'content'
+              if s.parts[0] == 'users'
+                host = ('https://' + s.host).R
+                yield s, Creator, host.join(s.parts[0..1].join('/'))
+                yield s, To, host
+              end
+              h.map{|p, v|
+                unless %w(id uri).member? p
+                  p = MetaMap[p] || p
+                  (v.class == Array ? v : [v]).map{|o|
+                    unless [Hash, NilClass].member?(o.class) || (o.class == String && o.empty?)
+                      o = o.R if o.class == String && o.match?(/^(http|\/)\S+$/)
+                      o = Webize::HTML.clean o, @base if p == Content
+                      yield s, p, o
+                    end} unless p == :drop
+                end}
+            end}
         end
-=begin
-        # JSON-Feed
-        if @base.parts.map{|part| part.split '.'}.flatten.member? 'feed'
-          @base.env[:transform] = true
-          self.JSONfeed &f
-        end
-=end
+
+        # JSON Feed
+        #self.JSONfeed &f if @base.parts.map{|part| part.split '.'}.flatten.member? 'feed'
+
       end
     end
   end
