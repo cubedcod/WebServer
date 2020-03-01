@@ -236,8 +236,7 @@ class WebResource
       fallback.fetchHTTP options
     end
 
-    def fetchHTTP options = {}
-      puts [:FETCH, uri].join ' ' if ENV.has_key? 'VERBOSE'
+    def fetchHTTP options = {} #; puts [:FETCH, uri].join ' ' if ENV.has_key? 'VERBOSE'
       URI.open(uri, headers.merge({redirect: false})) do |response|
         h = response.meta                                             # upstream metadata
         if response.status.to_s.match? /206/                          # partial response
@@ -255,18 +254,29 @@ class WebResource
           static = !options[:reformat] && (fixedFormat? format)       # rewritable format?
           body = Webize::HTML.degunk body if format == 'text/html' && !AllowedHosts.has_key?(host) # clean HTML
           formatExt = Suffixes[format] || Suffixes_Rack[format] || (puts "ENOSUFFIX #{format} #{uri}";'') # filename-extension for format
+
           storage = fsPath                                            # storage location
           storage += formatExt unless extension == formatExt
           storage.R.writeFile body                                    # cache body
+
           reader = RDF::Reader.for content_type: format               # select reader
           reader.new(body, base_uri: self){|_|                        # read RDF
             (env[:repository] ||= RDF::Repository.new) << _ } if reader && !%w(.css .gif .ico .jpg .js .png .svg).member?(formatExt)
-          return self if options[:intermediate]                       # intermediate fetch, return w/o HTTP response
+          return self if options[:intermediate]                       # intermediate fetch, no finishing HTTP response
           reader ? saveRDF : (puts "ENORDF #{format} #{uri}")         # cache RDF
+
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
-            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # expose upstream metadata to downstream
-          env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin # CORS header
+            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # upstream metadata for downstream
+          if links = h['link']
+            links.split(',').map{|link|
+              ref, type = link.split(';').map &:strip
+              ref = ref.sub(/^</,'').sub(/>$/,'')
+              type = type.sub(/^rel="?/,'').sub(/"$/,'')
+              env[:links][type.to_sym] = ref}
+          end
+          env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
           env[:resp]['Set-Cookie'] ||= h['set-cookie'] if h['set-cookie'] && allowCookies?
+
           if static
             env[:resp]['Content-Length'] = body.bytesize.to_s         # size header
             [200, env[:resp], [body]]                                 # upstream doc
