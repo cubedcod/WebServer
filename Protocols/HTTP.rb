@@ -49,18 +49,31 @@ class WebResource
         ext = resource.path ? resource.ext.downcase : ''                        # log
         mime = head['Content-Type'] || ''
 
-        action_icon = case env['REQUEST_METHOD']
-                      when 'OPTIONS'
-                        '🔧'
-                      when 'POST'
-                        '📝'
-                      when 'GET'
-                        env[:fetch] ? '🐕' : nil
+        action_icon = if env[:deny]
+                        '🛑'
                       else
-                        env['REQUEST_METHOD']
+                        case env['REQUEST_METHOD']
+                        when 'OPTIONS'
+                          '🔧'
+                        when 'POST'
+                          '📝'
+                        when 'GET'
+                          env[:fetch] ? '🐕' : ' '
+                        else
+                          env['REQUEST_METHOD']
+                        end
                       end
 
-        status_icon = env[:deny] && '🛑' || {204 => '🌐', 301 => '➡️', 302 => '➡️', 303 => '➡️', 304 => '✅', 401 => '🚫', 403 => '🚫', 404 => '❓', 410 => '❌', 500 => '🚩'}[status] || (status == 200 ? nil : status)
+        status_icon = {204 => '🌐',
+                       301 => '➡️',
+                       302 => '➡️',
+                       303 => '➡️',
+                       304 => '✅',
+                       401 => '🚫',
+                       403 => '🚫',
+                       404 => '❓',
+                       410 => '❌',
+                       500 => '🚩'}[status] || (status == 200 ? nil : status)
 
         format_icon = if ext == 'css' || mime.match?(/text\/css/)
                         '🎨'

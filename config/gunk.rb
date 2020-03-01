@@ -40,7 +40,7 @@ chartbeat|clickability|cloudfront|consent|crazyegg|crwdcntrl|
 doubleclick|d[fm]p|driftt|
 ensighten|evidon|facebook|feedbackify|
 ga|gdpr|google[a-z]*|g(a|pt|tm)|gu-web|
-hotjar|indexww|intercom|krxd|licdn|linkedin|
+hotjar|indexww|intercom|ipify|kr(ux|xd)|licdn|linkedin|
 mar(feel|keto)|moatads|mpulse|newrelic|newsmax|npttech|nreum|ntv.io|outbrain|
 parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|
 sail-horizon|scorecard[a-z]*|segment|snapkit|sophi|sp-prod|ssp|sumo|survicate|
