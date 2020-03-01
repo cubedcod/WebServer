@@ -34,6 +34,13 @@ class WebResource
     # metadata-normalization map
     MetaMap = {
       'Author' => Creator,
+      'DC.Date' => Date,
+      'DC.Date.X-MetadataLastModified' => Date,
+      'DC.Description' => Abstract,
+      'DC.Publisher' => Creator,
+      'DC.Publisher.Address' => Creator,
+      'DC.Title' => Title,
+      'DC.Type' => Type,
       'DC.author' => Creator,
       'DC.contributor' => Creator,
       'DC.creator' => Creator,
