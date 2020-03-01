@@ -91,7 +91,7 @@ class WebResource
         NoGunk[r]
       end}
 
-    %w(bit.ly dlvr.it t.co ti.me tinyurl.com trib.al wired.trib.al).map{|short| GET short, NoQuery }
+    %w(bit.ly dlvr.it feeds.feedburner.com hubs.ly rssfeeds.usatoday.com t.co ti.me tinyurl.com trib.al wired.trib.al).map{|short| GET short, NoQuery }
 
     # Adobe
     Allow 'entitlement.auth.adobe.com'
@@ -171,9 +171,6 @@ thumbs.ebaystatic.com).map{|host| GET host }
 
     %w(l.facebook.com lm.facebook.com).map{|host| GET host, GotoU}
 
-    # Feedburner
-    GET 'feeds.feedburner.com', NoQuery
-
     # Forbes
     GET 'thumbor.forbes.com', -> r {[301, {'Location' => Rack::Utils.unescape(r.parts[-1])}, []]}
 
@@ -215,9 +212,6 @@ thumbs.ebaystatic.com).map{|host| GET host }
     GET 'i.guim.co.uk'
     GET 'assets.guim.co.uk'
     GET 'www.theguardian.com'
-
-    # Hubspot
-    GET 'hubs.ly', NoQuery
 
     # Instagram
     Cookies 'www.instagram.com'
@@ -317,48 +311,44 @@ thumbs.ebaystatic.com).map{|host| GET host }
       r.fetch}
 
     Twitter = -> r {
-      r.chrono_sort
-      r.TwitterAuth
-
+      r.chrono_sort.TwitterAuth
       # feed
-      if r.path == '/'
-        subscriptions = Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}
-        subscriptions.shuffle.each_slice(18){|sub|
-          print '🐦'
-          q = sub.map{|u|'from%3A' + u}.join('%2BOR%2B')
-          apiURL = 'https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&q=' + q + '&vertical=default&count=40&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2CcameraMoment'
-          apiURL.R(r.env).fetch intermediate: true}
-        r.saveRDF.graphResponse
-
-      # user page
+      (if r.path == '/'
+       subscriptions = Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}
+       subscriptions.shuffle.each_slice(18){|sub|
+         print '🐦'
+         q = sub.map{|u|'from%3A' + u}.join('%2BOR%2B')
+         apiURL = 'https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&q=' + q + '&vertical=default&count=40&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2CcameraMoment'
+         apiURL.R(r.env).fetch intermediate: true}
+       r.saveRDF.graphResponse
+      # user
       elsif r.parts.size == 1 && !%w(favicon.ico manifest.json push_service_worker.js search sw.js).member?(r.parts[0]) && !r.upstreamUI?
         uid = nil
         begin
-        URI.open('https://api.twitter.com/graphql/G6Lk7nZ6eEKd7LBBZw9MYw/UserByScreenName?variables=%7B%22screen_name%22%3A%22' + r.parts[0] + '%22%2C%22withHighlightedLabel%22%3Afalse%7D', r.headers){|response| # find uid
-          body = HTTP.decompress response.meta, response.read
-          json = ::JSON.parse body
-          uid = json['data']['user']['rest_id']}
-        ('https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment').R(r.env).fetch reformat: true
+          URI.open('https://api.twitter.com/graphql/G6Lk7nZ6eEKd7LBBZw9MYw/UserByScreenName?variables=%7B%22screen_name%22%3A%22' + r.parts[0] + '%22%2C%22withHighlightedLabel%22%3Afalse%7D', r.headers){|response| # find uid
+            body = HTTP.decompress response.meta, response.read
+            json = ::JSON.parse body
+            uid = json['data']['user']['rest_id']}
+          ('https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment').R(r.env).fetch reformat: true
         rescue
-          puts "TWITTER API error on #{r.uri}, falling back to default UI"
-          'twitter/.cookie'.R.node.delete # toss stale cookie
-          r.upstreamUI.fetch              # load upstream UI for fresh tokens
+          [401,{},[]]
         end
-
       # conversation
       elsif r.parts.member?('status') && !r.upstreamUI?
         convo = r.parts.find{|p| p.match? /^\d{8}\d+$/ }
         "https://api.twitter.com/2/timeline/conversation/#{convo}.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&count=20&ext=mediaStats%2CcameraMoment".R(r.env).fetch reformat: true
-
       else
         NoGunk[r]
-      end}
+       end).yield_self{|s,h,b|
+        if [401,403,429].member? s
+          'twitter/.cookie'.R.node.delete # nuke tokens
+          r.upstreamUI.fetch
+        else
+          [s,h,b]
+        end}}
 
     GET 'mobile.twitter.com', Twitter
     GET 'twitter.com', Twitter
-
-    # USA Today
-    GET 'rssfeeds.usatoday.com', NoQuery
 
     # Viglink
     GET 'redirect.viglink.com', GotoU
@@ -659,7 +649,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
   end
 
   def TwitterAuth
-    return unless env.has_key? 'HTTP_COOKIE'
+    return self unless env.has_key? 'HTTP_COOKIE'
     attrs = {}
     env['HTTP_COOKIE'].split(';').map{|attr|
       k , v = attr.split('=').map &:strip
@@ -667,6 +657,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
     env['authorization'] ||= 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA'
     env['x-csrf-token'] ||= attrs['ct0'] if attrs['ct0']
     env['x-guest-token'] ||= attrs['gt'] if attrs['gt']
+    self
   end
 
   def TwitterHTML doc, &b

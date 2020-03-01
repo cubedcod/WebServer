@@ -36,16 +36,16 @@ zerg(net)?)
 3gl|6sc|
 ad|[a-z]*analytic[a-z]*|auction|
 bid(d(er|ing)|s)?|bing|bouncee?x[a-z]*|
-chartbeat|clickability|cloudfront|consent|crazyegg|crwdcntrl|
+chartbeat|clickability|cloudfront|COMSCORE|consent|crazyegg|c(rss)?pxl?|crwdcntrl|
 doubleclick|d[fm]p|driftt|
 ensighten|evidon|facebook|feedbackify|
-ga|gdpr|google[a-z]*|g(a|pt|tm)|gu-web|
+ga|gdpr|google[a-z]*|g(a|pt|tm)|gu-web|gumgum|gwallet|
 hotjar|indexww|intercom|ipify|kr(ux|xd)|licdn|linkedin|
-mar(feel|keto)|moatads|mpulse|newrelic|newsmax|npttech|nreum|ntv.io|outbrain|
+mar(feel|keto)|ml314|moatads|mpulse|newrelic|newsmax|npttech|nreum|ntv.io|outbrain|
 parsely|petametrics|pgmcdn|pinimg|pressboard|quantserve|quora|revcontent|
 sail-horizon|scorecard[a-z]*|segment|snapkit|sophi|sp-prod|ssp|sumo|survicate|
 taboola|[a-z]*targeting[a-z]*|tinypass|tiqcdn|[a-z]*track[a-z]*|twitter|tynt|
-visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk
+viglink|visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk
 )(\b|[_'"]))xi
 
     InitialState = /(bootstrap|global|init(ial)?|preload(ed)?|shared).?(content|data|state)|SCRIPTS_LOADED|window.app/i

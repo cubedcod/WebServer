@@ -91,6 +91,10 @@ class WebResource
                         '🐢'
                       elsif %w(htm html).member?(ext) || mime.match?(/html/)
                         '📃'
+                      elsif mime.match? /^font/
+                        '🇹 '
+                      elsif mime.match? /octet.stream/
+                        '🧱'
                       else
                         mime
                       end
