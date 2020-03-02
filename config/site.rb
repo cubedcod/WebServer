@@ -91,7 +91,7 @@ class WebResource
         NoGunk[r]
       end}
 
-    %w(bit.ly dlvr.it econ.trib.al feeds.feedburner.com hubs.ly rssfeeds.usatoday.com t.co ti.me tinyurl.com trib.al wired.trib.al).map{|short| GET short, NoQuery }
+    %w(bit.ly cbsn.ws dlvr.it econ.trib.al feeds.feedburner.com hubs.ly rssfeeds.usatoday.com t.co ti.me tinyurl.com trib.al wired.trib.al).map{|short| GET short, NoQuery }
 
     # Adobe
     Allow 'entitlement.auth.adobe.com'
