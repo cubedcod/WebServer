@@ -5,11 +5,13 @@
 #prev, #next {position: fixed; height: 100%}
 #prev, #next, #expand {font-size: 1.9em; color: #eee}
 #prev:hover, #next:hover {background-color: #333}
-#showMain {background: repeating-linear-gradient(135deg, #000, #000 .4em, #fff .4em, #fff .8em); height: 1.2em; width: 1.2em; display: inline-block; border: 1px solid white}
+#showMain {background: repeating-linear-gradient(135deg, #000, #000 .4em, #fff .4em, #fff .8em); height: 1.2em; width: 1.2em; border: 1px solid white}
+* { display: inline-block }
+style, script { display: none }
 .avatar {max-height: 2em; background-color: #000}
 .breadcrumb {border-width: 0 0 0 .08em; border-color: #444; border-style: solid; border-radius: 0; color: #ddd}
 .container > .body {border-radius: 0 .2em .2em .2em; background-color: #fff; color: #000; width: 100%}
-.container > .title {border-radius: .4em .4em 0 0; display: inline-block; padding-right: .1em}
+.container > .title {border-radius: .4em .4em 0 0; padding-right: .1em}
 .file > .icon {font-size: 4.2em; background-color: #000; color: #fff}
 .file > .name {font-size: .8em; position: absolute; top: 4.8em; left: .4em}
 .file {position: relative}
@@ -18,23 +20,23 @@
 .links {float: right}
 .list {background-color: #fff; color: #000}
 .main.post {background-color: #fff; color: #000; border-width: 0; padding: .2em}
-.post {border-radius: .42em; max-width: 88ex; padding: .2em; display: inline-block; margin: .166em}
+.post {border-radius: .42em; max-width: 88ex; padding: .2em; margin: .166em}
 .quote {background-color: #ccc; color: #000}
 .site {background: repeating-linear-gradient(45deg, #000, #000 4em, #fff 4em, #fff 8em); border: 1px solid white; border-radius: .3em; color: #aaa}
-.thumb, svg, img[src*="svg"] {display: inline-block; max-width: 22em}
-.title {background-color: #fff; color: #000; padding:0; font-size: 1.08em; font-weight: bold; vertical-align: top; margin-top: -.1em; margin-left: -.1em; display: inline-block; border-width: 0 0 0 .4em; border-color: #fff; border-style: solid; border-radius: .18em }
+.thumb, img[src*="svg"] {max-width: 22em}
+.title {background-color: #fff; color: #000; padding:0; font-size: 1.08em; font-weight: bold; vertical-align: top; margin-top: -.1em; margin-left: -.1em; border-width: 0 0 0 .4em; border-color: #fff; border-style: solid; border-radius: .18em }
 .title:visited {border-color: #0f0}
 .toolbox a.icon {font-size: 1.6em}
 .toolbox a.icon, .breadcrumb {text-shadow: 1px 1px #000000}
 .toolbox a:target {text-shadow: 0px 0px #000000}
 .toolbox svg {height: 1em; width: 1em}
-.toolbox { display: inline-block; position: fixed; top: 0; z-index: 2 }
+.toolbox { position: fixed; top: 0; z-index: 2 }
 :target {background-color: #0f0 !important; color: #000 !important}
 a {text-decoration: none; border-radius: .14em}
 a.date {float: right; white-space: nowrap; color: #888; font-size: .8em; border-color: #222}
 a.id {float: right}
-a.idlink {color: #000; background-color: #aaa; font-size: .72em; display: inline-block; vertical-align: bottom; border-radius: .28em .28em 0 0}
-a.uri {background-color: #eee; border-radius: .28em; color: #000; display: inline-block; border-style: solid; border-color: #fff; border-width: 0 0 0 .3em; max-width: 42ex; overflow: hidden; margin: .1em; font-weight: bold}
+a.idlink {color: #000; background-color: #aaa; font-size: .72em; vertical-align: bottom; border-radius: .28em .28em 0 0}
+a.uri {background-color: #eee; border-radius: .28em; color: #000; border-style: solid; border-color: #fff; border-width: 0 0 0 .3em; max-width: 42ex; overflow: hidden; margin: .1em; font-weight: bold}
 a.uri > span.uri {font-size: 0.8em; font-weight: normal}
 a.uri.path {background-color: #111; color: #fff; border-color: #222}
 a.uri:visited {border-color: #0f0}
@@ -45,7 +47,8 @@ h1,h2,h3,h4,h5,h6,p,pre {margin: 0}
 img, video {max-width: 100%}
 p, li, blockquote {max-width: 86ex}
 pre {white-space: pre-wrap}
-span.name {font-size: .8em; display: inline-block}
+span.name {font-size: .8em}
+svg {max-width:2em; max-height: 2em}
 thead a {color: #eee}
 td {overflow: hidden; border-radius: .2em; vertical-align: top}
 td[property="uri"] {max-width: 100ex; text-align: left}
