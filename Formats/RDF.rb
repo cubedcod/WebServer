@@ -85,7 +85,8 @@ class WebResource < RDF::URI
         puts "\e[32m#{'%2d' % graph.size}⋮🐢 \e[1m#{doc}\e[0m" if doc.path != path
       end
 
-      if timestamp = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value            # timestamp
+      # link to timeline , if not already on it
+      if !turtle.match?(/^\d\d\d\d\/\d\d\/\d\d/) && timestamp = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value # timestamp query
         tlink = [timestamp.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), # hour-dir
                  %w{host path query}.map{|attr|
                    doc.send(attr).yield_self{|p|p && p.split(/[\W_]/)}}, 'ttl']. # URI slugs
@@ -95,7 +96,6 @@ class WebResource < RDF::URI
           FileUtils.mkdir_p File.dirname tlink
           FileUtils.ln turtle, tlink
         end
-
       end}
     self
   end
