@@ -63,9 +63,10 @@ class WebResource < RDF::URI
       options[:format] ||= formatHint if formatHint
       graph.load fsPath, **options
     elsif node.directory?
-      graph << RDF::Statement.new(self, Type.R, Container.R)
-      graph << RDF::Statement.new(self, Title.R, basename)
-      graph << RDF::Statement.new(self, Date.R, node.stat.mtime.iso8601)
+      subject = to_s[-1] == '/' ? self : (self + '/')
+      graph << RDF::Statement.new(subject, Type.R, Container.R)
+      graph << RDF::Statement.new(subject, Title.R, basename)
+      graph << RDF::Statement.new(subject, Date.R, node.stat.mtime.iso8601)
     end
     self
   rescue RDF::FormatError => e
