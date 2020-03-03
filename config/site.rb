@@ -5,6 +5,7 @@ module Webize
       Triplr = {
         'apnews.com' => :AP,
         'boards.4chan.org' => :FourChan,
+        'boards.4channel.org' => :FourChan,
         'github.com' => :GitHub,
         'gitter.im' => :Gitter,
         'lwn.net' => :LWN,
@@ -92,7 +93,13 @@ class WebResource
         NoGunk[r]
       end}
 
-    %w(bit.ly cbsn.ws dlvr.it econ.trib.al feeds.feedburner.com hubs.ly rssfeeds.usatoday.com t.co ti.me tinyurl.com trib.al wired.trib.al).map{|short| GET short, NoQuery }
+    # URL shorteners / redirectors
+    %w(bit.ly bos.gl w.bos.gl
+ cbsn.ws dlvr.it econ.trib.al
+ feedproxy.google.com feeds.feedburner.com feeds.reuters.com
+ hubs.ly
+ reut.rs rss.cnn.com rssfeeds.usatoday.com
+ t.co ti.me tinyurl.com trib.al wired.trib.al).map{|short| GET short, NoQuery }
 
     # Adobe
     Allow 'entitlement.auth.adobe.com'
@@ -109,7 +116,6 @@ class WebResource
 
     # Boston Globe
     GET 'bostonglobe-prod.cdn.arcpublishing.com', Resizer
-    %w(bos.gl w.bos.gl).map{|short| GET short, NoQuery }
 
     # Brightcove
     %w(
@@ -131,7 +137,6 @@ secure.brightcove.com
 
     # CNN
     GET 'dynaimage.cdn.cnn.com', GotoBasename
-    GET 'rss.cnn.com', NoQuery
 
     # DartSearch
     GET 'clickserve.dartsearch.net', -> r {[301,{'Location' => r.query_values['ds_dest_url']}, []]}
@@ -181,33 +186,16 @@ thumbs.ebaystatic.com).map{|host| GET host }
 
     # Google
     GET 'ajax.googleapis.com'  # Javascript libraries
-    GET 'feedproxy.google.com', NoQuery
-
-    if ENV.has_key? 'GOOGLE'
-      Cookies 'www.google.com' # personalization
-      %w(docs).map{|h| GET h + '.google.com' }
-      %w(maps ssl www).map{|h| GET h + '.googleapis.com' }
-      %w(maps ssl www).map{|h| GET h + '.gstatic.com' }
-      (0..3).map{|i|           GET "encrypted-tbn#{i}.gstatic.com" }
-      (0..3).map{|i|           GET "khms#{i}.google.com" }
-      GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
-      GET 'www.google.com', -> r {
-        case r.path
-        when /^.complete/
-          r.query_values.map{|k,v| puts [k,v].join "\t"}
-          r.deny
-        when /^.(images|maps)/
-          r.upstreamUI.env['HTTP_USER_AGENT'] = DesktopUA
-          r.fetch
-        when /^.search/ # full URLs are sent here on Android/Chrome. redirect to URL
-          q = (r.query_values||{})['q']
-          q && q.match?(/^(https?:|l(ocalhost)?(:8000)?)\//) && [301,{'Location'=>q.sub(/^l/,'http://l')},[]] || r.fetch
-        when '/url'
-          GotoURL[r]
-        else
-          r.deny
-        end}
-    end
+    GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
+    GET 'www.google.com', -> r {
+      case r.path
+      when /^.(images|maps|search)/
+        r.fetch
+      when '/url'
+        GotoURL[r]
+      else
+        r.deny
+      end}
 
     # Guardian
     GET 'i.guim.co.uk'
@@ -270,8 +258,6 @@ thumbs.ebaystatic.com).map{|host| GET host }
         end}}
 
     # Reuters
-    GET 'feeds.reuters.com', NoQuery
-    GET 'reut.rs', NoQuery
     (0..5).map{|i|
       GET "s#{i}.reutersmedia.net", -> r {
         if (r.query_values||{}).has_key? 'w'
