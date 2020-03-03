@@ -4,6 +4,7 @@ module Webize
     class Reader
       Triplr = {
         'apnews.com' => :AP,
+        'boards.4chan.org' => :FourChan,
         'github.com' => :GitHub,
         'gitter.im' => :Gitter,
         'lwn.net' => :LWN,
@@ -485,6 +486,12 @@ thumbs.ebaystatic.com).map{|host| GET host }
       end
       post.remove }
     ['#fixed_sidebar'].map{|s|doc.css(s).map &:remove}
+  end
+
+  def FourChan doc
+    doc.css().map{|post|
+
+    }
   end
 
   GHgraph = /__gh__coreData.content=(.*?);?\s*__gh__coreData.content.bylineFormat/m
