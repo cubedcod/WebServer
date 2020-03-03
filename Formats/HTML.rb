@@ -100,6 +100,7 @@ module Webize
         @opts = options
         @doc = (input.respond_to?(:read) ? input.read : input).encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ')
         @base = options[:base_uri]
+        @base = @base.to_s[0..-6].R @base.env if @base.to_s.match? /\.html$/ # strip filename extension
         @opts[:noRDFa] = true if @base.to_s.match? /\/feed|polymer.*html/ # don't look for RDF in templates
         if block_given?
           case block.arity
