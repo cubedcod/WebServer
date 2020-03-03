@@ -103,16 +103,18 @@ class WebResource
                   31
                 else
                   case format_icon
-                  when '🎨'
-                    33
-                  when '🖼️'
-                    33
-                  when '📜'
-                    36
-                  when '🐢'
-                    32
                   when '📃'
                     34
+                  when '📜'
+                    36
+                  when '🗒'
+                    '38;5;60'
+                  when '🐢'
+                    32
+                  when '🎨'
+                    '38;5;223'
+                  when '🖼️'
+                    33
                   when '🎬'
                     '38;5;208'
                   else
@@ -132,7 +134,7 @@ class WebResource
                 format_icon,
                 triple_count,
                 env[:refhost] ? ["\e[#{color};1m", env[:refhost], "\e[0m→"] : nil,
-                "\e[#{color}#{thirdparty ? ';1;7' : ''}m", thirdparty ? resource.uri : resource.path[1..-1], "\e[0m"].compact.join ' '
+                "\e[#{color}#{thirdparty ? ';7' : ''};1m", thirdparty ? resource.uri : resource.path[1..-1], "\e[0m"].compact.join ' '
         end
         
         [status, head, body]} # response

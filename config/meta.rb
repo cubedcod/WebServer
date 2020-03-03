@@ -139,6 +139,7 @@ class WebResource
       'baidu-site-verification' => :drop,
       'beat' => Abstract,
       'biography' => Abstract,
+      'body' => Content,
       'bot' => :drop,
       'brightspot.cached' => :drop,
       'brightspot.contentId' => :drop,
