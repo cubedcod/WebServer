@@ -204,7 +204,9 @@ thumbs.ebaystatic.com).map{|host| GET host }
 
     # Instagram
     Cookies 'www.instagram.com'
+    GET 'instagram.com', -> r {[301, {'Location' => 'https://www.instagram.com' + r.path}, []]}
     GET 'l.instagram.com', GotoU
+    GET 'www.instagram.com', RootIndex
     Populate 'www.instagram.com', -> r {
       base = 'instagram/'
       FileUtils.mkdir base
@@ -218,7 +220,6 @@ thumbs.ebaystatic.com).map{|host| GET host }
               FileUtils.mkdir base + name
             end
           end}}}
-    GET 'www.instagram.com', RootIndex
 
     # JWPlayer
     GET 'ssl.p.jwpcdn.com'
