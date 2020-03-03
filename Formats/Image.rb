@@ -63,7 +63,10 @@ module Webize
 
   module JPEG
     class Format < RDF::Format
-      content_type 'image/jpeg', extensions: [:jpeg, :jpg]
+      content_type 'image/jpeg',
+                   extensions: [:jpeg, :jpg],
+                   aliases: %w(
+                   image/jpg;q=0.8)
       reader { Reader }
     end
 

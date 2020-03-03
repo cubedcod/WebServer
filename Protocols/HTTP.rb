@@ -100,19 +100,21 @@ class WebResource
                       end
 
         color = if env[:deny]
-                  '31;1'
+                  31
                 else
                   case format_icon
                   when '🎨'
-                    '33;1'
+                    33
                   when '🖼️'
-                    '33;1'
+                    33
                   when '📜'
-                    '36;1'
+                    36
                   when '🐢'
                     32
+                  when '📃'
+                    34
                   else
-                    '34;1'
+                    35
                   end
                 end
 
@@ -127,8 +129,8 @@ class WebResource
                 status_icon,
                 format_icon,
                 triple_count,
-                env[:refhost] ? ["\e[#{color};7m", env[:refhost], "\e[0m→"] : nil,
-                "\e[#{color}#{thirdparty ? ';7' : ''}m", thirdparty ? resource.uri : resource.path[1..-1], "\e[0m"].compact.join ' '
+                env[:refhost] ? ["\e[#{color};1m", env[:refhost], "\e[0m→"] : nil,
+                "\e[#{color}#{thirdparty ? ';1;7' : ''}m", thirdparty ? resource.uri : resource.path[1..-1], "\e[0m"].compact.join ' '
         end
         
         [status, head, body]} # response
