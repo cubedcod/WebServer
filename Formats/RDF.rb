@@ -46,7 +46,7 @@ class WebResource < RDF::URI
   # file(s) -> RDF::Repository
   def loadRDF options = {}
     graph = options[:repository] || env[:repository] ||= RDF::Repository.new
-    options[:base_uri] ||= uri.gsub(/\.ttl$/,'').R env
+    options[:base_uri] ||= (localNode? ? path : uri).gsub(/\.ttl$/,'').R env
     if node.file?
       # path-derived format hints when suffix is ambiguous or missing
       formatHint = if ext != 'ttl' && (basename.index('msg.')==0 || path.index('/sent/cur')==0)
