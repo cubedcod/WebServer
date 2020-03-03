@@ -490,19 +490,14 @@ thumbs.ebaystatic.com).map{|host| GET host }
 
   def FourChan doc
     doc.css('.post').map{|post|
-      num = post.css('.postNum a')[0]
-      if subject = num ? num['href'] : ('#' + post['id'])
-                                           yield subject, Type,    Post.R
-        post.css(      '.name').map{|name| yield subject, Creator, name.inner_text }
-        post.css(  '.dateTime').map{|date| yield subject, Date,    Time.at(date['data-utc'].to_i).iso8601 }
-        post.css(   '.subject').map{|subj| yield subject, Title,   subj.inner_text }
-        post.css('.postMessage').map{|msg| yield subject, Content, msg }
-        post.css('.fileThumb').map{|thumb| yield subject, Image,   thumb['href'].R }
-        post.remove
-      else
-        puts "unidentified post!"
-      end
-    }
+      subject = join post.css('.postNum a')[0]['href'] #  ('#' + post['id'])
+      yield subject, Type, Post.R
+      post.css(      '.name').map{|name| yield subject, Creator, name.inner_text }
+      post.css(  '.dateTime').map{|date| yield subject, Date,    Time.at(date['data-utc'].to_i).iso8601 }
+      post.css(   '.subject').map{|subj| yield subject, Title,   subj.inner_text }
+      post.css('.postMessage').map{|msg| yield subject, Content, msg }
+      post.css('.fileThumb').map{|thumb| yield subject, Image,   thumb['href'].R }
+      post.remove}
   end
 
   GHgraph = /__gh__coreData.content=(.*?);?\s*__gh__coreData.content.bylineFormat/m
