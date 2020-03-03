@@ -273,7 +273,7 @@ class WebResource
 
           reader = RDF::Reader.for content_type: format               # select reader
           reader.new(body, base_uri: self){|_|                        # read RDF
-            (env[:repository] ||= RDF::Repository.new) << _ } if reader && !%w(.css .gif .ico .jpg .js .png .svg).member?(formatExt)
+            (env[:repository] ||= RDF::Repository.new) << _ } if reader && !%w(.css .gif .ico .jpg .js .png .svg .webm).member?(formatExt)
           return self if options[:intermediate]                       # intermediate fetch, no finishing HTTP response
           reader ? saveRDF : (puts "ENORDF #{format} #{uri}")         # cache RDF
 
@@ -356,7 +356,7 @@ class WebResource
       elsif path.match? /gen(erate)?_?204$/ # connectivity check
         [204, {}, []]
       elsif path.match? HourDir # cached remote - timeslice
-        (path + '*' + host.split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*').R(env).nodeResponse
+        (path + '*' + host.split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*' + (query ? ('?' + query) : '')).R(env).nodeResponse
       elsif handler = HostGET[host] # host lambda
         Populator[host][self] if Populator[host] && !join('/').R.node.exist?
         handler[self]

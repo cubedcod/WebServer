@@ -546,7 +546,8 @@ class WebResource
 
     Markup[Post] = -> post, env {
       post.delete Type
-      uri = post.delete 'uri'
+      uri = post.delete('uri') || ('#' + Digest::SHA2.hexdigest(rand.to_s))
+      resource = uri.R
       titles = (post.delete(Title)||[]).map(&:to_s).map(&:strip).uniq
       abstracts = post.delete(Abstract) || []
       date = (post.delete(Date) || [])[0]
@@ -554,21 +555,27 @@ class WebResource
       to = post.delete(To) || []
       images = post.delete(Image) || []
       content = post.delete(Content) || []
-      uri_hash = 'r' + Digest::SHA2.hexdigest(uri) if uri
+      uri_hash = 'r' + Digest::SHA2.hexdigest(uri)
       cssname = 'post'
-      cssname += ' main' if uri && uri.R.path == env['REQUEST_PATH']
-      identified = false
-      {class: cssname,
+      hasPointer = false
+      if resource.path == env['REQUEST_PATH']
+        cssname += ' main'
+        local_id = resource.fragment || 'this'
+      else
+        local_id = uri_hash
+      end
+      {class: cssname, id: local_id,
        c: ["\n",
            titles.map{|title|
              title = title.to_s.sub(/\/u\/\S+ on /,'')
              unless env[:title] == title
                env[:title] = title
-               [{_: :a, class: 'title', type: 'node', href: uri, c: CGI.escapeHTML(title)}.update(identified ? {} : (identified = true; {id: uri_hash})), " \n"]
+               hasPointer = true
+               [{_: :a, class: 'title', type: 'node', href: uri, c: CGI.escapeHTML(title)}, " \n"]
              end},
+           ({_: :a, class: :id, type: :node, c: '🔗', href: uri} unless hasPointer), "\n", # pointer
            abstracts,
-           ({_: :a, id: uri_hash, class: 'id', type: :node, c: '🔗', href: uri} if uri && !identified), "\n", # minimum pointer
-           ([{_: :a, class: :date, id: 'date' + uri_hash, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date}, "\n"] if date && uri_hash),
+           ([{_: :a, class: :date, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date}, "\n"] if date),
            images.map{|i| Markup[Image][i,env]},
            {_: :table,
             c: {_: :tr,
