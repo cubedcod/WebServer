@@ -490,8 +490,8 @@ thumbs.ebaystatic.com).map{|host| GET host }
 
   def FourChan doc
     doc.css('.post').map{|post|
-      subject = join post.css('.postNum a')[0]['href'] #  ('#' + post['id'])
-      yield subject, Type, Post.R
+      subject = join post.css('.postNum a')[0]['href']
+                                         yield subject, Type,    Post.R
       post.css(      '.name').map{|name| yield subject, Creator, name.inner_text }
       post.css(  '.dateTime').map{|date| yield subject, Date,    Time.at(date['data-utc'].to_i).iso8601 }
       post.css(   '.subject').map{|subj| yield subject, Title,   subj.inner_text }
@@ -518,10 +518,9 @@ thumbs.ebaystatic.com).map{|host| GET host }
   end
 
   def GitHub doc
-    base = 'https://github.com'
     doc.css('div.comment').map{|comment|
       if ts = comment.css('.js-timestamp')[0]
-        subject = ts['href'] || self
+        subject = ts['href'] ? (join ts['href']) : self
         yield subject, Type, Post.R
         if body = comment.css('.comment-body')[0]
           yield subject, Content, Webize::HTML.clean(body.inner_html, self)
@@ -530,7 +529,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
           yield subject, Date, time['datetime']
         end
         if author = comment.css('.author')[0]
-          yield subject, Creator, (base + author['href']).R
+          yield subject, Creator, join(author['href'])
           yield subject, Creator, author.inner_text
         end
         yield subject, To, self
