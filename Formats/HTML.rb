@@ -556,15 +556,9 @@ class WebResource
       images = post.delete(Image) || []
       content = post.delete(Content) || []
       uri_hash = 'r' + Digest::SHA2.hexdigest(uri)
-      cssname = 'post'
       hasPointer = false
-      if resource.path == env['REQUEST_PATH']
-        cssname += ' main'
-        local_id = resource.fragment || 'this'
-      else
-        local_id = uri_hash
-      end
-      {class: cssname, id: local_id,
+      local_id = resource.path == env['REQUEST_PATH'] && resource.fragment || uri_hash
+      {class: :post, id: local_id,
        c: ["\n",
            titles.map{|title|
              title = title.to_s.sub(/\/u\/\S+ on /,'')
