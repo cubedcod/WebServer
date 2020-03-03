@@ -244,6 +244,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
     %w(cooking www).map{|host|GET host+'.nytimes.com'}
 
     # Reddit
+    GET 'reddit.com', -> r {[301, {'Location' => 'https://www.reddit.com' + r.path}, []]}
     GET 'www.reddit.com', -> r { parts = r.parts
       r.chrono_sort if r.path == '/' || parts[-1] == 'new' || parts.size == 5                # chrono-sort preference
       r = ('//www.reddit.com/r/Rad_Decentralization+SOLID+StallmanWasRight+dancehall+darknetplan+fossdroid+selfhosted+shortwave/new/').R r.env if r.path == '/' # subscriptions

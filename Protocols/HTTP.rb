@@ -113,6 +113,8 @@ class WebResource
                     32
                   when '📃'
                     34
+                  when '🎬'
+                    '38;5;208'
                   else
                     35
                   end
