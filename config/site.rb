@@ -234,12 +234,11 @@ thumbs.ebaystatic.com).map{|host| GET host }
     %w(cooking www).map{|host|GET host+'.nytimes.com'}
 
     # Reddit
-    GET 'reddit.com', -> r {[301, {'Location' => 'https://www.reddit.com' + r.path}, []]}
+    GET 'reddit.com', -> r {[301, {'Location' => 'https://www.reddit.com/r/Rad_Decentralization+SOLID+StallmanWasRight+dancehall+darknetplan+fossdroid+selfhosted+shortwave/new/'}, []]}
     GET 'www.reddit.com', -> r { parts = r.parts
-      r.chrono_sort if r.path == '/' || parts[-1] == 'new' || parts.size == 5                # chrono-sort preference
-      r = ('//www.reddit.com/r/Rad_Decentralization+SOLID+StallmanWasRight+dancehall+darknetplan+fossdroid+selfhosted+shortwave/new/').R r.env if r.path == '/' # subscriptions
-      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !parts.member?('wiki') # MIME preference
-      r.env[:links][:prev] = ['https://old.reddit.com', r.path, '?', r.query].join # page pointers
+      r.chrono_sort if parts[-1] == 'new' || parts.size == 5                    # chrono sort
+      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI?              # MIME preference
+      r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination link
       r.fetch options}
 
     GET 'old.reddit.com', -> r {
@@ -383,7 +382,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
         [301, {'Location' => r.query_values['q'] || r.query_values['u']}, []]
       elsif r.path == '/'
         [301, {'Location' => '/feed/subscriptions'}, []]
-      elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results signin user watch watch_videos yts).member? path
+      elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results signin user watch watch_videos yts).member?(path) || (r.query_values||{})['allow'] == ServerKey
         NoGunk[r.upstreamUI]
       else
         r.deny
