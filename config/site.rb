@@ -496,7 +496,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
       post.css(  '.dateTime').map{|date| yield subject, Date,    Time.at(date['data-utc'].to_i).iso8601 }
       post.css(   '.subject').map{|subj| yield subject, Title,   subj.inner_text }
       post.css('.postMessage').map{|msg| yield subject, Content, msg }
-      post.css('.fileThumb').map{|thumb| yield subject, Image,   thumb['href'].R }
+      post.css('.fileThumb').map{|thumb| yield subject, Image,   thumb['href'].R if thumb['href']}
       post.remove}
   end
 
