@@ -266,6 +266,9 @@ thumbs.ebaystatic.com).map{|host| GET host }
           r.fetch
         end}}
 
+    # Russia
+    %w(cloud. img.imgs).map{|h| GET h + 'mail.ru'}
+
     # Shopify
     GET 'cdn.shopify.com'
 
@@ -275,6 +278,9 @@ thumbs.ebaystatic.com).map{|host| GET host }
 
     # Soundcloud
     GET 'gate.sc', GotoURL
+
+    # Tiktok
+    GET 's16.tiktokcdn.com'
 
     # Tumblr
     GET '.tumblr.com', -> r {(r.query_values||{}).has_key?('audio_file') ? [301, {'Location' => r.query_values['audio_file']}, []] : NoGunk[r]}
