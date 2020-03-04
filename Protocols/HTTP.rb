@@ -112,7 +112,7 @@ class WebResource
                   when '🐢'
                     32
                   when '🎨'
-                    '38;5;216'
+                    '38;5;227'
                   when '🖼️'
                     '38;5;226'
                   when '🎬'
@@ -125,18 +125,16 @@ class WebResource
         triple_count = env[:repository] ? (env[:repository].size.to_s + '⋮') : nil
         thirdparty = env[:refhost] != resource.host
 
-        if [204, 304].member? status
-        elsif [301, 302, 303].member? status # redirect
-          puts ["\e[38;5;45m", resource.uri, status_icon + ' ', head['Location'], "\e[0m"].join ' '
-        else
+        unless [204, 304].member? status
           puts [action_icon,
                 status_icon,
                 format_icon,
                 triple_count,
                 env[:refhost] ? ["\e[#{color};1m", env[:refhost], "\e[0m→"] : nil,
-                "\e[#{color}#{thirdparty ? ';7' : ''};1m", thirdparty ? resource.uri : resource.path[1..-1], "\e[0m"].compact.join ' '
+                "\e[#{color}#{thirdparty ? ';7' : ''};1m", thirdparty ? resource.uri : resource.path[1..-1], "\e[0m"].
+                 flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
         end
-        
+
         [status, head, body]} # response
     rescue Exception => e
       msg = [uri, e.class, e.message].join " "
