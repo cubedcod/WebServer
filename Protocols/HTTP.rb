@@ -100,17 +100,19 @@ class WebResource
                       end
 
         color = if env[:deny]
-                  31
+                  '31;1'
                 else
                   case format_icon
+                  when '➡️'
+                    '38;5;7'
                   when '📃'
-                    34
+                    '34;1'
                   when '📜'
-                    36
+                    '36;1'
                   when '🗒'
                     '38;5;60'
                   when '🐢'
-                    32
+                    '32;1'
                   when '🎨'
                     '38;5;227'
                   when '🖼️'
@@ -118,7 +120,7 @@ class WebResource
                   when '🎬'
                     '38;5;208'
                   else
-                    35
+                    '35;1'
                   end
                 end
 
@@ -130,8 +132,10 @@ class WebResource
                 status_icon,
                 format_icon,
                 triple_count,
-                env[:refhost] ? ["\e[#{color};1m", env[:refhost], "\e[0m→"] : nil,
-                "\e[#{color}#{thirdparty ? ';7' : ''};1m", thirdparty ? resource.uri : resource.path[1..-1], "\e[0m"].
+                env[:refhost] ? ["\e[#{color}m", env[:refhost], "\e[0m→"] : nil,
+                "\e[#{color}#{thirdparty ? ';7' : ''}m", thirdparty ? resource.uri : resource.path[1..-1], "\e[0m",
+                head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil,
+               ].
                  flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
         end
 
@@ -151,12 +155,12 @@ class WebResource
 
     def cookies
       cookie = (hostPath + '.cookie').R
-      if jar = cookie.readFile # jar cookie. invalidate on your own, see examples in site.rb
+      if jar = cookie.readFile # jar has a cookie
         env['HTTP_COOKIE'] = jar unless env['HTTP_COOKIE'] == jar
       elsif env.has_key?('HTTP_COOKIE') && allowCookies?
         data = env['HTTP_COOKIE']
         return if host == 'twitter.com' && !data.match?(/ct0/)
-        puts ['🍪 ', "\e[1m", host, "\e[0m", data].join  ' '
+        puts ['🍪 ', "\e[38;5;130m", host, "\e[0m", data].join  ' '
         cookie.writeFile data # put cookie in jar
       end
       self
