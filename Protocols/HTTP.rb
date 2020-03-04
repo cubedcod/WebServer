@@ -112,9 +112,9 @@ class WebResource
                   when '🐢'
                     32
                   when '🎨'
-                    '38;5;223'
+                    '38;5;216'
                   when '🖼️'
-                    33
+                    '38;5;226'
                   when '🎬'
                     '38;5;208'
                   else
@@ -127,7 +127,7 @@ class WebResource
 
         if [204, 304].member? status
         elsif [301, 302, 303].member? status # redirect
-          puts ["\e[36m", resource.uri, status_icon + ' ', head['Location'], "\e[0m"].join ' '
+          puts ["\e[38;5;45m", resource.uri, status_icon + ' ', head['Location'], "\e[0m"].join ' '
         else
           puts [action_icon,
                 status_icon,
