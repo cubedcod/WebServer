@@ -189,7 +189,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
     GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
     GET 'www.google.com', -> r {
       case r.path
-      when /^.(images|maps|search)/
+      when /^.(ima?gr?es|maps|search)/
         r.fetch
       when '/url'
         GotoURL[r]

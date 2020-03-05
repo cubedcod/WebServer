@@ -19,7 +19,7 @@
 .list {background-color: #fff; color: #000}
 .post {border-radius: .42em; max-width: 88ex; padding: .2em; margin: .166em}
 .post, td {background-color: #000; color: #fff}
-.quote {background-color: #ccc; color: #000}
+.quote, blockquote {background-color: #ccc; color: #000; padding-left: .3em}
 .site {background: repeating-linear-gradient(45deg, #000, #000 4em, #fff 4em, #fff 8em); border: 1px solid white; border-radius: .3em; color: #aaa}
 .thumb {max-width: 22em}
 .title {background-color: #fff; color: #000; font-size: 1.08em; font-weight: bold; vertical-align: top; border-width: 0 0 0 .4em; border-color: #fff; border-style: solid; border-radius: .18em }
