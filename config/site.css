@@ -19,7 +19,7 @@
 .list {background-color: #fff; color: #000}
 .post {border-radius: .42em; max-width: 88ex; padding: .2em; margin: .166em}
 .post, td {background-color: #000; color: #fff}
-.quote, blockquote {background-color: #ccc; color: #000; padding-left: .3em}
+.quote {background-color: #ccc; color: #000; padding-left: .3em}
 .site {background: repeating-linear-gradient(45deg, #000, #000 4em, #fff 4em, #fff 8em); border: 1px solid white; border-radius: .3em; color: #aaa}
 .thumb {max-width: 22em}
 .title {background-color: #fff; color: #000; font-size: 1.08em; font-weight: bold; vertical-align: top; border-width: 0 0 0 .4em; border-color: #fff; border-style: solid; border-radius: .18em }
@@ -38,6 +38,7 @@ a.uri > span.uri {font-size: 0.8em; font-weight: normal}
 a.uri {background-color: #eee; border-radius: .28em; color: #000; border-style: solid; border-color: #fff; border-width: 0 0 0 .3em; max-width: 42ex; overflow: hidden; margin: .1em; font-weight: bold}
 a.uri.path {background-color: #111; color: #fff; border-color: #222}
 a.uri:visited {border-color: #0f0}
+blockquote {background-color: #080808; color: #fff; border-width: 0 0 0 .4em; border-style: solid; border-color: #222}
 body {font-family: sans-serif; margin: 2em}
 body, thead td, td.k {background-color: #555; color: #fff}
 div,p,a,li,ul,ol,form,svg { display: inline-block }

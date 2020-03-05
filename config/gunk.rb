@@ -2,7 +2,7 @@
 class WebResource
   module URIs
 
-    # URI gunk
+    # URI pattern
     Gunk = %r([-._\/'"\s:?&=~%]
 ((block|load|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|frame|id|obe|rotat[eo]r?|slots?|system|tech|tools?|types?|units?|words?|zones?)?|ak(am|ismet)|alerts?|.*analytics?.*|appnexus|audience|(app|smart)?
 b(lueconic|ouncee?x.*)s?|.*bid(d(er|ing)|s).*|
@@ -31,7 +31,7 @@ zerg(net)?)
 ([-._\/'"\s:?&=~%]|$)|
 \.(eot|gif\?|otf|ttf|woff2?))xi
 
-    # executable-code gunk
+    # executable pattern
     GunkExec = %r(_0x[0-9a-f]|(\b|[_'"])(
 3gl|6sc|
 ad(nxs)?|[a-z]*analytic[a-z]*|auction|
@@ -118,7 +118,7 @@ image-src
 
     # degunk HTML string
     def self.degunk body
-      doc = Nokogiri::HTML.parse body # parse
+      doc = Nokogiri::HTML.parse body # parse HTML
       if content_type = doc.css('meta[http-equiv="Content-Type"]')[0]
         if content = content_type['content']
           if charset_tag = content.split(';')[1]
@@ -126,6 +126,7 @@ image-src
               # in-band charset tag found
               unless charset.match? /utf.?8/i
                 puts "charset specified in <head> :: #{charset}"
+                # parse with explicit charset
                 doc = Nokogiri::HTML.parse body.force_encoding(charset).encode('UTF-8')
               end
             end
