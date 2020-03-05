@@ -444,7 +444,7 @@ class WebResource
                       title = title.to_s.sub(/\/u\/\S+ on /, '').sub /^Re: /, ''
                       unless env[:title] == title # show topic if changed from previous post
                         env[:title] = title; tCount += 1
-                        {_: :a, href: re.uri, class: :title, type: :node, c: CGI.escapeHTML(title)}
+                        {_: :a, href: re.uri, class: :title, type: :node, c: CGI.escapeHTML(title), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}
                       end},
                     ({_: :a, href: re.uri, class: :id, type: :node, c: '🔗', id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} if tCount == 0),
                     resource[Abstract] ? [resource[Abstract], '<br>'] : '',
@@ -571,9 +571,9 @@ class WebResource
              unless env[:title] == title
                env[:title] = title
                hasPointer = true
-               [{_: :a, class: :title, type: :node, href: uri, c: CGI.escapeHTML(title)}, " \n"]
+               [{_: :a, class: :title, type: :node, href: uri, c: CGI.escapeHTML(title), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, " \n"]
              end},
-           ({_: :a, class: :id, type: :node, c: '🔗', href: uri} unless hasPointer), "\n", # pointer
+           ({_: :a, class: :id, type: :node, c: '🔗', href: uri, id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} unless hasPointer), "\n", # pointer
            abstracts,
            ([{_: :a, class: :date, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date}, "\n"] if date),
            images.map{|i| Markup[Image][i,env]},
