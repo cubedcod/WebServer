@@ -64,7 +64,8 @@ class WebResource
                         end
                       end
 
-        status_icon = {204 => '🌐',
+        status_icon = {202 => '✅',
+                       204 => '🌐',
                        301 => '➡️',
                        302 => '➡️',
                        303 => '➡️',
@@ -160,8 +161,8 @@ class WebResource
       elsif env.has_key?('HTTP_COOKIE') && allowCookies?
         data = env['HTTP_COOKIE']
         return if host == 'twitter.com' && !data.match?(/ct0/)
-        puts ['🍪 ', "\e[38;5;130m", host, "\e[0m", data].join  ' '
         cookie.writeFile data # put cookie in jar
+        puts ['🍪 ', "\e[38;5;130m", host, "\e[0m", data].join  ' '
       end
       self
     end
@@ -277,11 +278,12 @@ class WebResource
           reader.new(body, base_uri: self){|_|                        # read RDF
             (env[:repository] ||= RDF::Repository.new) << _ } if reader && !%w(.css .gif .ico .jpg .js .png .svg .webm).member?(formatExt)
           return self if options[:intermediate]                       # intermediate fetch, no finishing HTTP response
+
           reader ? saveRDF : (puts "ENORDF #{format} #{uri}")         # cache RDF
 
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # upstream metadata for downstream
-          if links = h['link']
+          if links = h['link']                                        # parse Link header
             links.split(',').map{|link|
               ref, type = link.split(';').map &:strip
               if ref && type
@@ -357,9 +359,9 @@ class WebResource
         end                    ## remote
       elsif path.match? /gen(erate)?_?204$/ # connectivity check
         [204, {}, []]
-      elsif path.match? HourDir # cached remote - timeslice
+      elsif path.match? HourDir # cache timeslice
         (path + '*' + host.split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*' + (query ? ('?' + query) : '')).R(env).nodeResponse
-      elsif handler = HostGET[host] # host lambda
+      elsif handler = HostGET[host] # host handler
         Populator[host][self] if Populator[host] && !join('/').R.node.exist?
         handler[self]
       elsif host.match? CDNhost # CDN handler
