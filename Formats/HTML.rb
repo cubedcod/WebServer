@@ -447,6 +447,8 @@ class WebResource
                         {_: :a, href: re.uri, class: :title, type: :node, c: CGI.escapeHTML(title), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}
                       end},
                     ({_: :a, href: re.uri, class: :id, type: :node, c: '🔗', id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} if tCount == 0),
+                    (resource[SIOC+'reply_of']||[]).map{|r|
+                      {_: :a, href: r.to_s, c: Icons[SIOC+'reply_of']} if r.class == RDF::URI || r.class == WebResource},
                     resource[Abstract] ? [resource[Abstract], '<br>'] : '',
                     [Image,
                      Video].map{|t|(resource[t]||[]).map{|i|
