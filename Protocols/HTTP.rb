@@ -53,6 +53,8 @@ class WebResource
                         '🛑'
                       else
                         case env['REQUEST_METHOD']
+                        when 'HEAD'
+                          '🗣'
                         when 'OPTIONS'
                           '🔧'
                         when 'POST'
