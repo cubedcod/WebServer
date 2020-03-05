@@ -3,7 +3,7 @@ module Webize
   module HTML
     include WebResource::URIs
 
-    # degunk and reformat to local conventions
+    # format to local conventions
     def self.clean body, base
       html = Nokogiri::HTML.fragment body
 
