@@ -432,7 +432,11 @@ class WebResource
                   {_: :td, c: {_: :a, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}}}},
            {_: :tbody,
             c: graph.map{|resource|
-              [{_: :tr, resource: resource['uri'], c: keys.map{|k|
+
+              re = resource['uri'].R
+              local_id = re.path == env['REQUEST_PATH'] && re.fragment || ('r' + Digest::SHA2.hexdigest(re.uri))
+
+              [{_: :tr, id: local_id, c: keys.map{|k|
                  [{_: :td, property: k,
                   c: if k == 'uri'
                    tCount = 0
@@ -440,11 +444,13 @@ class WebResource
                       title = title.to_s.sub(/\/u\/\S+ on /, '').sub /^Re: /, ''
                       unless env[:title] == title # show topic if changed from previous post
                         env[:title] = title; tCount += 1
-                        {_: :a, href: resource['uri'], id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: 'title', type: 'node', c: CGI.escapeHTML(title)}
+                        {_: :a, href: re.uri, class: :title, type: :node, c: CGI.escapeHTML(title)}
                       end},
-                    ({_: :a, href: resource['uri'], id: 'r'+Digest::SHA2.hexdigest(rand.to_s), class: 'id', type: 'node', c: '🔗'} if tCount == 0),
+                    ({_: :a, href: re.uri, class: :id, type: :node, c: '🔗', id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} if tCount == 0),
                     resource[Abstract] ? [resource[Abstract], '<br>'] : '',
-                    [Image, Video].map{|t|(resource[t]||[]).map{|i| Markup[t][i,env]}},
+                    [Image,
+                     Video].map{|t|(resource[t]||[]).map{|i|
+                                         Markup[t][i,env]}},
                     [resource[Content], resource[SIOC+'richContent']].compact.join('<hr>'),
                     {class: :links, c: (resource[Link]||[]).map{|i| Markup[Link][i,env]}}]
                  else
@@ -548,7 +554,7 @@ class WebResource
       post.delete Type
       uri = post.delete('uri') || ('#' + Digest::SHA2.hexdigest(rand.to_s))
       resource = uri.R
-      titles = (post.delete(Title)||[]).map(&:to_s).map(&:strip).uniq
+      titles = (post.delete(Title)||[]).map(&:to_s).map(&:strip).compact.-([""]).uniq
       abstracts = post.delete(Abstract) || []
       date = (post.delete(Date) || [])[0]
       from = post.delete(Creator) || []
@@ -565,7 +571,7 @@ class WebResource
              unless env[:title] == title
                env[:title] = title
                hasPointer = true
-               [{_: :a, class: 'title', type: 'node', href: uri, c: CGI.escapeHTML(title)}, " \n"]
+               [{_: :a, class: :title, type: :node, href: uri, c: CGI.escapeHTML(title)}, " \n"]
              end},
            ({_: :a, class: :id, type: :node, c: '🔗', href: uri} unless hasPointer), "\n", # pointer
            abstracts,

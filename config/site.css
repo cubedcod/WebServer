@@ -17,8 +17,7 @@
 .identified {border: 1px solid #333; border-radius: .3em}
 .links {float: right}
 .list {background-color: #fff; color: #000}
-.post {border-radius: .42em; max-width: 88ex; padding: .2em; margin: .166em}
-.post, td {background-color: #000; color: #fff}
+.post {border-radius: .42em; max-width: 88ex; padding: .2em; margin: .166em; background-color: #000; color: #fff}
 .quote {background-color: #ccc; color: #000; padding-left: .3em}
 .site {background: repeating-linear-gradient(45deg, #000, #000 4em, #fff 4em, #fff 8em); border: 1px solid white; border-radius: .3em; color: #aaa}
 .thumb {max-width: 22em}
@@ -31,14 +30,14 @@
 .toolbox { position: fixed; top: 0; z-index: 2 }
 :target {background-color: #0f0 !important; color: #000 !important}
 a {text-decoration: none; border-radius: .14em}
-a.date {float: right; white-space: nowrap; color: #888; font-size: .8em}
+a.date {float: right; white-space: nowrap; background-color: #000; color: #888; border-radius: .2em; font-size: .8em}
 a.id {float: right}
 a.idlink {color: #000; background-color: #aaa; font-size: .72em; vertical-align: bottom; border-radius: .28em .28em 0 0}
 a.uri > span.uri {font-size: 0.8em; font-weight: normal}
 a.uri {background-color: #eee; border-radius: .28em; color: #000; border-style: solid; border-color: #fff; border-width: 0 0 0 .3em; max-width: 42ex; overflow: hidden; margin: .1em; font-weight: bold}
 a.uri.path {background-color: #111; color: #fff; border-color: #222}
 a.uri:visited {border-color: #0f0}
-blockquote {background-color: #080808; color: #fff; border-width: 0 0 0 .4em; border-style: solid; border-color: #222}
+blockquote {background-color: #080808; color: #fff; border-radius: .2em; border-width: 0 0 0 .4em; border-style: solid; border-color: #222}
 body {font-family: sans-serif; margin: 2em}
 body, thead td, td.k {background-color: #555; color: #fff}
 div,p,a,li,ul,ol,form,svg { display: inline-block }
@@ -48,7 +47,7 @@ p, li, blockquote {max-width: 86ex}
 pre {white-space: pre-wrap}
 span.name {font-size: .8em}
 svg, img[src*="svg"] {max-width:2em; max-height: 2em}
-td {overflow: hidden; border-radius: .2em; vertical-align: top}
+td {overflow: hidden; vertical-align: top; border-color: #222; border-width: 0 1px 1px 0; border-style: dotted}
 td.k {max-width: 28ex; text-align: right}
 td[property="http://rdfs.org/sioc/ns#has_creator"], td[property="http://rdfs.org/sioc/ns#addressed_to"] {text-align: center}
 td[property="uri"] {max-width: 100ex; text-align: left}
