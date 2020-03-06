@@ -4,7 +4,7 @@ module Webize
     include WebResource::URIs
 
     # clean HTML string
-    def self.degunk body
+    def self.clean body
       doc = Nokogiri::HTML.parse body # parse HTML
       if content_type = doc.css('meta[http-equiv="Content-Type"]')[0]
         if content = content_type['content']
@@ -20,16 +20,16 @@ module Webize
           end
         end
       end
-      degunkDoc doc # degunk
-      doc.to_html   # serialize
+      clean_doc doc
+      doc.to_html
     end
 
     # clean HTML nokogiri/nokogumbo instance
-    def self.degunkDoc doc
+    def self.clean_doc doc
       doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
       doc.css("iframe, img, [type='image'], link, script").map{|s|
-        text = s.inner_text     # inline content
-        if s['type'] != 'application/ld+json' && text.match?(GunkExec) && !text.match?(InitialState)
+        text = s.inner_text     # inline script
+        if !ENV.has_key?('JS') && s['type'] != 'application/ld+json' && !text.match?(InitialState) && text.match?(GunkExec)
           puts "🚩 " + text.split(/[\n\r]/).join(' ').gsub(/\s+/,' ')[0..4096] if ENV.has_key? 'VERBOSE'
           s.remove
         end
@@ -37,7 +37,7 @@ module Webize
           if s[attr]
             src = s[attr].R
             if src.uri.match?(Gunk) || (src.gunkDomain? && !src.allowCDN?)
-              puts "🚫 \e[31;1m" + src.uri + "\e[0m" if ENV.has_key? 'VERBOSE'
+              puts "🚫 \e[31;1m" + src.uri + "\e[0m"
               s.remove
             end
           end}}
@@ -47,7 +47,7 @@ module Webize
     def self.format body, base
       html = Nokogiri::HTML.fragment body
       html.css('iframe, style, link[rel="stylesheet"], ' + Scripts).remove
-      degunkDoc html                                                   # remove misc gunk
+      clean_doc html                                                   # remove misc gunk
       html.css('[style*="background-image"]').map{|node|               # map image references to classic image-tag
         node['style'].match(/url\(['"]*([^\)'"]+)['"]*\)/).yield_self{|url| # image in CSS background
           node.add_child "<img src=\"#{url[1]}\">" if url}}
