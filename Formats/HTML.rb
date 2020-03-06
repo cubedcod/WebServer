@@ -211,7 +211,7 @@ end
 
 class WebResource
 
-  # RDF::Repository -> tree of nested Hash keyed on s->p->o
+  # RDF data -> Hash tree indexed on s -> p -> o
   def treeFromGraph graph = nil
     graph ||= env[:repository]
     return {} unless graph
@@ -496,19 +496,20 @@ class WebResource
     # Value -> Markup
     def self.value type, v, env
       if [Abstract, Content, 'http://rdfs.org/sioc/ns#richContent'].member? type
-        v                # HTML content
-      elsif Markup[type] # markup lambda
+        v                # prepared HTML content
+      elsif Markup[type] # markup lambda defined for explicit type argument
         Markup[type][v,env]
-      elsif v.class == Hash
-        types = (v[Type] || []).map{|t| MarkupMap[t.to_s] || t.to_s } # find typetags
+      elsif v.class == Hash # data
+        types = (v[Type] || []).map{|t|
+          MarkupMap[t.to_s] || t.to_s } # normalize typetags for unified renderer selection
         seen = false
         [types.map{|type|
-          if markup = Markup[type] # type renderer exists
+          if markup = Markup[type] # markup lambda defined for RDF type
             seen = true
-            markup[v,env]          # render
+            markup[v,env]
           end},
-         (keyval v, env unless seen)] # basic render
-      elsif v.class == WebResource
+         (keyval v, env unless seen)] # basic key-value render
+      elsif v.class == WebResource # resource-reference argument
         if v.path && %w{jpeg jpg JPG png PNG webp}.member?(v.ext)
           Markup[Image][v, env]    # image reference
         else
@@ -518,6 +519,8 @@ class WebResource
         CGI.escapeHTML v.to_s
       end
     end
+
+    # markup lambdas
 
     Markup['uri'] = -> uri, env=nil {uri.R}
 

@@ -67,9 +67,8 @@ class WebResource
         end}}
     GET 'gate.sc', GotoURL
 
-    # scripting libraries
-    GET 'ajax.googleapis.com'
-    GET 'cdnjs.cloudflare.com'
+    # script-library hosts
+    %w(ajax.googleapis.com cdnjs.cloudflare.com stackpath.bootstrapcdn.com).map{|host| GET host}
 
     # video API stuff
     Allow 'entitlement.auth.adobe.com'
