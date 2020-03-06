@@ -34,18 +34,18 @@ zerg(net)?)
     # script pattern
     GunkExec = %r(_0x[0-9a-f]|(\b|[_'"])(
 3gl|6sc|
-ad(nxs)?|[a-z]*analytic[a-z]*|auction|
-bid(d(er|ing)|s)?|bing|bouncee?x[a-z]*|
+ad(nxs)?|.*analytic.*|auction|
+bid(d(er|ing)|s)?|bing|bouncee?x.*|
 chartbeat|clickability|cloudfront|COMSCORE|consent|crazyegg|c(rss)?pxl?|crwdcntrl|
 doubleclick|d[fm]p|driftt|
 ensighten|evidon|facebook|feedbackify|
-ga|gdpr|google[a-z]*|g(a|pt|t(ag|m))|gu-web|gumgum|gwallet|
+google.*|g(a|dpr|pt|t(ag|m))|gu-web|gumgum|gwallet|
 hotjar|indexww|intercom|ipify|kr(ux|xd)|licdn|linkedin|
 mar(feel|keto)|ml314|moatads|mpulse|newrelic|newsmax|npttech|nreum|ntv.io|
 olark|outbrain|
 parsely|petametrics|pgmcdn|pinimg|pressboard|pushcrew|quantserve|quora|revcontent|
-sail-horizon|scorecard[a-z]*|segment|snapkit|sophi|sp-prod|ssp|sumo|survicate|
-taboola|[a-z]*targeting[a-z]*|tinypass|tiqcdn|[a-z]*track[a-z]*|twitter|tynt|
+sail-horizon|scorecard.*|segment|snapkit|sophi|sp-prod|ssp|sumo|survicate|
+taboola|.*targeting.*|tinypass|tiqcdn|.*track.*|twitter|tynt|
 viglink|visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk
 )(\b|[_'"]))xi
 
@@ -76,7 +76,7 @@ footer nav sidebar
 [id*='social']
 }
 
-    # alternatives to the src attribute
+    # alternatives to @src
     SRCnotSRC = %w(
 data-baseurl
 data-delayed-url

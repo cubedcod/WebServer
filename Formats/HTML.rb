@@ -30,14 +30,14 @@ module Webize
       doc.css("iframe, img, [type='image'], link, script").map{|s|
         text = s.inner_text     # inline content
         if s['type'] != 'application/ld+json' && text.match?(GunkExec) && !text.match?(InitialState)
-          puts '🚩 ' + text if ENV.has_key? 'VERBOSE'
+          puts "🚩 " + text.split(/\n/).join(' ')[0..4096] if ENV.has_key? 'VERBOSE'
           s.remove
         end
         %w(href src).map{|attr| # references
           if s[attr]
             src = s[attr].R
             if src.uri.match?(Gunk) || (src.gunkDomain? && !src.allowCDN?)
-              puts '🚫 ' + src.uri if ENV.has_key? 'VERBOSE'
+              puts "🚫 \e[31;1m" + src.uri + "\e[0m" if ENV.has_key? 'VERBOSE'
               s.remove
             end
           end}}
