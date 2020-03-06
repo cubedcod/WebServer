@@ -8,7 +8,6 @@ module Webize
         'boards.4channel.org' => :FourChan,
         'github.com' => :GitHub,
         'gitter.im' => :Gitter,
-        'lwn.net' => :LWN,
         'news.ycombinator.com' => :HackerNews,
         'twitter.com' => :TwitterHTML,
         'universalhub.com' => :UHub,
@@ -19,7 +18,6 @@ module Webize
         'www.patriotledger.com' => :GateHouse,
         'www.providencejournal.com' => :GateHouse,
         'www.universalhub.com' => :UHub,
-        'www.youtube.com' => :YouTubeHTML,
       }
     end
   end
@@ -27,11 +25,7 @@ module Webize
     Triplr = {
       'twitter.com' => :TwitterHTMLinJSON,
       'api.twitter.com' => :TwitterJSON,
-      'gateway.reddit.com' => :RedditJSON,
-      'outline.com' => :Outline,
-      'outlineapi.com' => :Outline,
       'www.instagram.com' => :InstagramJSON,
-      'www.youtube.com' => :YouTubeJSON,
     }
   end
 end
@@ -59,51 +53,35 @@ class WebResource
     DesktopUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
     MobileUA = 'Mozilla/5.0 (Linux; Android 9; SM-G960F Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.157 Mobile Safari/537.36'
 
-    # common handlers
-    Fetch = -> r {r.fetch}
-    GoIfURL = -> r {r.query_values&.has_key?('url') ? GotoURL[r] : NoGunk[r]}
-    GotoBasename = -> r {[301, {'Location' => CGI.unescape(r.basename)}, []]}
-    GotoU   = -> r {[301, {'Location' =>  r.query_values['u']}, []]}
-    GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['q'])}, []]}
-    NoGunk  = -> r {r.gunkURI && (r.query_values || {})['allow'] != ServerKey && r.deny || r.fetch}
-
-    NoQuery = -> r {
-      if !r.query                         # request without query
-        NoGunk[r].yield_self{|s,h,b|      #  inspect response
-          h.keys.map{|k|                  #  strip query from new location
-            h[k] = h[k].split('?')[0] if k.downcase == 'location' && h[k].match?(/\?/)}
-          [s,h,b]}                        #  response
-      else                                # request with query
-        [302, {'Location' => r.path}, []] #  redirect to path
-      end}
-
-    RootIndex = -> r {
-      if r.path == '/' || r.path.match?(GlobChars)
-        r.nodeResponse
-      else
-        r.chrono_sort if r.parts.size == 1
-        NoGunk[r]
-      end}
-
-    Resizer = -> r {
-      if r.parts[0] == 'resizer'
-        parts = r.path.split /\/\d+x\d+\/((filter|smart)[^\/]*\/)?/
-        parts.size > 1 ? [302, {'Location' => 'https://' + parts[-1]}, []] : NoGunk[r]
-      else
-        NoGunk[r]
-      end}
-
     # URL shorteners / redirectors
     %w(bit.ly bos.gl w.bos.gl
  cbsn.ws dlvr.it econ.trib.al
  feedproxy.google.com feeds.feedburner.com feeds.reuters.com
  hubs.ly
  reut.rs rss.cnn.com rssfeeds.usatoday.com
- t.co ti.me tinyurl.com trib.al wired.trib.al).map{|short| GET short, NoQuery }
+ t.co ti.me tinyurl.com trib.al wired.trib.al).map{|short|
+      GET short, -> r {
+        if !r.query                         # request
+          NoGunk[r].yield_self{|s,h,b|      #  inspect response
+            h.keys.map{|k|                  #  strip query from relocation
+              h[k] = h[k].split('?')[0] if k.downcase == 'location' && h[k].match?(/\?/)}
+            [s,h,b]}                        #  response
+        else                                # request has query
+          [302, {'Location' => r.path}, []] #  redirect to path
+        end}}
+    GET 'gate.sc', GotoURL
 
-    # Adobe
+    # scripting libraries
+    GET 'ajax.googleapis.com'
+    GET 'cdnjs.cloudflare.com'
+
+    # video API stuff
     Allow 'entitlement.auth.adobe.com'
     Allow 'sp.auth.adobe.com'
+    Allow 'tkx.apis.anvato.net'
+    Allow 'www.youtube.com'
+    GET 'ssl.p.jwpcdn.com'
+    %w(edge.api.brightcove.com players.brightcove.net secure.brightcove.com).map{|h| Allow h}
 
     # Amazon
     AmazonHost = -> r {(%w(www.amazon.com www.audible.com www.imdb.com).member?(r.env[:refhost]) || (r.query_values||{})['allow'] == ServerKey) ? NoGunk[r] : r.deny}
@@ -111,81 +89,10 @@ class WebResource
     GET 'images-na.ssl-images-amazon.com', AmazonHost
     GET 'm.media-amazon.com', AmazonHost
 
-    # Anvato
-    Allow 'tkx.apis.anvato.net'
-
-    # Boston Globe
-    GET 'bostonglobe-prod.cdn.arcpublishing.com', Resizer
-
-    # Brightcove
-    %w(
-edge.api.brightcove.com
-players.brightcove.net
-secure.brightcove.com
-).map{|h|
-      Allow h}
-
-    # Brightspot
-    %w(ca-times ewscripps wgbh).map{|h|
-      GET h + '.brightspotcdn.com', GoIfURL}
-
-    # BusinessWire
-    GET 'cts.businesswire.com', GoIfURL
-
-    # Cloudflare
-    GET 'cdnjs.cloudflare.com'
-
-    # CNN
-    GET 'dynaimage.cdn.cnn.com', GotoBasename
-
-    # DartSearch
-    GET 'clickserve.dartsearch.net', -> r {[301,{'Location' => r.query_values['ds_dest_url']}, []]}
-
-    # Disqus
-    GET 'c.disquscdn.com', GoIfURL
-    GET 'disq.us', GoIfURL
-
-    # DuckDuckGo
-    GET 'proxy.duckduckgo.com', -> r {%w{iu}.member?(r.parts[0]) ? [301, {'Location' => r.query_values['u']}, []] : r.fetch}
-
-    # eBay
-    Allow 'www.ebay.com'
-    %w(ebay.com
-   www.ebay.com
-    ir.ebaystatic.com
-thumbs.ebaystatic.com).map{|host| GET host }
-
-    GET 'i.ebayimg.com', -> r {r.basename.match?(/s-l(64|96|200|225).jpg/) ? [301, {'Location' => File.dirname(r.path) + '/s-l1600.jpg'}, []] : r.fetch}
-    GET 'rover.ebay.com', -> r {(r.query_values||{}).has_key?('mpre') ? [301, {'Location' => r.query_values['mpre']}, []] : r.deny}
-
-    # ESPN
-    %w(api-app broadband media.video-cdn secure site.api site.web.api watch.auth.api watch.graph.api www).map{|h|
-      Allow h + '.espn.com' }
-
-    %w(a a1 a2 a3 a4).map{|a| GET a + '.espncdn.com' }
-
     # Facebook
-    if ENV.has_key?('FACEBOOK')
-      %w(facebook.com business.facebook.com edge-chat.facebook.com m.facebook.com static.xx.fbcdn.net www.facebook.com).map{|host| Allow host }
-      GET 'external.fbed1-2.fna.fbcdn.net', -> r {
-        if r.path == '/safe_image.php'
-          GotoURL[r]
-        else
-          NoGunk[r]
-        end}
-    end
-
-    %w(l.facebook.com lm.facebook.com).map{|host| GET host, GotoU}
-
-    # Forbes
-    GET 'thumbor.forbes.com', -> r {[301, {'Location' => Rack::Utils.unescape(r.parts[-1])}, []]}
-
-    # Gfycat
-    GET 'gfycat.com'
-    GET 'thumbs.gfycat.com'
+    %w(l.facebook.com lm.facebook.com l.instagram.com).map{|host| GET host, -> r {[301, {'Location' =>  r.query_values['u']}, []]}}
 
     # Google
-    GET 'ajax.googleapis.com'  # Javascript libraries
     GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
     GET 'www.google.com', -> r {
       case r.path
@@ -197,15 +104,9 @@ thumbs.ebaystatic.com).map{|host| GET host }
         r.deny
       end}
 
-    # Guardian
-    GET 'i.guim.co.uk'
-    GET 'assets.guim.co.uk'
-    GET 'www.theguardian.com'
-
     # Instagram
     Cookies 'www.instagram.com'
     GET 'instagram.com', -> r {[301, {'Location' => 'https://www.instagram.com' + r.path}, []]}
-    GET 'l.instagram.com', GotoU
     GET 'www.instagram.com', RootIndex
     Populate 'www.instagram.com', -> r {
       base = 'instagram/'
@@ -220,15 +121,6 @@ thumbs.ebaystatic.com).map{|host| GET host }
               FileUtils.mkdir base + name
             end
           end}}}
-
-    # JWPlayer
-    GET 'ssl.p.jwpcdn.com'
-
-    # MassLive
-    GET 'i.masslive.com', Resizer
-
-    # Meredith
-    GET 'imagesvc.meredithcorp.io', GoIfURL
 
     # Reddit
     GET 'reddit.com', -> r {[301, {'Location' => 'https://www.reddit.com/r/Rad_Decentralization+SOLID+StallmanWasRight+darknetplan+fossdroid+selfhosted/new/'}, []]}
@@ -263,29 +155,9 @@ thumbs.ebaystatic.com).map{|host| GET host }
           r.fetch
         end}}
 
-    # Russia
-    %w(cloud. img.imgs).map{|h| GET h + 'mail.ru'}
-
-    # Shopify
-    GET 'cdn.shopify.com'
-
-    # SkimResources
-    GET 'go.skimresources.com', GotoURL
-    GET 'c212.net', GotoU
-
-    # Soundcloud
-    GET 'gate.sc', GotoURL
-
-    # Tiktok
-    GET 's16.tiktokcdn.com'
-
     # Tumblr
     GET '.tumblr.com', -> r {(r.query_values||{}).has_key?('audio_file') ? [301, {'Location' => r.query_values['audio_file']}, []] : NoGunk[r]}
     
-    # Twitch
-    %w( api gql irc-ws.chat panels-images pubsub-edge www ).map{|h|Allow h + '.twitch.tv'}
-    GET 'static.twitchcdn.net'
-
     # Twitter
     ['', 'api.', 'mobile.'].map{|h| Allow h + 'twitter.com'}
 
@@ -341,25 +213,8 @@ thumbs.ebaystatic.com).map{|host| GET host }
     GET 'mobile.twitter.com', Twitter
     GET 'twitter.com', Twitter
 
-    # Viglink
-    GET 'redirect.viglink.com', GotoU
-
-    # WaPo
-    GET 'www.washingtonpost.com', -> r {(r.parts[0]=='resizer' ? Resizer : NoGunk)[r]}
-
-    # Wix
-    GET 'static.parastorage.com'
-
     # WordPress
-    %w(i0 i1 i2 s0 s1 s2).map{|h| host = h + '.wp.com'
-      Cookies host
-      GET host }
-
-    # WSJ
-    %w(images m s).map{|h| GET h + '.wsj.net' }
-
-    # Yahoo!
-    %w(finance news www).map{|h| GET h + '.yahoo.com' }
+    %w(i0 i1 i2 s0 s1 s2).map{|h| GET h + '.wp.com' }
 
     GET 's.yimg.com', -> r {
       parts = r.path.split /https?:\/+/
@@ -373,12 +228,8 @@ thumbs.ebaystatic.com).map{|host| GET host }
     GET 'www.yelp.com', -> r {(r.query_values||{})['redirect_url'] ? [301, {'Location' => r.query_values['redirect_url']},[]] : r.fetch}
 
     # YouTube
-    Cookies 'm.youtube.com'
-    Allow 'www.youtube.com'
     GET 'youtube.com', -> r {[301, {'Location' => ['https://www.youtube.com', r.path, '?', r.query].join}, []]}
-    GET 'm.youtube.com', -> r {%w(channel feed playlist results user watch watch_comment yts).member?(r.parts[0]) ? r.upstreamUI.fetch : r.deny}
     GET 'img.youtube.com'
-
     GET 'www.youtube.com', -> r {
       path = r.parts[0]
       if %w{attribution_link redirect}.member? path
@@ -633,23 +484,6 @@ thumbs.ebaystatic.com).map{|host| GET host }
     }
   end
 
-  def LWN doc
-    doc.css()
-  end
-
-  def Outline tree
-    subject = tree['data']['article_url']
-    yield subject, Type, Post.R
-    yield subject, Title, tree['data']['title']
-    yield subject, To, ('//' + tree['data']['domain']).R
-    yield subject, Content, (Webize::HTML.clean tree['data']['html'], self)
-    yield subject, Image, tree['data']['meta']['og']['og:image'].R
-  end
-
-  def RedditJSON tree
-    puts tree.keys
-  end
-
   def TwitterAuth
     return self unless env.has_key? 'HTTP_COOKIE'
     attrs = {}
@@ -778,14 +612,6 @@ thumbs.ebaystatic.com).map{|host| GET host }
   def UHub doc
     doc.css('.pager-next > a[href]').map{|n| env[:links][:next] ||= n['href'] }
     doc.css('.pager-previous > a[href]').map{|p| env[:links][:prev] ||= p['href'] }
-  end
-
-  def YouTubeHTML doc
-    yield self, Video, self if path == '/watch'
-  end
-
-  def YouTubeJSON doc
-
   end
 
 end

@@ -15,6 +15,17 @@ class WebResource
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
     SingleHop = %w(connection fetch gunk host keep-alive links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software site-chrome summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for)
 
+    # common handlers
+    GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['q'])}, []]}
+    NoGunk  = -> r {r.gunkURI && (r.query_values || {})['allow'] != ServerKey && r.deny || r.fetch}
+    RootIndex = -> r {
+      if r.path == '/' || r.path.match?(GlobChars)
+        r.nodeResponse
+      else
+        r.chrono_sort if r.parts.size == 1
+        NoGunk[r]
+      end}
+
     def self.Allow host
       AllowedHosts[host] = true
     end
