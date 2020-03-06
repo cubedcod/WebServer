@@ -9,21 +9,17 @@ module Webize
         'github.com' => :GitHub,
         'gitter.im' => :Gitter,
         'news.ycombinator.com' => :HackerNews,
-        'twitter.com' => :TwitterHTML,
         'universalhub.com' => :UHub,
         'www.apnews.com' => :AP,
         'www.city-data.com' => :CityData,
         'www.google.com' => :GoogleHTML,
         'www.instagram.com' => :InstagramHTML,
-        'www.patriotledger.com' => :GateHouse,
-        'www.providencejournal.com' => :GateHouse,
         'www.universalhub.com' => :UHub,
       }
     end
   end
   module JSON
     Triplr = {
-      'twitter.com' => :TwitterHTMLinJSON,
       'api.twitter.com' => :TwitterJSON,
       'www.instagram.com' => :InstagramJSON,
     }
@@ -340,23 +336,6 @@ class WebResource
       post.remove}
   end
 
-  GHgraph = /__gh__coreData.content=(.*?);?\s*__gh__coreData.content.bylineFormat/m
-  def GateHouse doc
-    doc.css('script').map{|script|
-      if data = script.inner_text.gsub(/[,\s]+\]/m,']').match(GHgraph)
-        graph = ::JSON.parse data[1]
-        Webize::HTML.webizeHash(graph){|h|
-          if h['type'] == 'gallery'
-            h['items'].map{|i|
-              subject = i['link']
-              yield subject, Type, Post.R
-              yield subject, Image, subject.R
-              yield subject, Abstract, CGI.escapeHTML(i['caption'])
-            }
-          end}
-      end}
-  end
-
   def GitHub doc
     doc.css('div.comment').map{|comment|
       if ts = comment.css('.js-timestamp')[0]
@@ -494,72 +473,6 @@ class WebResource
     env['x-csrf-token'] ||= attrs['ct0'] if attrs['ct0']
     env['x-guest-token'] ||= attrs['gt'] if attrs['gt']
     self
-  end
-
-  def TwitterHTML doc, &b
-
-    # page pointer
-    doc.css('.stream-container').map{|stream|
-      user = parts[0]
-      if user && position = stream['data-min-position']
-        env[:links][:prev] = '/i/profiles/show/' + user + '/timeline/tweets?include_available_features=1&include_entities=1&max_position=' + position + '&reset_error_state=false&rdf&view=table&sort=date'
-      end}
-
-    # tweets
-    %w{grid-tweet tweet}.map{|tweetclass|
-      doc.css('.' + tweetclass).map{|tweet|
-        s = 'https://twitter.com' + (tweet.css('.js-permalink').attr('href') || tweet.attr('data-permalink-path') || '')
-        yield s, Type, (SIOC + 'MicroblogPost').R
-        yield s, To, 'https://twitter.com'.R
-
-        authorName = if b = tweet.css('.username b')[0]
-                       b.inner_text
-                     else
-                       s.R.parts[0]
-                     end
-        author = ('https://twitter.com/' + authorName).R
-        yield s, Creator, author
-
-        ts = (if unixtime = tweet.css('[data-time]')[0]
-              Time.at(unixtime.attr('data-time').to_i)
-             else
-               Time.now
-              end).iso8601
-        yield s, Date, ts
-
-        content = tweet.css('.tweet-text')[0]
-        if content
-          content.css('a').map{|a|
-            a.set_attribute('id', 'l' + Digest::SHA2.hexdigest(rand.to_s))
-            a.set_attribute('href', 'https://twitter.com' + (a.attr 'href')) if (a.attr 'href').match /^\//
-            yield s, DC+'link', (a.attr 'href').R}
-          yield s, Content, Webize::HTML.clean(content.inner_html, self).gsub(/<\/?span[^>]*>/,'').gsub(/\n/,'').gsub(/\s+/,' ')
-        end
-
-        if img = tweet.attr('data-resolved-url-large')
-          yield s, Image, img.to_s.R
-        end
-        tweet.css('img').map{|img|
-          yield s, Image, img.attr('src').to_s.R}
-
-        tweet.css('.PlayableMedia-player').map{|player|
-          player['style'].match(/url\('([^']+)'/).yield_self{|url|
-            yield s, Video, url[1].sub('pbs','video').sub('_thumb','').sub('jpg','mp4')
-          }}}}
-
-    %w(link[rel="alternate"] meta[name="description"] title body).map{|sel|
-      doc.css(sel).remove}
-  end
-
-  def TwitterHTMLinJSON tree, &b
-    # page pointer
-    if position = tree['min_position']
-      env[:links][:prev] = '/i/profiles/show/' + parts[3] + '/timeline/tweets?include_available_features=1&include_entities=1&max_position=' + position + '&reset_error_state=false&rdf&view=table&sort=date'
-    end
-    # tweets
-    if html = tree['items_html']
-      TwitterHTML Nokogiri::HTML.fragment(html), &b
-    end
   end
 
   def TwitterJSON tree, &b
