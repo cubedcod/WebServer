@@ -230,11 +230,8 @@ thumbs.ebaystatic.com).map{|host| GET host }
     # Meredith
     GET 'imagesvc.meredithcorp.io', GoIfURL
 
-    # NYTimes
-    %w(cooking www).map{|host|GET host+'.nytimes.com'}
-
     # Reddit
-    GET 'reddit.com', -> r {[301, {'Location' => 'https://www.reddit.com/r/Rad_Decentralization+SOLID+StallmanWasRight+dancehall+darknetplan+fossdroid+selfhosted+shortwave/new/'}, []]}
+    GET 'reddit.com', -> r {[301, {'Location' => 'https://www.reddit.com/r/Rad_Decentralization+SOLID+StallmanWasRight+darknetplan+fossdroid+selfhosted/new/'}, []]}
     GET 'www.reddit.com', -> r { parts = r.parts
       r.chrono_sort if parts[-1] == 'new' || parts.size == 5                    # chrono sort
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI?              # MIME preference
@@ -335,7 +332,7 @@ thumbs.ebaystatic.com).map{|host| GET host }
         NoGunk[r]
        end).yield_self{|s,h,b|
         if [401,403,429].member? s
-          'twitter/.cookie'.R.node.delete # nuke tokens
+          'twitter/.cookie'.R.node.delete if File.exist? 'twitter/.cookie'
           r.upstreamUI.fetch
         else
           [s,h,b]
