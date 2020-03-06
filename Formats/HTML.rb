@@ -30,7 +30,7 @@ module Webize
       doc.css("iframe, img, [type='image'], link, script").map{|s|
         text = s.inner_text     # inline content
         if s['type'] != 'application/ld+json' && text.match?(GunkExec) && !text.match?(InitialState)
-          puts "🚩 " + text.split(/\n/).join(' ')[0..4096] if ENV.has_key? 'VERBOSE'
+          puts "🚩 " + text.split(/[\n\r]/).join(' ').gsub(/\s+/,' ')[0..4096] if ENV.has_key? 'VERBOSE'
           s.remove
         end
         %w(href src).map{|attr| # references
@@ -47,15 +47,9 @@ module Webize
     def self.format body, base
       html = Nokogiri::HTML.fragment body
 
-      # strip iframes, stylesheets, scripts and misc gunk
+      # clean misc gunk
       html.css('iframe, style, link[rel="stylesheet"], ' + Scripts).remove
       degunkDoc html
-
-      # tag site-nav elements
-      SiteNav.map{|selector|
-        html.css(selector).map{|node|
-          base.env[:site_chrome] ||= true
-          node['class'] = 'site'}}
 
       # map image references
       # CSS:background-image → <img>
@@ -393,8 +387,7 @@ class WebResource
                                     href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless qs['view'] == 'table'),
                                  parts.map{|p|
                                     [{_: :a, class: :breadcrumb, href: bc += p + '/', c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
-                                 link[:feed, FeedIcon],
-                                 ([' ',{_: :a, id: :showMain, href: '#body'}] if env[:site_chrome])]},
+                                 link[:feed, FeedIcon]]},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?
                                HTML.keyval (Webize::HTML.webizeHash env), env
