@@ -95,7 +95,11 @@ class WebResource < RDF::URI
 
         unless File.exist? tlink # link to timeline
           FileUtils.mkdir_p File.dirname tlink
-          FileUtils.ln turtle, tlink
+          begin
+            FileUtils.ln turtle, tlink
+          rescue
+            FileUtils.cp turtle, tlink
+          end
         end
       end}
     self
