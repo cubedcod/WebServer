@@ -136,7 +136,7 @@ class WebResource
                 format_icon,
                 triple_count,
                 env[:refhost] ? ["\e[#{color}m", env[:refhost], "\e[0m→"] : nil,
-                "\e[#{color}#{thirdparty ? ';7' : ''}m", thirdparty ? resource.uri : resource.path[1..-1], "\e[0m",
+                "\e[#{color}#{thirdparty ? ';7' : ''}m", (thirdparty || format_icon=='🗒') ? resource.uri : resource.path[1..-1], "\e[0m",
                 head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil,
                ].
                  flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
