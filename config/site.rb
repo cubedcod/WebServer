@@ -79,12 +79,6 @@ class WebResource
     GET 'ssl.p.jwpcdn.com'
     %w(edge.api.brightcove.com players.brightcove.net secure.brightcove.com).map{|h| Allow h}
 
-    # Amazon
-    AmazonHost = -> r {(%w(www.amazon.com www.audible.com www.imdb.com).member?(r.env[:refhost]) || (r.query_values||{})['allow'] == ServerKey) ? NoGunk[r] : r.deny}
-    %w(amazon.com www.amazon.com).map{|host| GET host}
-    GET 'images-na.ssl-images-amazon.com', AmazonHost
-    GET 'm.media-amazon.com', AmazonHost
-
     # Facebook
     %w(l.facebook.com lm.facebook.com l.instagram.com).map{|host| GET host, -> r {[301, {'Location' =>  r.query_values['u']}, []]}}
 
@@ -219,9 +213,6 @@ class WebResource
       else
         NoGunk[r]
       end}
-
-    # Yelp
-    GET 'www.yelp.com', -> r {(r.query_values||{})['redirect_url'] ? [301, {'Location' => r.query_values['redirect_url']},[]] : r.fetch}
 
     # YouTube
     GET 'youtube.com', -> r {[301, {'Location' => ['https://www.youtube.com', r.path, '?', r.query].join}, []]}
