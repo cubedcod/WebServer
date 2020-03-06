@@ -264,7 +264,7 @@ class WebResource
           %w(contentType embedRatio ignoreClickOnElements order socialEmbeds shortId sponsored videoRenderedSizes).map{|p| hash.delete p}
           hash.map{|p, o|
             p = MetaMap[p] || p
-            o = Webize::HTML.clean o, self if p == Content && o.class == String
+            o = Webize::HTML.format o, self if p == Content && o.class == String
             o = Post.R if p == Type && o == 'article'
 
             # emit triples
@@ -289,7 +289,7 @@ class WebResource
         yield subject, Creator, (join user['href'])
         yield subject, Creator, user.inner_text }
       post.css("div[id^='post_message']").map{|content|
-        yield subject, Content, Webize::HTML.clean(content.inner_html, self)}
+        yield subject, Content, Webize::HTML.format(content.inner_html, self)}
       if headers = post.css('td.thead > div.normal')
         if datetime = headers[1]
           datetime = datetime.inner_text.strip
@@ -333,7 +333,7 @@ class WebResource
         subject = ts['href'] ? (join ts['href']) : self
         yield subject, Type, Post.R
         if body = comment.css('.comment-body')[0]
-          yield subject, Content, Webize::HTML.clean(body.inner_html, self)
+          yield subject, Content, Webize::HTML.format(body.inner_html, self)
         end
         if time = comment.css('[datetime]')[0]
           yield subject, Date, time['datetime']

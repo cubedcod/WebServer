@@ -100,7 +100,7 @@ module Webize
                   (v.class == Array ? v : [v]).map{|o|
                     unless [Hash, NilClass].member?(o.class) || (o.class == String && o.empty?)
                       o = o.R if o.class == String && o.match?(/^(http|\/)\S+$/)
-                      o = Webize::HTML.clean o, @base if p == Content
+                      o = Webize::HTML.format o, @base if p == Content
                       yield s, p, o
                     end} unless p == :drop
                 end}

@@ -42,7 +42,7 @@ module Webize
         scanContent(:normalizeDates, :normalizePredicates,:rawTriples){|s,p,o| # triples flow (left ← right) in filter stack
           fn.call RDF::Statement.new(s.R, p.R,
                                      (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal (if p == Content
-                                                                                                              Webize::HTML.clean o, @base
+                                                                                                              Webize::HTML.format o, @base
                                                                                                              else
                                                                                                                o.gsub(/<[^>]*>/,' ')
                                                                                                               end)

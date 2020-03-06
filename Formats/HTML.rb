@@ -4,7 +4,7 @@ module Webize
     include WebResource::URIs
 
     # format to local conventions
-    def self.clean body, base
+    def self.format body, base
       html = Nokogiri::HTML.fragment body
 
       # strip iframes, stylesheets, scripts and misc gunk
@@ -200,9 +200,9 @@ module Webize
 
         # <body>
         if body = n.css('body')[0]
-          yield subject, Content, HTML.clean(body.inner_html, @base).gsub(/<\/?noscript[^>]*>/i, '')
+          yield subject, Content, HTML.format(body.inner_html, @base).gsub(/<\/?noscript[^>]*>/i, '')
         else # no <body> element
-          yield subject, Content, HTML.clean(n.inner_html, @base).gsub(/<\/?noscript[^>]*>/i, '')
+          yield subject, Content, HTML.format(n.inner_html, @base).gsub(/<\/?noscript[^>]*>/i, '')
         end
       end
     end
