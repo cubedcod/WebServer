@@ -31,7 +31,7 @@ zerg(net)?)
 ([-._\/'"\s:?&=~%]|$)|
 \.(eot|gif\?|otf|ttf|woff2?))xi
 
-    # executable pattern
+    # script pattern
     GunkExec = %r(_0x[0-9a-f]|(\b|[_'"])(
 3gl|6sc|
 ad(nxs)?|[a-z]*analytic[a-z]*|auction|
@@ -49,34 +49,9 @@ taboola|[a-z]*targeting[a-z]*|tinypass|tiqcdn|[a-z]*track[a-z]*|twitter|tynt|
 viglink|visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk
 )(\b|[_'"]))xi
 
+    # script pattern with JSON state data
     InitialState = /(bootstrap|global|init(ial)?|preload(ed)?|shared).?(content|data|state)/i
-
   end
-
-  module HTTP
-
-    def gunk?
-      return false if (query_values||{})['allow'] == ServerKey
-      gunkTag? || gunkURI
-    end
-
-    def gunkDomain?
-      return false if !host || AllowedHosts.has_key?(host) || HostGET.has_key?(host)
-      c = GunkHosts
-      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # find leaf on gunk-domain tree
-    end
-
-    def gunkTag?
-      return false if AllowedHosts.has_key? host
-      env.has_key? 'HTTP_GUNK'
-    end
-
-    def gunkURI
-      ('/' + host + (env && env['REQUEST_URI'] || path || '/')).match? Gunk
-    end
-
-  end
-
 end
 module Webize
   module HTML
@@ -117,38 +92,5 @@ data-src
 image-src
 )
 
-    # degunk HTML string
-    def self.degunk body
-      doc = Nokogiri::HTML.parse body # parse HTML
-      if content_type = doc.css('meta[http-equiv="Content-Type"]')[0]
-        if content = content_type['content']
-          if charset_tag = content.split(';')[1]
-            if charset = charset_tag.split('=')[1]
-              # in-band charset tag found
-              unless charset.match? /utf.?8/i
-                puts "charset specified in <head> :: #{charset}"
-                # parse with explicit charset
-                doc = Nokogiri::HTML.parse body.force_encoding(charset).encode('UTF-8')
-              end
-            end
-          end
-        end
-      end
-      degunkDoc doc # degunk
-      doc.to_html   # serialize
-    end
-
-    # degunk parsed HTML (nokogiri/nokogumbo) document
-    def self.degunkDoc doc
-      doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
-      doc.css("iframe, img, [type='image'], link, script").map{|s|
-        text = s.inner_text     # inline content
-        s.remove if s['type'] != 'application/ld+json' && text.match?(GunkExec) && !text.match?(InitialState)
-        %w(href src).map{|attr| # references
-          if s[attr]
-            src = s[attr].R
-            s.remove if src.uri.match?(Gunk) || (src.gunkDomain? && !src.allowCDN?)
-          end}}
-    end
   end
 end

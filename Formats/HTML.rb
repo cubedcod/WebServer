@@ -3,6 +3,46 @@ module Webize
   module HTML
     include WebResource::URIs
 
+    # clean HTML string
+    def self.degunk body
+      doc = Nokogiri::HTML.parse body # parse HTML
+      if content_type = doc.css('meta[http-equiv="Content-Type"]')[0]
+        if content = content_type['content']
+          if charset_tag = content.split(';')[1]
+            if charset = charset_tag.split('=')[1]
+              # in-band charset tag found
+              unless charset.match? /utf.?8/i
+                puts "charset specified in <head> :: #{charset}"
+                # parse with explicit charset
+                doc = Nokogiri::HTML.parse body.force_encoding(charset).encode('UTF-8')
+              end
+            end
+          end
+        end
+      end
+      degunkDoc doc # degunk
+      doc.to_html   # serialize
+    end
+
+    # clean HTML nokogiri/nokogumbo instance
+    def self.degunkDoc doc
+      doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
+      doc.css("iframe, img, [type='image'], link, script").map{|s|
+        text = s.inner_text     # inline content
+        if s['type'] != 'application/ld+json' && text.match?(GunkExec) && !text.match?(InitialState)
+          puts '🚩 ' + text if ENV.has_key? 'VERBOSE'
+          s.remove
+        end
+        %w(href src).map{|attr| # references
+          if s[attr]
+            src = s[attr].R
+            if src.uri.match?(Gunk) || (src.gunkDomain? && !src.allowCDN?)
+              puts '🚫 ' + src.uri if ENV.has_key? 'VERBOSE'
+              s.remove
+            end
+          end}}
+    end
+
     # format to local conventions
     def self.format body, base
       html = Nokogiri::HTML.fragment body

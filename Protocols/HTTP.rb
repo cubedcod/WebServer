@@ -17,7 +17,7 @@ class WebResource
 
     # common handlers
     GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['q'])}, []]}
-    NoGunk  = -> r {r.gunkURI && (r.query_values || {})['allow'] != ServerKey && r.deny || r.fetch}
+    NoGunk  = -> r {r.uri.match?(Gunk) && (r.query_values||{})['allow'] != ServerKey && r.deny || r.fetch}
     RootIndex = -> r {
       if r.path == '/' || r.path.match?(GlobChars)
         r.nodeResponse
@@ -264,7 +264,7 @@ class WebResource
       fallback.fetchHTTP options
     end
 
-    def fetchHTTP options = {} #; puts [:FETCH, uri].join ' ' if ENV.has_key? 'VERBOSE'
+    def fetchHTTP options = {}
       URI.open(uri, headers.merge({redirect: false})) do |response|
         h = response.meta                                             # upstream metadata
         if response.status.to_s.match? /206/                          # partial response
@@ -387,6 +387,19 @@ class WebResource
     end
 
     alias_method :get, :fetch
+
+    def gunk?
+      return false if (query_values||{})['allow'] == ServerKey
+      return true if gunkDomain?
+      return true if uri.match? Gunk
+      false
+    end
+
+    def gunkDomain?
+      return false if !host || AllowedHosts.has_key?(host) || HostGET.has_key?(host)
+      c = GunkHosts                                                 # start cursor
+      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # find leaf node on gunk tree
+    end
 
     def HEAD
       self.GET.yield_self{|s, h, _|
