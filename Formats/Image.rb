@@ -33,7 +33,8 @@ module Webize
       content_type 'image/jpeg',
                    extensions: [:jpeg, :jpg],
                    aliases: %w(
-                   image/jpg;q=0.8)
+                   image/jpg;q=0.8
+                   image/x-icon;q=0.2)
       reader { Reader }
     end
 
