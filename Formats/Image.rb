@@ -28,39 +28,6 @@ module Webize
       end
     end
   end
-  module Icon
-    class Format < RDF::Format
-      content_type 'image/x-icon',
-                   extension: :ico,
-                   aliases: %w(
-                   image/vnd.microsoft.icon;q=0.8
-                   )
-
-      reader { Reader }
-    end
-
-    class Reader < RDF::Reader
-      include WebResource::URIs
-      format Format
-
-      def initialize(input = $stdin, options = {}, &block)
-        @subject = (options[:base_uri] || '#icon').R
-        if block_given?
-          case block.arity
-          when 0 then instance_eval(&block)
-          else block.call(self)
-          end
-        end
-        nil
-      end
-
-      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
-
-      def each_statement &fn
-      end
-    end
-  end
-
   module JPEG
     class Format < RDF::Format
       content_type 'image/jpeg',
@@ -76,7 +43,7 @@ module Webize
 
       def initialize(input = $stdin, options = {}, &block)
         @subject = (options[:base_uri] || '#image').R 
-        @img = Exif::Data.new(input.respond_to?(:read) ? input.read : input) rescue nil #puts("EXIF read failed on #{@subject}")
+        @img = Exif::Data.new(input.respond_to?(:read) ? input.read : input) rescue nil
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -110,10 +77,9 @@ module Webize
       
     end
   end
-
   module PNG
     class Format < RDF::Format
-      content_type 'image/png', :extension => :png
+      content_type 'image/png', :extensions => [:ico, :png]
       reader { Reader }
     end
 
@@ -122,8 +88,7 @@ module Webize
       format Format
 
       def initialize(input = $stdin, options = {}, &block)
-        #@img = Exif::Data.new(input.respond_to?(:read) ? input.read : input)
-        @subject = (options[:base_uri] || '#image').R 
+         @subject = (options[:base_uri] || '#image').R 
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -147,7 +112,6 @@ module Webize
 
     end
   end
-
   module WebP
     class Format < RDF::Format
       content_type 'image/webp', :extension => :webp
@@ -159,7 +123,6 @@ module Webize
       format Format
 
       def initialize(input = $stdin, options = {}, &block)
-        #@img = Exif::Data.new(input.respond_to?(:read) ? input.read : input)
         @subject = (options[:base_uri] || '#image').R 
         if block_given?
           case block.arity

@@ -53,9 +53,9 @@ module Webize
           node.add_child "<img src=\"#{url[1]}\">" if url}}
       html.css('amp-img').map{|amp|amp.add_child "<img src=\"#{amp['src']}\">"} # image in amp or div tag
       html.css("div[class*='image'][data-src]").map{|div|div.add_child "<img src=\"#{div['data-src']}\">"}
-      html.traverse{|e| # visit node
-        e.attribute_nodes.map{|a| # visit attribute
-          e.set_attribute 'src', a.value if SRCnotSRC.member? a.name   # map @src attribute to classic name
+      html.traverse{|e| # visit nodes
+        e.attribute_nodes.map{|a| # visit attributes
+          e.set_attribute 'src', a.value if SRCnotSRC.member? a.name   # map @src-like attributes to @src
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/)||# strip attributes
                       %w(bgcolor class height http-equiv layout ping role style tabindex target theme width).member?(a.name)}
@@ -118,8 +118,8 @@ module Webize
         @opts = options
         @doc = (input.respond_to?(:read) ? input.read : input).encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ')
         @base = options[:base_uri]
-        @base = @base.to_s[0..-6].R @base.env if @base.to_s.match? /\.html$/ # strip filename extension
-        @opts[:noRDFa] = true if @base.to_s.match? /\/feed|polymer.*html/ # don't look for RDF in templates
+        @base = @base.to_s[0..-6].R @base.env if @base.to_s.match? /\.html$/ # strip filename for generic Base-URI
+        @opts[:noRDFa] = true if @base.to_s.match? /\/feed|polymer.*html/ # don't extract RDF from unpopulated templates
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -153,21 +153,17 @@ module Webize
           @base.send hostTriplr, n, &f
         end
 
-        # embedded RDF in RDFa and JSON-LD # TODO move this out of each_statement to make blank-node handling easier? 
+        # embedded RDF in RDFa and JSON-LD
         unless @opts[:noRDFa]
           embeds = RDF::Graph.new
-          # JSON-LD
           n.css('script[type="application/ld+json"]').map{|dataElement|
-            embeds << (::JSON::LD::API.toRdf ::JSON.parse dataElement.inner_text)} rescue "JSON-LD read failure in #{@base}"
+            embeds << (::JSON::LD::API.toRdf ::JSON.parse dataElement.inner_text)} rescue "JSON-LD read failure in #{@base}" # JSON-LD triples
+          RDF::Reader.for(:rdfa).new(@doc, base_uri: @base){|_| embeds << _ } rescue "RDFa read failure in #{@base}"         # RDFa triples
 
-          # RDFa
-          RDF::Reader.for(:rdfa).new(@doc, base_uri: @base){|_| embeds << _ } rescue "RDFa read failure in #{@base}"
-
-          # emit triples
           embeds.each_triple{|s,p,o|
-            p = MetaMap[p.to_s] || p # predicate map
+            p = MetaMap[p.to_s] || p # map predicates
             puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/ # show unresolved property-names
-            yield s, p, o unless p == :drop}
+            yield s, p, o unless p == :drop} # add mapped-triple to graph
         end
 
         # <link>
@@ -525,14 +521,14 @@ class WebResource
             seen = true
             markup[v,env]
           end},
-         (keyval v, env unless seen)] # basic key-value render
-      elsif v.class == WebResource # resource-reference argument
+         (keyval v, env unless seen)] # default key-value renderer
+      elsif v.class == WebResource # resource-reference arguments
         if v.path && %w{jpeg jpg JPG png PNG webp}.member?(v.ext)
           Markup[Image][v, env]    # image reference
         else
           v                        # generic reference
         end
-      else # undefined
+      else # undefined renderer
         CGI.escapeHTML v.to_s
       end
     end
@@ -667,7 +663,6 @@ class WebResource
             else
               image['https://schema.org/url'] || image[Schema+'url'] || image[Link] || image['uri']
             end
-      puts "no img-src found:", image.class, image unless src
       if src.class == Array
         puts "multiple img-src found:", src if src.size > 1
         src = src[0]
@@ -690,9 +685,7 @@ class WebResource
         dash = true
       end
       v = src.R
-      if env[:images][src]
-       # duplicate
-      else
+      unless env[:images][src]
         env[:images][src] = true
         if src.match /youtu/
           id = (v.query_values||{})['v'] || v.parts[-1]
