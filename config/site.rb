@@ -67,6 +67,7 @@ class WebResource
         else                                # request has query
           [302, {'Location' => r.path}, []] #  redirect to path
         end}}
+    %w(l.facebook.com lm.facebook.com l.instagram.com).map{|host| GET host, -> r {[301, {'Location' =>  r.query_values['u']}, []]}}
     GET 'gate.sc', GotoURL
 
     # script-library hosts
@@ -80,8 +81,10 @@ class WebResource
     GET 'ssl.p.jwpcdn.com'
     %w(edge.api.brightcove.com players.brightcove.net secure.brightcove.com).map{|h| Allow h}
 
-    # Facebook
-    %w(l.facebook.com lm.facebook.com l.instagram.com).map{|host| GET host, -> r {[301, {'Location' =>  r.query_values['u']}, []]}}
+    # chat
+    Allow 'discordapp.com'
+    Allow 'status.discordapp.com'
+    Allow 'gateway.discord.gg'
 
     # Gitlab
     Allow 'gitlab.com'
@@ -123,7 +126,6 @@ class WebResource
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI?              # MIME preference
       r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination link
       r.fetch options}
-
     GET 'old.reddit.com', -> r {
       r.upstreamUI.env['HTTP_USER_AGENT'] = DesktopUA
       r.fetch.yield_self{|status,head,body|
@@ -140,20 +142,8 @@ class WebResource
           end
         end}}
 
-    # Reuters
-    (0..5).map{|i|
-      GET "s#{i}.reutersmedia.net", -> r {
-        if (r.query_values||{}).has_key? 'w'
-          [301, {'Location' =>  r.env['REQUEST_PATH'] + HTTP.qs(r.query_values.reject{|k,_|k=='w'})}, []]
-        else
-          r.fetch
-        end}}
-
-    # Tumblr
-    GET '.tumblr.com', -> r {(r.query_values||{}).has_key?('audio_file') ? [301, {'Location' => r.query_values['audio_file']}, []] : NoGunk[r]}
-    
     # Twitter
-    ['', 'api.', 'mobile.'].map{|h| Allow h + 'twitter.com'}
+    ['','api.','mobile.'].map{|h| Allow h + 'twitter.com'}
 
     Populate 'twitter.com', -> r {
       FileUtils.mkdir 'twitter'
@@ -167,7 +157,7 @@ class WebResource
       end
       r.fetch}
 
-    Twitter = -> r {
+    GET 'twitter.com', -> r {
       r.chrono_sort.TwitterAuth
       # feed
       (if r.path == '/'
@@ -203,12 +193,6 @@ class WebResource
         else
           [s,h,b]
         end}}
-
-    GET 'mobile.twitter.com', Twitter
-    GET 'twitter.com', Twitter
-
-    # WordPress
-    %w(i0 i1 i2 s0 s1 s2).map{|h| GET h + '.wp.com' }
 
     GET 's.yimg.com', -> r {
       parts = r.path.split /https?:\/+/
