@@ -147,9 +147,16 @@ module Webize
         subject = @base         # subject URI
         n = Nokogiri::HTML.parse @doc # parse
 
+        if base = n.css('head base')[0]
+          new_base = base['href']
+          if new_base != @base.to_s
+            puts "NOTICE base URI redefined in HTML #{@base} -> #{new_base}"
+            @base = new_base.R @base.env
+          end
+        end
+
         # host bindings
-        if hostTriplr = Triplr[@base.host] ||
-                        Triplr[@base.respond_to?(:env) && @base.env && @base.query_values && @base.query_values['host']]
+        if hostTriplr = Triplr[@base.host]
           @base.send hostTriplr, n, &f
         end
 

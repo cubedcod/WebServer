@@ -7,6 +7,7 @@ class WebResource
       'application/x-javascript' => '.js',
       'application/x-mpegURL' => '.m3u8',
       'application/x-rss+xml' => '.rss',
+      'application/x-turtle' => '.ttl',
       'audio/mpeg' => '.mp3',
       'image/jpg' => '.jpg',
       'image/svg+xml' => '.svg',

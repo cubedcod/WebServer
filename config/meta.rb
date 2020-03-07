@@ -551,6 +551,7 @@ class WebResource
       Schema + 'interactionStatistic' => :drop,
       Schema + 'keywords' => Abstract,
       Schema + 'mainEntityOfPage' => :drop,
+      Schema + 'name' => Title,
       Schema + 'primaryImageOfPage' => Image,
       Schema + 'reviewBody' => Content,
       Schema + 'text' => Content,

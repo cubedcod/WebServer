@@ -59,28 +59,12 @@ module Webize
     # CSS selector for script elements
     Scripts = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script"
 
-    # CSS selectors for site-navigation elements
-    SiteNav = %w{
-footer nav sidebar
-[class*='foot']
-[class*='head']
-[class*='nav']
-[class*='related']
-[class*='share']
-[class*='social']
-[id*='foot']
-[id*='head']
-[id*='nav']
-[id*='related']
-[id*='share']
-[id*='social']
-}
-
     # alternatives to @src
     SRCnotSRC = %w(
 data-baseurl
 data-delayed-url
 data-hi-res-src
+data-image
 data-img-src
 data-lazy-img
 data-lazy-src
