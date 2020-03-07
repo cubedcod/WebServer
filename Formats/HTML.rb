@@ -266,6 +266,7 @@ class WebResource
       Creator => '👤',
       DC + 'hasFormat' => '≈',
       DC + 'identifier' => '☸',
+      DC + 'rights' => '⚖️',
       Date => '⌚', 'http://purl.org/dc/terms/created' => '⌚', 'http://purl.org/dc/terms/modified' => '⌚',
       Image => '🖼️',
       LDP + 'contains' => '📁',
@@ -340,7 +341,7 @@ class WebResource
       env[:images] ||= {}
       env[:colors] ||= {}
       env[:links] ||= {}
-      if env[:summary] || (qs.has_key?('q') && !qs.has_key?('fullContent'))
+      if env[:summary] || ((qs.has_key?('Q')||qs.has_key?('q')) && !qs.has_key?('fullContent'))
         expanded = HTTP.qs qs.merge({'fullContent' => nil})
         env[:links][:full] = expanded
         expander = {_: :a, id: :expand, c: '&#11206;', href: expanded}

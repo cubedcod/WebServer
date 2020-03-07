@@ -81,6 +81,9 @@ class WebResource
     # Facebook
     %w(l.facebook.com lm.facebook.com l.instagram.com).map{|host| GET host, -> r {[301, {'Location' =>  r.query_values['u']}, []]}}
 
+    # Gitlab
+    Allow 'gitlab.com'
+
     # Google
     GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
     GET 'www.google.com', -> r {
