@@ -210,8 +210,7 @@ class WebResource
                       elsif type == :image || %w(gif png).member?(ext)
                         ['image/gif', SiteGIF]
                       elsif type == :script || ext == 'js'
-                        source = SiteDir.join 'alternatives/' + host + path
-                        ['application/javascript', source.exist? ? source.read : '//']
+                        ['application/javascript', '//']
                       elsif type == :JSON || ext == 'json'
                         ['application/json','{}']
                       else

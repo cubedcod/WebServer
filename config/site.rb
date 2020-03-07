@@ -27,6 +27,7 @@ module Webize
 end
 class WebResource
   module URIs
+
     CacheFormats = %w(css geojson gif html ico jpeg jpg js json m3u8 m4a md mp3 mp4 opus pdf png svg ts webm webp xml) # cached filetypes
     CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|googleapis|netdna.*)\.(com|io|net)$/
     CookieHost = /\.(akamai(hd)?|bandcamp|ttvnw)\.(com|net)$/
@@ -44,6 +45,7 @@ class WebResource
     SiteCSS = SiteDir.join('site.css').read
     CodeCSS = SiteDir.join('code.css').read
     SiteJS  = SiteDir.join('site.js').read
+
   end
   module HTTP
     DesktopUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'

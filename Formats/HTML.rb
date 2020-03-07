@@ -149,7 +149,7 @@ module Webize
 
         if base = n.css('head base')[0]
           new_base = base['href']
-          if new_base != @base.to_s
+          if new_base && new_base != @base.to_s
             puts "NOTICE base URI redefined in HTML #{@base} -> #{new_base}"
             @base = new_base.R @base.env
           end

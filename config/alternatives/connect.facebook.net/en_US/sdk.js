@@ -1,1 +1,0 @@
-FB = {init: function(opts){}};
