@@ -585,7 +585,11 @@ class WebResource
         CGI.escapeHTML (c||'')
       end}
 
-    Markup[Date] = -> date, env=nil {{_: :a, class: :date, c: date, href: '/' + date[0..13].gsub(/[-T:]/,'/')}}
+    Markup[Date] = -> date, env=nil {
+#      elsif path.match? HourDir # cache timeslice
+#        (path + '*' + host.split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*' + (query ? ('?' + query) : '')).R(env).nodeResponse
+      {_: :a, class: :date, c: date, href: '/' + date[0..13].gsub(/[-T:]/,'/')}
+    }
     Markup['http://purl.org/dc/terms/created'] = Markup['http://purl.org/dc/terms/modified'] = Markup[Date]
 
     Markup[Link] = -> ref, env=nil {

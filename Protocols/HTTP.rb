@@ -371,14 +371,12 @@ class WebResource
         end                    ## remote
       elsif path.match? /gen(erate)?_?204$/ # connectivity check
         [204, {}, []]
-      elsif path.match? HourDir # cache timeslice
-        (path + '*' + host.split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*' + (query ? ('?' + query) : '')).R(env).nodeResponse
       elsif handler = HostGET[host] # host handler
         Populator[host][self] if Populator[host] && !join('/').R.node.exist?
         handler[self]
       elsif host.match? CDNhost # CDN handler
         (AllowedHosts.has_key?(host) || (query_values||{})['allow'] == ServerKey || allowCDN?) ? fetch : deny
-      elsif gunk?               # block handler
+      elsif gunk?               # blocked-content handler
         deny
       else
         fetch                   # remote node
