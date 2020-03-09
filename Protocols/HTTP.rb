@@ -243,12 +243,12 @@ class WebResource
 
     # fetch node from cache or remote server
     def fetch options=nil
-      return nodeResponse if ENV.has_key? 'OFFLINE'                                               # offline-only response
-      if StaticFormats.member? ext.downcase                                                       # static-cache formats:
+      return nodeResponse if ENV.has_key? 'OFFLINE'                                            # offline-only response
+      if StaticFormats.member? ext.downcase                                                    # static-cache formats:
         return [304, {}, []] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client-cached node
-        return fileResponse if node.file?                                                         # server-cached node (direct hit)
+        return fileResponse if node.file?                                                      # server-cached node (direct hit)
       end
-      c = nodeSet ; return c[0].fileResponse if c.size == 1 && StaticFormats.member?(c[0].ext)    # server-cached node (indirect hit)
+      c = nodeSet ; return c[0].fileResponse if c.size == 1 && StaticFormats.member?(c[0].ext) # server-cached node (indirect hit)
 
       # cache miss, network fetch
 
