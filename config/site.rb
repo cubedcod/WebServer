@@ -4,6 +4,7 @@ module Webize
     class Reader
       Triplr = {
         'apnews.com' => :AP,
+        'archive.4plebs.org' => :FourPlebs,
         'boards.4chan.org' => :FourChan,
         'boards.4channel.org' => :FourChan,
         'github.com' => :GitHub,
@@ -312,6 +313,18 @@ class WebResource
       post.css(   '.subject').map{|subj| yield subject, Title,   subj.inner_text }
       post.css('.postMessage').map{|msg| yield subject, Content, msg }
       post.css('.fileThumb').map{|thumb| yield subject, Image,   thumb['href'].R if thumb['href']}
+      post.remove}
+  end
+
+  def FourPlebs doc
+    doc.css('.post').map{|post|
+      subject = join '#' + post['id']
+                                          yield subject, Type,    Post.R
+      post.css('.post_author').map{|name| yield subject, Creator, name.inner_text }
+      post.css(        'time').map{|time| yield subject, Date,    time['datetime'] }
+      post.css( '.post_title').map{|subj| yield subject, Title,   subj.inner_text }
+      post.css(       '.text').map{|msg|  yield subject, Content, msg }
+      post.css('.post_image').map{|img|   yield subject, Image,   img['src'].R if img['src']}
       post.remove}
   end
 

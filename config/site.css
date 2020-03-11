@@ -21,21 +21,20 @@
 .quote {background-color: #ccc; color: #000; padding-left: .3em}
 .thumb {max-width: 22em}
 .title {background-color: #fff; color: #000; font-size: 1.08em; font-weight: bold; vertical-align: top; border-width: 0 0 0 .4em; border-color: #fff; border-style: solid; border-radius: .18em }
-.title:visited {border-color: #0f0}
 .toolbox a.icon {font-size: 1.6em}
 .toolbox a.icon, .breadcrumb {text-shadow: 1px 1px #000000}
 .toolbox a:target {text-shadow: 0px 0px #000000}
 .toolbox svg {height: 1em; width: 1em}
 .toolbox { position: fixed; top: 0; z-index: 2 }
 :target {background-color: #0f0 !important; color: #000 !important}
+:visited {border-color: #ccf}
 a {text-decoration: none; border-radius: .14em}
 a.date {float: right; white-space: nowrap; background-color: #000; color: #888; border-radius: .2em; font-size: .8em}
 a.id {float: right}
 a.idlink {color: #aaa; background-color: #000; font-size: .72em; vertical-align: bottom}
 a.uri > span.uri {font-size: 0.8em; font-weight: normal}
 a.uri {background-color: #eee; border-radius: .28em; color: #000; border-style: solid; border-color: #fff; border-width: 0 0 0 .3em; max-width: 42ex; overflow: hidden; margin: .1em; font-weight: bold}
-a.uri.path {background-color: #111; color: #fff; border-color: #222}
-a.uri:visited {border-color: #0f0}
+a.uri.path {background-color: #111; color: #fff; border-color: #222; border-width: 1px 1px 1px .3em;}
 blockquote {background-color: #080808; color: #fff; border-radius: .2em; border-width: 0 0 0 .4em; border-style: solid; border-color: #222}
 body {font-family: sans-serif; margin: 2em}
 body, thead td, td.k {background-color: #555; color: #fff}
@@ -48,8 +47,8 @@ span.name {font-size: .8em}
 svg, img[src*="svg"] {max-width:2em; max-height: 2em}
 table {border-spacing: 1px}
 td {overflow: hidden; vertical-align: top; border-color: #222; border-width: 0 1px 1px 0; border-style: dotted}
-td.k {max-width: 28ex; text-align: right}
 td.k > a {color: #eee}
+td.k {max-width: 28ex; text-align: right}
 td.v, td[property="uri"] {background-color: #000; color: #fff; border-radius: .2em}
 td[property="http://rdfs.org/sioc/ns#has_creator"], td[property="http://rdfs.org/sioc/ns#addressed_to"] {text-align: center}
 td[property="uri"] {max-width: 100ex; text-align: left}
