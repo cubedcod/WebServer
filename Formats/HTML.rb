@@ -30,7 +30,7 @@ module Webize
       doc.css("iframe, img, [type='image'], link, script").map{|s|
         text = s.inner_text     # inline script
         if !ENV.has_key?('JS') && s['type'] != 'application/ld+json' && !text.match?(InitialState) && text.match?(GunkExec)
-          puts "🚩 " + s.to_s.size.to_s + ' ' + s.to_s.split(/[\n\r]/).join(' ').gsub(/\s+/,' ')[0..(ENV.has_key?('VERBOSE') ? -1 : 127)]
+          puts "🚩 " + s.to_s.size.to_s + ' ' + text.match(GunkExec)[2] + ' ' + s.to_s.split(/[\n\r]/).join(' ').gsub(/\s+/,' ')[0..(ENV.has_key?('VERBOSE') ? -1 : 127)]
           s.remove
         end
         %w(href src).map{|attr| # references
