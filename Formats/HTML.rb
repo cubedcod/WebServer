@@ -30,7 +30,7 @@ module Webize
       doc.css("iframe, img, [type='image'], link, script").map{|s|
         text = s.inner_text     # inline script
         if !ENV.has_key?('JS') && s['type'] != 'application/ld+json' && !text.match?(InitialState) && text.match?(GunkExec)
-          puts "🚩 " + s.to_s.split(/[\n\r]/).join(' ').gsub(/\s+/,' ')[0..4096] if ENV.has_key? 'VERBOSE'
+          puts "🚩 " + s.to_s.size.to_s + ' ' + s.to_s.split(/[\n\r]/).join(' ').gsub(/\s+/,' ')[0..(ENV.has_key?('VERBOSE') ? -1 : 127)]
           s.remove
         end
         %w(href src).map{|attr| # references
@@ -586,10 +586,8 @@ class WebResource
       end}
 
     Markup[Date] = -> date, env=nil {
-#      elsif path.match? HourDir # cache timeslice
-#        (path + '*' + host.split('.').-(Webize::Plaintext::BasicSlugs).join('.') + '*' + (query ? ('?' + query) : '')).R(env).nodeResponse
-      {_: :a, class: :date, c: date, href: '/' + date[0..13].gsub(/[-T:]/,'/')}
-    }
+      {_: :a, class: :date, c: date, href: 'http://' + (ENV['HOSTNAME'] || 'localhost') + ':8000/' + date[0..13].gsub(/[-T:]/,'/')}}
+
     Markup['http://purl.org/dc/terms/created'] = Markup['http://purl.org/dc/terms/modified'] = Markup[Date]
 
     Markup[Link] = -> ref, env=nil {
