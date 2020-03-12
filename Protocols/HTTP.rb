@@ -242,28 +242,21 @@ class WebResource
     end
 
     # fetch node from cache or remote server
-    def fetch options=nil
-      return nodeResponse if ENV.has_key? 'OFFLINE'                                            # offline-only response
-      if StaticFormats.member? ext.downcase                                                    # static-cache formats:
-        return [304, {}, []] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client-cached node
-        return fileResponse if node.file?                                                      # server-cached node (direct hit)
+    def fetch options={}
+      return nodeResponse if ENV.has_key? 'OFFLINE'  # offline cached node(s)
+      if StaticFormats.member? ext.downcase
+        return [304, {}, []] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has node
+        return fileResponse if node.file?            # cache hit (direct)
       end
-      c = nodeSet ; return c[0].fileResponse if c.size == 1 && StaticFormats.member?(c[0].ext) # server-cached node (indirect hit)
-
-      # cache miss, network fetch
-
-      options ||= {}
+      c = nodeSet                                    # cache hit (indirect)
+      return c[0].fileResponse if c.size == 1 && StaticFormats.member?(c[0].ext)
       location = ['//', host, (port ? [':', port] : nil), path, options[:suffix], (query ? ['?', query] : nil)].join
-      primary  = ('https:' + location).R env
-      fallback = ('http:' + location).R env
-
-      env[:fetch] = true
-      primary.fetchHTTP options
+      ('https:' + location).R(env).fetchHTTP options # cache miss, network fetch
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
-      fallback.fetchHTTP options
+      ('http:' + location).R(env).fetchHTTP options
     end
 
-    def fetchHTTP options = {}
+    def fetchHTTP options = {}; env[:fetch] = true
       URI.open(uri, headers.merge({redirect: false})) do |response|
         h = response.meta                                             # upstream metadata
         if response.status.to_s.match? /206/                          # partial response
