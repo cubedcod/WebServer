@@ -120,6 +120,8 @@ class WebResource
             end
           end}}}
 
+    GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
+
     # Reddit
     GET 'reddit.com', -> r {[301, {'Location' => 'https://www.reddit.com/r/Rad_Decentralization+SOLID+StallmanWasRight+darknetplan+fossdroid+selfhosted/new/'}, []]}
     GET 'www.reddit.com', -> r { parts = r.parts
