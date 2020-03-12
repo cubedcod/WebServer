@@ -77,8 +77,8 @@ class WebResource
                         end
                       end
 
-        status_icon = {202 => '✅',
-                       204 => '🌐',
+        status_icon = {202 => '➕',
+                       204 => '✅',
                        301 => '➡️',
                        302 => '➡️',
                        303 => '➡️',
@@ -251,9 +251,9 @@ class WebResource
       c = nodeSet                                    # server cache-hit, indirect via node-mapping
       return c[0].fileResponse if c.size == 1 && StaticFormats.member?(c[0].ext)
       location = ['//', host, (port ? [':', port] : nil), path, options[:suffix], (query ? ['?', query] : nil)].join
-      ('https:' + location).R(env).fetchHTTP options # cache miss, network fetch
+      ('https:' + location).R(env).fetchHTTP options # cache miss, HTTPS fetch
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
-      ('http:' + location).R(env).fetchHTTP options
+      ('http:' + location).R(env).fetchHTTP options  # fallback HTTP fetch
     end
 
     def fetchHTTP options = {}; env[:fetch] = true

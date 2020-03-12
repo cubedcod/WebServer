@@ -137,20 +137,15 @@ class WebResource
         end}}
 
     # Twitter
-    ['','api.','mobile.'].map{|h| Allow h + 'twitter.com'}
-
-    Populate 'twitter.com', -> r {
-      FileUtils.mkdir 'twitter'
-      `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|n|
-        FileUtils.touch 'twitter/.' + n}}
-
+    Allow 'api.twitter.com'
+    Populate 'twitter.com', -> r { FileUtils.mkdir 'twitter'
+      `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|n| FileUtils.touch 'twitter/.' + n}}
     GET 'api.twitter.com', -> r {
       if r.env.keys.grep(/token/i).empty?
         r.env['HTTP_COOKIE'] = 'twitter/.cookie'.R.readFile
         r.TwitterAuth
       end
       r.fetch}
-
     GET 'twitter.com', -> r {
       r.chrono_sort.TwitterAuth
       # feed
@@ -185,7 +180,7 @@ class WebResource
         NoGunk[r]
        end).yield_self{|s,h,b|
         if [401,403,429].member? s
-          'twitter/.cookie'.R.node.delete if File.exist? 'twitter/.cookie'
+          'twitter/.cookie'.R.node.delete if File.exist? 'twitter/.cookie' # invalidate credentials
           r.upstreamUI.fetch
         else
           [s,h,b]
