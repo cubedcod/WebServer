@@ -242,7 +242,7 @@ class WebResource
     end
 
     # fetch node from cache or remote server
-    def fetch options={}
+    def fetch options = nil ; options ||= {}
       return nodeResponse if ENV.has_key? 'OFFLINE'  # offline cached node(s)
       if StaticFormats.member? ext.downcase
         return [304, {}, []] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has node

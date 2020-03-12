@@ -82,14 +82,6 @@ class WebResource
     GET 'ssl.p.jwpcdn.com'
     %w(edge.api.brightcove.com players.brightcove.net secure.brightcove.com).map{|h| Allow h}
 
-    # chat
-    Allow 'discordapp.com'
-    Allow 'status.discordapp.com'
-    Allow 'gateway.discord.gg'
-
-    # Gitlab
-    Allow 'gitlab.com'
-
     # Google
     GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
     GET 'www.google.com', -> r {
@@ -123,7 +115,6 @@ class WebResource
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # Reddit
-    GET 'reddit.com', -> r {[301, {'Location' => 'https://www.reddit.com/r/Rad_Decentralization+SOLID+StallmanWasRight+darknetplan+fossdroid+selfhosted/new/'}, []]}
     GET 'www.reddit.com', -> r { parts = r.parts
       r.chrono_sort if parts[-1] == 'new' || parts.size == 5                    # chrono sort
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI?              # MIME preference
