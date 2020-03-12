@@ -129,6 +129,8 @@ document.addEventListener("DOMContentLoaded", function(){
 	    if(key==78) // [shift-N] next node
 		selectNextNode();
 	} else {
+	    if(key==13)
+		gotoHref();
 	    if(key==80) // [p]revious link
 		selectPrevLink();
 	    if(key==78) // [n]ext link
