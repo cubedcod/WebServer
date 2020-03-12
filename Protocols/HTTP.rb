@@ -258,37 +258,33 @@ class WebResource
 
     def fetchHTTP options = {}; env[:fetch] = true
       URI.open(uri, headers.merge({redirect: false})) do |response|
-        h = response.meta                                             # upstream metadata
-        if response.status.to_s.match? /206/                          # partial response
+        h = response.meta                                     # upstream metadata
+        if response.status.to_s.match? /206/                  # partial response
           h['Access-Control-Allow-Origin'] = allowedOrigin unless h['Access-Control-Allow-Origin'] || h['access-control-allow-origin']
-          [206, h, [response.read]]                                   # return part downstream
+          [206, h, [response.read]]                           # return part
         else
-          body = HTTP.decompress h, response.read                     # decompress body
-          format = if path == '/feed' || (query_values||{})['mime']=='xml'   # content-type
-                     'application/atom+xml'
-                   elsif h.has_key? 'content-type'
-                     h['content-type'].split(/;/)[0]
+          body = HTTP.decompress h, response.read             # decompress body
+          format = if path=='/feed' || (query_values||{})['mime']=='xml'
+                     'application/atom+xml'                   # find content-type
+                   elsif h.has_key? 'content-type'            #  Atom/RSS feed ||
+                     h['content-type'].split(/;/)[0]          #  MIME header ||
                    elsif RDF::Format.file_extensions.has_key? ext.to_sym
                      RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
-                   end
-          static = !options[:reformat] && (fixedFormat? format)       # rewritable format?
-          body = Webize::HTML.clean body if format == 'text/html' && !AllowedHosts.has_key?(host) # clean HTML
-          formatExt = Suffixes[format] || Suffixes_Rack[format] || (puts "ENOSUFFIX #{format} #{uri}";'') # filename-extension for format
-
-          storage = fsPath                                            # storage location
-          storage += formatExt unless extension == formatExt
-          storage.R.writeFile body                                    # cache body
-
-          reader = RDF::Reader.for content_type: format               # select reader
-          reader.new(body, base_uri: self){|_|                        # read RDF
+                   end                                        #  name extension
+          static = !options[:reformat] && fixedFormat?(format)# rewritable?
+          body = Webize::HTML.clean body if format == 'text/html' && !AllowedHosts.has_key?(host) # tidy HTML
+          formatExt = Suffixes[format] || Suffixes_Rack[format] || (puts "ENOSUFFIX #{format} #{uri}";'') # find name-extension
+          storage = fsPath                                    # storage location
+          storage += formatExt unless extension == formatExt  # add name-extension if incorrect or missing
+          storage.R.writeFile body                            # cache static representation
+          reader = RDF::Reader.for content_type: format       # find reader
+          reader.new(body, base_uri: self){|_|                # read RDF
             (env[:repository] ||= RDF::Repository.new) << _ } if reader && !%w(.css .gif .ico .jpg .js .png .svg .webm).member?(formatExt)
-          return self if options[:intermediate]                       # intermediate fetch, no finishing HTTP response
-
-          reader ? saveRDF : (puts "ENORDF #{format} #{uri}")         # cache RDF
-
+          return self if options[:intermediate]               # intermediate fetch, no immediate HTTP response
+          reader ? saveRDF : (puts "ENORDF #{format} #{uri}") # cache RDF graph(s)
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
-            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # upstream metadata for downstream
-          if links = h['link']                                        # parse Link header
+            env[:resp][k] ||= h[k.downcase] if h[k.downcase]} # upstream metadata to downstream
+          if links = h['link']                                # read Link metadata
             links.split(',').map{|link|
               ref, type = link.split(';').map &:strip
               if ref && type
@@ -299,12 +295,11 @@ class WebResource
           end
           env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
           env[:resp]['Set-Cookie'] ||= h['set-cookie'] if h['set-cookie'] && allowCookies?
-
           if static
-            env[:resp]['Content-Length'] = body.bytesize.to_s         # size header
-            [200, env[:resp], [body]]                                 # upstream doc
+            env[:resp]['Content-Length'] = body.bytesize.to_s # content size
+            [200, env[:resp], [body]]                         # upstream doc
           else
-            graphResponse                                             # local doc
+            graphResponse                                     # document
           end
         end
       end
@@ -334,8 +329,8 @@ class WebResource
     end
 
     def fixedFormat? format = nil
-      return true if upstreamUI? || format.to_s.match?(/dash.xml/)
-      return false if (query_values||{}).has_key?('rdf') || env[:transform] || !format || format.match?(/atom|html|rss|xml/i)
+      return true if upstreamUI? || format.to_s.match?(/dash.xml/) # preserve upstream format
+      return false if (query_values||{}).has_key?('rdf') || env[:transform] || !format || format.match?(/atom|html|rss|turtle|xml/i) # transformable formats
       return true
     end
 
