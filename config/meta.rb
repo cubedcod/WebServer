@@ -537,7 +537,7 @@ class WebResource
       Podcast + 'subtitle' => Title,
       Podcast + 'title' => Title,
       RSS + 'comments' => Link,
-      RSS + 'description' => Content,
+      RSS + 'description' => Abstract,
       RSS + 'encoded' => Content,
       RSS + 'modules/content/encoded' => Content,
       RSS + 'modules/slash/comments' => :drop,
