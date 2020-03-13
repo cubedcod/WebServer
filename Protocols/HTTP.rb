@@ -149,6 +149,7 @@ class WebResource
                 env[:refhost] ? ["\e[#{color}m", env[:refhost], "\e[0m→"] : nil,
                 "\e[#{color}#{thirdparty ? ';7' : ''}m", (thirdparty || format_icon=='🗒') ? resource.uri : resource.path[1..-1], "\e[0m",
                 head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil,
+                env['HTTP_ACCEPT'],
                ].
                  flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
         end
@@ -278,12 +279,12 @@ class WebResource
           storage += formatExt unless extension == formatExt  # add name-extension if incorrect or missing
           storage.R.writeFile body                            # cache static representation
           reader = RDF::Reader.for content_type: format       # find reader
-          reader.new(body, base_uri: self){|_|                # read RDF
+          reader.new(body, base_uri: self){|_|                # read graph-data
             (env[:repository] ||= RDF::Repository.new) << _ } if reader && !%w(.css .gif .ico .jpg .js .png .svg .webm).member?(formatExt)
           return self if options[:intermediate]               # intermediate fetch, no immediate HTTP response
           reader ? saveRDF : (puts "ENORDF #{format} #{uri}") # cache RDF graph(s)
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
-            env[:resp][k] ||= h[k.downcase] if h[k.downcase]} # upstream metadata to downstream
+            env[:resp][k] ||= h[k.downcase] if h[k.downcase]} # raed upstream metadata
           if links = h['link']                                # read Link metadata
             links.split(',').map{|link|
               ref, type = link.split(';').map &:strip

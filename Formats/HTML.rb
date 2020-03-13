@@ -3,7 +3,7 @@ module Webize
   module HTML
     include WebResource::URIs
 
-    # clean HTML string
+    # clean HTML (string) document
     def self.clean body
       doc = Nokogiri::HTML.parse body # parse HTML
       if content_type = doc.css('meta[http-equiv="Content-Type"]')[0]
@@ -24,16 +24,16 @@ module Webize
       doc.to_html
     end
 
-    # clean HTML nokogiri/nokogumbo instance
+    # clean HTML (nokogiri/nokogumbo) document
     def self.clean_doc doc
       doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
       doc.css("iframe, img, [type='image'], link, script").map{|s|
-        text = s.inner_text     # inline script
+        text = s.inner_text     # inline resource
         if !ENV.has_key?('JS') && s['type'] != 'application/ld+json' && !text.match?(InitialState) && text.match?(GunkExec)
-          puts "🚩 " + s.to_s.size.to_s + ' ' + text.match(GunkExec)[2] + ' ' + s.to_s.split(/[\n\r]/).join(' ').gsub(/\s+/,' ')[0..(ENV.has_key?('VERBOSE') ? -1 : 127)]
+          puts "🚩 " + s.to_s.size.to_s + ' ' + text.match(GunkExec)[2][0..192]
           s.remove
         end
-        %w(href src).map{|attr| # references
+        %w(href src).map{|attr| # resource references
           if s[attr]
             src = s[attr].R
             if src.uri.match?(Gunk) || (src.gunkDomain? && !src.allowCDN?)
@@ -589,6 +589,14 @@ class WebResource
       {_: :a, class: :date, c: date, href: 'http://' + (ENV['HOSTNAME'] || 'localhost') + ':8000/' + date[0..13].gsub(/[-T:]/,'/')}}
 
     Markup['http://purl.org/dc/terms/created'] = Markup['http://purl.org/dc/terms/modified'] = Markup[Date]
+
+    Markup[DC+'language'] = -> lang, env=nil {
+      {'de' => '🇩🇪',
+       'en' => '🇬🇧',
+       'fr' => '🇫🇷',
+       'ja' => '🇯🇵',
+      }[lang] || lang
+    }
 
     Markup[Link] = -> ref, env=nil {
       u = ref.to_s

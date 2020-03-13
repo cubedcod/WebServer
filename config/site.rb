@@ -31,7 +31,7 @@ class WebResource
 
     CacheFormats = %w(css geojson gif html ico jpeg jpg js json m3u8 m4a md mp3 mp4 opus pdf png svg ts webm webp xml) # cached filetypes
     CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|googleapis|netdna.*)\.(com|io|net)$/
-    CookieHost = /\.(akamai(hd)?|bandcamp|ttvnw)\.(com|net)$/
+    CookieHost = /\.(akamai(hd)?|bandcamp|ttvnw|twitter)\.(com|net)$/
     GunkHosts = {}
     POSThost = /^video.*.ttvnw.net$/
     UIhosts = %w(players.brightcove.net www.redditmedia.com)
@@ -449,7 +449,7 @@ class WebResource
   def TwitterAuth
     return self unless env.has_key? 'HTTP_COOKIE'
     attrs = {}
-    env['HTTP_COOKIE'].split(';').map{|attr|
+    (env['HTTP_COOKIE']||'').split(';').map{|attr|
       k , v = attr.split('=').map &:strip
       attrs[k] = v}
     env['authorization'] ||= 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA'
