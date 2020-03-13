@@ -83,14 +83,12 @@ module Webize
           mail_triples m.body.decoded, &b}
 
         # From
-        from = []
         m.from.yield_self{|f|
           ((f.class == Array || f.class == ::Mail::AddressContainer) ? f : [f]).compact.map{|f|
             noms = f.split ' '
-            if noms.size > 2 && noms[1] == 'at'
-              f = "#{noms[0]}@#{noms[2]}"
-            end
-            from.push f.downcase}} # queue address for indexing + triple-emitting
+            f = "#{noms[0]}@#{noms[2]}" if noms.size > 2 && noms[1] == 'at'
+            yield mail, Creator, ('/m/*/*/msg*?q=' + f + '#' + f).R, graph
+          }}
         m[:from] && m[:from].yield_self{|fr|
           fr.addrs.map{|a|
             name = a.display_name || a.name # human-readable name
@@ -98,11 +96,11 @@ module Webize
           } if fr.respond_to? :addrs}
 
         # To
-        to = []
         %w{to cc bcc resent_to}.map{|p|      # recipient fields
           m.send(p).yield_self{|r|           # recipient lookup
             ((r.class == Array || r.class == ::Mail::AddressContainer) ? r : [r]).compact.map{|r| # recipient
-            to.push r.downcase }}} # queue for indexing
+              yield mail, To, ('/m/*/*/msg*?q=' + r + '#' + r).R, graph
+            }}}
         m['X-BeenThere'].yield_self{|b|(b.class == Array ? b : [b]).compact.map{|r|to.push r.to_s}} # anti-loop recipient
         m['List-Id'] && m['List-Id'].yield_self{|name|
           yield mail, To, name.decoded.sub(/<[^>]+>/,'').gsub(/[<>&]/,''), graph} # mailinglist name

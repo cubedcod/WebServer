@@ -32,9 +32,9 @@ a {text-decoration: none; border-radius: .14em}
 a.date {float: right; white-space: nowrap; background-color: #000; color: #888; border-radius: .2em; font-size: .8em}
 a.id {float: right}
 a.idlink {color: #aaa; background-color: #000; font-size: .72em; vertical-align: bottom}
-a.uri > span.uri {font-size: 0.8em; font-weight: normal; color: #555}
+a.uri > span.uri {font-size: 0.8em; font-weight: normal; color: #444}
 a.uri {background-color: #fff; border-radius: .28em; color: #000; border-style: solid; border-color: #eee; border-width: 0 0 0 .2em; max-width: 42ex; overflow: hidden; margin: .1em; font-weight: bold}
-a.uri.path > span.uri {color: #bbb}
+a.uri.path > span.uri {color: #ccc}
 a.uri.path {background-color: #181818; color: #fff; border-color: #444}
 blockquote {background-color: #080808; color: #fff; border-radius: .2em; border-width: 0 0 0 .4em; border-style: solid; border-color: #222}
 body {font-family: sans-serif; margin: 2em}
@@ -43,7 +43,7 @@ div,p,a,li,ul,ol,form,svg { display: inline-block }
 h1,h2,h3,h4,h5,h6,p,pre,blockquote {margin: 0}
 img, video {max-width: 100%}
 p, li, blockquote {max-width: 86ex}
-p:nth-child(even) {background-color: #181818; color: #fff; border-radius: .3em}
+p:nth-child(even) {background-color: #111; color: #fff; border-radius: .3em}
 pre {white-space: pre-wrap}
 span.name {font-size: .8em}
 svg, img[src*="svg"] {max-width:2em; max-height: 2em}
