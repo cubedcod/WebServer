@@ -505,7 +505,7 @@ class WebResource
                      Video].map{|t|(resource[t]||[]).map{|i|
                                          Markup[t][i,env]}},
                     [resource[Content], resource[SIOC+'richContent']].compact.join('<hr>'),
-                    {class: :links, c: (resource[Link]||[]).map{|i| Markup[Link][i,env]}}]
+                    MarkupLinks[(resource[Link]||[]),env]]
                  else
                    (resource[k]||[]).map{|v|value k, v, env }
                    end}, "\n"
@@ -598,15 +598,19 @@ class WebResource
       }[lang] || lang
     }
 
+    MarkupLinks = -> links, env=nil{
+      {_: :table, class: :links,
+       c: links.group_by{|l|l.R.host}.map{|host, paths|
+         {_: :tr,
+          c: [{_: :td, style: 'text-align: right', c: {_: :a, href: '//' + host, c: host, style: env[:colors][host] ||= HTML.colorize}},
+              {_: :td, c: paths.map{|path| Markup[Link][path,env]}}]}}}}
+
     Markup[Link] = -> ref, env=nil {
       u = ref.to_s
-      [{_: :a,
-        c: u.sub(/^https?.../,'')[0..79],
-        href: u,
+      re = u.R
+      [{_: :a, href: u, c: (re.path||'/')[0..79], title: u,
         id: 'l' + Digest::SHA2.hexdigest(rand.to_s),
-        style: env[:colors][u.R.host] ||= HTML.colorize,
-        title: u,
-       },
+        style: env[:colors][re.host] ||= HTML.colorize},
        " \n"]}
 
     Markup[List] = -> list, env {
@@ -626,6 +630,7 @@ class WebResource
       from = post.delete(Creator) || []
       to = post.delete(To) || []
       images = post.delete(Image) || []
+      links = post.delete(Link) || []
       content = post.delete(Content) || []
       uri_hash = 'r' + Digest::SHA2.hexdigest(uri)
       hasPointer = false
@@ -653,7 +658,9 @@ class WebResource
                      c: [to.map{|f|Markup[To][f,env]},
                          post.delete(SIOC+'reply_of')],
                      class: :to}, "\n"]}}, "\n",
-           content, (["<br>\n", HTML.keyval(post,env)] unless post.keys.size < 1)]}}
+           content,
+           MarkupLinks[links, env],
+           (["<br>\n", HTML.keyval(post,env)] unless post.keys.size < 1)]}}
 
     Markup[Stat+'File'] = -> file, env {
       [({class: :file,
