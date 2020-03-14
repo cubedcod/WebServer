@@ -31,7 +31,7 @@ class WebResource
     end
 
     def allowCookies?
-      @cookies || AllowedHosts.has_key?(host) || CookieHosts.has_key?(host) || CookieHost.match?(host)
+      @cookies || AllowedHosts.has_key?(host) || CookieHosts.has_key?(host) || CookieHost.match?(host) || HostPOST.has_key?(host)
     end
 
     def allowCDN?

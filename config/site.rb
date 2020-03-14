@@ -120,12 +120,14 @@ class WebResource
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI?              # MIME preference
       r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination link
       r.fetch options}
+
     GET 'old.reddit.com', -> r {
+      # get old HTML representation to find next-page pointer, missing in HTTP Headers (old+new) and HTML+RSS (new)
       r.upstreamUI.env['HTTP_USER_AGENT'] = DesktopUA
       r.fetch.yield_self{|status,head,body|
         if !%w(r u user).member?(r.parts[0]) || status.to_s.match?(/^30/)
           [status, head, body]
-        else # find next-page pointer, missing in HTTP Headers (old/new UI) and HTML/RSS (new UI)
+        else
           refs = []
           body[0].scan(/href="([^"]+after=[^"]+)/){|l| refs << l[0] }
           if refs.empty?
@@ -135,6 +137,11 @@ class WebResource
             [302, {'Location' => ['https://www.reddit.com', page.path, '?', page.query].join}, []]
           end
         end}}
+
+    POST 'www.reddit.com', -> r {%w(/login/).member?((r.env['HTTP_REFERER'] || '').R.path) ? r.POSTthru : r.denyPOST}
+
+    %w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h| Allow h }
+    %w().map{|h| Allow h + '.reddit.com' }
 
     # Twitter
     Allow 'api.twitter.com'
