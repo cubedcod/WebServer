@@ -340,12 +340,10 @@ class WebResource
     end
 
     def GET
-      # populate site-data if missing
-      Populator[host][self] if Populator[host] && !join('/').R.node.exist?
-      # cache cookie
-      cookies
-      # dir parent-pointer
-      if query_values&.has_key? 'fullContent'
+      return [204,{},[]] if path.match? /gen(erate)?_?204$/                # connectivity-check response
+      Populator[host][self] if Populator[host] && !join('/').R.node.exist? # populate site-data if missing
+      cookies                                                              # cache cookies
+      if query_values&.has_key? 'fullContent'                              # point to container
         env[:links][:up] = '?'
       elsif path != '/'
         up = File.dirname path
@@ -353,25 +351,22 @@ class WebResource
         up += '?' + query if query
         env[:links][:up] = up
       end
-
-      if localNode?            ## local
-        if %w{y year m month d day h hour}.member? parts[0]
-          dateDir               # timeline redirect
-        elsif path == '/mail'   # inbox redirect
-          [302, {'Location' => '/d/*/msg*?sort=date&view=table'}, []]
-        else                    # local node
-          nodeResponse
-        end                    ## remote
-      elsif path.match? /gen(erate)?_?204$/ # connectivity check
-        [204, {}, []]
-      elsif handler = HostGET[host] # host handler
+      if localNode?
+        if %w{m d h}.member? parts[0]
+          dateDir                                                          # timeline redirect
+        elsif path == '/mail'
+          [302, {'Location' => '/d/*/msg*?sort=date&view=table'}, []]      # inbox redirect
+        else
+          nodeResponse                                                     # local node
+        end
+      elsif handler = HostGET[host]                                        # host handler
         handler[self]
-      elsif host.match? CDNhost # CDN handler
+      elsif host.match? CDNhost                                            # CDN content
         (AllowedHosts.has_key?(host) || (query_values||{})['allow'] == ServerKey || allowCDN?) ? fetch : deny
-      elsif gunk?               # blocked-content handler
+      elsif gunk?                                                          # blocked content
         deny
-      else
-        fetch                   # remote node
+      else                                                                 # remote node
+        fetch
       end
     end
 
@@ -387,7 +382,7 @@ class WebResource
     def gunkDomain?
       return false if !host || AllowedHosts.has_key?(host) || HostGET.has_key?(host)
       c = GunkHosts                                                 # start cursor
-      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # find leaf node on gunk tree
+      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # find leaf node in gunk tree
     end
 
     def HEAD
@@ -426,7 +421,7 @@ class WebResource
         head['Referer'] = 'https://www.youtube.com/'
       end
 
-      head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # we want redirection in HTTP HEAD-Location not Javascript
+      head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # we want redirection in HTTP HEAD, not Javascript
       head.delete 'User-Agent' if host == 't.co'            # so advertise a 'dumb' user-agent
 
       head
