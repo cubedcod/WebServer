@@ -602,7 +602,7 @@ class WebResource
       {_: :table, class: :links,
        c: links.group_by{|l|l.R.host}.map{|host, paths|
          {_: :tr,
-          c: [{_: :td, style: 'text-align: right', c: {_: :a, href: '//' + host, c: host, style: env[:colors][host] ||= HTML.colorize}},
+          c: [{_: :td, style: 'text-align: right', c: host ? {_: :a, href: '//' + host, c: host, style: env[:colors][host] ||= HTML.colorize} : []},
               {_: :td, c: paths.map{|path| Markup[Link][path,env]}}]}}}}
 
     Markup[Link] = -> ref, env=nil {

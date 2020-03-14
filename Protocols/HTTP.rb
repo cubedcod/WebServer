@@ -437,7 +437,7 @@ class WebResource
       else
         env[:deny] = true
         [204, {'Access-Control-Allow-Credentials' => 'true',
-               'Access-Control-Allow-Headers' => 'authorization, content-type, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-hostname, x-lib-version, x-locale, x-requested-with',
+               'Access-Control-Allow-Headers' => 'authorization, content-type, x-access-token, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-hostname, x-lib-version, x-locale, x-requested-with',
                'Access-Control-Allow-Origin' => allowedOrigin},
          []]
       end
