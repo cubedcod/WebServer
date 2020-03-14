@@ -138,10 +138,8 @@ class WebResource
           end
         end}}
 
-    POST 'www.reddit.com', -> r {%w(/login/).member?((r.env['HTTP_REFERER'] || '').R.path) ? r.POSTthru : r.denyPOST}
-
     %w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h| Allow h }
-    %w().map{|h| Allow h + '.reddit.com' }
+    %w(gateway gql oauth www).map{|h| Allow h + '.reddit.com' }
 
     # Twitter
     Allow 'api.twitter.com'
