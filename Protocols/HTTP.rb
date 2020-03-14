@@ -340,7 +340,11 @@ class WebResource
     end
 
     def GET
+      # populate site-data if missing
+      Populator[host][self] if Populator[host] && !join('/').R.node.exist?
+      # cache cookie
       cookies
+      # dir parent-pointer
       if query_values&.has_key? 'fullContent'
         env[:links][:up] = '?'
       elsif path != '/'
@@ -361,7 +365,6 @@ class WebResource
       elsif path.match? /gen(erate)?_?204$/ # connectivity check
         [204, {}, []]
       elsif handler = HostGET[host] # host handler
-        Populator[host][self] if Populator[host] && !join('/').R.node.exist?
         handler[self]
       elsif host.match? CDNhost # CDN handler
         (AllowedHosts.has_key?(host) || (query_values||{})['allow'] == ServerKey || allowCDN?) ? fetch : deny
