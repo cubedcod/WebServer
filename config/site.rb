@@ -102,7 +102,7 @@ class WebResource
       base = 'instagram/'
       FileUtils.mkdir base
       names = {}
-      `grep -E 'instagram.com/[[:alnum:]]+/? ' ../web.log`.each_line{|line|
+      `grep --text -E 'instagram.com/[[:alnum:]]+/? ' ../web.log`.each_line{|line|
         line.chomp.split(' ').map{|token|
           if token.match? /^https?:/
             name = token.split('/')[-1]
