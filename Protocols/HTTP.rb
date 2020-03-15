@@ -51,7 +51,7 @@ class WebResource
     def self.call env
       return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']           # allow HTTP methods
       uri = RDF::URI('https://' + env['HTTP_HOST']).join env['REQUEST_PATH']
-      uri.query = env['QUERY_STRING'].sub(/^&/,'') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty?
+      uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading and consecutive & from query
       resource = uri.R env                                                      # instantiate web resource
       env[:refhost] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # referring host
       env[:resp] = {}                                                           # response-header storage
@@ -343,9 +343,7 @@ class WebResource
       return [204,{},[]] if path.match? /gen(erate)?_?204$/                # connectivity-check response
       Populator[host][self] if Populator[host] && !join('/').R.node.exist? # populate site-data if missing
       cookies                                                              # cache cookies
-      if query_values&.has_key? 'fullContent'                              # point to container
-        env[:links][:up] = '?'
-      elsif path != '/'
+      unless path == '/'                                                   # point to containing node
         up = File.dirname path
         up += '/' unless up == '/'
         up += '?' + query if query
