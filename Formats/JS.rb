@@ -32,14 +32,15 @@ module Webize
       def each_triple &block; each_statement{|s| block.call *s.to_triple} end
 
       def each_statement &fn
-        scanContent{|s,p,o,g=nil|
-          fn.call RDF::Statement.new(s.class == String ? s.R : s,
-                                     p.class == String ? p.R : p,
+        scanContent{|s, p, o, graph=nil|
+          s = s.R
+          graph ||= ['https://', s.host, s.path].join.R
+          fn.call RDF::Statement.new(s, p.R,
                                      (o.class == WebResource || o.class == RDF::Node ||
                                       o.class == RDF::URI) ? o : (l = RDF::Literal o
                                                                   l.datatype = RDF.XMLLiteral if p == Content
                                                                   l),
-                                     :graph_name => g ? g.R : @base)}
+                                     :graph_name => graph )}
       end
 
       def JSONfeed
