@@ -302,14 +302,15 @@ class WebResource
 
   def FourChan doc
     doc.css('.post').map{|post|
-      subject = join post.css('.postNum a')[0]['href']
-                                         yield subject, Type,    Post.R
-      post.css(      '.name').map{|name| yield subject, Creator, name.inner_text }
-      post.css(  '.dateTime').map{|date| yield subject, Date,    Time.at(date['data-utc'].to_i).iso8601 }
-      post.css(   '.subject').map{|subj| yield subject, Title,   subj.inner_text }
-      post.css('.postMessage').map{|msg| yield subject, Content, msg }
-      post.css('.fileThumb').map{|thumb| yield subject, Image,   thumb['href'].R if thumb['href']}
-      post.remove}
+      subject = join path.R.join post.css('.postNum a')[0]['href']
+      graph = ['https://', subject.host, subject.path, '/', subject.fragment].join.R
+                                         yield subject, Type,    Post.R,          graph
+      post.css(      '.name').map{|name| yield subject, Creator, name.inner_text, graph }
+      post.css(  '.dateTime').map{|date| yield subject, Date,    Time.at(date['data-utc'].to_i).iso8601, graph }
+      post.css(   '.subject').map{|subj| yield subject, Title,   subj.inner_text, graph }
+      post.css('.postMessage').map{|msg| yield subject, Content, msg,             graph }
+      post.css('.fileThumb').map{|thumb| yield subject, Image,   thumb['href'].R, graph if thumb['href'] }
+      post.remove }
   end
 
   def FourPlebs doc

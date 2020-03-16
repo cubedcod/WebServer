@@ -79,6 +79,7 @@ class WebResource < RDF::URI
     (repository || env[:repository]).each_graph.map{|graph|
       doc = (graph.name || self).R
       turtle = doc.fsPath + '.ttl'
+      puts "graph #{graph} -> #{turtle}"
 
       unless File.exist? turtle # write document
         FileUtils.mkdir_p File.dirname turtle

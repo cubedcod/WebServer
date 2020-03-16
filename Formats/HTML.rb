@@ -132,14 +132,13 @@ module Webize
       def each_triple &block; each_statement{|s| block.call *s.to_triple} end
 
       def each_statement &fn
-        scanContent{|s,p,o|
-          fn.call RDF::Statement.new(s.class == String ? s.R : s,
-                                     p.class == String ? p.R : p,
+        scanContent{|s,p,o,g=nil|
+          fn.call RDF::Statement.new(s.R, p.R,
                                      (o.class == WebResource || o.class == RDF::Node ||
                                       o.class == RDF::URI) ? o : (l = RDF::Literal o
                                                                   l.datatype=RDF.XMLLiteral if p == Content
                                                                   l),
-                                     :graph_name => s.R)}
+                                     :graph_name => g ? g.R : @base)}
       end
 
       # HTML -> RDF
