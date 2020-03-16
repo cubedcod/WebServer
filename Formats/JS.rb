@@ -34,7 +34,7 @@ module Webize
       def each_statement &fn
         scanContent{|s, p, o, graph=nil|
           s = s.R
-          graph ||= ['https://', s.host, s.path].join.R
+          graph ||= ['https://', s.host || 'localhost', s.path].join.R
           fn.call RDF::Statement.new(s, p.R,
                                      (o.class == WebResource || o.class == RDF::Node ||
                                       o.class == RDF::URI) ? o : (l = RDF::Literal o

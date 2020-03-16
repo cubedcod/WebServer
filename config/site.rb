@@ -94,52 +94,31 @@ class WebResource
         r.deny
       end}
 
-    # Instagram
-    Cookies 'www.instagram.com'
-    GET 'instagram.com', -> r {[301, {'Location' => 'https://www.instagram.com' + r.path}, []]}
-    GET 'www.instagram.com', RootIndex
-    Populate 'www.instagram.com', -> r {
-      base = 'instagram/'
-      FileUtils.mkdir base
-      names = {}
-      `grep --text -E 'instagram.com/[[:alnum:]]+/? ' ../web.log`.each_line{|line|
-        line.chomp.split(' ').map{|token|
-          if token.match? /^https?:/
-            name = token.split('/')[-1]
-            unless names[name]
-              names[name] = true
-              FileUtils.mkdir base + name
-            end
-          end}}}
-
+    # Mozilla
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # Reddit
-    GET 'www.reddit.com', -> r { parts = r.parts
-      r.chrono_sort if parts[-1] == 'new' || parts.size == 5                    # chrono sort
-      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI?              # MIME preference
-      r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination link
-      r.fetch options}
-
-    GET 'old.reddit.com', -> r {
-      # get old HTML representation to find next-page pointer, missing in HTTP Headers (old+new) and HTML+RSS (new)
-      r.upstreamUI.env['HTTP_USER_AGENT'] = DesktopUA
+    %w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h| Allow h }
+    %w(gateway gql oauth www).map{|h| Allow h + '.reddit.com' }
+    GET 'old.reddit.com', -> r {# use old HTML representation to find next-page pointer, missing in HTTP Headers (old+new) and HTML+RSS (new)
       r.fetch.yield_self{|status,head,body|
-        if !%w(r u user).member?(r.parts[0]) || status.to_s.match?(/^30/)
+        if status.to_s.match? /^30/
           [status, head, body]
         else
           refs = []
           body[0].scan(/href="([^"]+after=[^"]+)/){|l| refs << l[0] }
           if refs.empty?
-            [301, {'Location' => ['https://www.reddit.com', r.path, '?', r.query].join}, []]
+            [302, {'Location' => ['https://www.reddit.com', r.path, '?', r.query].join}, []]
           else
             page = refs[-1].R
             [302, {'Location' => ['https://www.reddit.com', page.path, '?', page.query].join}, []]
           end
         end}}
-
-    %w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h| Allow h }
-    %w(gateway gql oauth www).map{|h| Allow h + '.reddit.com' }
+    GET 'www.reddit.com', -> r {
+      r.chrono_sort if r.parts[-1] == 'new' || r.parts.size == 5                # chrono sort
+      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI?              # MIME preference
+      r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination link
+      r.fetch options}
 
     # Twitter
     Allow 'api.twitter.com'
@@ -201,7 +180,6 @@ class WebResource
 
     # YouTube
     GET 'youtube.com', -> r {[301, {'Location' => ['https://www.youtube.com', r.path, '?', r.query].join}, []]}
-    GET 'img.youtube.com'
     GET 'www.youtube.com', -> r {
       path = r.parts[0]
       if %w{attribution_link redirect}.member? path
@@ -213,7 +191,6 @@ class WebResource
       else
         r.deny
       end}
-
     POST 'www.youtube.com', -> r {
       if r.parts.member? 'stats'
         r.denyPOST
