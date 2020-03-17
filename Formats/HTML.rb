@@ -3,37 +3,37 @@ module Webize
   module HTML
     include WebResource::URIs
 
-    # clean HTML (string) document
+    # clean HTML (string)
     def self.clean body
-      doc = Nokogiri::HTML.parse body # parse HTML
-      if content_type = doc.css('meta[http-equiv="Content-Type"]')[0]
+      doc = Nokogiri::HTML.parse body # parse to Nokogiri doc
+      if content_type = doc.css('meta[http-equiv="Content-Type"]')[0] # in-band content-type tag found
         if content = content_type['content']
           if charset_tag = content.split(';')[1]
             if charset = charset_tag.split('=')[1]
-              # in-band charset tag found
               unless charset.match? /utf.?8/i
-                puts "charset specified in <head> :: #{charset}"
-                # parse with explicit charset
-                doc = Nokogiri::HTML.parse body.force_encoding(charset).encode('UTF-8')
+                doc = Nokogiri::HTML.parse body.force_encoding(charset).encode('UTF-8') # re-read with specified charset
               end
             end
           end
         end
       end
-      clean_doc doc
+      clean_doc doc # clean nokogiri
       doc.to_html
     end
 
-    # clean HTML (nokogiri/nokogumbo) document
+    # clean HTML (nokogiri instance)
     def self.clean_doc doc
+      # strip fonts and preload-directives
       doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
+
+      # inspect resources
       doc.css("iframe, img, [type='image'], link, script").map{|s|
-        text = s.inner_text     # inline resource
+        text = s.inner_text     # inline
         if !ENV.has_key?('JS') && s['type'] != 'application/ld+json' && !text.match?(InitialState) && text.match?(GunkExec)
           puts "🚩 " + s.to_s.size.to_s + ' ' + text.match(GunkExec)[2][0..192]
           s.remove
         end
-        %w(href src).map{|attr| # resource references
+        %w(href src).map{|attr| # reference
           if s[attr]
             src = s[attr].R
             if src.uri.match?(Gunk) || (src.gunkDomain? && !src.allowCDN?)

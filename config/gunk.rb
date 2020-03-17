@@ -25,7 +25,7 @@ s?s(a(fe[-_]?browsing|ilthru)|cheduler|erv(edby|ice[-_]?worker)|i(ftscience|gnal
 t(aboola.*|(arget|rack)(ers?|ing).*|ampering|ealium|elemetry|inypass|ra?c?k?ing(data)?|ricorder|rustx|ype(face|kit))|autotrack|
 u(psell|rchin|s(abilla|er[-_]?(context|location))|tm)|
 viral|
-wp-?(ad.*|rum)|
+webtrends|wp-?(ad.*|rum)|
 xiti|_0x.*|
 zerg(net)?)
 ([-._\/'"\s:?&=~%]|$)|
@@ -34,7 +34,7 @@ zerg(net)?)
     # script pattern
     GunkExec = %r(_0x[0-9a-f]|(\b|[_'"])(
 3gl|6sc|
-ad(nxs)?|.*analytic.*|auction|
+ad(dtoany|nxs)?|.*analytic.*|auction|
 bid(d(er|ing)|s)?|bing|bouncee?x.*|
 chartbeat|clickability|cloudfront|COMSCORE|consent|crazyegg|c(rss)?pxl?|crwdcntrl|
 doubleclick|d[fm]p|driftt|
