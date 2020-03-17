@@ -50,7 +50,7 @@ viglink|visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk
 )(\b|[_'"]))xi
 
     # script pattern with JSON state data
-    InitialState = /(bootstrap|global|init(ial)?|preload(ed)?|shared).?(content|data|state)|SCRIPTS_LOADED/i
+    InitialState = /(bootstrap|client|global|init(ial)?|preload(ed)?|shared).?(content|data|env|state)|SCRIPTS_LOADED/i
   end
 end
 module Webize

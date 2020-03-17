@@ -346,7 +346,9 @@ class WebResource
   end
 
   def GitterJSON tree, &b
-    tree['items'].map{|item|
+    return if tree.class == Array
+    return unless items = tree['items']
+    items.map{|item|
       id = item['id']
       date = item['sent']
       uid = item['fromUser']
