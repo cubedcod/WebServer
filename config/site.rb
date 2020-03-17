@@ -8,7 +8,7 @@ module Webize
         'boards.4chan.org' => :FourChan,
         'boards.4channel.org' => :FourChan,
         'github.com' => :GitHub,
-        'gitter.im' => :Gitter,
+        'gitter.im' => :GitterHTML,
         'news.ycombinator.com' => :HackerNews,
         'universalhub.com' => :UHub,
         'www.apnews.com' => :AP,
@@ -22,6 +22,7 @@ module Webize
   module JSON
     Triplr = {
       'api.twitter.com' => :TwitterJSON,
+      'gitter.im' => :GitterJSON,
       'www.instagram.com' => :InstagramJSON,
     }
   end
@@ -323,7 +324,7 @@ class WebResource
     }
   end
 
-  def Gitter doc
+  def GitterHTML doc
     position = 0
     doc.css('.chat-item').map{|msg|
       id = msg.classes.grep(/^model-id/)[0].split('-')[-1] # find ID
@@ -342,6 +343,23 @@ class WebResource
       yield subject, Date, '%03d' % position += 1
       msg.remove }
     doc.css('header').map &:remove
+  end
+
+  def GitterJSON tree, &b
+    tree['items'].map{|item|
+      id = item['id']
+      date = item['sent']
+      uid = item['fromUser']
+      user = tree['lookups']['users'][uid]
+      graph = [date.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), 'gitter', user['username'], id].join('.').R # graph URI
+      subject = 'https://gitter.im' + path + '?at=' + id # subject URI
+      yield subject, Date, date, graph
+      yield subject, Type, Post.R, graph
+      yield subject, Creator, join(user['url']), graph
+      yield subject, Creator, user['displayName'], graph
+      yield subject, Image, user['avatarUrl'], graph
+      yield subject, Content, item['html'], graph
+    }
   end
 
   def GoogleHTML doc

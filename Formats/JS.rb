@@ -40,7 +40,7 @@ module Webize
                                       o.class == RDF::URI) ? o : (l = RDF::Literal o
                                                                   l.datatype = RDF.XMLLiteral if p == Content
                                                                   l),
-                                     :graph_name => graph )}
+                                     graph_name: graph )}
       end
 
       def JSONfeed
