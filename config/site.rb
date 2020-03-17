@@ -101,19 +101,15 @@ class WebResource
     # Reddit
     %w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h| Allow h }
     %w(gateway gql oauth www).map{|h| Allow h + '.reddit.com' }
-    GET 'old.reddit.com', -> r {# use old HTML representation to find next-page pointer, missing in HTTP Headers (old+new) and HTML+RSS (new)
+    GET 'old.reddit.com', -> r {
       r.fetch.yield_self{|status,head,body|
         if status.to_s.match? /^30/
           [status, head, body]
-        else
-          refs = []
-          body[0].scan(/href="([^"]+after=[^"]+)/){|l| refs << l[0] }
-          if refs.empty?
-            [302, {'Location' => ['https://www.reddit.com', r.path, '?', r.query].join}, []]
-          else
-            page = refs[-1].R
-            [302, {'Location' => ['https://www.reddit.com', page.path, '?', page.query].join}, []]
-          end
+        else # HTML representation used for next-page pointer, missing in HTTP Headers (old & new) and HTML & RSS (new)
+          links = []
+          body[0].scan(/href="([^"]+after=[^"]+)/){|link| links << CGI.unescapeHTML(link[0]).R }
+          link = links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]
+          [302, {'Location' => ['https://www.reddit.com', link.path, '?', link.query].join}, []]
         end}}
     GET 'www.reddit.com', -> r {
       r.chrono_sort if r.parts[-1] == 'new' || r.parts.size == 5                # chrono sort
