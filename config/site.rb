@@ -332,7 +332,7 @@ class WebResource
       if username = msg.css('.chat-item__username')[0]
         yield subject, Creator, ('https://github.com/' + username.inner_text.sub(/^@/,'')).R
       end
-      yield subject, Content, msg.css('.chat-item__text')[0].inner_html
+      yield subject, Content, (Webize::HTML.format msg.css('.chat-item__text')[0].inner_html, self)
       if image = msg.css('.avatar__image')[0]
         yield subject, Image, image['src'].R
       end
@@ -356,7 +356,7 @@ class WebResource
       yield subject, Creator, join(user['url']), graph
       yield subject, Creator, user['displayName'], graph
       yield subject, Image, user['avatarUrl'], graph
-      yield subject, Content, item['html'], graph
+      yield subject, Content, (Webize::HTML.format item['html'], self), graph
     }
   end
 
