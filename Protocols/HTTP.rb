@@ -380,7 +380,7 @@ class WebResource
     def gunkDomain?
       return false if !host || AllowedHosts.has_key?(host) || HostGET.has_key?(host)
       c = GunkHosts                                                 # start cursor
-      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # find leaf node in gunk tree
+      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # find leaf in gunk tree
     end
 
     def HEAD
@@ -404,7 +404,7 @@ class WebResource
         }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
         head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless SingleHop.member?(key.downcase)} # output value
 
-      head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head.has_key?('Accept') && head['Accept'].match?(/text\/turtle/)) || (query_values||{}).has_key?('html') # accept Turtle
+      head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head.has_key?('Accept') && head['Accept'].match?(/text\/turtle/)) || (query_values||{}).has_key?('UX') # add Turtle to accepted content-types
 
       unless allowCookies?
         head.delete 'Cookie'

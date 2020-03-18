@@ -316,6 +316,7 @@ class WebResource
       'name' => Title,
       'news_keywords' => Abstract,
       'next' => LDP+'next',
+      'nofollow' => Link,
       'note' => Content,
       'og:article:published_time' => Date,
       'og:article:author' => Creator,
