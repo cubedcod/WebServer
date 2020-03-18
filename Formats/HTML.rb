@@ -369,7 +369,6 @@ class WebResource
                         {_: :body,
                          c: [{class: :toolbox,
                               c: [(icon.node.exist? && icon.node.size != 0) ? {_: :a, href: '/', id: :host, c: {_: :img, src: icon.uri}} : (host || 'localhost').split('.').-(%w(com net org www)).reverse.map{|h| {_: :a, class: :breadcrumb, href: '/', c: h}},
-                                  {_: :a, id: :UX, class: :icon, style: 'color: #555', c: '⚗️', href: HTTP.qs(qs.merge({'UX' => 'upstream'}))},
                                  ({_: :a, id: :tabular, class: :icon, style: 'color: #555', c: '↨',
                                     href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless qs['view'] == 'table'),
                                  parts.map{|p|

@@ -35,7 +35,7 @@ class WebResource
     CookieHost = /(^|\.)(akamai(hd)?|bandcamp|ttvnw|twitter)\.(com|net)$/
     GunkHosts = {}
     POSThost = /^video.*.ttvnw.net$/
-    UIhosts = %w(players.brightcove.net www.redditmedia.com)
+    UIhosts = %w(players.brightcove.net timbl.com www.redditmedia.com)
     StaticFormats = CacheFormats - %w(json html xml)
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
     SiteDir.join('gunk_hosts').each_line{|l|

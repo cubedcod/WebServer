@@ -404,7 +404,7 @@ class WebResource
         }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
         head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless SingleHop.member?(key.downcase)} # output value
 
-      head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head.has_key?('Accept') && head['Accept'].match?(/text\/turtle/)) || (query_values||{}).has_key?('UX') # add Turtle to accepted content-types
+      head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) || upstreamUI? # add Turtle to accepted content-types
 
       unless allowCookies?
         head.delete 'Cookie'
@@ -542,11 +542,9 @@ class WebResource
     def upstreamUI; env[:UX] = true; self end
 
     def upstreamUI?
-      env.has_key?(:UX) ||                          # request environment
-        ENV.has_key?('UX') ||                       # process environment
-        parts.member?('embed') ||                   # embed URL
-        UIhosts.member?(host) ||                    # UI host
-        query_values&.has_key?('UX')                # request argument
+      env.has_key?(:UX) || ENV.has_key?('UX') || # request environment
+        parts.member?('embed') ||                # embed URL
+        UIhosts.member?(host)                    # UI host
     end
 
   end
