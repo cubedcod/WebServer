@@ -177,7 +177,7 @@ module Webize
           if src = frame.attr('src')
             yield subject, Link, src.R
           end}
-        n.css('head link[rel]').map{|m|
+        n.css('[rel][href]').map{|m|
           if k = m.attr("rel") # predicate
             if v = m.attr("href") # object
               @base.env[:links][:prev] ||= v if k=='prev'

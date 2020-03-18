@@ -115,6 +115,7 @@ class WebResource
       'biography' => Abstract,
       'blurhash' => :drop,
       'body' => Content,
+      'bookmark' => Link,
       'bot' => :drop,
       'brightspot.cached' => :drop,
       'brightspot.contentId' => :drop,
