@@ -174,7 +174,7 @@ class WebResource
         env['HTTP_COOKIE'] = jar unless env['HTTP_COOKIE'] == jar
       elsif env.has_key?('HTTP_COOKIE') && allowCookies?
         data = env['HTTP_COOKIE']
-        return if host == 'twitter.com' && !data.match?(/ct0/)
+        return if host.match?(/twitter.com$/) && !data.match?(/ct0/)
         cookie.writeFile data # put cookie in jar
         puts ['🍪 ', "\e[38;5;130m", host, "\e[0m", data].join  ' '
       end

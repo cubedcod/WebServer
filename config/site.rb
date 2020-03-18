@@ -127,7 +127,7 @@ class WebResource
         r.TwitterAuth
       end
       r.fetch}
-    GET 'twitter.com', -> r {
+    Twitter = -> r {
       r.chrono_sort.TwitterAuth
       # feed
       (if r.path == '/'
@@ -166,6 +166,9 @@ class WebResource
         else
           [s,h,b]
         end}}
+
+    GET 'twitter.com', Twitter
+    GET 'mobile.twitter.com', Twitter
 
     GET 's.yimg.com', -> r {
       parts = r.path.split /https?:\/+/
