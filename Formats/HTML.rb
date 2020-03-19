@@ -178,14 +178,15 @@ module Webize
             yield subject, Link, src.R
           end}
         n.css('[rel][href]').map{|m|
-          if k = m.attr("rel") # predicate
+          if rel = m.attr("rel") # predicate
             if v = m.attr("href") # object
-              @base.env[:links][:prev] ||= v if k=='prev'
-              @base.env[:links][:next] ||= v if k=='next'
-              @base.env[:links][:feed] ||= v if k=='alternate' && v.R.path&.match?(/^\/feed\/?$/)
-              k = MetaMap[k] || k
-              puts [k, v].join "\t" unless k.to_s.match? /^(drop|http)/
-              yield subject, k, v.R unless k == :drop
+              rel.split(' ').map{|k|
+                @base.env[:links][:prev] ||= v if k == 'prev'
+                @base.env[:links][:next] ||= v if k == 'next'
+                @base.env[:links][:feed] ||= v if k == 'alternate' && v.R.path&.match?(/^\/feed\/?$/)
+                k = MetaMap[k] || k
+                puts [k, v].join "\t" unless k.to_s.match? /^(drop|http)/
+                yield subject, k, v.R unless k == :drop]
             end
           end}
 

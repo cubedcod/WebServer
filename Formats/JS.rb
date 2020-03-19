@@ -87,7 +87,7 @@ module Webize
           @base.send hostTriples, @json, &f
         else # generic triplr
           Webize::HTML.webizeValue(@json){|h|
-            if s = h['uri'] || h['url'] || (h['id'] && ('#'+h['id']))
+            if s = h['uri'] || h['url'] || (h['id'] && ('#' + h['id'].to_s))
               s = s.R
               yield s, Type, Post.R if h.has_key? 'content'
               if s.parts[0] == 'users'
