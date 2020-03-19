@@ -254,7 +254,7 @@ class WebResource
       location = ['//', host, (port ? [':', port] : nil), path, options[:suffix], (query ? ['?', query] : nil)].join
       ('https:' + location).R(env).fetchHTTP options                                                       # cache miss, HTTPS fetch
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
-      ('http:' + location).R(env).fetchHTTP options                                                        # fallback HTTP fetch
+      ('http:' + location).R(env).fetchHTTP options rescue nodeResponse                                    # fallback to HTTP, then offline
     end
 
     def fetchHTTP options = {}; env[:fetch] = true

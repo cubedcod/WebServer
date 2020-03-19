@@ -384,6 +384,7 @@ class WebResource
       'preview_url' => Link,
       'profile' => :drop,
       'profile:username' => Creator,
+      'propeller' => :drop,
       'provider_name' => To,
       'provider_url' => To,
       'pubdate' => Date,

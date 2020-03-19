@@ -11,8 +11,8 @@ class WebResource
       else           # host dir
         hostPath
        end) +       ## path
-        (if !path    # no path
-         []
+        (if !path || path =='/'               # root path
+         %w(index)
         elsif localNode? && parts[0] == 'msg' # message-ID URL
           id = Digest::SHA2.hexdigest Rack::Utils.unescape_path parts[1]
           ['mail', id[0..1], id[2..-1]]       # mail storage-path
