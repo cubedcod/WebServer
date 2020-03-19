@@ -147,10 +147,8 @@ module Webize
         n = Nokogiri::HTML.parse @doc # parse
 
         if base = n.css('head base')[0]
-          new_base = base['href']
-          if new_base && new_base != @base.to_s
-            puts "NOTICE base URI redefined in HTML #{@base} -> #{new_base}"
-            @base = new_base.R @base.env
+          if baseHref = base['href']
+            @base = @base.join(baseHref).R @base.env
           end
         end
 
@@ -186,7 +184,7 @@ module Webize
                 @base.env[:links][:feed] ||= v if k == 'alternate' && v.R.path&.match?(/^\/feed\/?$/)
                 k = MetaMap[k] || k
                 puts [k, v].join "\t" unless k.to_s.match? /^(drop|http)/
-                yield subject, k, v.R unless k == :drop]
+                yield subject, k, v.R unless k == :drop}
             end
           end}
 
