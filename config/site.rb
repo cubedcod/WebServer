@@ -99,8 +99,8 @@ class WebResource
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # Reddit
-    %w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h| Allow h }
-    %w(gateway gql oauth www).map{|h| Allow h + '.reddit.com' }
+    #%w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h| Allow h }
+    #%w(gateway gql oauth www).map{|h| Allow h + '.reddit.com' }
     GET 'old.reddit.com', -> r {
       r.fetch.yield_self{|status,head,body|
         if status.to_s.match? /^30/
@@ -111,10 +111,9 @@ class WebResource
           link = links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]
           [302, {'Location' => ['https://www.reddit.com', link.path, '?', link.query].join}, []]
         end}}
-    GET 'www.reddit.com', -> r {
-      r.chrono_sort if r.parts[-1] == 'new' || r.parts.size == 5                # chrono sort
-      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI?              # MIME preference
-      r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination link
+    GET 'www.reddit.com', -> r {    r.chrono_sort                  # chronological sorting
+      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? # MIME preference
+      r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination
       r.fetch options}
 
     # Twitter
