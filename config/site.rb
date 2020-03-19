@@ -118,8 +118,7 @@ class WebResource
 
     # Twitter
     Allow 'api.twitter.com'
-    Populate 'twitter.com', -> r { FileUtils.mkdir 'twitter'
-      `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|n| FileUtils.touch 'twitter/.' + n}}
+    FollowTwits = -> r {FileUtils.mkdir 'twitter'; `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|n| FileUtils.touch 'twitter/.' + n}}
     GET 'api.twitter.com', -> r {
       if r.env.keys.grep(/token/i).empty?
         r.env['HTTP_COOKIE'] = 'twitter/.cookie'.R.readFile

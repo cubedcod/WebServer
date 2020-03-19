@@ -10,7 +10,6 @@ class WebResource
     HostGET = {}
     HostPOST = {}
     Methods = %w(GET HEAD OPTIONS POST PUT)
-    Populator = {}
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
     SingleHop = %w(connection fetch gunk host keep-alive links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software site-chrome summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for)
@@ -341,7 +340,6 @@ class WebResource
 
     def GET
       return [204,{},[]] if path.match? /gen(erate)?_?204$/                # connectivity-check response
-      Populator[host][self] if Populator[host] && !join('/').R.node.exist? # populate site-data if missing
       cookies                                                              # cache cookies
       unless path == '/'                                                   # point to containing node
         up = File.dirname path
@@ -442,10 +440,6 @@ class WebResource
     def OPTIONSthru
       r = HTTParty.options uri, headers: headers, body: env['rack.input'].read
       [r.code, (headers r.headers), [r.body]]
-    end
-
-    def self.Populate host, lambda
-      Populator[host] = lambda
     end
 
     def self.POST host, lambda
