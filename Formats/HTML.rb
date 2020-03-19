@@ -5,7 +5,7 @@ module Webize
 
     # clean HTML (string)
     def self.clean body
-      doc = Nokogiri::HTML.parse body # parse to Nokogiri doc
+      doc = Nokogiri::HTML.parse body.encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ') # parse to Nokogiri doc
       if content_type = doc.css('meta[http-equiv="Content-Type"]')[0] # in-band content-type tag found
         if content = content_type['content']
           if charset_tag = content.split(';')[1]
