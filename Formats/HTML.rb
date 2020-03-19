@@ -146,35 +146,34 @@ module Webize
         subject = @base         # subject URI
         n = Nokogiri::HTML.parse @doc # parse
 
+        # base URI
         if base = n.css('head base')[0]
           if baseHref = base['href']
             @base = @base.join(baseHref).R @base.env
           end
         end
 
-        # host bindings
-        if hostTriplr = Triplr[@base.host]
-          @base.send hostTriplr, n, &f
-        end
+        # bespoke triplr
+        @base.send Triplr[@base.host], n, &f if Triplr[@base.host]
 
-        # embedded RDF in RDFa and JSON-LD
+        # RDFa + JSON-LD
         unless @opts[:noRDFa]
           embeds = RDF::Graph.new
           n.css('script[type="application/ld+json"]').map{|dataElement|
-            embeds << (::JSON::LD::API.toRdf ::JSON.parse dataElement.inner_text)} rescue "JSON-LD read failure in #{@base}" # JSON-LD triples
-          RDF::Reader.for(:rdfa).new(@doc, base_uri: @base){|_| embeds << _ } rescue "RDFa read failure in #{@base}"         # RDFa triples
-
+            embeds << (::JSON::LD::API.toRdf ::JSON.parse dataElement.inner_text)} rescue "JSON-LD read failure in #{@base}" # find JSON-LD triples
+          RDF::Reader.for(:rdfa).new(@doc, base_uri: @base){|_| embeds << _ } rescue "RDFa read failure in #{@base}"         # find RDFa triples
           embeds.each_triple{|s,p,o|
             p = MetaMap[p.to_s] || p # map predicates
             puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/ # show unresolved property-names
-            yield s, p, o unless p == :drop} # add mapped-triple to graph
+            yield s, p, o unless p == :drop} # emit triple
         end
 
-        # <link>
+        # embeds and links
         n.css('frame, iframe').map{|frame|
           if src = frame.attr('src')
             yield subject, Link, src.R
           end}
+
         n.css('[rel][href]').map{|m|
           if rel = m.attr("rel") # predicate
             if v = m.attr("href") # object
@@ -188,7 +187,13 @@ module Webize
             end
           end}
 
-        # <meta>
+        if nextPage = n.css('#nextPage')[0]
+          if ref = nextPage.attr("href")
+            @base.env[:links][:next] ||= ref
+          end
+        end
+
+        # meta tags
         n.css('head meta').map{|m|
           if k = (m.attr("name") || m.attr("property")) # predicate
             if v = m.attr("content")                    # object

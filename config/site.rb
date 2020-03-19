@@ -54,12 +54,26 @@ class WebResource
     MobileUA = 'Mozilla/5.0 (Linux; Android 9; SM-G960F Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.157 Mobile Safari/537.36'
 
     # URL shorteners / redirectors
-    %w(bit.ly bos.gl w.bos.gl
- cbsn.ws dlvr.it econ.trib.al
- feedproxy.google.com feeds.feedburner.com feeds.reuters.com
- hubs.ly
- reut.rs rss.cnn.com rssfeeds.usatoday.com
- t.co ti.me tinyurl.com trib.al wired.trib.al).map{|short|
+    %w(
+bit.ly
+bos.gl
+cbsn.ws
+dlvr.it
+econ.trib.al
+feedproxy.google.com
+feeds.feedburner.com
+feeds.reuters.com
+hubs.ly
+reut.rs
+rss.cnn.com
+rssfeeds.usatoday.com
+t.co
+ti.me
+tinyurl.com
+trib.al
+w.bos.gl
+wired.trib.al
+).map{|short|
       GET short, -> r {
         if !r.query                         # request
           NoGunk[r].yield_self{|s,h,b|      #  inspect response
@@ -69,6 +83,7 @@ class WebResource
         else                                # request has query
           [302, {'Location' => r.path}, []] #  redirect to path
         end}}
+
     %w(l.facebook.com lm.facebook.com l.instagram.com).map{|host| GET host, -> r {[301, {'Location' =>  r.query_values['u']}, []]}}
     GET 'gate.sc', GotoURL
 
