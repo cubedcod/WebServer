@@ -34,7 +34,7 @@ zerg(net)?)
     # script pattern
     GunkExec = %r(_0x[0-9a-f]|(\b|[_'"])(
 3gl|6sc|
-ad(dtoany|nxs)?|.*analytic.*|auction|
+ad(dtoany|nxs)?|.*analytic.*|apptentive.*|auction|
 bid(d(er|ing)|s)?|bing|bouncee?x.*|
 chartbeat|clickability|cloudfront|COMSCORE|consent|crazyegg|c(rss)?pxl?|crwdcntrl|
 doubleclick|d[fm]p|driftt|

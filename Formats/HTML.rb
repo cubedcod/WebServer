@@ -29,7 +29,7 @@ module Webize
       # inspect resources
       doc.css("iframe, img, [type='image'], link, script").map{|s|
         text = s.inner_text     # inline
-        if !ENV.has_key?('JS') && s['type'] != 'application/ld+json' && !text.match?(InitialState) && text.match?(GunkExec)
+        if !ENV.has_key?('JS') && s['type'] != 'application/json' && s['type'] != 'application/ld+json' && !text.match?(InitialState) && text.match?(GunkExec)
           puts "🚩 " + s.to_s.size.to_s + ' ' + text.match(GunkExec)[2][0..192]
           s.remove
         end
