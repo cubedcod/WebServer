@@ -456,9 +456,7 @@ wired.trib.al
   def QRZ doc, &b
     doc.css('script').map{|script|
       script.inner_text.scan(%r(biodata'\).html\(\s*Base64.decode\("([^"]+))xi){|data|
-        yield self, Content, Base64.decode64(data[0]).encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ')
-      }
-    }
+        yield self, Content, Base64.decode64(data[0]).encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ')}}
   end
 
   def TwitterAuth

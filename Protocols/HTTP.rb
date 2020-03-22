@@ -536,11 +536,11 @@ class WebResource
     def upstreamUI; env[:UX] = true; self end
 
     def upstreamUI?
-      env.has_key?(:UX) || ENV.has_key?('UX') || # request environment
-        parts.member?('embed') ||                # embed URL
-        UIhosts.member?(host)                    # UI host
+      env.has_key?(:UX) || ENV.has_key?('UX') ||      # request or process environment-flag
+      parts.member?('embed') ||                       # embed URL
+      UIhosts.member?(host) ||                        # upstream-UI host
+      (env['HTTP_USER_AGENT']||'').match?(/Epiphany/) # upstream-UI agent
     end
-
   end
   include HTTP
 end
