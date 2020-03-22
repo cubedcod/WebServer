@@ -97,7 +97,8 @@ wired.trib.al
     Allow 'tkx.apis.anvato.net'
     Allow 'www.youtube.com'
     GET 'ssl.p.jwpcdn.com'
-    %w(edge.api.brightcove.com players.brightcove.net secure.brightcove.com).map{|h| Allow h}
+    %w(edge.api.brightcove.com players.brightcove.net secure.brightcove.com
+).map{|h| Allow h}
 
     # Google
     GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
@@ -207,45 +208,12 @@ wired.trib.al
 
   end
 
-  def AP doc
+  def AP doc, &f
     doc.css('script').map{|script|
       script.inner_text.scan(/window\['[-a-z]+'\] = ([^\n]+)/){|data|
         data = data[0]
         data = data[0..-2] if data[-1] == ';'
-        Webize::HTML.webizeHash(::JSON.parse data){|hash|
-          # resource identifier
-          id = '#ap_' + Digest::SHA2.hexdigest(rand.to_s)
-
-          # image-post resources
-          if base = (hash.delete 'gcsBaseUrl')
-            hash['type'] = Post.R
-            if fmt = (hash.delete 'imageFileExtension')
-              if sizes = (hash.delete 'imageRenderedSizes')
-                sizes.map{|size|
-                  yield id, Image.R, (base + size.to_s + fmt).R}
-              end
-            end
-          end
-
-          # massage data
-          %w(contentType embedRatio ignoreClickOnElements order socialEmbeds shortId sponsored videoRenderedSizes).map{|p| hash.delete p}
-          hash.map{|p, o|
-            p = MetaMap[p] || p
-            o = Webize::HTML.format o, self if p == Content && o.class == String
-            o = Post.R if p == Type && o == 'article'
-
-            # emit triples
-            unless p == :drop
-              case o.class.to_s
-              when 'Array'
-                o.flatten.map{|o|
-                  yield id, p, o unless o.class == Hash}
-              when 'Hash'
-              else
-                yield id, p, o
-              end
-            end
-          }}}}
+        Webize::JSON::Reader.new(data).scanContent &f}}
   end
 
   def CityData doc
