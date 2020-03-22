@@ -273,17 +273,16 @@ class WebResource
                    end                                        #  name extension
           static = !options[:reformat] && fixedFormat?(format)# rewritable?
           body = Webize::HTML.clean body if format == 'text/html' && !AllowedHosts.has_key?(host) # tidy HTML
-          formatExt = Suffixes[format] || Suffixes_Rack[format] || (puts "ENOSUFFIX #{format} #{uri}";'') # find name-extension
+          formatExt = Suffixes[format] || Suffixes_Rack[format] || '' # format suffix
           storage = fsPath                                    # storage location
-          storage += formatExt unless extension == formatExt  # add name-extension if incorrect or missing
+          storage += formatExt unless extension == formatExt  # add suffix if incorrect or missing
           storage.R.writeFile body                            # cache static representation
-          reader = RDF::Reader.for content_type: format       # find reader
-          reader.new(body, base_uri: self){|_|                # read graph-data
-            (env[:repository] ||= RDF::Repository.new) << _ } if reader && !%w(.css .gif .ico .jpg .js .png .svg .webm).member?(formatExt)
-          return self if options[:intermediate]               # intermediate fetch, no immediate HTTP response
-          reader ? saveRDF : (puts "ENORDF #{format} #{uri}") # cache RDF graph(s)
+          reader = RDF::Reader.for content_type: format       # read graph-data
+          reader.new(body, base_uri: self){|_|(env[:repository] ||= RDF::Repository.new) << _ } if reader && !NoScan.member?(formatExt)
+          return self if options[:intermediate]               # intermediate fetch, no HTTP response
+          saveRDF if reader                                   # cache graph-data
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
-            env[:resp][k] ||= h[k.downcase] if h[k.downcase]} # raed upstream metadata
+            env[:resp][k] ||= h[k.downcase] if h[k.downcase]} # read upstream metadata
           if links = h['link']                                # read Link metadata
             links.split(',').map{|link|
               ref, type = link.split(';').map &:strip

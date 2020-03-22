@@ -35,6 +35,7 @@ class WebResource
     CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|googleapis|netdna.*)\.(com|io|net)$/
     CookieHost = /(^|\.)(akamai(hd)?|bandcamp|ttvnw|twitter)\.(com|net)$/
     GunkHosts = {}
+    NoScan = %w(.css .gif .ico .jpg .js .png .svg .webm)
     POSThost = /^video.*.ttvnw.net$/
     UIhosts = %w(players.brightcove.net timbl.com www.redditmedia.com)
     StaticFormats = CacheFormats - %w(json html xml)
