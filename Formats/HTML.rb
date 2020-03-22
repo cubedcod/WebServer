@@ -27,20 +27,22 @@ module Webize
       doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
 
       # inspect resources
+      log = []
       doc.css("iframe, img, [type='image'], link, script").map{|s|
         text = s.inner_text     # inline
         if !ENV.has_key?('JS') && s['type'] != 'application/json' && s['type'] != 'application/ld+json' && !text.match?(InitialState) && text.match?(GunkExec)
-          puts "🚩 " + s.to_s.size.to_s + ' ' + text.match(GunkExec)[2][0..192]
+          log << "🚩 " + s.to_s.size.to_s + ' ' + text.match(GunkExec)[2][0..42]
           s.remove
         end
         %w(href src).map{|attr| # reference
           if s[attr]
             src = s[attr].R
             if src.uri.match?(Gunk) || (src.gunkDomain? && !src.allowCDN?)
-              puts "🚫 \e[31;1m" + src.uri + "\e[0m"
+              log << "🚫 \e[31;1m" + src.uri + "\e[0m"
               s.remove
             end
           end}}
+      puts log.join ' '
     end
 
     # format to local conventions
