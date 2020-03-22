@@ -30,25 +30,31 @@ module Webize
 end
 class WebResource
   module URIs
+    # format configuration
+    CacheFormats = %w(css geojson gif html ico jpeg jpg js json m3u8 m4a md mp3 mp4 opus pdf png svg ts webm webp xml)
+    NoScan = %w(.css .gif .ico .jpg .js .png .svg .webm)
+    StaticFormats = CacheFormats - %w(json html xml)
 
-    CacheFormats = %w(css geojson gif html ico jpeg jpg js json m3u8 m4a md mp3 mp4 opus pdf png svg ts webm webp xml) # cached filetypes
+    # host configuration
     CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|googleapis|netdna.*)\.(com|io|net)$/
     CookieHost = /(^|\.)(akamai(hd)?|bandcamp|ttvnw|twitter)\.(com|net)$/
-    GunkHosts = {}
-    NoScan = %w(.css .gif .ico .jpg .js .png .svg .webm)
     POSThost = /^video.*.ttvnw.net$/
     UIhosts = %w(players.brightcove.net timbl.com www.redditmedia.com)
-    StaticFormats = CacheFormats - %w(json html xml)
+
+    # local static resources
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
-    SiteDir.join('gunk_hosts').each_line{|l|
-      cursor = GunkHosts
-      l.chomp.sub(/^\./,'').split('.').reverse.map{|name|cursor = cursor[name] ||= {}}}
     FeedIcon = SiteDir.join('feed.svg').read
     SiteFont = SiteDir.join('fonts/hack-regular-subset.woff2').read
     SiteGIF = SiteDir.join('site.gif').read
     SiteCSS = SiteDir.join('site.css').read
     CodeCSS = SiteDir.join('code.css').read
     SiteJS  = SiteDir.join('site.js').read
+
+    # junklist
+    GunkHosts = {}
+    SiteDir.join('gunk_hosts').each_line{|l|
+      cursor = GunkHosts
+      l.chomp.sub(/^\./,'').split('.').reverse.map{|name|cursor = cursor[name] ||= {}}}
 
   end
   module HTTP
