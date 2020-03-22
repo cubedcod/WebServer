@@ -15,6 +15,7 @@ module Webize
         'www.city-data.com' => :CityData,
         'www.google.com' => :GoogleHTML,
         'www.instagram.com' => :InstagramHTML,
+        'www.qrz.com' => :QRZ,
         'www.universalhub.com' => :UHub,
       }
     end
@@ -449,6 +450,15 @@ wired.trib.al
                 end}.join(' ')
         end rescue nil
       end
+    }
+  end
+
+  def QRZ doc, &b
+    puts :QRZ
+    doc.css('script').map{|script|
+      script.inner_text.scan(%r(biodata'\).html\(\s*Base64.decode\("([^"]+))xi){|data|
+        puts data
+      }
     }
   end
 
