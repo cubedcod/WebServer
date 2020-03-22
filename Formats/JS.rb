@@ -88,7 +88,8 @@ module Webize
         else # generic triplr
           Webize::HTML.webizeValue(@json){|h|
             if s = h['uri'] || h['url'] || (h['id'] && ('#' + h['id'].to_s))
-              s = s.R
+              puts s if s.class == Array || s.class == Hash
+              s = s.to_s.R
               yield s, Type, Post.R if h.has_key? 'content'
               if s.parts[0] == 'users'
                 host = ('https://' + s.host).R
