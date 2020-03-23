@@ -18,7 +18,6 @@ module Webize
 
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri].R
-        @subject = (options[:base_uri] || '#image').R 
         @json = ::JSON.parse(input.respond_to?(:read) ? input.read : input) rescue {}
         if block_given?
           case block.arity
@@ -80,14 +79,14 @@ module Webize
 
       def scanContent &f
 
-        ## JSON triplrs
+        ## JSON triplr
 
         # host triplr
         if hostTriples = Triplr[@base.host]
           @base.send hostTriples, @json, &f
         else # generic triplr
           Webize::HTML.webizeValue(@json){|h|
-            if s = h['uri'] || h['url'] || (h['id'] && ('#' + h['id'].to_s))
+            if s = h['uri'] || h['url'] || ((h['id']||h['ID']) && ('#' + (h['id']||h['ID']).to_s))
               puts s if s.class == Array || s.class == Hash
               s = s.to_s.R
               yield s, Type, Post.R if h.has_key? 'content'
@@ -108,9 +107,6 @@ module Webize
                 end}
             end}
         end
-
-        # JSON Feed
-        #self.JSONfeed &f if @base.parts.map{|part| part.split '.'}.flatten.member? 'feed'
 
       end
     end
