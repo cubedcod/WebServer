@@ -192,11 +192,15 @@ module Webize
             end
           end}
 
-        if nextPage = n.css('#nextPage')[0]
+        n.css('#next, #nextPage, a.next').map{|nextPage|
           if ref = nextPage.attr("href")
             @base.env[:links][:next] ||= ref
-          end
-        end
+          end}
+
+        n.css('#prev, #prevPage, a.prev').map{|prevPage|
+          if ref = prevPage.attr("href")
+            @base.env[:links][:prev] ||= ref
+          end}
 
         # meta tags
         n.css('head meta').map{|m|
