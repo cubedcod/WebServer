@@ -37,11 +37,11 @@ module Webize
         %w(href src).map{|attr| # reference
           if s[attr]
             src = s[attr].R
-            if src.uri.match? Gunk
-              log << "🚫 \e[31;1m" + src.uri + "\e[0m"
-              s.remove
-            elsif src.gunkDomain? && !src.allowCDN?
+            if src.gunkDomain? && !src.allowCDN?
               log << "🚫 \e[31;1;7m" + src.host + "\e[0m"
+              s.remove
+            elsif src.uri.match? Gunk
+              log << "🚫 \e[31;1m" + src.uri + "\e[0m"
               s.remove
             end
           end}}
