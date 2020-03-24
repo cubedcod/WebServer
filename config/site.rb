@@ -123,8 +123,8 @@ wired.trib.al
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # Reddit
-    #%w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it).map{|h| Allow h }
-    #%w(gateway gql oauth www).map{|h| Allow h + '.reddit.com' }
+    [*%w(gateway gql oauth www).map{|h| h + '.reddit.com' },
+     *%w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it)].map{|h| Allow h }
     GET 'old.reddit.com', -> r {
       r.fetch.yield_self{|status,head,body|
         if status.to_s.match? /^30/
