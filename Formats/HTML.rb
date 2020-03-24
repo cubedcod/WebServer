@@ -45,7 +45,7 @@ module Webize
               s.remove
             end
           end}}
-      puts log.join ' '
+      puts log.join ' ' unless log.empty?
     end
 
     # format to local conventions

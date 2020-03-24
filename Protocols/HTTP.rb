@@ -141,10 +141,7 @@ class WebResource
         thirdparty = env[:refhost] != resource.host
 
         unless [204, 304].member? status
-          puts [action_icon,
-                status_icon,
-                format_icon,
-                triple_count,
+          puts [action_icon, status_icon, format_icon, triple_count,
                 env[:refhost] ? ["\e[#{color}m", env[:refhost], "\e[0m→"] : nil,
                 "\e[#{color}#{thirdparty ? ';7' : ''}m", (thirdparty || format_icon=='🗒') ? resource.uri : resource.path[1..-1], "\e[0m",
                 head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil,
@@ -253,7 +250,7 @@ class WebResource
       location = ['//', host, (port ? [':', port] : nil), path, options[:suffix], (query ? ['?', query] : nil)].join
       ('https:' + location).R(env).fetchHTTP options                                                       # cache miss, HTTPS fetch
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
-      ('http:' + location).R(env).fetchHTTP options rescue nodeResponse                                    # fallback to HTTP, then offline
+      ('http:' + location).R(env).fetchHTTP options rescue nodeResponse                                    # fallback to HTTP fetch, then offline
     end
 
     def fetchHTTP options = {}; env[:fetch] = true
@@ -338,29 +335,29 @@ class WebResource
     end
 
     def GET
-      return [204,{},[]] if path.match? /gen(erate)?_?204$/                # connectivity-check response
-      cookies                                                              # cache cookies
-      unless path == '/'                                                   # point to containing node
+      return [204,{},[]] if path.match? /gen(erate)?_?204$/ # connectivity-check response
+      cookies                                               # cache cookies
+      unless path == '/'                                    # point to containing node
         up = File.dirname path
         up += '/' unless up == '/'
         up += '?' + query if query
         env[:links][:up] = up
       end
       if localNode?
-        if %w{m d h}.member? parts[0]
-          dateDir                                                          # timeline redirect
-        elsif path == '/mail'
-          [302, {'Location' => '/d/*/msg*?sort=date&view=table'}, []]      # inbox redirect
+        if %w{m d h}.member? parts[0]                       # timeline redirect
+          dateDir
+        elsif path == '/mail'                               # inbox redirect
+          [302, {'Location' => '/d/*/msg*?sort=date&view=table'}, []]
         else
-          nodeResponse                                                     # local node
+          nodeResponse                                      # local node
         end
-      elsif handler = HostGET[host]                                        # host handler
+      elsif handler = HostGET[host]                         # host handler
         handler[self]
-      elsif host.match? CDNhost                                            # CDN content
+      elsif host.match? CDNhost                             # CDN content
         (AllowedHosts.has_key?(host) || (query_values||{})['allow'] == ServerKey || allowCDN?) ? fetch : deny
-      elsif gunk?                                                          # blocked content
+      elsif gunk?                                           # blocked content
         deny
-      else                                                                 # remote node
+      else                                                  # remote node
         fetch
       end
     end
@@ -535,10 +532,11 @@ class WebResource
     def upstreamUI; env[:UX] = true; self end
 
     def upstreamUI?
-      env.has_key?(:UX) || ENV.has_key?('UX') ||      # request or process environment-flag
-      parts.member?('embed') ||                       # embed URL
-      UIhosts.member?(host) ||                        # upstream-UI host
-      (env['HTTP_USER_AGENT']||'').match?(/Epiphany/) # upstream-UI agent
+      env.has_key?(:UX) || ENV.has_key?('UX') ||         # request or process environment setting
+      parts.member?('embed') ||                          # embed URL
+      UIhosts.member?(host) ||                           # hostname configuration
+      (env['HTTP_USER_AGENT']||'').match?(/Epiphany/) || # agent preference
+      query == 'UI'                                      # preference URL
     end
   end
   include HTTP
