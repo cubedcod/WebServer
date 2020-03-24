@@ -237,7 +237,7 @@ class WebResource
         @env = e
         self
       else
-        @env
+        @env ||= {}
       end
     end
 

@@ -11,15 +11,15 @@ class WebResource
       else           # host dir
         hostPath
        end) +       ## path
-        (if !path || path =='/'               # root path
-         %w(index)
-        elsif localNode? && parts[0] == 'msg' # message-ID URL
+        (if !path || path =='/'
+         %w(index)                            # root node
+        elsif localNode? && parts[0] == 'msg'
           id = Digest::SHA2.hexdigest Rack::Utils.unescape_path parts[1]
-          ['mail', id[0..1], id[2..-1]]       # mail storage-path
+          ['mail', id[0..1], id[2..-1]]       # Message-ID -> path
         elsif path.size > 512 || parts.find{|p|p.size > 255}
-          hash = Digest::SHA2.hexdigest path  # path too big, hash it
+          hash = Digest::SHA2.hexdigest path  # name too long, hash it
           [hash[0..1], hash[2..-1]]
-        else                                  # direct path
+        else                                  # direct mapping
           parts.map{|p| Rack::Utils.unescape_path p}
          end).join('/')
     end
@@ -44,32 +44,30 @@ class WebResource
 
   def writeFile o
     FileUtils.mkdir_p node.dirname
-    File.open(fsPath,'w'){|f|
-      f << o#.force_encoding('UTF-8')
-    }
+    File.open(fsPath,'w'){|f| f << o }
     self
   end
 
   module HTTP
 
-    # if needed by client, return lazily-generated file or string, by Rack handler if file
+    # if needed, return lazily-generated entity, via Rack handler if file-reference
     def entity generator = nil
       if env['HTTP_IF_NONE_MATCH']&.strip&.split(/\s*,\s*/)&.include? env[:resp]['ETag']
         [304, {}, []]                            # unmodified entity
       else
         body = generator ? generator.call : self # generate entity
-        if body.class == WebResource             # entity file-reference?
+        if body.class == WebResource             # file-reference?
           Rack::Files.new('.').serving(Rack::Request.new(env), body.fsPath).yield_self{|s,h,b|
             if 304 == s
-              [304, {}, []]                      #  unmodified file
+              [304, {}, []]                      # unmodified file
             else
               h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type'] == 'application/javascript'
               env[:resp]['Content-Length'] = body.node.size.to_s
-              [s, h.update(env[:resp]), b]       #  file
+              [s, h.update(env[:resp]), b]       # file
             end}
         else
           env[:resp]['Content-Length'] = body.bytesize.to_s
-          [200, env[:resp], [body]]              # entity
+          [200, env[:resp], [body]]              # inline data
         end
       end
     end
@@ -82,15 +80,15 @@ class WebResource
 
     def nodeSet
       pathIndex = localNode? ? 0 : hostPath.size
-      qs = query_values || {}                                # query arguments
-      env[:summary] = !(qs.has_key? 'fullContent')           # summarize multi-node sets by default
+      qs = query_values || {}                      # query arguments
+      env[:summary] = !(qs.has_key? 'fullContent') # summarize multi-node sets
       (if node.directory?
        if qs.has_key?('f') && !qs['f'].empty? && path != '/'          # FIND (case-insensitive)
          `find #{shellPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
        elsif qs.has_key?('find') && !qs['find'].empty? && path != '/' #  substring (case-insensitive)
          `find #{shellPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
        elsif (qs.has_key?('Q') || qs.has_key?('q')) && path != '/'    # GREP
-         env[:summary] = false # keep full content for HTML match-highlighting
+         env[:summary] = false # keep full content for HTML highlighting of matched fields
          q = qs['Q'] || qs['q']
          args = q.shellsplit rescue q.split(/\W/)
          case args.size
