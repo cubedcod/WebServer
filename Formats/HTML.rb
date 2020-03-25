@@ -63,9 +63,10 @@ module Webize
       html.css("div[class*='image'][data-src]").map{|div|div.add_child "<img src=\"#{div['data-src']}\">"} # div image
 
       # <p> <pre>
-      pCount = preCount = -1
-      html.css('p').map{|e|   e.set_attribute 'id', 'p'   + (  pCount += 1).to_s unless e['id']}
-      html.css('pre').map{|e| e.set_attribute 'id', 'pre' + (preCount += 1).to_s unless e['id']}
+      base.env[:pCount] ||= -1
+      base.env[:preCount] ||= -1
+      html.css('p').map{|e|   e.set_attribute 'id', 'p'   + (  base.env[:pCount] += 1).to_s unless e['id']}
+      html.css('pre').map{|e| e.set_attribute 'id', 'pre' + (base.env[:preCount] += 1).to_s unless e['id']}
 
       # <*>
       html.traverse{|e|
