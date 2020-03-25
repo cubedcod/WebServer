@@ -39,11 +39,11 @@ blockquote {background-color: #080808; color: #fff; border-radius: .2em; border-
 body {font-family: sans-serif; margin: 2em}
 body, thead td, td.k {background-color: #555; color: #fff}
 div,p,a,li,ul,ol,form,svg { display: inline-block }
-h1,h2,h3,h4,h5,h6,pre,blockquote {margin: 0}
+h1,h2,h3,h4,h5,h6,blockquote {margin: 0}
 img, video {max-width: 100%}
-p {margin: .125em}
 p, li, blockquote {max-width: 86ex}
 pre {white-space: pre-wrap}
+pre, p {margin: .125em}
 span.name {font-size: .8em}
 svg, img[src*="svg"] {max-width:2em; max-height: 2em}
 table {border-spacing: 1px}
