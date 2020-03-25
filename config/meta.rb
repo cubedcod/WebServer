@@ -214,6 +214,7 @@ class WebResource
       'five_hundred_pixels:uploaded' => Date,
       'flattenedCaption' => Abstract,
       'fluid-icon' => Image,
+      'follow' => Link,
       'followers_count' => :drop,
       'following_count' => :drop,
       'format-detection' => :drop,

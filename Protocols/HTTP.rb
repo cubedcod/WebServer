@@ -240,17 +240,17 @@ class WebResource
 
     # fetch node from cache or remote
     def fetch options = nil ; options ||= {}
-      return nodeResponse if ENV.has_key?('OFFLINE') || env['QUERY_STRING']=='cache'                       # offline, return cache
+      return nodeResponse if ENV.has_key?('OFFLINE') || env['QUERY_STRING']=='cache'                     # offline, return cache
       if StaticFormats.member? ext.downcase
-        return [304, {}, []] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client cache-hit
-        return fileResponse if node.file?                                                                  # server cache-hit, direct
+        return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client cache-hit
+        return fileResponse if node.file?                                                                # server cache-hit, direct
       end
-      c = nodeSet; return c[0].fileResponse if c.size == 1 && StaticFormats.member?(c[0].ext)              # server cache-hit, indirect via mapping
+      c = nodeSet; return c[0].fileResponse if c.size == 1 && StaticFormats.member?(c[0].ext)            # server cache-hit, indirect via mapping
 
       location = ['//', host, (port ? [':', port] : nil), path, options[:suffix], (query ? ['?', query] : nil)].join
-      ('https:' + location).R(env).fetchHTTP options                                                       # cache miss, HTTPS fetch
+      ('https:' + location).R(env).fetchHTTP options                                                     # cache miss, HTTPS fetch
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
-      ('http:' + location).R(env).fetchHTTP options rescue nodeResponse                                    # fallback to HTTP fetch, then offline
+      ('http:' + location).R(env).fetchHTTP options rescue nodeResponse                                  # fallback to HTTP fetch, then offline
     end
 
     def fetchHTTP options = {}; env[:fetch] = true

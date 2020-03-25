@@ -36,7 +36,7 @@ zerg(net)?)
 3gl|6sc|
 ad(dtoany|nxs)?|.*analytic.*|apptentive.*|auction|
 bid(d(er|ing)|s)?|bing|bouncee?x.*|
-chartbeat|clickability|cloudfront|COMSCORE|consent|crazyegg|c(rss)?pxl?|crwdcntrl|
+cedexis|chartbeat|clickability|cloudfront|COMSCORE|consent|crazyegg|c(rss)?pxl?|crwdcntrl|
 doubleclick|d[fm]p|driftt|
 ensighten|evidon|facebook|feedbackify|
 google.*|g(a|dpr|pt|t(ag|m))|gu-web|gumgum|gwallet|
