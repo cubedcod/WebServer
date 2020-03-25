@@ -36,11 +36,11 @@ zerg(net)?)
 3gl|6sc|
 ad(dtoany|nxs)?|.*analytic.*|apptentive.*|auction|
 bid(d(er|ing)|s)?|bing|bouncee?x.*|
-cedexis|chartbeat|clickability|cloudfront|COMSCORE|consent|crazyegg|c(rss)?pxl?|crwdcntrl|
+cedexis|chartbeat|clickability|cloudfront|COMSCORE|consent|cr(azyegg|iteo)|c(rss)?pxl?|crwdcntrl|
 doubleclick|d[fm]p|driftt|
 ensighten|evidon|facebook|feedbackify|
 google.*|g(a|dpr|pt|t(ag|m))|gu-web|gumgum|gwallet|
-hotjar|indexww|intercom|ipify|kr(ux|xd)|licdn|linkedin|
+hotjar|imrworldwide|indexww|intercom|ipify|kr(ux|xd)|licdn|linkedin|
 mar(feel|keto)|ml314|moatads|mpulse|newrelic|newsmax|npttech|nreum|ntv.io|
 olark|outbrain|
 parsely|petametrics|pgmcdn|pinimg|pressboard|pushcrew|quantserve|quora|revcontent|
