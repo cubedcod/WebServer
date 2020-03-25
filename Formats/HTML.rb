@@ -53,13 +53,23 @@ module Webize
       html = Nokogiri::HTML.fragment body
       html.css('iframe, style, link[rel="stylesheet"], ' + Scripts).remove
       clean_doc html                                                   # remove misc gunk
-      html.css('[style*="background-image"]').map{|node|               # map image references to classic image-tag
-        node['style'].match(/url\(['"]*([^\)'"]+)['"]*\)/).yield_self{|url| # image in CSS background
+
+      # <img>
+      html.css('[style*="background-image"]').map{|node|               # map references to classic image tag
+        node['style'].match(/url\(['"]*([^\)'"]+)['"]*\)/).yield_self{|url|                                # CSS background-image
           node.add_child "<img src=\"#{url[1]}\">" if url}}
-      html.css('amp-img').map{|amp|amp.add_child "<img src=\"#{amp['src']}\">"} # image in amp or div tag
-      html.css("div[class*='image'][data-src]").map{|div|div.add_child "<img src=\"#{div['data-src']}\">"}
-      html.traverse{|e| # visit nodes
-        e.attribute_nodes.map{|a| # visit attributes
+      html.css('amp-img').map{|amp|amp.add_child "<img src=\"#{amp['src']}\">"}                            # amp image
+      html.css("div[class*='image'][data-src]").map{|div|div.add_child "<img src=\"#{div['data-src']}\">"} # div image
+
+      # <p>
+      pCount = -1
+      html.css('p').map{|e|
+        e.set_attribute 'id', 'p' + (pCount += 1).to_s unless e['id'] # identify node
+      }
+
+      # <*>
+      html.traverse{|e|
+        e.attribute_nodes.map{|a| # inspect attrs
           e.set_attribute 'src', a.value if SRCnotSRC.member? a.name   # map @src-like attributes to @src
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/)||# strip attributes
