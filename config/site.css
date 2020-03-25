@@ -46,11 +46,10 @@ pre {white-space: pre-wrap}
 pre, p {margin: .125em}
 span.name {font-size: .8em}
 svg, img[src*="svg"] {max-width:2em; max-height: 2em}
-table {border-spacing: 1px}
-td {overflow: hidden; vertical-align: top; border-color: #222; border-width: 0 1px 1px 0; border-style: dotted}
+td {overflow: hidden; vertical-align: top; border-radius: .2em}
 td.k > a {color: #eee}
 td.k {max-width: 28ex; text-align: right}
-td.v, td[property="uri"] {background-color: #000; color: #fff; border-radius: .2em}
+td.v, td[property="uri"] {background-color: #000; color: #fff}
 td[property="http://rdfs.org/sioc/ns#has_creator"], td[property="http://rdfs.org/sioc/ns#addressed_to"] {text-align: center}
 td[property="uri"] {max-width: 100ex; text-align: left}
 thead a {color: #eee}
