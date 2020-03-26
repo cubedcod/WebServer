@@ -62,14 +62,21 @@ class WebResource < RDF::URI
     elsif node.directory?
       subject = localNode? ? path.R : self
       subject += '/' unless subject.to_s[-1] == '/'
-      puts subject
       graph << RDF::Statement.new(subject, Type.R, Container.R)
       graph << RDF::Statement.new(subject, Title.R, basename)
       graph << RDF::Statement.new(subject, Date.R, node.stat.mtime.iso8601)
     end
-    self
   rescue RDF::FormatError => e
-    puts [e.class, e.message].join ' '
+    mime = `file -b --mime-type #{shellPath}`.chomp
+    puts e.message,"FILE(1) suggests type #{mime}, retrying"
+    options.delete :content_type
+    options.delete :format
+    if mime == 'text/html'
+      options[:format] = :html
+    else
+      options[:content_type] = mime
+    end
+    graph.load fsPath, **options
   end
 
   # RDF::Repository -> file(s)
