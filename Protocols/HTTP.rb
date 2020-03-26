@@ -232,10 +232,9 @@ class WebResource
 
     def env e = nil
       if e
-        @env = e
-        self
+        @env = e;  self
       else
-        @env #||= {}
+        @env ||= {}
       end
     end
 
