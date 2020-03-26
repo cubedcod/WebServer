@@ -64,6 +64,7 @@ class WebResource < RDF::URI
       graph.load fsPath, **options
     elsif node.directory?
       subject = to_s[-1] == '/' ? self : (self + '/')
+      puts subject
       graph << RDF::Statement.new(subject, Type.R, Container.R)
       graph << RDF::Statement.new(subject, Title.R, basename)
       graph << RDF::Statement.new(subject, Date.R, node.stat.mtime.iso8601)
