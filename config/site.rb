@@ -92,7 +92,10 @@ wired.trib.al
           [302, {'Location' => r.path}, []] #  redirect to path
         end}}
 
-    %w(l.facebook.com lm.facebook.com l.instagram.com).map{|host| GET host, -> r {[301, {'Location' =>  r.query_values['u']}, []]}}
+    %w(l.facebook.com lm.facebook.com l.instagram.com).map{|host|
+      GET host, -> r {
+        [301, {'Location' =>  r.query_values['u']}, []]}}
+
     GET 'gate.sc', GotoURL
 
     # script-library hosts
@@ -125,16 +128,18 @@ wired.trib.al
     # Reddit
     [*%w(gateway gql oauth www).map{|h| h + '.reddit.com' },
      *%w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it)].map{|h| Allow h }
+
     GET 'old.reddit.com', -> r {
       r.fetch.yield_self{|status,head,body|
         if status.to_s.match? /^30/
           [status, head, body]
-        else # HTML representation used for next-page pointer, missing in HTTP Headers (old & new) and HTML & RSS (new)
+        else # find next-page pointer, missing in HTTP Headers (old & new) and HTML & RSS (new)
           links = []
           body[0].scan(/href="([^"]+after=[^"]+)/){|link| links << CGI.unescapeHTML(link[0]).R }
           link = links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]
           [302, {'Location' => ['https://www.reddit.com', link.path, '?', link.query].join}, []]
         end}}
+
     GET 'www.reddit.com', -> r {    r.chrono_sort                  # chronological sorting
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? # MIME preference
       r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination

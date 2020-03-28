@@ -306,6 +306,7 @@ class WebResource
       SIOC + 'richContent' => '',
       Schema + 'height' => '↕',
       Schema + 'width' => '↔',
+      Schema + 'DiscussionForumPosting' => '📝',
       Stat + 'File' => '📄',
       To => '☇',
       Type => '📕',

@@ -221,6 +221,7 @@ class WebResource
       'followers_count' => :drop,
       'following_count' => :drop,
       'format-detection' => :drop,
+      'fragment' => :drop,
       'fromUser' => Creator,
       'fullName' => Title,
       'generator' => SIOC + 'generator',
