@@ -164,7 +164,12 @@ class WebResource < RDF::URI
   end
 
 end
-
+class Array
+  def R env=nil
+    puts ['Array#R', self].join ' ' if size > 1
+    env ? WebResource.new(self[0].to_s).env(env) : WebResource.new(self[0].to_s)
+  end
+end
 class RDF::URI
   def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
 end
