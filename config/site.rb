@@ -111,7 +111,6 @@ wired.trib.al
 ).map{|h| Allow h}
 
     # Google
-    Allow "translate.googleapis.com"
     GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
     GET 'www.google.com', -> r {
       case r.path
@@ -127,9 +126,6 @@ wired.trib.al
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # Reddit
-    [*%w(gateway gql oauth www).map{|h| h + '.reddit.com' },
-     *%w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it)].map{|h| Allow h }
-
     GET 'old.reddit.com', -> r {
       r.fetch.yield_self{|status,head,body|
         if status.to_s.match? /^30/
