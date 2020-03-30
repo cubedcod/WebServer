@@ -62,13 +62,11 @@ module Webize
       html.css('amp-img').map{|amp|amp.add_child "<img src=\"#{amp['src']}\">"}                            # amp image
       html.css("div[class*='image'][data-src]").map{|div|div.add_child "<img src=\"#{div['data-src']}\">"} # div image
 
-      # <p> <pre> <ul>
-      base.env[:pCount] ||= -1
-      base.env[:preCount] ||= -1
-      base.env[:ulCount] ||= -1
-      html.css('p').map{|e|   e.set_attribute 'id', 'p'   + (base.env[:pCount]   += 1).to_s unless e['id']}
-      html.css('pre').map{|e| e.set_attribute 'id', 'pre' + (base.env[:preCount] += 1).to_s unless e['id']}
-      html.css('ul').map{|e|  e.set_attribute 'id', 'ul'  + (base.env[:ulCount]  += 1).to_s unless e['id']}
+      # identify <p> <pre> <ul> <ol>
+      html.css('p').map{|e|   e.set_attribute 'id', 'p'   + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
+      html.css('pre').map{|e| e.set_attribute 'id', 'pre' + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
+      html.css('ul').map{|e|  e.set_attribute 'id', 'ul'  + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
+      html.css('ol').map{|e|  e.set_attribute 'id', 'ol'  + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
 
       # <*>
       html.traverse{|e|

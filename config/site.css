@@ -14,7 +14,7 @@
 .file > .name {font-size: .8em; position: absolute; top: 4.8em; left: .4em}
 .file {position: relative}
 .fromto:only-child {padding: .1em 64ex 256ex 64ex; margin: 0 -64ex -256ex -64ex}
-.identified {border: 1px solid #333; background-color: #000; color: #fff}
+.identified {border: 1px solid #282828; background-color: #000; color: #fff}
 .links {float: right}
 .post {border-radius: .42em; max-width: 88ex; padding: .2em; margin: .166em; background-color: #000; color: #fff}
 .quote {background-color: #ccc; color: #000; padding-left: .3em}
