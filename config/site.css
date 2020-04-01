@@ -36,21 +36,18 @@ a.uri {background-color: #fff; border-radius: .28em; color: #000; border-style: 
 a.uri.path > span.uri {color: #ccc}
 a.uri.path {background-color: #222; color: #fff; border-color: #333}
 blockquote {background-color: #111; color: #fff; border-radius: .2em; border-width: 0 0 0 .5em; border-style: solid; border-color: #888}
-body {font-family: sans-serif; margin: 2em; background-color: #181818; color: #fff}
+body {font-family: sans-serif; margin: 2em; background-color: #555; color: #fff}
 div,p,a,li,ul,ol,form,svg { display: inline-block }
 h1,h2,h3,h4,h5,h6,blockquote {margin: 0}
 img, video {max-width: 100%}
-p, li, blockquote {max-width: 86ex}
+p, li, blockquote, td[property="uri"] {max-width: 92ex}
 pre {white-space: pre-wrap}
 pre, p {margin: .125em}
 span.name {font-size: .8em}
 svg, img[src*="svg"] {max-width:2em; max-height: 2em}
-table {border-spacing: 1px; background-color: #222; border-radius: .2em}
-td {overflow: hidden; vertical-align: top; border-radius: .2em}
-td.k > a {color: #eee}
+table {border-spacing: 1px; background-color: #333; border-radius: .2em}
+td {background-color: #000; color: #fffl; overflow: hidden; vertical-align: top; border-radius: .2em}
+td.k a, thead a {color: #eee}
 td.k {max-width: 28ex; text-align: right}
-td.v, td[property="uri"] {background-color: #000; color: #fff}
 td[property="http://rdfs.org/sioc/ns#has_creator"], td[property="http://rdfs.org/sioc/ns#addressed_to"] {text-align: center}
-td[property="uri"] {max-width: 100ex; text-align: left}
-thead a {color: #eee}
 video {min-width: 40ex}

@@ -505,7 +505,7 @@ class WebResource
                   p = p.R
                   slug = p.fragment || (p.path && p.basename) || ' '
                   icon = Icons[p.uri] || slug
-                  {_: :td, c: {_: :a, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}}}},
+                  {_: :th, c: {_: :a, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}}}},
            {_: :tbody,
             c: graph.map{|resource|
 
