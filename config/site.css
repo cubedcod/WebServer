@@ -14,11 +14,11 @@
 .file > .name {font-size: .8em; position: absolute; top: 4.8em; left: .4em}
 .file {position: relative}
 .fromto:only-child {padding: .1em 64ex 256ex 64ex; margin: 0 -64ex -256ex -64ex}
-.identified, .post {border: 1px solid #222; background-color: #000; color: #fff}
+.identified, .post {border: 1px solid #222}
 .links .host a {border-width: 1px; border-style: dotted}
 .links .host {text-align: right}
 .links {float: right}
-.post {border-radius: .42em; max-width: 88ex; padding: .2em; margin: .166em}
+.post { background-color: #000; color: #fff; border-radius: .42em; max-width: 88ex; padding: .2em; margin: .166em}
 .quote {background-color: #ccc; color: #000; padding-left: .3em}
 .thumb {max-width: 22em}
 .title {background-color: #fff; color: #000; font-size: 1.08em; font-weight: bold; vertical-align: top; border-width: 0 0 0 .4em; border-color: #fff; border-style: solid; border-radius: .18em }
@@ -37,8 +37,7 @@ a.uri > span.uri {font-size: 0.8em; font-weight: normal; color: #777}
 a.uri {background-color: #fff; border-radius: .28em; color: #000; border-style: solid; border-color: #ddd; border-width: 0 0 0 .24em; max-width: 42ex; overflow: hidden; margin: .1em; font-weight: bold}
 a.uri.path > span.uri {color: #333}
 a.uri.path {background-color: #bababa}
-blockquote {border-radius: .2em; border-width: 0 0 0 .5em; border-style: solid; border-color: #888; margin: 0 0 0 .1em}
-blockquote, blockquote > p {background-color: #333; color: #fff}
+blockquote {border-radius: .2em; border-width: 0 0 0 .5em; border-style: solid; border-color: #888; margin: 0 0 0 .1em; background-color: #333; color: #fff}
 body {font-family: sans-serif; margin: 2em; background-color: #555; color: #fff}
 div,p,a,li,ul,ol,form,svg { display: inline-block }
 h1,h2,h3,h4,h5,h6 {margin: 0}
