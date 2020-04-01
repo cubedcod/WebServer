@@ -14,7 +14,7 @@
 .file > .name {font-size: .8em; position: absolute; top: 4.8em; left: .4em}
 .file {position: relative}
 .fromto:only-child {padding: .1em 64ex 256ex 64ex; margin: 0 -64ex -256ex -64ex}
-.identified {border: 1px solid #333; background-color: #000; color: #fff}
+.identified {border: 1px solid #2a2a2a; background-color: #000; color: #fff}
 .links {float: right}
 .post {border-radius: .42em; max-width: 88ex; padding: .2em; margin: .166em; background-color: #000; color: #fff}
 .quote {background-color: #ccc; color: #000; padding-left: .3em}
@@ -28,7 +28,7 @@
 :target {background-color: #0f0 !important; color: #000 !important}
 :visited {border-color: #cff !important}
 a {text-decoration: none; border-radius: .14em}
-a.date {float: right; white-space: nowrap; background-color: #000; color: #888; border-radius: .2em; font-size: .8em}
+a.date {float: right; white-space: nowrap; background-color: #000; color: #999; border-radius: .2em; font-size: .8em}
 a.id {float: right}
 a.idlink {color: #aaa; background-color: #000; font-size: .72em; vertical-align: bottom}
 a.uri > span.uri {font-size: 0.8em; font-weight: normal; color: #444}
@@ -36,8 +36,7 @@ a.uri {background-color: #fff; border-radius: .28em; color: #000; border-style: 
 a.uri.path > span.uri {color: #ccc}
 a.uri.path {background-color: #222; color: #fff; border-color: #333}
 blockquote {background-color: #111; color: #fff; border-radius: .2em; border-width: 0 0 0 .5em; border-style: solid; border-color: #888}
-body {font-family: sans-serif; margin: 2em}
-body, thead td, td.k {background-color: #555; color: #fff}
+body {font-family: sans-serif; margin: 2em; background-color: #444; color: #fff}
 div,p,a,li,ul,ol,form,svg { display: inline-block }
 h1,h2,h3,h4,h5,h6,blockquote {margin: 0}
 img, video {max-width: 100%}
@@ -46,7 +45,7 @@ pre {white-space: pre-wrap}
 pre, p {margin: .125em}
 span.name {font-size: .8em}
 svg, img[src*="svg"] {max-width:2em; max-height: 2em}
-table {border-spacing: 1px}
+table {border-spacing: 1px; background-color: #333; border-radius: .2em}
 td {overflow: hidden; vertical-align: top; border-radius: .2em}
 td.k > a {color: #eee}
 td.k {max-width: 28ex; text-align: right}
