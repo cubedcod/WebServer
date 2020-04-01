@@ -48,6 +48,6 @@ svg, img[src*="svg"] {max-width:2em; max-height: 2em}
 table {border-spacing: 1px; background-color: #333; border-radius: .2em}
 td {background-color: #000; color: #fffl; overflow: hidden; vertical-align: top; border-radius: .2em}
 td.k a, thead a {color: #eee}
-td.k {max-width: 28ex; text-align: right}
+td.k {max-width: 28ex; text-align: right; font-weight: bold}
 td[property="http://rdfs.org/sioc/ns#has_creator"], td[property="http://rdfs.org/sioc/ns#addressed_to"] {text-align: center}
 video {min-width: 40ex}

@@ -38,7 +38,7 @@ class WebResource
     StaticFormats = CacheFormats - %w(json html xml)
 
     # host configuration
-    CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|googleapis|netdna.*)\.(com|io|net)$/
+    CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|googleapis|netdna.*|yimg)\.(com|io|net)$/
     CookieHost = /(^|\.)(akamai(hd)?|bandcamp|ttvnw|twitter)\.(com|net)$/
     POSThost = /^video.*.ttvnw.net$/
     UIhosts = %w(bandcamp.com players.brightcove.net timbl.com www.redditmedia.com)
@@ -196,6 +196,12 @@ wired.trib.al
 
     GET 'twitter.com', Twitter
     GET 'mobile.twitter.com', Twitter
+
+    # Yahoo
+    GET 'news.yahoo.com'
+    GET 's.yimg.com', -> r {
+      ps = r.path.split /https?:\/+/
+      ps.size > 1 ? [301, {'Location' => 'https://' + ps[-1]}, []] : NoGunk[r]}
 
     # YouTube
     GET 'www.youtube.com', -> r {
