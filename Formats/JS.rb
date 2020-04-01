@@ -4,7 +4,7 @@ class WebResource
   module URIs
 
     # JSON page-state pattern
-    InitialState = /(bio|bootstrap|client|global|init(ial)?|preload(ed)?|shared|site).?(content|data|env|st(ate|ore))|SCRIPTS_LOADED|__typename/i
+    InitialState = /(bio|bootstrap|client|global|init(ial)?|player|preload(ed)?|shared|site).?(content|data|env|st(ate|ore))|SCRIPTS_LOADED|__typename/i
 
   end
 end

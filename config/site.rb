@@ -1,4 +1,6 @@
 # coding: utf-8
+
+# coding: utf-8
 module Webize
   module HTML
     class Reader
@@ -39,7 +41,7 @@ class WebResource
     CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|googleapis|netdna.*)\.(com|io|net)$/
     CookieHost = /(^|\.)(akamai(hd)?|bandcamp|ttvnw|twitter)\.(com|net)$/
     POSThost = /^video.*.ttvnw.net$/
-    UIhosts = %w(players.brightcove.net timbl.com www.redditmedia.com)
+    UIhosts = %w(bandcamp.com players.brightcove.net timbl.com www.redditmedia.com)
 
     # local static resources
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
@@ -111,7 +113,7 @@ wired.trib.al
 ).map{|h| Allow h}
 
     # Google
-    GET 'googleads.g.doubleclick.net', -> r {a=r.query_values['adurl'].R; a.query=''; [301, {'Location' => a }, []]}
+    GET 'googleads.g.doubleclick.net', -> r {((q = r.query_values) && (u = q['adurl'])) ? (u = u.R; u.query = ''; [301,{'Location' => u},[]]) : r.deny}
     GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
     GET 'www.google.com', -> r {
       case r.path
