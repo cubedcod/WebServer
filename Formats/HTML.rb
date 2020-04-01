@@ -86,7 +86,7 @@ module Webize
           e['class'] = css.join ' '                                    # node CSS-class
         elsif e['id']                                                  # identified node without a link
           e.set_attribute 'class', 'identified'
-          e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id']}</span> " unless e.name == 'p'
+          e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id'] unless e.name == 'p'}</span> "
         end
         e['src'] = base.join e['src'] if e['src'] && !e['src'].R.host} # resolve media location
 
@@ -396,7 +396,7 @@ class WebResource
                                     href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless qs['view'] == 'table'),
                                  parts.map{|p|
                                     [{_: :a, class: :breadcrumb, href: bc += p + '/', c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
-                                 link[:feed, FeedIcon], {_: :a, href: '?UI', c: '⚗️', id: :UI}]},
+                                 link[:feed, FeedIcon], ({_: :a, href: '?UI', c: '⚗️', id: :UI} unless localNode?)]},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?
                                HTML.keyval (Webize::HTML.webizeHash env), env
