@@ -85,8 +85,8 @@ module Webize
           e['href'] = base.join e['href'] unless ref.host              # resolve relative references
           e['class'] = css.join ' '                                    # node CSS-class
         elsif e['id']                                                  # identified node without a link
-          e.set_attribute 'class', 'identified'                        # node CSS-class
-          e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id']}</span> " # add link to node
+          e.set_attribute 'class', 'identified'
+          e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id']}</span> " unless e.name == 'p'
         end
         e['src'] = base.join e['src'] if e['src'] && !e['src'].R.host} # resolve media location
 
