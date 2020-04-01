@@ -356,10 +356,6 @@ class WebResource
       "color: black; background-color: #{color}; border-color: #{color}"
     end
 
-    def self.colorizeFG color = '#%06x' % (rand 16777216)
-      "background-color: black; color: #{color}; border-color: #{color}"
-    end
-
     # Graph -> HTML
     def htmlDocument graph=nil
       graph ||= env[:graph] = treeFromGraph
@@ -400,7 +396,7 @@ class WebResource
                                     href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless qs['view'] == 'table'),
                                  parts.map{|p|
                                     [{_: :a, class: :breadcrumb, href: bc += p + '/', c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
-                                 link[:feed, FeedIcon]]},
+                                 link[:feed, FeedIcon], {_: :a, href: '?UI', c: '⚗️', id: :UI}]},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?
                                HTML.keyval (Webize::HTML.webizeHash env), env
@@ -627,7 +623,7 @@ class WebResource
       {_: :table, class: :links,
        c: links.group_by{|l|l.R.host}.map{|host, paths|
          {_: :tr,
-          c: [{_: :td, style: 'text-align: right', c: host ? {_: :a, href: '//' + host, c: host, style: env[:colors][host] ||= HTML.colorize} : []},
+          c: [{_: :td, class: :host, c: host ? {_: :a, href: '//' + host, c: host, style: (env[:colors][host] ||= HTML.colorize)[14..-1].sub('background-','')} : []},
               {_: :td, c: paths.map{|path| Markup[Link][path,env]}}]}}}}
 
     Markup[Link] = -> ref, env=nil {

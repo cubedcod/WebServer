@@ -16,6 +16,8 @@
 .fromto:only-child {padding: .1em 64ex 256ex 64ex; margin: 0 -64ex -256ex -64ex}
 .identified, .post {border: 1px solid #222; background-color: #000; color: #fff}
 .links {float: right}
+.links .host {text-align: right}
+.links .host a {border-width: 1px; border-style: dotted}
 .post {border-radius: .42em; max-width: 88ex; padding: .2em; margin: .166em}
 .quote {background-color: #ccc; color: #000; padding-left: .3em}
 .thumb {max-width: 22em}
@@ -31,9 +33,10 @@ a {text-decoration: none; border-radius: .14em}
 a.date {float: right; white-space: nowrap; background-color: #000; color: #999; border-radius: .2em; font-size: .8em}
 a.id {float: right}
 a.idlink {color: #aaa; background-color: #000; font-size: .72em; vertical-align: bottom}
-a.uri > span.uri {font-size: 0.8em; font-weight: normal; color: #888}
-a.uri {background-color: #fff; border-radius: .28em; color: #000; border-style: solid; border-color: #ccc; border-width: 0 0 0 .2em; max-width: 42ex; overflow: hidden; margin: .1em; font-weight: bold}
-a.uri.path {background-color: #000; color: #fff; border-width: 1px 1px 1px .2em}
+a.uri > span.uri {font-size: 0.8em; font-weight: normal; color: #777}
+a.uri {background-color: #fff; border-radius: .28em; color: #000; border-style: solid; border-color: #ddd; border-width: 0 0 0 .24em; max-width: 42ex; overflow: hidden; margin: .1em; font-weight: bold}
+a.uri.path {background-color: #bababa}
+a.uri.path > span.uri {color: #333}
 blockquote {background-color: #333; color: #fff; border-radius: .2em; border-width: 0 0 0 .5em; border-style: solid; border-color: #888; margin: 0 0 0 .1em}
 body {font-family: sans-serif; margin: 2em; background-color: #555; color: #fff}
 div,p,a,li,ul,ol,form,svg { display: inline-block }
