@@ -145,6 +145,9 @@ wired.trib.al
       r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination
       r.fetch options}
 
+    # TikTok
+    %w(v19.muscdn.com s16.tiktokcdn.com).map{|host| GET host}
+
     # Twitter
     Allow 'api.twitter.com'; Allow 'twitter.com'
     FollowTwits = -> r {FileUtils.mkdir 'twitter'; `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|n| FileUtils.touch 'twitter/.' + n}}
