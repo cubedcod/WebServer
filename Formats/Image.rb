@@ -28,6 +28,26 @@ module Webize
       end
     end
   end
+  module HTML
+
+    # img @src attributes
+    SRCnotSRC = %w(
+data-baseurl
+data-delayed-url
+data-hi-res-src
+data-image
+data-img-src
+data-lazy-img
+data-lazy-src
+data-menuimg
+data-native-src
+data-original
+data-raw-src
+data-src
+image-src
+)
+
+  end
   module JPEG
     class Format < RDF::Format
       content_type 'image/jpeg',

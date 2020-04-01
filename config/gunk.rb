@@ -31,7 +31,12 @@ zerg(net)?)
 ([-._\/'"\s:?&=~%]|$)|
 \.(eot|gif\?|otf|ttf|woff2?))xi
 
-    # script pattern
+  end
+end
+module Webize
+  module HTML
+
+    # <script> pattern
     GunkExec = %r(_0x[0-9a-f]|(\b|[_'"])(
 3gl|6sc|
 ad(dtoany|nxs)?|.*analytic.*|apptentive.*|auction|
@@ -48,33 +53,6 @@ sail-horizon|scorecard.*|segment|snapkit|sophi|sp-prod|ssp|sumo|survicate|
 taboola|.*targeting.*|tinypass|tiqcdn|.*track.*|twitter|tynt|
 viglink|visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk
 )(\b|[_'"]))xi
-
-    # script pattern with JSON state data
-    InitialState = /(bio|bootstrap|client|global|init(ial)?|preload(ed)?|shared|site).?(content|data|env|st(ate|ore))|SCRIPTS_LOADED/i
-  end
-end
-module Webize
-  module HTML
-
-    # CSS selector for script elements
-    Scripts = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script"
-
-    # alternatives to @src
-    SRCnotSRC = %w(
-data-baseurl
-data-delayed-url
-data-hi-res-src
-data-image
-data-img-src
-data-lazy-img
-data-lazy-src
-data-menuimg
-data-native-src
-data-original
-data-raw-src
-data-src
-image-src
-)
 
   end
 end

@@ -3,6 +3,8 @@ module Webize
   module HTML
     include WebResource::URIs
 
+    Scripts = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script" # CSS selector for script elements
+
     # clean HTML (string)
     def self.clean body
       doc = Nokogiri::HTML.parse body.encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ') # parse to Nokogiri doc

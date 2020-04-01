@@ -111,6 +111,7 @@ wired.trib.al
 ).map{|h| Allow h}
 
     # Google
+    GET 'googleads.g.doubleclick.net', -> r {a=r.query_values['adurl'].R; a.query=''; [301, {'Location' => a }, []]}
     GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
     GET 'www.google.com', -> r {
       case r.path
