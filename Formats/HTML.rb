@@ -346,12 +346,6 @@ class WebResource
       Schema + 'WebPage' => Post,
     }
 
-    def chrono_sort
-      env[:sort] = 'date'
-      env[:view] = 'table'
-      self
-    end
-
     def self.colorize color = '#%06x' % (rand 16777216)
       "color: black; background-color: #{color}; border-color: #{color}"
     end
@@ -363,12 +357,15 @@ class WebResource
       env[:images] ||= {}
       env[:colors] ||= {}
       env[:links] ||= {}
+      if path.match?(HourDir) || TemporalHosts.member?(host)
+        env[:sort] = 'date'
+        env[:view] = 'table'
+      end
       if env[:summary] || ((qs.has_key?('Q')||qs.has_key?('q')) && !qs.has_key?('fullContent'))
         expanded = HTTP.qs qs.merge({'fullContent' => nil})
         env[:links][:full] = expanded
         expander = {_: :a, id: :expand, c: '&#11206;', href: expanded}
       end
-      chrono_sort if path.match?(HourDir) || TemporalHosts.member?(host)
       titleRes = ['', path, host && path && ('https://' + host + path)].compact.find{|u| graph[u] && graph[u][Title]}
       bc = '/' # breadcrumb path
       icon = ('//' + (host || 'localhost') + '/favicon.ico').R # site icon

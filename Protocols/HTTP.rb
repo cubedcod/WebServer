@@ -17,13 +17,6 @@ class WebResource
     # common handlers
     GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['q'])}, []]}
     NoGunk  = -> r {r.uri.match?(Gunk) && (r.query_values||{})['allow'] != ServerKey && r.deny || r.fetch}
-    RootIndex = -> r {
-      if r.path == '/' || r.path.match?(GlobChars)
-        r.nodeResponse
-      else
-        r.chrono_sort if r.parts.size == 1
-        NoGunk[r]
-      end}
 
     def self.Allow host
       AllowedHosts[host] = true
