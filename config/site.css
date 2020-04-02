@@ -32,7 +32,7 @@
 a {text-decoration: none; border-radius: .14em}
 a.date {float: right; white-space: nowrap; background-color: #000; color: #999; border-radius: .2em; font-size: .8em}
 a.id {float: right}
-a.idlink {color: #aaa; background-color: #000; font-size: .72em; vertical-align: bottom}
+a.idlink {color: #aaa; font-size: .72em; vertical-align: bottom}
 a.uri > span.uri {font-size: 0.8em; font-weight: normal; color: #777}
 a.uri {background-color: #fff; border-radius: .28em; color: #000; border-style: solid; border-color: #ddd; border-width: 0 0 0 .24em; max-width: 42ex; overflow: hidden; margin: .1em; font-weight: bold}
 a.uri.path > span.uri {color: #333}

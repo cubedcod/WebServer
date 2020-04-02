@@ -100,8 +100,8 @@ wired.trib.al
 
     GET 'gate.sc', GotoURL
 
-    # script-library hosts
-    %w(ajax.googleapis.com cdnjs.cloudflare.com stackpath.bootstrapcdn.com).map{|host| GET host}
+    # CDN scripts
+    %w(ajax.googleapis.com a-v2.sndcdn.com cdnjs.cloudflare.com stackpath.bootstrapcdn.com).map{|host| GET host}
 
     # video API stuff
     Allow 'entitlement.auth.adobe.com'
