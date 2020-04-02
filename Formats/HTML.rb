@@ -301,7 +301,6 @@ class WebResource
       SIOC + 'MailMessage' => '✉️',
       SIOC + 'MicroblogPost' => '🐦',
       SIOC + 'attachment' => '✉',
-      SIOC + 'generator' => '⚙',
       SIOC + 'reply_of' => '↩',
       SIOC + 'richContent' => '',
       Schema + 'height' => '↕',
