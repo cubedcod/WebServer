@@ -104,13 +104,10 @@ wired.trib.al
     %w(ajax.googleapis.com a-v2.sndcdn.com cdnjs.cloudflare.com stackpath.bootstrapcdn.com).map{|host| GET host}
 
     # video API stuff
-    Allow 'entitlement.auth.adobe.com'
-    Allow 'sp.auth.adobe.com'
-    Allow 'tkx.apis.anvato.net'
-    Allow 'www.youtube.com'
     GET 'ssl.p.jwpcdn.com'
-    %w(edge.api.brightcove.com players.brightcove.net secure.brightcove.com
-).map{|h| Allow h}
+    %w(entitlement.auth.adobe.com sp.auth.adobe.com tkx.apis.anvato.net
+edge.api.brightcove.com players.brightcove.net secure.brightcove.com
+graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
 
     # Google
     GET 'googleads.g.doubleclick.net', -> r {((q = r.query_values) && (u = q['adurl'])) ? (u = u.R; u.query = ''; [301,{'Location' => u},[]]) : r.deny}
