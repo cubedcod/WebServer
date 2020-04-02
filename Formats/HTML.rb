@@ -368,7 +368,7 @@ class WebResource
         env[:links][:full] = expanded
         expander = {_: :a, id: :expand, c: '&#11206;', href: expanded}
       end
-      chrono_sort if path.match? HourDir
+      chrono_sort if path.match?(HourDir) || TemporalHosts.member?(host)
       titleRes = ['', path, host && path && ('https://' + host + path)].compact.find{|u| graph[u] && graph[u][Title]}
       bc = '/' # breadcrumb path
       icon = ('//' + (host || 'localhost') + '/favicon.ico').R # site icon

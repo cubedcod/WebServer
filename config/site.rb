@@ -41,6 +41,7 @@ class WebResource
     CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|googleapis|netdna.*|yimg)\.(com|io|net)$/
     CookieHost = /(^|\.)(akamai(hd)?|bandcamp|ttvnw|twitter)\.(com|net)$/
     POSThost = /^video.*.ttvnw.net$/
+    TemporalHosts = %w(gitter.im twitter.com www.reddit.com)
     UIhosts = %w(bandcamp.com players.brightcove.net timbl.com www.redditmedia.com)
 
     # local static resources
@@ -137,9 +138,9 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
           [302, {'Location' => ['https://www.reddit.com', link.path, '?', link.query].join}, []]
         end}}
 
-    GET 'www.reddit.com', -> r {    r.chrono_sort                  # chronological sorting
+    GET 'www.reddit.com', -> r {
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? # MIME preference
-      r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination
+      r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination pointer
       r.fetch options}
 
     # TikTok
@@ -155,7 +156,7 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
       end
       r.fetch}
     Twitter = -> r {
-      r.chrono_sort.TwitterAuth
+      r.TwitterAuth
       # feed
       (if r.path == '/'
        subscriptions = Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}
