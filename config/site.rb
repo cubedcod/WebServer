@@ -213,7 +213,7 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
         [301, {'Location' => r.query_values['q'] || r.query_values['u']}, []]
       elsif r.path == '/'
         [301, {'Location' => '/feed/subscriptions'}, []]
-      elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results signin user watch watch_videos yts).member?(path) || (r.query_values||{})['allow'] == ServerKey
+      elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results s signin user watch watch_videos yts).member?(path) || (r.query_values||{})['allow'] == ServerKey
         NoGunk[r.upstreamUI]
       else
         r.deny

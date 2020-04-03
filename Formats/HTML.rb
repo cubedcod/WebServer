@@ -730,7 +730,7 @@ class WebResource
         env[:images][src] = true
         if src.match /youtu/
           id = (v.query_values||{})['v'] || v.parts[-1]
-          {_: :iframe, width: 560, height: 315, src: "https://www.youtube.com/embed/#{id}", frameborder: 0, allowfullscreen: :true}
+          {_: :iframe, width: 560, height: 315, src: "https://www.youtube.com/embed/#{id}", frameborder: 0, allow: 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture', allowfullscreen: :true}
         else
           [dash ? '<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>' : nil,
            {class: :video,
