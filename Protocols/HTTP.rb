@@ -27,7 +27,7 @@ class WebResource
     end
 
     def allowCDN?
-      return true if ENV.has_key? 'DIRTY'
+      return true if AllowedHosts.has_key? host
       (CacheFormats - %w(gif html js)).member?(ext.downcase) && !path.match?(Gunk)
     end
 
@@ -345,7 +345,7 @@ class WebResource
       elsif handler = HostGET[host]                         # host handler
         handler[self]
       elsif host.match? CDNhost                             # CDN content
-        (AllowedHosts.has_key?(host) || allowCDN?) ? fetch : deny
+        allowCDN? ? fetch : deny
       elsif gunk?                                           # blocked content
         deny
       else                                                  # remote node

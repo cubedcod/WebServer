@@ -123,6 +123,9 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
         r.deny
       end}
 
+    # Mixlr
+    Allow 'd23yw4k24ca21h.cloudfront.net'
+
     # Mozilla
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
