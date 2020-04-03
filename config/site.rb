@@ -74,7 +74,7 @@ econ.trib.al
 feedproxy.google.com
 feeds.feedburner.com
 feeds.reuters.com
-hubs.ly
+hubs.ly okt.to
 reut.rs
 rss.cnn.com
 rssfeeds.usatoday.com

@@ -234,6 +234,8 @@ module Webize
               puts [k,v].join "\t" unless k.to_s.match? /^(drop|http)/
               yield subject, k, v unless k == :drop
             end
+          elsif m['http-equiv'] == 'refresh'
+            yield subject, Link, m['content'].split('url=')[-1].R
           end}
 
         # <title>
