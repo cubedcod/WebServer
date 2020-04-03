@@ -109,6 +109,15 @@ wired.trib.al
     %w(entitlement.auth.adobe.com sp.auth.adobe.com tkx.apis.anvato.net
 edge.api.brightcove.com players.brightcove.net secure.brightcove.com
 graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
+    # Gitter
+    GET 'gitter.im', -> r {
+      if r.parts[0] == 'api'
+        token = ('//' + r.host + '/.token').R
+        if !r.env.has_key?('x-access-token') && token.node.exist?
+          r.env['x-access-token'] = token.readFile
+        end
+      end
+      NoGunk[r]}
 
     # Google
     GET 'googleads.g.doubleclick.net', -> r {((q = r.query_values) && (u = q['adurl'])) ? (u = u.R; u.query = ''; [301,{'Location' => u},[]]) : r.deny}
@@ -321,7 +330,25 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
   end
 
   def GitterHTML doc
-    position = 0
+    # auth stuff
+    doc.css('script').map{|script|
+      text = script.inner_text
+      if text.match? /^window.gitterClientEnv/
+        if token = text.match(/accessToken":"([^"]+)/)
+          token = token[1]
+          tFile = 'im/gitter/.token'.R
+          unless tFile.node.exist? && tFile.readFile == token
+            tFile.writeFile token
+            puts ['🎫 ', host, token].join ' '
+          end
+        end
+        if room = text.match(/"id":"([^"]+)/)
+          env[:links][:prev] = '/api/v1/rooms/' + room[1] + '/chatMessages?lookups%5B%5D=user&includeThreads=false&limit=47&rdf'
+        end
+      end}
+
+    # messages
+    messageCount = 0
     doc.css('.chat-item').map{|msg|
       id = msg.classes.grep(/^model-id/)[0].split('-')[-1] # find ID
       subject = 'https://gitter.im' + path + '?at=' + id   # subject URI
@@ -336,7 +363,7 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
       if image = msg.css('.avatar__image')[0]
         yield subject, Image, image['src'].R
       end
-      yield subject, Date, '%03d' % position += 1
+      yield subject, Date, '%03d' % messageCount += 1
       msg.remove }
     doc.css('header').map &:remove
   end
@@ -346,6 +373,7 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
     return unless items = tree['items']
     items.map{|item|
       id = item['id']
+      env[:links][:prev] ||= '/api/v1/rooms/' + parts[3] + '/chatMessages?lookups%5B%5D=user&includeThreads=false&beforeId=' + id + '&limit=47&rdf'
       date = item['sent']
       uid = item['fromUser']
       user = tree['lookups']['users'][uid]
