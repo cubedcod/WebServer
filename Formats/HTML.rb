@@ -34,7 +34,7 @@ module Webize
       doc.css("iframe, img, [type='image'], link, script").map{|s|
         text = s.inner_text     # inline
         if s['type'] != 'application/json' && s['type'] != 'application/ld+json' && !text.match?(InitialState) && text.match?(GunkExec)
-          log << "🚩 " + s.to_s.size.to_s + ' ' + text.match(GunkExec)[2][0..42]
+          log << "🚩 " + s.to_s.size.to_s + ' ' + (text.match(GunkExec)[2]||'')[0..42]
           s.remove
         end
         %w(href src).map{|attr| # reference
@@ -448,9 +448,10 @@ class WebResource
          type = (k ? k.to_s : '#notype').R
          ([{_: :tr, name: type.fragment || (type.path && type.basename),
             c: ["\n",
-                {_: :td, class: 'k', c: Markup[Type][type]}, "\n",
-                {_: :td, class: 'v', c: vs.map{|v|
-                   [(value k, v, env), ' ']}}]}, "\n"] unless k=='uri' && vs[0] && vs[0].to_s.match?(/^_:/))}}
+                {_: :td, class: 'k',
+                 c: Markup[Type][type]}, "\n",
+                {_: :td, class: 'v',
+                 c: k==Link ? MarkupLinks[vs, env] : vs.map{|v|[(value k, v, env), ' ']}}]}, "\n"] unless k == 'uri' && vs[0] && vs[0].to_s.match?(/^_:/))}}
     end
 
     # Markup -> HTML
@@ -530,8 +531,8 @@ class WebResource
               ]}}]}
     end
 
+    # values -> Markup
 
-    # Value -> Markup
     def self.value type, v, env
       if [Abstract, Content, 'http://rdfs.org/sioc/ns#richContent'].member? type
         v                # prepared HTML content
@@ -557,8 +558,6 @@ class WebResource
         CGI.escapeHTML v.to_s
       end
     end
-
-    # markup lambdas
 
     Markup['uri'] = -> uri, env=nil {uri.R}
 
