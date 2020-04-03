@@ -433,6 +433,7 @@ class WebResource
       'reply_count' => :drop,
       'request-id' => :drop,
       'resource-type' => Type,
+      'revisit-after' => :drop,
       'robots' => :drop,
       'sailthru.author' => Creator,
       'sailthru.contentid' => :drop,

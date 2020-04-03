@@ -137,11 +137,9 @@ class WebResource
         unless [204, 304].member? status
           puts [action_icon, status_icon, format_icon, triple_count,
                 env[:refhost] ? ["\e[#{color}m", env[:refhost], "\e[0m→"] : nil,
-                "\e[#{color}#{thirdparty ? ';7' : ''}m", (thirdparty || format_icon=='🗒') ? resource.uri : resource.path[1..-1], "\e[0m",
-                head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil,
-                #env['HTTP_ACCEPT'],
-               ].
-                 flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
+                "\e[#{color}#{thirdparty ? ';7' : ''}m", resource.uri, "\e[0m",
+                head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil, #env['HTTP_ACCEPT']
+               ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
         end
 
         [status, head, body]} # response
