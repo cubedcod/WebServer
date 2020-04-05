@@ -35,6 +35,7 @@ class WebResource
       'HandheldFriendly' => :drop,
       'Keywords' => Abstract,
       'MobileOptimized' => :drop,
+      'Modified' => Date,
       'P3Pv1' => :drop,
       'ROBOTS' => :drop,
       'SHORTCUT ICON' => Image,
