@@ -96,7 +96,7 @@ module Webize
           @base.send hostTriples, @json, &f
         else # generic triplr
           Webize::HTML.webizeValue(@json){|h|
-            if s = h['uri'] || h['url'] || ((h['id']||h['ID']) && ('#' + (h['id']||h['ID']).to_s))
+            if s = h['uri'] || h['url'] || h['link'] || ((h['id']||h['ID']) && ('#' + (h['id']||h['ID']).to_s))
               puts s if s.class == Array || s.class == Hash
               s = s.to_s.R
               yield s, Type, Post.R if h.has_key? 'content'
