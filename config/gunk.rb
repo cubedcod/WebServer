@@ -39,7 +39,7 @@ module Webize
     # <script> pattern
     GunkExec = %r(_0x[0-9a-f]|(\b|[_'"])(
 3gl|6sc|
-ad(dtoany|nxs)?|.*analytic.*|apptentive.*|auction|
+ad(dtoany|nxs)?|.*analytic.*|apptentive.*|auction|aswpsdkus|
 bid(d(er|ing)|s)?|bing|bouncee?x.*|
 cedexis|chartbeat|clickability|cloudfront|COMSCORE|consent|cr(azyegg|iteo)|c(rss)?pxl?|crwdcntrl|
 doubleclick|d[fm]p|driftt|
@@ -47,7 +47,7 @@ ensighten|evidon|facebook|feedbackify|
 google.*|g(a|dpr|pt|t(ag|m))|gu-web|gumgum|gwallet|
 hotjar|imrworldwide|indexww|intercom|ipify|kr(ux|xd)|licdn|linkedin|
 mar(feel|keto)|ml314|moatads|mpulse|newrelic|newsmax|npttech|nreum|ntv.io|
-olark|outbrain|
+olark|OneSignal|outbrain|
 parsely|petametrics|pgmcdn|pinimg|pressboard|pushcrew|quantserve|quora|revcontent|
 sail-horizon|scorecard.*|segment|snapkit|sophi|sp-prod|ssp|sumo|survicate|
 taboola|.*targeting.*|tinypass|tiqcdn|.*track.*|twitter|tynt|
