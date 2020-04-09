@@ -94,12 +94,14 @@ class WebResource
                         '🔉'
                       elsif %w(mp4 webm).member?(ext) || mime.match?(/^video/)
                         '🎬'
+                      elsif ext == 'txt' || mime.match?(/text\/plain/)
+                        '🇹'
                       elsif ext == 'ttl' || mime.match?(/text\/turtle/)
                         '🐢'
                       elsif %w(htm html).member?(ext) || mime.match?(/html/)
                         '📃'
                       elsif mime.match? /^(application\/)?font/
-                        '🇹 '
+                        '🇦'
                       elsif mime.match? /octet.stream/
                         '🧱'
                       else

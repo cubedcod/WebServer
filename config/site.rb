@@ -41,7 +41,7 @@ class WebResource
     CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|googleapis|netdna.*|yimg)\.(com|io|net)$/
     CookieHost = /(^|\.)(akamai(hd)?|bandcamp|ttvnw|twitter)\.(com|net)$/
     POSThost = /^video.*.ttvnw.net$/
-    TemporalHosts = %w(gitter.im www.instagram.com twitter.com www.reddit.com)
+    TemporalHosts = %w(api.twitter.com gitter.im www.instagram.com twitter.com www.reddit.com)
     UIhosts = %w(bandcamp.com players.brightcove.net timbl.com www.redditmedia.com)
 
     # local static resources

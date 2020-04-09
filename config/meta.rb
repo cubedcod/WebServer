@@ -478,6 +478,7 @@ class WebResource
       'soundcloud:follower_count' => :drop,
       'soundcloud:sound_count' => :drop,
       'spoiler_text' => Abstract,
+      'sponsored' => :drop,
       'state' => :drop,
       'static_url' => Link,
       'statuses_count' => :drop,
