@@ -104,6 +104,7 @@ class WebResource
       'article:suggested-social-copy' => Abstract,
       'article:tag' => Abstract,
       'article:title' => Title,
+      'articleBody' => Content,
       'articleid' => :drop,
       'aspectRatio' => :drop,
       'assets' => :drop,

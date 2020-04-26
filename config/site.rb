@@ -160,15 +160,18 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
 
     # Twitter
     Allow 'api.twitter.com'; Allow 'twitter.com'
+
     FollowTwits = -> {
       FileUtils.mkdir 'twitter' unless File.directory? 'twitter'
       `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|n| FileUtils.touch 'twitter/.' + n}}
+
     GET 'api.twitter.com', -> r {
       if r.env.keys.grep(/token/i).empty?
         r.env['HTTP_COOKIE'] = 'twitter/.cookie'.R.readFile
         r.TwitterAuth
       end
       r.fetch}
+
     Twitter = -> r {
       r.TwitterAuth
       # feed
@@ -230,6 +233,7 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
       else
         r.deny
       end}
+
     POST 'www.youtube.com', -> r {
       if r.parts.member? 'stats'
         r.denyPOST

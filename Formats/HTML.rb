@@ -81,14 +81,14 @@ module Webize
           ref = e['href'].R                                            # show full(er) URL in text
           e.add_child " <span class='uri'>#{CGI.escapeHTML e['href'].sub(/^https?:..(www.)?/,'')[0..127]}</span> "
           e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # identify node
-          css = [:uri]; css.push :path if !ref.host || (ref.host == base.host) # local site or global link
+          css = [:uri]; css.push :path if !ref.host || (ref.host == base.host) # style as local or global link
           e['href'] = base.join e['href'] unless ref.host              # resolve relative references
           e['class'] = css.join ' '                                    # node CSS-class
-        elsif e['id']                                                  # identified node without a link
+        elsif e['id']                                                  # identified node without a reference
           e.set_attribute 'class', 'identified'
           e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id'] unless e.name == 'p'}</span> "
         end
-        e['src'] = base.join e['src'] if e['src'] && !e['src'].R.host} # resolve media location
+        e['src'] = base.join e['src'] if e['src'] && !e['src'].R.host} # resolve media locations
 
       html.to_xhtml indent: 0
     end
@@ -186,16 +186,17 @@ module Webize
             yield s, p, o unless p == :drop} # emit triple
         end
 
-        # embeds and links
+        # embeds
         n.css('frame, iframe').map{|frame|
           if src = frame.attr('src')
             yield subject, Link, src.R
           end}
 
+        # typed references
         n.css('[rel][href]').map{|m|
           if rel = m.attr("rel") # predicate
             if v = m.attr("href") # object
-              rel.split(' ').map{|k|
+              rel.split(/[\s,]+/).map{|k|
                 @base.env[:links][:prev] ||= v if k == 'prev'
                 @base.env[:links][:next] ||= v if k == 'next'
                 @base.env[:links][:feed] ||= v if k == 'alternate' && v.R.path&.match?(/^\/feed\/?$/)
