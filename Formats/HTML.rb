@@ -25,7 +25,6 @@ module Webize
 
     # clean HTML (nokogiri instance)
     def self.clean_doc doc
-      return if ENV.has_key? 'DIRTY'
       # strip fonts and preload-directives
       doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
 
@@ -51,11 +50,11 @@ module Webize
       puts log.join ' ' unless log.empty?
     end
 
-    # format to local conventions
+    # format to local convention
     def self.format body, base
       html = Nokogiri::HTML.fragment body
       html.css('iframe, style, link[rel="stylesheet"], ' + Scripts).remove
-      clean_doc html                                                   # remove misc gunk
+      clean_doc html                                                   # strip misc gunk
 
       # <img>
       html.css('[style*="background-image"]').map{|node|               # map references to classic image tag

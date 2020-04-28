@@ -14,7 +14,6 @@ which apt-add-repository && su -c 'apt-get install graphicsmagick git ruby ruby-
 which pkg && pkg install graphicsmagick git ruby grep file findutils pkg-config libiconv libexif libprotobuf libxslt clang tmux squid make rsync libffi python libcap libcrypt openssl-tool zlib
 
 # Ruby
-rm Gemfile.lock
 which bundle || gem install bundler
 bundle install
 
