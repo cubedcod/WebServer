@@ -35,7 +35,7 @@ class WebResource
     # format configuration
     CacheFormats = %w(css geojson gif html ico jpeg jpg js json m3u8 m4a md mp3 mp4 opus pdf png svg ts webm webp xml)
     NoScan = %w(.css .gif .ico .jpg .js .png .svg .webm)
-    StaticFormats = CacheFormats - %w(json html xml)
+    StaticFormats = CacheFormats - %w(json html md xml)
 
     # host configuration
     CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|googleapis|netdna.*|yimg)\.(com|io|net)$/
