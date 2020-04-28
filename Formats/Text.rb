@@ -188,6 +188,7 @@ module Webize
 
       def initialize(input = $stdin, options = {}, &block)
         @doc = input.respond_to?(:read) ? input.read : input
+        @base = options[:base_uri].R
         @subject = (options[:base_uri] || '#textfile').R
         if block_given?
           case block.arity
@@ -210,7 +211,7 @@ module Webize
       end
 
       def markdown_triples
-        yield @subject, Content, ::Redcarpet::Markdown.new(::Redcarpet::Render::Pygment, fenced_code_blocks: true).render(@doc)
+        yield @subject, Content, (Webize::HTML.format ::Redcarpet::Markdown.new(::Redcarpet::Render::Pygment, fenced_code_blocks: true).render(@doc), @base)
       end
     end
   end
