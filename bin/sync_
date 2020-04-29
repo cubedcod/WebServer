@@ -1,4 +1,0 @@
-#!/bin/sh
-cd
-rsync -e 'ssh -p 8022' -avR $1 $DATAPEER:
-rsync -e 'ssh -p 8022' -avR $DATAPEER:$1 .
