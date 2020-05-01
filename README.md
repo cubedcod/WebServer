@@ -16,9 +16,11 @@ in theory, this proxy can go away once clients and servers get better, but in ty
     cd; mkdir src; cd src
     git clone https://gitlab.com/ix/WebServer
 
-## DEPENDENCIES
+## INSTALL
 
-    ./DEPENDENCIES.sh
+there is no install step, code can be run from the checkout dir or moved to a library dir of your taste. for alpine/arch/debian/termux deps:
+
+    sh DEPENDENCIES
 
 ## USAGE
 
@@ -26,8 +28,11 @@ in theory, this proxy can go away once clients and servers get better, but in ty
 
 alternately:
 
-    cd $HOME/web
-    squid -f ../src/WebServer/config/squid.conf
+    cd $HOME/web && squid -f ../src/WebServer/config/squid.conf
     unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c ../src/WebServer/config/unicorn.rb ../src/WebServer/config/rack.ru
+
+launch a browser using the running proxy:
+
+    http_proxy=http://localhost:8080 https_proxy=http://localhost:8080 no_proxy=localhost palemoon
 
 advanced scenarios like transparent-proxy require network or SSL configuration. see [bin/](bin/) for sample scripts
