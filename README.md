@@ -24,14 +24,14 @@ there is no install step, code can be run from the checkout dir or moved to a li
 
 ## USAGE
 
+server
+
     ./bin/session
-
-alternately:
-
+    #alternately:
     cd $HOME/web && squid -f ../src/WebServer/config/squid.conf
     unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c ../src/WebServer/config/unicorn.rb ../src/WebServer/config/rack.ru
 
-launch a browser using the running proxy:
+client
 
     http_proxy=http://localhost:8080 https_proxy=http://localhost:8080 no_proxy=localhost palemoon
 
