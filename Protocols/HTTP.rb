@@ -269,7 +269,7 @@ class WebResource
           storage.R.writeFile body                            # cache static representation
           reader = RDF::Reader.for content_type: format       # read graph-data
           reader.new(body, base_uri: self){|_|(env[:repository] ||= RDF::Repository.new) << _ } if reader && !NoScan.member?(formatExt)
-          return self if options[:intermediate]               # intermediate fetch, no HTTP response
+          return self if options[:intermediate]               # intermediate fetch, no immediate response or indexing
           saveRDF if reader                                   # cache graph-data
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]} # read upstream metadata
@@ -286,9 +286,9 @@ class WebResource
           env[:resp]['Set-Cookie'] ||= h['set-cookie'] if h['set-cookie'] && allowCookies?
           if static
             env[:resp]['Content-Length'] = body.bytesize.to_s # content size
-            [200, env[:resp], [body]]                         # upstream doc
+            [200, env[:resp], [body]]                         # upstream document
           else
-            graphResponse                                     # document
+            graphResponse                                     # locally-generated document
           end
         end
       end

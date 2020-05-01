@@ -139,7 +139,7 @@ module Webize
                    text/x-ruby;q=0.8
                    text/x-shellscript;q=0.8
                    ),
-                   extensions: [:bash, :c, :cpp, :gemspec, :h, :hs, :js, :pl, :py, :rb, :sh]
+                   extensions: [:bash, :c, :cpp, :gemspec, :go, :h, :hs, :js, :pl, :py, :rb, :sh]
       content_encoding 'utf-8'
       reader { Reader }
     end
