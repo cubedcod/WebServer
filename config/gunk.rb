@@ -16,7 +16,7 @@ impression|indexww|
 kr(ux|xd).*|
 log(event|g(er|ing))|(app|s)?
 m(a(rfeel|tomo)|e(asurement|t(er|rics?))|ms|odal|pulse|tr)|
-newrelic|.*notifications?.*|
+newrelic|
 o(m(niture|tr)|nboarding|nesignal|ptanon|utbrain)|
 p(aywall|er(imeter-?x|sonali[sz](ation|e))|i(wik|xel(propagate)?)|lacement|op(down|over|up)|orpoiseant|owaboot|repopulator|ro(fitwell|m(o(tion)?s?|pt))|ubmatic)|/pv|
 quantcast|
