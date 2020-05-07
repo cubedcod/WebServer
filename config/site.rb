@@ -139,11 +139,14 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # Reddit
-    GET 'old.reddit.com', -> r {
+    [*%w(gateway gql oauth www).map{|h| h + '.reddit.com' },
+     *%w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it)].map{|h| Allow h }
+
+    GET 'old.reddit.com', -> r { # use host to find next-page pointer, missing in HTTP Headers (old + new UI) and HTML + RSS representations (new UI)
       r.fetch.yield_self{|status,head,body|
         if status.to_s.match? /^30/
           [status, head, body]
-        else # find next-page pointer, missing in HTTP Headers (old & new) and HTML & RSS (new)
+        else
           links = []
           body[0].scan(/href="([^"]+after=[^"]+)/){|link| links << CGI.unescapeHTML(link[0]).R }
           link = links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]
@@ -151,7 +154,7 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
         end}}
 
     GET 'www.reddit.com', -> r {
-      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? # MIME preference
+      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !%w(login).member?(r.parts[0]) # MIME preference
       r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination pointer
       r.fetch options}
 

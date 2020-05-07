@@ -390,6 +390,7 @@ class WebResource
       'og:video:url' => Video,
       'og:video:width' => :drop,
       'opened' => :drop,
+      'optimizely-sdk-key' => :drop,
       'p:domain_verify' => :drop,
       'page:primary_channel' => Abstract,
       'page:topic' => Abstract,

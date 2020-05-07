@@ -525,11 +525,11 @@ class WebResource
     def upstreamUI; env[:UX] = true; self end
 
     def upstreamUI?
-      env.has_key?(:UX) || ENV.has_key?('UX') ||         # request or process environment setting
+      env.has_key?(:UX) || ENV.has_key?('UX') ||         # (request or process) environment preference
       parts.member?('embed') ||                          # embed URL
-      UIhosts.member?(host) ||                           # hostname configuration
-      (env['HTTP_USER_AGENT']||'').match?(/Epiphany/) || # agent preference
-      query == 'UI'                                      # preference URL
+      UIhosts.member?(host) ||                           # host preference
+      (env['HTTP_USER_AGENT']||'').match?(/Epiphany/) || # user-agent preference
+      (query_values||{})['UI'] == 'upstream'             # query-arg preference
     end
   end
   include HTTP
