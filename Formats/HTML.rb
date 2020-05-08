@@ -392,10 +392,12 @@ class WebResource
                          c: [{class: :toolbox,
                               c: [(icon.node.exist? && icon.node.size != 0) ? {_: :a, href: '/', id: :host, c: {_: :img, src: icon.uri}} : (host || 'localhost').split('.').-(%w(com net org www)).reverse.map{|h| {_: :a, class: :breadcrumb, href: '/', c: h}},
                                  ({_: :a, id: :tabular, class: :icon, style: 'color: #555', c: '↨',
-                                    href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless qs['view'] == 'table'),
+                                   href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless qs['view'] == 'table'),
+                                 link[:feed, FeedIcon],
+                                 ({_: :a, href: (HTTP.qs qs.merge({'UI' => :upstream})), c: '⚗️', id: :UI} unless localNode?),
                                  parts.map{|p|
                                     [{_: :a, class: :breadcrumb, href: bc += p + '/', c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
-                                 link[:feed, FeedIcon], ({_: :a, href: '?UI', c: '⚗️', id: :UI} unless localNode?)]},
+                                 ]},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?
                                HTML.keyval (Webize::HTML.webizeHash env), env
