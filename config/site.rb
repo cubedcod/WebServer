@@ -132,6 +132,8 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
         r.deny
       end}
 
+    # Mixcloud
+    Allow 'www.mixcloud.com'
     # Mixlr
     Allow 'd23yw4k24ca21h.cloudfront.net'
 
@@ -216,7 +218,7 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
         end}}
 
     GET 'twitter.com', Twitter
-    GET 'mobile.twitter.com', Twitter
+    GET 'mobile.twitter.com', -> r {[302, {'Location' => 'https://twitter.com' + r.path}, []]}
 
     # Yahoo
     GET 'news.yahoo.com'
