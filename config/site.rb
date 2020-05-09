@@ -120,20 +120,10 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
       NoGunk[r]}
 
     # Google
-    %w(accounts mail).map{|h|
-      Allow h + '.google.com'}
-    %w(maps.gstatic.com www.gstatic.com).map{|host| GET host }
+    %w(accounts mail www).map{|h| Allow h + '.google.com'}
+    %w(maps www).map{|h| GET h + '.gstatic.com' }
     GET 'googleads.g.doubleclick.net', -> r {((q = r.query_values) && (u = q['adurl'])) ? (u = u.R; u.query = ''; [301,{'Location' => u},[]]) : r.deny}
     GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
-    GET 'www.google.com', -> r {
-      case r.path
-      when /^.(g?mail|ima?gr?es|maps|search)/
-        r.fetch
-      when '/url'
-        GotoURL[r]
-      else
-        r.deny
-      end}
 
     # Mixcloud
     Allow 'www.mixcloud.com'

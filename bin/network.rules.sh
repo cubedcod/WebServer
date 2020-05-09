@@ -43,19 +43,25 @@ ip6tables -A OUTPUT -o lo   -j ACCEPT
 
 # services
 open_TCP     22 SSH
-
 open_port    53 DNS
-
 open_port    67 DHCP
 open_port    68 DHCP
 
-open_port    80 HTTP
+# HTTP
+# transparently proxy traffic not originating from the proxy uid
 iptables  -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8082 -m owner ! --uid-owner $1
 ip6tables -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8082 -m owner ! --uid-owner $1
-
-#HTTPS - only allow proxy uid out, redirect others to transparent proxy port
 iptables  -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1
 ip6tables -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1
+# allow proxy uid direct network access
+iptables  -A INPUT  -p tcp --sport 80 -j ACCEPT -m owner --uid-owner $1
+ip6tables -A INPUT  -p tcp --sport 80 -j ACCEPT -m owner --uid-owner $1
+iptables  -A INPUT  -p tcp --dport 80 -j ACCEPT -m owner --uid-owner $1
+ip6tables -A INPUT  -p tcp --dport 80 -j ACCEPT -m owner --uid-owner $1
+iptables  -A OUTPUT -p tcp --sport 80 -j ACCEPT -m owner --uid-owner $1
+ip6tables -A OUTPUT -p tcp --sport 80 -j ACCEPT -m owner --uid-owner $1
+iptables  -A OUTPUT -p tcp --dport 80 -j ACCEPT -m owner --uid-owner $1
+ip6tables -A OUTPUT -p tcp --dport 80 -j ACCEPT -m owner --uid-owner $1
 iptables  -A INPUT  -p tcp --sport 443 -j ACCEPT -m owner --uid-owner $1
 ip6tables -A INPUT  -p tcp --sport 443 -j ACCEPT -m owner --uid-owner $1
 iptables  -A INPUT  -p tcp --dport 443 -j ACCEPT -m owner --uid-owner $1
