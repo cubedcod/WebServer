@@ -329,7 +329,6 @@ class WebResource
 
     def GET
       return [204,{},[]] if path.match? /gen(erate)?_?204$/ # connectivity-check response
-      cookies                                               # cache cookies
       unless path == '/'                                    # point to containing node
         up = File.dirname path
         up += '/' unless up == '/'

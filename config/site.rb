@@ -120,12 +120,14 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
       NoGunk[r]}
 
     # Google
+    %w(accounts mail).map{|h|
+      Allow h + '.google.com'}
+    %w(maps.gstatic.com www.gstatic.com).map{|host| GET host }
     GET 'googleads.g.doubleclick.net', -> r {((q = r.query_values) && (u = q['adurl'])) ? (u = u.R; u.query = ''; [301,{'Location' => u},[]]) : r.deny}
-    GET 'maps.gstatic.com'
     GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
     GET 'www.google.com', -> r {
       case r.path
-      when /^.(ima?gr?es|maps|search)/
+      when /^.(g?mail|ima?gr?es|maps|search)/
         r.fetch
       when '/url'
         GotoURL[r]
@@ -142,19 +144,24 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # Reddit
-    [*%w(gateway gql oauth www).map{|h| h + '.reddit.com' },
+    [*%w(gateway gql oauth old www).map{|h| h + '.reddit.com' },
      *%w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it)].map{|h| Allow h }
 
     GET 'old.reddit.com', -> r { # use host to find next-page pointer, missing in HTTP Headers (old + new UI) and HTML + RSS representations (new UI)
-      r.fetch.yield_self{|status,head,body|
-        if status.to_s.match? /^30/
-          [status, head, body]
-        else
-          links = []
-          body[0].scan(/href="([^"]+after=[^"]+)/){|link| links << CGI.unescapeHTML(link[0]).R }
-          link = links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]
-          [302, {'Location' => ['https://www.reddit.com', link.path, '?', link.query].join}, []]
-        end}}
+      if %w(api login).member? r.parts[0]
+        NoGunk[r]
+      else
+        r.fetch.yield_self{|status,head,body|
+          if status.to_s.match? /^30/
+            [status, head, body]
+          else
+            links = []
+            body[0].scan(/href="([^"]+after=[^"]+)/){|link| links << CGI.unescapeHTML(link[0]).R }
+            link = links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]
+            [302, {'Location' => ['https://www.reddit.com', link.path, '?', link.query].join}, []]
+          end}
+      end
+    }
 
     GET 'www.reddit.com', -> r {
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !%w(login).member?(r.parts[0]) # MIME preference
