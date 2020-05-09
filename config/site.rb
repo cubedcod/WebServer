@@ -42,7 +42,7 @@ class WebResource
     CookieHost = /(^|\.)(akamai(hd)?|bandcamp|ttvnw|twitter)\.(com|net)$/
     POSThost = /^video.*.ttvnw.net$/
     TemporalHosts = %w(api.twitter.com gitter.im news.ycombinator.com www.instagram.com twitter.com www.reddit.com)
-    UIhosts = %w(bandcamp.com duckduckgo.com players.brightcove.net timbl.com www.redditmedia.com)
+    UIhosts = %w(bandcamp.com duckduckgo.com players.brightcove.net soundcloud.com timbl.com www.redditmedia.com)
 
     # local static resources
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
@@ -121,6 +121,7 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
 
     # Google
     GET 'googleads.g.doubleclick.net', -> r {((q = r.query_values) && (u = q['adurl'])) ? (u = u.R; u.query = ''; [301,{'Location' => u},[]]) : r.deny}
+    GET 'maps.gstatic.com'
     GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
     GET 'www.google.com', -> r {
       case r.path

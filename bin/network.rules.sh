@@ -72,6 +72,7 @@ open_TCP   8022 SSH
 open_TCP   8000 HTTP
 open_TCP   8080 HTTP
 open_TCP   8081 HTTP
+open_port  8443 HFU
 open_port  8901 SDR
 open_TCP   9418 Git
 open_UDP   9993 ZeroTier
