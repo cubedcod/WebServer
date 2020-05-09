@@ -48,11 +48,13 @@ open_port    67 DHCP
 open_port    68 DHCP
 
 # HTTP
+
 # transparently proxy traffic not originating from the proxy uid
 iptables  -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8082 -m owner ! --uid-owner $1
 ip6tables -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8082 -m owner ! --uid-owner $1
 iptables  -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1
 ip6tables -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1
+
 # allow proxy uid direct network access
 iptables  -A INPUT  -p tcp --sport 80 -j ACCEPT -m owner --uid-owner $1
 ip6tables -A INPUT  -p tcp --sport 80 -j ACCEPT -m owner --uid-owner $1
@@ -73,15 +75,14 @@ ip6tables -A OUTPUT -p tcp --dport 443 -j ACCEPT -m owner --uid-owner $1
 
 open_TCP    587 SMTP
 open_TCP   6667 IRC
-open_TCP   6789 IRC
 open_TCP   8022 SSH
 open_TCP   8000 HTTP
 open_TCP   8080 HTTP
 open_TCP   8081 HTTP
+open_TCP   8082 HTTP
 open_port  8443 HFU
 open_port  8901 SDR
 open_TCP   9418 Git
-open_UDP   9993 ZeroTier
 open_UDP  60001 Mosh
 open_UDP  60002 Mosh
 open_UDP  60003 Mosh
