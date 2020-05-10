@@ -114,6 +114,7 @@ class WebResource < RDF::URI
 
   # Turtle file (big) -> Turtle file (small)
   def summary
+    return self if basename.split('.')[0].upcase == 'README'
     isRDF = ext == 'ttl'
     sPath = '../.cache/RDF/' + fsPath + (path == '/' ? 'index' : '') + (isRDF ? '' : '.ttl')
     summary = sPath.R env                                 # summary name
