@@ -174,10 +174,7 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
       `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|n| FileUtils.touch 'twitter/.' + n}}
 
     GET 'api.twitter.com', -> r {
-      if r.env.keys.grep(/token/i).empty?
-        r.env['HTTP_COOKIE'] = 'twitter/.cookie'.R.readFile
-        r.TwitterAuth
-      end
+      r.TwitterAuth if r.env.keys.grep(/token/i).empty?
       r.fetch}
 
     Twitter = -> r {
@@ -222,6 +219,28 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
 
     GET 'twitter.com', Twitter
     GET 'mobile.twitter.com', -> r {[302, {'Location' => 'https://twitter.com' + r.path}, []]}
+
+    def TwitterAuth
+      cookie = ('twitter/.cookie').R
+      if baked = cookie.readFile # jar has cookie
+        env['HTTP_COOKIE'] = baked
+      elsif env.has_key? 'HTTP_COOKIE' # request has cookie
+        data = env['HTTP_COOKIE']
+        if data.match? /ct0/    # cookie has token
+          cookie.writeFile data # put baked cookie in jar
+          puts ['🍪 ', "\e[38;5;130m", host, "\e[0m", data].join  ' '
+        end
+      else
+        return
+      end
+      attrs = {}
+      env['HTTP_COOKIE'].split(';').map{|attr|
+        k, v = attr.split('=').map &:strip
+        attrs[k] = v}
+      env['authorization'] ||= 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA'
+      env['x-csrf-token'] ||= attrs['ct0'] if attrs['ct0']
+      env['x-guest-token'] ||= attrs['gt'] if attrs['gt']
+    end
 
     # Yahoo
     GET 'news.yahoo.com'
@@ -489,18 +508,6 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
     doc.css('script').map{|script|
       script.inner_text.scan(%r(biodata'\).html\(\s*Base64.decode\("([^"]+))xi){|data|
         yield self, Content, Base64.decode64(data[0]).encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ')}}
-  end
-
-  def TwitterAuth
-    return self unless env.has_key? 'HTTP_COOKIE'
-    attrs = {}
-    (env['HTTP_COOKIE']||'').split(';').map{|attr|
-      k , v = attr.split('=').map &:strip
-      attrs[k] = v}
-    env['authorization'] ||= 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA'
-    env['x-csrf-token'] ||= attrs['ct0'] if attrs['ct0']
-    env['x-guest-token'] ||= attrs['gt'] if attrs['gt']
-    self
   end
 
   def TwitterJSON tree, &b

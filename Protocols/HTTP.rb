@@ -158,19 +158,6 @@ class WebResource
                                                             (HTML.keyval (Webize::HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
     end
 
-    def cookies
-      cookie = (hostPath + '.cookie').R
-      if jar = cookie.readFile # jar has a cookie
-        env['HTTP_COOKIE'] = jar unless env['HTTP_COOKIE'] == jar
-      elsif env.has_key?('HTTP_COOKIE') && allowCookies?
-        data = env['HTTP_COOKIE']
-        return if host.match?(/twitter.com$/) && !data.match?(/ct0/)
-        cookie.writeFile data # put cookie in jar
-        puts ['🍪 ', "\e[38;5;130m", host, "\e[0m", data].join  ' '
-      end
-      self
-    end
-
     def self.Cookies host
       CookieHosts[host] = true
     end
