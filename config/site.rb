@@ -39,7 +39,7 @@ class WebResource
 
     # host configuration
     CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|googleapis|netdna.*|yimg)\.(com|io|net)$/
-    CookieHost = /(^|\.)(akamai(hd)?|bandcamp|ttvnw|twitter)\.(com|net)$/
+    CookieHost = /(^|\.)(akamai(hd)?|bandcamp|sndcdn|ttvnw|twitter)\.(com|net)$/
     POSThost = /^video.*.ttvnw.net$/
     TemporalHosts = %w(api.twitter.com gitter.im news.ycombinator.com www.instagram.com twitter.com www.reddit.com)
     UIhosts = %w(bandcamp.com duckduckgo.com players.brightcove.net soundcloud.com timbl.com www.redditmedia.com)
@@ -121,7 +121,7 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
 
     # Google
     %w(accounts mail).map{|h| Allow h + '.google.com'}
-    %w(khms0 khms1 khms2 khms3 www).map{|h| GET h + '.google.com'}
+    %w(kh khms0 khms1 khms2 khms3 www).map{|h| GET h + '.google.com'}
     %w(maps www).map{|h| GET h + '.gstatic.com' }
     GET 'googleads.g.doubleclick.net', -> r {((q = r.query_values) && (u = q['adurl'])) ? (u = u.R; u.query = ''; [301,{'Location' => u},[]]) : r.deny}
     GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
@@ -161,6 +161,10 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
 
     # TikTok
     %w(v19.muscdn.com s16.tiktokcdn.com).map{|host| GET host}
+
+    # Twitch
+    Allow 'gql.twitch.tv'
+    GET 'static.twitchcdn.net'
 
     # Twitter
     Allow 'api.twitter.com'; Allow 'twitter.com'
