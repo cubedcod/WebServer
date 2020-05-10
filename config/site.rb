@@ -120,7 +120,8 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
       NoGunk[r]}
 
     # Google
-    %w(accounts mail www).map{|h| Allow h + '.google.com'}
+    %w(accounts mail).map{|h| Allow h + '.google.com'}
+    %w(khms0 khms1 khms2 khms3 www).map{|h| GET h + '.google.com'}
     %w(maps www).map{|h| GET h + '.gstatic.com' }
     GET 'googleads.g.doubleclick.net', -> r {((q = r.query_values) && (u = q['adurl'])) ? (u = u.R; u.query = ''; [301,{'Location' => u},[]]) : r.deny}
     GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
