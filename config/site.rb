@@ -1,6 +1,4 @@
 # coding: utf-8
-
-# coding: utf-8
 module Webize
   module HTML
     class Reader
@@ -122,7 +120,7 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
     # Google
     %w(accounts mail).map{|h| Allow h + '.google.com'}
     %w(kh khms0 khms1 khms2 khms3 www).map{|h| GET h + '.google.com'}
-    %w(maps www).map{|h| GET h + '.gstatic.com' }
+    %w(encrypted-tbn0 maps www).map{|h| GET h + '.gstatic.com' }
     GET 'googleads.g.doubleclick.net', -> r {((q = r.query_values) && (u = q['adurl'])) ? (u = u.R; u.query = ''; [301,{'Location' => u},[]]) : r.deny}
     GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
 

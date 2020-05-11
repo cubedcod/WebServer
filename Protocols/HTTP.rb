@@ -252,12 +252,19 @@ class WebResource
           body = Webize::HTML.clean body if format == 'text/html' && !AllowedHosts.has_key?(host) # tidy HTML
           formatExt = Suffixes[format] || Suffixes_Rack[format] || '' # format suffix
           storage = fsPath                                    # storage location
-          storage += formatExt unless extension == formatExt  # add suffix if incorrect or missing
-          storage.R.writeFile body                            # cache static representation
-          reader = RDF::Reader.for content_type: format       # read graph-data
+          storage += formatExt unless extension == formatExt  # append suffix if incorrect or missing
+          storage.R.writeFile body                            # cache upstream representation
+          reader = RDF::Reader.for content_type: format       # RDF reader-pass
           reader.new(body, base_uri: self){|_|(env[:repository] ||= RDF::Repository.new) << _ } if reader && !NoScan.member?(formatExt)
-          return self if options[:intermediate]               # intermediate fetch, no immediate response or indexing
-          saveRDF if reader                                   # cache graph-data
+          return self if options[:intermediate]               # intermediate fetch, no immediate response or caching
+          if reader
+            saveRDF                                           # cache RDF
+          else
+            puts "no RDF reader found:"
+            puts [['URI', uri],
+                  ['MIME', format]
+                 ].map{|r| r.join "\t"}.join "\n"
+          end
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]} # read upstream metadata
           if links = h['link']                                # read Link metadata
