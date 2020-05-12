@@ -37,10 +37,10 @@ class WebResource
 
     # host configuration
     CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|googleapis|netdna.*|yimg)\.(com|io|net)$/
-    CookieHost = /(^|\.)(akamai(hd)?|bandcamp|sndcdn|ttvnw|twitter)\.(com|net)$/
+    CookieHost = /(^|\.)(akamai(hd)?|bandcamp|google|sndcdn|ttvnw|twitter|youtube)\.(com|net)$/
     POSThost = /^video.*.ttvnw.net$/
     TemporalHosts = %w(api.twitter.com gitter.im news.ycombinator.com www.instagram.com twitter.com www.reddit.com)
-    UIhosts = %w(bandcamp.com duckduckgo.com players.brightcove.net soundcloud.com timbl.com www.redditmedia.com)
+    UIhosts = %w(bandcamp.com books.google.com duckduckgo.com players.brightcove.net soundcloud.com timbl.com www.redditmedia.com)
 
     # local static resources
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
@@ -106,7 +106,7 @@ wired.trib.al
     GET 'ssl.p.jwpcdn.com'
     %w(entitlement.auth.adobe.com sp.auth.adobe.com tkx.apis.anvato.net
 edge.api.brightcove.com players.brightcove.net secure.brightcove.com
-graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
+graphql.api.dailymotion.com).map{|h| Allow h}
 
     # .edu
     Allow 'www.nyu.edu'
@@ -122,11 +122,8 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
       NoGunk[r]}
 
     # Google
-    %w(accounts mail).map{|h| Allow h + '.google.com'}
-    %w(kh khms0 khms1 khms2 khms3 www).map{|h| GET h + '.google.com'}
-    %w(encrypted-tbn0 maps www).map{|h| GET h + '.gstatic.com' }
+    %w(accounts chrome mail).map{|h| Allow h + '.google.com'}
     GET 'googleads.g.doubleclick.net', -> r {((q = r.query_values) && (u = q['adurl'])) ? (u = u.R; u.query = ''; [301,{'Location' => u},[]]) : r.deny}
-    GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
 
     # Imgur
     Allow 'api.imgur.com'
@@ -258,11 +255,12 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
     # YouTube
     GET 'www.youtube.com', -> r {
       path = r.parts[0]
-      if %w{attribution_link redirect}.member? path
+      if !path
+        r.fetch
+      elsif %w{attribution_link redirect}.member? path
         [301, {'Location' => r.query_values['q'] || r.query_values['u']}, []]
-      elsif r.path == '/'
-        [301, {'Location' => '/feed/subscriptions'}, []]
-      elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results s signin user watch watch_videos yts).member?(path) || (r.query_values||{})['allow'] == ServerKey
+      elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json
+ opensearch playlist results s user watch watch_videos yts).member?(path) || (r.query_values||{})['allow'] == ServerKey
         NoGunk[r.upstreamUI]
       else
         r.deny

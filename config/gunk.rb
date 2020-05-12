@@ -6,7 +6,7 @@ class WebResource
     Gunk = %r([-._\/'"\s:?&=~%]
 ((block|load|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|frame|id|obe|rotat[eo]r?|slots?|system|tech|tools?|types?|units?|words?|zones?)?|ak(am|ismet)|alerts?|appnexus|audience|(app|smart)?
 b(lueconic|ouncee?x.*)s?|.*bid(d(er|ing).*|s)|
-c(ampaigns?|edexis|hartbeat.*|mp|ollector|omscore|on(sent|version)|ookie(c(hoice|onsent)|law|notice)|riteo|se)|
+c(ampaigns?|edexis|hartbeat.*|mp|ollector|omscore|on(sent|version)|ookie(c(hoice|onsent)|law|notice)|riteo|(xen)?se)|
 de(als|mandware|t(ect|roitchicago))|dfp|disney(id)?|doubleclick|
 e(moji.*\.js|ndscreen|nsighten|proof|scenic|vidon|zoic)|
 firebase|(web)?fonts?(awesome)?|
@@ -18,10 +18,10 @@ log(event|g(er|ing))|(app|s)?
 m(a(rfeel|tomo)|e(asurement|t(er|rics?))|ms|odal|pulse|tr)|
 newrelic|
 o(m(niture|tr)|nboarding|nesignal|ptanon|utbrain)|
-p(aywall|er(imeter-?x|sonali[sz](ation|e))|i(wik|xel(propagate)?)|lacement|op(down|over|up)|orpoiseant|owaboot|repopulator|ro(fitwell|m(o(tion)?s?|pt))|ubmatic)|/pv|
+p(aywall|erimeter-?x|i(wik|xel(propagate)?)|lacement|op(down|over|up)|orpoiseant|owaboot|repopulator|ro(fitwell|m(o(tion)?s?|pt))|ubmatic)|/pv|
 quantcast|
 record(event|stats?)|re?t(ar)?ge?t(ing)?|(rich)?relevance|recirc.*|rpc|rubicon.*|
-s?s(a(fe[-_]?browsing|ilthru)|cheduler|erv(edby|ice[-_]?worker)|harecount|i(ftscience|gnalr|tenotice)|ponsor(ed)?|tat(istic)?s?|ubscriber?|urvey|w.js|yn(dicat(ed|ion)))|
+s?s(a(fe[-_]?browsing|ilthru)|cheduler|erv(edby|ice[-_]?worker)|harecount|i(ftscience|gnalr|tenotice)|ponsor(ed)?|tats?|ubscriber?|urvey|w.js|yn(dicat(ed|ion)))|
 t(aboola.*|(arget|rack)(ers?|ing).*|ampering|ealium|elemetry|inypass|ra?c?k?ing(data)?|ricorder|rustx|ype(face|kit))|autotrack|
 u(psell|rchin|s(abilla|er[-_]?(context|location))|tm)|
 webtrends|wp-?(ad.*|rum)|
@@ -43,7 +43,7 @@ bid(d(er|ing)|s)?|bing|bouncee?x.*|
 cedexis|chartbeat|clickability|cloudfront|COMSCORE|consent|cr(azyegg|iteo)|c(rss)?pxl?|crwdcntrl|
 doubleclick|d[fm]p|driftt|
 ensighten|evidon|facebook|feedbackify|
-google.*|g(a|dpr|pt|t(ag|m))|gu-web|gumgum|gwallet|
+g(a|dpr|pt|t(ag|m))|gu-web|gumgum|gwallet|
 hotjar|imrworldwide|indexww|intercom|ipify|kr(ux|xd)|licdn|linkedin|
 mar(feel|keto)|ml314|moatads|mpulse|newrelic|newsmax|npttech|nreum|ntv.io|
 olark|OneSignal|outbrain|
