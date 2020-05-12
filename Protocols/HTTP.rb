@@ -23,7 +23,7 @@ class WebResource
     end
 
     def allowCookies?
-      @cookies || AllowedHosts.has_key?(host) || CookieHosts.has_key?(host) || CookieHost.match?(host) || HostPOST.has_key?(host)
+      ENV.has_key?('ALLOW_COOKIES') || @cookies || AllowedHosts.has_key?(host) || CookieHosts.has_key?(host) || CookieHost.match?(host) || HostPOST.has_key?(host)
     end
 
     def allowedOrigin
@@ -424,7 +424,7 @@ class WebResource
     def POST
       if handler = HostPOST[host]
         handler[self]
-      elsif AllowedHosts.has_key?(host) || POSThost.match?(host)
+      elsif ENV.has_key?('ALLOW_POST') || AllowedHosts.has_key?(host) || POSThost.match?(host)
         self.POSTthru
       else
         denyPOST
