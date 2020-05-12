@@ -40,7 +40,7 @@ module Webize
         %w(href src).map{|attr| # reference
           if s[attr]
             src = s[attr].R
-            if src.gunkDomain? && !src.allowCDN?
+            if src.gunkDomain?
               log << "🚫 \e[31;1;7m" + src.host + "\e[0m"
               s.remove
             elsif src.uri.match? Gunk

@@ -36,7 +36,6 @@ class WebResource
     StaticFormats = CacheFormats - %w(json html md xml)
 
     # host configuration
-    CDNhost = /\.(akamai(hd)?|amazonaws|.*cdn|cloud(f(lare|ront)|inary)|fastly|googleapis|netdna.*|yimg)\.(com|io|net)$/
     CookieHost = /(^|\.)(akamai(hd)?|bandcamp|google|sndcdn|ttvnw|twitter|youtube)\.(com|net)$/
     POSThost = /^video.*.ttvnw.net$/
     TemporalHosts = %w(api.twitter.com gitter.im news.ycombinator.com www.instagram.com twitter.com www.reddit.com)
@@ -100,10 +99,11 @@ wired.trib.al
     GET 'gate.sc', GotoURL
 
     # CDN scripts
-    %w(ajax.googleapis.com a-v2.sndcdn.com cdnjs.cloudflare.com stackpath.bootstrapcdn.com).map{|host| GET host}
+    %w(ajax.googleapis.com
+      cdnjs.cloudflare.com
+).map{|host| GET host}
 
     # video API stuff
-    GET 'ssl.p.jwpcdn.com'
     %w(entitlement.auth.adobe.com sp.auth.adobe.com tkx.apis.anvato.net
 edge.api.brightcove.com players.brightcove.net secure.brightcove.com
 graphql.api.dailymotion.com).map{|h| Allow h}
@@ -163,12 +163,8 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination pointer
       r.fetch options}
 
-    # TikTok
-    %w(v19.muscdn.com s16.tiktokcdn.com).map{|host| GET host}
-
     # Twitch
     Allow 'gql.twitch.tv'
-    GET 'static.twitchcdn.net'
 
     # Twitter
     Allow 'api.twitter.com'; Allow 'twitter.com'

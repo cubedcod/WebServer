@@ -26,11 +26,6 @@ class WebResource
       @cookies || AllowedHosts.has_key?(host) || CookieHosts.has_key?(host) || CookieHost.match?(host) || HostPOST.has_key?(host)
     end
 
-    def allowCDN?
-      return true if AllowedHosts.has_key? host
-      (CacheFormats - %w(gif html js)).member?(ext.downcase) && !path.match?(Gunk)
-    end
-
     def allowedOrigin
       if env['HTTP_ORIGIN']
         env['HTTP_ORIGIN']
@@ -339,8 +334,6 @@ class WebResource
         end
       elsif handler = HostGET[host]                         # host handler
         handler[self]
-      elsif host.match? CDNhost                             # CDN content
-        allowCDN? ? fetch : deny
       elsif gunk?                                           # blocked content
         deny
       else                                                  # remote node
