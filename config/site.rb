@@ -107,6 +107,10 @@ wired.trib.al
     %w(entitlement.auth.adobe.com sp.auth.adobe.com tkx.apis.anvato.net
 edge.api.brightcove.com players.brightcove.net secure.brightcove.com
 graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
+
+    # .edu
+    Allow 'www.nyu.edu'
+
     # Gitter
     GET 'gitter.im', -> r {
       if r.parts[0] == 'api'
@@ -124,8 +128,13 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
     GET 'googleads.g.doubleclick.net', -> r {((q = r.query_values) && (u = q['adurl'])) ? (u = u.R; u.query = ''; [301,{'Location' => u},[]]) : r.deny}
     GET 'google.com', -> r {[301, {'Location' => 'https://www.google.com' + r.env['REQUEST_URI'] }, []]}
 
+    # Imgur
+    Allow 'api.imgur.com'
+    Allow 'imgur.com'
+
     # Mixcloud
     Allow 'www.mixcloud.com'
+
     # Mixlr
     Allow 'd23yw4k24ca21h.cloudfront.net'
 
@@ -143,7 +152,7 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
         r.fetch.yield_self{|status,head,body|
           if status.to_s.match? /^30/
             [status, head, body]
-          else
+          else # HTML  delivered, find and sort pointers
             links = []
             body[0].scan(/href="([^"]+after=[^"]+)/){|link| links << CGI.unescapeHTML(link[0]).R }
             link = links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]
@@ -244,7 +253,7 @@ graphql.api.dailymotion.com www.youtube.com).map{|h| Allow h}
     GET 'news.yahoo.com'
     GET 's.yimg.com', -> r {
       ps = r.path.split /https?:\/+/
-      ps.size > 1 ? [301, {'Location' => 'https://' + ps[-1]}, []] : NoGunk[r]}
+      ps.size > 1 ? [301, {'Location' => 'https://' + ps[-1]}, []] : r.deny}
 
     # YouTube
     GET 'www.youtube.com', -> r {
