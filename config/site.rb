@@ -122,6 +122,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       NoGunk[r]}
 
     # Google
+    Allow 'play.google.com'
     GET 'googleads.g.doubleclick.net', -> r {((q = r.query_values) && (u = q['adurl'])) ? (u = u.R; u.query = ''; [301,{'Location' => u},[]]) : r.deny}
 
     # Imgur

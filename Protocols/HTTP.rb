@@ -392,7 +392,7 @@ class WebResource
         head['Referer'] = 'https://www.youtube.com/'
       end
 
-      head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # we want redirection in HTTP, not Javascript
+      head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # we want redirection in HTTP, not Javascript,
       head.delete 'User-Agent' if host == 't.co'            # so advertise a 'dumb' user-agent
 
       head
