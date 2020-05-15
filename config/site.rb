@@ -99,8 +99,10 @@ wired.trib.al
     GET 'gate.sc', GotoURL
 
     # CDN scripts
-    %w(ajax.googleapis.com
-      cdnjs.cloudflare.com
+    %w(
+ajax.cloudflare.com
+ajax.googleapis.com
+cdnjs.cloudflare.com
 ).map{|host| GET host}
 
     # video API stuff
