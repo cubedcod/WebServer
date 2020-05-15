@@ -9,7 +9,7 @@ b(lueconic|ouncee?x.*)s?|.*bid(d(er|ing).*|s)|
 c(ampaigns?|edexis|hartbeat.*|mp|ollector|omscore|on(sent|version)|ookie(c(hoice|onsent)|law|notice)|riteo|(xen)?se)|
 de(als|mandware|t(ect|roitchicago))|dfp|disney(id)?|doubleclick|
 e(moji.*\.js|ndscreen|nsighten|proof|scenic|vidon|zoic)|
-firebase|(web)?fonts?(awesome)?|
+fbcdn.*gif|firebase|(web)?fonts?(awesome)?|
 g(dpr|eo(ip|locat(e|ion))|igya|pt|tag|tm)|.*(
 header|pre)[-_]?bid.*|hotjar|.*hubspot.*|[hp]b.?js|ima[0-9]?|
 impression|indexww|

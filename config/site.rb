@@ -45,7 +45,7 @@ class WebResource
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
     FeedIcon = SiteDir.join('feed.svg').read
     SiteFont = SiteDir.join('fonts/hack-regular-subset.woff2').read
-    SiteGIF = SiteDir.join('site.gif').read
+    SiteIcon = SiteDir.join('favicon.ico').read
     SiteCSS = SiteDir.join('site.css').read
     CodeCSS = SiteDir.join('code.css').read
     SiteJS  = SiteDir.join('site.js').read

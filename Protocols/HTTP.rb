@@ -181,7 +181,7 @@ class WebResource
                       elsif type == :font || %w(eot otf ttf woff woff2).member?(ext)
                         ['font/woff2', SiteFont]
                       elsif type == :image || %w(gif png).member?(ext)
-                        ['image/gif', SiteGIF]
+                        ['image/png', SiteIcon]
                       elsif type == :script || ext == 'js'
                         ['application/javascript', '//']
                       elsif type == :JSON || ext == 'json'
