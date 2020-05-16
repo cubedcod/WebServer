@@ -266,7 +266,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     POST 'www.youtube.com', -> r {
       if r.parts.member? 'stats'
         r.denyPOST
-      elsif r.env['REQUEST_URI'].match? /ACCOUNT_MENU|comment|\/results|subscribe/i
+      elsif r.env['REQUEST_URI'].match? /ACCOUNT_MENU|comment|\/results|subscribe|verify/i
         r.POSTthru
       else
         r.denyPOST
