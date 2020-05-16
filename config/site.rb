@@ -126,6 +126,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     # Google
     %w(groups).map{|h| Allow h + '.google.com' }
     GET 'googleads.g.doubleclick.net', -> r {((q = r.query_values) && (u = q['adurl'])) ? (u = u.R; u.query = ''; [301,{'Location' => u},[]]) : r.deny}
+    GET 'www.googleadservices.com',    -> r {((q = r.query_values) && (u = q['adurl'])) ? (u = u.R; u.query = ''; [301,{'Location' => u},[]]) : r.deny}
 
     # Imgur
     Allow 'api.imgur.com'
