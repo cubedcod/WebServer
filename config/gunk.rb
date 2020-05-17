@@ -28,7 +28,7 @@ webtrends|wp-?(ad.*|rum)|
 xiti|_0x.*|
 zerg(net)?)
 ([-._\/'"\s:?&=~%]|$)|
-\.(eot|gif\?|otf|ttf|woff2?))xi
+\.(eot|(bmp|gif)\?|otf|ttf|woff2?))xi
 
   end
 end

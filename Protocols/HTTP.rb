@@ -180,7 +180,7 @@ class WebResource
                         ['text/css', '']
                       elsif type == :font || %w(eot otf ttf woff woff2).member?(ext)
                         ['font/woff2', SiteFont]
-                      elsif type == :image || %w(gif png).member?(ext)
+                      elsif type == :image || %w(bmp gif png).member?(ext)
                         ['image/png', SiteIcon]
                       elsif type == :script || ext == 'js'
                         ['application/javascript', '//']
