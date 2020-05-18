@@ -131,7 +131,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
 
     # Google
     %w(books drive groups mail www).map{|h| Allow h + '.google.com' } if ENV.has_key? 'GOOGLE'
-    GoDS =  -> r {
+    GoAU =  -> r {
       if url = (r.query_values || {})['adurl']
         dest = url.R
         dest.query = '' unless url.match? /dest_url/
@@ -139,8 +139,9 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       else
         r.deny
       end}
-    GET 'googleads.g.doubleclick.net', GoDS
-    GET 'www.googleadservices.com', GoDS
+    GET 'googleads.g.doubleclick.net', GoAU
+    GET 'www.googleadservices.com', GoAU
+    GET 'www.google.com', -> r {%w(maps search).member?(r.parts[0]) ? NoGunk[r] : r.deny}
 
     # Imgur
     Allow 'api.imgur.com'
@@ -176,7 +177,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     }
 
     GET 'www.reddit.com', -> r {
-      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !%w(login).member?(r.parts[0]) # MIME preference
+      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !r.parts.member?('wiki') # MIME preference
       r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination pointer
       r.fetch options}
 
