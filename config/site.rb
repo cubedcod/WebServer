@@ -108,10 +108,16 @@ cdnjs.cloudflare.com
     # video API stuff
     %w(entitlement.auth.adobe.com sp.auth.adobe.com tkx.apis.anvato.net
 edge.api.brightcove.com players.brightcove.net secure.brightcove.com
+api.lbry.com api.lbry.tv lbry.tv
 graphql.api.dailymotion.com).map{|h| Allow h}
 
     # .edu
     Allow 'www.nyu.edu'
+
+    # DartSearch
+    GET 'clickserve.dartsearch.net', -> r {
+      [301, {'Location' => r.query_values['ds_dest_url']}, []]
+    }
 
     # Gitter
     GET 'gitter.im', -> r {
@@ -124,9 +130,17 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       NoGunk[r]}
 
     # Google
-    %w(groups).map{|h| Allow h + '.google.com' }
-    GET 'googleads.g.doubleclick.net', -> r {((q = r.query_values) && (u = q['adurl'])) ? (u = u.R; u.query = ''; [301,{'Location' => u},[]]) : r.deny}
-    GET 'www.googleadservices.com',    -> r {((q = r.query_values) && (u = q['adurl'])) ? (u = u.R; u.query = ''; [301,{'Location' => u},[]]) : r.deny}
+    %w(books drive groups mail www).map{|h| Allow h + '.google.com' } if ENV.has_key? 'GOOGLE'
+    GoDS =  -> r {
+      if url = (r.query_values || {})['adurl']
+        dest = url.R
+        dest.query = '' unless url.match? /dest_url/
+        [301, {'Location' => dest}, []]
+      else
+        r.deny
+      end}
+    GET 'googleads.g.doubleclick.net', GoDS
+    GET 'www.googleadservices.com', GoDS
 
     # Imgur
     Allow 'api.imgur.com'

@@ -4,12 +4,12 @@ class WebResource
 
     # URI pattern
     Gunk = %r([-._\/'"\s:?&=~%]
-((block|load|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate)s?(bl(oc)?k(er|ing)?.*|frame|id|obe|rotat[eo]r?|slots?|system|tech|tools?|types?|units?|words?|zones?)?|ak(am|ismet)|alerts?|analytics|appnexus|audience|(app|smart)?
+((block|load|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate(link)?)s?(bl(oc)?k(er|ing)?.*|frame|id|obe|rotat[eo]r?|slots?|system|tech|tools?|types?|units?|words?|zones?)?|ak(am|ismet)|alerts?|analytics|appnexus|audience|(app|smart)?
 b(lueconic|ouncee?x.*)s?|.*bid(d(er|ing).*|s)|
 c(ampaigns?|edexis|hartbeat.*|mp|ollector|omscore|on(sent|version)|ookie(c(hoice|onsent)|law|notice)|riteo|(xen)?se)|
 de(als|mandware|t(ect|roitchicago))|dfp|disney(id)?|doubleclick|
 e(moji.*\.js|ndscreen|nsighten|proof|scenic|vidon|zoic)|
-fbcdn.*gif|firebase|
+fbcdn.*gif|firebase|frosmo|
 g(dpr|eo(ip|locat(e|ion))|igya|pt|tag|tm)|.*(
 header|pre)[-_]?bid.*|hotjar|.*hubspot.*|[hp]b.?js|ima[0-9]?|
 impression|indexww|
@@ -21,7 +21,7 @@ o(m(niture|tr)|nboarding|nesignal|ptanon|utbrain)|
 p(aywall|erimeter-?x|i(wik|xel(propagate)?)|lacement|op(down|over|up)|orpoiseant|owaboot|repopulator|ro(fitwell|m(o(tion)?s?|pt))|ubmatic)|/pv|
 quantcast|
 record(event|stats?)|re?t(ar)?ge?t(ing)?|(rich)?relevance|recirc.*|rubicon.*|
-s?s(a(fe[-_]?browsing|ilthru)|erv(edby|ice[-_]?worker)|harecount|i(ftscience|gnalr|tenotice)|ponsor(ed)?|w.js|yn(dicat(ed|ion)))|
+s?s(a(fe[-_]?browsing|ilthru)|erv(edby|ice[-_]?worker)|(har|tag)e(aholic|count)|i(ftscience|gnalr|tenotice)|ponsor(ed)?|w.js|yn(dicat(ed|ion)))|
 t(aboola.*|(arget|rack)(ers?|ing).*|ampering|ealium|elemetry|inypass|ra?c?k?ing(data)?|ricorder|rustx|ype(face|kit))|autotrack|
 u(psell|rchin|s(abilla|er[-_]?(context|location))|tm)|
 webtrends|wp-?(ad.*|rum)|
