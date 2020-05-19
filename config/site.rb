@@ -133,9 +133,10 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     GET 'www.google.com', -> r {%w(maps search).member?(r.parts[0]) ? NoGunk[r] : r.deny}
 
     %w(books groups).map{|h| Allow h + '.google.com' }
-    %w(photos).map{|h| GET h + '.google.com' }
+    %w(update).map{|h| Allow h + '.googleapis.com' }
+    %w(clients2 maps photos).map{|h| GET h + '.google.com' }
     %w(maps).map{|h| GET h + '.gstatic.com' }
-    %w(maps).map{|h| GET h + '.googleapis.com' }
+    %w(clientservices maps).map{|h| GET h + '.googleapis.com' }
 
     GoAU =  -> r {
       if url = (r.query_values || {})['adurl']

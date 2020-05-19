@@ -197,8 +197,8 @@ module Webize
           if rel = m.attr("rel") # predicate
             if v = m.attr("href") # object
               rel.split(/[\s,]+/).map{|k|
-                @base.env[:links][:prev] ||= v if k == 'prev'
-                @base.env[:links][:next] ||= v if k == 'next'
+                @base.env[:links][:prev] ||= v if k.match? /prev(ious)?/i
+                @base.env[:links][:next] ||= v if k.downcase == 'next'
                 @base.env[:links][:feed] ||= v if k == 'alternate' && v.R.path&.match?(/^\/feed\/?$/)
                 k = MetaMap[k] || k
                 puts [k, v].join "\t" unless k.to_s.match? /^(drop|http)/
