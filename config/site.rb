@@ -39,6 +39,7 @@ class WebResource
     CookieHost = /(^|\.)(akamai(hd)?|bandcamp|twitter)\.(com|net)$/
     TemporalHosts = %w(api.twitter.com gitter.im news.ycombinator.com www.instagram.com twitter.com www.reddit.com)
     UIhosts = %w(bandcamp.com books.google.com duckduckgo.com groups.google.com players.brightcove.net soundcloud.com timbl.com www.redditmedia.com www.zillow.com)
+    AllowedHeaders = 'authorization, client-id, content-type, x-access-token, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-csrf-token, x-guest-token, x-hostname, x-lib-version, x-locale, x-twitter-active-user, x-twitter-client-language, x-twitter-utcoffset, x-requested-with'
 
     # local static resources
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
@@ -192,7 +193,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     FollowTwits = -> {
       FileUtils.mkdir 'twitter' unless File.directory? 'twitter'
       `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|n| FileUtils.touch 'twitter/.' + n}}
-    
+    GET 'api.twitter.com'
     GET 'twitter.com', -> r {
       setTokens = -> {
         if cookie = r.env['HTTP_COOKIE']
@@ -204,7 +205,6 @@ graphql.api.dailymotion.com).map{|h| Allow h}
           r.env['x-csrf-token'] ||= attrs['ct0'] if attrs['ct0']
           r.env['x-guest-token'] ||= attrs['gt'] if attrs['gt']
         end}
-
       if r.upstreamUI?
         NoGunk[r]
       # feed
@@ -238,7 +238,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       else
         NoGunk[r]
       end}
-
+    POST 'twitter.com', -> r {%w(.json).member?(r.parts[-1]) ? r.POSTthru : r.denyPOST}
     %w(mobile www).map{|h| GET h + '.twitter.com', -> r {[302, {'Location' => 'https://twitter.com' + r.path}, []]}}
 
     # Yahoo
