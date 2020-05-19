@@ -134,7 +134,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
 
     %w(books groups).map{|h| Allow h + '.google.com' }
     %w(update).map{|h| Allow h + '.googleapis.com' }
-    %w(clients2 maps photos).map{|h| GET h + '.google.com' }
+    %w(clients2 images maps photos).map{|h| GET h + '.google.com' }
     %w(maps).map{|h| GET h + '.gstatic.com' }
     %w(clientservices maps).map{|h| GET h + '.googleapis.com' }
 
@@ -194,7 +194,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     FollowTwits = -> {
       FileUtils.mkdir 'twitter' unless File.directory? 'twitter'
       `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|n| FileUtils.touch 'twitter/.' + n}}
-    GET 'api.twitter.com'
+    Allow 'api.twitter.com'
     GET 'twitter.com', -> r {
       setTokens = -> {
         if cookie = r.env['HTTP_COOKIE']
