@@ -37,7 +37,6 @@ class WebResource
 
     # host config
     CookieHost = /(^|\.)(akamai(hd)?|bandcamp|twitter)\.(com|net)$/
-    POSThost = /^video.*.ttvnw.net$/
     TemporalHosts = %w(api.twitter.com gitter.im news.ycombinator.com www.instagram.com twitter.com www.reddit.com)
     UIhosts = %w(bandcamp.com books.google.com duckduckgo.com groups.google.com players.brightcove.net soundcloud.com timbl.com www.redditmedia.com www.zillow.com)
 

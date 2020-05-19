@@ -401,7 +401,7 @@ class WebResource
     def notfound; [404, {'Content-Type' => 'text/html'}, [htmlDocument]] end
 
     def OPTIONS
-      if AllowedHosts.has_key?(host) || POSThost.match?(host)
+      if AllowedHosts.has_key? host
         self.OPTIONSthru
       else
         env[:deny] = true
@@ -424,7 +424,7 @@ class WebResource
     def POST
       if handler = HostPOST[host]
         handler[self]
-      elsif ENV.has_key?('ALLOW_POST') || AllowedHosts.has_key?(host) || POSThost.match?(host)
+      elsif AllowedHosts.has_key? host
         self.POSTthru
       else
         denyPOST
