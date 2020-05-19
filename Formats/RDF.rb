@@ -65,6 +65,8 @@ class WebResource < RDF::URI
       graph << RDF::Statement.new(subject, Type.R, Container.R)
       graph << RDF::Statement.new(subject, Title.R, basename)
       graph << RDF::Statement.new(subject, Date.R, node.stat.mtime.iso8601)
+      node.children.map{|child|
+        graph << RDF::Statement.new(subject, (LDP+'contains').R, (subject.join child.basename '.ttl'))}
     end
   rescue RDF::FormatError => e
     mime = `file -b --mime-type #{shellPath}`.chomp
@@ -126,7 +128,7 @@ class WebResource < RDF::URI
     saveRDF fullGraph unless isRDF                        # save RDF-ized graph(s)
     treeFromGraph(fullGraph).values.map{|resource|        # each subject
       subject = (resource['uri'] || '').R
-      ps = [Abstract, Creator, Date, Image, Link, Title, To, Type, Video]
+      ps = [Abstract, Creator, Date, Image, LDP+'contains', Link, Title, To, Type, Video]
       type = resource[Type]
       type = [type] unless type.class == Array
       ps.push Content if type.member? (SIOC + 'MicroblogPost').R
