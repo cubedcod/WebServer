@@ -187,7 +187,8 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     }
 
     GET 'www.reddit.com', -> r {
-      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !r.parts.member?('wiki') # MIME preference
+      ps = r.parts
+      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !ps.member?('wiki') && !ps.member?('submit') # prefer RSS when offered
       r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination pointer
       r.fetch options}
 
