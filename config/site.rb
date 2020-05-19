@@ -238,7 +238,6 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       else
         NoGunk[r]
       end}
-    POST 'twitter.com', -> r {%w(.json).member?(r.parts[-1]) ? r.POSTthru : r.denyPOST}
     %w(mobile www).map{|h| GET h + '.twitter.com', -> r {[302, {'Location' => 'https://twitter.com' + r.path}, []]}}
 
     # Yahoo

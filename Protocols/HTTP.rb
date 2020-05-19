@@ -8,7 +8,6 @@ class WebResource
     CookieHosts = {}
     GlobChars = /[\*\{\[]/
     HostGET = {}
-    HostPOST = {}
     Methods = %w(GET HEAD OPTIONS POST PUT)
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
@@ -23,7 +22,7 @@ class WebResource
     end
 
     def allowCookies?
-      ENV.has_key?('ALLOW_COOKIES') || @cookies || AllowedHosts.has_key?(host) || CookieHosts.has_key?(host) || CookieHost.match?(host) || HostPOST.has_key?(host)
+      AllowedHosts.has_key?(host) || CookieHosts.has_key?(host) || CookieHost.match?(host)
     end
 
     def allowedOrigin
@@ -417,18 +416,8 @@ class WebResource
       [r.code, (headers r.headers), [r.body]]
     end
 
-    def self.POST host, lambda
-      HostPOST[host] = lambda
-    end
-
     def POST
-      if handler = HostPOST[host]
-        handler[self]
-      elsif AllowedHosts.has_key? host
-        self.POSTthru
-      else
-        denyPOST
-      end
+      AllowedHosts.has_key?(host) ? self.POSTthru : denyPOST
     end
 
     def POSTthru
