@@ -190,25 +190,27 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     Allow 'gql.twitch.tv'
 
     # Twitter
-    Allow 'api.twitter.com'; Allow 'twitter.com'
-
     FollowTwits = -> {
       FileUtils.mkdir 'twitter' unless File.directory? 'twitter'
       `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|n| FileUtils.touch 'twitter/.' + n}}
     
     GET 'twitter.com', -> r {
-      if cookie = r.env['HTTP_COOKIE']
-        attrs = {}
-        cookie.split(';').map{|attr|
-          k, v = attr.split('=').map &:strip
-          attrs[k] = v}
-        r.env['authorization'] ||= 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA'
-        r.env['x-csrf-token'] ||= attrs['ct0'] if attrs['ct0']
-        r.env['x-guest-token'] ||= attrs['gt'] if attrs['gt']
-      end
+      setTokens = -> {
+        if cookie = r.env['HTTP_COOKIE']
+          attrs = {}
+          cookie.split(';').map{|attr|
+            k, v = attr.split('=').map &:strip
+            attrs[k] = v}
+          r.env['authorization'] ||= 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA'
+          r.env['x-csrf-token'] ||= attrs['ct0'] if attrs['ct0']
+          r.env['x-guest-token'] ||= attrs['gt'] if attrs['gt']
+        end}
 
+      if r.upstreamUI?
+        NoGunk[r]
       # feed
-      if r.path == '/'
+      elsif r.path == '/'
+        setTokens[]
         subscriptions = Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}
         subscriptions.shuffle.each_slice(18){|sub|
           print '🐦'
@@ -217,7 +219,8 @@ graphql.api.dailymotion.com).map{|h| Allow h}
           apiURL.R(r.env).fetch intermediate: true}
         r.saveRDF.graphResponse
       # user
-      elsif r.parts.size == 1 && !%w(favicon.ico manifest.json push_service_worker.js search sw.js).member?(r.parts[0]) && !r.upstreamUI?
+      elsif r.parts.size == 1 && !%w(favicon.ico manifest.json push_service_worker.js search sw.js).member?(r.parts[0])
+        setTokens[]
         uid = nil
         URI.open('https://api.twitter.com/graphql/G6Lk7nZ6eEKd7LBBZw9MYw/UserByScreenName?variables=%7B%22screen_name%22%3A%22' + r.parts[0] + '%22%2C%22withHighlightedLabel%22%3Afalse%7D', r.headers){|response| # find uid
           body = HTTP.decompress response.meta, response.read
@@ -225,11 +228,13 @@ graphql.api.dailymotion.com).map{|h| Allow h}
           uid = json['data']['user']['rest_id']}
         ('https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment').R(r.env).fetch reformat: true
       # conversation
-      elsif r.parts.member?('status') && !r.upstreamUI?
+      elsif r.parts.member? 'status'
+        setTokens[]
         convo = r.parts.find{|p| p.match? /^\d{8}\d+$/ }
         "https://api.twitter.com/2/timeline/conversation/#{convo}.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&count=20&ext=mediaStats%2CcameraMoment".R(r.env).fetch reformat: true
       # hashtag
       elsif r.parts[0] == 'hashtag'
+        setTokens[]
         "https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&q=%23#{r.parts[1]}&count=20&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2ChighlightedLabel%2CcameraMoment".R(r.env).fetch reformat: true
       else
         NoGunk[r]
