@@ -30,13 +30,13 @@ module Webize
 end
 class WebResource
   module URIs
-    # format configuration
+    # format config
     CacheFormats = %w(css geojson gif html ico jpeg jpg js json m3u8 m4a md mp3 mp4 opus pem pdf png svg ts webm webp xml)
     NoScan = %w(.css .gif .ico .jpg .js .png .svg .webm)
     StaticFormats = CacheFormats - %w(json html md xml)
 
-    # host configuration
-    CookieHost = /(^|\.)(akamai(hd)?|bandcamp|google|sndcdn|ttvnw|twitter|youtube)\.(com|net)$/
+    # host config
+    CookieHost = /(^|\.)(akamai(hd)?|bandcamp|twitter)\.(com|net)$/
     POSThost = /^video.*.ttvnw.net$/
     TemporalHosts = %w(api.twitter.com gitter.im news.ycombinator.com www.instagram.com twitter.com www.reddit.com)
     UIhosts = %w(bandcamp.com books.google.com duckduckgo.com groups.google.com players.brightcove.net soundcloud.com timbl.com www.redditmedia.com www.zillow.com)
@@ -130,7 +130,13 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       NoGunk[r]}
 
     # Google
-    %w(books drive groups mail www).map{|h| Allow h + '.google.com' } if ENV.has_key? 'GOOGLE'
+    GET 'www.google.com', -> r {%w(maps search).member?(r.parts[0]) ? NoGunk[r] : r.deny}
+
+    %w(books groups).map{|h| Allow h + '.google.com' }
+    %w(photos).map{|h| GET h + '.google.com' }
+    %w(maps).map{|h| GET h + '.gstatic.com' }
+    %w(maps).map{|h| GET h + '.googleapis.com' }
+
     GoAU =  -> r {
       if url = (r.query_values || {})['adurl']
         dest = url.R
@@ -140,10 +146,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
         r.deny
       end}
     GET 'googleads.g.doubleclick.net', GoAU
-    GET 'maps.googleapis.com'
-    GET 'maps.gstatic.com'
     GET 'www.googleadservices.com', GoAU
-    GET 'www.google.com', -> r {%w(maps search).member?(r.parts[0]) ? NoGunk[r] : r.deny}
 
     # Imgur
     Allow 'api.imgur.com'
@@ -192,22 +195,27 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     FollowTwits = -> {
       FileUtils.mkdir 'twitter' unless File.directory? 'twitter'
       `cd ~/src/WebServer && git show -s --format=%B a3e600d66f2fd850577f70445a0b3b8b53b81e89`.split.map{|n| FileUtils.touch 'twitter/.' + n}}
+    
+    GET 'twitter.com', -> r {
+      if cookie = r.env['HTTP_COOKIE']
+        attrs = {}
+        cookie.split(';').map{|attr|
+          k, v = attr.split('=').map &:strip
+          attrs[k] = v}
+        r.env['authorization'] ||= 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA'
+        r.env['x-csrf-token'] ||= attrs['ct0'] if attrs['ct0']
+        r.env['x-guest-token'] ||= attrs['gt'] if attrs['gt']
+      end
 
-    GET 'api.twitter.com', -> r {
-      r.TwitterAuth if r.env.keys.grep(/token/i).empty?
-      r.fetch}
-
-    Twitter = -> r {
-      r.TwitterAuth
       # feed
-      (if r.path == '/'
-       subscriptions = Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}
-       subscriptions.shuffle.each_slice(18){|sub|
-         print '🐦'
-         q = sub.map{|u|'from%3A' + u}.join('%2BOR%2B')
-         apiURL = 'https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&q=' + q + '&vertical=default&count=40&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2CcameraMoment'
-         apiURL.R(r.env).fetch intermediate: true}
-       r.saveRDF.graphResponse
+      if r.path == '/'
+        subscriptions = Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}
+        subscriptions.shuffle.each_slice(18){|sub|
+          print '🐦'
+          q = sub.map{|u|'from%3A' + u}.join('%2BOR%2B')
+          apiURL = 'https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&q=' + q + '&vertical=default&count=40&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2CcameraMoment'
+          apiURL.R(r.env).fetch intermediate: true}
+        r.saveRDF.graphResponse
       # user
       elsif r.parts.size == 1 && !%w(favicon.ico manifest.json push_service_worker.js search sw.js).member?(r.parts[0]) && !r.upstreamUI?
         uid = nil
@@ -225,40 +233,9 @@ graphql.api.dailymotion.com).map{|h| Allow h}
         "https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&q=%23#{r.parts[1]}&count=20&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2ChighlightedLabel%2CcameraMoment".R(r.env).fetch reformat: true
       else
         NoGunk[r]
-       end).yield_self{|s,h,b|
-        if [401,403,429].member? s
-          'twitter/.cookie'.R.node.delete if File.exist? 'twitter/.cookie' # invalidate credentials
-          r.upstreamUI.fetch
-        else
-          [s,h,b]
-        end}}
+      end}
 
-    GET 'twitter.com', Twitter
-
-    GET 'mobile.twitter.com', Twitter
-    #GET 'mobile.twitter.com', -> r {[302, {'Location' => 'https://twitter.com' + r.path}, []]}
-
-    def TwitterAuth
-      cookie = ('twitter/.cookie').R
-      if baked = cookie.readFile # jar has cookie
-        env['HTTP_COOKIE'] = baked
-      elsif env.has_key? 'HTTP_COOKIE' # request has cookie
-        data = env['HTTP_COOKIE']
-        if data.match? /ct0/    # cookie has token
-          cookie.writeFile data # put baked cookie in jar
-          puts ['🍪 ', "\e[38;5;130m", host, "\e[0m", data].join  ' '
-        end
-      else
-        return
-      end
-      attrs = {}
-      env['HTTP_COOKIE'].split(';').map{|attr|
-        k, v = attr.split('=').map &:strip
-        attrs[k] = v}
-      env['authorization'] ||= 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA'
-      env['x-csrf-token'] ||= attrs['ct0'] if attrs['ct0']
-      env['x-guest-token'] ||= attrs['gt'] if attrs['gt']
-    end
+    %w(mobile www).map{|h| GET h + '.twitter.com', -> r {[302, {'Location' => 'https://twitter.com' + r.path}, []]}}
 
     # Yahoo
     GET 'news.yahoo.com'
@@ -279,16 +256,6 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       else
         r.deny
       end}
-
-    POST 'www.youtube.com', -> r {
-      if r.parts.member? 'stats'
-        r.denyPOST
-      elsif r.env['REQUEST_URI'].match? /ACCOUNT_MENU|comment|\/results|subscribe|verify/i
-        r.POSTthru
-      else
-        r.denyPOST
-      end}
-
   end
 
   def AP doc, &f
