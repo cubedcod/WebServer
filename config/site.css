@@ -8,7 +8,8 @@
 #showMain {background: repeating-linear-gradient(135deg, #000, #000 .4em, #fff .4em, #fff .8em); height: 1.2em; width: 1.2em; border: 1px solid white}
 .avatar {max-height: 2em; background-color: #000}
 .breadcrumb {border-width: 0 0 0 .08em; border-color: #444; border-style: solid; border-radius: 0; color: #ddd}
-.container > .body {border-radius: 0 .2em .2em .2em; background-color: #fff; color: #000; width: 100%}
+.container {margin: .1em}
+.container > .body {border-radius: 0 .2em .2em .2em; background-color: #333; color: #000; width: 100%}
 .container > .title {border-radius: .4em .4em 0 0}
 .file > .icon {font-size: 4.2em; background-color: #000; color: #fff}
 .file > .name {font-size: .8em; position: absolute; top: 4.8em; left: .4em}
@@ -36,7 +37,7 @@ a.idlink {color: #aaa; font-size: .72em; vertical-align: bottom}
 a.uri > span.uri {font-size: 0.8em; font-weight: normal; color: #777}
 a.uri {background-color: #fff; border-radius: .28em; color: #000; border-style: solid; border-width: 0 0 0 .25em; max-width: 42ex; overflow: hidden; margin: .1em; font-weight: bold}
 a.uri.path > span.uri {color: #333}
-a.uri.path {background-color: #bababa}
+a.uri.path, tr[name="contains"] > td.v > a, td[property="http://www.w3.org/ns/ldp#contains"] > a {background-color: #ccc; color: #000}
 blockquote {border-radius: .2em; border-width: 0 0 0 .5em; border-style: solid; border-color: #444; margin: 0 0 0 .1em; background-color: #2c2c2c; color: #fff}
 body {font-family: sans-serif; margin: 2em; background-color: #333; color: #fff}
 div, a, svg, form, textarea { display: inline-block }
@@ -49,7 +50,7 @@ span.name {font-size: .8em}
 svg, img[src*="svg"] {max-width:2em; max-height: 2em}
 table {border-spacing: 1px; background-color: #282828; border-radius: .2em}
 table.links {background-color: #000}
-td {background-color: #000; color: #fffl; overflow: hidden; vertical-align: top; border-radius: .2em}
+td {background-color: #000; color: #fff; overflow: hidden; vertical-align: top; border-radius: .2em}
 td.k a {color: #ccc; max-width: 28ex}
 td.k, th:first-child {text-align: right; font-weight: bold}
 td[property="http://rdfs.org/sioc/ns#has_creator"], td[property="http://rdfs.org/sioc/ns#addressed_to"] {text-align: center}
