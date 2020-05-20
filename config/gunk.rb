@@ -6,7 +6,7 @@ class WebResource
     Gunk = %r([-._\/'"\s:?&=~%]
 ((block|load|page|show)?a(d(vert(i[sz](ement|ing))?)?|ffiliate(link)?)s?(bl(oc)?k(er|ing)?.*|frame|id|obe|rotat[eo]r?|slots?|system|tech|tools?|types?|units?|words?|zones?)?|ak(am|ismet)|alerts?|analytics|appnexus|audience|(app|smart)?
 b(lueconic|ouncee?x.*)s?|.*bid(d(er|ing).*|s)|
-c(ampaigns?|edexis|hartbeat.*|mp|ollector|omscore|on(sent|version)|ookie(c(hoice|onsent)|law|notice)|riteo|(xen)?se)|
+c(ampaigns?|edexis|hartbeat.*|mp|ollector|omscore|on(sent|version)|ookie.?(c(hoice|onsent)|law|notice)|riteo|(xen)?se)|
 de(als|mandware|t(ect|roitchicago))|dfp|disney(id)?|doubleclick|
 e(moji.*\.js|ndscreen|nsighten|proof|scenic|vidon|zoic)|
 fbcdn.*gif|firebase|frosmo|

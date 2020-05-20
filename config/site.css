@@ -28,7 +28,7 @@
 .toolbox a:target {text-shadow: 0px 0px #000000}
 .toolbox svg {height: 1em; width: 1em}
 .toolbox { position: fixed; top: 0; z-index: 2 }
-:target {background-color: #0f0 !important; color: #000 !important}
+:target {background-color: #2ef !important; color: #000 !important}
 a.title:visited, a.uri:visited {background-color: #0f5}
 a {text-decoration: none; border-radius: .14em; background-color: #000; color: #fff; padding-left: .15em; padding-right: .15em}
 a.date {float: right; white-space: nowrap; color: #999; border-radius: .2em; font-size: .8em}
