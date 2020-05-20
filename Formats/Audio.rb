@@ -56,9 +56,40 @@ module Webize
     end
   end
 
+  module Opus
+    class Format < RDF::Format
+      content_type 'audio/opus', :extension => :opus
+      reader { Reader }
+    end
+
+    class Reader < RDF::Reader
+      include WebResource::URIs
+      format Format
+
+      def initialize(input = $stdin, options = {}, &block)
+        @subject = (options[:base_uri] || '#opus').R
+        if block_given?
+          case block.arity
+          when 0 then instance_eval(&block)
+          else block.call(self)
+          end
+        end
+        nil
+      end
+
+      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
+
+      def each_statement &fn
+      end
+    end
+  end
+
   module M4S
     class Format < RDF::Format
-      content_type 'audio/m4s', :extension => :m4s
+      content_type 'audio/m4a', extensions: [:m4a, :m4s],
+                   aliases: %w(
+                    audio/x-m4a;q=0.8
+                    audio/m4s;q=0.8)
       reader { Reader }
     end
 
@@ -68,6 +99,34 @@ module Webize
 
       def initialize(input = $stdin, options = {}, &block)
         @subject = (options[:base_uri] || '#m4s').R
+        if block_given?
+          case block.arity
+          when 0 then instance_eval(&block)
+          else block.call(self)
+          end
+        end
+        nil
+      end
+
+      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
+
+      def each_statement &fn
+      end
+    end
+  end
+
+  module Wav
+    class Format < RDF::Format
+      content_type 'audio/wav', :extension => :wav
+      reader { Reader }
+    end
+
+    class Reader < RDF::Reader
+      include WebResource::URIs
+      format Format
+
+      def initialize(input = $stdin, options = {}, &block)
+        @subject = (options[:base_uri] || '#wav').R
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)

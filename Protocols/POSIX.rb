@@ -5,25 +5,25 @@ class WebResource
     LocalAddress = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).concat(ENV.has_key?('HOSTNAME') ? [ENV['HOSTNAME']] : []).uniq
 
     # URI -> file path
-    def fsPath      ## host
+    def fsPath      ## host part
       (if localNode? # localhost
        ''
       else           # host dir
         hostPath
-       end) +       ## path
-        (if !path || path =='/' # root path
+       end) +       ## path part
+        (if !path || path =='/' # root dir
          %w(index)
         elsif localNode?
-          if parts[0] == 'msg'  # Message-ID -> path
+          if parts[0] == 'msg'  # Message-ID to path
             id = Digest::SHA2.hexdigest Rack::Utils.unescape_path parts[1]
             ['mail', id[0..1], id[2..-1]]
-          else                  # local path
+          else       # local path
             parts.map{|p| Rack::Utils.unescape_path p}
           end
-        elsif path.size > 512 || parts.find{|p|p.size > 255} || (query && !query.empty?) # unwieldy URI
+        elsif path.size > 512 || parts.find{|p|p.size > 255} || (query && !query.empty?) # hash unwieldy URIs
           hash = Digest::SHA2.hexdigest [path, query].join
           [hash[0..1], hash[2..-1]]
-        else                   # direct mapping to local path
+        else         # direct map to local path
           parts.map{|p| Rack::Utils.unescape_path p}
          end).join('/')
     end

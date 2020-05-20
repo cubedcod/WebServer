@@ -58,7 +58,8 @@ class WebResource < RDF::URI
                    end # path-derived format hints when suffix is ambiguous or missing
       options[:base_uri] ||= (localNode? ? path : uri).gsub(/\.ttl$/,'').R env
       options[:format] ||= formatHint if formatHint
-      graph.load fsPath, **options
+      #puts 'load file:' + fsPath
+      graph.load 'file:' + fsPath, **options
     elsif node.directory?
       subject = localNode? ? path.R : self
       subject += '/' unless subject.to_s[-1] == '/'

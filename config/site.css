@@ -34,9 +34,9 @@ a {text-decoration: none; border-radius: .14em; background-color: #000; color: #
 a.date {float: right; white-space: nowrap; color: #999; border-radius: .2em; font-size: .8em}
 a.id {float: right}
 a.idlink {color: #aaa; font-size: .72em; vertical-align: bottom}
-a.uri > span.uri {font-size: 0.8em; font-weight: normal; color: #777}
+a.uri > span.uri {font-size: 0.8em; font-weight: normal; color: #999}
 a.uri {border-radius: .28em; background-color: #ddd; color: #000; max-width: 42ex; overflow: hidden; margin: .1em; font-weight: bold}
-a.uri.path {background-color: #222}
+a.uri.path {background-color: #282828; color: #eee}
 blockquote {border-radius: .2em; border-width: 0 0 0 .5em; border-style: solid; border-color: #444; margin: 0 0 0 .1em; background-color: #2c2c2c; color: #fff}
 body {font-family: sans-serif; margin: 2em; background-color: #333; color: #fff}
 div, a, svg, form, textarea { display: inline-block }
