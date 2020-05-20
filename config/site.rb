@@ -132,12 +132,10 @@ graphql.api.dailymotion.com).map{|h| Allow h}
 
     %w(books groups).map{|h|
       Allow h + '.google.com' }
-    %w(update).map{|h|
-      Allow h + '.googleapis.com' }
 
-    %w(clients2 images maps photos).map{|h|
+    %w(images maps photos).map{|h|
       GET h + '.google.com' }
-    %w(clientservices maps).map{|h|
+    %w(maps).map{|h|
       GET h + '.googleapis.com' }
     %w(maps).map{|h|
       GET h + '.gstatic.com' }
