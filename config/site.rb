@@ -133,7 +133,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     %w(books groups).map{|h|
       Allow h + '.google.com' }
 
-    %w(images maps photos).map{|h|
+    %w(docs images maps photos).map{|h|
       GET h + '.google.com' }
     %w(maps).map{|h|
       GET h + '.googleapis.com' }
@@ -186,7 +186,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
 
     GET 'www.reddit.com', -> r {
       ps = r.parts
-      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !ps.member?('wiki') && !ps.member?('submit') # prefer RSS when offered
+      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !ps.member?('wiki') && !ps.member?('login') && !ps.member?('submit') # prefer RSS when offered
       r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination pointer
       r.fetch options}
 
