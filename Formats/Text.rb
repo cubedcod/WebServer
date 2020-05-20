@@ -171,7 +171,7 @@ module Webize
         yield Type.R, (Schema + 'Code').R
         yield Title.R, @base.basename
         lang = "-l #{@lang}" if @lang
-        html = RDF::Literal [`pygmentize #{lang} -f html #{@base.shellPath}`,'<style>',CodeCSS,'</style>'].join
+        html = RDF::Literal [`pygmentize #{lang} -f html #{@base.shellPath}`,'<style>',CodeCSS,'</style>'].join.encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
         html.datatype = RDF.XMLLiteral
         yield Content.R, html
       end

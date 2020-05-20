@@ -53,7 +53,7 @@ class WebResource < RDF::URI
                      :html
                    elsif %w(changelog license readme todo).member? basename.downcase
                      :plaintext
-                   elsif %w(gemfile rakefile).member? basename.downcase
+                   elsif %w(gemfile makefile rakefile).member? basename.downcase
                      :sourcecode
                    end # path-derived format hints when suffix is ambiguous or missing
       options[:base_uri] ||= (localNode? ? path : uri).gsub(/\.ttl$/,'').R env

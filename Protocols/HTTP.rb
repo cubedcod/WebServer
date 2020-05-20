@@ -392,7 +392,7 @@ class WebResource
       end
 
       head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # we want redirection in HTTP, not Javascript,
-      head.delete 'User-Agent' if host == 't.co'            # so advertise a 'dumb' user-agent
+      head.delete 'User-Agent' if host == 't.co'            # so don't advertise a JS-capable user-agent
 
       head
     end
@@ -417,7 +417,7 @@ class WebResource
     end
 
     def POST
-      AllowedHosts.has_key?(host) ? self.POSTthru : denyPOST
+      AllowedHosts.has_key?(host) && !path.match?(/\/jot\//) && self.POSTthru || denyPOST
     end
 
     def POSTthru
