@@ -128,15 +128,20 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       NoGunk[r]}
 
     # Google
-    GET 'www.google.com', -> r {%w(books maps search).member?(r.parts[0]) ? NoGunk[r] : r.deny}
+    GET 'www.google.com', -> r {
+      if %w(books maps search).member? r.parts[0]
+        NoGunk[r]
+      elsif r.path == '/url'
+        GotoURL[r]
+      else
+        r.deny
+      end}
 
     %w(books groups).map{|h| Allow h + '.google.com' }
 
     %w(docs images maps photos).map{|h| GET h + '.google.com' }
     %w(maps).map{|h| GET h + '.googleapis.com' }
-    #%w(maps ssl www).map{|h|
-    %w(maps).map{|h|
-      GET h + '.gstatic.com' }
+    %w(encrypted-tbn0 maps ssl www).map{|h| GET h + '.gstatic.com' }
 
     GoAU =  -> r {
       if url = (r.query_values || {})['adurl']
