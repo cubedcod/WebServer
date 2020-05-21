@@ -173,7 +173,6 @@ class WebResource
     end
 
     def deny status=200, type=nil
-      return [301, {'Location' => path}, []] if !(query_values||{}).keys.grep(/^utm/).empty?
       env[:deny] = true
       type, content = if type == :stylesheet || ext == 'css'
                         ['text/css', '']

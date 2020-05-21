@@ -148,8 +148,14 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       else
         r.deny
       end}
+
+    NoProxy = -> r {
+      r.parts[0] == 'proxy' ? r.deny(200,:image) : NoGunk[r]}
+
+    (3..6).map{|i| GET "lh#{i}.googleusercontent.com", NoProxy}
     GET 'googleads.g.doubleclick.net', GoAU
     GET 'www.googleadservices.com', GoAU
+    GET 'yt3.ggpht.com', NoProxy
 
     # Imgur
     Allow 'api.imgur.com'
