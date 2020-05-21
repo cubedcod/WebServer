@@ -275,7 +275,7 @@ module Webize
  uk utm www}
 
     class Format < RDF::Format
-      content_type 'text/plain', :extensions => [:pkcs12, :README, :toml, :txt]
+      content_type 'text/plain', :extensions => [:log, :txt]
       content_encoding 'utf-8'
       reader { Reader }
     end
@@ -310,10 +310,11 @@ module Webize
 
       def text_triples
         yield @body, Content, WebResource::HTML.render({_: :pre, style: 'white-space: pre-wrap',
-                                              c: @doc.hrefs{|p,o| # hypertextize
-                                                # yield detected links to consumer
-                                                yield @body, p, o
-                                                yield o, Type, (W3 + '2000/01/rdf-schema#Resource').R}})
+                                                        c: @doc.each_line{|line|
+                                                          line.hrefs{|p,o| # hypertextize
+                                                            # yield detected links to consumer
+                                                            yield @body, p, o
+                                                            yield o, Type, (W3 + '2000/01/rdf-schema#Resource').R}}})
       end
     end
   end
