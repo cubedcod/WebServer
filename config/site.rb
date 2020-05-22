@@ -157,6 +157,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
 
     (3..6).map{|i| GET "lh#{i}.googleusercontent.com", NoProxy}
     GET 'googleads.g.doubleclick.net', GoAU
+    GET 'googleweblight.com', GotoURL
     GET 'www.googleadservices.com', GoAU
     GET 'yt3.ggpht.com', NoProxy
 
