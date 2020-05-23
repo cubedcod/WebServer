@@ -129,7 +129,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
 
     # Google
     GET 'www.google.com', -> r {
-      if %w(books maps search).member? r.parts[0]
+      if %w(books chromebook images maps search).member? r.parts[0]
         NoGunk[r]
       elsif r.path == '/url'
         GotoURL[r]
