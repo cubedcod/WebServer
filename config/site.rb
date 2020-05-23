@@ -30,13 +30,9 @@ module Webize
 end
 class WebResource
   module URIs
-    # format config
-    CacheFormats = %w(css geojson gif html ico jpeg jpg js json m3u8 m4a md mp3 mp4 opus pem pdf png svg ts webm webp xml)
-    NoScan = %w(.css .gif .ico .jpg .js .png .svg .webm)
-    StaticFormats = CacheFormats - %w(json html md xml)
-
-    # host config
-    CookieHost = /(^|\.)(akamai(hd)?|bandcamp|twitter|google)\.(com|net)$/
+    NoScan = %w(.css .gif .ico .jpg .js .png .svg .webm)                                                       # skip RDF scan for these formats when caching
+    StaticFormats = %w(bin css geojson gif ico jpeg jpg js m3u8 m4a mp3 mp4 opus pem pdf png svg ts webm webp) # static formats valid in cache if extant
+    CookieHost = /(^|\.)(akamai(hd)?|bandcamp|twitter|ggpht|google)\.(com|net)$/
     TemporalHosts = %w(api.twitter.com gitter.im news.ycombinator.com www.instagram.com twitter.com www.reddit.com)
     UIhosts = %w(bandcamp.com books.google.com duckduckgo.com groups.google.com players.brightcove.net soundcloud.com timbl.com www.redditmedia.com www.zillow.com)
     AllowedHeaders = 'authorization, client-id, content-type, x-access-token, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-csrf-token, x-guest-token, x-hostname, x-lib-version, x-locale, x-twitter-active-user, x-twitter-client-language, x-twitter-utcoffset, x-requested-with'
@@ -126,7 +122,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
 
     # Google
     GET 'www.google.com', -> r {
-      if %w(books images maps search).member? r.parts[0]
+      if %w(books images maps s search).member? r.parts[0]
         NoGunk[r]
       elsif r.path == '/url'
         GotoURL[r]

@@ -3,12 +3,15 @@ class WebResource
     # MIME to extension mapping, adjunct to Rack's list for obscure/new/nonstandard format-identities
     Suffixes = {
       'application/manifest+json' => '.json',
+      'application/octet-stream' => '.bin',
+      'application/vnd.google.octet-stream-compressible' => '.bin',
       'application/x-www-form-urlencoded' => '.wwwform',
       'application/x-javascript' => '.js',
       'application/x-mpegURL' => '.m3u8',
       'application/x-rss+xml' => '.rss',
       'application/x-turtle' => '.ttl',
       'audio/mpeg' => '.mp3',
+      'binary/octet-stream' => '.bin',
       'image/jpg' => '.jpg',
       'image/svg+xml' => '.svg',
       'image/webp' => '.webp',
