@@ -121,15 +121,6 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       NoGunk[r]}
 
     # Google
-    GET 'www.google.com', -> r {
-      if %w(books images maps s search).member? r.parts[0]
-        NoGunk[r]
-      elsif r.path == '/url'
-        GotoURL[r]
-      else
-        r.deny
-      end}
-
     GoAU =  -> r {
       if url = (r.query_values || {})['adurl']
         dest = url.R
@@ -138,12 +129,10 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       else
         r.deny
       end}
-
-    NoProxy = -> r {
-      r.parts[0] == 'proxy' ? r.deny(200,:image) : NoGunk[r]}
-
+    NoProxy = -> r {r.parts[0] == 'proxy' ? r.deny(200,:image) : NoGunk[r]}
     (3..6).map{|i| GET "lh#{i}.googleusercontent.com", NoProxy}
-    %w(books groups).map{|h| Allow h + '.google.com' }
+    %w(aa books groups).map{|h| Allow h + '.google.com' }
+    GET 'www.google.com', -> r { r.path == '/url' ? GotoURL[r] : NoGunk[r] }
     GET 'googleads.g.doubleclick.net', GoAU
     GET 'googleweblight.com', GotoURL
     GET 'www.googleadservices.com', GoAU
