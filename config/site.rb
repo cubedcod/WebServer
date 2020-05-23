@@ -36,7 +36,7 @@ class WebResource
     StaticFormats = CacheFormats - %w(json html md xml)
 
     # host config
-    CookieHost = /(^|\.)(akamai(hd)?|bandcamp|twitter|www.google)\.(com|net)$/
+    CookieHost = /(^|\.)(akamai(hd)?|bandcamp|twitter|google)\.(com|net)$/
     TemporalHosts = %w(api.twitter.com gitter.im news.ycombinator.com www.instagram.com twitter.com www.reddit.com)
     UIhosts = %w(bandcamp.com books.google.com duckduckgo.com groups.google.com players.brightcove.net soundcloud.com timbl.com www.redditmedia.com www.zillow.com)
     AllowedHeaders = 'authorization, client-id, content-type, x-access-token, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-csrf-token, x-guest-token, x-hostname, x-lib-version, x-locale, x-twitter-active-user, x-twitter-client-language, x-twitter-utcoffset, x-requested-with'
@@ -126,7 +126,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
 
     # Google
     GET 'www.google.com', -> r {
-      if %w(books chromebook images maps search).member? r.parts[0]
+      if %w(books images maps search).member? r.parts[0]
         NoGunk[r]
       elsif r.path == '/url'
         GotoURL[r]
@@ -136,7 +136,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
 
     %w(books groups).map{|h| Allow h + '.google.com' }
 
-    %w(docs images maps photos).map{|h| GET h + '.google.com' }
+    %w(docs images kh khms0 khms1 khms2 khms3 maps photos).map{|h| GET h + '.google.com' }
     %w(maps).map{|h| GET h + '.googleapis.com' }
     %w(encrypted-tbn0 maps ssl www).map{|h| GET h + '.gstatic.com' }
 
@@ -201,7 +201,14 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     Allow 'gql.twitch.tv'
 
     # Twitter
-    Twits = %w(2timez 50Kitchen 5_13Dist 792QFD 857FirePhotos ActCal AestheticResear AlertBoston AlertsBoston AnnissaForBos ArchivesBoston ArtsinBoston AssignGuy AyannaPressley BCYFcenters BHA_Boston BILL34793923 BOSCityCouncil BOSTON_WATER BPDPCGross BankerTradesman BansheeBoston BayStateBanner BillForry BlairMillerTV BosBizAllison BosBizJournal Boston25Photogs Boston25photog BostonBTD BostonBldgRes BostonFire BostonFireAlert BostonGlobe BostonHassle BostonLca BostonMagazine BostonNewsMan BostonPWD BostonParksDept BostonPlans BostonPoliceRA BostonRev BostonSchools BostonTVPhotog BostonWomen Boston_Fireman Boston_PFD CFamaWBZ CJPFirePhotos CampbellforD4 ChelseaScanner ChiefJoeFinn CityBosYouth CityLife_Clvu CityOfBoston CityofQuincy CodmanHealth CommonWealthMag CotterReporter Dan_Adams86 DorchesterBrew DorchesterNorth DotHistorical DotNews DotWrite ENG1SFD EdforBoston EirePub FBIBoston Fairmount_Lab FieldsCornerMS FireSafeCorp FortPointer FranklinParkBos GARYD117 GlobeMetro GlobeOpinion GreenovateBos HelloGreenway JLDifazio JTrufant_Ledger JennDotSmith JohnAKeith Karynregal KerriCorrado Kim_Janey KristinaRex LDBpeaceInst LOCAL_718 LaurieWBZ LiamWBZ LiveBoston617 LouisaMoller LydiaMEdwards MAFIREFIGHTER1 MAPCMetroBoston MBTA MBuffs MaFireEMS MadisonParkDC MarcHurBoston MartyForBoston MassArt MassDOT MassDev MassInno MassStatePolice MattOMalley MikeLaCrosseWBZ NBC10Boston NECN NE_FireBuffs NiaNBCBoston NotoriousVOG ONS_Chinatown PatriotLedger PaulNuttingJr PaulaEbbenWBZ PlunkettPrime ProRockThrower QuincyQuarry RevereJournal SBHealthCenter ScanBoston SquantumScoop Stizzy_LeftLane StreetsBoston StreetsblogMASS StringerBoston SunwealthPower TAGlobe TMGormanPhotos The_BMC ThomasCranePL UMassBoston ViolenceNBoston WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury advocatenewsma ajafarzadehPR alertpageboston beetlenaut bfdradio blarneystonedot bosimpact boston25 bostonpolice bpsnews bytimlogan cdinopoulos chipgoines chipsy231 dbedc doogs1227 franksansev gavin86077173 gavinschoch greaterashmont janovember3 jenyp jrquin1234 kathrynburcham kennycooks kwilesjrnews lawrencepolice markpothier marty_walsh matredsoxfan2 mattgrobo metro_notify mfflaherty news_bnn nickcollinsma nina_liang nuestradavid ofsevit pain24seven pictureboston quincymapolice radio615 reverescanner rgoulston scotteisenphoto sjforman138 skoczela stacos stevebikes susantran thecrimehub therealreporter universalhub wbz wbznewsradio wgbhnews wutrain)
+    Twits = %w(5_13Dist 792QFD 857FirePhotos ActCal AestheticResear AlertBoston AlertsBoston AnnissaForBos ArchivesBoston ArtsinBoston AssignGuy AyannaPressley
+ BCYFcenters BHA_Boston BILL34793923 BOSCityCouncil BOSTON_WATER BPDPCGross BankerTradesman BansheeBoston BayStateBanner BillForry BlairMillerTV BosBizAllison BosBizJournal Boston25Photogs Boston25photog BostonBTD BostonBldgRes BostonFire BostonFireAlert BostonGlobe BostonHassle BostonLca BostonMagazine BostonNewsMan BostonPWD BostonParksDept BostonPlans BostonPoliceRA BostonRev BostonSchools BostonTVPhotog BostonWomen Boston_Fireman Boston_PFD BreakngNewsPhtg
+ CFamaWBZ CJPFirePhotos CampbellforD4 ChelseaScanner ChiefJoeFinn CityBosYouth CityLife_Clvu CityOfBoston CityofQuincy CodmanHealth CommonWealthMag CotterReporter
+ Dan_Adams86 DorchesterBrew DorchesterNorth DotHistorical DotNews DotWrite ENG1SFD EdforBoston EirePub FBIBoston Fairmount_Lab FieldsCornerMS FireSafeCorp FortPointer FranklinParkBos fiahspahk GARYD117 GlobeMetro GlobeOpinion GreenovateBos
+ HelloGreenway JLDifazio JTrufant_Ledger JennDotSmith JohnAKeith Karynregal KerriCorrado Kim_Janey KristinaRex LDBpeaceInst LOCAL_718 LaurieWBZ LiamWBZ LiveBoston617 LouisaMoller LydiaMEdwards
+ MAFIREFIGHTER1 MAPCMetroBoston MBTA MBuffs MaFireEMS MadisonParkDC MarcHurBoston MartyForBoston MassArt MassDOT MassDev MassInno MassStatePolice MattOMalley MikeLaCrosseWBZ NBC10Boston NECN NE_FireBuffs NiaNBCBoston NotoriousVOG ONS_Chinatown PatriotLedger PaulNuttingJr PaulaEbbenWBZ PlunkettPrime ProRockThrower
+ QuincyQuarry RevereJournal SBHealthCenter ScanBoston SquantumScoop Stizzy_LeftLane StreetsBoston StreetsblogMASS StringerBoston SunwealthPower TAGlobe TMGormanPhotos The_BMC ThomasCranePL UMassBoston ViolenceNBoston
+ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury advocatenewsma ajafarzadehPR alertpageboston beetlenaut bfdradio blarneystonedot bosimpact boston25 bostonpolice bpsnews bytimlogan cdinopoulos chipgoines chipsy231 dbedc doogs1227 franksansev gavin86077173 gavinschoch greaterashmont janovember3 jenyp jrquin1234 kathrynburcham kennycooks kwilesjrnews lawrencepolice markpothier marty_walsh matredsoxfan2 mattgrobo metro_notify mfflaherty news_bnn nickcollinsma nina_liang nuestradavid ofsevit pain24seven pictureboston quincymapolice radio615 reverescanner rgoulston scotteisenphoto sjforman138 skoczela stacos stevebikes susantran thecrimehub therealreporter universalhub wbz wbznewsradio wgbhnews wutrain)
     FollowTwits = -> {
       FileUtils.mkdir 'twitter' unless File.directory? 'twitter'
       Twits.map{|n| FileUtils.touch 'twitter/.' + n}}
