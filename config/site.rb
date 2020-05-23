@@ -149,6 +149,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     Allow 'd23yw4k24ca21h.cloudfront.net'
 
     # Mozilla
+    GET 'bugzilla.mozilla.org'
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # Reddit
