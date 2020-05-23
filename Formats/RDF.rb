@@ -88,22 +88,18 @@ class WebResource < RDF::URI
     (repository || env[:repository]).each_graph.map{|graph|
       doc = (graph.name || self).R
       turtle = doc.fsPath + '.ttl'
-      puts "graph #{graph} -> #{turtle}" if ENV.has_key? 'VERBOSE'
-
-      unless File.exist? turtle # write document
+      # write document
+      unless File.exist? turtle
         FileUtils.mkdir_p File.dirname turtle
         RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
         puts "\e[32m#{'%2d' % graph.size}⋮🐢 \e[1m#{doc}\e[0m" if doc.path != path
       end
-
-      # link to timeline , if not already on it
-      if !turtle.match?(/^\d\d\d\d\/\d\d\/\d\d/) && timestamp = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value # timestamp query
-        tlink = [timestamp.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), # hour-dir
-                 %w{host path query}.map{|attr|
-                   doc.send(attr).yield_self{|p|p && p.split(/[\W_]/)}}, 'ttl']. # URI slugs
-                  flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join '.'  # apply slug skiplist
-
-        unless File.exist? tlink # link to timeline
+      # link to timeline (if not already on it)
+      if !turtle.match?(/^\d\d\d\d\/\d\d\/\d\d/) && timestamp = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value # find timestamp
+        tlink = [timestamp.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), # hour-dir container
+                 %w{host path query}.map{|a|doc.send(a).yield_self{|p|p && p.split(/[\W_]/)}}]. # URI slugs
+                  flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.')[0..123] + '.ttl'
+        unless File.exist? tlink
           FileUtils.mkdir_p File.dirname tlink
           begin
             FileUtils.ln turtle, tlink
