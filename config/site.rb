@@ -58,9 +58,6 @@ class WebResource
 
   end
   module HTTP
-    DesktopUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/888.38 (KHTML, like Gecko) Chrome/80.0.3888.80 Safari/888.38'
-    MobileUA = 'Mozilla/5.0 (Linux; Android 9; SM-G960F Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.157 Mobile Safari/537.36'
-
     # URL shorteners / redirectors
     %w(
 bit.ly
@@ -157,6 +154,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
 
     (3..6).map{|i| GET "lh#{i}.googleusercontent.com", NoProxy}
     GET 'googleads.g.doubleclick.net', GoAU
+    GET 'googleweblight.com', GotoURL
     GET 'www.googleadservices.com', GoAU
     GET 'yt3.ggpht.com', NoProxy
 
