@@ -241,7 +241,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       else
         NoGunk[r]
       end.yield_self{|s,h,b|
-        if s == 429 && !r.upstreamUI? # load upstream UI to mint new tokens
+        if [403,429].member?(s) && !r.upstreamUI? # load upstream UI to mint new tokens
           [302, {'Location' => '?UI=upstream'}, []]
         else
           [s,h,b]
