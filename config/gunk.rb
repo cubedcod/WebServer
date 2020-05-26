@@ -18,7 +18,7 @@ kr(ux|xd).*|
 log(event|g(er|ing))|(app|s)?
 m(a(ilchimp|rfeel|tomo)|e(asurement|trics?)|ms|pulse|tr)|
 newrelic|
-o(m(niture|tr)|nboarding|nesignal|ptanon|utbrain)|
+o(m(niture|tr)|nboarding|nesignal|pt(anon|imera)|utbrain)|
 p(aywall|erimeter-?x|i(wik|xel(propagate)?)|lacement|op(down|over|up)|orpoiseant|owaboot|repopulator|ro(fitwell|m(o(tion)?s?|pt))|ub(exchange|matic))|/pv|
 quantcast|
 recaptcha|record(event|stats?)|re?t(ar)?ge?t(ing)?|(rich)?relevance|recirc.*|rubicon.*|
