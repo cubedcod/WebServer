@@ -37,6 +37,7 @@ class WebResource
 
     def self.call env
       return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']           # allow HTTP methods
+      URIs.gunkTree true if GunkFile.mtime > GunkHosts[:mtime]
       uri = RDF::URI('https://' + env['HTTP_HOST']).join env['REQUEST_PATH']
       uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading and consecutive & from query
       resource = uri.R env                                                      # instantiate web resource

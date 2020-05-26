@@ -46,11 +46,6 @@ class WebResource
     CodeCSS = SiteDir.join('code.css').read
     SiteJS  = SiteDir.join('site.js').read
 
-    # junklist
-    SiteDir.join('gunk_hosts').each_line{|l|
-      cursor = GunkHosts
-      l.chomp.sub(/^\./,'').split('.').reverse.map{|name|cursor = cursor[name] ||= {}}}
-
   end
   module HTTP
     # URL shorteners / redirectors

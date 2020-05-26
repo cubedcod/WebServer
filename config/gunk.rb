@@ -1,7 +1,20 @@
 # coding: utf-8
 class WebResource
   module URIs
+
+    GunkFile = SiteDir.join 'gunk_hosts'
     GunkHosts = {}
+
+    def self.gunkTree verbose=false
+      GunkFile.each_line{|l|
+        cursor = GunkHosts
+        l.chomp.sub(/^\./,'').split('.').reverse.map{|name|
+          cursor = cursor[name] ||= (print '🗑️' + l if verbose;
+                                     {})}}
+      GunkHosts[:mtime] = GunkFile.mtime
+    end
+
+    self.gunkTree # read gunkfile
 
     # URI pattern
     Gunk = %r([-._\/'"\s:?&=~%]
