@@ -332,8 +332,8 @@ class WebResource
         end
       elsif handler = HostGET[host]                         # host handler
         handler[self]
-      elsif gunk?                                           # blocked content
-        deny
+      elsif gunk?                                           # gunk handler
+        gunkQuery? ? [301, {'Location' => path}, []] : deny
       else                                                  # remote node
         fetch
       end
@@ -352,6 +352,10 @@ class WebResource
       return false if !host || AllowedHosts.has_key?(host) || HostGET.has_key?(host)
       c = GunkHosts                                                 # start cursor
       host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # find leaf in gunk tree
+    end
+
+    def gunkQuery?
+      !(query_values||{}).keys.grep(/^utm/).empty?
     end
 
     def HEAD
