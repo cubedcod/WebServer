@@ -101,6 +101,9 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     # .edu
     Allow 'www.nyu.edu'
 
+    # Algolia
+    Allow 'uj5wyc0l7x-dsn.algolia.net'
+
     # DartSearch
     GET 'clickserve.dartsearch.net', -> r {[301, {'Location' => r.query_values['ds_dest_url']}, []]}
 
@@ -126,8 +129,8 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     NoProxy = -> r {r.parts[0] == 'proxy' ? r.deny(200,:image) : NoGunk[r]}
 
     %w(aa books groups).map{|h| Allow h + '.google.com' }
-    %w(docs images kh khms0 khms1 khms2 khms3 maps photos).map{|h| GET h + '.google.com' }
-    %w(encrypted-tbn0 maps ssl www).map{|h| GET h + '.gstatic.com' }
+    %w(docs images kh khms0 khms1 khms2 khms3 lh3 maps photos).map{|h| GET h + '.google.com' }
+    %w(encrypted-tbn0 encrypted-tbn1 encrypted-tbn2 encrypted-tbn3 maps ssl www).map{|h| GET h + '.gstatic.com' }
     %w(maps).map{|h| GET h + '.googleapis.com' }
     (3..6).map{|i| GET "lh#{i}.googleusercontent.com", NoProxy}
     GET 'googleads.g.doubleclick.net', GoAU
