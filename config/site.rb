@@ -35,7 +35,7 @@ class WebResource
     CookieHost = /(^|\.)(akamai(hd)?|bandcamp|twitter|ggpht|google)\.(com|net)$/
     TemporalHosts = %w(api.twitter.com gitter.im news.ycombinator.com www.instagram.com twitter.com www.reddit.com)
     UIhosts = %w(aprs.mennolink.org bandcamp.com books.google.com chrome.google.com duckduckgo.com groups.google.com play.google.com players.brightcove.net soundcloud.com timbl.com www.redditmedia.com www.zillow.com)
-    AllowedHeaders = 'authorization, client-id, content-type, x-access-token, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-csrf-token, x-guest-token, x-hostname, x-lib-version, x-locale, x-twitter-active-user, x-twitter-client-language, x-twitter-utcoffset, x-requested-with'
+    AllowedHeaders = 'authorization, client-id, content-type, x-access-token, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-csrf-token, x-goog-authuser, x-guest-token, x-hostname, x-lib-version, x-locale, x-twitter-active-user, x-twitter-client-language, x-twitter-utcoffset, x-requested-with'
 
     # local static resources
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
@@ -135,7 +135,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     (3..6).map{|i| GET "lh#{i}.googleusercontent.com", NoProxy}
     GET 'googleads.g.doubleclick.net', GoAU
     GET 'googleweblight.com', GotoURL
-    GET 'www.google.com', -> r {r.path=='/url' ? GotoURL[r] : %w(books images maps search).member?(r.parts[0]) ? NoGunk[r] : r.deny}
+    GET 'www.google.com', -> r {r.parts[0] == 'complete' ? r.deny : (r.path == '/url' ? GotoURL : NoGunk)[r]}
     GET 'www.googleadservices.com', GoAU
     GET 'yt3.ggpht.com', NoProxy
 
