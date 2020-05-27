@@ -143,6 +143,8 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     Allow 'api.imgur.com'
     Allow 'imgur.com'
 
+    # Microsoft
+    
     # Mixcloud
     Allow 'www.mixcloud.com'
 
