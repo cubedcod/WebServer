@@ -442,8 +442,9 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       post = comment.parent
       date = post.css('.age > a')[0]
       subject = base + date['href']
+      comment.css('.reply').remove
       yield subject, Type, Post.R
-      yield subject, Content, comment.inner_html
+      yield subject, Content, (Webize::HTML.format comment.inner_html, self)
       if user = post.css('.hnuser')[0]
         yield subject, Creator, (base + user['href']).R
         yield subject, Creator, user.inner_text
