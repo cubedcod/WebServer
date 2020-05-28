@@ -284,11 +284,8 @@ class WebResource
       case status
       when /30[12378]/ # redirect
         dest = e.io.meta['location'].R env
-        same_path = (path || '/') == (dest.path || '/')
-        same_host = host == dest.host
-        scheme_downgrade = scheme == 'https' && dest.scheme == 'http'
-        if same_path && same_host && scheme_downgrade
-          puts "WARNING HTTPS downgraded to HTTP at #{uri}"
+        if scheme == 'https' && dest.scheme == 'http'
+          puts "WARNING HTTPS downgraded to HTTP: #{uri} -> #{dest}"
           dest.fetchHTTP options
         else
           [302, {'Location' => dest.uri}, []]
