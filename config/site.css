@@ -2,7 +2,7 @@
 #host img {max-height: 4.2em}
 #next {right: 0}
 #prev {left: 0}
-#prev, #next {position: fixed; height: 100%}
+#prev, #next {position: fixed; height: 100%; background-color: #222}
 #prev, #next, #expand {font-size: 1.9em; color: #eee}
 #prev:hover, #next:hover {background-color: #333}
 #showMain {background: repeating-linear-gradient(135deg, #000, #000 .4em, #fff .4em, #fff .8em); height: 1.2em; width: 1.2em; border: 1px solid white}

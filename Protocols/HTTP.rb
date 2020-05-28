@@ -235,13 +235,13 @@ class WebResource
         else
           body = HTTP.decompress h, response.read             # decompress body
           format = if path=='/feed' || (query_values||{})['mime']=='xml'
-                     'application/atom+xml'                   # find content-type
-                   elsif h.has_key? 'content-type'            #  Atom/RSS feed ||
-                     h['content-type'].split(/;/)[0]          #  MIME header ||
-                   elsif RDF::Format.file_extensions.has_key? ext.to_sym
+                     'application/atom+xml'                   # Atom/RSS content-type
+                   elsif h.has_key? 'content-type'
+                     h['content-type'].split(/;/)[0]          # content-type in HTTP header
+                   elsif RDF::Format.file_extensions.has_key? ext.to_sym # path extension
                      RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
-                   end                                        #  name extension
-          static = !options[:reformat] && fixedFormat?(format)# rewritable?
+                   end
+          fixedFormat = !options[:reformat] && fixedFormat?(format)
           body = Webize::HTML.clean body if format == 'text/html' && !AllowedHosts.has_key?(host) # tidy HTML
           formatExt = Suffixes[format] || Suffixes_Rack[format] || '' # format suffix
           storage = fsPath                                    # storage location
@@ -271,7 +271,7 @@ class WebResource
           end
           env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
           env[:resp]['Set-Cookie'] ||= h['set-cookie'] if h['set-cookie'] && allowCookies?
-          if static
+          if fixedFormat
             env[:resp]['Content-Length'] = body.bytesize.to_s # content size
             [200, env[:resp], [body]]                         # upstream document
           else
@@ -301,9 +301,9 @@ class WebResource
       end
     end
 
-    def fixedFormat? format = nil
-      return true if upstreamUI? || format.to_s.match?(/dash.xml/) # preserve upstream format
-      return false if (query_values||{}).has_key?('rdf') || env[:transform] || !format || format.match?(/atom|html|rss|turtle|xml/i) # transformable formats
+    def fixedFormat? format
+      return true if !format || upstreamUI? || format.match?(/dash.xml/) # unknown or upstream format
+      return false if (query_values||{}).has_key?('rdf') || format.match?(/atom|html|rss|turtle|xml/i) # default or requested transform
       return true
     end
 

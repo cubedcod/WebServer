@@ -35,7 +35,7 @@ o(m(niture|tr)|nboarding|nesignal|pt(anon|imera)|utbrain)|
 p(aywall|erimeter-?x|i(wik|xel(propagate)?)|lacement|op(down|over|up)|orpoiseant|owaboot|repopulator|ro(fitwell|m(o(tion)?s?|pt))|ub(exchange|matic))|/pv|
 quantcast|
 recaptcha|record(event|stats?)|re?t(ar)?ge?t(ing)?|(rich)?relevance|recirc.*|rubicon.*|
-s?s(a(fe[-_]?browsing|ilthru)|erv(edby|ice[-_]?worker)|(har|tag)e(aholic|count)|i(ftscience|gnalr|tenotice)|ponsor(ed)?|w.js|yn(dicat(ed|ion)))|
+s(a(fe[-_]?browsing|ilthru)|erv(edby|ice[-_]?worker)|(har|tag)e(aholic|count)|i(ftscience|gnalr|tenotice)|ponsor(ed)?|w.js)|
 t(aboola.*|(arget|rack)(ers?|ing).*|ampering|ealium|elemetry|inypass|ra?c?k?ing(data)?|ricorder|rustx|ype(face|kit))|autotrack|
 u(psell|rchin|s(abilla|er[-_]?(context|location))|tm)|
 web(font|trends)|wp-?(ad.*|json|rum)|
