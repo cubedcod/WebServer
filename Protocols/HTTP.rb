@@ -39,7 +39,7 @@ class WebResource
       return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']           # allow HTTP methods
       URIs.gunkTree true if GunkFile.mtime > GunkHosts[:mtime]
       uri = RDF::URI('https://' + env['HTTP_HOST']).join env['REQUEST_PATH']
-      uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading and consecutive & from query
+      uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading and consecutive & from query - URI libraries hate this
       resource = uri.R env                                                      # instantiate web resource
       env[:refhost] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # referring host
       env[:resp] = {}                                                           # response-header storage
@@ -302,8 +302,8 @@ class WebResource
     end
 
     def fixedFormat? format
-      return true if !format || upstreamUI? || format.match?(/dash.xml/) # unknown or upstream format
-      return false if (query_values||{}).has_key?('rdf') || format.match?(/atom|html|rss|turtle|xml/i) # default or requested transform
+      return true if !format || upstreamUI? || format.match?(/dash.xml/)                               # unknown or upstream format
+      return false if (query_values||{}).has_key?('rdf') || format.match?(/atom|html|rss|turtle|xml/i) # default or requested transformability
       return true
     end
 
