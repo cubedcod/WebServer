@@ -24,8 +24,7 @@ module Webize
     end
 
     # clean HTML (nokogiri instance)
-    def self.clean_doc doc; return if ENV.has_key? 'INLINE_GUNK'
-
+    def self.clean_doc doc
       # strip fonts and preload-directives
       doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
 

@@ -240,7 +240,7 @@ class WebResource
           puts "WARNING format undefined for URL #{uri}, please fix your server" unless format
 
           body = HTTP.decompress h, response.read             # decompress body
-          body = Webize::HTML.clean body if format == 'text/html' # clean/reformat HTML body
+          body = Webize::HTML.clean body if format == 'text/html' && !ENV.has_key?('GUNK')# clean HTML body
 
           cache = fsPath.R                                    # base path for cache
           cache += querySlug                                  # add qs-derived slug

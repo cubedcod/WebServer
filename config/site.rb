@@ -121,26 +121,32 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       NoGunk[r]}
 
     # Google
-    GoAU =  -> r {
-      if url = (r.query_values || {})['adurl']
-        dest = url.R
-        dest.query = '' unless url.match? /dest_url/
-        [301, {'Location' => dest}, []]
-      else
-        r.deny
-      end}
-    NoProxy = -> r {r.parts[0] == 'proxy' ? r.deny(200,:image) : NoGunk[r]}
-
-    %w(aa books groups).map{|h| Allow h + '.google.com' }
-    %w(docs images kh khms0 khms1 khms2 khms3 lh3 maps photos).map{|h| GET h + '.google.com' }
-    %w(encrypted-tbn0 encrypted-tbn1 encrypted-tbn2 encrypted-tbn3 maps ssl www).map{|h| GET h + '.gstatic.com' }
-    %w(maps).map{|h| GET h + '.googleapis.com' }
-    (3..6).map{|i| GET "lh#{i}.googleusercontent.com", NoProxy}
-    GET 'googleads.g.doubleclick.net', GoAU
-    GET 'googleweblight.com', GotoURL
-    GET 'www.google.com', -> r {%w(async complete).member?(r.parts[0]) ? r.deny : (r.path == '/url' ? GotoURL : NoGunk)[r]}
-    GET 'www.googleadservices.com', GoAU
-    GET 'yt3.ggpht.com', NoProxy
+    if ENV.has_key? 'GOOGLE'
+      %w(accounts.google.com
+          www.googleapis.com).map{|host|
+        Allow host}
+    end
+    unless ENV.has_key? 'DEGOOGLE'
+      GoAU =  -> r {
+        if url = (r.query_values || {})['adurl']
+          dest = url.R
+          dest.query = '' unless url.match? /dest_url/
+          [301, {'Location' => dest}, []]
+        else
+          r.deny
+        end}
+      NoProxy = -> r {r.parts[0] == 'proxy' ? r.deny(200,:image) : NoGunk[r]}
+      %w(aa books groups).map{|h| Allow h + '.google.com' }
+      %w(docs images kh khms0 khms1 khms2 khms3 lh3 maps photos).map{|h| GET h + '.google.com' }
+      %w(encrypted-tbn0 encrypted-tbn1 encrypted-tbn2 encrypted-tbn3 maps ssl www).map{|h| GET h + '.gstatic.com' }
+      %w(maps).map{|h| GET h + '.googleapis.com' }
+      (3..6).map{|i| GET "lh#{i}.googleusercontent.com", NoProxy}
+      GET 'googleads.g.doubleclick.net', GoAU
+      GET 'googleweblight.com', GotoURL
+      GET 'www.google.com', -> r {%w(async complete).member?(r.parts[0]) ? r.deny : (r.path == '/url' ? GotoURL : NoGunk)[r]}
+      GET 'www.googleadservices.com', GoAU
+      GET 'yt3.ggpht.com', NoProxy
+    end
 
     # Imgur
     Allow 'api.imgur.com'

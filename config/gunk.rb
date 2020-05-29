@@ -23,7 +23,7 @@ b(lueconic|ouncee?x.*|ugsnag)|.*bid(d(er|ing).*|s)|
 c(ampaigns?|edexis|hartbeat.*|mp|ollector|omscore|on(sent|version)|ookie.?(c(hoice|onsent)|law|notice)|riteo|(xen)?se)|
 de(als|mandware|t(ect|roitchicago))|dfp|dis(ney(id)?|qus)|doubleclick|
 e(moji.*\.js|ndscreen|nsighten|proof|scenic|vidon|zoic)|
-fbcdn.*gif|firebase|frosmo|
+fbcdn.*gif|frosmo|
 g(dpr|eo(ip|locat(e|ion))|igya|pt|tag|tm)|.*(
 header|pre)[-_]?bid.*|hotjar|.*hubspot.*|[hp]b.?js|ima[0-9]?|
 impression|indexww|
