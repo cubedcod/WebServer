@@ -18,7 +18,7 @@ in theory, this proxy can go away once clients and servers get better, but in ty
 
 ## INSTALL
 
-there is no install step, code can be run from the checkout dir or moved to a library dir of your taste. for alpine/arch/debian/termux deps:
+at least until a release version is ready, there is no install step, code is run/edited in checkout dir. to install alpine/arch/debian/termux dependencies:
 
     sh DEPENDENCIES
 
@@ -33,4 +33,4 @@ client
 
     http_proxy=http://localhost:8080 https_proxy=http://localhost:8080 no_proxy=localhost firefox
 
-advanced scenarios like transparent-proxy require network or SSL configuration. see [bin/](bin/) for sample scripts
+see [bin/](bin/) for sample scripts for browser/server launching, cert installation, network config

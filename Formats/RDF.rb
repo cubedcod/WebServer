@@ -38,7 +38,10 @@ class WebResource < RDF::URI
     def ext; path ? (File.extname(path)[1..-1] || '') : '' end
     def extension; '.' + ext end
     def parts; path ? (path.split('/') - ['']) : [] end
-
+    def querySlug
+      return '' unless query && !query.empty?
+      '.' + Digest::SHA2.hexdigest(query)[0..15]
+    end
   end
 
   alias_method :uri, :to_s

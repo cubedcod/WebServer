@@ -20,7 +20,7 @@ class WebResource
           else       # local path
             parts.map{|p| Rack::Utils.unescape_path p}
           end
-        elsif path.size > 512 || parts.find{|p|p.size > 255} || (query && !query.empty?) # hash unwieldy URIs
+        elsif path.size > 512 || parts.find{|p|p.size > 127} # long path
           hash = Digest::SHA2.hexdigest [path, query].join
           [hash[0..1], hash[2..-1]]
         else         # direct map to local path
@@ -114,7 +114,8 @@ class WebResource
       else                      # GLOB
         globPath = fsPath
         unless globPath.match GlobChars # parametric glob
-          env[:summary] = false         # graph-documents glob
+          env[:summary] = false         # glob of default documents
+          globPath += querySlug
           globPath += '*'
         end
         Pathname.glob globPath

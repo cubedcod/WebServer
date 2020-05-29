@@ -217,9 +217,9 @@ class WebResource
       return nodeResponse if ENV.has_key?('OFFLINE')                                                     # offline, return cached nodes
       if StaticFormats.member? ext.downcase
         return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client cache-hit
-        return fileResponse if node.file?                                                                # server cache-hit, direct
+        return fileResponse if node.file?                                                                # server cache-hit - direct
       end
-      c = nodeSet; return c[0].fileResponse if c.size == 1 && StaticFormats.member?(c[0].ext)            # server cache-hit, indirect via mapping
+      c = nodeSet; return c[0].fileResponse if c.size == 1 && StaticFormats.member?(c[0].ext)            # server cache-hit - indirect
       locator = ['//',host,(port ? [':',port] : nil),path,options[:suffix],(query ? ['?',query] : nil)].join
       ('https:' + locator).R(env).fetchHTTP options                                                      # cache miss, HTTPS fetch
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
@@ -233,7 +233,6 @@ class WebResource
           h['Access-Control-Allow-Origin'] = allowedOrigin unless h['Access-Control-Allow-Origin'] || h['access-control-allow-origin']
           [206, h, [response.read]]                           # return part
         else
-          body = HTTP.decompress h, response.read             # decompress body
           format = if path=='/feed' || (query_values||{})['mime']=='xml'
                      'application/atom+xml'                   # Atom/RSS content-type
                    elsif h.has_key? 'content-type'
@@ -241,37 +240,37 @@ class WebResource
                    elsif RDF::Format.file_extensions.has_key? ext.to_sym # path extension
                      RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
                    end
-          fixedFormat = !options[:reformat] && fixedFormat?(format)
-          body = Webize::HTML.clean body if format == 'text/html' && !AllowedHosts.has_key?(host) # tidy HTML
-          formatExt = Suffixes[format] || Suffixes_Rack[format] || '' # format suffix
-          storage = fsPath                                    # storage location
-          storage += formatExt unless extension == formatExt  # append suffix if incorrect or missing
-          storage.R.writeFile body                            # cache upstream representation
-          reader = RDF::Reader.for content_type: format       # RDF reader-pass
-          reader.new(body, base_uri: self){|_|(env[:repository] ||= RDF::Repository.new) << _ } if reader && !NoScan.member?(formatExt)
-          return self if options[:intermediate]               # intermediate fetch, no immediate response or caching
-          if reader
-            saveRDF                                           # cache RDF
+          formatExt = Suffixes[format] || Suffixes_Rack[format] # format -> name-suffix
+          puts "WARNING format undefined for URL #{uri}, please afix your server" unless format
+
+          body = HTTP.decompress h, response.read             # decompress body
+          body = Webize::HTML.clean body if format == 'text/html' # clean/reformat HTML body
+
+          cache = fsPath.R                                    # base path for cache
+          cache += querySlug                                  # add qs-derived slug
+          if formatExt
+            cache += formatExt unless cache.R.extension == formatExt  # append format-suffix
           else
-            puts "no RDF reader found:"
-            puts [['URI', uri],
-                  ['MIME', format]
-                 ].map{|r| r.join "\t"}.join "\n"
+            puts "WARNING suffix undefined for format #{format}, please add to Formats/MIME.rb"
           end
-          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
-            env[:resp][k] ||= h[k.downcase] if h[k.downcase]} # read upstream metadata
-          if links = h['link']                                # read Link metadata
-            links.split(',').map{|link|
-              ref, type = link.split(';').map &:strip
-              if ref && type
-                ref  =  ref.sub(/^</,'').sub      />$/,''
-                type = type.sub(/^rel="?/,'').sub /"$/,''
-                env[:links][type.to_sym] = ref
-              end}
-          end
+          cache.R.writeFile body                              # cache representation
+
+          reader = RDF::Reader.for content_type: format       # find RDF reader
+          reader.new(body, base_uri: self){|_|(env[:repository] ||= RDF::Repository.new) << _ } if reader && !NoScan.member?(formatExt)
+          return self if options[:intermediate]               # intermediate fetch, no immediate indexing and response
+          saveRDF if reader                                   # index RDF
+                                                              # add upstream metadata to response
+          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k| env[:resp][k] ||= h[k.downcase] if h[k.downcase]}
+          h['link'].split(',').map{|link|                     # parse Link metadata
+            ref, type = link.split(';').map &:strip
+            if ref && type
+              ref = ref.sub(/^</,'').sub />$/, ''
+              type = type.sub(/^rel="?/,'').sub /"$/, ''
+              env[:links][type.to_sym] = ref
+            end} if h['link']
           env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
           env[:resp]['Set-Cookie'] ||= h['set-cookie'] if h['set-cookie'] && allowCookies?
-          if fixedFormat
+          if !options[:reformat] && fixedFormat?(format)
             env[:resp]['Content-Length'] = body.bytesize.to_s # content size
             [200, env[:resp], [body]]                         # upstream document
           else
@@ -293,6 +292,7 @@ class WebResource
       when /304/ # Not Modified
         [304, {}, []]
       when /404/ # Not Found
+        env[:status] = 404
         upstreamUI? ? [404, (headers e.io.meta), [e.io.read]] : nodeResponse
       when /300|4(0[13]|10|29)|50[03]|999/
         [status.to_i, (headers e.io.meta), [e.io.read]]
