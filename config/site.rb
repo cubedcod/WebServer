@@ -106,7 +106,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     GET 'clickserve.dartsearch.net', -> r {[301, {'Location' => r.query_values['ds_dest_url']}, []]}
 
     # Facebook
-    GET 'www.facebook.com' if ENV.has_key? 'FACEBOOK'
+    Allow 'www.facebook.com' if ENV.has_key? 'FACEBOOK'
     %w(l.facebook.com
       l.instagram.com).map{|host|GET host, GotoURL}
 
