@@ -48,6 +48,10 @@ class WebResource
 
   end
   module HTTP
+
+    GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['u']||r.query_values['q'])}, []]}
+    NoGunk  = -> r {r.uri.match?(Gunk) && (r.query_values||{})['allow'] != ServerKey && r.deny || r.fetch}
+
     # URL shorteners / redirectors
     %w(
 bit.ly
@@ -79,12 +83,6 @@ wired.trib.al
           [302, {'Location' => r.path}, []] #  redirect to path
         end}}
 
-    %w(l.facebook.com lm.facebook.com l.instagram.com).map{|host|
-      GET host, -> r {
-        [301, {'Location' =>  r.query_values['u']}, []]}}
-
-    GET 'gate.sc', GotoURL
-
     # CDN scripts
     %w(
 ajax.cloudflare.com
@@ -106,6 +104,11 @@ graphql.api.dailymotion.com).map{|h| Allow h}
 
     # DartSearch
     GET 'clickserve.dartsearch.net', -> r {[301, {'Location' => r.query_values['ds_dest_url']}, []]}
+
+    # Facebook
+    GET 'www.facebook.com' if ENV.has_key? 'FACEBOOK'
+    %w(l.facebook.com
+      l.instagram.com).map{|host|GET host, GotoURL}
 
     # Gitter
     GET 'gitter.im', -> r {
@@ -180,6 +183,9 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !ps.member?('wiki') && !ps.member?('login') && !ps.member?('submit') # prefer RSS when offered
       r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination pointer
       r.fetch options}
+
+    # Soundcloud
+    GET 'gate.sc', GotoURL
 
     # Twitch
     Allow 'gql.twitch.tv'

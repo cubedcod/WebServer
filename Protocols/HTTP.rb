@@ -241,7 +241,7 @@ class WebResource
                      RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
                    end
           formatExt = Suffixes[format] || Suffixes_Rack[format] # format -> name-suffix
-          puts "WARNING format undefined for URL #{uri}, please afix your server" unless format
+          puts "WARNING format undefined for URL #{uri}, please fix your server" unless format
 
           body = HTTP.decompress h, response.read             # decompress body
           body = Webize::HTML.clean body if format == 'text/html' # clean/reformat HTML body
