@@ -205,9 +205,6 @@ graphql.api.dailymotion.com).map{|h| Allow h}
  MAFIREFIGHTER1 MAPCMetroBoston MBTA MBuffs MaFireEMS MadisonParkDC MarcHurBoston MartyForBoston MassArt MassDOT MassDev MassInno MassStatePolice MattOMalley MikeLaCrosseWBZ NBC10Boston NECN NE_FireBuffs NiaNBCBoston NotoriousVOG ONS_Chinatown PatriotLedger PaulNuttingJr PaulaEbbenWBZ PlunkettPrime ProRockThrower
  QuincyQuarry RevereJournal SBHealthCenter ScanBoston SquantumScoop Stizzy_LeftLane StreetsBoston StreetsblogMASS StringerBoston SunwealthPower TAGlobe TMGormanPhotos The_BMC ThomasCranePL UMassBoston ViolenceNBoston
  WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury advocatenewsma ajafarzadehPR alertpageboston beetlenaut bfdradio blarneystonedot bosimpact boston25 bostonpolice bpsnews bytimlogan cdinopoulos chipgoines chipsy231 dbedc doogs1227 franksansev gavin86077173 gavinschoch greaterashmont janovember3 jenyp jrquin1234 kathrynburcham kennycooks kwilesjrnews lawrencepolice markpothier marty_walsh matredsoxfan2 mattgrobo metro_notify mfflaherty news_bnn nickcollinsma nina_liang nuestradavid ofsevit pain24seven pictureboston quincymapolice radio615 reverescanner rgoulston scotteisenphoto sjforman138 skoczela stacos stevebikes susantran thecrimehub therealreporter universalhub wbz wbznewsradio wgbhnews wutrain)
-    FollowTwits = -> {
-      FileUtils.mkdir 'twitter' unless File.directory? 'twitter'
-      Twits.map{|n| FileUtils.touch 'twitter/.' + n}}
     Allow 'api.twitter.com'
     GET 'twitter.com', -> r {
       setTokens = -> {
@@ -225,8 +222,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       # feed
       elsif r.path == '/'
         setTokens[]
-        subscriptions = Pathname.glob('twitter/.??*').map{|n|n.basename.to_s[1..-1]}
-        subscriptions.shuffle.each_slice(18){|sub|
+        Twits.shuffle.each_slice(18){|sub|
           print '🐦'
           q = sub.map{|u|'from%3A' + u}.join('%2BOR%2B')
           apiURL = 'https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&q=' + q + '&vertical=default&count=40&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2CcameraMoment'
