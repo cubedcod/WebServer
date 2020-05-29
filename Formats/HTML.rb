@@ -403,7 +403,13 @@ class WebResource
                                HTML.keyval (Webize::HTML.webizeHash env), env
                              elsif (env[:view] || qs['view']) == 'table'
                                env[:sort] ||= qs['sort']
-                               HTML.tabular graph, env
+                               groups = {}
+                               graph.map{|uri, resource|
+                                 (resource[Type]||[:untyped]).map{|type|
+                                   groups[type] ||= []
+                                   groups[type].push resource }}
+                               groups.map{|type, resources|
+                                 HTML.tabular resources, env}
                              else
                                graph.values.map{|resource|
                                  HTML.value nil, resource, env}
