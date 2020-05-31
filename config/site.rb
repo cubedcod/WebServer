@@ -106,9 +106,9 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     GET 'clickserve.dartsearch.net', -> r {[301, {'Location' => r.query_values['ds_dest_url']}, []]}
 
     # Facebook
-    Allow 'www.facebook.com' if ENV.has_key? 'FACEBOOK'
     %w(l.facebook.com
       l.instagram.com).map{|host|GET host, GotoURL}
+    Allow 'www.facebook.com' if ENV.has_key? 'FACEBOOK'
 
     # Gitter
     GET 'gitter.im', -> r {
@@ -121,26 +121,25 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       NoGunk[r]}
 
     # Google
-    unless ENV.has_key? 'DEGOOGLE'
-      #%w(accounts.google.com www.googleapis.com).map{|h|Allow h} if ENV.has_key? 'GOOGLE'
-      GoAU =  -> r {
-        if url = (r.query_values || {})['adurl']
-          dest = url.R
-          dest.query = '' unless url.match? /dest_url/
-          [301, {'Location' => dest}, []]
-        else
-          r.deny
-        end}
-      NoProxy = -> r {r.parts[0] == 'proxy' ? r.deny(200,:image) : NoGunk[r]}
-      %w(aa books groups).map{|h| Allow h + '.google.com' }
-      %w(docs images kh khms0 khms1 khms2 khms3 lh3 maps photos support).map{|h| GET h + '.google.com' }
+    NoProxy = -> r {r.parts[0] == 'proxy' ? r.deny(200,:image) : NoGunk[r]}
+    GoAU =  -> r {
+      if url = (r.query_values || {})['adurl']
+        dest = url.R
+        dest.query = '' unless url.match? /dest_url/
+        [301, {'Location' => dest}, []]
+      else
+        r.deny
+      end}
+    GET 'googleads.g.doubleclick.net', GoAU
+    GET 'googleweblight.com', GotoURL
+    GET 'www.googleadservices.com', GoAU
+    if ENV.has_key? 'GOOGLE'
+      %w(aa books groups).map{|h|                                                        Allow h + '.google.com' }
+      %w(docs images kh khms0 khms1 khms2 khms3 lh3 maps photos).map{|h|                   GET h + '.google.com' }
       %w(encrypted-tbn0 encrypted-tbn1 encrypted-tbn2 encrypted-tbn3 maps ssl www).map{|h| GET h + '.gstatic.com' }
-      %w(maps storage).map{|h| GET h + '.googleapis.com' }
+      %w(maps storage).map{|h|                                                             GET h + '.googleapis.com' }
       (3..6).map{|i| GET "lh#{i}.googleusercontent.com", NoProxy}
-      GET 'googleads.g.doubleclick.net', GoAU
-      GET 'googleweblight.com', GotoURL
       GET 'www.google.com', -> r {%w(async complete).member?(r.parts[0]) ? r.deny : (r.path == '/url' ? GotoURL : NoGunk)[r]}
-      GET 'www.googleadservices.com', GoAU
       GET 'yt3.ggpht.com', NoProxy
     end
 
