@@ -187,6 +187,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
  WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury advocatenewsma ajafarzadehPR alertpageboston beetlenaut bfdradio blarneystonedot bosimpact boston25 bostonpolice bpsnews bytimlogan cdinopoulos chipgoines chipsy231 dbedc doogs1227 franksansev gavin86077173 gavinschoch greaterashmont janovember3 jenyp jrquin1234 kathrynburcham kennycooks kwilesjrnews lawrencepolice markpothier marty_walsh matredsoxfan2 mattgrobo metro_notify mfflaherty news_bnn nickcollinsma nina_liang nuestradavid ofsevit pain24seven pictureboston quincymapolice radio615 reverescanner rgoulston scotteisenphoto sjforman138 skoczela stacos stevebikes susantran thecrimehub therealreporter universalhub wbz wbznewsradio wgbhnews wutrain)
     Allow 'api.twitter.com'
     GET 'twitter.com', -> r {
+
       setTokens = -> {
         if cookie = r.env['HTTP_COOKIE']
           attrs = {}
@@ -197,6 +198,11 @@ graphql.api.dailymotion.com).map{|h| Allow h}
           r.env['x-csrf-token'] ||= attrs['ct0'] if attrs['ct0']
           r.env['x-guest-token'] ||= attrs['gt'] if attrs['gt']
         end}
+
+      upstreamUI = -> {
+        %w(authorization x-csrf-token x-guest-token HTTP_COOKIE).map{|k| r.env.delete k}
+        r.upstreamUI.fetch}
+
       if r.upstreamUI?
         NoGunk[r]
       # feed
@@ -218,7 +224,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
           json = ::JSON.parse body
           uid = json['data']['user']['rest_id']
           # find tweets
-          ('https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment').R(r.env).fetch reformat: true} rescue r.upstreamUI.fetch
+          ('https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment').R(r.env).fetch reformat: true} rescue upstreamUI[]
       # conversation
       elsif r.parts.member? 'status'
         setTokens[]
@@ -231,12 +237,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       else
         NoGunk[r]
       end.yield_self{|s,h,b|
-        if [403,429].member?(s) # load upstream UI to mint new tokens
-          #[302, {'Location' => '?UI=upstream'}, []]
-          r.upstreamUI.fetch
-        else
-          [s,h,b]
-        end}}
+        [403,429].member?(s) ? upstreamUI[] : [s,h,b]}}
 
     %w(mobile www).map{|host|
       GET host + '.twitter.com', -> r {
