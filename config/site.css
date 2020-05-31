@@ -16,7 +16,7 @@
 .file {position: relative}
 .fromto:only-child {padding: .1em 64ex 256ex 64ex; margin: 0 -64ex -256ex -64ex}
 .identified, .post {border: 1px solid #222}
-.links .host a {border-width: 1px; border-style: dotted}
+.links .host a {border-width: 1px; border-style: solid}
 .links .host {text-align: right}
 .links {float: right}
 .post { background-color: #000; color: #fff; border-radius: .42em; max-width: 88ex; padding: .2em; margin: .166em}
