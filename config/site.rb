@@ -96,15 +96,6 @@ edge.api.brightcove.com players.brightcove.net secure.brightcove.com
 api.lbry.com api.lbry.tv lbry.tv
 graphql.api.dailymotion.com).map{|h| Allow h}
 
-    # .edu
-    Allow 'www.nyu.edu'
-
-    # Algolia
-    Allow 'uj5wyc0l7x-dsn.algolia.net'
-
-    # DartSearch
-    GET 'clickserve.dartsearch.net', -> r {[301, {'Location' => r.query_values['ds_dest_url']}, []]}
-
     # Facebook
     %w(l.facebook.com
       l.instagram.com).map{|host|GET host, GotoURL}
@@ -146,17 +137,11 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     # Imgur
     Allow 'api.imgur.com'
     Allow 'imgur.com'
-
-    # Microsoft
     
     # Mixcloud
     Allow 'www.mixcloud.com'
 
-    # Mixlr
-    Allow 'd23yw4k24ca21h.cloudfront.net'
-
     # Mozilla
-    GET 'bugzilla.mozilla.org'
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     # Reddit
@@ -233,7 +218,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
           json = ::JSON.parse body
           uid = json['data']['user']['rest_id']
           # find tweets
-          ('https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment').R(r.env).fetch reformat: true} rescue [302,{'Location' => '?UI=upstream'},[]]
+          ('https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment').R(r.env).fetch reformat: true} rescue r.upstreamUI.fetch
       # conversation
       elsif r.parts.member? 'status'
         setTokens[]
@@ -246,8 +231,9 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       else
         NoGunk[r]
       end.yield_self{|s,h,b|
-        if [403,429].member?(s) && !r.upstreamUI? # load upstream UI to mint new tokens
-          [302, {'Location' => '?UI=upstream'}, []]
+        if [403,429].member?(s) # load upstream UI to mint new tokens
+          #[302, {'Location' => '?UI=upstream'}, []]
+          r.upstreamUI.fetch
         else
           [s,h,b]
         end}}
