@@ -135,7 +135,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       %w(aa books groups).map{|h| Allow h + '.google.com' }
       %w(docs images kh khms0 khms1 khms2 khms3 lh3 maps photos support).map{|h| GET h + '.google.com' }
       %w(encrypted-tbn0 encrypted-tbn1 encrypted-tbn2 encrypted-tbn3 maps ssl www).map{|h| GET h + '.gstatic.com' }
-      %w(maps).map{|h| GET h + '.googleapis.com' }
+      %w(maps storage).map{|h| GET h + '.googleapis.com' }
       (3..6).map{|i| GET "lh#{i}.googleusercontent.com", NoProxy}
       GET 'googleads.g.doubleclick.net', GoAU
       GET 'googleweblight.com', GotoURL
@@ -283,7 +283,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       script.inner_text.scan(/window\['[-a-z]+'\] = ([^\n]+)/){|data|
         data = data[0]
         data = data[0..-2] if data[-1] == ';'
-        Webize::JSON::Reader.new(data).scanContent &f}}
+        Webize::JSON::Reader.new(data, base_uri: self).scanContent &f}}
   end
 
   def CityData doc
