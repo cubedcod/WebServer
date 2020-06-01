@@ -51,6 +51,15 @@ class WebResource
 
     GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['u']||r.query_values['q'])}, []]}
     NoGunk  = -> r {r.uri.match?(Gunk) && (r.query_values||{})['allow'] != ServerKey && r.deny || r.fetch}
+    Resizer = -> r {
+      if r.parts[0] == 'resizer'
+        parts = r.path.split /\/\d+x\d+\/((filter|smart)[^\/]*\/)?/
+        parts.size > 1 ? [302,
+                          {'Location' => 'https://' + parts[-1] #+ '?allow='+ServerKey
+                          }, []] : NoJS[r]
+      else
+        NoGunk[r]
+      end}
 
     # URL shorteners / redirectors
     %w(
@@ -90,11 +99,15 @@ ajax.googleapis.com
 cdnjs.cloudflare.com
 ).map{|host| GET host}
 
-    # video API stuff
+    # video APIs
     %w(entitlement.auth.adobe.com sp.auth.adobe.com tkx.apis.anvato.net
 edge.api.brightcove.com players.brightcove.net secure.brightcove.com
 api.lbry.com api.lbry.tv lbry.tv
 graphql.api.dailymotion.com).map{|h| Allow h}
+
+    # img APIs
+    %w(bostonglobe-prod.cdn.arcpublishing.com).map{|host| GET host, Resizer}
+
 
     # Facebook
     %w(l.facebook.com
