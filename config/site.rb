@@ -143,6 +143,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       %w(aa books groups).map{|h|                                                        Allow h + '.google.com' }
       %w(docs images kh khms0 khms1 khms2 khms3 lh3 maps photos).map{|h|                   GET h + '.google.com' }
       %w(encrypted-tbn0 encrypted-tbn1 encrypted-tbn2 encrypted-tbn3 maps ssl www).map{|h| GET h + '.gstatic.com' }
+      %w(geo0 geo1 geo2 geo3 lh3 lh4 lh5 lh6).map{|h|                                      GET h + '.ggpht.com' }
       %w(maps storage).map{|h|                                                             GET h + '.googleapis.com' }
       NoProxy = -> r {r.parts[0] == 'proxy' ? r.deny(200,:image) : NoGunk[r]}
       (3..6).map{|i| GET "lh#{i}.googleusercontent.com", NoProxy}
