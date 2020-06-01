@@ -35,7 +35,7 @@ class WebResource
       return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']           # allow HTTP methods
       URIs.gunkTree true if GunkFile.mtime > GunkHosts[:mtime]
       uri = RDF::URI('https://' + env['HTTP_HOST']).join env['REQUEST_PATH']
-      uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading and consecutive & from query - URI libraries hate this
+      uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading + consecutive & from qs so URI library doesn't break
       resource = uri.R env                                                      # instantiate web resource
       env[:refhost] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # referring host
       env[:resp] = {}                                                           # response-header storage
@@ -131,7 +131,7 @@ class WebResource
           puts [action_icon, status_icon, format_icon, triple_count,
                 env[:refhost] ? ["\e[#{color}m", env[:refhost], "\e[0m→"] : nil,
                 "\e[#{color}#{thirdparty ? ';7' : ''}m", resource.uri, "\e[0m",
-                head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil, #env['HTTP_ACCEPT']
+                head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil, env['HTTP_ACCEPT']
                ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
         end
 
@@ -325,6 +325,8 @@ class WebResource
         end
       elsif handler = HostGET[host]                         # host handler
         handler[self]
+      elsif host.match?(StoragePool) && %w(jpg png mp4 webm).member?(ext.downcase)
+        fetch
       elsif gunk?                                           # gunk handler
         gunkQuery? ? [301, {'Location' => path}, []] : deny
       else                                                  # remote node

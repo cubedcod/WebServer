@@ -36,6 +36,7 @@ class WebResource
     TemporalHosts = %w(api.twitter.com gitter.im news.ycombinator.com www.city-data.com www.instagram.com twitter.com www.reddit.com)
     UIhosts = %w(aprs.mennolink.org bandcamp.com books.google.com chrome.google.com duckduckgo.com groups.google.com play.google.com players.brightcove.net soundcloud.com timbl.com www.redditmedia.com www.zillow.com)
     AllowedHeaders = 'authorization, client-id, content-type, x-access-token, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-csrf-token, x-goog-authuser, x-guest-token, x-hostname, x-lib-version, x-locale, x-twitter-active-user, x-twitter-client-language, x-twitter-utcoffset, x-requested-with'
+    StoragePool = /storage.googleapis.com$/
 
     # local static resources
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
