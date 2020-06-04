@@ -110,7 +110,7 @@ class WebResource
                   when '📜'
                     '36;1'
                   when '🗒'
-                    '38;5;60'
+                    '38;5;128'
                   when '🐢'
                     '32;1'
                   when '🎨'
