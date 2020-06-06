@@ -35,7 +35,7 @@ class WebResource
     CookieHost = /(^|\.)(akamai(hd)?|bandcamp|twitter|ggpht|google|youtube)\.(com|net)$/
     TemporalHosts = %w(api.twitter.com gitter.im news.ycombinator.com www.city-data.com www.instagram.com twitter.com www.reddit.com)
     UIhosts = %w(aprs.mennolink.org bandcamp.com books.google.com chrome.google.com duckduckgo.com groups.google.com play.google.com players.brightcove.net soundcloud.com timbl.com www.redditmedia.com www.zillow.com)
-    AllowedHeaders = 'authorization, client-id, content-type, x-access-token, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-csrf-token, x-goog-authuser, x-guest-token, x-hostname, x-lib-version, x-locale, x-twitter-active-user, x-twitter-client-language, x-twitter-utcoffset, x-requested-with'
+    AllowedHeaders = 'authorization, client-id, content-type, device-fp, device-id, x-access-token, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-csrf-token, x-goog-authuser, x-guest-token, x-hostname, x-lib-version, x-locale, x-twitter-active-user, x-twitter-client-language, x-twitter-utcoffset, x-requested-with'
     StoragePool = /storage.googleapis.com$/
 
     # local static resources
@@ -186,8 +186,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     }
 
     GET 'www.reddit.com', -> r {
-      ps = r.parts
-      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && !ps.member?('wiki') && !ps.member?('login') && !ps.member?('submit') # prefer RSS when offered
+      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && %w(r u user).member?(r.parts[0]) # request RSS format on user and thread pages
       r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination pointer
       r.fetch options}
 
