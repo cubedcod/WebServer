@@ -18,7 +18,7 @@ class WebResource
     end
 
     def allowCookies?
-      AllowedHosts.has_key?(host) || CookieHosts.has_key?(host) || CookieHost.match?(host)
+      AllowedHosts.has_key?(host) || CookieHosts.has_key?(host) || CookieHost.match?(host) || ENV.has_key?('COOKIES')
     end
 
     def allowedOrigin
@@ -415,7 +415,7 @@ class WebResource
     end
 
     def POST
-      AllowedHosts.has_key?(host) && !path.match?(/\/jot\//) && self.POSTthru || denyPOST
+      (ENV.has_key?('POST') || AllowedHosts.has_key?(host)) && !path.match?(/\/jot\//) && self.POSTthru || denyPOST
     end
 
     def POSTthru
