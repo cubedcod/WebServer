@@ -36,8 +36,8 @@ module Webize
       end
 
       def pdf_tuples
-        return unless @doc
-        @doc.info.map{|k,v|
+        return unless @doc && @doc.respond_to?(:info)
+        (@doc.info || []).map{|k,v|
           k = {
             Author: Creator,
             Title: Title,
