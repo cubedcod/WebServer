@@ -415,7 +415,7 @@ class WebResource
     end
 
     def POST
-      (ENV.has_key?('POST') || AllowedHosts.has_key?(host)) && !path.match?(/\/jot\//) && self.POSTthru || denyPOST
+      (ENV.has_key?('POST') || AllowedHosts.has_key?(host) || host.match?(/\.ttvnw.net$/)) && !path.match?(/\/jot\//) && self.POSTthru || denyPOST
     end
 
     def POSTthru
