@@ -32,7 +32,7 @@ class WebResource
   module URIs
     NoScan = %w(.css .gif .ico .jpg .js .png .svg .webm)                                                       # formats not scanned for RDF in cache-mode
     StaticFormats = %w(bin css geojson gif ico jpeg jpg js m3u8 m4a mp3 mp4 opus pem pdf png svg ts webm webp) # formats requiring URI change for cache-invalidation
-    CookieHost = /(^|\.)(akamai(hd)?|bandcamp|twitter|ggpht|google|youtube)\.(com|net)$/
+    CookieHost = /(^|\.)(akamai(hd)?|bandcamp|twitter|ggpht|google|ttvnw|youtube)\.(com|net)$/
     TemporalHosts = %w(api.twitter.com gitter.im news.ycombinator.com www.city-data.com www.instagram.com twitter.com www.reddit.com)
     UIhosts = %w(aprs.mennolink.org bandcamp.com books.google.com chrome.google.com duckduckgo.com groups.google.com play.google.com players.brightcove.net soundcloud.com timbl.com www.redditmedia.com www.twitch.tv www.zillow.com)
     AllowedHeaders = 'authorization, client-id, content-type, device-fp, device-id, x-access-token, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-csrf-token, x-device-id, x-goog-authuser, x-guest-token, x-hostname, x-lib-version, x-locale, x-twitter-active-user, x-twitter-client-language, x-twitter-utcoffset, x-requested-with'

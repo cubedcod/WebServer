@@ -1,16 +1,5 @@
 require 'json'
-
-class WebResource
-  module URIs
-
-    # JSON page-state pattern
-    InitialState = /(app|bio|bootstrap|broadcast(er)?|client|global|init(ial)?|meta|page|player|preload(ed)?|shared|site).?(con(fig|tent)|data|env|node|props|st(ate|ore))|app.bundle|hydrat|SCRIPTS_LOADED|__typename|window.mixlr/i
-
-  end
-end
-
 module Webize
-
   module JSON
     class Format < RDF::Format
       content_type 'application/json',
