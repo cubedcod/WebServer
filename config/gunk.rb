@@ -28,7 +28,7 @@ g(dpr|eo(ip|locat(e|ion))|igya|pt|tag|tm)|.*(
 header|pre)[-_]?bid.*|hotjar|.*hubspot.*|[hp]b.?js|
 impression|indexww|
 kr(ux|xd).*|
-(app|s)?m(a(ilchimp|rfeel|tomo)|e(asurement|trics?)|ms|pulse|tr)|
+(app|s)?m(a(ilchimp|rfeel|tomo|utic)|e(asurement|trics?)|ms|pulse|tr)|
 newrelic|
 o(m(niture|tr)|nesignal|pt(anon|imera)|utbrain)|
 p(erimeter-?x|i(wik|xel(propagate)?)|lacement|op(down|over|up)|orpoiseant|owaboot|repopulator|ro(fitwell|m(o(tion)?s?|pt))|ub(exchange|matic))|/pv|
@@ -43,7 +43,7 @@ zerg(net)?)
 ([-._\/'"\s:?&=~%]|$)|
 \.(eot|(bmp|gif)\?|otf|ttf|woff2?))xi
 
-        # JSON page-state pattern
+    # JSON page-state pattern
     InitialState = /(app|bio|bootstrap|broadcast(er)?|client|global|init(ial)?|meta|page|player|preload(ed)?|shared|site).?(con(fig|tent)|data|env|node|props|st(ate|ore))|app.bundle|environment|hydrat|SCRIPTS_LOADED|__typename/i
 
   end
@@ -51,7 +51,7 @@ end
 module Webize
   module HTML
 
-    # <script> pattern
+    # script pattern
     GunkExec = %r(_0x[0-9a-f]|(\b|[_'"])(
 3gl|6sc|
 ad(dtoany|nxs)|.*analytic.*|apptentive.*|auction|aswpsdkus|
