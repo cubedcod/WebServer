@@ -17,4 +17,5 @@ which pkg && pkg install graphicsmagick git ruby grep file findutils pkg-config 
 which bundle || gem install bundler
 bundle install
 
-mkdir ~/web
+# filesystem
+mkdir -p ~/web/mail/{cur,new,tmp}
