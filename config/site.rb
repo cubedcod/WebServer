@@ -257,7 +257,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     GET 'www.youtube.com', -> r {
       path = r.parts[0]
       if !path
-        r.fetch
+        [301, {'Location' => '/feed/subscriptions'}, []]
       elsif %w{attribution_link redirect}.member? path
         [301, {'Location' => r.query_values['q'] || r.query_values['u']}, []]
       elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json
@@ -265,7 +265,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
         cookie = 'youtube/.cookie'.R
         if cookie.node.exist?
           r.env['HTTP_COOKIE'] = cookie.readFile
-        elsif r.env['HTTP_COOKIE']
+        elsif r.env['HTTP_COOKIE'] && r.env['HTTP_COOKIE'].match?(/LOGIN/)
           cookie.writeFile r.env['HTTP_COOKIE']
         end
         NoGunk[r.upstreamUI]
@@ -363,10 +363,10 @@ graphql.api.dailymotion.com).map{|h| Allow h}
   end
 
   def GitterHTML doc
-    # auth stuff
     doc.css('script').map{|script|
       text = script.inner_text
       if text.match? /^window.gitterClientEnv/
+=begin
         if token = text.match(/accessToken":"([^"]+)/)
           token = token[1]
           tFile = 'im/gitter/.token'.R
@@ -375,6 +375,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
             puts ['🎫 ', host, token].join ' '
           end
         end
+=end
         if room = text.match(/"id":"([^"]+)/)
           env[:links][:prev] = '/api/v1/rooms/' + room[1] + '/chatMessages?lookups%5B%5D=user&includeThreads=false&limit=47&rdf'
         end
