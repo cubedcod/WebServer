@@ -262,6 +262,12 @@ graphql.api.dailymotion.com).map{|h| Allow h}
         [301, {'Location' => r.query_values['q'] || r.query_values['u']}, []]
       elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json
  opensearch playlist results s user watch watch_videos yts).member?(path) || (r.query_values||{})['allow'] == ServerKey
+        cookie = 'youtube/.cookie'.R
+        if cookie.node.exist?
+          r.env['HTTP_COOKIE'] = cookie.readFile
+        elsif r.env['HTTP_COOKIE']
+          cookie.writeFile r.env['HTTP_COOKIE']
+        end
         NoGunk[r.upstreamUI]
       else
         r.deny
