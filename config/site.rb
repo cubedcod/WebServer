@@ -109,13 +109,12 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     # img APIs
     %w(bostonglobe-prod.cdn.arcpublishing.com).map{|host| GET host, Resizer}
 
+    # host definitions
 
-    # Facebook
     %w(l.facebook.com
       l.instagram.com).map{|host|GET host, GotoURL}
     Allow 'www.facebook.com' if ENV.has_key? 'FACEBOOK'
 
-    # Gitter
     GET 'gitter.im', -> r {
       if r.parts[0] == 'api'
         token = ('//' + r.host + '/.token').R
@@ -125,58 +124,48 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       end
       NoGunk[r]}
 
-    # Google
-    GoAU =  -> r {
-      if url = (r.query_values || {})['adurl']
-        dest = url.R
-        dest.query = '' unless url.match? /dest_url/
-        [301, {'Location' => dest}, []]
-      else
-        r.deny
-      end}
-    GET 'googleads.g.doubleclick.net', GoAU
-    GET 'googleweblight.com', GotoURL
-    GET 'www.googleadservices.com', GoAU
+    if ENV.has_key? 'GOOGLE'
+      NoProxy = -> r {r.parts[0] == 'proxy' ? r.deny(200,:image) : NoGunk[r]}
+      GoAU =  -> r {
+        if url = (r.query_values || {})['adurl']
+          dest = url.R
+          dest.query = '' unless url.match? /dest_url/
+          [301, {'Location' => dest}, []]
+        else
+          r.deny
+        end}
 
-    unless ENV.has_key? 'DEGOOGLE'
-      GET 'www.google.com', -> r {%w(async complete).member?(r.parts[0]) ? r.deny : (r.path == '/url' ? GotoURL : NoGunk)[r]}
       %w(aa books groups).map{|h|                                                        Allow h + '.google.com' }
       %w(docs drive images kh khms0 khms1 khms2 khms3 lh3 maps photos).map{|h|             GET h + '.google.com' }
       %w(encrypted-tbn0 encrypted-tbn1 encrypted-tbn2 encrypted-tbn3 maps ssl www).map{|h| GET h + '.gstatic.com' }
       %w(geo0 geo1 geo2 geo3 lh3 lh4 lh5 lh6).map{|h|                                      GET h + '.ggpht.com' }
       %w(maps storage).map{|h|                                                             GET h + '.googleapis.com' }
-      NoProxy = -> r {r.parts[0] == 'proxy' ? r.deny(200,:image) : NoGunk[r]}
       (3..6).map{|i| GET "lh#{i}.googleusercontent.com", NoProxy}
+      GET 'googleads.g.doubleclick.net', GoAU
+      GET 'googleweblight.com', GotoURL
+      GET 'www.google.com', -> r {%w(async complete).member?(r.parts[0]) ? r.deny : (r.path == '/url' ? GotoURL : NoGunk)[r]}
+      GET 'www.googleadservices.com', GoAU
       GET 'yt3.ggpht.com', NoProxy
     end
 
-    if ENV.has_key? 'GOOGLE'
-      %w(accounts android.clients id play).map{|h|                                       Allow h + '.google.com' }
-      %w(update www).map{|h|                                                             Allow h + '.googleapis.com' }
-    end
-
-    # Imgur
     Allow 'api.imgur.com'
     Allow 'imgur.com'
     
-    # Mixcloud
     Allow 'www.mixcloud.com'
 
-    # Mozilla
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
-    # Reddit
     [*%w(gateway gql oauth old www).map{|h| h + '.reddit.com' },
      *%w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it)].map{|h| Allow h }
 
-    GET 'old.reddit.com', -> r { # use host to find next-page pointer, missing in HTTP Headers (old + new UI) and HTML + RSS representations (new UI)
+    GET 'old.reddit.com', -> r {
       if %w(api login).member? r.parts[0]
         NoGunk[r]
       else
         r.fetch.yield_self{|status,head,body|
           if status.to_s.match? /^30/
             [status, head, body]
-          else # HTML  delivered, find and sort pointers
+          else # old UI page delivered, find page pointers, missing in HEAD (old + new UI) and HTML + RSS body (new UI)
             links = []
             body[0].scan(/href="([^"]+after=[^"]+)/){|link| links << CGI.unescapeHTML(link[0]).R }
             link = links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]
@@ -190,13 +179,10 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination pointer
       r.fetch options}
 
-    # Soundcloud
     GET 'gate.sc', GotoURL
 
-    # Twitch
     Allow 'gql.twitch.tv'
 
-    # Twitter
     Twits = %w(5_13Dist 792QFD 857FirePhotos ActCal AestheticResear AlertBoston AlertsBoston AnnissaForBos ArchivesBoston ArtsinBoston AssignGuy AyannaPressley
  BCYFcenters BHA_Boston BILL34793923 BOSCityCouncil BOSTON_WATER BPDPCGross BankerTradesman BansheeBoston BayStateBanner BillForry BlairMillerTV BosBizAllison BosBizJournal Boston25Photogs Boston25photog BostonBTD BostonBldgRes BostonFire BostonFireAlert BostonGlobe BostonHassle BostonLca BostonMagazine BostonNewsMan BostonPWD BostonParksDept BostonPlans BostonPoliceRA BostonRev BostonSchools BostonTVPhotog BostonWomen Boston_Fireman Boston_PFD BreakngNewsPhtg
  CFamaWBZ CJPFirePhotos CampbellforD4 ChelseaScanner ChiefJoeFinn CityBosYouth CityLife_Clvu CityOfBoston CityofQuincy CodmanHealth CommonWealthMag CotterReporter
@@ -263,13 +249,11 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       GET host + '.twitter.com', -> r {
         [302, {'Location' => 'https://twitter.com' + r.path}, []]}}
 
-    # Yahoo
     GET 'news.yahoo.com'
     GET 's.yimg.com', -> r {
       ps = r.path.split /https?:\/+/
       ps.size > 1 ? [301, {'Location' => 'https://' + ps[-1]}, []] : r.deny}
 
-    # YouTube
     GET 'www.youtube.com', -> r {
       path = r.parts[0]
       if !path

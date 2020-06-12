@@ -18,7 +18,7 @@ class WebResource
 
     # URI pattern
     Gunk = %r([-._\/'"\s:?&=~%](
-affiliate(link)?s?|adobe|ak(am|ismet)|analytics|appnexus|audience|(app|smart)?
+affiliate(link)?s?|adobe|ak(am|ismet)|analytics|apester|appnexus|audience|(app|smart)?
 b(lueconic|ouncee?x.*|ugsnag)|.*bid(d(er|ing).*|s)|
 c(ampaigns?|edexis|hartbeat.*|mp|ollector|omscore|on(sent|version)|ookie.?(c(hoice|onsent)|law|notice)|riteo|(xen)?se)|
 de(mandware|t(ect|roitchicago))|dfp|dis(ney(id)?|qus)|doubleclick|
