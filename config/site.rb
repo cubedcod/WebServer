@@ -120,8 +120,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
 
     # host definitions
 
-    %w(l.facebook.com
-      l.instagram.com).map{|host|GET host, GotoURL}
+    %w(l.facebook.com l.instagram.com).map{|host|GET host, GotoURL}
     Allow 'www.facebook.com' if ENV.has_key? 'FACEBOOK'
 
     GET 'gitter.im', -> r {
@@ -145,6 +144,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
         end}
 
       %w(aa books groups).map{|h|                                                        Allow h + '.google.com' }
+      %w(update).map{|h|                                                                 Allow h + '.googleapis.com' }
       %w(docs drive images kh khms0 khms1 khms2 khms3 lh3 maps photos).map{|h|             GET h + '.google.com' }
       %w(encrypted-tbn0 encrypted-tbn1 encrypted-tbn2 encrypted-tbn3 maps ssl www).map{|h| GET h + '.gstatic.com' }
       %w(geo0 geo1 geo2 geo3 lh3 lh4 lh5 lh6).map{|h|                                      GET h + '.ggpht.com' }
@@ -190,7 +190,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       elsif r.env['HTTP_COOKIE']
         cookie.writeFile r.env['HTTP_COOKIE']
       end
-      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && %w(r u user).member?(r.parts[0]) # request RSS format on user and thread pages
+      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && %w(r u user).member?(r.parts[0]) && r.parts[-1] != 'submit' # request RSS format on user and thread pages
       r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination pointer
       r.fetch options}
 
