@@ -59,8 +59,19 @@ www.reddit.com
   end
   module HTTP
 
+    GoAU =  -> r {
+      if url = (r.query_values || {})['adurl']
+        dest = url.R
+        dest.query = '' unless url.match? /dest_url/
+        [301, {'Location' => dest}, []]
+      else
+        r.deny
+      end}
+
     GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['u']||r.query_values['q'])}, []]}
     NoGunk  = -> r {r.uri.match?(Gunk) && (r.query_values||{})['allow'] != ServerKey && r.deny || r.fetch}
+    NoProxy = -> r {r.parts[0] == 'proxy' ? r.deny(200, :image) : NoGunk[r]}
+
     Resizer = -> r {
       if r.parts[0] == 'resizer'
         parts = r.path.split /\/\d+x\d+\/((filter|smart)[^\/]*\/)?/
@@ -71,7 +82,18 @@ www.reddit.com
         NoGunk[r]
       end}
 
-    # URL shorteners / redirectors
+    ShortURL = -> r {
+      if !r.query                         # request
+        NoGunk[r].yield_self{|s,h,b|      #  inspect response
+          h.keys.map{|k|                  #  strip query from relocation
+            h[k] = h[k].split('?')[0] if k.downcase == 'location' && h[k].match?(/\?/)}
+          [s,h,b]}                        #  response
+      else                                # request has query
+        [302, {'Location' => r.path}, []] #  redirect to path
+      end}
+
+    # host definitions
+
     %w(
 bit.ly
 bos.gl
@@ -91,23 +113,7 @@ tinyurl.com
 trib.al
 w.bos.gl
 wired.trib.al
-).map{|short|
-      GET short, -> r {
-        if !r.query                         # request
-          NoGunk[r].yield_self{|s,h,b|      #  inspect response
-            h.keys.map{|k|                  #  strip query from relocation
-              h[k] = h[k].split('?')[0] if k.downcase == 'location' && h[k].match?(/\?/)}
-            [s,h,b]}                        #  response
-        else                                # request has query
-          [302, {'Location' => r.path}, []] #  redirect to path
-        end}}
-
-    # CDN scripts
-    %w(
-ajax.cloudflare.com
-ajax.googleapis.com
-cdnjs.cloudflare.com
-).map{|host| GET host}
+).map{|s| GET s, ShortURL}
 
     # video APIs
     %w(entitlement.auth.adobe.com sp.auth.adobe.com tkx.apis.anvato.net
@@ -115,10 +121,9 @@ edge.api.brightcove.com players.brightcove.net secure.brightcove.com
 api.lbry.com api.lbry.tv lbry.tv
 graphql.api.dailymotion.com).map{|h| Allow h}
 
-    # img APIs
     %w(bostonglobe-prod.cdn.arcpublishing.com).map{|host| GET host, Resizer}
 
-    # host definitions
+    %w(ajax.cloudflare.com ajax.googleapis.com cdnjs.cloudflare.com).map{|host| GET host}
 
     %w(l.facebook.com l.instagram.com).map{|host|GET host, GotoURL}
     Allow 'www.facebook.com' if ENV.has_key? 'FACEBOOK'
@@ -132,18 +137,9 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       end
       NoGunk[r]}
 
+    GET 'abcnews.go.com'
+
     if ENV.has_key? 'GOOGLE'
-      NoProxy = -> r {r.parts[0] == 'proxy' ? r.deny(200,:image) : NoGunk[r]}
-
-      GoAU =  -> r {
-        if url = (r.query_values || {})['adurl']
-          dest = url.R
-          dest.query = '' unless url.match? /dest_url/
-          [301, {'Location' => dest}, []]
-        else
-          r.deny
-        end}
-
       %w(aa books groups).map{|h|                                               Allow h + '.google.com' }
       %w(update).map{|h|                                                        Allow h + '.googleapis.com' }
       %w(dl docs drive images kh khms0 khms1 khms2 khms3 lh3 maps photos).map{|h| GET h + '.google.com' }
