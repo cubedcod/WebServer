@@ -18,17 +18,17 @@ class WebResource
 
     # URI pattern
     Gunk = %r([-._\/'"\s:?&=~%](
-affiliate(link)?s?|adobe|ak(am|ismet)|analytics|apester|appnexus|audience|(app|smart)?
+affiliate(link)?s?|ad(s|obe)|ak(am|ismet)|analytics|apester|appnexus|audience|(app|smart)?
 b(lueconic|ouncee?x.*|ugsnag)|.*bid(d(er|ing).*|s)|
 c(ampaigns?|edexis|hartbeat.*|mp|ollector|omscore|on(sent|version)|ookie.?(c(hoice|onsent)|law|notice)|riteo|(xen)?se)|
 de(mandware|t(ect|roitchicago))|dfp|dis(ney(id)?|qus)|doubleclick|
-e(nsighten|proof|scenic|vidon|zoic)|
+e(moji|nsighten|proof|scenic|vidon|zoic)|
 fbcdn.*gif|frosmo|
 g(dpr|eo(ip|locat(e|ion))|igya|pt|tag|tm)|.*(
 header|pre)[-_]?bid.*|hotjar|.*hubspot.*|[hp]b.?js|
 impression|indexww|
-kr(ux|xd).*|
-(app|s)?m(a(ilchimp|rfeel|tomo|utic)|e(asurement|trics?)|ms|pulse|tr)|
+keywee|kr(ux|xd).*|
+(app|s)?m(a(ilchimp|r(feel|keto)|tomo|utic)|e(asurement|trics?)|ms|pulse|tr)|
 newrelic|
 o(m(niture|tr)|nesignal|pt(anon|imera)|utbrain)|
 p(erimeter-?x|i(wik|xel(propagate)?)|lacement|op(down|over|up)|orpoiseant|owaboot|repopulator|ro(fitwell|m(o(tion)?s?|pt))|ub(exchange|matic))|/pv|

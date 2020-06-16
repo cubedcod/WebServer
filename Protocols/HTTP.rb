@@ -247,7 +247,7 @@ class WebResource
           if formatExt
             cache += formatExt unless cache.R.extension == formatExt  # append format-suffix
           else
-            puts "WARNING suffix undefined for format #{format}, please add to Formats/MIME.rb"
+            puts "WARNING suffix undefined for format #{format}, please add to Formats/MIME.rb" if format
           end
           cache.R.writeFile body                              # cache representation
 

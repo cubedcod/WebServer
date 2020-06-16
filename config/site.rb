@@ -128,6 +128,8 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     %w(l.facebook.com l.instagram.com).map{|host|GET host, GotoURL}
     Allow 'www.facebook.com' if ENV.has_key? 'FACEBOOK'
 
+    GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
+
     GET 'gitter.im', -> r {
       if r.parts[0] == 'api'
         token = ('//' + r.host + '/.token').R
@@ -160,10 +162,9 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     
     Allow 'www.mixcloud.com'
 
-    GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
+    %w(www).map{|h| GET h + '.nytimes.com' }
 
-    [*%w(gateway gql oauth old www).map{|h| h + '.reddit.com' },
-     *%w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it)].map{|h| Allow h }
+    [*%w(gateway gql oauth old www).map{|h| h+'.reddit.com' }, *%w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it)].map{|h| Allow h }
 
     GET 'old.reddit.com', -> r {
       if %w(api login).member? r.parts[0]
@@ -191,6 +192,15 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && %w(r u user).member?(r.parts[0]) && r.parts[-1] != 'submit' # request RSS format on user and thread pages
       r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination pointer
       r.fetch options}
+
+    GET 's4.reutersmedia.net', -> r {
+      args = r.query_values || {}
+      if args.has_key? 'w'
+        args.delete 'w'
+        [301, {'Location' => (qs args)}, []]
+      else
+        NoGunk[r]
+      end}
 
     GET 'gate.sc', GotoURL
 
