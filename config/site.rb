@@ -152,9 +152,10 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       %w(geo0 geo1 geo2 geo3 lh3 lh4 lh5 lh6).map{|h|                             GET h + '.ggpht.com' }
       %w(maps storage).map{|h|                                                    GET h + '.googleapis.com' }
       (3..6).map{|i|                                                              GET "lh#{i}.googleusercontent.com", NoProxy}
+      GET 'ad.doubleclick.net', -> r {[301, {'Location' => 'https://en.wikipedia.org/wiki/Special:Random'}, []]}
       GET 'googleads.g.doubleclick.net', GoAU
       GET 'googleweblight.com', GotoURL
-      GET 'www.google.com', -> r {%w(async complete).member?(r.parts[0]) ? r.deny : (r.path == '/url' ? GotoURL : NoGunk)[r]}
+      GET 'www.google.com', -> r {!%w(maps search url).member?(r.parts[0]) ? r.deny : (r.path == '/url' ? GotoURL : NoGunk)[r]}
       GET 'www.googleadservices.com', GoAU
       GET 'yt3.ggpht.com', NoProxy
     end
