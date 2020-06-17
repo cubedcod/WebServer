@@ -146,6 +146,7 @@ class WebResource
       'content:encoded' => Content,
       'content_html' => Content,
       'content_text' => Content,
+      'cooked' => Content,
       'copyright' => Schema+'copyright',
       'created_at' => Date,
       'csrf-param' => :drop,
