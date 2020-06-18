@@ -33,15 +33,18 @@ class WebResource
 
     def self.call env
       return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']           # allow HTTP methods
-      URIs.gunkTree true if GunkFile.mtime > GunkHosts[:mtime]
-      uri = RDF::URI('https://' + env['HTTP_HOST']).join env['REQUEST_PATH']
-      uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading + consecutive & from qs so URI library doesn't break
-      resource = uri.R env                                                      # instantiate web resource
+      URIs.gunkTree true if GunkFile.mtime > GunkHosts[:mtime]                  # check for config changes
+
+      uri = RDF::URI('https://' + env['HTTP_HOST']).join env['REQUEST_PATH']    # resource identifier
+      uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading + consecutive & from qs so URI library doesn't freak out
+      resource = uri.R env                                                      # request resource and environment
+
       env[:refhost] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # referring host
       env[:resp] = {}                                                           # response-header storage
       env[:links] = {}                                                          # response-header links
-      resource.send(env['REQUEST_METHOD']).yield_self{|status, head, body|      # dispatch
-        ext = resource.path ? resource.ext.downcase : ''                        # log
+
+      resource.send(env['REQUEST_METHOD']).yield_self{|status, head, body|      # dispatch request
+        ext = resource.path ? resource.ext.downcase : ''                        # log response
         mime = head['Content-Type'] || ''
 
         action_icon = if env[:deny]
@@ -215,11 +218,13 @@ class WebResource
         return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client cache-hit
         return fileResponse if node.file?                                                                # server cache-hit - direct
       end
-      c = nodeSet; return c[0].fileResponse if c.size == 1 && StaticFormats.member?(c[0].ext)            # server cache-hit - indirect
-      locator = ['//',host,(port ? [':',port] : nil),path,options[:suffix],(query ? ['?',query] : nil)].join
-      ('https:' + locator).R(env).fetchHTTP options                                                      # cache miss, HTTPS fetch
+      nodes = nodeSet
+      return nodes[0].fileResponse if nodes.size == 1 && StaticFormats.member?(nodes[0].ext)             # server cache-hit - indirect
+
+      loc = ['//',host,(port ? [':',port] : nil),path,options[:suffix],(query ? ['?',query] : nil)].join # locator
+      ('https:' + loc).R(env).fetchHTTP options                                                          # HTTPS fetch
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
-      ('http:' + locator).R(env).fetchHTTP options                                                       # fallback to HTTP fetch, then offline
+      ('http:' + loc).R(env).fetchHTTP options                                                           # fallback to HTTP fetch
     end
 
     def fetchHTTP options = {}; env[:fetch] = true
