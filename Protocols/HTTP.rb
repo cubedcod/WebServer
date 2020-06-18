@@ -133,7 +133,7 @@ class WebResource
         unless [204, 304].member? status
           puts [action_icon, status_icon, format_icon, triple_count,
                 env[:refhost] ? ["\e[#{color}m", env[:refhost], "\e[0m→"] : nil,
-                "\e[#{color}#{thirdparty ? ';7' : ''}m", resource.uri, "\e[0m",
+                "\e[#{color}#{thirdparty ? ';7' : ''}m", env[:cacherefs] ? resource.remoteURL : resource.uri, "\e[0m",
                 head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil, env['HTTP_ACCEPT']
                ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
         end
@@ -325,7 +325,7 @@ class WebResource
           dateDir
         elsif parts[0] == 'cache'
           env[:cacherefs] = true
-          ['https://' , path[7..-1], (query ? ['?',query] : nil) ].join.R(env).hostHandler
+          remoteURL.hostHandler
          elsif path == '/mail'                               # inbox redirect
           [301, {'Location' => '/d/*/msg*?sort=date&view=table'}, []]
         else
@@ -488,6 +488,10 @@ class WebResource
       '?' + h.map{|k,v|
         CGI.escape(k.to_s) + (v ? ('=' + CGI.escape([*v][0].to_s)) : '')
       }.join("&")
+    end
+
+    def remoteURL
+      ['https://' , path[7..-1], (query ? ['?',query] : nil) ].join.R env
     end
 
     def selectFormat default = 'text/html'
