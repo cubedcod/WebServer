@@ -46,8 +46,7 @@ module Webize
               log << "🚫 \e[31;1m" + src.uri + "\e[0m"
               s.remove
             elsif base && base.env[:cacherefs]
-              cache_location = ['/cache/', (src.host || base.host), src.path, src.query].join
-              s[attr] = cache_location
+              s[attr] = ['/cache/', (src.host || base.host), src.path, src.query].join
             end
           end}}
       puts log.join ' ' unless log.empty?
@@ -669,7 +668,9 @@ class WebResource
              unless env[:title] == title
                env[:title] = title
                hasPointer = true
-               [{_: :a, class: :title, type: :node, href: uri, c: CGI.escapeHTML(title), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, " \n"]
+               [{_: :a,  id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: :title, type: :node,
+                 href: env[:cacherefs] ? resource.cacheURL : uri,
+                 c: CGI.escapeHTML(title)}, " \n"]
              end},
            ({_: :a, class: :id, type: :node, c: '🔗', href: uri, id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} unless hasPointer), "\n", # pointer
            abstracts,

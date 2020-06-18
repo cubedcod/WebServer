@@ -31,6 +31,11 @@ class WebResource
       end
     end
 
+    def cacheURL
+      return self unless h = host || env['HTTP_HOST']
+      ['/cache/', h, path, query, fragment].join
+    end
+
     def self.call env
       return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']           # allow HTTP methods
       URIs.gunkTree true if GunkFile.mtime > GunkHosts[:mtime]                  # check for config changes
@@ -242,11 +247,8 @@ class WebResource
                      RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
                    end
           formatExt = Suffixes[format] || Suffixes_Rack[format] # format -> name-suffix
-          puts "WARNING format undefined for URL #{uri}, please fix your server" unless format
-
+          puts "WARNING format undefined for #{uri}, missing Content-Type or known extension at server" unless format
           body = HTTP.decompress h, response.read             # decompress body
-          body = Webize::HTML.clean body, self if format == 'text/html' # clean HTML
-         
           cache = fsPath.R                                    # base path for cache
           cache += querySlug                                  # add qs-derived slug
           if formatExt
@@ -255,13 +257,11 @@ class WebResource
             puts "WARNING suffix undefined for format #{format}, please add to Formats/MIME.rb" if format
           end
           cache.R.writeFile body                              # cache representation
-
           reader = RDF::Reader.for content_type: format       # find RDF reader
           reader.new(body, base_uri: self){|_|(env[:repository] ||= RDF::Repository.new) << _ } if reader && !NoScan.member?(formatExt)
           return self if options[:intermediate]               # intermediate fetch, no immediate indexing and response
           saveRDF if reader                                   # index RDF
-                                                              # add upstream metadata to response
-          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k| env[:resp][k] ||= h[k.downcase] if h[k.downcase]}
+          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k| env[:resp][k] ||= h[k.downcase] if h[k.downcase]} # upstream metadata for downstream
           h['link'].split(',').map{|link|                     # parse Link metadata
             ref, type = link.split(';').map &:strip
             if ref && type
@@ -272,6 +272,7 @@ class WebResource
           env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
           env[:resp]['Set-Cookie'] ||= h['set-cookie'] if h['set-cookie'] && allowCookies?
           if !options[:reformat] && fixedFormat?(format)
+            body = Webize::HTML.clean body, self if format == 'text/html' # clean upstream HTML
             env[:resp]['Content-Length'] = body.bytesize.to_s # content size
             [200, env[:resp], [body]]                         # upstream document
           else
