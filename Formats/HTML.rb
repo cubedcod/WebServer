@@ -6,7 +6,7 @@ module Webize
     Scripts = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script" # CSS selector for script elements
 
     # clean HTML (string)
-    def self.clean body
+    def self.clean body, base=nil
       doc = Nokogiri::HTML.parse body.encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ') # parse to Nokogiri doc
       if content_type = doc.css('meta[http-equiv="Content-Type"]')[0] # in-band content-type tag found
         if content = content_type['content']
@@ -19,12 +19,12 @@ module Webize
           end
         end
       end
-      clean_doc doc # clean nokogiri
+      clean_doc doc, base
       doc.to_html
     end
 
     # clean HTML (nokogiri instance)
-    def self.clean_doc doc
+    def self.clean_doc doc, base=nil
       # strip fonts and preload-directives
       doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
 
@@ -45,6 +45,9 @@ module Webize
             elsif src.uri.match? Gunk
               log << "🚫 \e[31;1m" + src.uri + "\e[0m"
               s.remove
+            elsif base && base.env[:cacherefs]
+              cache_location = ['/cache/', (src.host || base.host), src.path, src.query].join
+              s[attr] = cache_location
             end
           end}}
       puts log.join ' ' unless log.empty?

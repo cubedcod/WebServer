@@ -11,7 +11,7 @@ class WebResource
     Methods = %w(GET HEAD OPTIONS POST PUT)
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
-    SingleHop = %w(connection fetch gunk host keep-alive links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software site-chrome summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for)
+    SingleHop = %w(cacherefs connection fetch gunk host keep-alive links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for)
 
     def self.Allow host
       AllowedHosts[host] = true
@@ -224,7 +224,7 @@ class WebResource
       loc = ['//',host,(port ? [':',port] : nil),path,options[:suffix],(query ? ['?',query] : nil)].join # locator
       ('https:' + loc).R(env).fetchHTTP options                                                          # HTTPS fetch
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
-      ('http:' + loc).R(env).fetchHTTP options                                                           # fallback to HTTP fetch
+      ('http:' + loc).R(env).fetchHTTP options                                                           # fallback HTTP fetch
     end
 
     def fetchHTTP options = {}; env[:fetch] = true
@@ -245,8 +245,8 @@ class WebResource
           puts "WARNING format undefined for URL #{uri}, please fix your server" unless format
 
           body = HTTP.decompress h, response.read             # decompress body
-          body = Webize::HTML.clean body if format == 'text/html' && !ENV.has_key?('GUNK')# clean HTML body
-
+          body = Webize::HTML.clean body, self if format == 'text/html' # clean HTML
+         
           cache = fsPath.R                                    # base path for cache
           cache += querySlug                                  # add qs-derived slug
           if formatExt
@@ -323,18 +323,27 @@ class WebResource
       if localNode?
         if %w{m d h}.member? parts[0]                       # timeline redirect
           dateDir
-        elsif path == '/mail'                               # inbox redirect
+        elsif parts[0] == 'cache'
+          env[:cacherefs] = true
+          ['https://' , path[7..-1], (query ? ['?',query] : nil) ].join.R(env).hostHandler
+         elsif path == '/mail'                               # inbox redirect
           [301, {'Location' => '/d/*/msg*?sort=date&view=table'}, []]
         else
           nodeResponse                                      # local node
         end
-      elsif handler = HostGET[host]                         # host handler
+      else
+        hostHandler
+      end
+    end
+
+    def hostHandler
+      if handler = HostGET[host]                            # host handler
         handler[self]
       elsif host.match?(StoragePool) && %w(jpg png mp4 webm).member?(ext.downcase)
         fetch
       elsif gunk?                                           # gunk handler
         gunkQuery? ? [301, {'Location' => path}, []] : deny
-      else                                                  # remote node
+      else                                                  # fetch remote node
         fetch
       end
     end
