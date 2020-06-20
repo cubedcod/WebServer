@@ -161,6 +161,10 @@ class WebResource
       CookieHosts[host] = true
     end
 
+    def href
+      env[:cacherefs] ? cacheURL : uri
+    end
+
     def HTTP.decompress head, body
       case (head['content-encoding']||head['Content-Encoding']).to_s
       when /^br(otli)?$/i
@@ -221,15 +225,15 @@ class WebResource
       return nodeResponse if ENV.has_key?('OFFLINE')                                                     # offline, return cached nodes
       if StaticFormats.member? ext.downcase
         return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client cache-hit
-        return fileResponse if node.file?                                                                # server cache-hit - direct
+        return fileResponse if node.file?                                                                # server cache-hit - direct static-file hit
       end
       nodes = nodeSet
-      return nodes[0].fileResponse if nodes.size == 1 && StaticFormats.member?(nodes[0].ext)             # server cache-hit - indirect
+      return nodes[0].fileResponse if nodes.size == 1 && StaticFormats.member?(nodes[0].ext)             # server cache-hit - indirect, one static-file in file(s) map
 
       loc = ['//',host,(port ? [':',port] : nil),path,options[:suffix],(query ? ['?',query] : nil)].join # locator
       ('https:' + loc).R(env).fetchHTTP options                                                          # HTTPS fetch
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
-      ('http:' + loc).R(env).fetchHTTP options                                                           # fallback HTTP fetch
+      ('http:' + loc).R(env).fetchHTTP options                                                           # fallback to HTTP
     end
 
     def fetchHTTP options = {}; env[:fetch] = true
@@ -259,10 +263,10 @@ class WebResource
           cache.R.writeFile body                              # cache representation
           reader = RDF::Reader.for content_type: format       # find RDF reader
           reader.new(body, base_uri: self){|_|(env[:repository] ||= RDF::Repository.new) << _ } if reader && !NoScan.member?(formatExt)
-          return self if options[:intermediate]               # intermediate fetch, no immediate indexing and response
-          saveRDF if reader                                   # index RDF
+          return self if options[:intermediate]               # intermediate fetch, no indexing or HTTP response
+          saveRDF if reader                                   # index graph-data
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k| env[:resp][k] ||= h[k.downcase] if h[k.downcase]} # upstream metadata for downstream
-          h['link'].split(',').map{|link|                     # parse Link metadata
+          h['link'].split(',').map{|link|                     # parse Link header
             ref, type = link.split(';').map &:strip
             if ref && type
               ref = ref.sub(/^</,'').sub />$/, ''

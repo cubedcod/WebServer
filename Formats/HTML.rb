@@ -374,7 +374,7 @@ class WebResource
       icon = ('//' + (host || 'localhost') + '/favicon.ico').R # site icon
       link = -> key, content { # render Link reference
         if url = env[:links] && env[:links][key]
-          [{_: :a, href: url, id: key, class: :icon, c: content},
+          [{_: :a, href: url.R(env).href, id: key, class: :icon, c: content},
            "\n"]
         end}
       htmlGrep if localNode?
@@ -386,8 +386,8 @@ class WebResource
                          c: [{_: :meta, charset: 'utf-8'},
                             ({_: :title, c: CGI.escapeHTML(graph[titleRes][Title].map(&:to_s).join ' ')} if titleRes),
                              {_: :style, c: ["\n", SiteCSS]}, "\n",
-                             env[:links].map{|type,uri|
-                               {_: :link, rel: type, href: CGI.escapeHTML(uri.to_s)}}
+                             env[:links].map{|type, resource|
+                               {_: :link, rel: type, href: CGI.escapeHTML(resource.R(env).href)}}
                             ]}, "\n",
                         {_: :body,
                          c: [{class: :toolbox,
@@ -669,8 +669,7 @@ class WebResource
                env[:title] = title
                hasPointer = true
                [{_: :a,  id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: :title, type: :node,
-                 href: env[:cacherefs] ? resource.cacheURL : uri,
-                 c: CGI.escapeHTML(title)}, " \n"]
+                 href: resource.href, c: CGI.escapeHTML(title)}, " \n"]
              end},
            ({_: :a, class: :id, type: :node, c: '🔗', href: uri, id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} unless hasPointer), "\n", # pointer
            abstracts,
