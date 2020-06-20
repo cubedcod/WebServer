@@ -46,7 +46,7 @@ module Webize
               log << "🚫 \e[31;1m" + src.uri + "\e[0m"
               s.remove
             elsif base && base.env[:cacherefs]
-              s[attr] = ['/cache/', (src.host || base.host), src.path, src.query].join
+              s[attr] = ['/', (src.host || base.host), src.path, src.query].join
             end
           end}}
       puts log.join ' ' unless log.empty?

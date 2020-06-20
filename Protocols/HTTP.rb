@@ -33,7 +33,7 @@ class WebResource
 
     def cacheURL
       return self unless h = host || env['HTTP_HOST']
-      ['/cache/', h, path, (query ? ['?',query] : nil), fragment].join
+      ['/', h, path, (query ? ['?',query] : nil), fragment].join
     end
 
     def self.call env
@@ -329,15 +329,18 @@ class WebResource
         env[:links][:up] = up
       end
       if localNode?
-        if %w{m d h}.member? parts[0]                       # timeline redirect
+        p = parts[0]
+        if %w{m d h}.member? p                       # timeline redirect
           dateDir
-        elsif parts[0] == 'cache'
-          env[:cacherefs] = true
-          remoteURL.hostHandler
-         elsif path == '/mail'                               # inbox redirect
+        elsif p == '/mail'                               # inbox redirect
           [301, {'Location' => '/d/*/msg*?sort=date&view=table'}, []]
-        else
+        elsif !p
+          [404, {}, []]
+        elsif p.match?(/^\d\d\d\d$/) || %w().member?(p)
           nodeResponse                                      # local node
+        else
+          env[:cacherefs] = true
+          remoteURL.hostHandler                             # remote node
         end
       else
         hostHandler
@@ -499,7 +502,7 @@ class WebResource
     end
 
     def remoteURL
-      ['https://' , path[7..-1], (query ? ['?',query] : nil) ].join.R env
+      ['https:/' , path, (query ? ['?', query] : nil), (fragment ? ['#', fragment] : nil) ].join.R env
     end
 
     def selectFormat default = 'text/html'
