@@ -336,7 +336,7 @@ class WebResource
           [301, {'Location' => '/d/*/msg*?sort=date&view=table'}, []]
         elsif !p
           [404, {}, []]
-        elsif p.match?(/^\d\d\d\d$/) || %w().member?(p)
+        elsif p.match?(/^\d\d\d\d$/) || %w(src).member?(p)
           nodeResponse                                      # local node
         else
           env[:cacherefs] = true
