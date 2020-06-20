@@ -296,7 +296,7 @@ class WebResource
           puts "WARNING HTTPS downgraded to HTTP: #{uri} -> #{dest}"
           dest.fetchHTTP options
         else
-          [302, {'Location' => dest.uri}, []]
+          [302, {'Location' => dest.href}, []]
         end
       when /304/ # Not Modified
         [304, {}, []]
