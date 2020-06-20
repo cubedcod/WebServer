@@ -596,7 +596,7 @@ class WebResource
 
     Markup[Creator] = Markup[To] = Markup['http://xmlns.com/foaf/0.1/maker'] = -> c, env {
       if c.class == Hash || c.respond_to?(:uri)
-        u = c.R
+        u = c.R env
         basename = u.basename if u.path
         host = u.host
         name = u.fragment ||
@@ -604,7 +604,7 @@ class WebResource
                (host && host.sub(/\.com$/,'')) ||
                'user'
         avatar = nil
-        {_: :a, href: u.to_s,
+        {_: :a, href: u.href,
          id: 'a' + Digest::SHA2.hexdigest(rand.to_s),
          class: avatar ? :avatar : :fromto,
          style: avatar ? '' : (env[:colors][name] ||= HTML.colorize),
@@ -635,8 +635,8 @@ class WebResource
 
     Markup[Link] = -> ref, env=nil {
       u = ref.to_s
-      re = u.R
-      [{_: :a, href: u, c: (re.path||'/')[0..79], title: u,
+      re = u.R env
+      [{_: :a, href: re.href, c: (re.path||'/')[0..79], title: u,
         id: 'l' + Digest::SHA2.hexdigest(rand.to_s),
         style: env[:colors][re.host] ||= HTML.colorize},
        " \n"]}
