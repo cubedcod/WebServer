@@ -312,7 +312,7 @@ class WebResource
 
     def fixedFormat? format
       return true if !format || upstreamUI? || format.match?(/dash.xml/)                               # unknown or upstream format
-      return false if (query_values||{}).has_key?('rdf') || format.match?(/atom|html|rss|turtle|xml/i) # default or requested transformability
+      return false if (query_values||{}).has_key?('rdf') || format.match?(/atom|html|rss|turtle|xml/i) # Feed/HTML/RDF formats transformable via RDF Readers/Writers
       return true
     end
 
@@ -321,8 +321,8 @@ class WebResource
     end
 
     def GET
-      return [204,{},[]] if path.match? /gen(erate)?_?204$/ # connectivity-check response
-      unless path == '/'                                    # point to containing node
+      return [204,{},[]] if path.match? /gen(erate)?_?204$/ # connectivity-check
+      unless path == '/'                                    # point to container
         up = File.dirname path
         up += '/' unless up == '/'
         up += '?' + query if query
@@ -526,13 +526,8 @@ class WebResource
 
     def upstreamUI; env[:UX] = true; self end
 
-    def upstreamUI?
-      env.has_key?(:UX) || ENV.has_key?('UX') ||         # (request or process) environment preference
-      parts.member?('embed') ||                          # embed URL
-      UIhosts.member?(host) ||                           # host preference
-      (env['HTTP_USER_AGENT']||'').match?(/Epiphany/) || # user-agent preference
-      (query_values||{})['UI'] == 'upstream'             # query-arg preference
-    end
+    def upstreamUI?; env.has_key?(:UX) || (query_values||{})['UI'] == 'upstream' end
+
   end
   include HTTP
 end

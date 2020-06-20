@@ -33,7 +33,6 @@ class WebResource
     NoScan = %w(.css .gif .ico .jpg .js .png .svg .webm)                                                       # formats not scanned for RDF in cache-mode
     StaticFormats = %w(bin css geojson gif ico jpeg jpg js m3u8 m4a mp3 mp4 opus pem pdf png svg ts webm webp) # formats requiring URI change for cache-invalidation
     CookieHost = /(^|\.)(akamai(hd)?|bandcamp|twitter|youtube)\.(com|net)$/
-    UIhosts = %w(aprs.mennolink.org bandcamp.com books.google.com chrome.google.com duckduckgo.com groups.google.com play.google.com players.brightcove.net soundcloud.com timbl.com www.redditmedia.com www.twitch.tv www.zillow.com)
     AllowedHeaders = 'authorization, client-id, content-type, device-fp, device-id, x-access-token, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-csrf-token, x-device-id, x-goog-authuser, x-guest-token, x-hostname, x-lib-version, x-locale, x-twitter-active-user, x-twitter-client-language, x-twitter-utcoffset, x-requested-with'
     StoragePool = /storage.googleapis.com$/
     TemporalHosts = %w(
@@ -59,6 +58,8 @@ www.reddit.com
   end
   module HTTP
 
+    # handler lambdas
+
     GoAU =  -> r {
       if url = (r.query_values || {})['adurl']
         dest = url.R
@@ -76,7 +77,7 @@ www.reddit.com
       if r.parts[0] == 'resizer'
         parts = r.path.split /\/\d+x\d+\/((filter|smart)[^\/]*\/)?/
         parts.size > 1 ? [302,
-                          {'Location' => 'https://' + parts[-1] #+ '?allow='+ServerKey
+                          {'Location' => 'https://' + parts[-1]
                           }, []] : NoJS[r]
       else
         NoGunk[r]
@@ -182,7 +183,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
             links = []
             body[0].scan(/href="([^"]+after=[^"]+)/){|link| links << CGI.unescapeHTML(link[0]).R }
             link = links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]
-            [302, {'Location' => ['https://www.reddit.com', link.path, '?', link.query].join}, []]
+            [302, {'Location' => ['https://www.reddit.com', link.path, '?', link.query].join.R(r.env).href}, []]
           end}
       end
     }
