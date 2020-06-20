@@ -33,7 +33,7 @@ class WebResource
 
     def cacheURL
       return self unless h = host || env['HTTP_HOST']
-      ['/cache/', h, path, query, fragment].join
+      ['/cache/', h, path, (query ? ['?',query] : nil), fragment].join
     end
 
     def self.call env
@@ -236,7 +236,8 @@ class WebResource
       ('http:' + loc).R(env).fetchHTTP options                                                           # fallback to HTTP
     end
 
-    def fetchHTTP options = {}; env[:fetch] = true
+    def fetchHTTP options = {}
+      env[:fetch] = true
       URI.open(uri, headers.merge({redirect: false})) do |response|
         h = response.meta                                     # upstream metadata
         if response.status.to_s.match? /206/                  # partial response
@@ -263,10 +264,12 @@ class WebResource
           cache.R.writeFile body                              # cache representation
           reader = RDF::Reader.for content_type: format       # find RDF reader
           reader.new(body, base_uri: self){|_|(env[:repository] ||= RDF::Repository.new) << _ } if reader && !NoScan.member?(formatExt)
+
           return self if options[:intermediate]               # intermediate fetch, no indexing or HTTP response
+
           saveRDF if reader                                   # index graph-data
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k| env[:resp][k] ||= h[k.downcase] if h[k.downcase]} # upstream metadata for downstream
-          h['link'].split(',').map{|link|                     # parse Link header
+          h['link'].split(',').map{|link|                     # parse Link header, add to downstream
             ref, type = link.split(';').map &:strip
             if ref && type
               ref = ref.sub(/^</,'').sub />$/, ''
@@ -277,8 +280,8 @@ class WebResource
           env[:resp]['Set-Cookie'] ||= h['set-cookie'] if h['set-cookie'] && allowCookies?
           if !options[:reformat] && fixedFormat?(format)
             body = Webize::HTML.clean body, self if format == 'text/html' # clean upstream HTML
-            env[:resp]['Content-Length'] = body.bytesize.to_s # content size
-            [200, env[:resp], [body]]                         # upstream document
+            env[:resp]['Content-Length'] = body.bytesize.to_s # size header
+            [200, env[:resp], [body]]                         # lightly-modified upstream document
           else
             graphResponse                                     # locally-generated document
           end

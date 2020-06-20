@@ -514,7 +514,7 @@ class WebResource
            {_: :tbody,
             c: graph.map{|resource|
 
-              re = (resource['uri'] || ('#' + Digest::SHA2.hexdigest(rand.to_s))).R
+              re = (resource['uri'] || ('#' + Digest::SHA2.hexdigest(rand.to_s))).R env
               local_id = re.path == env['REQUEST_PATH'] && re.fragment || ('r' + Digest::SHA2.hexdigest(re.uri))
 
               [{_: :tr, id: local_id, c: keys.map{|k|
@@ -525,9 +525,9 @@ class WebResource
                       title = title.to_s.sub(/\/u\/\S+ on /, '').sub /^Re: /, ''
                       unless env[:title] == title # show topic if changed from previous post
                         env[:title] = title; tCount += 1
-                        {_: :a, href: re.uri, class: :title, type: :node, c: CGI.escapeHTML(title), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}
+                        {_: :a, href: re.href, class: :title, type: :node, c: CGI.escapeHTML(title), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}
                       end},
-                    ({_: :a, href: re.uri, class: :id, type: :node, c: '🔗', id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} if tCount == 0),
+                    ({_: :a, href: re.href, class: :id, type: :node, c: '🔗', id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} if tCount == 0),
                     (resource[SIOC+'reply_of']||[]).map{|r|
                       {_: :a, href: r.to_s, c: Icons[SIOC+'reply_of']} if r.class == RDF::URI || r.class == WebResource},
                     resource[Abstract] ? [resource[Abstract], '<br>'] : '',
@@ -649,7 +649,7 @@ class WebResource
     Markup[Post] = -> post, env {
       post.delete Type
       uri = post.delete('uri') || ('#' + Digest::SHA2.hexdigest(rand.to_s))
-      resource = uri.R
+      resource = uri.R env
       titles = (post.delete(Title)||[]).map(&:to_s).map(&:strip).compact.-([""]).uniq
       abstracts = post.delete(Abstract) || []
       date = (post.delete(Date) || [])[0]
@@ -671,7 +671,7 @@ class WebResource
                [{_: :a,  id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: :title, type: :node,
                  href: resource.href, c: CGI.escapeHTML(title)}, " \n"]
              end},
-           ({_: :a, class: :id, type: :node, c: '🔗', href: uri, id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} unless hasPointer), "\n", # pointer
+           ({_: :a, class: :id, type: :node, c: '🔗', href: resource.href, id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} unless hasPointer), "\n", # pointer
            abstracts,
            ([{_: :a, class: :date, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date}, "\n"] if date),
            images.map{|i| Markup[Image][i,env]},

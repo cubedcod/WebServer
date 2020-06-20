@@ -77,13 +77,11 @@ module Webize
       end
 
       def scanContent &f
-
-        ## JSON triplr
-
-        # host triplr
         if hostTriples = Triplr[@base.host]
+          #puts "JSON triplr - custom for #{@base.host}"
           @base.send hostTriples, @json, &f
-        else # generic triplr
+        else
+          #puts "JSON triplr - generic for #{@base.host}"
           Webize::HTML.webizeValue(@json){|h|
             if s = h['uri'] || h['url'] || h['link'] || ((h['id']||h['ID']) && ('#' + (h['id']||h['ID']).to_s))
               puts s if s.class == Array || s.class == Hash

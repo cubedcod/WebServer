@@ -514,7 +514,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       end
       yield ('https://www.instagram.com/' + h['username']).R, Type, Person.R if h['username']
       if h['shortcode']
-        s = 'https://www.instagram.com/p/' + h['shortcode']
+        s = 'https://www.instagram.com/p/' + h['shortcode'] + '/'
         yield s, Type, Post.R
         yield s, Image, h['display_url'].R if h['display_url']
         if owner = h['owner']
