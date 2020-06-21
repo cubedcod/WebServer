@@ -286,7 +286,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     GET 'www.youtube.com', -> r {
       path = r.parts[0]
       if !path
-        [301, {'Location' => '/feed/subscriptions'}, []]
+        [301, {'Location' => '//www.youtube.com/feed/subscriptions'.R(r.env).href}, []]
       elsif %w{attribution_link redirect}.member? path
         [301, {'Location' => r.query_values['q'] || r.query_values['u']}, []]
       elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json
