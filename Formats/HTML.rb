@@ -5,6 +5,15 @@ module Webize
 
     Scripts = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script" # CSS selector for script elements
 
+    # set location references to cache
+    def self.cacherefs content, env
+      doc = Nokogiri::HTML.fragment content
+      doc.css('a, img').map{|e| # reference element
+        %w(href src).map{|attr| # reference attr,
+          e[attr] = e[attr].R(env).cacheURL if e[attr]}} # update location
+      doc.to_html
+    end
+
     # clean HTML (string)
     def self.clean body, base=nil
       doc = Nokogiri::HTML.parse body.encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ') # parse to Nokogiri doc
@@ -45,8 +54,6 @@ module Webize
             elsif src.uri.match? Gunk
               log << "🚫 \e[31;1m" + src.uri + "\e[0m"
               s.remove
-            elsif base && base.env[:cacherefs]
-              s[attr] = ['/', (src.host || base.host), src.path, src.query].join
             end
           end}}
       puts log.join ' ' unless log.empty?
@@ -395,7 +402,7 @@ class WebResource
                                  ({_: :a, id: :tabular, class: :icon, style: 'color: #555', c: '↨',
                                    href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless qs['view'] == 'table'),
                                  link[:feed, FeedIcon],
-                                 ({_: :a, href: (HTTP.qs qs.merge({'UI' => :upstream})), c: '⚗️', id: :UI} unless localNode?),
+                                 ({_: :a, href: env[:cacherefs] ? uri : (HTTP.qs qs.merge({'UI' => :upstream})), c: '⚗️', id: :UI} unless localNode?),
                                  parts.map{|p|
                                     [{_: :a, class: :breadcrumb, href: bc += p + '/', c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
                                  ]},
@@ -534,7 +541,7 @@ class WebResource
                     [Image,
                      Video].map{|t|(resource[t]||[]).map{|i|
                                          Markup[t][i,env]}},
-                    [resource[Content], resource[SIOC+'richContent']].compact.join('<hr>'),
+                    (env[:cacherefs] ? [resource[Content], resource[SIOC+'richContent']].flatten.compact.map{|c| Webize::HTML.cacherefs c, env} : [resource[Content], resource[SIOC+'richContent']]).compact.join('<hr>'),
                     MarkupLinks[(resource[Link]||[]),env]]
                  else
                    (resource[k]||[]).map{|v|value k, v, env }
