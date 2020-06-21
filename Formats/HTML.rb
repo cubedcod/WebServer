@@ -367,7 +367,7 @@ class WebResource
       env[:images] ||= {}
       env[:colors] ||= {}
       env[:links] ||= {}
-      if path.match?(HourDir) || TemporalHosts.member?(host)
+      if (path && path.match?(HourDir)) || TemporalHosts.member?(host)
         env[:sort] = 'date'
         env[:view] = 'table'
       end
@@ -554,7 +554,7 @@ class WebResource
 
     def self.value type, v, env
       if [Abstract, Content, 'http://rdfs.org/sioc/ns#richContent'].member? type
-        v                # prepared HTML content
+        env[:cacherefs] ? Webize::HTML.cacherefs(v, env) : v
       elsif Markup[type] # markup lambda defined for explicit type argument
         Markup[type][v,env]
       elsif v.class == Hash # data
