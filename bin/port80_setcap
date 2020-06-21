@@ -1,4 +1,3 @@
 #!/bin/sh
 sudo setcap 'cap_net_bind_service=+ep' `which ruby`
-echo "run the daemon on port 80:"
-echo "cd ~/web && unicorn -N -l 127.0.0.1:80 -l [::1]:80 -c ../src/WebServer/config/unicorn.rb ../src/WebServer/config/rack.ru"
+cd ~/web && unicorn -N -l 127.0.0.1:80 -l [::1]:80 -c ../src/WebServer/config/unicorn.rb ../src/WebServer/config/rack.ru
