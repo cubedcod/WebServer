@@ -335,8 +335,9 @@ class WebResource
         elsif p == '/mail'                               # inbox redirect
           [301, {'Location' => '/d/*/msg*?sort=date&view=table'}, []]
         elsif !p
-          [404, {}, []]
-        elsif p.match?(/^\d\d\d\d$/) || %w(src).member?(p)
+          env[:cacherefs] = true
+          BookmarksFile.R(env).loadRDF.graphResponse
+        elsif p.match?(/^\d\d\d\d$/) || %w(src).member?(p) || node.file?
           nodeResponse                                      # local node
         else
           env[:cacherefs] = true

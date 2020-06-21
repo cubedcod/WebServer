@@ -50,7 +50,7 @@ class WebResource < RDF::URI
   def loadRDF options = {}
     graph = options[:repository] || env[:repository] ||= RDF::Repository.new
     if node.file?
-      formatHint = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0)
+      formatHint = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # path-derived format hints when suffix is ambiguous or missing
                      :mail # procmail doesnt have configurable SUFFIX (.eml), only PREFIX? - presumably due to some sort of maildir suffix-renames to denote state?
                    elsif ext.match? /^html?$/
                      :html
@@ -58,10 +58,9 @@ class WebResource < RDF::URI
                      :plaintext
                    elsif %w(gemfile makefile rakefile).member? basename.downcase
                      :sourcecode
-                   end # path-derived format hints when suffix is ambiguous or missing
+                   end
       options[:base_uri] ||= (localNode? ? path : uri).gsub(/\.ttl$/,'').R env
       options[:format] ||= formatHint if formatHint
-      #puts 'load file:' + fsPath
       graph.load 'file:' + fsPath, **options
     elsif node.directory?
       subject = localNode? ? path.R : self
@@ -72,6 +71,7 @@ class WebResource < RDF::URI
       node.children.map{|child|
         graph << RDF::Statement.new(subject, (LDP+'contains').R, (subject.join child.basename '.ttl'))}
     end
+    self
   rescue RDF::FormatError => e
     mime = `file -b --mime-type #{shellPath}`.chomp
     puts e.message,"FILE(1) suggests type #{mime}, retrying"
@@ -83,6 +83,7 @@ class WebResource < RDF::URI
       options[:content_type] = mime
     end
     graph.load fsPath, **options
+    self
   end
 
   # RDF::Repository -> file(s)
@@ -146,7 +147,6 @@ class WebResource < RDF::URI
   include URIs
 
   module HTTP
-
     def graphResponse
       return notfound if !env.has_key?(:repository) || env[:repository].empty?
       format = selectFormat
@@ -163,16 +163,20 @@ class WebResource < RDF::URI
           env[:repository].dump RDF::Writer.for(content_type: format).to_sym, base_uri: self
         end}
     end
-
   end
-
 end
+
 class Array
   def R env=nil
     puts ['Array#R', self].join ' ' if size > 1
     env ? WebResource.new(self[0].to_s).env(env) : WebResource.new(self[0].to_s)
   end
 end
+
+class Pathname
+  def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
+end
+
 class RDF::URI
   def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
 end

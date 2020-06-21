@@ -54,6 +54,7 @@ www.reddit.com
     SiteCSS = SiteDir.join('site.css').read
     CodeCSS = SiteDir.join('code.css').read
     SiteJS  = SiteDir.join('site.js').read
+    BookmarksFile  = SiteDir.join 'bookmarks.u'
 
   end
   module HTTP
