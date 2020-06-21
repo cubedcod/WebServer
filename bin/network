@@ -1,4 +1,0 @@
-#!/bin/sh
-uid=$(id -u)
-rules=$(realpath ~/src/WebServer/bin/network.rules.sh)
-su -c "sh $rules $uid"

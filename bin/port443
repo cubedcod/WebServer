@@ -1,0 +1,13 @@
+#!/bin/sh
+conf=../src/WebServer/config
+uid=$(id -u)
+rules=$(realpath ~/src/WebServer/bin/transparent.rules.sh)
+
+# configure network for transparent proxy
+su -c "sh $rules $uid"
+
+# run daemon and proxy pairing
+cd ~/web
+
+squid -f $conf/squid.conf
+unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c $conf/unicorn.rb $conf/rack.ru
