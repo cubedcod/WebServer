@@ -174,20 +174,19 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     [*%w(gateway gql oauth old www).map{|h| h+'.reddit.com' }, *%w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it)].map{|h| Allow h }
 
     GET 'old.reddit.com', -> r {
-      if %w(api login).member? r.parts[0]
-        NoGunk[r]
-      else
-        r.fetch.yield_self{|status,head,body|
-          if status.to_s.match? /^30/
-            [status, head, body]
-          else # old UI page delivered, find page pointers, missing in HEAD (old + new UI) and HTML + RSS body (new UI)
-            links = []
-            body[0].scan(/href="([^"]+after=[^"]+)/){|link| links << CGI.unescapeHTML(link[0]).R }
-            link = links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]
-            [302, {'Location' => ['https://www.reddit.com', link.path, '?', link.query].join.R(r.env).href}, []]
-          end}
-      end
-    }
+      cr = r.env[:cacherefs]
+      r.env[:cacherefs] = false # don't rewrite references in fetch response
+      r.fetch.yield_self{|status,head,body|
+        if status.to_s.match? /^30/
+          [status, head, body]
+        else # find page pointers missing in HEAD (old + new UI) and HTML/RSS bodies (new UI)
+          links = []
+          body[0].scan(/href="([^"]+after=[^"]+)/){|link|links << CGI.unescapeHTML(link[0]).R} # find links
+          link = links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]         # sort links
+          nextPage = ['https://www.reddit.com', link.path, '?', link.query].join.R r.env       # page reference
+          r.env[:cacherefs] = cr # restore rewrite settings
+          [302, {'Location' => nextPage.href}, []]
+        end}}
 
     GET 'www.reddit.com', -> r {
       cookie = 'reddit/.cookie'.R
