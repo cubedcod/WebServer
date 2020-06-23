@@ -236,7 +236,7 @@ class WebResource
       ('http:' + loc).R(env).fetchHTTP options                                                           # fallback to HTTP
     end
 
-    def fetchHTTP options = {}
+    def fetchHTTP cache_raw: true, index: true, response: true
       env[:fetch] = true
       URI.open(uri, headers.merge({redirect: false})) do |response|
         h = response.meta                                     # upstream metadata
@@ -254,36 +254,45 @@ class WebResource
           formatExt = Suffixes[format] || Suffixes_Rack[format] # format -> name-suffix
           puts "WARNING format undefined for #{uri}, missing Content-Type or known extension at server" unless format
           body = HTTP.decompress h, response.read             # decompress body
-          cache = fsPath.R                                    # base path for cache
-          cache += querySlug                                  # add qs-derived slug
-          if formatExt
-            cache += formatExt unless cache.R.extension == formatExt  # append format-suffix
-          else
-            puts "WARNING suffix undefined for format #{format}, please add to Formats/MIME.rb" if format
+
+          if cache_raw
+            cache = fsPath.R                                  # base path for cache
+            cache += querySlug                                # add qs-derived slug
+            if formatExt
+              cache += formatExt unless cache.R.extension == formatExt  # append format-suffix
+            else
+              puts "WARNING suffix undefined for format #{format}, please add to Formats/MIME.rb" if format
+            end
+            cache.R.writeFile body                            # cache representation
           end
-          cache.R.writeFile body                              # cache representation
-          reader = RDF::Reader.for content_type: format       # find RDF reader
-          reader.new(body, base_uri: self){|_|(env[:repository] ||= RDF::Repository.new) << _ } if reader && !NoScan.member?(formatExt)
 
-          return self if options[:intermediate]               # intermediate fetch, no indexing or HTTP response
+          if index
+            if reader = RDF::Reader.for content_type: format  # find RDF reader
+              reader.new(body, base_uri: self){|_|(env[:repository] ||= RDF::Repository.new) << _ } unless NoScan.member? formatExt
+              saveRDF                                         # index RDF
+            end
+          end
 
-          saveRDF if reader                                   # index graph-data
-          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k| env[:resp][k] ||= h[k.downcase] if h[k.downcase]} # upstream metadata for downstream
-          h['link'].split(',').map{|link|                     # parse Link header, add to downstream
-            ref, type = link.split(';').map &:strip
-            if ref && type
-              ref = ref.sub(/^</,'').sub />$/, ''
-              type = type.sub(/^rel="?/,'').sub /"$/, ''
-              env[:links][type.to_sym] = ref
-            end} if h['link']
-          env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
-          env[:resp]['Set-Cookie'] ||= h['set-cookie'] if h['set-cookie'] && allowCookies?
-          if !options[:reformat] && fixedFormat?(format)
-            body = Webize::HTML.clean body, self if format == 'text/html' # clean upstream HTML
-            env[:resp]['Content-Length'] = body.bytesize.to_s # size header
-            [200, env[:resp], [body]]                         # lightly-modified upstream document
+          if response                                         # HTTP response
+            %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k| env[:resp][k] ||= h[k.downcase] if h[k.downcase]} # upstream metadata for downstream
+            h['link'].split(',').map{|link|                   # parse Link header, add to downstream
+              ref, type = link.split(';').map &:strip
+              if ref && type
+                ref = ref.sub(/^</,'').sub />$/, ''
+                type = type.sub(/^rel="?/,'').sub /"$/, ''
+                env[:links][type.to_sym] = ref
+              end} if h['link']
+            env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
+            env[:resp]['Set-Cookie'] ||= h['set-cookie'] if h['set-cookie'] && allowCookies?
+            if !options[:reformat] && fixedFormat?(format)
+              body = Webize::HTML.clean body, self if format == 'text/html' # clean upstream HTML
+              env[:resp]['Content-Length'] = body.bytesize.to_s # size header
+              [200, env[:resp], [body]]                       # lightly-modified upstream document
+            else
+              graphResponse                                   # locally-generated document
+            end
           else
-            graphResponse                                     # locally-generated document
+            body
           end
         end
       end

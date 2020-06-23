@@ -212,14 +212,30 @@ graphql.api.dailymotion.com).map{|h| Allow h}
 
     Allow 'gql.twitch.tv'
 
-    Twits = %w(5_13Dist 792QFD 857FirePhotos ActCal AestheticResear AlertBoston AlertsBoston AnnissaForBos ArchivesBoston ArtsinBoston AssignGuy AyannaPressley
- BCYFcenters BHA_Boston BILL34793923 BOSCityCouncil BOSTON_WATER BPDPCGross BankerTradesman BansheeBoston BayStateBanner BillForry BlairMillerTV BosBizAllison BosBizJournal Boston25Photogs Boston25photog BostonBTD BostonBldgRes BostonFire BostonFireAlert BostonGlobe BostonHassle BostonLca BostonMagazine BostonNewsMan BostonPWD BostonParksDept BostonPlans BostonPoliceRA BostonRev BostonSchools BostonTVPhotog BostonWomen Boston_Fireman Boston_PFD BreakngNewsPhtg
- CFamaWBZ CJPFirePhotos CampbellforD4 ChelseaScanner ChiefJoeFinn CityBosYouth CityLife_Clvu CityOfBoston CityofQuincy CodmanHealth CommonWealthMag CotterReporter
- Dan_Adams86 DorchesterBrew DorchesterNorth DotHistorical DotNews DotWrite ENG1SFD EdforBoston EirePub FBIBoston Fairmount_Lab FieldsCornerMS FireSafeCorp FortPointer FranklinParkBos fiahspahk GARYD117 GlobeMetro GlobeOpinion GreenovateBos
- HelloGreenway JLDifazio JTrufant_Ledger JennDotSmith JohnAKeith Karynregal KerriCorrado Kim_Janey KristinaRex LDBpeaceInst LOCAL_718 LaurieWBZ LiamWBZ LiveBoston617 LouisaMoller LydiaMEdwards
- MAFIREFIGHTER1 MAPCMetroBoston MBTA MBuffs MaFireEMS MadisonParkDC MarcHurBoston MartyForBoston MassArt MassDOT MassDev MassInno MassStatePolice MattOMalley MikeLaCrosseWBZ NBC10Boston NECN NE_FireBuffs NiaNBCBoston NotoriousVOG ONS_Chinatown PatriotLedger PaulNuttingJr PaulaEbbenWBZ PlunkettPrime ProRockThrower
- QuincyQuarry RevereJournal SBHealthCenter ScanBoston SquantumScoop Stizzy_LeftLane StreetsBoston StreetsblogMASS StringerBoston SunwealthPower TAGlobe TMGormanPhotos The_BMC ThomasCranePL UMassBoston ViolenceNBoston
- WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury advocatenewsma ajafarzadehPR alertpageboston beetlenaut bfdradio blarneystonedot bosimpact boston25 bostonpolice bpsnews bytimlogan cdinopoulos chipgoines chipsy231 dbedc doogs1227 franksansev gavin86077173 gavinschoch greaterashmont janovember3 jenyp jrquin1234 kathrynburcham kennycooks kwilesjrnews lawrencepolice markpothier marty_walsh matredsoxfan2 mattgrobo metro_notify mfflaherty news_bnn nickcollinsma nina_liang nuestradavid ofsevit pain24seven pictureboston quincymapolice radio615 reverescanner rgoulston scotteisenphoto sjforman138 skoczela stacos stevebikes susantran thecrimehub therealreporter universalhub wbz wbznewsradio wgbhnews wutrain)
+    Twits = %w(
+5_13Dist 792QFD 857FirePhotos
+ActCal AestheticResear AlertBoston AlertsBoston AnnissaForBos ArchivesBoston ArtsinBoston AssignGuy AyannaPressley advocatenewsma ajafarzadehPR alertpageboston
+BCYFcenters BHA_Boston BILL34793923 BOSCityCouncil BOSTON_WATER BPDPCGross BankerTradesman BansheeBoston BayStateBanner BillForry BlairMillerTV BosBizAllison BosBizJournal Boston25Photogs Boston25photog BostonBTD BostonBldgRes BostonFire BostonFireAlert BostonGlobe BostonHassle BostonLca BostonMagazine BostonNewsMan BostonPWD BostonParksDept BostonPlans BostonPoliceRA BostonRev BostonSchools BostonTVPhotog BostonWomen Boston_Fireman Boston_PFD BreakngNewsPhtg beetlenaut bfdradio blarneystonedot bosimpact boston25 bostonpolice bpsnews bytimlogan
+CFamaWBZ CJPFirePhotos CampbellforD4 ChelseaScanner ChiefJoeFinn CityBosYouth CityLife_Clvu CityOfBoston CityofQuincy CodmanHealth CommonWealthMag CotterReporter cdinopoulos chipgoines chipsy231
+Dan_Adams86 DorchesterBrew DorchesterNorth DotHistorical DotNews DotWrite dbedc doogs1227
+ENG1SFD EdforBoston EirePub
+Fairmount_Lab FieldsCornerMS FireSafeCorp FortPointer FranklinParkBos fiahspahk franksansev
+GARYD117 GlobeMetro GlobeOpinion GreenovateBos gavin86077173 gavinschoch greaterashmont
+HelloGreenway
+JLDifazio JTrufant_Ledger JennDotSmith JohnAKeith janovember3 jenyp jrquin1234
+Karynregal KerriCorrado Kim_Janey KristinaRex kathrynburcham kennycooks kwilesjrnews
+LDBpeaceInst LOCAL_718 LaurieWBZ LiamWBZ LiveBoston617 LouisaMoller LydiaMEdwards lawrencepolice
+MAFIREFIGHTER1 MAPCMetroBoston MBTA MBuffs MaFireEMS MadisonParkDC MarcHurBoston MartyForBoston MassArt MassDOT MassDev MassInno MassStatePolice MattOMalley MikeLaCrosseWBZ markpothier marty_walsh matredsoxfan2 mattgrobo metro_notify mfflaherty
+NBC10Boston NECN NE_FireBuffs NiaNBCBoston NotoriousVOG news_bnn nickcollinsma nina_liang nuestradavid
+ONS_Chinatown ofsevit
+PatriotLedger PaulNuttingJr PaulaEbbenWBZ PlunkettPrime ProRockThrower pain24seven pictureboston
+QuincyQuarry quincymapolice
+RevereJournal radio615 reverescanner rgoulston
+SBHealthCenter ScanBoston SquantumScoop Stizzy_LeftLane StreetsBoston StreetsblogMASS StringerBoston SunwealthPower scotteisenphoto sjforman138 skoczela stacos stevebikes susantran
+TAGlobe TMGormanPhotos The_BMC ThomasCranePL thecrimehub therealreporter
+UMassBoston universalhub
+ViolenceNBoston
+WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbhnews wutrain)
     Allow 'api.twitter.com'
     GET 'twitter.com', -> r {
 
@@ -247,7 +263,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
           print '🐦'
           q = sub.map{|u|'from%3A' + u}.join('%2BOR%2B')
           apiURL = 'https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&q=' + q + '&vertical=default&count=40&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2CcameraMoment'
-          apiURL.R(r.env).fetch intermediate: true}
+          apiURL.R(r.env).fetch cache: false, index: false, response: false}
         r.saveRDF.graphResponse
       # user
       elsif r.parts.size == 1 && !%w(favicon.ico manifest.json push_service_worker.js search sw.js).member?(r.parts[0])
