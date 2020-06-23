@@ -267,7 +267,7 @@ class WebResource
           end
 
           if index
-            if reader = RDF::Reader.for content_type: format  # find RDF reader
+            if reader = RDF::Reader.for(content_type: format)  # find RDF reader
               reader.new(body, base_uri: self){|_|(env[:repository] ||= RDF::Repository.new) << _ } unless NoScan.member? formatExt
               saveRDF                                         # index RDF
             end
