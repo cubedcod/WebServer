@@ -31,7 +31,7 @@ end
 class WebResource
   module URIs
     NoScan = %w(.css .gif .ico .jpg .js .png .svg .webm)                                                       # formats not scanned for RDF in cache-mode
-    StaticFormats = %w(bin css geojson gif ico jpeg jpg js m3u8 m4a mp3 mp4 opus pem pdf png svg ts webm webp) # formats requiring URI change for cache-invalidation
+    StaticFormats = %w(bin css geojson gif ico jpeg jpg js m3u8 m4a mp3 mp4 opus pem pdf png svg ts webm webp .ico .gif .jpg .png .mp4 .js) # formats requiring URI change for cache-invalidation
     CookieHost = /(^|\.)(akamai(hd)?|bandcamp|twitter|youtube)\.(com|net)$/
     AllowedHeaders = 'authorization, client-id, content-type, device-fp, device-id, x-access-token, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-csrf-token, x-device-id, x-goog-authuser, x-guest-token, x-hostname, x-lib-version, x-locale, x-twitter-active-user, x-twitter-client-language, x-twitter-utcoffset, x-requested-with'
     StoragePool = /storage.googleapis.com$/
@@ -195,9 +195,9 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       elsif r.env['HTTP_COOKIE']
         cookie.writeFile r.env['HTTP_COOKIE']
       end
-      options = {suffix: '.rss'} if r.ext.empty? && !r.upstreamUI? && %w(r u user).member?(r.parts[0]) && r.parts[-1] != 'submit' # request RSS format on user and thread pages
+      r.path += '.rss' if r.ext.empty? && !r.upstreamUI? && %w(r u user).member?(r.parts[0]) && r.parts[-1] != 'submit' # request RSS format on user and thread pages
       r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination pointer
-      r.fetch options}
+      r.fetch}
 
     GET 's4.reutersmedia.net', -> r {
       args = r.query_values || {}
@@ -250,7 +250,9 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
           r.env['x-guest-token'] ||= attrs['gt'] if attrs['gt']
         end}
 
+      env[:transformable] = true
       upstreamUI = -> {
+        env[:transformable] = false
         %w(authorization x-csrf-token x-guest-token HTTP_COOKIE).map{|k| r.env.delete k}
         r.upstreamUI.fetch}
 
@@ -263,7 +265,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
           print '🐦'
           q = sub.map{|u|'from%3A' + u}.join('%2BOR%2B')
           apiURL = 'https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&q=' + q + '&vertical=default&count=40&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2CcameraMoment'
-          apiURL.R(r.env).fetch cache: false, index: false, response: false}
+          apiURL.R(r.env).fetchHTTP response: false}
         r.saveRDF.graphResponse
       # user
       elsif r.parts.size == 1 && !%w(favicon.ico manifest.json push_service_worker.js search sw.js).member?(r.parts[0])
@@ -275,16 +277,16 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
           json = ::JSON.parse body
           uid = json['data']['user']['rest_id']
           # find tweets
-          ('https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment').R(r.env).fetch reformat: true} rescue upstreamUI[]
+          ('https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment').R(r.env).fetch} rescue upstreamUI[]
       # conversation
       elsif r.parts.member?('status') #|| r.parts.member?('statuses')
         setTokens[]
         convo = r.parts.find{|p| p.match? /^\d{8}\d+$/ }
-        "https://api.twitter.com/2/timeline/conversation/#{convo}.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&count=20&ext=mediaStats%2CcameraMoment".R(r.env).fetch reformat: true
+        "https://api.twitter.com/2/timeline/conversation/#{convo}.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&count=20&ext=mediaStats%2CcameraMoment".R(r.env).fetch
       # hashtag
       elsif r.parts[0] == 'hashtag'
         setTokens[]
-        "https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&q=%23#{r.parts[1]}&count=20&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2ChighlightedLabel%2CcameraMoment".R(r.env).fetch reformat: true
+        "https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&q=%23#{r.parts[1]}&count=20&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2ChighlightedLabel%2CcameraMoment".R(r.env).fetch
       else
         NoGunk[r]
       end.yield_self{|s,h,b|

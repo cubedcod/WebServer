@@ -63,7 +63,7 @@ class WebResource
                         when 'POST'
                           '📝'
                         when 'GET'
-                          env[:fetch] ? '🐕' : ' '
+                          env[:fetched] ? '🐕' : ' '
                         else
                           env['REQUEST_METHOD']
                         end
@@ -221,24 +221,22 @@ class WebResource
     end
 
     # fetch node from cache or remote
-    def fetch options = nil ; options ||= {}
-      return nodeResponse if ENV.has_key?('OFFLINE')                                                     # offline, return cached nodes
+    def fetch
+      return nodeResponse if ENV.has_key?('OFFLINE')                                         # offline cache
       if StaticFormats.member? ext.downcase
         return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client cache-hit
-        return fileResponse if node.file?                                                                # server cache-hit - direct static-file hit
+        return fileResponse if node.file?                                                    # daemon cache-hit - static-file at location
       end
       nodes = nodeSet
-      return nodes[0].fileResponse if nodes.size == 1 && StaticFormats.member?(nodes[0].ext)             # server cache-hit - indirect, one static-file in file(s) map
-
-      loc = ['//',host,(port ? [':',port] : nil),path,options[:suffix],(query ? ['?',query] : nil)].join # locator
-      ('https:' + loc).R(env).fetchHTTP options                                                          # HTTPS fetch
+      return nodes[0].fileResponse if nodes.size == 1 && StaticFormats.member?(nodes[0].ext) # daemon cache-hit, indirect - single static-file in file(s) map
+      scheme = 'https'; fetchHTTP                                                            # fetch via HTTPS
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
-      ('http:' + loc).R(env).fetchHTTP options                                                           # fallback to HTTP
+      scheme = 'http'; fetchHTTP                                                             # fetch via HTTP
     end
 
-    def fetchHTTP cache_raw: true, index: true, response: true
-      env[:fetch] = true
+    def fetchHTTP response: true
       URI.open(uri, headers.merge({redirect: false})) do |response|
+        env[:fetched] = true
         h = response.meta                                     # upstream metadata
         if response.status.to_s.match? /206/                  # partial response
           h['Access-Control-Allow-Origin'] = allowedOrigin unless h['Access-Control-Allow-Origin'] || h['access-control-allow-origin']
@@ -253,27 +251,18 @@ class WebResource
                    end
           formatExt = Suffixes[format] || Suffixes_Rack[format] # format -> name-suffix
           puts "WARNING format undefined for #{uri}, missing Content-Type or known extension at server" unless format
-          body = HTTP.decompress h, response.read             # decompress body
-
-          if cache_raw
+          body = HTTP.decompress h, response.read             # read body
+          if reader = RDF::Reader.for(content_type: format)   # read RDF
+            reader.new(body, base_uri: self){|_|(env[:repository] ||= RDF::Repository.new) << _ } unless NoScan.member? formatExt
+          end
+          if response                                         # HTTP response
             cache = fsPath.R                                  # base path for cache
             cache += querySlug                                # add qs-derived slug
-            if formatExt
-              cache += formatExt unless cache.R.extension == formatExt  # append format-suffix
-            else
-              puts "WARNING suffix undefined for format #{format}, please add to Formats/MIME.rb" if format
-            end
-            cache.R.writeFile body                            # cache representation
-          end
+            cache += formatExt if formatExt && cache.R.extension == formatExt  # append format-suffix
+            cache.R.writeFile body                            # update cache
 
-          if index
-            if reader = RDF::Reader.for(content_type: format)  # find RDF reader
-              reader.new(body, base_uri: self){|_|(env[:repository] ||= RDF::Repository.new) << _ } unless NoScan.member? formatExt
-              saveRDF                                         # index RDF
-            end
-          end
+            saveRDF if reader
 
-          if response                                         # HTTP response
             %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k| env[:resp][k] ||= h[k.downcase] if h[k.downcase]} # upstream metadata for downstream
             h['link'].split(',').map{|link|                   # parse Link header, add to downstream
               ref, type = link.split(';').map &:strip
@@ -284,7 +273,7 @@ class WebResource
               end} if h['link']
             env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
             env[:resp]['Set-Cookie'] ||= h['set-cookie'] if h['set-cookie'] && allowCookies?
-            if !options[:reformat] && fixedFormat?(format)
+            if fixedFormat? format
               body = Webize::HTML.clean body, self if format == 'text/html' # clean upstream HTML
               env[:resp]['Content-Length'] = body.bytesize.to_s # size header
               [200, env[:resp], [body]]                       # lightly-modified upstream document
@@ -303,7 +292,7 @@ class WebResource
         dest = e.io.meta['location'].R env
         if scheme == 'https' && dest.scheme == 'http'
           puts "WARNING HTTPS downgraded to HTTP: #{uri} -> #{dest}"
-          dest.fetchHTTP options
+          dest.fetchHTTP
         else
           [302, {'Location' => dest.href}, []]
         end
@@ -320,6 +309,7 @@ class WebResource
     end
 
     def fixedFormat? format
+      return false if env.has_key? :transformable
       return true if !format || upstreamUI? || format.match?(/dash.xml/)                               # unknown or upstream format
       return false if (query_values||{}).has_key?('rdf') || format.match?(/atom|html|rss|turtle|xml/i) # Feed/HTML/RDF formats transformable via RDF Readers/Writers
       return true
