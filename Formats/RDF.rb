@@ -105,11 +105,7 @@ class WebResource < RDF::URI
                   flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.')[0..123] + '.ttl'
         unless File.exist? tlink
           FileUtils.mkdir_p File.dirname tlink
-          begin
-            FileUtils.ln turtle, tlink
-          rescue
-            FileUtils.cp turtle, tlink
-          end
+          FileUtils.ln turtle, tlink rescue nil
         end
       end}
     self
