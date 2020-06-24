@@ -32,7 +32,7 @@ class WebResource
   module URIs
     NoScan = %w(.css .gif .ico .jpg .js .png .svg .webm)                                                       # formats not scanned for RDF in cache-mode
     StaticFormats = %w(bin css geojson gif ico jpeg jpg js m3u8 m4a mp3 mp4 opus pem pdf png svg ts webm webp .ico .gif .jpg .png .mp4 .js) # formats requiring URI change for cache-invalidation
-    CookieHost = /(^|\.)(akamai(hd)?|bandcamp|twitter|youtube)\.(com|net)$/
+    CookieHost = /(^|\.)(akamai(hd)?|amazon|bandcamp|twitter|youtube)\.(com|net)$/
     AllowedHeaders = 'authorization, client-id, content-type, device-fp, device-id, x-access-token, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-csrf-token, x-device-id, x-goog-authuser, x-guest-token, x-hostname, x-lib-version, x-locale, x-twitter-active-user, x-twitter-client-language, x-twitter-utcoffset, x-requested-with'
     StoragePool = /storage.googleapis.com$/
     TemporalHosts = %w(
@@ -195,7 +195,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       elsif r.env['HTTP_COOKIE']
         cookie.writeFile r.env['HTTP_COOKIE']
       end
-      r.path += '.rss' if r.ext.empty? && !r.upstreamUI? && %w(r u user).member?(r.parts[0]) && r.parts[-1] != 'submit' # request RSS format on user and thread pages
+      r.path += '.rss' if r.ext.empty? && %w(r u user).member?(r.parts[0]) && r.parts[-1] != 'submit' # request RSS format on user and thread pages
       r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination pointer
       r.fetch}
 
@@ -238,7 +238,7 @@ ViolenceNBoston
 WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbhnews wutrain)
     Allow 'api.twitter.com'
     GET 'twitter.com', -> r {
-
+      parts = r.parts
       setTokens = -> {
         if cookie = r.env['HTTP_COOKIE']
           attrs = {}
@@ -250,16 +250,12 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
           r.env['x-guest-token'] ||= attrs['gt'] if attrs['gt']
         end}
 
-      env[:transformable] = true
-      upstreamUI = -> {
-        env[:transformable] = false
+      remoteUI = -> {
         %w(authorization x-csrf-token x-guest-token HTTP_COOKIE).map{|k| r.env.delete k}
-        r.upstreamUI.fetch}
+        r.fetchHTTP transformable: false}
 
-      if r.upstreamUI?
-        NoGunk[r]
       # feed
-      elsif r.path == '/'
+      if r.path == '/'
         setTokens[]
         Twits.shuffle.each_slice(18){|sub|
           print '🐦'
@@ -268,29 +264,29 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
           apiURL.R(r.env).fetchHTTP response: false}
         r.saveRDF.graphResponse
       # user
-      elsif r.parts.size == 1 && !%w(favicon.ico manifest.json push_service_worker.js search sw.js).member?(r.parts[0])
+      elsif parts.size == 1 && !%w(favicon.ico manifest.json push_service_worker.js search sw.js).member?(parts[0])
         setTokens[]
         uid = nil
         # find uid
-        URI.open('https://api.twitter.com/graphql/G6Lk7nZ6eEKd7LBBZw9MYw/UserByScreenName?variables=%7B%22screen_name%22%3A%22' + r.parts[0] + '%22%2C%22withHighlightedLabel%22%3Afalse%7D', r.headers){|response| # find uid
+        URI.open('https://api.twitter.com/graphql/G6Lk7nZ6eEKd7LBBZw9MYw/UserByScreenName?variables=%7B%22screen_name%22%3A%22' + parts[0] + '%22%2C%22withHighlightedLabel%22%3Afalse%7D', r.headers){|response| # find uid
           body = HTTP.decompress response.meta, response.read
           json = ::JSON.parse body
           uid = json['data']['user']['rest_id']
           # find tweets
-          ('https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment').R(r.env).fetch} rescue upstreamUI[]
+          ('https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment').R(r.env).fetch transform: true} rescue remoteUI[]
       # conversation
-      elsif r.parts.member?('status') #|| r.parts.member?('statuses')
+      elsif parts.member?('status') || parts.member?('statuses')
         setTokens[]
-        convo = r.parts.find{|p| p.match? /^\d{8}\d+$/ }
-        "https://api.twitter.com/2/timeline/conversation/#{convo}.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&count=20&ext=mediaStats%2CcameraMoment".R(r.env).fetch
+        convo = parts.find{|p| p.match? /^\d{8}\d+$/ }
+        "https://api.twitter.com/2/timeline/conversation/#{convo}.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&count=20&ext=mediaStats%2CcameraMoment".R(r.env).fetch transform: true
       # hashtag
-      elsif r.parts[0] == 'hashtag'
+      elsif parts[0] == 'hashtag'
         setTokens[]
-        "https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&q=%23#{r.parts[1]}&count=20&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2ChighlightedLabel%2CcameraMoment".R(r.env).fetch
+        "https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&q=%23#{parts[1]}&count=20&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2ChighlightedLabel%2CcameraMoment".R(r.env).fetch transform: true
       else
         NoGunk[r]
       end.yield_self{|s,h,b|
-        [403,429].member?(s) ? upstreamUI[] : [s,h,b]}}
+        [403,429].member?(s) ? remoteUI[] : [s,h,b]}}
 
     %w(mobile www).map{|host|
       GET host + '.twitter.com', -> r {
@@ -315,7 +311,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
         elsif r.env['HTTP_COOKIE'] && r.env['HTTP_COOKIE'].match?(/LOGIN/)
           cookie.writeFile r.env['HTTP_COOKIE']
         end
-        NoGunk[r.upstreamUI]
+        NoGunk[r]
       else
         r.deny
       end}

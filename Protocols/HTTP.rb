@@ -11,7 +11,6 @@ class WebResource
     Methods = %w(GET HEAD OPTIONS POST PUT)
     ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
-    SingleHop = %w(cacherefs connection fetch gunk host keep-alive links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests ux version via x-forwarded-for)
 
     def self.Allow host
       AllowedHosts[host] = true
@@ -220,65 +219,71 @@ class WebResource
       end
     end
 
-    # fetch node from cache or remote
+    # fetch from cache or remote server
     def fetch
       return nodeResponse if ENV.has_key?('OFFLINE')                                         # offline cache
-      if StaticFormats.member? ext.downcase
-        return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client cache-hit
-        return fileResponse if node.file?                                                    # daemon cache-hit - static-file at location
+      if StaticFormats.member? ext.downcase                                                  # static representation valid in cache if exists
+        return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client cache-hit, in browser-cache
+        return fileResponse if node.file?                                                    # server cache-hit, on fs
       end
       nodes = nodeSet
-      return nodes[0].fileResponse if nodes.size == 1 && StaticFormats.member?(nodes[0].ext) # daemon cache-hit, indirect - single static-file in file(s) map
+      return nodes[0].fileResponse if nodes.size == 1 && StaticFormats.member?(nodes[0].ext) # server cache-hit, single static-node in set
       scheme = 'https'; fetchHTTP                                                            # fetch via HTTPS
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
       scheme = 'http'; fetchHTTP                                                             # fetch via HTTP
     end
 
-    def fetchHTTP response: true
-      URI.open(uri, headers.merge({redirect: false})) do |response|
-        env[:fetched] = true
-        h = response.meta                                     # upstream metadata
-        if response.status.to_s.match? /206/                  # partial response
+    def fetchHTTP cache: true, response: true, transform: (query_values||{}).has_key?('rdf'), transformable: (query_values||{})['UI'] != 'upstream' # cache locally, construct HTTP response, explicit or allowable format-agility (conneg switch)
+      URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
+        h = response.meta                            # upstream metadata
+        if response.status.to_s.match? /206/         # partial response
           h['Access-Control-Allow-Origin'] = allowedOrigin unless h['Access-Control-Allow-Origin'] || h['access-control-allow-origin']
-          [206, h, [response.read]]                           # return part
+          [206, h, [response.read]]                  # return part
         else
-          format = if path=='/feed' || (query_values||{})['mime']=='xml'
-                     'application/atom+xml'                   # Atom/RSS content-type
+          format = if path == '/feed' || (query_values||{})['mime'] == 'xml'
+                     'application/atom+xml'          # Atom/RSS content-type
                    elsif h.has_key? 'content-type'
-                     h['content-type'].split(/;/)[0]          # content-type in HTTP header
+                     h['content-type'].split(/;/)[0] # content-type in HTTP header
                    elsif RDF::Format.file_extensions.has_key? ext.to_sym # path extension
                      RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
                    end
-          formatExt = Suffixes[format] || Suffixes_Rack[format] # format -> name-suffix
-          puts "WARNING format undefined for #{uri}, missing Content-Type or known extension at server" unless format
-          body = HTTP.decompress h, response.read             # read body
-          if reader = RDF::Reader.for(content_type: format)   # read RDF
-            reader.new(body, base_uri: self){|_|(env[:repository] ||= RDF::Repository.new) << _ } unless NoScan.member? formatExt
+          body = HTTP.decompress h, response.read    # read response-body
+
+          if cache
+            c = fsPath.R                             # cache location
+            c += querySlug                           # append query-hash slug
+            formatExt = Suffixes[format] || Suffixes_Rack[format] # format -> name-suffix
+            c += formatExt if formatExt && c.R.extension != formatExt  # append format-suffix
+            c.R.writeFile body                       # cache upstream representation
+            if format && !NoScan.member?(formatExt) && reader = RDF::Reader.for(content_type: format) # read RDF
+              reader.new(body, base_uri: self){|_| (env[:repository] ||= RDF::Repository.new) << _ }
+              saveRDF                                # cache RDF graph
+            end
           end
-          if response                                         # HTTP response
-            cache = fsPath.R                                  # base path for cache
-            cache += querySlug                                # add qs-derived slug
-            cache += formatExt if formatExt && cache.R.extension == formatExt  # append format-suffix
-            cache.R.writeFile body                            # update cache
 
-            saveRDF if reader
+          if response                                # HTTP response
+            %w(Access-Control-Allow-Origin
+               Access-Control-Allow-Credentials
+               Content-Type ETag).map{|k|
+              env[:resp][k] ||= h[k.downcase] if h[k.downcase]} # upstream headers
 
-            %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k| env[:resp][k] ||= h[k.downcase] if h[k.downcase]} # upstream metadata for downstream
-            h['link'].split(',').map{|link|                   # parse Link header, add to downstream
+            env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin # CORS header
+            env[:resp]['Set-Cookie'] ||= h['set-cookie'] if h['set-cookie'] && allowCookies? # Set-Cookie header
+
+            h['link'] && h['link'].split(',').map{|link|        # Link header, parse and merge
               ref, type = link.split(';').map &:strip
               if ref && type
                 ref = ref.sub(/^</,'').sub />$/, ''
                 type = type.sub(/^rel="?/,'').sub /"$/, ''
                 env[:links][type.to_sym] = ref
-              end} if h['link']
-            env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
-            env[:resp]['Set-Cookie'] ||= h['set-cookie'] if h['set-cookie'] && allowCookies?
-            if fixedFormat? format
-              body = Webize::HTML.clean body, self if format == 'text/html' # clean upstream HTML
-              env[:resp]['Content-Length'] = body.bytesize.to_s # size header
-              [200, env[:resp], [body]]                       # lightly-modified upstream document
+              end}
+
+            if transform || (transformable && format && (format.match?(/atom|html|rss|turtle|xml/i) && !format.match?(/dash.xml/)))
+              graphResponse                                     # locally-generated document from fetched graph-data
             else
-              graphResponse                                   # locally-generated document
+              body = Webize::HTML.clean body, self if format == 'text/html' # clean upstream doc
+              env[:resp]['Content-Length'] = body.bytesize.to_s # size header
+              [200, env[:resp], [body]]                         # upstream document
             end
           else
             body
@@ -300,19 +305,12 @@ class WebResource
         [304, {}, []]
       when /404/ # Not Found
         env[:status] = 404
-        upstreamUI? ? [404, (headers e.io.meta), [e.io.read]] : nodeResponse
+        nodeResponse
       when /300|4(0[13]|10|29)|50[03]|999/
         [status.to_i, (headers e.io.meta), [e.io.read]]
       else
         raise
       end
-    end
-
-    def fixedFormat? format
-      return false if env.has_key? :transformable
-      return true if !format || upstreamUI? || format.match?(/dash.xml/)                               # unknown or upstream format
-      return false if (query_values||{}).has_key?('rdf') || format.match?(/atom|html|rss|turtle|xml/i) # Feed/HTML/RDF formats transformable via RDF Readers/Writers
-      return true
     end
 
     def self.GET arg, lambda = NoGunk
@@ -397,9 +395,9 @@ class WebResource
           end
           t                                       # token
         }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
-        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless SingleHop.member?(key.downcase)} # output value
+        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(cacherefs connection fetched gunk host keep-alive links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # output value
 
-      head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) || upstreamUI? # add Turtle to accepted content-types
+      head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # we accept Turtle
 
       unless allowCookies?
         head.delete 'Cookie'
@@ -447,33 +445,9 @@ class WebResource
       head = headers
       body = env['rack.input'].read
       env.delete 'rack.input'
-      print_header head if ENV.has_key? 'VERBOSE'
       r = HTTParty.post uri, headers: head, body: body
       head = headers r.headers
-      print_header head if ENV.has_key? 'VERBOSE'
       [r.code, head, [r.body]]
-    end
-
-    def print_body head, body
-      type = head['Content-Type'] || head['content-type']
-      puts type
-      puts case type
-           when 'application/json'
-             json = ::JSON.parse body rescue {}
-             ::JSON.pretty_generate json
-           when /^text\/plain/
-             json = ::JSON.parse body rescue nil
-             json ? ::JSON.pretty_generate(json) : body
-           else
-             body
-           end
-    end
-
-    def print_header header
-      print "\n🔗 " + uri
-      header.map{|k, v|
-        print "\n", [k, v.to_s].join("\t"), ' '}
-      print "\n", '_' * 80, ' '
     end
 
     def PUT
@@ -523,10 +497,6 @@ class WebResource
 
       default                                                 # default
     end
-
-    def upstreamUI; env[:UX] = true; self end
-
-    def upstreamUI?; env.has_key?(:UX) || (query_values||{})['UI'] == 'upstream' end
 
   end
   include HTTP
