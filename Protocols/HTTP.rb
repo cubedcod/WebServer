@@ -32,6 +32,7 @@ class WebResource
 
     def cacheURL
       return self unless h = host || env['HTTP_HOST']
+      return self if h == 'localhost'
       ['/', h, path, (query ? ['?',query] : nil), fragment].join
     end
 
@@ -221,18 +222,19 @@ class WebResource
 
     # fetch from cache or remote server
     def fetch
-      return nodeResponse if ENV.has_key?('OFFLINE')                                         # offline cache
-      if StaticFormats.member? ext.downcase                                                  # static representation valid in cache if exists
+      return nodeResponse if ENV.has_key?('OFFLINE') # offline cache
+      if StaticFormats.member? ext.downcase          # static representation valid in cache if exists
         return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client cache-hit, in browser-cache
-        return fileResponse if node.file?                                                    # server cache-hit, on fs
+        return fileResponse if node.file?            # server cache-hit, on fs
       end
-      nodes = nodeSet
-      return nodes[0].fileResponse if nodes.size == 1 && StaticFormats.member?(nodes[0].ext) # server cache-hit, single static-node in set
-      scheme = 'https'; fetchHTTP                                                            # fetch via HTTPS
+      nodes = nodeSet                                # server cache-hit, single static-node in set:
+      return nodes[0].fileResponse if nodes.size == 1 && StaticFormats.member?(nodes[0].ext)
+      scheme = 'https'; fetchHTTP                    # fetch via HTTPS
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
-      scheme = 'http'; fetchHTTP                                                             # fetch via HTTP
+      scheme = 'http'; fetchHTTP                     # fetch via HTTP
     end
 
+    # fetch from remote
     def fetchHTTP cache: true, response: true, transform: (query_values||{}).has_key?('rdf'), transformable: (query_values||{})['UI'] != 'upstream' # cache locally, construct HTTP response, explicit or allowable format-agility (conneg switch)
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                            # upstream metadata
@@ -248,7 +250,6 @@ class WebResource
                      RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
                    end
           body = HTTP.decompress h, response.read    # read response-body
-
           if cache
             c = fsPath.R                             # cache location
             c += querySlug                           # append query-hash slug
@@ -260,30 +261,28 @@ class WebResource
               saveRDF                                # cache RDF graph
             end
           end
-
           if response                                # HTTP response
+                                                     # response header
             %w(Access-Control-Allow-Origin
                Access-Control-Allow-Credentials
                Content-Type ETag).map{|k|
               env[:resp][k] ||= h[k.downcase] if h[k.downcase]} # upstream headers
-
             env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin # CORS header
             env[:resp]['Set-Cookie'] ||= h['set-cookie'] if h['set-cookie'] && allowCookies? # Set-Cookie header
-
-            h['link'] && h['link'].split(',').map{|link|        # Link header, parse and merge
+            h['link'] && h['link'].split(',').map{|link| # Link header, parse and merge
               ref, type = link.split(';').map &:strip
               if ref && type
                 ref = ref.sub(/^</,'').sub />$/, ''
                 type = type.sub(/^rel="?/,'').sub /"$/, ''
                 env[:links][type.to_sym] = ref
               end}
-
+                                                     # response body
             if transform || (transformable && format && (format.match?(/atom|html|rss|turtle|xml/i) && !format.match?(/dash.xml/)))
-              graphResponse                                     # locally-generated document from fetched graph-data
+              graphResponse                          # locally-generated document from fetched graph
             else
               body = Webize::HTML.clean body, self if format == 'text/html' # clean upstream doc
               env[:resp]['Content-Length'] = body.bytesize.to_s # size header
-              [200, env[:resp], [body]]                         # upstream document
+              [200, env[:resp], [body]]              # upstream document
             end
           else
             body
@@ -326,18 +325,17 @@ class WebResource
         env[:links][:up] = up
       end
       if localNode?
+        env[:cacherefs] = true
         p = parts[0]
         if %w{m d h}.member? p                       # timeline redirect
           dateDir
         elsif p == '/mail'                               # inbox redirect
           [301, {'Location' => '/d/*/msg*?sort=date&view=table'}, []]
         elsif !p
-          env[:cacherefs] = true
           BookmarksFile.R(env).loadRDF.graphResponse
         elsif p.match?(/^\d\d\d\d$/) || %w(src).member?(p) || node.file?
           nodeResponse                                      # local node
         else
-          env[:cacherefs] = true
           remoteURL.hostHandler                             # remote node
         end
       else
