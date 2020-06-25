@@ -243,17 +243,17 @@ class WebResource
                    elsif RDF::Format.file_extensions.has_key? ext.to_sym # path extension
                      RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
                    end
+          formatExt = Suffixes[format] || Suffixes_Rack[format] # format -> name-suffix
           body = HTTP.decompress h, response.read    # read response-body
+          if format && !NoScan.member?(formatExt) && reader = RDF::Reader.for(content_type: format) # read RDF
+            reader.new(body, base_uri: self){|_| (env[:repository] ||= RDF::Repository.new) << _ }
+          end
           if cache
             c = fsPath.R                             # cache location
             c += querySlug                           # append query-hash slug
-            formatExt = Suffixes[format] || Suffixes_Rack[format] # format -> name-suffix
             c += formatExt if formatExt && c.R.extension != formatExt  # append format-suffix
             c.R.writeFile body                       # cache upstream representation
-            if format && !NoScan.member?(formatExt) && reader = RDF::Reader.for(content_type: format) # read RDF
-              reader.new(body, base_uri: self){|_| (env[:repository] ||= RDF::Repository.new) << _ }
-              saveRDF                                # cache RDF graph
-            end
+            saveRDF                                  # cache RDF graph
           end
           return unless response                                                           # HTTP response
           %w(Access-Control-Allow-Origin
