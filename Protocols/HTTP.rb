@@ -240,10 +240,13 @@ class WebResource
                      RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
                    end
           formatExt = Suffixes[format] || Suffixes_Rack[format] # format -> name-suffix
+
           body = HTTP.decompress h, response.read    # read response-body
+
           if format && !NoScan.member?(formatExt) && reader = RDF::Reader.for(content_type: format) # read RDF
             reader.new(body, base_uri: self){|_| (env[:repository] ||= RDF::Repository.new) << _ }
           end
+
           if cache
             c = fsPath.R                             # cache location
             c += querySlug                           # append query-hash slug
@@ -251,7 +254,9 @@ class WebResource
             c.R.writeFile body                       # cache upstream representation
             saveRDF                                  # cache RDF graph
           end
+
           return unless response                                                           # HTTP response
+
           %w(Access-Control-Allow-Origin
              Access-Control-Allow-Credentials
              Content-Type ETag).map{|k| env[:resp][k] ||= h[k.downcase] if h[k.downcase]}  # misc upstream headers
@@ -264,10 +269,14 @@ class WebResource
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
             end}
+
           if transform || (transformable && format && (format.match?(/atom|html|rss|turtle|xml/i) && !format.match?(/dash.xml/)))
             graphResponse                                                                  # locally-generated document of fetched graph
           else
-            body = Webize::HTML.clean body, self if format == 'text/html'                  # clean upstream doc
+            if format == 'text/html'                                                       # upstream HTML
+              body = Webize::HTML.clean body, self                                         # clean upstream doc
+              body = Webize::HTML.cacherefs body, env, self if env[:cacherefs]             # content  location
+            end
             env[:resp]['Content-Length'] = body.bytesize.to_s                              # size header
             [200, env[:resp], [body]]                                                      # upstream document
           end
