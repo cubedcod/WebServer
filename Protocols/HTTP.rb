@@ -261,31 +261,25 @@ class WebResource
               saveRDF                                # cache RDF graph
             end
           end
-          if response                                # HTTP response
-                                                     # response header
-            %w(Access-Control-Allow-Origin
-               Access-Control-Allow-Credentials
-               Content-Type ETag).map{|k|
-              env[:resp][k] ||= h[k.downcase] if h[k.downcase]} # upstream headers
-            env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin # CORS header
-            env[:resp]['Set-Cookie'] ||= h['set-cookie'] if h['set-cookie'] && allowCookies? # Set-Cookie header
-            h['link'] && h['link'].split(',').map{|link| # Link header, parse and merge
-              ref, type = link.split(';').map &:strip
-              if ref && type
-                ref = ref.sub(/^</,'').sub />$/, ''
-                type = type.sub(/^rel="?/,'').sub /"$/, ''
-                env[:links][type.to_sym] = ref
-              end}
-                                                     # response body
-            if transform || (transformable && format && (format.match?(/atom|html|rss|turtle|xml/i) && !format.match?(/dash.xml/)))
-              graphResponse                          # locally-generated document from fetched graph
-            else
-              body = Webize::HTML.clean body, self if format == 'text/html' # clean upstream doc
-              env[:resp]['Content-Length'] = body.bytesize.to_s # size header
-              [200, env[:resp], [body]]              # upstream document
-            end
+          return unless response                                                           # HTTP response
+          %w(Access-Control-Allow-Origin
+             Access-Control-Allow-Credentials
+             Content-Type ETag).map{|k| env[:resp][k] ||= h[k.downcase] if h[k.downcase]}  # misc upstream headers
+          env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin                      # CORS header
+          env[:resp]['Set-Cookie'] ||= h['set-cookie'] if h['set-cookie'] && allowCookies? # Set-Cookie header
+          h['link'] && h['link'].split(',').map{|link|                                     # Link header - parse and merge
+            ref, type = link.split(';').map &:strip
+            if ref && type
+              ref = ref.sub(/^</,'').sub />$/, ''
+              type = type.sub(/^rel="?/,'').sub /"$/, ''
+              env[:links][type.to_sym] = ref
+            end}
+          if transform || (transformable && format && (format.match?(/atom|html|rss|turtle|xml/i) && !format.match?(/dash.xml/)))
+            graphResponse                                                                  # locally-generated document of fetched graph
           else
-            body
+            body = Webize::HTML.clean body, self if format == 'text/html'                  # clean upstream doc
+            env[:resp]['Content-Length'] = body.bytesize.to_s                              # size header
+            [200, env[:resp], [body]]                                                      # upstream document
           end
         end
       end
