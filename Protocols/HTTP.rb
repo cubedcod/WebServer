@@ -148,13 +148,7 @@ class WebResource
       msg = [uri, e.class, e.message].join " "
       trace = e.backtrace.join "\n"
       puts "\e[7;31m500\e[0m " + msg , trace
-      [500, {'Content-Type' => 'text/html'},
-       env['REQUEST_METHOD'] == 'HEAD' ? [] : [uri.R(env).htmlDocument(
-                                                 {uri => {Content => [
-                                                            {_: :h3, c: msg.hrefs, style: 'color: red'},
-                                                            {_: :pre, c: trace.hrefs},
-                                                            (HTML.keyval (Webize::HTML.webizeHash env), env),
-                                                            (HTML.keyval (Webize::HTML.webizeHash e.io.meta), env if e.respond_to? :io)]}})]]
+      [500, {'Content-Type' => 'text/html'}, env['REQUEST_METHOD'] == 'HEAD' ? [] : ['<html><body style="background-color: red; font-size: 12ex; text-align: center">500</body></html>']]
     end
 
     def self.Cookies host
@@ -327,7 +321,7 @@ class WebResource
           [301, {'Location' => '/d/*/msg*?sort=date&view=table'}, []]
         elsif !p
           BookmarksFile.R(env).loadRDF.graphResponse
-        elsif p.match?(/^\d\d\d\d$/) || %w(src).member?(p) || node.file?
+        elsif p.match?(/^\d\d\d\d$/) || node.file?
           nodeResponse                                      # local node
         else
           remoteURL.hostHandler                             # remote node
