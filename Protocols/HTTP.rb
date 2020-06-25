@@ -155,10 +155,6 @@ class WebResource
       CookieHosts[host] = true
     end
 
-    def href
-      env[:cacherefs] ? cacheURL : uri
-    end
-
     def HTTP.decompress head, body
       case (head['content-encoding']||head['Content-Encoding']).to_s
       when /^br(otli)?$/i
@@ -337,7 +333,11 @@ class WebResource
       elsif host.match?(StoragePool) && %w(jpg png mp4 webm).member?(ext.downcase)
         fetch
       elsif gunk?                                           # gunk handler
-        gunkQuery? ? [301, {'Location' => path}, []] : deny
+        if gunkQuery?
+          [301, {'Location' => ['//', host, path].join.R(env).href}, []]
+        else
+          deny
+        end
       else                                                  # fetch remote node
         fetch
       end
@@ -402,6 +402,10 @@ class WebResource
       head.delete 'User-Agent' if host == 't.co'            # so don't advertise a JS-capable user-agent
 
       head
+    end
+
+    def href
+      env[:cacherefs] ? cacheURL : uri
     end
 
     def notfound; [404, {'Content-Type' => 'text/html'}, [htmlDocument]] end
