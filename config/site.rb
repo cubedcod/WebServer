@@ -73,7 +73,7 @@ www.reddit.com
     GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['u']||r.query_values['q'])}, []]}
     NoGunk  = -> r {r.uri.match?(Gunk) && (r.query_values||{})['allow'] != ServerKey && r.deny || r.fetch}
     NoProxy = -> r {r.parts[0] == 'proxy' ? r.deny(200, :image) : NoGunk[r]}
-
+    RemoteUI =  -> r {r.uri.match?(Gunk) ? r.deny : r.fetchHTTP(transformable: false)}
     Resizer = -> r {
       if r.parts[0] == 'resizer'
         parts = r.path.split /\/\d+x\d+\/((filter|smart)[^\/]*\/)?/
@@ -318,7 +318,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
         elsif r.env['HTTP_COOKIE'] && r.env['HTTP_COOKIE'].match?(/LOGIN/)
           cookie.writeFile r.env['HTTP_COOKIE']
         end
-        NoGunk[r]
+        RemoteUI[r]
       else
         r.deny
       end}

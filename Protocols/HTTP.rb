@@ -186,8 +186,9 @@ class WebResource
                       else
                         q = query_values || {}
                         q['allow'] = ServerKey
+                        ref = ['//', host, path, HTTP.qs(q)].join.R(env).href
                         ['text/html; charset=utf-8',
-                         "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center'><a href='#{HTTP.qs q}' style='color: #fff; font-size: 22em; font-weight: bold; text-decoration: none'>⌘</a></body></html>"]
+                         "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center'><a href='#{ref}' style='color: #fff; font-size: 22em; font-weight: bold; text-decoration: none'>⌘</a></body></html>"]
                       end
       [status,
        {'Access-Control-Allow-Credentials' => 'true',
@@ -213,15 +214,15 @@ class WebResource
     # fetch from cache or remote server
     def fetch
       return nodeResponse if ENV.has_key?('OFFLINE') # offline cache
-      if StaticFormats.member? ext.downcase          # static representation valid in cache if exists
+      if StaticFormats.member? ext.downcase          # static representation valid in cache if exists:
         return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client cache-hit, in browser-cache
         return fileResponse if node.file?            # server cache-hit, on fs
       end
-      nodes = nodeSet                                # server cache-hit, single static-node in set:
+      nodes = nodeSet                                # server cache-hit, single static-node in set
       return nodes[0].fileResponse if nodes.size == 1 && StaticFormats.member?(nodes[0].ext)
-      scheme = 'https'; fetchHTTP                    # fetch via HTTPS
+      fetchHTTP                                      # fetch via HTTPS
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
-      scheme = 'http'; fetchHTTP                     # fetch via HTTP
+      ['http://', host, path, query ? ['?', query] : nil].join.R(env).fetchHTTP # fetch via HTTP
     end
 
     # fetch from remote
