@@ -8,7 +8,7 @@ module Webize
     # set location references to cache
     def self.cacherefs content, env, base=nil
       doc = Nokogiri::HTML.fragment content
-      doc.css('a, img, script').map{|e| # reference element
+      doc.css('a, img, link, script').map{|e| # reference element
         %w(href src).map{|attr|         # reference attribute
           if e[attr]
             ref = e[attr].R                          # original reference
@@ -513,7 +513,7 @@ class WebResource
 
     def self.value type, v, env
       if [Abstract, Content, 'http://rdfs.org/sioc/ns#richContent'].member? type
-        env[:cacherefs] ? Webize::HTML.cacherefs(v, env) : v
+        (env[:cacherefs] && v.class == String) ? Webize::HTML.cacherefs(v, env) : v
       elsif Markup[type] # markup lambda defined for explicit type argument
         Markup[type][v,env]
       elsif v.class == Hash # data

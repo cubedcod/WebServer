@@ -260,7 +260,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
       end
 
       remoteUI = -> {
-        cookie.node.delete
+        cookie.node.delete if cookie.node.exist?
         %w(authorization x-csrf-token x-guest-token HTTP_COOKIE).map{|k| r.env.delete k}
         r.fetchHTTP transformable: false}
 
