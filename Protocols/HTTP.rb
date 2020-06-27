@@ -275,7 +275,7 @@ class WebResource
             graphResponse                                                                  # locally-generated document of fetched graph
           else
             if format == 'text/html'                                                       # upstream HTML
-              body = Webize::HTML.clean body, self                                         # clean upstream doc
+              body = Webize::HTML.clean body, self unless ENV.has_key? 'DIRTY'             # clean upstream doc
               body = Webize::HTML.cacherefs body, env, self if env[:cacherefs]             # content  location
             end
             env[:resp]['Content-Length'] = body.bytesize.to_s                              # size header
@@ -287,7 +287,7 @@ class WebResource
       status = e.respond_to?(:io) ? e.io.status[0] : ''
       case status
       when /30[12378]/ # redirect
-        dest = e.io.meta['location'].R env
+        dest = (join e.io.meta['location']).R env
         if scheme == 'https' && dest.scheme == 'http'
           puts "WARNING HTTPS downgraded to HTTP: #{uri} -> #{dest}"
           dest.fetchHTTP
