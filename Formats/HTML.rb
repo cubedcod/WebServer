@@ -361,7 +361,7 @@ class WebResource
                                  ({_: :a, id: :tabular, class: :icon, style: 'color: #555', c: '↨',
                                    href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless qs['view'] == 'table'),
                                  link[:feed, FeedIcon],
-                                 ({_: :a, href: env[:cacherefs] ? uri : (HTTP.qs qs.merge({'UI' => :upstream})), c: '⚗️', id: :UI} unless localNode?),
+                                 ({_: :a, href: (HTTP.qs qs.merge({'UI' => :upstream})), c: '⚗️', id: :UI} unless localNode?),
                                  parts.map{|p|
                                     [{_: :a, class: :breadcrumb, href: bc += p + '/', c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
                                  ]},

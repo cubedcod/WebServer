@@ -32,7 +32,7 @@ class WebResource
   module URIs
     NoScan = %w(.css .gif .ico .jpg .js .png .svg .webm)                                                       # formats not scanned for RDF in cache-mode
     StaticFormats = %w(bin css geojson gif ico jpeg jpg js m3u8 m4a mp3 mp4 opus pem pdf png svg ts webm webp .ico .gif .jpg .png .mp4 .js) # formats requiring URI change for cache-invalidation
-    CookieHost = /(^|\.)(akamai(hd)?|amazon|bandcamp|bizjournals|twitter|youtube)\.(com|net)$/
+    CookieHost = /(^|\.)(akamai(hd)?|amazon|bandcamp|bizjournals|discord|twitter|youtube)\.(com|net)$/
     AllowedHeaders = 'authorization, client-id, content-type, device-fp, device-id, x-access-token, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-csrf-token, x-device-id, x-goog-authuser, x-guest-token, x-hostname, x-lib-version, x-locale, x-twitter-active-user, x-twitter-client-language, x-twitter-utcoffset, x-requested-with'
     StoragePool = /storage.googleapis.com$/
     TemporalHosts = %w(
@@ -131,6 +131,8 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     Allow 'www.facebook.com' if ENV.has_key? 'FACEBOOK'
 
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
+
+    Allow 'discord.com'
 
     GET 'gitter.im', -> r {
       if r.parts[0] == 'api'
