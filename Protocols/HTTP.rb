@@ -33,7 +33,7 @@ class WebResource
     def cacheURL
       return self unless h = host || env['HTTP_HOST']
       return self if h == 'localhost'
-      ['/', h, path, (query ? ['?',query] : nil), fragment].join
+      ['/', h, path, (query ? ['?',query] : nil), (fragment ? ['#', fragment] : nil) ].join
     end
 
     def self.call env
