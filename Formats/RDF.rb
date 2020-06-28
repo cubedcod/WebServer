@@ -2,7 +2,6 @@
 require 'linkeddata'
 
 class WebResource < RDF::URI
-  def R env_=nil; env_ ? env(env_) : self end
 
   module URIs # URI constants
     W3       = 'http://www.w3.org/'
@@ -183,4 +182,8 @@ end
 
 class String
   def R env=nil; env ? WebResource.new(self).env(env) : WebResource.new(self) end
+end
+
+class WebResource
+  def R env_=nil; env_ ? env(env_) : self end
 end

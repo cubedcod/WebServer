@@ -226,7 +226,10 @@ class WebResource
     end
 
     # fetch from remote
-    def fetchHTTP cache: true, response: true, transform: (query_values||{}).has_key?('rdf'), transformable: (query_values||{})['UI'] != 'upstream' # cache locally, construct HTTP response, explicit or allowable format-agility (conneg switch)
+    def fetchHTTP cache: true,                       # cache fetched document and mapped RDF graph
+                  response: true,                    # construct HTTP response
+                  transform:     (query_values||{}).has_key?('rdf'), # explicit format transform
+                  transformable: (query_values||{})['UI'] != 'upstream' # allow format transforms
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                            # upstream metadata
         if response.status.to_s.match? /206/         # partial response
@@ -276,7 +279,7 @@ class WebResource
           else
             if format == 'text/html'                                                       # upstream HTML
               body = Webize::HTML.clean body, self unless ENV.has_key? 'DIRTY'             # clean upstream doc
-              body = Webize::HTML.cacherefs body, env, self if env[:cacherefs]             # content  location
+              body = Webize::HTML.cacherefs body, env, self if env[:cacherefs]             # content location
             end
             env[:resp]['Content-Length'] = body.bytesize.to_s                              # size header
             [200, env[:resp], [body]]                                                      # upstream document

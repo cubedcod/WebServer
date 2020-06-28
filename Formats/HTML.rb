@@ -15,6 +15,11 @@ module Webize
             ref = base.join ref if base && !ref.host # resolve host
             e[attr] = ref.R(env).cacheURL            # cache location
           end}}
+      doc.css('style').map{|style|
+        if style.inner_txt.match? /url\(/
+          style.inner_text = style.inner_text.gsub(/url\((['"]?)https?:\//, 'url(\1')
+        end
+      }
       doc.to_html
     end
 
@@ -48,7 +53,7 @@ module Webize
           ref = e['href'].R                                            # show full(er) URL in text
           e.add_child " <span class='uri'>#{CGI.escapeHTML e['href'].sub(/^https?:..(www.)?/,'')[0..127]}</span> "
           e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # identify node
-          css = [:uri]; css.push :path if !ref.host || (ref.host == base.host) # style as local or global link
+          css = [:uri]; css.push :path if !ref.host || (ref.host == base.host) # style as local or global reference
           e['href'] = base.join e['href'] unless ref.host              # resolve relative references
           e['class'] = css.join ' '                                    # node CSS-class
         elsif e['id']                                                  # identified node without a reference
@@ -673,46 +678,38 @@ class WebResource
         CGI.escapeHTML t.to_s
       end}
 
-    Markup[Image] = -> image,env {
-      src = if image.class == WebResource
-              image.to_s
+    Markup[Image] = -> image, env {
+      src = (if image.class == WebResource
+              image
             elsif image.class == String && image.match?(/^([\/]|http)/)
               image
             else
               image['https://schema.org/url'] || image[Schema+'url'] || image[Link] || image['uri']
-            end
-      if src.class == Array
-        puts "multiple img-src found:", src if src.size > 1
-        src = src[0]
-      end
-      [{class: :thumb, c: {_: :a, href: src, c: {_: :img, src: src}}}, " \n"]}
+            end).R env
+      [{class: :thumb,
+        c: {_: :a, href: src.href,
+            c: {_: :img, src: src.href}}}, " \n"]}
 
     Markup[Video] = -> video, env {
-      src = if video.class == WebResource || (video.class == String && video.match?(/^http/))
+      v = (if video.class == WebResource || (video.class == String && video.match?(/^http/))
               video
             else
               video['https://schema.org/url'] || video[Schema+'contentURL'] || video[Schema+'url'] || video[Link] || video['uri']
-            end
-      if src.class == Array
-        puts "multiple video-src found:", src if src.size > 1
-        src = src[0]
-      end
-      src = src.to_s
-      if src.match /v.redd.it/
-        src += '/DASHPlaylist.mpd'
+            end).R env
+      if v.uri.match? /v.redd.it/
+        v += '/DASHPlaylist.mpd'
         dash = true
       end
-      v = src.R
-      unless env[:images][src]
-        env[:images][src] = true
-        if src.match /youtu/
+      unless env[:images][v.uri]
+        env[:images][v.uri] = true
+        if v.uri.match? /youtu/
           id = (v.query_values||{})['v'] || v.parts[-1]
           {_: :iframe, width: 560, height: 315, src: "https://www.youtube.com/embed/#{id}", frameborder: 0, allow: 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture', allowfullscreen: :true}
         else
           [dash ? '<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>' : nil,
            {class: :video,
-           c: [{_: :video, src: src, controls: :true}.update(dash ? {'data-dashjs-player' => 1} : {}), '<br>',
-               ({_: :a, href: src, c: v.basename} if v.path)]}]
+           c: [{_: :video, src: v.href, controls: :true}.update(dash ? {'data-dashjs-player' => 1} : {}), '<br>',
+               ({_: :a, href: v.href, c: v.basename} if v.path)]}]
         end
       end}
   end
