@@ -15,11 +15,21 @@ module Webize
             ref = base.join ref if base && !ref.host # resolve host
             e[attr] = ref.R(env).cacheURL            # cache location
           end}}
+
+      doc.css('script').map{|script|
+        if script.content.match? /https/
+          script.content = script.content.gsub(/(['"])(https:\/\/[^'"]+)(['"])/){
+            m = Regexp.last_match
+            puts "JS reference #{m[2]}"
+            [m[1], m[2].R(env).cacheURL, m[3]].join}
+        end}
+
       doc.css('style').map{|style|
-        if style.inner_txt.match? /url\(/
-          style.inner_text = style.inner_text.gsub(/url\((['"]?)https?:\//, 'url(\1')
-        end
-      }
+        if style.content.match? /url\(/
+          style.content = style.content.gsub(/url\(['"]?([^'"\)]+)['"]?\)/){
+            m = Regexp.last_match
+            ['url(', m[1].R(env).cacheURL, ')'].join}
+        end}
       doc.to_html
     end
 
