@@ -689,16 +689,18 @@ class WebResource
       end}
 
     Markup[Image] = -> image, env {
-      src = (if image.class == WebResource
-              image
-            elsif image.class == String && image.match?(/^([\/]|http)/)
-              image
-            else
-              image['https://schema.org/url'] || image[Schema+'url'] || image[Link] || image['uri']
-            end).R env
-      [{class: :thumb,
-        c: {_: :a, href: src.href,
-            c: {_: :img, src: src.href}}}, " \n"]}
+      if src = if image.class == WebResource
+                 image
+               elsif image.class == String && image.match?(/^([\/]|http)/)
+                 image
+               else
+                 image['https://schema.org/url'] || image[Schema+'url'] || image[Link] || image['uri']
+               end
+        src = src.R env
+        [{class: :thumb,
+          c: {_: :a, href: src.href,
+              c: {_: :img, src: src.href}}}, " \n"]
+      end}
 
     Markup[Video] = -> video, env {
       v = (if video.class == WebResource || (video.class == String && video.match?(/^http/))
