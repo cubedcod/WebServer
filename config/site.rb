@@ -150,7 +150,8 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     if ENV.has_key? 'GOOGLE'
       %w(aa books groups).map{|h|                                               Allow h + '.google.com' }
       %w(update).map{|h|                                                        Allow h + '.googleapis.com' }
-      %w(dl docs drive images kh khms0 khms1 khms2 khms3 lh3 maps photos).map{|h| GET h + '.google.com' }
+      %w(cse dl docs drive images kh khms0 khms1 khms2 khms3
+         lh3 maps photos).map{|h| GET h + '.google.com' }
       %w(encrypted-tbn0 encrypted-tbn1 encrypted-tbn2 encrypted-tbn3
          encrypted-vtbn3 maps ssl www).map{|h|                                    GET h + '.gstatic.com' }
       %w(geo0 geo1 geo2 geo3 lh3 lh4 lh5 lh6).map{|h|                             GET h + '.ggpht.com' }
@@ -159,7 +160,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       GET 'ad.doubleclick.net', -> r {[301, {'Location' => 'https://en.wikipedia.org/wiki/Special:Random'}, []]}
       GET 'googleads.g.doubleclick.net', GoAU
       GET 'googleweblight.com', GotoURL
-      GET 'www.google.com', -> r {!%w(maps search url).member?(r.parts[0]) ? r.deny : (r.path == '/url' ? GotoURL : NoGunk)[r]}
+      GET 'www.google.com', -> r {!%w(cse maps search url).member?(r.parts[0]) ? r.deny : (r.path == '/url' ? GotoURL : NoGunk)[r]}
       GET 'www.googleadservices.com', GoAU
       GET 'yt3.ggpht.com', NoProxy
     end
