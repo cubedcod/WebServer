@@ -299,10 +299,11 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
       GET host + '.twitter.com', -> r {
         [302, {'Location' => 'https://twitter.com' + r.path}, []]}}
 
-    GET 'news.yahoo.com'
+    %w(finance news).map{|h| GET h + '.yahoo.com'}
+
     GET 's.yimg.com', -> r {
       ps = r.path.split /https?:\/+/
-      ps.size > 1 ? [301, {'Location' => 'https://' + ps[-1]}, []] : r.deny}
+      ps.size > 1 ? [301, {'Location' => ('https://' + ps[-1]).R(r.env).href}, []] : r.deny}
 
     GET 'www.youtube.com', -> r {
       path = r.parts[0]
