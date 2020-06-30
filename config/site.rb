@@ -162,8 +162,6 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       GET 'www.google.com', -> r {!%w(maps search url).member?(r.parts[0]) ? r.deny : (r.path == '/url' ? GotoURL : NoGunk)[r]}
       GET 'www.googleadservices.com', GoAU
       GET 'yt3.ggpht.com', NoProxy
-    else
-      GET 'www.google.com', -> r {r.send r.path == '/search' ? :fetch : :deny}
     end
 
     Allow 'api.imgur.com'
