@@ -639,6 +639,7 @@ class WebResource
       images = post.delete(Image) || []
       links = post.delete(Link) || []
       content = post.delete(Content) || []
+      htmlcontent = post.delete(SIOC + 'richContent') || []
       uri_hash = 'r' + Digest::SHA2.hexdigest(uri)
       hasPointer = false
       local_id = resource.path == env['REQUEST_PATH'] && resource.fragment || uri_hash
@@ -666,7 +667,7 @@ class WebResource
                      c: [to.map{|f|Markup[To][f,env]},
                          post.delete(SIOC+'reply_of')],
                      class: :to}, "\n"]}}, "\n",
-           content,
+           (env[:cacherefs] ? [content, htmlcontent].flatten.compact.map{|c| Webize::HTML.cacherefs c, env} : [content, htmlcontent]).compact.join('<hr>'),
            MarkupLinks[links, env],
            (["<br>\n", HTML.keyval(post,env)] unless post.keys.size < 1)]}}
 
