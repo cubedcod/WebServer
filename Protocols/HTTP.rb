@@ -31,7 +31,7 @@ class WebResource
     end
 
     def cacheURL
-      return self unless h = host || env['HTTP_HOST']
+      return self unless h = host || env['SERVER_NAME']
       return self if h == 'localhost'
       ['/', h, path, (query ? ['?',query] : nil), (fragment ? ['#', fragment] : nil) ].join
     end
@@ -479,7 +479,9 @@ class WebResource
     end
 
     def remoteURL
-      ['https:/' , path, (query ? ['?', query] : nil), (fragment ? ['#', fragment] : nil) ].join.R env
+      ['https:/' , path.sub(/^\/https?:\//,''),
+       (query ? ['?', query] : nil),
+       (fragment ? ['#', fragment] : nil) ].join.R env
     end
 
     def selectFormat default = 'text/html'
