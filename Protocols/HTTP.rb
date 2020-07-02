@@ -326,11 +326,11 @@ class WebResource
         p = parts[0]
         if %w{m d h}.member? p                       # timeline redirect
           dateDir
-        elsif p == '/mail'                               # inbox redirect
+        elsif p == 'mail'                               # inbox redirect
           [301, {'Location' => '/d/*/msg*?sort=date&view=table'}, []]
         elsif !p
           BookmarksFile.R(env).loadRDF.graphResponse
-        elsif p.match?(/^\d\d\d\d$/) || node.file?
+        elsif p.match?(/^(\d\d\d\d|msg)$/) || node.file?
           nodeResponse                                      # local node
         else
           remoteURL.hostHandler                             # remote node
