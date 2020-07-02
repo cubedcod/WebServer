@@ -196,9 +196,10 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       elsif r.env['HTTP_COOKIE']
         cookie.writeFile r.env['HTTP_COOKIE']
       end
+      submitUI = r.parts[-1] == 'submit'
       r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination pointer
-      r.path += '.rss' if r.ext.empty? && %w(r u user).member?(r.parts[0]) && r.parts[-1] != 'submit' # request RSS format on user and thread pages
-      r.fetch}
+      r.path += '.rss' if r.ext.empty? && %w(r u user).member?(r.parts[0]) && !submitUI # request RSS format on user and thread pages
+      r.fetchHTTP transformable: !submitUI}
 
     GET 's4.reutersmedia.net', -> r {
       args = r.query_values || {}
