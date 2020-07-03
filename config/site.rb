@@ -198,7 +198,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       end
       submitUI = r.parts[-1] == 'submit'
       r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination pointer
-      r.path += '.rss' if r.ext.empty? && %w(r u user).member?(r.parts[0]) && !submitUI # request RSS format on user and thread pages
+      r.path += '.rss' if r.ext.empty? && %w(r u user).member?(r.parts[0]) && !submitUI && !(r.query_values||{}).has_key?('UI') # request RSS format on user and thread pages
       r.fetchHTTP transformable: !submitUI}
 
     GET 's4.reutersmedia.net', -> r {

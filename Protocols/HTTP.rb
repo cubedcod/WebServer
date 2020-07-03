@@ -229,7 +229,8 @@ class WebResource
     def fetchHTTP cache: true,                       # cache fetched document and mapped RDF graph
                   response: true,                    # construct HTTP response
                   transform:     (query_values||{}).has_key?('rdf'), # explicit format transform
-                  transformable: (query_values||{})['UI'] != 'upstream' # allow format transforms
+                  transformable: true # allow format transforms
+      transformable = false if (query_values||{})['UI'] == 'upstream'  # preserve upstream format
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                            # upstream metadata
         if response.status.to_s.match? /206/         # partial response
