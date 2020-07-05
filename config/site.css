@@ -44,7 +44,7 @@ div, a, svg, form, textarea { display: inline-block }
 h1,h2,h3,h4,h5,h6 {margin: 0}
 img, video {max-width: 100%}
 p, li, blockquote, textarea, td[property="uri"] {max-width: 92ex}
-pre {white-space: pre-wrap}
+pre, code {white-space: pre-wrap}
 pre, p {margin: .125em}
 span.name {font-size: .8em}
 svg, img[src*="svg"] {max-width:2em; max-height: 2em}
