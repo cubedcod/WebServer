@@ -47,8 +47,8 @@ open_TCP     22 SSH
 open_port    53 DNS
 open_port    67 DHCP
 open_port    68 DHCP
-iptables  -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8082 -m owner ! --uid-owner $1 # redirect HTTP traffic not originating from proxy
-ip6tables -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8082 -m owner ! --uid-owner $1
+iptables  -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1 # redirect HTTP traffic not originating from proxy
+ip6tables -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1
 iptables  -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1
 ip6tables -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1
 iptables  -A INPUT  -p tcp --sport 80 -j ACCEPT -m owner --uid-owner $1                             # allow proxy network access
@@ -71,7 +71,6 @@ open_TCP    587 SMTP
 open_TCP   8000 HTTP
 open_TCP   8080 HTTP
 open_TCP   8081 HTTP
-open_TCP   8082 HTTP
 open_TCP   9418 Git
 open_UDP  60001 Mosh
 open_UDP  60002 Mosh
