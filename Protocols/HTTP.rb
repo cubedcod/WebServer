@@ -321,9 +321,7 @@ class WebResource
         p = parts[0]
         if %w{m d h}.member? p                       # timeline redirect
           dateDir
-        elsif !p
-          BookmarksFile.R(env).loadRDF.graphResponse
-        elsif p.match?(/^(\d\d\d\d|msg)$/) || node.file?
+        elsif !p || p.match?(/^(\d\d\d\d|msg)$/) || node.file?
           nodeResponse                                      # local node
         else
           remoteURL.hostHandler                             # remote node
@@ -336,8 +334,6 @@ class WebResource
     def hostHandler
       if handler = HostGET[host]                            # host handler
         handler[self]
-      elsif host.match?(StoragePool) && %w(jpg png mp4 webm).member?(ext.downcase)
-        fetch
       elsif gunk?                                           # gunk handler
         if gunkQuery?
           [301, {'Location' => ['//', host, path].join.R(env).href}, []]

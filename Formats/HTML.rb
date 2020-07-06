@@ -341,7 +341,7 @@ class WebResource
       env[:images] ||= {}
       env[:colors] ||= {}
       env[:links] ||= {}
-      if (path && path.match?(HourDir)) || TemporalHosts.member?(host)
+      if path&.match? HourDir
         env[:sort] = 'date'
         env[:view] = 'table'
       end

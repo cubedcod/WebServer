@@ -33,17 +33,6 @@ class WebResource
     StaticFormats = %w(bin css geojson gif ico jpeg jpg js m3u8 m4a mp3 mp4 opus pem pdf png svg ts webm webp .ico .gif .jpg .png .mp4 .js) # formats requiring URI change for cache-invalidation
     CookieHost = /(^|\.)(akamai(hd)?|amazon|bandcamp|bizjournals|discord|twitter|youtube)\.(com|net)$/
     AllowedHeaders = 'authorization, client-id, content-type, device-fp, device-id, x-access-token, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-csrf-token, x-device-id, x-goog-authuser, x-guest-token, x-hostname, x-lib-version, x-locale, x-twitter-active-user, x-twitter-client-language, x-twitter-utcoffset, x-requested-with'
-    StoragePool = /storage.googleapis.com$/
-    TemporalHosts = %w(
-api.twitter.com
-forum.solidproject.org
-gitter.im
-news.ycombinator.com
-twitter.com
-www.city-data.com
-www.instagram.com
-www.reddit.com
-)
 
     # local resources
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
@@ -53,7 +42,6 @@ www.reddit.com
     SiteCSS = SiteDir.join('site.css').read
     CodeCSS = SiteDir.join('code.css').read
     SiteJS  = SiteDir.join('site.js').read
-    BookmarksFile  = SiteDir.join 'bookmarks.u'
 
   end
   module HTTP
