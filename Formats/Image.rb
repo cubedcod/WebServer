@@ -64,7 +64,7 @@ image-src
 
       def initialize(input = $stdin, options = {}, &block)
         @subject = (options[:base_uri] || '#image').R 
-        @img = Exif::Data.new(input.respond_to?(:read) ? input.read : input) rescue nil
+#        @img = Exif::Data.new(input.respond_to?(:read) ? input.read : input) rescue nil
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -77,6 +77,7 @@ image-src
       def each_triple &block; each_statement{|s| block.call *s.to_triple} end
 
       def each_statement &fn
+        return # EXIF segfaulting, investigate.. or use perl exiftool?
         image_tuples{|p, o|
           fn.call RDF::Statement.new(@subject,
                                      p.R,
