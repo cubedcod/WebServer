@@ -6,13 +6,19 @@ until a release is ready, there is no install step, code is run/edited in checko
 
 ## USAGE
 
-server
-    port8080 &
+daemon: script launches daemon, proxy (if needed) and performs any network configuration 
 
-client
-    http_proxy=http://localhost:8080 https_proxy=http://localhost:8080 firefox
+port443      - HTTPS - apps use default port, transparent proxy configuration
+port8080     - HTTP/HTTPS - explicit proxy configuration
+port80       - HTTP - assumes you have permission to bind port 80. you probably want a variant:
+port80_socat - HTTP - socat redirect from port 80 to high-port daemon
+port80_setcap - HTTP - SETCAP(8) allows process to bind port 80
 
-see [bin/](bin/) for sample scripts for daemon launching, proxy network config, cert installation, etc
+client:
+
+http_proxy=http://localhost:8080 https_proxy=http://localhost:8080 firefox
+
+see [bin/browse](bin/browse/) for more client-launching examples
 
 ## WHAT
 
