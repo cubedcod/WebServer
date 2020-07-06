@@ -31,8 +31,7 @@ end
 class WebResource
   module URIs
     StaticFormats = %w(bin css geojson gif ico jpeg jpg js m3u8 m4a mp3 mp4 opus pem pdf png svg ts webm webp .ico .gif .jpg .png .mp4 .js) # formats requiring URI change for cache-invalidation
-    CookieHost = /(^|\.)(akamai(hd)?|amazon|bandcamp|bizjournals|discord|twitter|youtube)\.(com|net)$/
-    AllowedHeaders = 'authorization, client-id, content-type, device-fp, device-id, x-access-token, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-csrf-token, x-device-id, x-goog-authuser, x-guest-token, x-hostname, x-lib-version, x-locale, x-twitter-active-user, x-twitter-client-language, x-twitter-utcoffset, x-requested-with'
+    AllowedHeaders = 'authorization, client-id, content-type, device-fp, device-id, x-access-token, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-csrf-token, x-device-id, x-goog-authuser, x-guest-token, x-hostname, x-lib-version, x-locale, x-twitter-active-user, x-twitter-client-language, x-twitter-utcoffset, x-requested-with' # TODO populate from preflight?
 
     # local resources
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
@@ -60,6 +59,15 @@ class WebResource
     GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['u']||r.query_values['q'])}, []]}
     NoGunk  = -> r {r.uri.match?(Gunk) && (r.query_values||{})['allow'] != ServerKey && r.deny || r.fetch}
     NoProxy = -> r {r.parts[0] == 'proxy' ? r.deny(200, :image) : NoGunk[r]}
+    NoQuery = -> r {
+      if !r.query                         # request
+        NoGunk[r].yield_self{|s,h,b|      #  inspect response
+          h.keys.map{|k|                  #  strip query from relocation
+            h[k] = h[k].split('?')[0] if k.downcase == 'location' && h[k].match?(/\?/)}
+          [s,h,b]}                        #  response
+      else                                # request has query
+        [302, {'Location' => r.path}, []] #  redirect to path
+      end}
     RemoteUI =  -> r {r.uri.match?(Gunk) ? r.deny : r.fetchHTTP(transformable: false)}
     Resizer = -> r {
       if r.parts[0] == 'resizer'
@@ -71,18 +79,7 @@ class WebResource
         NoGunk[r]
       end}
 
-    ShortURL = -> r {
-      if !r.query                         # request
-        NoGunk[r].yield_self{|s,h,b|      #  inspect response
-          h.keys.map{|k|                  #  strip query from relocation
-            h[k] = h[k].split('?')[0] if k.downcase == 'location' && h[k].match?(/\?/)}
-          [s,h,b]}                        #  response
-      else                                # request has query
-        [302, {'Location' => r.path}, []] #  redirect to path
-      end}
-
-    # host definitions
-
+    # URL shorteners/redirectors
     %w(
 bit.ly
 bos.gl
@@ -102,7 +99,7 @@ tinyurl.com
 trib.al
 w.bos.gl
 wired.trib.al
-).map{|s| GET s, ShortURL}
+).map{|s| GET s, NoQuery}
 
     # video APIs
     %w(entitlement.auth.adobe.com sp.auth.adobe.com tkx.apis.anvato.net
@@ -300,8 +297,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
         [301, {'Location' => '//www.youtube.com/feed/subscriptions'.R(r.env).href}, []]
       elsif %w{attribution_link redirect}.member? path
         [301, {'Location' => r.query_values['q'] || r.query_values['u']}, []]
-      elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json
- opensearch playlist results s user watch watch_videos yts).member?(path) || (r.query_values||{})['allow'] == ServerKey
+      elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results s user watch watch_videos yts).member? path
         cookie = 'youtube/.cookie'.R
         if cookie.node.exist?
           r.env['HTTP_COOKIE'] = cookie.readFile

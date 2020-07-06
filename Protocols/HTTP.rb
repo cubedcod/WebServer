@@ -5,11 +5,9 @@ class WebResource
     include URIs
 
     AllowedHosts = {}
-    CookieHosts = {}
     GlobChars = /[\*\{\[]/
     HostGET = {}
     Methods = %w(GET HEAD OPTIONS POST PUT)
-    ServerKey = Digest::SHA2.hexdigest([`uname -a`, (Pathname.new __FILE__).stat.mtime].join)[0..7]
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
 
     def self.Allow host
@@ -17,7 +15,7 @@ class WebResource
     end
 
     def allowCookies?
-      AllowedHosts.has_key?(host) || CookieHosts.has_key?(host) || CookieHost.match?(host) || ENV.has_key?('COOKIES')
+      AllowedHosts.has_key?(host) || HostGET.has_key?(host) || ENV.has_key?('COOKIES')
     end
 
     def allowedOrigin
@@ -151,10 +149,6 @@ class WebResource
       [500, {'Content-Type' => 'text/html'}, env['REQUEST_METHOD'] == 'HEAD' ? [] : ['<html><body style="background-color: red; font-size: 12ex; text-align: center">500</body></html>']]
     end
 
-    def self.Cookies host
-      CookieHosts[host] = true
-    end
-
     def HTTP.decompress head, body
       case (head['content-encoding']||head['Content-Encoding']).to_s
       when /^br(otli)?$/i
@@ -184,11 +178,8 @@ class WebResource
                       elsif type == :JSON || ext == 'json'
                         ['application/json','{}']
                       else
-                        q = query_values || {}
-                        q['allow'] = ServerKey
-                        ref = ['//', host, path, HTTP.qs(q)].join.R(env).href
                         ['text/html; charset=utf-8',
-                         "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center'><a href='#{ref}' style='color: #fff; font-size: 22em; font-weight: bold; text-decoration: none'>⌘</a></body></html>"]
+                         "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center'><span style='color: #fff; font-size: 22em; font-weight: bold; text-decoration: none'>⌘</span></body></html>"]
                       end
       [status,
        {'Access-Control-Allow-Credentials' => 'true',
@@ -348,7 +339,6 @@ class WebResource
     alias_method :get, :fetch
 
     def gunk?
-      return false if (query_values||{})['allow'] == ServerKey
       return true if gunkDomain?
       return true if uri.match? Gunk
       false
@@ -390,7 +380,6 @@ class WebResource
       unless allowCookies?
         head.delete 'Cookie'
         head.delete 'Set-Cookie'
-        head.delete 'Referer'
       end
 
       case host
