@@ -118,6 +118,8 @@ graphql.api.dailymotion.com).map{|h| Allow h}
 
     Allow 'discord.com'
 
+    Allow 'github.com'
+
     GET 'gitter.im', -> r {
       if r.parts[0] == 'api'
         token = ('//' + r.host + '/.token').R
@@ -402,7 +404,6 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
     doc.css('script').map{|script|
       text = script.inner_text
       if text.match? /^window.gitterClientEnv/
-=begin
         if token = text.match(/accessToken":"([^"]+)/)
           token = token[1]
           tFile = 'im/gitter/.token'.R
@@ -411,7 +412,6 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
             puts ['🎫 ', host, token].join ' '
           end
         end
-=end
         if room = text.match(/"id":"([^"]+)/)
           env[:links][:prev] = 'https://gitter.im/api/v1/rooms/' + room[1] + '/chatMessages?lookups%5B%5D=user&includeThreads=false&limit=47&rdf'
         end
