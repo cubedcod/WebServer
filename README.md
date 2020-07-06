@@ -1,7 +1,3 @@
-## SOURCE
-    cd; mkdir src; cd src
-    git clone https://gitlab.com/ix/WebServer
-
 ## INSTALL
 
 until a release is ready, there is no install step, code is run/edited in checkout dir. to install alpine/arch/debian/termux dependencies:
@@ -11,11 +7,10 @@ until a release is ready, there is no install step, code is run/edited in checko
 ## USAGE
 
 server
-    cd ~/web
-    unicorn -N -l 127.0.0.1:8000 -c ../src/WebServer/config/unicorn.rb ../src/WebServer/config/rack.ru
+    port8080 &
 
 client
-    http_proxy=http://localhost:8080 https_proxy=http://localhost:8080 no_proxy=localhost firefox
+    http_proxy=http://localhost:8080 https_proxy=http://localhost:8080 firefox
 
 see [bin/](bin/) for sample scripts for daemon launching, proxy network config, cert installation, etc
 

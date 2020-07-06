@@ -37,15 +37,12 @@ class WebResource
     def self.call env
       return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']           # allow HTTP methods
       URIs.gunkTree true if GunkFile.mtime > GunkHosts[:mtime]                  # check for config changes
-
       uri = RDF::URI('https://' + env['HTTP_HOST']).join env['REQUEST_PATH']    # resource identifier
       uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading + consecutive & from qs so URI library doesn't freak out
       resource = uri.R env                                                      # request resource and environment
-
       env[:refhost] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # referring host
       env[:resp] = {}                                                           # response-header storage
       env[:links] = {}                                                          # response-header links
-
       resource.send(env['REQUEST_METHOD']).yield_self{|status, head, body|      # dispatch request
         ext = resource.path ? resource.ext.downcase : ''                        # log response
         mime = head['Content-Type'] || ''
