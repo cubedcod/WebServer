@@ -112,7 +112,7 @@ class WebResource < RDF::URI
 
   # file -> Turtle file (big) -> Turtle file (small)
   def summary
-    sPath = '../.cache/RDF/' + fsPath + (path == '/' ? 'index' : '')
+    sPath = 'summary/' + fsPath + (path == '/' ? 'index' : '')
     sPath += '.ttl' unless ext == 'ttl'
     summary = sPath.R env                                 # summary URI
     sNode = Pathname.new sPath                            # summary fs-node

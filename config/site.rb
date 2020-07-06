@@ -57,7 +57,7 @@ class WebResource
       end}
 
     GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['u']||r.query_values['q'])}, []]}
-    NoGunk  = -> r {r.uri.match?(Gunk) && (r.query_values||{})['allow'] != ServerKey && r.deny || r.fetch}
+    NoGunk  = -> r {r.send r.uri.match?(Gunk) ? :deny : :fetch}
     NoProxy = -> r {r.parts[0] == 'proxy' ? r.deny(200, :image) : NoGunk[r]}
     NoQuery = -> r {
       if !r.query                         # request
@@ -144,7 +144,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       GET 'ad.doubleclick.net', -> r {[301, {'Location' => 'https://en.wikipedia.org/wiki/Special:Random'}, []]}
       GET 'googleads.g.doubleclick.net', GoAU
       GET 'googleweblight.com', GotoURL
-      GET 'www.google.com', -> r {!%w(cse maps search url).member?(r.parts[0]) ? r.deny : (r.path == '/url' ? GotoURL : NoGunk)[r]}
+      GET 'www.google.com', -> r {!%w(dl maps search url).member?(r.parts[0]) ? r.deny : (r.path == '/url' ? GotoURL : NoGunk)[r]}
       GET 'www.googleadservices.com', GoAU
       GET 'yt3.ggpht.com', NoProxy
     end
