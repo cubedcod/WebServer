@@ -213,24 +213,23 @@ class WebResource
 
     # fetch from cache or remote server
     def fetch
-      return nodeResponse if ENV.has_key?('OFFLINE') # offline cache
-      if StaticFormats.member? ext.downcase          # static representation valid in cache if exists:
-        return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client cache-hit, in browser-cache
-        return fileResponse if node.file?            # server cache-hit, on fs
+      if StaticFormats.member? ext.downcase                                                  # static representation valid in cache if exists:
+        return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has resource in browser-cache
+        return fileResponse if node.file?                                                    #  server has static node, return it
       end
-      nodes = nodeSet                                # server cache-hit, single static-node in set
-      return nodes[0].fileResponse if nodes.size == 1 && StaticFormats.member?(nodes[0].ext)
-      fetchHTTP                                      # fetch via HTTPS
-    rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
-      ['http://', host, path, query ? ['?', query] : nil].join.R(env).fetchHTTP # fetch via HTTP
+      nodes = nodeSet
+      return nodes[0].fileResponse if nodes.size == 1 && StaticFormats.member?(nodes[0].ext) #  mapped set contains a single static-node
+      fetchHTTP                                                                 # fetch via HTTPS
+#    rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
+#      ['http://', host, path, query ? ['?', query] : nil].join.R(env).fetchHTTP # fetch via HTTP
     end
 
     # fetch from remote
-    def fetchHTTP cache: true,                       # cache fetched document and mapped RDF graph
-                  response: true,                    # construct HTTP response
-                  transform:     (query_values||{}).has_key?('rdf'), # explicit format transform
-                  transformable: true # allow format transforms
-      transformable = false if (query_values||{})['UI'] == 'upstream'  # preserve upstream format
+    def fetchHTTP cache: ENV.has_key?('CACHE'),      # cache representation and mapped RDF graph(s)?
+                  response: true,                    # construct HTTP response?
+                  transform: (query_values||{}).has_key?('rdf'), # definitely transform?
+                  transformable: true                # allow format transforms?
+      transformable = false if (query_values||{})['UI'] == 'upstream'
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                            # upstream metadata
         if response.status.to_s.match? /206/         # partial response
@@ -244,24 +243,19 @@ class WebResource
                    elsif RDF::Format.file_extensions.has_key? ext.to_sym # path extension
                      RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
                    end
-          formatExt = Suffixes[format] || Suffixes_Rack[format] # format -> name-suffix
-
-          body = HTTP.decompress h, response.read    # read response-body
-
-          if format && !NoScan.member?(formatExt) && reader = RDF::Reader.for(content_type: format) # read RDF
+          formatExt = Suffixes[format] || Suffixes_Rack[format] # format-suffix
+          body = HTTP.decompress h, response.read    # read body of response
+          if format && reader = RDF::Reader.for(content_type: format) # read RDF from body
             reader.new(body, base_uri: self){|_| (env[:repository] ||= RDF::Repository.new) << _ }
           end
-
           if cache
-            c = fsPath.R                             # cache location
-            c += querySlug                           # append query-hash slug
-            c += formatExt if formatExt && c.R.extension != formatExt  # append format-suffix
-            c.R.writeFile body                       # cache upstream representation
-            saveRDF                                  # cache RDF graph
+            c = fsPath.R                             # cache URI
+            c += querySlug                           # append query-hash
+            c += formatExt if formatExt && c.R.extension != formatExt # affix format-suffix
+            c.R.writeFile body                       # cache representation
+            saveRDF                                  # cache RDF graph(s)
           end
-
           return unless response                                                           # HTTP response
-
           %w(Access-Control-Allow-Origin
              Access-Control-Allow-Credentials
              Content-Type ETag).map{|k| env[:resp][k] ||= h[k.downcase] if h[k.downcase]}  # misc upstream headers
@@ -327,8 +321,6 @@ class WebResource
         p = parts[0]
         if %w{m d h}.member? p                       # timeline redirect
           dateDir
-        elsif p == 'mail'                               # inbox redirect
-          [301, {'Location' => '/d/*/msg*?sort=date&view=table'}, []]
         elsif !p
           BookmarksFile.R(env).loadRDF.graphResponse
         elsif p.match?(/^(\d\d\d\d|msg)$/) || node.file?

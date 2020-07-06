@@ -97,7 +97,7 @@ class WebResource < RDF::URI
         RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
         puts "\e[32m#{'%2d' % graph.size}⋮🐢 \e[1m#{doc}\e[0m" if doc.path != path
       end
-      # link to timeline (if not already on it)
+      # link off-timeline node to timeline directory
       if !turtle.match?(/^\d\d\d\d\/\d\d\/\d\d/) && timestamp = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value # find timestamp
         tlink = [timestamp.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), # hour-dir container
                  %w{host path query}.map{|a|doc.send(a).yield_self{|p|p && p.split(/[\W_]/)}}]. # URI slugs
@@ -110,18 +110,18 @@ class WebResource < RDF::URI
     self
   end
 
-  # Turtle file (big) -> Turtle file (small)
+  # file -> Turtle file (big) -> Turtle file (small)
   def summary
-    return self if basename.split('.')[0].upcase == 'README'
-    isRDF = ext == 'ttl'
-    sPath = '../.cache/RDF/' + fsPath + (path == '/' ? 'index' : '') + (isRDF ? '' : '.ttl')
-    summary = sPath.R env                                 # summary name
-    sNode = Pathname.new sPath                            # summary node
-    return summary if sNode.exist? && sNode.mtime >= node.mtime # summary exists and up to date
-    fullGraph = RDF::Repository.new                       # full graph
-    miniGraph = RDF::Repository.new                       # summary graph
+    sPath = '../.cache/RDF/' + fsPath + (path == '/' ? 'index' : '')
+    sPath += '.ttl' unless ext == 'ttl'
+    summary = sPath.R env                                 # summary URI
+    sNode = Pathname.new sPath                            # summary fs-node
+    return summary if sNode.exist? && sNode.mtime >= node.mtime # return up-to-date summary
+    fullGraph = RDF::Repository.new                       # full graph storage
+    miniGraph = RDF::Repository.new                       # summary graph storage
+    puts ['🐢', sNode].join ' '
     loadRDF repository: fullGraph                         # read RDF
-    saveRDF fullGraph unless isRDF                        # save RDF-ized graph(s)
+    saveRDF fullGraph unless ext == 'ttl'                 # save RDF graph(s)
     treeFromGraph(fullGraph).values.map{|resource|        # each subject
       subject = (resource['uri'] || '').R
       ps = [Abstract, Creator, Date, Image, LDP+'contains', Link, Title, To, Type, Video]
@@ -131,11 +131,11 @@ class WebResource < RDF::URI
       ps.map{|p|                                          # each predicate
         if o = resource[p] ; p = p.R
           (o.class == Array ? o : [o]).map{|o|            # each object
-            miniGraph << RDF::Statement.new(subject,p,o)} # triple to summary
+            miniGraph << RDF::Statement.new(subject,p,o)} # triple in summary-graph
         end}}
-    FileUtils.mkdir_p sNode.dirname                       # create containing dir
+    FileUtils.mkdir_p sNode.dirname                       # make fs-dir entries
     RDF::Writer.for(:turtle).open(sPath){|f|f << miniGraph} # write summary
-    summary
+    summary                                               # return summary
   end
   alias_method :summarize, :summary
 
