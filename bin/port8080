@@ -1,5 +1,7 @@
 #!/bin/sh
 cd ~/web
 conf=../src/WebServer/config
+
+# launch daemon and proxy
 squid -f $conf/squid.conf
 unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c $conf/unicorn.rb $conf/rack.ru
