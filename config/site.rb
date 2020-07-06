@@ -81,24 +81,15 @@ class WebResource
 
     # URL shorteners/redirectors
     %w(
-bit.ly
-bos.gl
+bit.ly bos.gl
 cbsn.ws
 dlvr.it
 econ.trib.al
-feedproxy.google.com
-feeds.feedburner.com
-feeds.reuters.com
+feedproxy.google.com feeds.feedburner.com feeds.reuters.com
 hubs.ly okt.to
-reut.rs
-rss.cnn.com
-rssfeeds.usatoday.com
-t.co
-ti.me
-tinyurl.com
-trib.al
-w.bos.gl
-wired.trib.al
+reut.rs rss.cnn.com rssfeeds.usatoday.com
+t.co ti.me tinyurl.com trib.al
+w.bos.gl wired.trib.al
 ).map{|s| GET s, NoQuery}
 
     # video APIs
