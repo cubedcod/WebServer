@@ -208,16 +208,17 @@ class WebResource
       nodes = nodeSet
       return nodes[0].fileResponse if nodes.size == 1 && StaticFormats.member?(nodes[0].ext) #  mapped set contains a single static-node
       fetchHTTP                                                                 # fetch via HTTPS
-#    rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
-#      ['http://', host, path, query ? ['?', query] : nil].join.R(env).fetchHTTP # fetch via HTTP
+    rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
+      ['http://', host, path, query ? ['?', query] : nil].join.R(env).fetchHTTP # fetch via HTTP
     end
 
-    # fetch from remote
-    def fetchHTTP cache: ENV.has_key?('CACHE'),      # cache representation and mapped RDF graph(s)?
-                  response: true,                    # construct HTTP response?
-                  transform: (query_values||{}).has_key?('rdf'), # definitely transform?
-                  transformable: true                # allow format transforms?
+    # fetch from remote                               OPTIONS
+    def fetchHTTP cache: !ENV.has_key?('NOCACHE'),   # cache representation and mapped RDF graph(s)
+                  response: true,                    # construct HTTP response
+                  transform: (query_values||{}).has_key?('rdf'), # definitely transform
+                  transformable: true                # allow format transforms
       transformable = false if (query_values||{})['UI'] == 'upstream'
+
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                            # upstream metadata
         if response.status.to_s.match? /206/         # partial response
