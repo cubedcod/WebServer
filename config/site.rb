@@ -524,7 +524,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
           yield s, Date, Time.at(time).iso8601
         end
         if text = h['edge_media_to_caption']['edges'][0]['node']['text']
-          yield s, Abstract, CGI.escapeHTML(text).split(' ').map{|t|
+          yield s, Content, CGI.escapeHTML(text).split(' ').map{|t|
                 if match = (t.match /^@([a-zA-Z0-9._]+)(.*)/)
                   "<a id='u#{Digest::SHA2.hexdigest rand.to_s}' class='uri' href='https://www.instagram.com/#{match[1]}'>#{match[1]}</a>#{match[2]}"
                 else
