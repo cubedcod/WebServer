@@ -344,7 +344,7 @@ class WebResource
         expander = {_: :a, id: :expand, c: '&#11206;', href: expanded}
       end
       titleRes = ['', path, host && path && ('https://' + host + path)].compact.find{|u| graph[u] && graph[u][Title]}
-      bc = '/' # breadcrumb path
+      bc = ('//' + host + '/').R env # breadcrumb path
       icon = ('//' + (host || 'localhost') + '/favicon.ico').R env # host icon
       link = -> key, content { # render Link reference
         if url = env[:links] && env[:links][key]
@@ -365,13 +365,14 @@ class WebResource
                             ]}, "\n",
                         {_: :body,
                          c: [{class: :toolbox,
-                              c: [{_: :a, href: ('//' + host).R(env).href, id: :host, c: (icon.node.exist? && icon.node.size != 0) ? {_: :img, src: icon.href} : host},
+                              c: [{_: :a, href: bc.href, id: :host, c: (icon.node.exist? && icon.node.size != 0) ? {_: :img, src: icon.href} : host},
                                  ({_: :a, id: :tabular, class: :icon, style: 'color: #555', c: '↨',
                                    href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless qs['view'] == 'table'),
                                  link[:feed, FeedIcon],
                                  ({_: :a, href: (HTTP.qs qs.merge({'UI' => :upstream})), c: '⚗️', id: :UI} unless localNode?),
                                  parts.map{|p|
-                                    [{_: :a, class: :breadcrumb, href: bc += p + '/', c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
+                                    bc.path += p + '/'
+                                    [{_: :a, class: :breadcrumb, href: bc.href, c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
                                  ]},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?

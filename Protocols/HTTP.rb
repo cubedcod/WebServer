@@ -285,10 +285,9 @@ class WebResource
         end
       when /304/ # Not Modified
         [304, {}, []]
-      when /404/ # Not Found
-        env[:status] = 404
+      when /4\d\d/ # Not Found/Allowed
         nodeResponse
-      when /300|4(0[13]|10|29)|50[03]|999/
+      when /300|5\d\d/ # upstream multiple choices or server error
         [status.to_i, (headers e.io.meta), [e.io.read]]
       else
         raise
@@ -312,6 +311,8 @@ class WebResource
         p = parts[0]
         if %w{m d h}.member? p                 # timeline redirect
           dateDir
+        elsif p == 'favicon.ico'
+          SiteDir.join('favicon.ico').R(env).fileResponse
         elsif !p || p.match?(/^(\d\d\d\d|msg)$/) || node.file?
           nodeResponse                         # local node
         else
