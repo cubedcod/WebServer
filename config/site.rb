@@ -272,7 +272,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
       else
         NoGunk[r]
       end.yield_self{|s,h,b|
-        [403,429].member?(s) ? remoteUI[] : [s,h,b]}}
+        [403, 404, 429].member?(s) ? remoteUI[] : [s,h,b]}}
 
     %w(mobile www).map{|host|
       GET host + '.twitter.com', -> r {
