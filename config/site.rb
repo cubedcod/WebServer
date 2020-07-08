@@ -404,7 +404,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
           end
         end
         if room = text.match(/"id":"([^"]+)/)
-          env[:links][:prev] = 'https://gitter.im/api/v1/rooms/' + room[1] + '/chatMessages?lookups%5B%5D=user&includeThreads=false&limit=47&rdf'
+          env[:links][:prev] = 'http://gitter.im/api/v1/rooms/' + room[1] + '/chatMessages?lookups%5B%5D=user&includeThreads=false&limit=47&view=table&sort=date&rdf'
         end
       end}
 
@@ -412,7 +412,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
     messageCount = 0
     doc.css('.chat-item').map{|msg|
       id = msg.classes.grep(/^model-id/)[0].split('-')[-1] # find ID
-      subject = 'https://gitter.im' + path + '?at=' + id   # subject URI
+      subject = 'http://gitter.im' + path + '?at=' + id   # subject URI
       yield subject, Type, Post.R
       if from = msg.css('.chat-item__from')[0]
         yield subject, Creator, from.inner_text
@@ -434,12 +434,12 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
     return unless items = tree['items']
     items.map{|item|
       id = item['id']
-      env[:links][:prev] ||= 'https://gitter.im/api/v1/rooms/' + parts[3] + '/chatMessages?lookups%5B%5D=user&includeThreads=false&beforeId=' + id + '&limit=47&rdf'
+      env[:links][:prev] ||= 'http://gitter.im/api/v1/rooms/' + parts[3] + '/chatMessages?lookups%5B%5D=user&includeThreads=false&beforeId=' + id + '&limit=47&view=table&sort=date&rdf'
       date = item['sent']
       uid = item['fromUser']
       user = tree['lookups']['users'][uid]
       graph = [date.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), 'gitter', user['username'], id].join('.').R # graph URI
-      subject = 'https://gitter.im' + path + '?at=' + id # subject URI
+      subject = 'http://gitter.im' + path + '?at=' + id # subject URI
       yield subject, Date, date, graph
       yield subject, Type, Post.R, graph
       yield subject, Creator, join(user['url']), graph
