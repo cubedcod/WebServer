@@ -345,7 +345,7 @@ class WebResource
       end
       titleRes = ['', path, host && path && ('https://' + host + path)].compact.find{|u| graph[u] && graph[u][Title]}
       bc = '/' # breadcrumb path
-      icon = ('//' + (host || 'localhost') + '/favicon.ico').R # site icon
+      icon = ('//' + (host || 'localhost') + '/favicon.ico').R env # host icon
       link = -> key, content { # render Link reference
         if url = env[:links] && env[:links][key]
           [{_: :a, href: url.R(env).href, id: key, class: :icon, c: content},
@@ -365,7 +365,7 @@ class WebResource
                             ]}, "\n",
                         {_: :body,
                          c: [{class: :toolbox,
-                              c: [(icon.node.exist? && icon.node.size != 0) ? {_: :a, href: '/', id: :host, c: {_: :img, src: icon.uri}} : (host || 'localhost').split('.').-(%w(com net org www)).reverse.map{|h| {_: :a, class: :breadcrumb, href: '/', c: h}},
+                              c: [{_: :a, href: ('//' + host).R(env).href, id: :host, c: (icon.node.exist? && icon.node.size != 0) ? {_: :img, src: icon.href} : host},
                                  ({_: :a, id: :tabular, class: :icon, style: 'color: #555', c: '↨',
                                    href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless qs['view'] == 'table'),
                                  link[:feed, FeedIcon],
@@ -508,13 +508,14 @@ class WebResource
                     [Image,
                      Video].map{|t|(resource[t]||[]).map{|i|
                                          Markup[t][i,env]}},
-                    (env[:cacherefs] ? [resource[Content], resource[SIOC+'richContent']].flatten.compact.map{|c| Webize::HTML.cacherefs c, env} : [resource[Content], resource[SIOC+'richContent']]).compact.join('<hr>'),
+                    (env[:cacherefs] ? [resource[Content],
+                                        resource[SIOC+'richContent']].flatten.compact.map{|c|
+                                         Webize::HTML.cacherefs c, env} : [resource[Content],
+                                                                           resource[SIOC+'richContent']]).compact.join('<hr>'),
                     MarkupLinks[(resource[Link]||[]),env]]
                  else
                    (resource[k]||[]).map{|v|value k, v, env }
-                   end}, "\n"
-                 ]}}, "\n"
-              ]}}]}
+                   end}, "\n" ]}}, "\n" ]}}]}
     end
 
     # values -> Markup

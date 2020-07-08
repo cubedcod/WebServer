@@ -205,10 +205,10 @@ class WebResource
     def fetch
       if StaticFormats.member? ext.downcase                                                  # static representation valid in cache if exists:
         return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has resource in browser-cache
-        return fileResponse if node.file?                                                    #  server has static node, return it
+        return fileResponse if node.file?                                                    #  server has static node on file
       end
       nodes = nodeSet
-      return nodes[0].fileResponse if nodes.size == 1 && StaticFormats.member?(nodes[0].ext) #  mapped set contains a single static-node
+      return nodes[0].fileResponse if nodes.size == 1 && StaticFormats.member?(nodes[0].ext) #  server has single static-node in mapped node-set
       fetchHTTP                                                                 # fetch via HTTPS
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
       ['http://', host, path, query ? ['?', query] : nil].join.R(env).fetchHTTP # fetch via HTTP
@@ -235,7 +235,7 @@ class WebResource
                      RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
                    end
           formatExt = Suffixes[format] || Suffixes_Rack[format] # format-suffix
-          body = HTTP.decompress h, response.read    # read body of response
+          body = HTTP.decompress h, response.read                     # read body
           if format && reader = RDF::Reader.for(content_type: format) # read RDF from body
             reader.new(body, base_uri: self){|_| (env[:repository] ||= RDF::Repository.new) << _ }
           end
