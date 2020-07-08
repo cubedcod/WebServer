@@ -5,24 +5,17 @@ module Webize
 
     Scripts = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script" # CSS selector for script elements
 
-    # set location references to cache
-    def self.cacherefs content, env, base=nil
+    # set resource references to cache location
+    def self.cacherefs content, env
       doc = Nokogiri::HTML.fragment content
-      doc.css('a, img, link, script').map{|e| # reference element
-        %w(href src).map{|attr|         # reference attribute
+      doc.css('a, form, img, link, script').map{|e| # ref element
+        %w(action href src).map{|attr|              # ref attribute
           if e[attr]
-            ref = e[attr].R                          # original reference
-            ref = base.join ref if base && !ref.host # resolve host
-            e[attr] = ref.R(env).cacheURL            # cache location
+            ref = e[attr].R                           # reference
+            ref = env[:base].join ref unless ref.host # resolve host
+            e[attr] = ref.R(env).cacheURL             # cache location
           end}}
-=begin
-      doc.css('script').map{|script|
-        if script.content.match? /https/
-          script.content = script.content.gsub(/(['"])((https?:)?\/\/[^'"]+)(['"])/){
-            m = Regexp.last_match
-            [m[1], m[2].R(env).cacheURL, m[1]].join}
-        end}
-=end
+
       doc.css('style').map{|style|
         if style.content.match? /url\(/
           style.content = style.content.gsub(/url\(['"]?([^'"\)]+)['"]?\)/){

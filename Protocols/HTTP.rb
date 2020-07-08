@@ -36,10 +36,12 @@ class WebResource
 
     def self.call env
       return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']           # allow HTTP methods
-      URIs.gunkTree true if GunkFile.mtime > GunkHosts[:mtime]                  # check for config changes
-      uri = RDF::URI('https://' + env['HTTP_HOST']).join env['REQUEST_PATH']    # resource identifier
+      #URIs.gunkTree true if GunkFile.mtime > GunkHosts[:mtime]                 # check for config changes
+      scheme = env['SERVER_NAME'] == 'localhost' ? 'http' : 'https'             # request scheme
+      uri = RDF::URI(scheme + '://' + env['HTTP_HOST']).join env['REQUEST_PATH'] # resource identifier
       uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading + consecutive & from qs so URI library doesn't freak out
       resource = uri.R env                                                      # request resource and environment
+      env[:base] = resource
       env[:refhost] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # referring host
       env[:resp] = {}                                                           # response-header storage
       env[:links] = {}                                                          # response-header links
@@ -258,15 +260,15 @@ class WebResource
               env[:links][type.to_sym] = ref
             end}
 
-          if transform || (transformable && format && (format.match?(/atom|html|rss|turtle|xml/i) && !format.match?(/dash.xml/)))
-            graphResponse                                                                  # locally-generated document of fetched graph
+          if transform || (transformable && format && (format.match?(/atom|html|rss|turtle|xml/i) && !format.match?(/dash.xml/))) # transform resource?
+            graphResponse                                                      # locally-generated doc
           else
-            if format == 'text/html'                                                       # upstream HTML
-              body = Webize::HTML.clean body, self unless ENV.has_key? 'DIRTY'             # clean upstream doc
-              body = Webize::HTML.cacherefs body, env, self if env[:cacherefs]             # content location
+            if format == 'text/html'                                           # upstream HTML
+              body = Webize::HTML.clean body, self unless ENV.has_key? 'DIRTY' # clean upstream doc
+              body = Webize::HTML.cacherefs body, env if env[:cacherefs]       # content location
             end
-            env[:resp]['Content-Length'] = body.bytesize.to_s                              # size header
-            [200, env[:resp], [body]]                                                      # upstream document
+            env[:resp]['Content-Length'] = body.bytesize.to_s                  # Content-Length header
+            [200, env[:resp], [body]]                                          # upstream doc
           end
         end
       end
@@ -299,7 +301,7 @@ class WebResource
 
     def GET
       return [204,{},[]] if path.match? /gen(erate)?_?204$/ # connectivity-check
-      unless path == '/'                                    # point to container
+      unless path == '/'                                    # container reference
         up = File.dirname path
         up += '/' unless up == '/'
         up += '?' + query if query
@@ -308,12 +310,12 @@ class WebResource
       if localNode?
         env[:cacherefs] = true
         p = parts[0]
-        if %w{m d h}.member? p                       # timeline redirect
+        if %w{m d h}.member? p                 # timeline redirect
           dateDir
         elsif !p || p.match?(/^(\d\d\d\d|msg)$/) || node.file?
-          nodeResponse                                      # local node
+          nodeResponse                         # local node
         else
-          remoteURL.hostHandler                             # remote node
+          (env[:base] = remoteURL).hostHandler # remote node
         end
       else
         hostHandler
@@ -321,15 +323,15 @@ class WebResource
     end
 
     def hostHandler
-      if handler = HostGET[host]                            # host handler
+      if handler = HostGET[host]               # host handler
         handler[self]
-      elsif gunk?                                           # gunk handler
+      elsif gunk?                              # gunk handler
         if gunkQuery?
           [301, {'Location' => ['//', host, path].join.R(env).href}, []]
         else
           deny
         end
-      else                                                  # fetch remote node
+      else                                     # fetch remote
         fetch
       end
     end
@@ -371,7 +373,7 @@ class WebResource
           end
           t                                       # token
         }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
-        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(cacherefs connection fetched gunk host keep-alive links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # output value
+        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base cacherefs connection fetched gunk host keep-alive links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # output value
 
       head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # we accept Turtle
 
