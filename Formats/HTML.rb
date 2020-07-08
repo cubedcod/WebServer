@@ -685,14 +685,14 @@ class WebResource
       end}
 
     Markup[Image] = -> image, env {
-      if src = if image.class == WebResource
+      if img = if image.class == WebResource
                  image
                elsif image.class == String && image.match?(/^([\/]|http)/)
                  image
                else
                  image['https://schema.org/url'] || image[Schema+'url'] || image[Link] || image['uri']
                end
-        src = src.R env
+        src = env[:base].join(img).R env
         [{class: :thumb,
           c: {_: :a, href: src.href,
               c: {_: :img, src: src.href}}}, " \n"]
