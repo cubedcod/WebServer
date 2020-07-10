@@ -4,6 +4,7 @@ module Webize
     class Reader
       Triplr = {
         'apnews.com' => :AP,
+        'drudgereport.com' => :Drudge,
         'archive.4plebs.org' => :FourPlebs,
         'boards.4chan.org' => :FourChan,
         'boards.4channel.org' => :FourChan,
@@ -98,19 +99,6 @@ edge.api.brightcove.com players.brightcove.net secure.brightcove.com
 api.lbry.com api.lbry.tv lbry.tv
 graphql.api.dailymotion.com).map{|h| Allow h}
 
-    %w(bostonglobe-prod.cdn.arcpublishing.com).map{|host| GET host, Resizer}
-
-    %w(ajax.cloudflare.com ajax.googleapis.com cdnjs.cloudflare.com).map{|host| GET host}
-
-    %w(l.facebook.com l.instagram.com).map{|host|GET host, GotoURL}
-    Allow 'www.facebook.com' if ENV.has_key? 'FACEBOOK'
-
-    GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
-
-    Allow 'discord.com'
-
-    Allow 'github.com'
-
     GET 'gitter.im', -> r {
       if r.parts[0] == 'api'
         token = ('//' + r.host + '/.token').R
@@ -120,9 +108,10 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       end
       NoGunk[r]}
 
-    GET 'abcnews.go.com'
-
-    GET 'www.amazon.com'
+    %w(bostonglobe-prod.cdn.arcpublishing.com).map{|host| GET host, Resizer }
+    %w(l.facebook.com l.instagram.com).map{|host| GET host, GotoURL}
+    GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
+    GET 'gate.sc', GotoURL
 
     unless ENV.has_key? 'DEGOOGLE'
       %w(aa books groups).map{|h|                                               Allow h + '.google.com' }
@@ -141,15 +130,6 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       GET 'www.googleadservices.com', GoAU
       GET 'yt3.ggpht.com', NoProxy
     end
-
-    Allow 'api.imgur.com'
-    Allow 'imgur.com'
-    
-    Allow 'www.mixcloud.com'
-
-    %w(www).map{|h| GET h + '.nytimes.com' }
-
-    [*%w(gateway gql oauth old www).map{|h| h+'.reddit.com' }, *%w(reddit-uploaded-media.s3-accelerate.amazonaws.com v.redd.it)].map{|h| Allow h }
 
     GET 'old.reddit.com', -> r {
       cr = r.env[:cacherefs]
@@ -187,10 +167,6 @@ graphql.api.dailymotion.com).map{|h| Allow h}
         NoGunk[r]
       end}
 
-    GET 'gate.sc', GotoURL
-
-    Allow 'gql.twitch.tv'
-
     Twits = %w(
 5_13Dist 792QFD 857FirePhotos
 ActCal AestheticResear AlertBoston AlertsBoston AnnissaForBos ArchivesBoston ArtsinBoston AssignGuy AyannaPressley advocatenewsma ajafarzadehPR alertpageboston
@@ -215,8 +191,6 @@ TAGlobe TMGormanPhotos The_BMC ThomasCranePL thecrimehub therealreporter
 UMassBoston universalhub
 ViolenceNBoston
 WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbhnews wutrain)
-
-    Allow 'api.twitter.com'
 
     GET 'twitter.com', -> r {
       parts = r.parts
@@ -273,12 +247,6 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
         NoGunk[r]
       end.yield_self{|s,h,b|
         [403, 404, 429].member?(s) ? remoteUI[] : [s,h,b]}}
-
-    %w(mobile www).map{|host|
-      GET host + '.twitter.com', -> r {
-        [302, {'Location' => 'https://twitter.com' + r.path}, []]}}
-
-    %w(finance news).map{|h| GET h + '.yahoo.com'}
 
     GET 's.yimg.com', -> r {
       ps = r.path.split /https?:\/+/
