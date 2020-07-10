@@ -49,18 +49,24 @@ class WebResource < RDF::URI
   def loadRDF options = {}
     graph = options[:repository] || env[:repository] ||= RDF::Repository.new
     if node.file?
-      formatHint = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # path-derived format hints when suffix is ambiguous or missing
-                     :mail # procmail doesnt have configurable SUFFIX (.eml), only PREFIX? - presumably due to some sort of maildir suffix-renames to denote state?
-                   elsif ext.match? /^html?$/
-                     :html
-                   elsif %w(changelog license readme todo).member? basename.downcase
-                     :plaintext
-                   elsif %w(gemfile makefile rakefile).member? basename.downcase
-                     :sourcecode
-                   end
-      options[:base_uri] ||= (localNode? ? path : uri).gsub(/\.ttl$/,'').R env
-      options[:format] ||= formatHint if formatHint
-      graph.load 'file:' + fsPath, **options
+      if %w(mp4 mkv webm).member? ext
+        graph << RDF::Statement.new(self, Type.R, Video.R)
+        graph << RDF::Statement.new(self, Title.R, basename)
+        graph << RDF::Statement.new(self, Date.R, node.stat.mtime.iso8601)
+      else
+        formatHint = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # path-derived format hints when suffix is ambiguous or missing
+                       :mail # procmail doesnt have configurable SUFFIX (.eml), only PREFIX? - presumably due to some sort of maildir suffix-renames to denote state?
+                     elsif ext.match? /^html?$/
+                       :html
+                     elsif %w(changelog license readme todo).member? basename.downcase
+                       :plaintext
+                     elsif %w(gemfile makefile rakefile).member? basename.downcase
+                       :sourcecode
+                     end
+        options[:base_uri] ||= (localNode? ? path : uri).gsub(/\.ttl$/,'').R env
+        options[:format] ||= formatHint if formatHint
+        graph.load 'file:' + fsPath, **options
+      end
     elsif node.directory?
       subject = localNode? ? path.R : self
       subject += '/' unless subject.to_s[-1] == '/'
