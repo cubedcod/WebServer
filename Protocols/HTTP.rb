@@ -178,7 +178,7 @@ class WebResource
                         ['application/json','{}']
                       else
                         ['text/html; charset=utf-8',
-                         "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center'><span style='color: #fff; font-size: 22em; font-weight: bold; text-decoration: none'>⌘</span></body></html>"]
+                         "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 1.5em, #f00 1.5em, #f00 8em); text-align: center'><span style='color: #fff; font-size: 22em; font-weight: bold; text-decoration: none'>⌘</span></body></html>"]
                       end
       [status,
        {'Access-Control-Allow-Credentials' => 'true',
@@ -338,22 +338,6 @@ class WebResource
     end
 
     alias_method :get, :fetch
-
-    def gunk?
-      return true if gunkDomain?
-      return true if uri.match? Gunk
-      false
-    end
-
-    def gunkDomain?
-      return false if !host || AllowedHosts.has_key?(host) || HostGET.has_key?(host)
-      c = GunkHosts                                                 # start cursor
-      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # find leaf in gunk tree
-    end
-
-    def gunkQuery?
-      !(query_values||{}).keys.grep(/^utm/).empty?
-    end
 
     def HEAD
       self.GET.yield_self{|s, h, _|

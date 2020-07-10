@@ -2,21 +2,12 @@
 class WebResource
   module URIs
 
-    GunkFile = SiteDir.join 'gunk_hosts'
-    GunkHosts = {}
+    CDNfile = SiteDir.join 'cdn_hosts'
 
-    def self.gunkTree verbose=false
-      GunkFile.each_line{|l|
-        cursor = GunkHosts
-        l.chomp.sub(/^\./,'').split('.').reverse.map{|name|
-          cursor = cursor[name] ||= (print '🗑️' + l if verbose;
-                                     {})}}
-      GunkHosts[:mtime] = GunkFile.mtime
-    end
+    CDNhosts = {}
 
-    self.gunkTree # read gunkfile
+    CDNfile.each_line{|l| CDNhosts[l.chomp] = true }
 
-    # URI pattern
     Gunk = %r([-._\/'"\s:?&=~%](
 affiliate(link)?s?|ad((s|unit)|obe)|ak(am|ismet)|.*analytics.*|apester|appnexus|atrk|audience|(app|smart)?
 b(lueconic|ouncee?x.*|ugsnag)|.*bid(d(er|ing).*|s)|
@@ -43,8 +34,41 @@ zerg(net)?)
 ([-._\/'"\s:?&=~%]|$)|
 \.(eot|(bmp|gif)\?|otf|ttf|woff2?))xi
 
-    # JSON page-state pattern
+    GunkFile = SiteDir.join 'gunk_hosts'
+
+    GunkHosts = {}
+
     InitialState = /(app|bio|bootstrap|broadcast(er)?|client|global|init(ial)?|meta|page|player|preload(ed)?|shared|site).?(con(fig|tent)|data|env|node|props|st(ate|ore))|app.bundle|environment|hydrat|SCRIPTS_LOADED|__typename/i
+
+    def self.gunkTree verbose=false
+      GunkFile.each_line{|l|
+        cursor = GunkHosts
+        l.chomp.sub(/^\./,'').split('.').reverse.map{|name|
+          cursor = cursor[name] ||= (print '🗑️' + l if verbose;
+                                     {})}}
+      GunkHosts[:mtime] = GunkFile.mtime
+    end
+
+    self.gunkTree # read gunkfile
+
+    def gunk?
+      return true if gunkDomain?
+      return true if uri.match? Gunk
+      false
+    end
+
+    def gunkDomain?
+      return false if !host ||
+                      CDNhosts.has_key?(host) ||
+                      WebResource::HTTP::AllowedHosts.has_key?(host) ||
+                      WebResource::HTTP::HostGET.has_key?(host)
+      c = GunkHosts                                                 # start cursor at root
+      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # find leaf in gunk tree
+    end
+
+    def gunkQuery?
+      !(query_values||{}).keys.grep(/^utm/).empty?
+    end
 
   end
 end
@@ -69,7 +93,7 @@ taboola|.*targeting.*|tinypass|tiqcdn|.*track.*|twitter|tynt|
 viglink|visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk
 )(\b|[_'"]))xi
 
-    # clean HTML (String)
+    # clean HTML String
     def self.clean body, base=nil
       doc = Nokogiri::HTML.parse body.encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ') # parse ass Nokogiri doc
       if content_type = doc.css('meta[http-equiv="Content-Type"]')[0] # in-band content-type tag found
@@ -87,9 +111,9 @@ viglink|visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk
       doc.to_html
     end
 
-    # clean HTML (Nokogiri)
+    # clean HTML Nokogiri
     def self.clean_doc doc, base=nil
-      # strip fonts and preload-directives
+      # strip fonts and preload directives
       doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
 
       # inspect resources
