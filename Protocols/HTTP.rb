@@ -10,6 +10,21 @@ class WebResource
     Methods = %w(GET HEAD OPTIONS POST PUT)
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
 
+    def self.action_icon action, fetched=true
+      case action
+      when 'HEAD'
+        '🗣'
+      when 'OPTIONS'
+        '🔧'
+      when 'POST'
+        '📝'
+      when 'GET'
+        fetched ? '🐕' : ' '
+      else
+        action
+      end
+    end
+
     def self.Allow host
       AllowedHosts[host] = true
     end
@@ -36,7 +51,6 @@ class WebResource
 
     def self.call env
       return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']           # allow HTTP methods
-      #URIs.gunkTree true if GunkFile.mtime > GunkHosts[:mtime]                 # check for config changes
       scheme = env['SERVER_NAME'] == 'localhost' ? 'http' : 'https'             # request scheme
       uri = RDF::URI(scheme + '://' + env['HTTP_HOST']).join env['REQUEST_PATH'] # resource identifier
       uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading + consecutive & from qs so URI library doesn't freak out
@@ -46,100 +60,20 @@ class WebResource
       env[:resp] = {}                                                           # response-header storage
       env[:links] = {}                                                          # response-header links
       resource.send(env['REQUEST_METHOD']).yield_self{|status, head, body|      # dispatch request
-        ext = resource.path ? resource.ext.downcase : ''                        # log response
-        mime = head['Content-Type'] || ''
-
-        action_icon = if env[:deny]
-                        '🛑'
-                      else
-                        case env['REQUEST_METHOD']
-                        when 'HEAD'
-                          '🗣'
-                        when 'OPTIONS'
-                          '🔧'
-                        when 'POST'
-                          '📝'
-                        when 'GET'
-                          env[:fetched] ? '🐕' : ' '
-                        else
-                          env['REQUEST_METHOD']
-                        end
-                      end
-
-        status_icon = {202 => '➕',
-                       204 => '✅',
-                       301 => '➡️',
-                       302 => '➡️',
-                       303 => '➡️',
-                       304 => '✅',
-                       401 => '🚫',
-                       403 => '🚫',
-                       404 => '❓',
-                       410 => '❌',
-                       500 => '🚩'}[status] || (status == 200 ? nil : status)
-
-        format_icon = if ext == 'css' || mime.match?(/text\/css/)
-                        '🎨'
-                      elsif ext == 'js' || mime.match?(/script/)
-                        '📜'
-                      elsif ext == 'json' || mime.match?(/json/)
-                        '🗒'
-                      elsif %w(gif jpeg jpg png svg webp).member?(ext) || mime.match?(/^image/)
-                        '🖼️'
-                      elsif %w(aac flac m4a mp3 ogg opus).member?(ext) || mime.match?(/^audio/)
-                        '🔉'
-                      elsif %w(mp4 webm).member?(ext) || mime.match?(/^video/)
-                        '🎬'
-                      elsif ext == 'txt' || mime.match?(/text\/plain/)
-                        '🇹'
-                      elsif ext == 'ttl' || mime.match?(/text\/turtle/)
-                        '🐢'
-                      elsif %w(htm html).member?(ext) || mime.match?(/html/)
-                        '📃'
-                      elsif mime.match? /^(application\/)?font/
-                        '🇦'
-                      elsif mime.match? /octet.stream/
-                        '🧱'
-                      else
-                        mime
-                      end
-
-        color = if env[:deny]
-                  '31;1'
-                else
-                  case format_icon
-                  when '➡️'
-                    '38;5;7'
-                  when '📃'
-                    '34;1'
-                  when '📜'
-                    '36;1'
-                  when '🗒'
-                    '38;5;128'
-                  when '🐢'
-                    '32;1'
-                  when '🎨'
-                    '38;5;227'
-                  when '🖼️'
-                    '38;5;226'
-                  when '🎬'
-                    '38;5;208'
-                  else
-                    '35;1'
-                  end
-                end
-
-        triple_count = env[:repository] ? (env[:repository].size.to_s + '⋮') : nil
-        thirdparty = env[:refhost] != resource.host
-
-        unless [204, 304].member? status
-          puts [action_icon, status_icon, format_icon, triple_count,
+        format = resource.format_icon head['Content-Type']
+        color = env[:deny] ? '31;1' : (format_color format)
+        unless [204, 304].member? status                                        # log response
+          puts [env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]),
+                (status_icon status),
+                format,
+                env[:repository] ? (env[:repository].size.to_s + '⋮') : nil,
                 env[:refhost] ? ["\e[#{color}m", env[:refhost], "\e[0m→"] : nil,
-                "\e[#{color}#{thirdparty ? ';7' : ''}m", resource.uri, "\e[0m",
-                head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil, env['HTTP_ACCEPT']
+                "\e[#{color}#{env[:refhost] != resource.host ? ';7' : ''}m",
+                resource.uri, "\e[0m",
+                head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil,
+                env['HTTP_ACCEPT']
                ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
         end
-
         [status, head, body]} # response
     rescue Exception => e
       msg = [uri, e.class, e.message].join " "
@@ -291,6 +225,29 @@ class WebResource
         [status.to_i, (headers e.io.meta), [e.io.read]]
       else
         raise
+      end
+    end
+
+    def self.format_color format_icon
+      case format_icon
+      when '➡️'
+        '38;5;7'
+      when '📃'
+        '34;1'
+      when '📜'
+        '36;1'
+      when '🗒'
+        '38;5;128'
+      when '🐢'
+        '32;1'
+      when '🎨'
+        '38;5;227'
+      when '🖼️'
+        '38;5;226'
+      when '🎬'
+        '38;5;208'
+      else
+        '35;1'
       end
     end
 
@@ -464,6 +421,20 @@ class WebResource
             ['application/atom+xml','text/html'].member?(f)}} # non-RDF via writer definition
 
       default                                                 # default
+    end
+
+    def self.status_icon status
+      {202 => '➕',
+       204 => '✅',
+       301 => '➡️',
+       302 => '➡️',
+       303 => '➡️',
+       304 => '✅',
+       401 => '🚫',
+       403 => '🚫',
+       404 => '❓',
+       410 => '❌',
+       500 => '🚩'}[status] || (status == 200 ? nil : status)
     end
 
   end

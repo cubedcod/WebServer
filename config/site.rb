@@ -313,6 +313,9 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
     ['#fixed_sidebar'].map{|s|doc.css(s).map &:remove}
   end
 
+  def Drudge doc
+  end
+
   def FourChan doc
     doc.css('.post').map{|post|
       subject = join path.R.join post.css('.postNum a')[0]['href']

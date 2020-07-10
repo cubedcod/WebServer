@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+# coding: utf-8
+STDOUT.sync = true
+require_relative '../index'
+require 'file-tail'
+File::Tail::Logfile.tail(ENV['HOME'] + '/web/web.log') do |line|
+  t = line.split /\s+/
+  url = t[6]
+  if url.match? /^http/
+    url = url.R
+    method = t[5]
+    estatus = t[3]
+    status = estatus.split('/')[-1].to_i
+    format = url.format_icon t[9]
+    fetched = !estatus.match?(/HIT/)
+    if estatus.match? /DENIED|NONE/
+      puts "🛑 \e[31;1m#{url}\e[0m"
+    else
+      puts [(WebResource::HTTP.action_icon method, fetched),
+            (WebResource::HTTP.status_icon status),
+            format,
+            "\e[#{WebResource::HTTP.format_color format}m",
+            url,
+            "\e[0m"].join ' '
+    end
+  end
+end

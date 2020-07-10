@@ -1,3 +1,4 @@
+# coding: utf-8
 class WebResource
   module URIs
     # MIME to extension mapping, adjunct to Rack's list for obscure/new/nonstandard format-identities
@@ -22,5 +23,35 @@ class WebResource
       'text/xml' => '.rss',
       'video/MP2T' => '.ts',
     }
+
+    def format_icon mime=nil
+      mime ||= ''
+      x = path ? ext.downcase : ''
+      if x == 'css' || mime.match?(/text\/css/)
+        '🎨'
+      elsif x == 'js' || mime.match?(/script/)
+        '📜'
+      elsif x == 'json' || mime.match?(/json/)
+        '🗒'
+      elsif %w(gif jpeg jpg png svg webp).member?(x) || mime.match?(/^image/)
+        '🖼️'
+      elsif %w(aac flac m4a mp3 ogg opus).member?(x) || mime.match?(/^audio/)
+        '🔉'
+      elsif %w(mp4 webm).member?(x) || mime.match?(/^video/)
+        '🎬'
+      elsif x == 'txt' || mime.match?(/text\/plain/)
+        '🇹'
+      elsif x == 'ttl' || mime.match?(/text\/turtle/)
+        '🐢'
+      elsif %w(htm html).member?(x) || mime.match?(/html/)
+        '📃'
+      elsif mime.match? /^(application\/)?font/
+        '🇦'
+      elsif mime.match? /octet.stream/
+        '🧱'
+      else
+        mime
+      end
+    end
   end
 end

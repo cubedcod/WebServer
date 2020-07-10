@@ -50,6 +50,7 @@ zerg(net)?)
     end
 
     self.gunkTree # read gunkfile
+    #URIs.gunkTree true if GunkFile.mtime > GunkHosts[:mtime] # check for gunkfile changes
 
     def gunk?
       return true if gunkDomain?
