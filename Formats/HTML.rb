@@ -343,7 +343,7 @@ class WebResource
         env[:links][:full] = expanded
         expander = {_: :a, id: :expand, c: '&#11206;', href: expanded}
       end
-      upstreamUI  = env[:cacherefs] ? uri : HTTP.qs(qs.merge({'UI' => 'upstream'})) # pointer to upstream UI (canonical-URI from rewrite-mode, UI=upstream appended)
+      upstreamUI  = env[:cacherefs] ? uri : HTTP.qs(qs.merge({'UI' => 'upstream'})) # pointer to upstream UI
       titleRes = ['', path, host && path && ('https://' + host + path)].compact.find{|u| graph[u] && graph[u][Title]}
       bc = ('//' + host + '/').R env # breadcrumb path
       icon = ('//' + (host || 'localhost') + '/favicon.ico').R env # host icon

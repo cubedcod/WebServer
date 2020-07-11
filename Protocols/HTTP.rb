@@ -51,18 +51,16 @@ class WebResource
 
     def self.call env
       return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']           # allow HTTP methods
-      scheme = env['SERVER_NAME'] == 'localhost' ? 'http' : 'https'             # request scheme
-      uri = RDF::URI(scheme + '://' + env['HTTP_HOST']).join env['REQUEST_PATH'] # resource identifier
+      uri = RDF::URI('http' + (env['SERVER_NAME'] == 'localhost' ? '' : 's') + '://' + env['HTTP_HOST']).join env['REQUEST_PATH'] # resource identifier
       uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading + consecutive & from qs so URI library doesn't freak out
-      resource = uri.R env                                                      # request resource and environment
-      env[:base] = resource
+      resource = uri.R env                                                      # bind resource and environment
+      env[:base] = resource                                                     # base URI
       env[:refhost] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # referring host
-      env[:resp] = {}                                                           # response-header storage
-      env[:links] = {}                                                          # response-header links
+      env[:resp] = {} ; env[:links] = {}                                        # response header storage
       resource.send(env['REQUEST_METHOD']).yield_self{|status, head, body|      # dispatch request
-        format = resource.format_icon head['Content-Type']
+        format = resource.format_icon head['Content-Type']                      # log response
         color = env[:deny] ? '31;1' : (format_color format)
-        unless [204, 304].member? status                                        # log response
+        unless [204, 304].member? status
           puts [env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]),
                 (status_icon status),
                 format,
@@ -74,7 +72,7 @@ class WebResource
                 env['HTTP_ACCEPT']
                ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
         end
-        [status, head, body]} # response
+        [status, head, body]}                                                   # response
     rescue Exception => e
       msg = [uri, e.class, e.message].join " "
       trace = e.backtrace.join "\n"
