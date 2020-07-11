@@ -2,7 +2,7 @@
 class WebResource
   module URIs
 
-    CDNfile = SiteDir.join 'cdn_hosts'
+    CDNfile = SiteDir.join 'allow_hosts'
 
     CDNhosts = {}
 
