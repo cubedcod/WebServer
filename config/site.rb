@@ -456,7 +456,8 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
       subject = story['href']
       yield subject, Type, Post.R
       yield subject, Title, story.inner_text
-      yield subject, SIOC + 'comments', join(comments_row.css('a')[-1]['href'])
+      yield subject, Link, join(comments_row.css('a')[-1]['href'])
+      yield subject, Date, Chronic.parse(comments_row.css('.age > a')[0].inner_text).iso8601
       story_row.remove
       comments_row.remove
     }
