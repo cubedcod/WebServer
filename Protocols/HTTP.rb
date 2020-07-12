@@ -217,7 +217,7 @@ class WebResource
       when /304/ # Not Modified
         [304, {}, []]
       when /4\d\d/ # Not Found/Allowed
-        nodeResponse
+        cacheResponse
       when /300|5\d\d/ # upstream multiple choices or server error
         [status.to_i, (headers e.io.meta), [e.io.read]]
       else
@@ -268,7 +268,7 @@ class WebResource
         elsif p == 'favicon.ico'
           SiteDir.join('favicon.ico').R(env).fileResponse
         elsif !p || p.match?(/^(\d\d\d\d|msg)$/) || node.file?
-          nodeResponse                         # local node
+          cacheResponse                        # local node
         else
           (env[:base] = remoteURL).hostHandler # remote node
         end

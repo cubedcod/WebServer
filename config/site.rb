@@ -264,7 +264,16 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
         elsif r.env['HTTP_COOKIE'] && r.env['HTTP_COOKIE'].match?(/LOGIN/)
           cookie.writeFile r.env['HTTP_COOKIE']
         end
-        r.fetch
+        if path == 'watch' && (r.query_values || {}).has_key?('dl')
+          base = [r.fsPath, r.querySlug].join
+          unless File.directory? base
+            pid = spawn "youtube-dl -o '#{base}/%(title)s.%(ext)s' -x \"#{r.uri}\""
+            Process.detach pid
+          end
+          r.cacheResponse
+        else
+          r.fetch
+        end
       else
         r.deny
       end}

@@ -54,6 +54,19 @@ class WebResource
 
   module HTTP
 
+    def cacheResponse
+      return fileResponse if StaticFormats.member?(ext.downcase) && node.file? # direct node
+      nodes = nodeSet                                                          # indirect nodes
+      if nodes.size == 1 && (StaticFormats.member?(nodes[0].ext) || (selectFormat == 'text/turtle' && nodes[0].ext == 'ttl'))
+        nodes[0].fileResponse           # nothing to merge or transform
+      else                              # transform and/or merge nodes
+        nodes = nodes.map &:summary if env[:summary] # summarize nodes
+        nodes.map &:loadRDF             # node(s) -> Graph
+        timeMeta                        # reference temporally-adjacent nodes
+        graphResponse                   # HTTP Response
+      end
+    end
+
     # if needed, return lazily-generated entity, via Rack handler if file-reference
     def entity generator = nil
       if env['HTTP_IF_NONE_MATCH']&.strip&.split(/\s*,\s*/)&.include? env[:resp]['ETag']
@@ -123,17 +136,5 @@ class WebResource
         ((host ? ('https://' + host) : '') + '/' + p.to_s[pathIndex..-1].gsub(':','%3A').gsub('#','%23')).R env }
     end
 
-    def nodeResponse
-      return fileResponse if StaticFormats.member?(ext.downcase) && node.file? # direct node
-      nodes = nodeSet                                                          # indirect nodes
-      if nodes.size == 1 && (StaticFormats.member?(nodes[0].ext) || (selectFormat == 'text/turtle' && nodes[0].ext == 'ttl'))
-        nodes[0].fileResponse           # nothing to merge or transform
-      else                              # transform and/or merge nodes
-        nodes = nodes.map &:summary if env[:summary] # summarize nodes
-        nodes.map &:loadRDF             # node(s) -> Graph
-        timeMeta                        # reference temporally-adjacent nodes
-        graphResponse                   # HTTP Response
-      end
-    end
   end
 end
