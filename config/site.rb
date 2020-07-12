@@ -449,12 +449,18 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
 
   def HackerNews doc
     base = 'https://news.ycombinator.com/'
+    # stories
     doc.css('a.storylink').map{|story|
-      subject = story.['href']
+      story_row = story.parent.parent
+      comments_row = story_row.next_sibling
+      subject = story['href']
       yield subject, Type, Post.R
       yield subject, Title, story.inner_text
-      
+      yield subject, SIOC + 'comments', join(comments_row.css('a')[-1]['href'])
+      story_row.remove
+      comments_row.remove
     }
+    # comments
     doc.css('div.comment').map{|comment|
       post = comment.parent
       date = post.css('.age > a')[0]
