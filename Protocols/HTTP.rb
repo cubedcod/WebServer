@@ -95,7 +95,7 @@ class WebResource
       puts [e.class, e.message].join " "
       ''
     end
-
+ 
     def deny status=200, type=nil
       env[:deny] = true
       type, content = if type == :stylesheet || ext == 'css'
@@ -178,7 +178,7 @@ class WebResource
             c.R.writeFile body                       # cache representation
             saveRDF                                  # cache RDF graph(s)
           end
-          return unless response                                                           # HTTP response
+          return unless response                                                           # HTTP response:
           %w(Access-Control-Allow-Origin
              Access-Control-Allow-Credentials
              Content-Type ETag).map{|k| env[:resp][k] ||= h[k.downcase] if h[k.downcase]}  # misc upstream headers
@@ -191,8 +191,7 @@ class WebResource
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
             end}
-
-          if transform || (transformable && format && (format.match?(/atom|html|rss|turtle|xml/i) && !format.match?(/dash.xml/))) # transform resource?
+          if transform || (transformable && format && (format.match?(/atom|html|rss|turtle|xml/i) && !format.match?(/dash.xml/))) # transform resource
             graphResponse                                                      # locally-generated doc
           else
             if format == 'text/html'                                           # upstream HTML

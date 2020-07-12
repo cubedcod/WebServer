@@ -114,18 +114,16 @@ viglink|visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk
 
     # clean HTML Nokogiri
     def self.clean_doc doc, base=nil
-      # strip fonts and preload directives
+      # fonts and preload directives
       doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
-
-      # inspect resources
       log = []
       doc.css("iframe, img, [type='image'], link, script").map{|s|
-        text = s.inner_text     # inline
+        text = s.inner_text     # inline gunk
         if s['type'] != 'application/json' && s['type'] != 'application/ld+json' && !text.match?(InitialState) && text.match?(GunkExec)
           log << "🚩 " + s.to_s.size.to_s + ' ' + (text.match(GunkExec)[2]||'')[0..42]
           s.remove
         end
-        %w(href src).map{|attr| # reference
+        %w(href src).map{|attr| # referenced gunk
           if s[attr]
             src = s[attr].R
             if src.gunkDomain?

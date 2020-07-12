@@ -164,7 +164,8 @@ module Webize
         # embeds
         n.css('frame, iframe').map{|frame|
           if src = frame.attr('src')
-            yield subject, Link, src.R
+            src = src.R
+            yield subject, Link, src unless src.gunk?
           end}
 
         # typed references
@@ -191,16 +192,12 @@ module Webize
             @base.env[:links][:prev] ||= ref
           end}
 
-        # meta tags
-        n.css('head meta').map{|m|
-          if k = (m.attr("name") || m.attr("property")) # predicate
-            if v = m.attr("content")                    # object
-              k = MetaMap[k] || k                       # normalize predicate
+        # meta
+        n.css('meta, [itemprop]').map{|m|
+          if k = (m.attr("name") || m.attr("property") || m.attr("itemprop")) # predicate
+            if v = (m.attr("content") || m.attr("href"))                      # object
+              k = MetaMap[k] || k                               # normalize property-name
               case k
-              when /lytics/
-                k = :drop
-              when 'https://twitter.com'
-                v = ('https://twitter.com/' + v.sub(/^@/,'')).R
               when Abstract
                 v = v.hrefs
               else

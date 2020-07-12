@@ -69,7 +69,6 @@ class WebResource
       else                                # request has query
         [302, {'Location' => r.path}, []] #  redirect to path
       end}
-    RemoteUI =  -> r {r.uri.match?(Gunk) ? r.deny : r.fetchHTTP(transformable: false)}
     Resizer = -> r {
       if r.parts[0] == 'resizer'
         parts = r.path.split /\/\d+x\d+\/((filter|smart)[^\/]*\/)?/
@@ -265,7 +264,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
         elsif r.env['HTTP_COOKIE'] && r.env['HTTP_COOKIE'].match?(/LOGIN/)
           cookie.writeFile r.env['HTTP_COOKIE']
         end
-        RemoteUI[r]
+        r.fetch
       else
         r.deny
       end}
