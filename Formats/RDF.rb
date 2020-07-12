@@ -68,7 +68,7 @@ class WebResource < RDF::URI
         graph.load 'file:' + fsPath, **options
       end
     elsif node.directory?
-      subject = localNode? ? path.R : self
+      subject = self
       subject += '/' unless subject.to_s[-1] == '/'
       graph << RDF::Statement.new(subject, Type.R, Container.R)
       graph << RDF::Statement.new(subject, Title.R, basename)
