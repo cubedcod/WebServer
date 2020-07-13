@@ -175,7 +175,7 @@ module Webize
               rel.split(/[\s,]+/).map{|k|
                 @base.env[:links][:prev] ||= v if k.match? /prev(ious)?/i
                 @base.env[:links][:next] ||= v if k.downcase == 'next'
-                @base.env[:links][:feed] ||= v if k == 'alternate' && v.R.path&.match?(/^\/feed\/?$/)
+                @base.env[:feeds].push v if k == 'alternate' && ((m['type']&.match?(/atom|rss/)) || (v.R.path&.match?(/^\/feed\/?$/)))
                 k = MetaMap[k] || k
                 puts [k, v].join "\t" unless k.to_s.match? /^(drop|http)/
                 yield subject, k, v.R unless k == :drop}
