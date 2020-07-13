@@ -56,7 +56,7 @@ class WebResource
       resource = uri.R env                                                      # bind resource and environment
       env[:base] = resource                                                     # base URI
       env[:refhost] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # referring host
-      env[:resp] = {} ; env[:links] = {}                                        # response header storage
+      env[:resp] = {}; env[:feeds] = []; env[:links] = {}                       # response-header storage
       resource.send(env['REQUEST_METHOD']).yield_self{|status, head, body|      # dispatch request
         format = resource.format_icon head['Content-Type']                      # log response
         color = env[:deny] ? '31;1' : (format_color format)
@@ -312,7 +312,7 @@ class WebResource
           end
           t                                       # token
         }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
-        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base cacherefs colors connection fetched graph host images keep-alive links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # external multi-hop headers
+        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base cacherefs colors connection feeds fetched graph host images keep-alive links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # external multi-hop headers
 
       head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # accept Turtle
 

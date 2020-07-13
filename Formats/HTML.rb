@@ -175,7 +175,7 @@ module Webize
               rel.split(/[\s,]+/).map{|k|
                 @base.env[:links][:prev] ||= v if k.match? /prev(ious)?/i
                 @base.env[:links][:next] ||= v if k.downcase == 'next'
-                @base.env[:feeds].push v if k == 'alternate' && ((m['type']&.match?(/atom|rss/)) || (v.R.path&.match?(/^\/feed\/?$/)))
+                @base.env[:feeds].push @base.join v if k == 'alternate' && ((m['type']&.match?(/atom|rss/)) || (v.R.path&.match?(/^\/feed\/?$/)))
                 k = MetaMap[k] || k
                 puts [k, v].join "\t" unless k.to_s.match? /^(drop|http)/
                 yield subject, k, v.R unless k == :drop}
@@ -366,7 +366,8 @@ class WebResource
                               c: [{_: :a, href: bc.href, id: :host, c: (icon.node.exist? && icon.node.size != 0) ? {_: :img, src: icon.href} : host},
                                  ({_: :a, id: :tabular, class: :icon, style: 'color: #555', c: '↨',
                                    href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless qs['view'] == 'table'),
-                                 link[:feed, FeedIcon],
+                                 env[:feeds].map{|feed|
+                                    {_: :a, href: feed.R(env).href, title: feed.path, class: :icon, c: FeedIcon}},
                                  ({_: :a, href: upstreamUI, c: '⚗️', id: :UI} unless localNode?),
                                  parts.map{|p|
                                     bc.path += p + '/'
