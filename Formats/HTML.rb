@@ -16,6 +16,14 @@ module Webize
             e[attr] = ref.R(env).cacheURL             # cache location
           end}}
 
+      doc.css('img[srcset]').map{|img|
+        img['srcset'] = img['srcset'].split(',').map{|i|
+          url, _ = i.split ' '
+          url = env[:base].join(url).R env
+          [url.cacheURL, _].join ' '
+        }.join(',')
+      }
+
       doc.css('style').map{|style|
         if style.content.match? /url\(/
           style.content = style.content.gsub(/url\(['"]?([^'"\)]+)['"]?\)/){
@@ -386,7 +394,7 @@ class WebResource
                                groups.map{|type, resources|
                                  HTML.tabular resources, env}
                              else
-                               graph.values.map{|resource|
+                               graph.values.sort_by!{|r| (r[Content] || [0])[0].size}.map{|resource|
                                  HTML.value nil, resource, env}
                              end, expander,
                              {_: :script, c: SiteJS}]}]}]
