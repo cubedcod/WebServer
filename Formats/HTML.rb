@@ -375,7 +375,7 @@ class WebResource
                                  ({_: :a, id: :tabular, class: :icon, style: 'color: #555', c: '↨',
                                    href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless qs['view'] == 'table'),
                                  env[:feeds].map{|feed|
-                                    {_: :a, href: feed.R(env).href, title: feed.path, class: :icon, c: FeedIcon}},
+                                    {_: :a, href: feed.R.cacheURL, title: feed.path, class: :icon, c: FeedIcon}},
                                  ({_: :a, href: upstreamUI, c: '⚗️', id: :UI} unless localNode?),
                                  parts.map{|p|
                                     bc.path += p + '/'
