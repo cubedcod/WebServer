@@ -380,7 +380,7 @@ class WebResource
                                  parts.map{|p|
                                     bc.path += p + '/'
                                     [{_: :a, class: :breadcrumb, href: bc.href, c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
-                                 ({_: :a, href: HTTP.qs(qs.merge({'dl' => env[:downloadable]})), c: '^&darr;', id: :download, class: :icon} if env.has_key? :downloadable),
+                                 ({_: :a, href: HTTP.qs(qs.merge({'dl' => env[:downloadable]})), c: '&darr;', id: :download, class: :icon} if env.has_key? :downloadable),
                                  ]},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?

@@ -155,7 +155,6 @@ class WebResource
                 h['Content-Type'] = RDF::Format.file_extensions[body.ext.to_sym][0].content_type[0]
               end
               env[:resp]['Content-Length'] = body.node.size.to_s
-              puts h, env[:resp]
               [s, h.update(env[:resp]), b]       # file
             end}
         else
