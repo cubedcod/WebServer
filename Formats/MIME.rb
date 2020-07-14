@@ -12,6 +12,7 @@ class WebResource
       'application/x-rss+xml' => '.rss',
       'application/x-turtle' => '.ttl',
       'audio/mpeg' => '.mp3',
+      'audio/opus' => '.opus',
       'binary/octet-stream' => '.bin',
       'image/jpg' => '.jpg',
       'image/svg+xml' => '.svg',

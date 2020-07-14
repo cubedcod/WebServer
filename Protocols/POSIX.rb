@@ -54,41 +54,6 @@ class WebResource
 
   module HTTP
 
-    def cacheResponse
-      return fileResponse if StaticFormats.member?(ext.downcase) && node.file? # direct node
-      nodes = nodeSet                                                          # indirect nodes
-      if nodes.size == 1 && (StaticFormats.member?(nodes[0].ext) || (selectFormat == 'text/turtle' && nodes[0].ext == 'ttl'))
-        nodes[0].fileResponse           # nothing to merge or transform
-      else                              # transform and/or merge nodes
-        nodes = nodes.map &:summary if env[:summary] # summarize nodes
-        nodes.map &:loadRDF             # node(s) -> Graph
-        timeMeta                        # reference temporally-adjacent nodes
-        graphResponse                   # HTTP Response
-      end
-    end
-
-    # if needed, return lazily-generated entity, via Rack handler if file-reference
-    def entity generator = nil
-      if env['HTTP_IF_NONE_MATCH']&.strip&.split(/\s*,\s*/)&.include? env[:resp]['ETag']
-        [304, {}, []]                            # unmodified entity
-      else
-        body = generator ? generator.call : self # generate entity
-        if body.class == WebResource             # file-reference?
-          Rack::Files.new('.').serving(Rack::Request.new(env), body.fsPath).yield_self{|s,h,b|
-            if 304 == s
-              [304, {}, []]                      # unmodified file
-            else
-              h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type'] == 'application/javascript'
-              env[:resp]['Content-Length'] = body.node.size.to_s
-              [s, h.update(env[:resp]), b]       # file
-            end}
-        else
-          env[:resp]['Content-Length'] = body.bytesize.to_s
-          [200, env[:resp], [body]]              # inline data
-        end
-      end
-    end
-
     def fileResponse
       env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
       env[:resp]['ETag'] ||= Digest::SHA2.hexdigest [uri, node.stat.mtime, node.size].join

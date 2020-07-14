@@ -348,9 +348,9 @@ class WebResource
         env[:links][:full] = expanded
         expander = {_: :a, id: :expand, c: '&#11206;', href: expanded}
       end
-      upstreamUI  = env[:cacherefs] ? uri : HTTP.qs(qs.merge({'UI' => 'upstream'})) # pointer to upstream UI
+      upstreamUI = HTTP.qs(qs.merge({'UI' => 'upstream'})) # pointer to upstream UI
       titleRes = ['', path, host && path && ('https://' + host + path)].compact.find{|u| graph[u] && graph[u][Title]}
-      bc = ('//' + host + '/').R env # breadcrumb path
+      bc = ('//' + (host || 'localhost') + '/').R env # breadcrumb path
       icon = ('//' + (host || 'localhost') + '/favicon.ico').R env # host icon
       link = -> key, content { # render Link reference
         if url = env[:links] && env[:links][key]
@@ -376,10 +376,11 @@ class WebResource
                                    href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless qs['view'] == 'table'),
                                  env[:feeds].map{|feed|
                                     {_: :a, href: feed.R.cacheURL, title: feed.path, class: :icon, c: FeedIcon}},
-                                 ({_: :a, href: upstreamUI, c: '⚗️', id: :UI} unless localNode?),
+                                 ({_: :a, href: upstreamUI, c: '⚗️', id: :UI, class: :icon} unless localNode?),
                                  parts.map{|p|
                                     bc.path += p + '/'
                                     [{_: :a, class: :breadcrumb, href: bc.href, c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
+                                 ({_: :a, href: HTTP.qs(qs.merge({'dl' => env[:downloadable]})), c: '^&darr;', id: :download, class: :icon} if env.has_key? :downloadable),
                                  ]},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?

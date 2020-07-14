@@ -43,6 +43,19 @@ class WebResource
       end
     end
 
+    def cacheResponse
+      return fileResponse if StaticFormats.member?(ext.downcase) && node.file? # direct node
+      nodes = nodeSet                                                          # indirect nodes
+      if nodes.size == 1 && (StaticFormats.member?(nodes[0].ext) || (selectFormat == 'text/turtle' && nodes[0].ext == 'ttl'))
+        nodes[0].fileResponse           # nothing to merge or transform
+      else                              # transform and/or merge nodes
+        nodes = nodes.map &:summary if env[:summary] # summarize nodes
+        nodes.map &:loadRDF             # node(s) -> Graph
+        timeMeta                        # reference temporally-adjacent nodes
+        graphResponse                   # HTTP Response
+      end
+    end
+
     def cacheURL
       return self unless h = host || env['SERVER_NAME']
       return self if h == 'localhost'
@@ -123,6 +136,33 @@ class WebResource
       env[:deny] = true
       [202, {'Access-Control-Allow-Credentials' => 'true',
              'Access-Control-Allow-Origin' => allowedOrigin}, []]
+    end
+
+    # if needed, return lazily-generated entity, via Rack handler if file-reference
+    def entity generator = nil
+      if env['HTTP_IF_NONE_MATCH']&.strip&.split(/\s*,\s*/)&.include? env[:resp]['ETag']
+        [304, {}, []]                            # unmodified entity
+      else
+        body = generator ? generator.call : self # generate entity
+        if body.class == WebResource             # file-reference?
+          Rack::Files.new('.').serving(Rack::Request.new(env), body.fsPath).yield_self{|s,h,b|
+            if 304 == s
+              [304, {}, []]                      # unmodified file
+            else
+              if h['Content-Type'] == 'application/javascript'
+                h['Content-Type'] = 'application/javascript; charset=utf-8' # add charset tag
+              elsif RDF::Format.file_extensions.has_key? body.ext.to_sym # format via path extension
+                h['Content-Type'] = RDF::Format.file_extensions[body.ext.to_sym][0].content_type[0]
+              end
+              env[:resp]['Content-Length'] = body.node.size.to_s
+              puts h, env[:resp]
+              [s, h.update(env[:resp]), b]       # file
+            end}
+        else
+          env[:resp]['Content-Length'] = body.bytesize.to_s
+          [200, env[:resp], [body]]              # inline data
+        end
+      end
     end
 
     def env e = nil
@@ -312,7 +352,7 @@ class WebResource
           end
           t                                       # token
         }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
-        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base cacherefs colors connection feeds fetched graph host images keep-alive links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # external multi-hop headers
+        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base cacherefs colors connection downloadable feeds fetched graph host images keep-alive links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # external multi-hop headers
 
       head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # accept Turtle
 

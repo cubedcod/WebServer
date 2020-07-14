@@ -265,13 +265,19 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
           cookie.writeFile r.env['HTTP_COOKIE']
         end
         if path == 'watch' && (r.query_values || {}).has_key?('dl')
-          base = [r.fsPath, r.querySlug].join
-          unless File.directory? base
-            pid = spawn "youtube-dl -o '#{base}/%(title)s.%(ext)s' -x \"#{r.uri}\""
+          dir = [r.fsPath, r.querySlug].join
+          unless File.directory? dir
+            pid = spawn "youtube-dl -o '#{dir}/%(title)s.%(ext)s' -x \"#{r.uri}\""
             Process.detach pid
           end
-          r.cacheResponse
+          if file = dir.R.node.children[0]
+puts file.R
+            file.R(r.env).fileResponse
+          else
+            [404, {'Content-Type' => 'text/html'}, ['downloading..']]
+          end
         else
+          r.env[:downloadable] = :audio
           r.fetch
         end
       else
