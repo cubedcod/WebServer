@@ -130,6 +130,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       GET 'ad.doubleclick.net', -> r {[301, {'Location' => 'https://en.wikipedia.org/wiki/Special:Random'}, []]}
       GET 'googleads.g.doubleclick.net', GoAU
       GET 'googleweblight.com', GotoURL
+      GET 'google.com', -> r {[301, {'Location' => ['http://localhost:8000/www.google.com', r.path, '?', r.query].join}, []]}
       GET 'www.google.com', -> r {![nil, *%w(dl maps search url)].member?(r.parts[0]) ? r.deny : (r.path == '/url' ? GotoURL : NoGunk)[r]}
       GET 'www.googleadservices.com', GoAU
       GET 'yt3.ggpht.com', NoProxy
@@ -456,7 +457,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
           yield subject, Link, cite.inner_text.R
         end
         if s = rc.css('div.s')[0]
-          yield subject, Content, s.inner_html
+          yield subject, Content, Webize::HTML.format(s.inner_html, self)
           rc.remove
         end
       end}
