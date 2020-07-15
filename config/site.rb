@@ -112,7 +112,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
     GET 'gate.sc', GotoURL
 
-    unless ENV.has_key? 'DEGOOGLE'
+    if ENV.has_key? 'GOOGLE'
       %w(aa books groups).map{|h|                                               Allow h + '.google.com' }
       %w(update).map{|h|                                                        Allow h + '.googleapis.com' }
       %w(cse dl docs drive images kh khms0 khms1 khms2 khms3 lh3 maps news photos sites).map{|h|
