@@ -116,11 +116,9 @@ module Webize
       format Format
 
       def initialize(input = $stdin, options = {}, &block)
-        @opts = options
         @doc = (input.respond_to?(:read) ? input.read : input).encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ')
         @base = options[:base_uri]
         @base = @base.to_s[0..-6].R @base.env if @base.to_s.match? /\.html$/ # strip filename for generic Base-URI
-        @opts[:noRDFa] = true if @base.to_s.match? /\/feed|polymer.*html/ # don't extract RDF from unpopulated templates
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -158,7 +156,7 @@ module Webize
         @base.send Triplr[@base.host], n, &f if Triplr[@base.host]
 
         # RDFa + JSON-LD
-        unless @opts[:noRDFa]
+        unless @base.to_s.match? /\/feed|polymer.*html/ # don't extract RDF from unpopulated templates
           embeds = RDF::Graph.new
           n.css('script[type="application/ld+json"]').map{|dataElement|
             embeds << (::JSON::LD::API.toRdf ::JSON.parse dataElement.inner_text)} rescue "JSON-LD read failure in #{@base}" # find JSON-LD triples
@@ -208,6 +206,8 @@ module Webize
               case k
               when Abstract
                 v = v.hrefs
+              when /lytics/
+                k = :drop
               else
                 v = HTML.webizeString v
                 v = @base.join v if v.class == WebResource || v.class == RDF::URI
