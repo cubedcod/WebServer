@@ -120,7 +120,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     if ENV.has_key? 'GOOGLE'
       %w(aa books groups).map{|h|                                               Allow h + '.google.com' }
       %w(update).map{|h|                                                        Allow h + '.googleapis.com' }
-      %w(cse dl docs drive images kh khms0 khms1 khms2 khms3 lh3 maps news photos sites).map{|h|
+      %w(cse developers dl docs drive images kh khms0 khms1 khms2 khms3 lh3 maps news photos sites).map{|h|
                                                                                   GET h + '.google.com' }
       %w(encrypted-tbn0 encrypted-tbn1 encrypted-tbn2 encrypted-tbn3 encrypted-vtbn3 maps ssl www).map{|h|
                                                                                   GET h + '.gstatic.com' }
@@ -134,6 +134,8 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       GET 'www.googleadservices.com', GoAU
       GET 'yt3.ggpht.com', NoProxy
     end
+
+    GET 'developer.mozilla.org'
 
     GET 'old.reddit.com', -> r {
       cr = r.env[:cacherefs]
@@ -196,6 +198,7 @@ UMassBoston universalhub
 ViolenceNBoston
 WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbhnews wutrain)
 
+    #Allow 'api.twitter.com'
     GET 'twitter.com', -> r {
       parts = r.parts
       cookie = 'twitter/.cookie'.R
