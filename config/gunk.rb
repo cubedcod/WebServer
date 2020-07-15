@@ -94,8 +94,8 @@ taboola|.*targeting.*|tinypass|tiqcdn|.*track.*|twitter|tynt|
 viglink|visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk
 )(\b|[_'"]))xi
 
-    # clean HTML String
-    def self.clean body, base=nil
+    # clean HTML :: String
+    def self.clean body, base=nil, serialize=true
       doc = Nokogiri::HTML.parse body.encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ') # parse ass Nokogiri doc
       if content_type = doc.css('meta[http-equiv="Content-Type"]')[0] # in-band content-type tag found
         if content = content_type['content']
@@ -109,13 +109,12 @@ viglink|visualwebsiteoptimizer|wp.?emoji|yieldmo|yimg|zergnet|zopim|zqtk
         end
       end
       clean_doc doc, base
-      doc.to_html
+      serialize ? doc.to_html : doc
     end
 
-    # clean HTML Nokogiri
+    # clean HTML :: Nokogiri
     def self.clean_doc doc, base=nil
-      # fonts and preload directives
-      doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove
+      doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove # fonts and preload directives
       log = []
       doc.css("iframe, img, [type='image'], link, script").map{|s|
         text = s.inner_text     # inline gunk

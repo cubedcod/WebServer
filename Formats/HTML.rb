@@ -5,9 +5,9 @@ module Webize
 
     Scripts = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script" # CSS selector for script elements
 
-    # set resource references to cache location
-    def self.cacherefs content, env
-      doc = Nokogiri::HTML.fragment content
+    # set references to cache location
+    def self.cacherefs doc, env, serialize=true
+      doc = Nokogiri::HTML.fragment doc if doc.class == String
       doc.css('a, form, img, link, script').map{|e| # ref element
         %w(action href src).map{|attr|              # ref attribute
           if e[attr]
@@ -31,7 +31,7 @@ module Webize
             ['url(', m[1].R(env).cacheURL, ')'].join}
         end}
 
-      doc.to_html
+      serialize ? doc.to_html : doc
     end
 
     # format to local convention

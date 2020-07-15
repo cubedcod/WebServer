@@ -231,14 +231,15 @@ class WebResource
               env[:links][type.to_sym] = ref
             end}
           if transform || (transformable && format && (format.match?(/atom|html|rss|turtle|xml/i) && !format.match?(/dash.xml/))) # transform resource
-            graphResponse                                                      # locally-generated doc
+            graphResponse                                               # locally-generated doc
           else
-            if format == 'text/html'                                           # upstream HTML
-              body = Webize::HTML.clean body, self unless ENV.has_key? 'DIRTY' # clean upstream doc
-              body = Webize::HTML.cacherefs body, env if env[:cacherefs]       # content location
+            if format == 'text/html'                                    # upstream HTML
+              doc = Webize::HTML.clean body, self, false                # clean upstream doc
+              Webize::HTML.cacherefs doc, env, false if env[:cacherefs] # content location
+              body = doc.to_html
             end
-            env[:resp]['Content-Length'] = body.bytesize.to_s                  # Content-Length header
-            [200, env[:resp], [body]]                                          # upstream doc
+            env[:resp]['Content-Length'] = body.bytesize.to_s           # Content-Length header
+            [200, env[:resp], [body]]                                   # upstream doc
           end
         end
       end
