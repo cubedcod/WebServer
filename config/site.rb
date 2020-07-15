@@ -108,7 +108,12 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       NoGunk[r]}
 
     %w(bostonglobe-prod.cdn.arcpublishing.com).map{|host| GET host, Resizer }
+
+    if ENV.has_key? 'FACEBOOK'
+      GET 'www.facebook.com'
+    end
     %w(l.facebook.com l.instagram.com).map{|host| GET host, GotoURL}
+
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
     GET 'gate.sc', GotoURL
 

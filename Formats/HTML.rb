@@ -372,7 +372,7 @@ class WebResource
                         {_: :body,
                          c: [{class: :toolbox,
                               c: [{_: :a, href: bc.href, id: :host, c: (icon.node.exist? && icon.node.size != 0) ? {_: :img, src: icon.href} : host},
-                                 ({_: :a, id: :tabular, class: :icon, style: 'color: #555', c: '↨',
+                                 ({_: :a, id: :tabular, class: :icon, c: '↨',
                                    href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless qs['view'] == 'table'),
                                  env[:feeds].map{|feed|
                                     {_: :a, href: feed.R.cacheURL, title: feed.path, class: :icon, c: FeedIcon}},
