@@ -3,11 +3,12 @@ module Webize
   module HTML
     class Reader
       Triplr = {
+        '8kun.top' => :Chan,
         'apnews.com' => :AP,
         'drudgereport.com' => :Drudge,
         'archive.4plebs.org' => :FourPlebs,
-        'boards.4chan.org' => :FourChan,
-        'boards.4channel.org' => :FourChan,
+        'boards.4chan.org' => :Chan,
+        'boards.4channel.org' => :Chan,
         'github.com' => :GitHub,
         'gitter.im' => :GitterHTML,
         'news.ycombinator.com' => :HackerNews,
@@ -337,20 +338,36 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
     ['#fixed_sidebar'].map{|s|doc.css(s).map &:remove}
   end
 
-  def Drudge doc
+  def Chan doc
+    doc.css('.post').map{|post|
+      subject = join path.R.join post.css('a.post_no, .postNum a')[0]['href']
+      graph = ['https://', subject.host, subject.path, '/', subject.fragment].join.R
+
+      yield subject, Type, Post.R, graph
+
+      post.css('.name').map{|name|
+        yield subject, Creator, name.inner_text, graph }
+
+      post.css('time, .dateTime').map{|date|
+        yield subject, Date,
+              Time.at((date['data-utc'] ||
+                       date['unixtime']).to_i).iso8601, graph }
+
+      post.css('.subject').map{|subj|
+        yield subject, Title, subj.inner_text, graph }
+
+      post.css('.body, .postMessage').map{|msg|
+        yield subject, Content, msg, graph }
+
+      post.css('.post-image').map{|img|
+        yield subject, Image, img.parent['href'].R}
+      post.css('.fileThumb').map{|a|
+        yield subject, Image, a['href'].R, graph if a['href'] }
+
+      post.remove }
   end
 
-  def FourChan doc
-    doc.css('.post').map{|post|
-      subject = join path.R.join post.css('.postNum a')[0]['href']
-      graph = ['https://', subject.host, subject.path, '/', subject.fragment].join.R
-                                         yield subject, Type,    Post.R,          graph
-      post.css(      '.name').map{|name| yield subject, Creator, name.inner_text, graph }
-      post.css(  '.dateTime').map{|date| yield subject, Date,    Time.at(date['data-utc'].to_i).iso8601, graph }
-      post.css(   '.subject').map{|subj| yield subject, Title,   subj.inner_text, graph }
-      post.css('.postMessage').map{|msg| yield subject, Content, msg,             graph }
-      post.css('.fileThumb').map{|thumb| yield subject, Image,   thumb['href'].R, graph if thumb['href'] }
-      post.remove }
+  def Drudge doc
   end
 
   def FourPlebs doc
