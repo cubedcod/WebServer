@@ -366,23 +366,35 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
   end
 
   def GitHub doc
-    doc.css('div.comment').map{|comment|
-      if ts = comment.css('.js-timestamp')[0]
-        subject = ts['href'] ? (join ts['href']) : self
-        yield subject, Type, Post.R
-        if body = comment.css('.comment-body')[0]
-          yield subject, Content, Webize::HTML.format(body.inner_html, self)
-        end
-        if time = comment.css('[datetime]')[0]
-          yield subject, Date, time['datetime']
-        end
-        if author = comment.css('.author')[0]
-          yield subject, Creator, join(author['href'])
-          yield subject, Creator, author.inner_text
-        end
-        yield subject, To, self
-        comment.remove
+    if title = doc.css('.gh-header-title')[0]
+      yield self, Title, title.inner_text
+      title.remove
+    end
+    
+    if meta = doc.css('.gh-header-meta')[0]
+      if author = meta.css('author[href]')[0]
+        yield self, Creator, author['href'].R
       end
+      meta.css('[datetime]').map{|date| yield self, Date, date['datetime'] }
+      yield self, Content, meta.inner_text
+      meta.remove
+    end
+
+    doc.css('.TimelineItem').map{|item|
+      timestamp = item.css('.js-timestamp')[0]
+      subject = join(timestamp && timestamp['href'] || ('#' + (Digest::SHA2.hexdigest item.to_s)))
+      body = item.css('.comment-body')[0]
+      yield subject, Type, Post.R
+      yield subject, Content, Webize::HTML.format((body || item).inner_html, self)
+      if time = item.css('[datetime]')[0]
+        yield subject, Date, time['datetime']
+      end
+      if author = item.css('.author')[0]
+        yield subject, Creator, join(author['href'])
+        yield subject, Creator, author.inner_text
+      end
+      yield subject, To, self
+      item.remove
     }
   end
 
