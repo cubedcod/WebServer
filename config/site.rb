@@ -489,7 +489,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
       yield subject, Type, Post.R
       yield subject, Title, story.inner_text
       yield subject, Link, story['href']
-      yield subject, Date, Chronic.parse(comments_row.css('.age > a')[0].inner_text).iso8601
+      yield subject, Date, (Chronic.parse(comments_row.css('.age > a')[0].inner_text.sub(/^on /,'')) || Time.now).iso8601
       story_row.remove
       comments_row.remove
     }
