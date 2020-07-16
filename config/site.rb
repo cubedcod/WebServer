@@ -380,16 +380,20 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
       meta.remove
     end
 
-    doc.css('.TimelineItem').map{|item|
+    doc.css('.Box-row, .TimelineItem').map{|item|
       timestamp = item.css('.js-timestamp')[0]
-      subject = join(timestamp && timestamp['href'] || ('#' + (Digest::SHA2.hexdigest item.to_s)))
-      body = item.css('.comment-body')[0]
+      subject = join((timestamp && timestamp['href']) || item['href'] || ('#' + (item['id'] || (Digest::SHA2.hexdigest item.to_s))))
       yield subject, Type, Post.R
-      yield subject, Content, Webize::HTML.format((body || item).inner_html, self)
+      if issue = item.css("[data-hovercard-type='issue']")[0]
+        yield subject, Title, issue.inner_text
+        yield subject, Link, join(issue['href'])
+        issue.remove
+      end
+      yield subject, Content, Webize::HTML.format((item.css('.comment-body')[0] || item).inner_html, self)
       if time = item.css('[datetime]')[0]
         yield subject, Date, time['datetime']
       end
-      if author = item.css('.author')[0]
+      if author = item.css('.author, .opened-by > a')[0]
         yield subject, Creator, join(author['href'])
         yield subject, Creator, author.inner_text
       end

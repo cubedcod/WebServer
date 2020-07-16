@@ -645,7 +645,11 @@ class WebResource
       htmlcontent = post.delete(SIOC + 'richContent') || []
       uri_hash = 'r' + Digest::SHA2.hexdigest(uri)
       hasPointer = false
-      local_id = resource.path == env['REQUEST_PATH'] && resource.fragment || uri_hash
+      local_id = if !resource.path || (resource.host == env[:base].host && resource.path == env[:base].path)
+                   resource.fragment
+                 else
+                   uri_hash
+                 end
       {class: :post, id: local_id,
        c: ["\n",
            titles.map{|title|
