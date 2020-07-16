@@ -375,12 +375,13 @@ class WebResource
                                  ({_: :a, id: :tabular, class: :icon, c: '↨',
                                    href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless qs['view'] == 'table'),
                                  env[:feeds].map{|feed|
-                                    {_: :a, href: feed.R.cacheURL, title: feed.path, class: :icon, c: FeedIcon}},
+                                    {_: :a, href: feed.R.cacheURL, title: feed.path, class: :icon, c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange; margin-right: .1em'} : {})},
                                  ({_: :a, href: upstreamUI, c: '⚗️', id: :UI, class: :icon} unless localNode?),
                                  parts.map{|p|
                                     bc.path += p + '/'
                                     [{_: :a, class: :breadcrumb, href: bc.href, c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
                                  ({_: :a, href: HTTP.qs(qs.merge({'dl' => env[:downloadable]})), c: '&darr;', id: :download, class: :icon} if env.has_key? :downloadable),
+                                 ({_: :a, href: uri, c: '↗', class: :icon} if env.has_key? :cacherefs),
                                  ]},
                              link[:prev, '&#9664;'], link[:next, '&#9654;'],
                              if graph.empty?
