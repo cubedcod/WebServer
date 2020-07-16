@@ -276,7 +276,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
         if path == 'embed'
           r.fetchHTTP transformable: false
         elsif path == 'watch' && (r.query_values || {}).has_key?('dl')
-          storage = [r.fsPath, r.querySlug].join.R
+          storage = [r.fsPath, r.query_hash].join.R
           unless File.directory? storage
             pid = spawn "youtube-dl -o '#{storage}/%(title)s.%(ext)s' -x \"#{r.uri}\""
             Process.detach pid

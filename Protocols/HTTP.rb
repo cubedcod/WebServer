@@ -212,7 +212,7 @@ class WebResource
           end
           if cache
             c = fsPath.R                             # cache URI
-            c += querySlug                           # append query-hash
+            c += query_hash                          # append query-hash
             c += formatExt if formatExt && c.R.extension != formatExt # affix format-suffix
             c.R.writeFile body                       # cache representation
             saveRDF                                  # cache RDF graph(s)

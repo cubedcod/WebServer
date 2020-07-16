@@ -93,7 +93,7 @@ class WebResource
         globPath = fsPath
         unless globPath.match GlobChars # parametric glob
           env[:summary] = false         # glob of default documents
-          globPath += querySlug
+          globPath += query_hash
           globPath += '*'
         end
         Pathname.glob globPath
