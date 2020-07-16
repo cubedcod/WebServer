@@ -367,23 +367,26 @@ class WebResource
                             ({_: :title, c: CGI.escapeHTML(graph[titleRes][Title].map(&:to_s).join ' ')} if titleRes),
                              {_: :style, c: ["\n", SiteCSS]}, "\n",
                              env[:links].map{|type, resource|
-                               {_: :link, rel: type, href: CGI.escapeHTML(resource.R(env).href)}}
-                            ]}, "\n",
+                               [{_: :link, rel: type, href: CGI.escapeHTML(resource.R(env).href)}, "\n"]}]}, "\n",
                         {_: :body,
                          c: [{class: :toolbox,
-                              c: [{_: :a, href: bc.href, id: :host, c: (icon.node.exist? && icon.node.size != 0) ? {_: :img, src: icon.href} : host},
+                              c: [{_: :a, href: bc.href, id: :host, c: (icon.node.exist? && icon.node.size != 0) ? {_: :img, src: icon.href} : host}, "\n",
                                  ({_: :a, id: :tabular, class: :icon, c: '↨',
-                                   href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless qs['view'] == 'table'),
+                                   href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless qs['view'] == 'table'), "\n",
                                  env[:feeds].map{|feed|
-                                    {_: :a, href: feed.R.cacheURL, title: feed.path, class: :icon, c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange; margin-right: .1em'} : {})},
-                                 ({_: :a, href: upstreamUI, c: '⚗️', id: :UI, class: :icon} unless localNode?),
+                                    {_: :a, href: feed.R.cacheURL, title: feed.path, class: :icon, c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange; margin-right: .1em'} : {})}, "\n",
+                                 ({_: :a, href: upstreamUI, c: '⚗️', id: :UI, class: :icon} unless localNode?), "\n",
                                  parts.map{|p|
                                     bc.path += p + '/'
-                                    [{_: :a, class: :breadcrumb, href: bc.href, c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']},
-                                 ({_: :a, href: HTTP.qs(qs.merge({'dl' => env[:downloadable]})), c: '&darr;', id: :download, class: :icon} if env.has_key? :downloadable),
-                                 ({_: :a, href: uri, c: '🔗', class: :icon} if env.has_key?(:cacherefs) && host != 'localhost'),
-                                 ]},
-                             link[:prev, '&#9664;'], link[:next, '&#9654;'],
+                                    [{_: :a, class: :breadcrumb, href: bc.href, c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, "\n ",]},
+                                 ({_: :a, href: HTTP.qs(qs.merge({'dl' => env[:downloadable]})), c: '&darr;', id: :download, class: :icon} if env.has_key? :downloadable), "\n",
+                                 ({_: :a, href: uri, c: '🔗', class: :icon, id: :directlink} if env.has_key?(:cacherefs) && host != 'localhost'), "\n",
+                                 if qs.has_key?('Q') || qs.has_key?('q')
+                                   {_: :form, c: qs.map{|k,v|
+                                      ["\n", {_: :input, name: k, value: v}.update((k=='q' || k == 'Q') ? {} : {type: :hidden})]}}
+                                 end, "\n"]}, "\n",
+                             link[:prev, '&#9664;'], "\n",
+                             link[:next, '&#9654;'], "\n",
                              if graph.empty?
                                HTML.keyval (Webize::HTML.webizeHash env), env
                              elsif (env[:view] || qs['view']) == 'table'
@@ -494,7 +497,7 @@ class WebResource
                   p = p.R
                   slug = p.fragment || (p.path && p.basename) || ' '
                   icon = Icons[p.uri] || slug
-                  {_: :th, c: {_: :a, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}}}},
+                  [{_: :th, c: {_: :a, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}, "\n"]}}}, "\n",
            {_: :tbody,
             c: graph.map{|resource|
 
