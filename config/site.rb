@@ -7,7 +7,7 @@ module Webize
         'apnews.com' => :AP,
         'bunkerchan.xyz' => :Chan,
         'drudgereport.com' => :Drudge,
-        'archive.4plebs.org' => :FourPlebs,
+        'archive.4plebs.org' => :Chan,
         'boards.4chan.org' => :Chan,
         'boards.4channel.org' => :Chan,
         'github.com' => :GitHub,
@@ -349,45 +349,33 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
 
       yield subject, Type, Post.R, graph
 
-      post.css('.name').map{|name|
+      post.css('.name, .post_author').map{|name|
         yield subject, Creator, name.inner_text, graph }
 
       post.css('time, .dateTime').map{|date|
         yield subject, Date,
-              Time.at((date['data-utc'] ||
-                       date['unixtime']).to_i).iso8601, graph }
+              (date['datetime'] || Time.at((date['data-utc'] ||
+                                            date['unixtime']).to_i).iso8601), graph }
 
       post.css('.labelCreated').map{|created|
         yield subject, Date, Chronic.parse(created.inner_text).iso8601, graph}
 
-      post.css('.subject, .title').map{|subj|
+      post.css('.post_title, .subject, .title').map{|subj|
         yield subject, Title, subj.inner_text, graph }
 
-      post.css('.body, .divMessage, .postMessage').map{|msg|
+      post.css('.body, .divMessage, .postMessage, .text').map{|msg|
         yield subject, Content, msg, graph }
 
       post.css('.fileThumb, .imgLink').map{|a|
         yield subject, Image, a['href'].R, graph if a['href'] }
 
-      post.css('.post-image').map{|img|
+      post.css('.post_image, .post-image').map{|img|
         yield subject, Image, img.parent['href'].R, graph}
 
       post.remove }
   end
 
   def Drudge doc
-  end
-
-  def FourPlebs doc
-    doc.css('.post').map{|post|
-      subject = join '#' + post['id']
-                                          yield subject, Type,    Post.R
-      post.css('.post_author').map{|name| yield subject, Creator, name.inner_text }
-      post.css(        'time').map{|time| yield subject, Date,    time['datetime'] }
-      post.css( '.post_title').map{|subj| yield subject, Title,   subj.inner_text }
-      post.css(       '.text').map{|msg|  yield subject, Content, msg }
-      post.css('.post_image').map{|img|   yield subject, Image,   img['src'].R if img['src']}
-      post.remove}
   end
 
   def GitHub doc
