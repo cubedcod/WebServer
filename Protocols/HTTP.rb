@@ -82,7 +82,7 @@ class WebResource
                 "\e[#{color}#{env[:refhost] != resource.host ? ';7' : ''}m",
                 resource.uri, "\e[0m",
                 head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil,
-                env['HTTP_ACCEPT']
+                [env['HTTP_ACCEPT'], env[:origin_format], head['Content-Type']].join('→')
                ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
         end
         [status, head, body]}                                                   # response
@@ -229,7 +229,8 @@ class WebResource
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
             end}
-          if transformable && (!(env['HTTP_ACCEPT']||'').index(format) || format == 'text/html') # reformat
+          if transformable && !(format||'').match?(/^(audio|image|video)/) && (!(env['HTTP_ACCEPT']||'').index(format) || format == 'text/html') # reformat
+            env[:upstream_format] = format
             graphResponse                                               # locally-generated doc
           else
             if format == 'text/html'                                    # upstream HTML
@@ -351,7 +352,7 @@ class WebResource
           end
           t                                       # token
         }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
-        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base cacherefs colors connection downloadable feeds fetched graph host images keep-alive links path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles rdf refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # external multi-hop headers
+        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base cacherefs colors connection downloadable feeds fetched graph host images keep-alive links origin-format path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # external multi-hop headers
 
       head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # accept Turtle
 
