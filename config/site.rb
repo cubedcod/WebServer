@@ -5,6 +5,7 @@ module Webize
       Triplr = {
         '8kun.top' => :Chan,
         'apnews.com' => :AP,
+        'bunkerchan.xyz' => :Chan,
         'drudgereport.com' => :Drudge,
         'archive.4plebs.org' => :FourPlebs,
         'boards.4chan.org' => :Chan,
@@ -341,8 +342,9 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
   end
 
   def Chan doc
-    doc.css('.post').map{|post|
-      subject = join path.R.join post.css('a.post_no, .postNum a')[0]['href']
+    doc.css('.post, .postCell').map{|post|
+      number = post.css('a.post_no, .postNum a')[0]
+      subject = join(number ? number['href'] : ('#' + (post['id'] || (Digest::SHA2.hexdigest post.to_s))))
       graph = ['https://', subject.host, subject.path, '/', subject.fragment].join.R
 
       yield subject, Type, Post.R, graph
@@ -355,16 +357,20 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
               Time.at((date['data-utc'] ||
                        date['unixtime']).to_i).iso8601, graph }
 
-      post.css('.subject').map{|subj|
+      post.css('.labelCreated').map{|created|
+        yield subject, Date, Chronic.parse(created.inner_text).iso8601, graph}
+
+      post.css('.subject, .title').map{|subj|
         yield subject, Title, subj.inner_text, graph }
 
-      post.css('.body, .postMessage').map{|msg|
+      post.css('.body, .divMessage, .postMessage').map{|msg|
         yield subject, Content, msg, graph }
 
-      post.css('.post-image').map{|img|
-        yield subject, Image, img.parent['href'].R}
-      post.css('.fileThumb').map{|a|
+      post.css('.fileThumb, .imgLink').map{|a|
         yield subject, Image, a['href'].R, graph if a['href'] }
+
+      post.css('.post-image').map{|img|
+        yield subject, Image, img.parent['href'].R, graph}
 
       post.remove }
   end
