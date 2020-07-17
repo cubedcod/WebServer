@@ -82,7 +82,7 @@ class WebResource
                 "\e[#{color}#{env[:refhost] != resource.host ? ';7' : ''}m",
                 resource.uri, "\e[0m",
                 head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil,
-                [env['HTTP_ACCEPT'], env[:origin_format], head['Content-Type']].join('→')
+                [env['HTTP_ACCEPT'], env[:origin_format], head['Content-Type']].compact.join(' → ')
                ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
         end
         [status, head, body]}                                                   # response
