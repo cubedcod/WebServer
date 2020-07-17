@@ -188,8 +188,7 @@ class WebResource
     # fetch from remote                               OPTIONS
     def fetchHTTP cache: !ENV.has_key?('NOCACHE'),   # cache representation and mapped RDF graph(s)
                   response: true,                    # construct HTTP response
-                  transform: false,                  # transform
-                  transformable: true                # allow transform
+                  transformable: true                # allow representation transformation
       transformable = false if (query_values||{})['UI'] == 'upstream'
 
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
@@ -230,7 +229,7 @@ class WebResource
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
             end}
-          if transform || (transformable && format && (format.match?(/atom|html|rss|turtle|xml/i) && !format.match?(/dash.xml/))) # transform resource
+          if transformable && (!(env['HTTP_ACCEPT']||'').index(format) || format == 'text/html') # reformat
             graphResponse                                               # locally-generated doc
           else
             if format == 'text/html'                                    # upstream HTML
@@ -442,9 +441,10 @@ class WebResource
     end
 
     def selectFormat default = 'text/html'
-      return default unless env && env.has_key?('HTTP_ACCEPT') # default via no specification
+      return default unless env.has_key? 'HTTP_ACCEPT' # no preference specified
 
-      index = {} # q -> format map
+      index = {} # q-value -> format
+
       env['HTTP_ACCEPT'].split(/,/).map{|e| # split to (MIME,q) pairs
         format, q = e.split /;/             # split (MIME,q) pair
         i = q && q.split(/=/)[1].to_f || 1  # q-value with default

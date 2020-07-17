@@ -103,6 +103,8 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     GET 'www.amazon.com'
 
     GET 'gitter.im', -> r {
+      r.env[:sort] = 'date'
+      r.env[:view] = 'table'
       if r.parts[0] == 'api'
         token = ('//' + r.host + '/.token').R
         if !r.env.has_key?('x-access-token') && token.node.exist?
