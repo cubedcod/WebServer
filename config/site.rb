@@ -428,7 +428,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
           end
         end
         if room = text.match(/"id":"([^"]+)/)
-          env[:links][:prev] = 'http://gitter.im/api/v1/rooms/' + room[1] + '/chatMessages?lookups%5B%5D=user&includeThreads=false&limit=47&view=table&sort=date&rdf'
+          env[:links][:prev] = 'http://gitter.im/api/v1/rooms/' + room[1] + '/chatMessages?lookups%5B%5D=user&includeThreads=false&limit=47'
         end
       end}
 
@@ -458,7 +458,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
     return unless items = tree['items']
     items.map{|item|
       id = item['id']
-      env[:links][:prev] ||= 'http://gitter.im/api/v1/rooms/' + parts[3] + '/chatMessages?lookups%5B%5D=user&includeThreads=false&beforeId=' + id + '&limit=47&view=table&sort=date&rdf'
+      env[:links][:prev] ||= 'http://gitter.im/api/v1/rooms/' + parts[3] + '/chatMessages?lookups%5B%5D=user&includeThreads=false&beforeId=' + id + '&limit=47'
       date = item['sent']
       uid = item['fromUser']
       user = tree['lookups']['users'][uid]
@@ -546,7 +546,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
       if tl = h['edge_owner_to_timeline_media']
         end_cursor = tl['page_info']['end_cursor'] rescue nil
         uid = tl["edges"][0]["node"]["owner"]["id"] rescue nil
-        env[:links][:prev] ||= 'https://www.instagram.com/graphql/query/' + HTTP.qs({query_hash: :e769aa130647d2354c40ea6a439bfc08, rdf: :rdf, variables: {id: uid, first: 12, after: end_cursor}.to_json}) if uid && end_cursor
+        env[:links][:prev] ||= 'https://www.instagram.com/graphql/query/' + HTTP.qs({query_hash: :e769aa130647d2354c40ea6a439bfc08, variables: {id: uid, first: 12, after: end_cursor}.to_json}) if uid && end_cursor
       end
       yield ('https://www.instagram.com/' + h['username']).R, Type, Person.R if h['username']
       if h['shortcode']

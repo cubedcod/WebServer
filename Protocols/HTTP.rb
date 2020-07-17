@@ -188,8 +188,8 @@ class WebResource
     # fetch from remote                               OPTIONS
     def fetchHTTP cache: !ENV.has_key?('NOCACHE'),   # cache representation and mapped RDF graph(s)
                   response: true,                    # construct HTTP response
-                  transform: (query_values||{}).has_key?('rdf'), # definitely transform
-                  transformable: true                # allow format transforms
+                  transform: false,                  # transform
+                  transformable: true                # allow transform
       transformable = false if (query_values||{})['UI'] == 'upstream'
 
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
@@ -207,7 +207,7 @@ class WebResource
                    end
           formatExt = Suffixes[format] || Suffixes_Rack[format] # format-suffix
           body = HTTP.decompress h, response.read                     # read body
-          if format && reader = RDF::Reader.for(content_type: format) # read RDF from body
+          if format && reader = RDF::Reader.for(content_type: format) # read data from body
             reader.new(body, base_uri: self){|_| (env[:repository] ||= RDF::Repository.new) << _ }
           end
           if cache

@@ -29,7 +29,7 @@
 .toolbox a:target {text-shadow: 0px 0px #000000}
 .toolbox svg {height: 1em; width: 1em}
 .toolbox { position: fixed; top: 0; z-index: 2 }
-.toolbox form input {background-color: #111; color: #fff; border-radius: .5em; border: 1px solid #888}
+.toolbox form input {background-color: #111; color: #fff; border-radius: .5em; border: 1px solid #777}
 :target {background-color: #2ef !important; color: #000 !important}
 a {text-decoration: none; border-radius: .14em}
 a.date {float: right; white-space: nowrap; color: #999; border-radius: .2em; font-size: .8em}
