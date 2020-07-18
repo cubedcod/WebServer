@@ -269,7 +269,6 @@ class WebResource
     Icons = {
       Abstract => '✍',
       Audio => '🔊',
-      Container => '📁',
       Content => '',
       Creator => '👤',
       DC + 'hasFormat' => '≈',
@@ -277,6 +276,7 @@ class WebResource
       DC + 'rights' => '⚖️',
       Date => '⌚', 'http://purl.org/dc/terms/created' => '⌚', 'http://purl.org/dc/terms/modified' => '⌚',
       Image => '🖼️',
+      LDP + 'Container' => '📁',
       LDP + 'contains' => '📁',
       Link => '☛',
       Post => '📝',

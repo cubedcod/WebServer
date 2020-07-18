@@ -19,7 +19,6 @@ class WebResource < RDF::URI
     Link     = DC + 'link'
     Title    = DC + 'title'
     Video    = DC + 'Video'
-    Container = LDP + 'Container'
     SIOC     = 'http://rdfs.org/sioc/ns#'
     Content  = SIOC + 'content'
     Creator  = SIOC + 'has_creator'
@@ -70,7 +69,7 @@ class WebResource < RDF::URI
     elsif node.directory?
       subject = self
       subject += '/' unless subject.to_s[-1] == '/'
-      graph << RDF::Statement.new(subject, Type.R, Container.R)
+      graph << RDF::Statement.new(subject, Type.R, (LDP + 'Container').R)
       graph << RDF::Statement.new(subject, Title.R, basename)
       graph << RDF::Statement.new(subject, Date.R, node.stat.mtime.iso8601)
       node.children.map{|child|
