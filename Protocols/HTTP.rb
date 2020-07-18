@@ -228,19 +228,19 @@ class WebResource
               env[:links][type.to_sym] = ref
             end}
           if transformable &&                                    # conneg shutoff switch
-             !(format||'').match?(/audio|image|script|video/) && # TODO conneg-based transcoding frontend to ffmpeg  and JS pretty-printing
-             (query_values||{})['UI'] != 'upstream' &&           # upstream formats requested
-             (!(env['HTTP_ACCEPT']||'').index(format) || format == 'text/html') # no transform if upstream format in ACCEPT at any q-val
-            env[:upstream_format] = format                              # note original format for log
-            graphResponse                                               # response with data in requested format
+             !(format||'').match?(/audio|image|script|video/) && # TODO conneg-based transcoding frontend to ffmpeg and JS pretty-printing
+             (query_values||{})['UI'] != 'upstream' &&           # upstream format requested
+             (!(env['HTTP_ACCEPT']||'').index(format) || format=='text/html') # no transform if upstream format in ACCEPT at any q-val (wildcard matches transformable formats), except if HTML (use qs or keyword opts for upstream HTML format)
+            env[:upstream_format] = format                       # note original format for log
+            graphResponse                                        # response with data in requested format
           else
-            if format == 'text/html'                                    # upstream HTML
-              doc = Webize::HTML.clean body, self, false                # clean upstream doc
-              Webize::HTML.cacherefs doc, env, false if env[:cacherefs] # content location
+            if format == 'text/html'                             # upstream HTML
+              doc = Webize::HTML.clean body, self, false         # clean upstream doc
+              Webize::HTML.cacherefs doc, env, false if env[:cacherefs] # content relocation
               body = doc.to_html
             end
-            env[:resp]['Content-Length'] = body.bytesize.to_s           # Content-Length header
-            [200, env[:resp], [body]]                                   # upstream doc
+            env[:resp]['Content-Length'] = body.bytesize.to_s    # Content-Length header
+            [200, env[:resp], [body]]                            # upstream doc
           end
         end
       end
