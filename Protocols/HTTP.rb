@@ -189,8 +189,6 @@ class WebResource
     def fetchHTTP cache: !ENV.has_key?('NOCACHE'),   # cache representation and mapped RDF graph(s)
                   response: true,                    # construct HTTP response
                   transformable: true                # allow representation transformation
-      transformable = false if (query_values||{})['UI'] == 'upstream'
-
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                            # upstream metadata
         if response.status.to_s.match? /206/         # partial response
@@ -229,9 +227,12 @@ class WebResource
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
             end}
-          if transformable && !(format||'').match?(/^(audio|image|video)/) && (!(env['HTTP_ACCEPT']||'').index(format) || format == 'text/html') # reformat
-            env[:upstream_format] = format
-            graphResponse                                               # locally-generated doc
+          if transformable &&                                    # conneg shutoff switch
+             !(format||'').match?(/audio|image|script|video/) && # TODO conneg-based transcoding frontend to ffmpeg  and JS pretty-printing
+             (query_values||{})['UI'] != 'upstream' &&           # upstream formats requested
+             (!(env['HTTP_ACCEPT']||'').index(format) || format == 'text/html') # no transform if upstream format in ACCEPT at any q-val
+            env[:upstream_format] = format                              # note original format for log
+            graphResponse                                               # response with data in requested format
           else
             if format == 'text/html'                                    # upstream HTML
               doc = Webize::HTML.clean body, self, false                # clean upstream doc
