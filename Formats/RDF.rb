@@ -44,9 +44,8 @@ class WebResource < RDF::URI
 
   alias_method :uri, :to_s
 
-  # file(s) -> RDF::Repository
-  def loadRDF options = {}
-    graph = options[:repository] || env[:repository] ||= RDF::Repository.new
+  # file(s) -> RDF::Repository (in-memory)
+  def loadRDF graph: env[:repository] ||= RDF::Repository.new
     if node.file?
       if %w(mp4 mkv webm).member? ext
         graph << RDF::Statement.new(self, Type.R, Video.R)
@@ -62,7 +61,7 @@ class WebResource < RDF::URI
                      elsif %w(gemfile makefile rakefile).member? basename.downcase
                        :sourcecode
                      end
-        options[:base_uri] ||= (localNode? ? path : uri).gsub(/\.ttl$/,'').R env
+        options = {base_uri: uri.gsub(/\.ttl$/,'').R(env)}
         options[:format] ||= formatHint if formatHint
         graph.load 'file:' + fsPath, **options
       end
@@ -119,28 +118,28 @@ class WebResource < RDF::URI
   def summary
     sPath = 'summary/' + fsPath + (path == '/' ? 'index' : '')
     sPath += '.ttl' unless ext == 'ttl'
-    summary = sPath.R env                                 # summary URI
-    sNode = Pathname.new sPath                            # summary fs-node
-    return summary if sNode.exist? && sNode.mtime >= node.mtime # return up-to-date summary
-    fullGraph = RDF::Repository.new                       # full graph storage
-    miniGraph = RDF::Repository.new                       # summary graph storage
+    summary = sPath.R env                          # summary URI
+    sNode = Pathname.new sPath                     # summary fs-storage
+    return summary if sNode.exist? && sNode.mtime >= node.mtime # summary up to date, return
+    fullGraph = RDF::Repository.new                # full-graph
+    miniGraph = RDF::Repository.new                # summary-graph
     puts ['🐢', sNode].join ' '
-    loadRDF repository: fullGraph                         # read RDF
-    saveRDF fullGraph unless ext == 'ttl'                 # save RDF graph(s)
-    treeFromGraph(fullGraph).values.map{|resource|        # each subject
+    loadRDF graph: fullGraph                       # read RDF
+    saveRDF fullGraph unless ext == 'ttl'          # save RDF graph(s)
+    treeFromGraph(fullGraph).values.map{|resource| # bind subject
       subject = (resource['uri'] || '').R
       ps = [Abstract, Creator, Date, Image, LDP+'contains', Link, Title, To, Type, Video]
       type = resource[Type]
       type = [type] unless type.class == Array
       ps.push Content if type.member? (SIOC + 'MicroblogPost').R
-      ps.map{|p|                                          # each predicate
+      ps.map{|p|                                   # bind predicate
         if o = resource[p] ; p = p.R
-          (o.class == Array ? o : [o]).map{|o|            # each object
-            miniGraph << RDF::Statement.new(subject,p,o)} # triple in summary-graph
+          (o.class == Array ? o : [o]).map{|o|     # bind object
+            miniGraph << RDF::Statement.new(subject,p,o)} # triple -> summary-graph
         end}}
-    FileUtils.mkdir_p sNode.dirname                       # make fs-dir entries
+    FileUtils.mkdir_p sNode.dirname                # allocate fs container
     RDF::Writer.for(:turtle).open(sPath){|f|f << miniGraph} # write summary
-    summary                                               # return summary
+    summary                                        # summary reference
   end
   alias_method :summarize, :summary
 

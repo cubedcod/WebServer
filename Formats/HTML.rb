@@ -574,7 +574,7 @@ class WebResource
                {_: :a, href: src, c: src.R.basename}]}
     }
 
-    Markup[Container] = -> dir , env { uri = (dir.delete('uri') || '').R
+    Markup[LDP + 'Container'] = -> dir , env { uri = (dir.delete('uri') || '').R
       [Type, Title,
        W3 + 'ns/posix/stat#mtime',
        W3 + 'ns/posix/stat#size'].map{|p|dir.delete p}
