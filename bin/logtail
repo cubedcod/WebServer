@@ -6,7 +6,7 @@ require 'file-tail'
 File::Tail::Logfile.tail(ENV['HOME'] + '/web/web.log') do |line|
   t = line.split /\s+/
   url = t[6]
-  if url.match? /^http/
+  if url&.match? /^http/
     url = url.R
     method = t[5]
     estatus = t[3]

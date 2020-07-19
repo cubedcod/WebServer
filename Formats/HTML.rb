@@ -350,7 +350,7 @@ class WebResource
       end
       upstreamUI = HTTP.qs(qs.merge({'UI' => 'upstream'})) # pointer to upstream UI
       titleRes = ['', path, host && path && ('https://' + host + path)].compact.find{|u| graph[u] && graph[u][Title]}
-      bc = ('//' + (host || 'localhost') + '/').R env # breadcrumb path
+      bc = ('//' + (host || 'localhost') + (port ? (':' + port.to_s) : '') + '/').R env # breadcrumb path
       icon = ('//' + (host || 'localhost') + '/favicon.ico').R env # host icon
       link = -> key, content { # render Link reference
         if url = env[:links] && env[:links][key]
