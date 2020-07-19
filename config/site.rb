@@ -100,8 +100,6 @@ edge.api.brightcove.com players.brightcove.net secure.brightcove.com
 api.lbry.com api.lbry.tv lbry.tv
 graphql.api.dailymotion.com).map{|h| Allow h}
 
-    GET 'www.amazon.com'
-
     GET 'gitter.im', -> r {
       r.env[:sort] = 'date'
       r.env[:view] = 'table'
