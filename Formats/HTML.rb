@@ -343,7 +343,7 @@ class WebResource
         env[:links][:full] = expanded
         expander = {_: :a, id: :expand, c: '&#11206;', href: expanded}
       end
-      upstreamUI = join(HTTP.qs(qs.merge({'UI' => 'upstream'}))).R env                               # pointer to upstream UI
+      upstreamUI = join(HTTP.qs(qs.merge({'notransform' => nil}))).R env                               # pointer to upstream UI
       bc   = ('//' + (host || 'localhost') + (port ? (':' + port.to_s) : '') + '/').R env            # breadcrumb-trail startpoint
       icon = ('//' + (host || 'localhost') + (port ? (':' + port.to_s) : '') + '/favicon.ico').R env # icon location
       link = -> key, content { # render Link reference

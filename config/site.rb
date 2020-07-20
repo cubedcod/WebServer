@@ -135,7 +135,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
       GET 'googleads.g.doubleclick.net', GoAU
       GET 'googleweblight.com', GotoURL
       GET 'google.com', -> r {[301, {'Location' => ['http://localhost:8000/www.google.com', r.path, '?', r.query].join}, []]}
-      GET 'www.google.com', -> r {![nil, *%w(dl maps search url)].member?(r.parts[0]) ? r.deny : (r.path == '/url' ? GotoURL : NoGunk)[r]}
+      GET 'www.google.com', -> r {![nil, *%w(logos maps search url)].member?(r.parts[0]) ? r.deny : (r.path == '/url' ? GotoURL : NoGunk)[r]}
       GET 'www.googleadservices.com', GoAU
       GET 'yt3.ggpht.com', NoProxy
     end
@@ -223,7 +223,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
         r.env['x-guest-token'] ||= attrs['gt'] if attrs['gt']
       end
 
-      remoteUI = -> {
+      reauth = -> {
         cookie.node.delete if cookie.node.exist?
         %w(authorization x-csrf-token x-guest-token HTTP_COOKIE).map{|k| r.env.delete k}
         r.fetchHTTP transformable: false}
@@ -246,7 +246,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
           json = ::JSON.parse body
           uid = json['data']['user']['rest_id']
           # find tweets
-          ('https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment').R(r.env).fetch} rescue remoteUI[]
+          ('https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment').R(r.env).fetch} rescue reauth[]
       # conversation
       elsif parts.member?('status') || parts.member?('statuses')
         convo = parts.find{|p| p.match? /^\d{8}\d+$/ }
@@ -257,7 +257,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
       else
         NoGunk[r]
       end.yield_self{|s,h,b|
-        [403, 404, 429].member?(s) ? remoteUI[] : [s,h,b]}}
+        [403, 404, 429].member?(s) ? reauth[] : [s,h,b]}}
 
     GET 's.yimg.com', -> r {
       ps = r.path.split /https?:\/+/

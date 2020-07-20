@@ -188,7 +188,7 @@ class WebResource
     # fetch from remote                               OPTIONS
     def fetchHTTP cache: !ENV.has_key?('NOCACHE'),   # cache representation and mapped RDF graph(s)
                   response: true,                    # construct HTTP response
-                  transformable: true                # allow representation transformation
+                  transformable: !(query_values||{}).has_key?('notransform') # allow representation transformations : conneg format conversions & HTML reformatting
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                            # upstream metadata
         if response.status.to_s.match? /206/         # partial response
@@ -227,20 +227,18 @@ class WebResource
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
             end}
-          if transformable &&                                    # conneg shutoff switch
-             !(format||'').match?(/audio|image|script|video/) && # TODO conneg-based transcoding frontend to ffmpeg and JS pretty-printing
-             (query_values||{})['UI'] != 'upstream' &&           # upstream format requested
-             (!(env['HTTP_ACCEPT']||'').index(format) || format=='text/html') # no transform if upstream format in ACCEPT at any q-val (wildcard matches transformable formats), except if HTML (use qs or keyword opts for upstream HTML format)
-            env[:upstream_format] = format                       # note original format for log
-            graphResponse                                        # response with data in requested format
+          if transformable &&                                 # conneg-via-proxy enabled (default)
+             !(format||'').match?(/audio|image|script|video/) # exempt media formats TODO ffmpeg/convert frontend
+            env[:upstream_format] = format                    # note original format for log
+            graphResponse                                     # response with data in requested format
           else
-            if format == 'text/html'                             # upstream HTML
-              doc = Webize::HTML.clean body, self, false         # clean upstream doc
+            if format == 'text/html'                          # upstream HTML
+              doc = Webize::HTML.clean body, self, false      # clean upstream doc
               Webize::HTML.cacherefs doc, env, false if env[:cacherefs] # content relocation
               body = doc.to_html
             end
-            env[:resp]['Content-Length'] = body.bytesize.to_s    # Content-Length header
-            [200, env[:resp], [body]]                            # upstream doc
+            env[:resp]['Content-Length'] = body.bytesize.to_s # Content-Length header
+            [200, env[:resp], [body]]                         # upstream doc
           end
         end
       end

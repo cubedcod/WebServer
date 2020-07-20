@@ -134,6 +134,7 @@ module Webize
     class Format < RDF::Format
       content_type 'application/javascript',
                    aliases: %w(
+                   application/json;q=0.8
                    application/x-javascript;q=0.8
                    text/javascript;q=0.8
                    text/x-perl;q=0.8
@@ -276,7 +277,7 @@ module Webize
  uk utm www}
 
     class Format < RDF::Format
-      content_type 'text/plain', :extensions => [:log, :txt]
+      content_type 'text/plain', :extensions => [:conf, :log, :txt]
       content_encoding 'utf-8'
       reader { Reader }
     end
