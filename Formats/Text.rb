@@ -136,6 +136,7 @@ module Webize
                    aliases: %w(
                    application/x-javascript;q=0.8
                    text/javascript;q=0.8
+                   text/x-perl;q=0.8
                    text/x-ruby;q=0.8
                    text/x-shellscript;q=0.8
                    ),
@@ -368,14 +369,6 @@ module Webize
           yield subject, Content, cue.text
         end
       end
-    end
-  end
-
-  module TempFile
-    class Format < RDF::Format
-      content_type 'text/tmpfile', :extension => :tmp
-      content_encoding 'utf-8'
-      reader { Plaintext::Reader }
     end
   end
 

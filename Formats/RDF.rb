@@ -77,15 +77,7 @@ class WebResource < RDF::URI
     self
   rescue RDF::FormatError => e
     mime = `file -b --mime-type #{shellPath}`.chomp
-    puts e.message,"FILE(1) suggests type #{mime}, retrying"
-    options.delete :content_type
-    options.delete :format
-    if mime == 'text/html'
-      options[:format] = :html
-    else
-      options[:content_type] = mime
-    end
-    graph.load fsPath, **options
+    puts e.message,"RDF::FormatError :: #{mime} :: #{fsPath}"
     self
   end
 
