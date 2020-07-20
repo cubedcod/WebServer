@@ -308,6 +308,8 @@ class WebResource
           SiteDir.join('favicon.ico').R(env).fileResponse
         elsif !p || p.match?(/^(\d\d\d\d|msg)$/) || node.file?
           cacheResponse                        # local node
+        elsif p == 'log' && parts.size == 2
+          [200, {'Content-Type' => 'text/html'}, [`tail -n 100000 ~/web/web.log | grep -i #{Shellwords.escape parts[1]} | tail -n 100`.hrefs]]
         else
           (env[:base] = remoteURL).hostHandler # remote node
         end
