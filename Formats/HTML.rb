@@ -336,28 +336,26 @@ class WebResource
     def htmlDocument graph=nil
       graph ||= env[:graph] = treeFromGraph
       qs = query_values || {}
-      env[:images] ||= {}
       env[:colors] ||= {}
       env[:links] ||= {}
-      if path&.match? HourDir
-        env[:sort] = 'date'
-        env[:view] = 'table'
-      end
-      if env[:summary] || ((qs.has_key?('Q')||qs.has_key?('q')) && !qs.has_key?('fullContent'))
+      if env[:summary] || ((qs.has_key?('Q')||qs.has_key?('q')) && !qs.has_key?('fullContent'))      # pointer to unabbreviated form
         expanded = HTTP.qs qs.merge({'fullContent' => nil})
         env[:links][:full] = expanded
         expander = {_: :a, id: :expand, c: '&#11206;', href: expanded}
       end
-      upstreamUI = HTTP.qs(qs.merge({'UI' => 'upstream'})) # pointer to upstream UI
-      titleRes = ['', path, host && path && ('https://' + host + path)].compact.find{|u| graph[u] && graph[u][Title]}
-      bc = ('//' + (host || 'localhost') + (port ? (':' + port.to_s) : '') + '/').R env # breadcrumb path
-      icon = ('//' + (host || 'localhost') + '/favicon.ico').R env # host icon
+      upstreamUI = join(HTTP.qs(qs.merge({'UI' => 'upstream'}))).R env                               # pointer to upstream UI
+      bc   = ('//' + (host || 'localhost') + (port ? (':' + port.to_s) : '') + '/').R env            # breadcrumb-trail startpoint
+      icon = ('//' + (host || 'localhost') + (port ? (':' + port.to_s) : '') + '/favicon.ico').R env # icon location
       link = -> key, content { # render Link reference
         if url = env[:links] && env[:links][key]
           [{_: :a, href: url.R(env).href, id: key, class: :icon, c: content},
            "\n"]
         end}
+
       htmlGrep if localNode?
+
+      title_resource = [path, host && path && ('https://' + host + path)].compact.find{|uri|
+        graph.has_key?(uri) && graph[uri].has_key?(Title)}
 
       # Markup -> HTML string
       HTML.render ["<!DOCTYPE html>\n",
@@ -365,7 +363,7 @@ class WebResource
                     c: [{_: :head,
                          c: [{_: :base, href: uri},
                              {_: :meta, charset: 'utf-8'},
-                            ({_: :title, c: CGI.escapeHTML(graph[titleRes][Title].map(&:to_s).join ' ')} if titleRes),
+                            ({_: :title, c: CGI.escapeHTML(graph[title_resource][Title].map(&:to_s).join ' ')} if title_resource),
                              {_: :style, c: ["\n", SiteCSS]}, "\n",
                              env[:links].map{|type, resource|
                                [{_: :link, rel: type, href: CGI.escapeHTML(resource.R(env).href)}, "\n"]}]}, "\n",
@@ -376,7 +374,7 @@ class WebResource
                                    href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless qs['view'] == 'table'), "\n",
                                  env[:feeds].map{|feed|
                                     {_: :a, href: feed.R.cacheURL, title: feed.path, class: :icon, c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange; margin-right: .1em'} : {})}, "\n",
-                                 ({_: :a, href: upstreamUI, c: '⚗️', id: :UI, class: :icon} unless localNode?), "\n",
+                                 ({_: :a, href: upstreamUI.href, c: '⚗️', id: :UI, class: :icon} unless localNode?), "\n",
                                  parts.map{|p|
                                     bc.path += p + '/'
                                     [{_: :a, class: :breadcrumb, href: bc.href, c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, "\n ",]},
@@ -726,17 +724,14 @@ class WebResource
           dash = true
         end
         v = v.R env
-        unless env[:images][v.uri] #  dedupe videos
-          env[:images][v.uri] = true
-          if v.uri.match? /youtu/
-            id = (v.query_values||{})['v'] || v.parts[-1]
-            {_: :iframe, width: 560, height: 315, src: "https://www.youtube.com/embed/#{id}", frameborder: 0, allow: 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture', allowfullscreen: :true}
-          else
-            [dash ? '<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>' : nil,
-             {class: :video,
-              c: [{_: :video, src: v.href, controls: :true}.update(dash ? {'data-dashjs-player' => 1} : {}), '<br>',
-                  ({_: :a, href: v.href, c: v.basename} if v.path)]}]
-          end
+        if v.uri.match? /youtu/
+          id = (v.query_values||{})['v'] || v.parts[-1]
+          {_: :iframe, width: 560, height: 315, src: "https://www.youtube.com/embed/#{id}", frameborder: 0, allow: 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture', allowfullscreen: :true}
+        else
+          [dash ? '<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>' : nil,
+           {class: :video,
+            c: [{_: :video, src: v.href, controls: :true}.update(dash ? {'data-dashjs-player' => 1} : {}), '<br>',
+                ({_: :a, href: v.href, c: v.basename} if v.path)]}]
         end
       end}
   end
