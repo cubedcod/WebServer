@@ -265,9 +265,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
 
     GET 'www.youtube.com', -> r {
       path = r.parts[0]
-      if !path
-        [301, {'Location' => '//www.youtube.com/feed/subscriptions'.R(r.env).href}, []]
-      elsif %w{attribution_link redirect}.member? path
+      if %w{attribution_link redirect}.member? path
         [301, {'Location' => r.query_values['q'] || r.query_values['u']}, []]
       elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results s user watch watch_videos yts).member? path
         cookie = 'youtube/.cookie'.R
