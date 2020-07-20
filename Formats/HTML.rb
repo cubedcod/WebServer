@@ -363,7 +363,8 @@ class WebResource
       HTML.render ["<!DOCTYPE html>\n",
                    {_: :html,
                     c: [{_: :head,
-                         c: [{_: :meta, charset: 'utf-8'},
+                         c: [{_: :base, href: uri},
+                             {_: :meta, charset: 'utf-8'},
                             ({_: :title, c: CGI.escapeHTML(graph[titleRes][Title].map(&:to_s).join ' ')} if titleRes),
                              {_: :style, c: ["\n", SiteCSS]}, "\n",
                              env[:links].map{|type, resource|
