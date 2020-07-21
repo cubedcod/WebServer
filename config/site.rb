@@ -144,7 +144,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
 
     GET 'old.reddit.com', -> r {
       cr = r.env[:cacherefs]
-      r.env[:cacherefs] = false # don't rewrite references in fetch response
+      r.env[:cacherefs] = false # preserve original references
       r.fetch.yield_self{|status,head,body|
         if status.to_s.match? /^30/
           [status, head, body]
@@ -153,7 +153,7 @@ graphql.api.dailymotion.com).map{|h| Allow h}
           body[0].scan(/href="([^"]+after=[^"]+)/){|link|links << CGI.unescapeHTML(link[0]).R} # find links
           link = links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]         # sort links
           nextPage = ['https://www.reddit.com', link.path, '?', link.query].join.R r.env       # page reference
-          r.env[:cacherefs] = cr # restore rewrite settings
+          r.env[:cacherefs] = cr # restore reference-locality prefs
           [302, {'Location' => nextPage.href}, []]
         end}}
 
@@ -394,19 +394,23 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
       timestamp = item.css('.js-timestamp')[0]
       subject = join((timestamp && timestamp['href']) || item['href'] || ('#' + (item['id'] || (Digest::SHA2.hexdigest item.to_s))))
       yield subject, Type, Post.R
-      if issue = item.css("[data-hovercard-type='issue']")[0]
-        yield subject, Title, issue.inner_text
-        yield subject, Link, join(issue['href'])
-        issue.remove
-      end
+
+      item.css("div[role='rowheader'] a, [data-hovercard-type='issue']").map{|title|
+        yield subject, Title, title.inner_text
+        yield subject, Link, join(title['href'])
+        title.remove}
+
       yield subject, Content, Webize::HTML.format((item.css('.comment-body')[0] || item).inner_html, self)
+
       if time = item.css('[datetime]')[0]
         yield subject, Date, time['datetime']
       end
+
       if author = item.css('.author, .opened-by > a')[0]
         yield subject, Creator, join(author['href'])
         yield subject, Creator, author.inner_text
       end
+
       yield subject, To, self
       item.remove
     }
