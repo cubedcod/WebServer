@@ -134,7 +134,6 @@ module Webize
     class Format < RDF::Format
       content_type 'application/javascript',
                    aliases: %w(
-                   application/json;q=0.8
                    application/x-javascript;q=0.8
                    text/javascript;q=0.8
                    text/x-perl;q=0.8
