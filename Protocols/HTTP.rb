@@ -5,10 +5,7 @@ class WebResource
     include URIs
 
     AllowedHosts = {}
-    GlobChars = /[\*\{\[]/
     HostGET = {}
-    Methods = %w(GET HEAD OPTIONS POST PUT)
-    Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
 
     def self.action_icon action, fetched=true
       case action
@@ -63,7 +60,7 @@ class WebResource
     end
 
     def self.call env
-      return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']           # allow HTTP methods
+      return [405,{},[]] unless %w(GET HEAD OPTIONS POST PUT).member? env['REQUEST_METHOD']           # allow HTTP methods
       uri = RDF::URI('http' + (env['SERVER_NAME'] == 'localhost' ? '' : 's') + '://' + env['HTTP_HOST']).join env['REQUEST_PATH'] # resource identifier
       uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading + consecutive & from qs so URI library doesn't freak out
       resource = uri.R env                                                      # bind resource and environment

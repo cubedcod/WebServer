@@ -1,7 +1,8 @@
 # coding: utf-8
 class WebResource
   module URIs
-    # MIME to extension mapping, adjunct to Rack's list for obscure/new/nonstandard format-identities
+
+    # MIME to extension mapping, adjunct to Rack's list
     Suffixes = {
       'application/manifest+json' => '.json',
       'application/octet-stream' => '.bin',
@@ -24,6 +25,8 @@ class WebResource
       'text/xml' => '.rss',
       'video/MP2T' => '.ts',
     }
+
+    Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
 
     def format_icon mime=nil
       mime ||= ''

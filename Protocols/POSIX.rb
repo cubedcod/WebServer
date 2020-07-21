@@ -91,8 +91,8 @@ class WebResource
        end
       else                      # GLOB
         globPath = fsPath
-        unless globPath.match GlobChars # parametric glob
-          env[:summary] = false         # glob of default documents
+        unless globPath.match /[\*\{\[]/ # parametric glob
+          env[:summary] = false          # default glob
           globPath += query_hash
           globPath += '*'
         end
