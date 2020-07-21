@@ -212,6 +212,7 @@ class WebResource
             c += query_hash                          # append query-hash
             c += formatExt if formatExt && c.R.extension != formatExt # affix format-suffix
             c.R.writeFile body                       # cache representation
+            #puts "CACHE #{uri}  -> #{c}"
             saveRDF                                  # cache RDF graph(s)
           end
 
@@ -234,7 +235,7 @@ class WebResource
 
           if transformable &&                                 # conneg-via-proxy enabled (default)
              !(format||'').match?(/audio|image|script|video/) # exempt media formats TODO ffmpeg/convert frontend
-            env[:upstream_format] = format                    # note original format for log
+            env[:origin_format] = format                      # note original format for log
             graphResponse                                     # response with data in requested format
           else
             if format == 'text/html'                          # upstream HTML
