@@ -10,6 +10,7 @@ module Webize
         'archive.4plebs.org' => :Chan,
         'boards.4chan.org' => :Chan,
         'boards.4channel.org' => :Chan,
+        'fosstodon.org' => :HFeed,
         'github.com' => :GitHub,
         'gitter.im' => :GitterHTML,
         'news.ycombinator.com' => :HackerNews,
@@ -531,6 +532,10 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
         yield subject, Date, time.iso8601
       end
       post.remove }
+  end
+
+  def HFeed
+
   end
 
   IGgraph = /^window._sharedData = /
