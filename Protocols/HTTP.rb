@@ -173,19 +173,20 @@ class WebResource
     def fetch
       if StaticFormats.member? ext.downcase                                                  # static representation valid in cache if exists:
         return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has resource in browser-cache
-        return fileResponse if node.file?                                                    #  server has static node on file
+        return fileResponse if node.file?                                                    # server has static node - direct hit
       end
       nodes = nodeSet
-      return nodes[0].fileResponse if nodes.size == 1 && StaticFormats.member?(nodes[0].ext) #  server has single static-node in mapped node-set
+      return nodes[0].fileResponse if nodes.size == 1 && StaticFormats.member?(nodes[0].ext) # server has static-node in 1-element set
       fetchHTTP                                                                 # fetch via HTTPS
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
       ['http://', host, path, query ? ['?', query] : nil].join.R(env).fetchHTTP # fetch via HTTP
     end
 
-    # fetch from remote                               OPTIONS
+    # fetch from remote                               options:
     def fetchHTTP cache: !ENV.has_key?('NOCACHE'),   # cache representation and mapped RDF graph(s)
                   response: true,                    # construct HTTP response
-                  transformable: !(query_values||{}).has_key?('notransform') # allow representation transformations : conneg format conversions & HTML reformatting
+                  transformable: !(query_values||{}).has_key?('notransform') # allow representation transformation: conneg format conversions & same-format (HTML reformatting, script pretty-print) rewriting
+
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                            # upstream metadata
         if response.status.to_s.match? /206/         # partial response
