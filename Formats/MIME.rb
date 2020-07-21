@@ -1,4 +1,5 @@
 # coding: utf-8
+require 'rack'
 class WebResource
   module URIs
 
