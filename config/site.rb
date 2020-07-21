@@ -62,6 +62,7 @@ class WebResource
     GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['u']||r.query_values['q'])}, []]}
     NoGunk  = -> r {r.send r.uri.match?(Gunk) ? :deny : :fetch}
     NoProxy = -> r {r.parts[0] == 'proxy' ? r.deny(200, :image) : NoGunk[r]}
+
     NoQuery = -> r {
       if !r.query                         # request
         NoGunk[r].yield_self{|s,h,b|      #  inspect response
@@ -71,12 +72,11 @@ class WebResource
       else                                # request has query
         [302, {'Location' => r.path}, []] #  redirect to path
       end}
+
     Resizer = -> r {
       if r.parts[0] == 'resizer'
         parts = r.path.split /\/\d+x\d+\/((filter|smart)[^\/]*\/)?/
-        parts.size > 1 ? [302,
-                          {'Location' => 'https://' + parts[-1]
-                          }, []] : NoJS[r]
+        parts.size > 1 ? [302, {'Location' => 'https://' + parts[-1]}, []] : NoGunk[r]
       else
         NoGunk[r]
       end}
