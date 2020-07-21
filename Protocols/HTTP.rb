@@ -315,7 +315,7 @@ class WebResource
         elsif !p || p.match?(/^(\d\d\d\d|msg)$/) || node.file?
           cacheResponse                        # local node
         elsif p == 'log' && parts.size == 2
-          [200, {'Content-Type' => 'text/html'}, [`tail -n 100000 ~/web/web.log | grep -i #{Shellwords.escape parts[1]} | tail -n 100`.hrefs]]
+          [200, {'Content-Type' => 'text/html'}, [`grep -i #{Shellwords.escape parts[1]} ~/web/web.log | tr -s ' ' | cut -d ' ' -f 7 | sort | uniq`.hrefs]]
         else
           (env[:base] = remoteURL).hostHandler # remote node
         end
