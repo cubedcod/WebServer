@@ -185,7 +185,7 @@ class WebResource
     # fetch from remote                               options:
     def fetchHTTP cache: !ENV.has_key?('NOCACHE'),   # cache representation and mapped RDF graph(s)
                   response: true,                    # construct HTTP response
-                  transformable: !(query_values||{}).has_key?('notransform') # allow representation transformation: conneg format conversions & same-format (HTML reformatting, script pretty-print) rewriting
+                  transformable: !(query_values||{}).has_key?('notransform') # allow representation transformation: format conversions & same-format (HTML reformatting, script pretty-print) rewriting
 
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                            # upstream metadata
@@ -201,10 +201,12 @@ class WebResource
                      RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
                    end
           formatExt = Suffixes[format] || Suffixes_Rack[format] # format-suffix
+
           body = HTTP.decompress h, response.read                     # read body
           if format && reader = RDF::Reader.for(content_type: format) # read data from body
             reader.new(body, base_uri: self){|_| (env[:repository] ||= RDF::Repository.new) << _ }
           end
+
           if cache
             c = fsPath.R                             # cache URI
             c += query_hash                          # append query-hash
@@ -212,19 +214,24 @@ class WebResource
             c.R.writeFile body                       # cache representation
             saveRDF                                  # cache RDF graph(s)
           end
+
           return unless response                                                           # HTTP response:
           %w(Access-Control-Allow-Origin
              Access-Control-Allow-Credentials
-             Content-Type ETag).map{|k| env[:resp][k] ||= h[k.downcase] if h[k.downcase]}  # misc upstream headers
+             Content-Type ETag).map{|k|
+            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}                              # upstream headers
+
           env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin                      # CORS header
           env[:resp]['Set-Cookie'] ||= h['set-cookie'] if h['set-cookie'] && allowCookies? # Set-Cookie header
-          h['link'] && h['link'].split(',').map{|link|                                     # Link header - parse and merge
+
+          h['link'] && h['link'].split(',').map{|link|                                     # Link header: parse and merge
             ref, type = link.split(';').map &:strip
             if ref && type
               ref = ref.sub(/^</,'').sub />$/, ''
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
             end}
+
           if transformable &&                                 # conneg-via-proxy enabled (default)
              !(format||'').match?(/audio|image|script|video/) # exempt media formats TODO ffmpeg/convert frontend
             env[:upstream_format] = format                    # note original format for log
