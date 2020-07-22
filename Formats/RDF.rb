@@ -47,10 +47,14 @@ class WebResource < RDF::URI
   # file(s) -> RDF::Repository (in-memory)
   def loadRDF graph: env[:repository] ||= RDF::Repository.new
     if node.file?
+      stat = node.stat
+      graph << RDF::Statement.new(self, Title.R, basename)
+      graph << RDF::Statement.new(self, Date.R, stat.mtime.iso8601)
+      graph << RDF::Statement.new(self, (Stat + 'size').R, stat.size)
       if %w(mp4 mkv webm).member? ext
         graph << RDF::Statement.new(self, Type.R, Video.R)
-        graph << RDF::Statement.new(self, Title.R, basename)
-        graph << RDF::Statement.new(self, Date.R, node.stat.mtime.iso8601)
+      elsif %w(m4a mp3 ogg opus).member? ext
+        graph << RDF::Statement.new(self, Type.R, Audio.R)
       else
         formatHint = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # path-derived format hints when suffix is ambiguous or missing
                        :mail # procmail doesnt have configurable SUFFIX (.eml), only PREFIX? - presumably due to some sort of maildir suffix-renames to denote state?
