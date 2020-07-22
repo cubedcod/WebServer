@@ -534,8 +534,31 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
       post.remove }
   end
 
-  def HFeed
+  def HFeed doc
+    doc.css('.entry').map{|post|
+      if info = post.css('.status__info > a')[0]
 
+        subject = graph = info['href'].R
+
+        yield subject, Type, Post.R, graph
+
+        post.css('.p-author').map{|author|
+          author.css('a').map{|a|
+            yield subject, Creator, a['href'].R, graph}
+          yield subject, Creator, author.inner_text, graph}
+
+        post.css('time').map{|date|
+          yield subject, Date, date['datetime'], graph }
+
+        post.css('.e-content').map{|msg|
+          yield subject, Content, Webize::HTML.format(msg.inner_html, self), graph }
+
+        post.css('img').map{|img|
+          yield subject, Image, img['src'].R, graph }
+
+        post.remove
+
+      end}
   end
 
   IGgraph = /^window._sharedData = /
