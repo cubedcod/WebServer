@@ -48,12 +48,15 @@ class WebResource < RDF::URI
   def loadRDF graph: env[:repository] ||= RDF::Repository.new
     if node.file?
       stat = node.stat
-      graph << RDF::Statement.new(self, Title.R, basename)
-      graph << RDF::Statement.new(self, Date.R, stat.mtime.iso8601)
-      graph << RDF::Statement.new(self, (Stat + 'size').R, stat.size)
+      unless ext == 'ttl'
+        graph << RDF::Statement.new(self, Title.R, basename)
+        graph << RDF::Statement.new(self, Date.R, stat.mtime.iso8601)
+        graph << RDF::Statement.new(self, (Stat + 'size').R, stat.size)
+      end
       if %w(mp4 mkv webm).member? ext
         graph << RDF::Statement.new(self, Type.R, Video.R)
       elsif %w(m4a mp3 ogg opus).member? ext
+        puts "audio #{self}"
         graph << RDF::Statement.new(self, Type.R, Audio.R)
       else
         formatHint = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # path-derived format hints when suffix is ambiguous or missing
