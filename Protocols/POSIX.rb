@@ -93,7 +93,7 @@ class WebResource
         globPath = fsPath
         unless globPath.match /[\*\{\[]/ # parametric glob
           env[:summary] = false          # default glob
-          globPath += query_hash
+          globPath += query_hash unless pathIndex = 0
           globPath += '*'
         end
         Pathname.glob globPath

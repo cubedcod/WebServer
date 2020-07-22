@@ -121,7 +121,7 @@ class WebResource < RDF::URI
     miniGraph = RDF::Repository.new                # summary-graph
     puts ['🐢', sNode].join ' '
     loadRDF graph: fullGraph                       # read RDF
-    saveRDF fullGraph unless ext == 'ttl'          # save RDF graph(s)
+    #saveRDF fullGraph unless ext == 'ttl'          # save RDFized from non-RDF graph(s)
     treeFromGraph(fullGraph).values.map{|resource| # bind subject
       subject = (resource['uri'] || '').R
       ps = [Abstract, Creator, Date, Image, LDP+'contains', Link, Title, To, Type, Video]
