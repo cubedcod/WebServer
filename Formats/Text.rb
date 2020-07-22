@@ -301,21 +301,36 @@ module Webize
       def each_triple &block; each_statement{|s| block.call *s.to_triple} end
 
       def each_statement &fn
-        text_triples{|s,p,o|
+        text_triples{|s, p, o, graph=nil|
           fn.call RDF::Statement.new(s, p.R,
                                      (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal o
                                                                                             l.datatype=RDF.XMLLiteral if p == Content
                                                                                             l),
-                                     :graph_name => @base)}
+                                     graph_name: graph || @base)}
       end
 
       def text_triples
-        yield @body, Content, WebResource::HTML.render({_: :pre, style: 'white-space: pre-wrap',
-                                                        c: @doc.each_line{|line|
-                                                          line.hrefs{|p,o| # hypertextize
-                                                            # yield detected links to consumer
-                                                            yield @body, p, o
-                                                            yield o, Type, (W3 + '2000/01/rdf-schema#Resource').R}}})
+        basename = File.basename @base.path, '.txt'
+        dirname = File.dirname @base.path
+        if basename == 'twtxt'
+          @doc.lines.grep(/^[^#]/).map{|line|
+            date, msg = line.split /\t/
+            graph = @base.join dirname + '/twtxt.' + date.gsub(/\D/,'.')
+            subject = graph.join '#msg'
+            yield subject, Type, Post.R, graph
+            yield subject, Date, date, graph
+            yield subject, Content, msg.hrefs, graph
+            yield subject, Creator, (@base.host + dirname).split(/\W/).join('.'), graph
+            yield subject, To, @base, graph
+          }
+        else
+          yield @body, Content, WebResource::HTML.render({_: :pre, style: 'white-space: pre-wrap',
+                                                          c: @doc.each_line{|line|
+                                                            line.hrefs{|p,o| # hypertextize
+                                                              # yield detected links to consumer
+                                                              yield @body, p, o
+                                                              yield o, Type, (W3 + '2000/01/rdf-schema#Resource').R}}})
+        end
       end
     end
   end
