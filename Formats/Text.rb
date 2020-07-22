@@ -315,11 +315,11 @@ module Webize
         if basename == 'twtxt'
           @doc.lines.grep(/^[^#]/).map{|line|
             date, msg = line.split /\t/
-            graph = @base.join dirname + '/twtxt.' + date.gsub(/\D/,'.')
+            graph = @base.join (dirname == '/' ? '' : dirname) + '/twtxt.' + date.gsub(/\D/,'.')
             subject = graph.join '#msg'
             yield subject, Type, Post.R, graph
             yield subject, Date, date, graph
-            yield subject, Content, msg.hrefs, graph
+            yield subject, Content, Webize::HTML.format(msg.hrefs, @base), graph
             yield subject, Creator, (@base.host + dirname).split(/\W/).join('.'), graph
             yield subject, To, @base, graph
           }
