@@ -1,5 +1,5 @@
 # coding: utf-8
-%w(brotli cgi digest/sha2 httparty open-uri rack).map{|_| require _}
+%w(brotli cgi digest/sha2 open-uri rack).map{|_| require _}
 class WebResource
   module HTTP
     include URIs
@@ -54,7 +54,7 @@ class WebResource
     end
 
     def self.call env
-      return [405,{},[]] unless %w(GET HEAD OPTIONS POST PUT).member? env['REQUEST_METHOD']           # allow HTTP methods
+      return [405,{},[]] unless %w(GET HEAD).member? env['REQUEST_METHOD']      # allowed HTTP methods
       uri = RDF::URI('http' + (env['SERVER_NAME'] == 'localhost' ? '' : 's') + '://' + env['HTTP_HOST']).join env['REQUEST_PATH'] # resource identifier
       uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading + consecutive & from qs so URI library doesn't freak out
       resource = uri.R env                                                      # bind resource and environment
@@ -336,8 +336,6 @@ class WebResource
       end
     end
 
-    alias_method :get, :fetch
-
     def HEAD
       self.GET.yield_self{|s, h, _|
                           [s, h, []]} # return header
@@ -384,25 +382,6 @@ class WebResource
     end
 
     def notfound; [404, {'Content-Type' => 'text/html'}, [htmlDocument]] end
-
-    def OPTIONS
-      r = HTTParty.options uri, headers: headers, body: env['rack.input'].read
-      [r.code, (headers r.headers), [r.body]]
-    end
-
-    def POST
-      head = headers
-      body = env['rack.input'].read
-      env.delete 'rack.input'
-      r = HTTParty.post uri, headers: head, body: body
-      head = headers r.headers
-      [r.code, head, [r.body]]
-    end
-
-    def PUT
-      r = HTTParty.put uri, headers: headers, body: env['rack.input'].read
-      [r.code, (headers r.headers), [r.body]]
-    end
 
     # Hash -> querystring
     def HTTP.qs h
