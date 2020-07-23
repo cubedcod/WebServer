@@ -50,19 +50,8 @@ class WebResource
   module HTTP
 
     # handler lambdas
-
-    GoAU =  -> r {
-      if url = (r.query_values || {})['adurl']
-        dest = url.R
-        dest.query = '' unless url.match? /dest_url/
-        [301, {'Location' => dest}, []]
-      else
-        r.deny
-      end}
-
     GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['u']||r.query_values['q'])}, []]}
     NoGunk  = -> r {r.send r.uri.match?(Gunk) ? :deny : :fetch}
-    NoProxy = -> r {r.parts[0] == 'proxy' ? r.deny(200, :image) : NoGunk[r]}
 
     NoQuery = -> r {
       if !r.query                         # request
@@ -116,22 +105,20 @@ w.bos.gl wired.trib.al
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
     GET 'gate.sc', GotoURL
 
-    if ENV.has_key? 'GOOGLE'
-      %w(cse developers dl docs drive images kh khms0 khms1 khms2 khms3 lh3 maps news photos sites).map{|h|
-                                                                                  GET h + '.google.com' }
-      %w(encrypted-tbn0 encrypted-tbn1 encrypted-tbn2 encrypted-tbn3 encrypted-vtbn3 maps ssl www).map{|h|
-                                                                                  GET h + '.gstatic.com' }
-      %w(geo0 geo1 geo2 geo3 lh3 lh4 lh5 lh6).map{|h|                             GET h + '.ggpht.com' }
-      %w(maps storage).map{|h|                                                    GET h + '.googleapis.com' }
-      (3..6).map{|i|                                                              GET "lh#{i}.googleusercontent.com", NoProxy}
-      GET 'ad.doubleclick.net', -> r {[301, {'Location' => 'https://en.wikipedia.org/wiki/Special:Random'}, []]}
-      GET 'googleads.g.doubleclick.net', GoAU
-      GET 'googleweblight.com', GotoURL
-      GET 'google.com', -> r {[301, {'Location' => ['http://localhost:8000/www.google.com', r.path, '?', r.query].join}, []]}
-      GET 'www.google.com', -> r {![nil, *%w(logos maps search url)].member?(r.parts[0]) ? r.deny : (r.path == '/url' ? GotoURL : NoGunk)[r]}
-      GET 'www.googleadservices.com', GoAU
-      GET 'yt3.ggpht.com', NoProxy
-    end
+    GotoAdURL =  -> r {
+      if url = (r.query_values || {})['adurl']
+        dest = url.R
+        dest.query = '' unless url.match? /dest_url/
+        [301, {'Location' => dest}, []]
+      else
+        r.deny
+      end}
+
+    GET 'googleads.g.doubleclick.net', GotoAdURL
+    GET 'googleweblight.com', GotoURL
+    GET 'google.com', -> r {[301, {'Location' => ['http://localhost:8000/www.google.com', r.path, '?', r.query].join}, []]}
+    GET 'www.google.com', -> r {![nil, *%w(logos maps search url)].member?(r.parts[0]) ? r.deny : (r.path == '/url' ? GotoURL : NoGunk)[r]}
+    GET 'www.googleadservices.com', GotoAdURL
 
     GET 'developer.mozilla.org'
 
