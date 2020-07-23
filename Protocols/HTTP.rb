@@ -308,11 +308,15 @@ class WebResource
       if localNode?
         env[:cacherefs] = true
         p = parts[0]
-        if %w{m d h}.member? p                 # timeline redirect
+        if !p
+          [301, {'Location' => '/h'}, []]
+        elsif %w{m d h}.member? p                 # timeline redirect
           dateDir
         elsif p == 'favicon.ico'
           SiteDir.join('favicon.ico').R(env).fileResponse
-        elsif !p || p.match?(/^(\d\d\d\d|msg)$/) || node.file?
+        elsif node.file?
+          fileResponse
+        elsif p.match? /^(\d\d\d\d|msg)$/
           cacheResponse                        # local node
         elsif p == 'log' && parts.size == 2
           [200, {'Content-Type' => 'text/html'}, [`grep -i #{Shellwords.escape parts[1]} ~/web/web.log | tr -s ' ' | cut -d ' ' -f 7 | sort | uniq`.hrefs]]
