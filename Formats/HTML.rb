@@ -531,11 +531,6 @@ class WebResource
         style: env[:colors][re.host] ||= HTML.colorize},
        " \n"]}
 
-    Markup[List] = -> list, env {
-      tabular((list[Schema+'itemListElement']||list[Schema+'ListItem']||
-               list['https://schema.org/itemListElement']||[]).map{|l|
-                l.respond_to?(:uri) && env[:graph][l.uri] || (l.class == WebResource ? {'uri' => l.uri, Title => [l.uri]} : l)}, env)}
-
     Markup[Type] = -> t, env=nil {
       if t.class == WebResource
         {_: :a, href: t.uri, c: Icons[t.uri] || t.fragment || (t.path && t.basename)}.update(Icons[t.uri] ? {class: :icon} : {})
