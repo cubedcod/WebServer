@@ -166,6 +166,8 @@ class WebResource < RDF::URI
   end
   module HTML
 
+    include URIs
+
     # single-character representation of URI
     Icons = {
       Abstract => '✍',
@@ -253,8 +255,6 @@ class WebResource < RDF::URI
         CGI.escapeHTML v.to_s
       end
     end
-
-    include URIs
 
     Markup = {} # markup lambdas for RDF types
 

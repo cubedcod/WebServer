@@ -348,7 +348,7 @@ class WebResource
          ([{_: :tr, name: type.fragment || (type.path && type.basename),
             c: ["\n",
                 {_: :td, class: 'k',
-                 c: Markup[Type][type]}, "\n",
+                 c: Markup[Type][type, env]}, "\n",
                 {_: :td, class: 'v',
                  c: k==Link ? MarkupLinks[vs, env] : vs.map{|v|
                    [(markup k, v, env), ' ']}}]}, "\n"] unless k == 'uri' && vs[0] && vs[0].to_s.match?(/^_:/))}} # hide bnode internal-identifiers
