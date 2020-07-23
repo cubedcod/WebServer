@@ -61,7 +61,6 @@ zerg(net)?)
     def gunkDomain?
       return false if !host ||
                       CDNhosts.has_key?(host) ||
-                      WebResource::HTTP::AllowedHosts.has_key?(host) ||
                       WebResource::HTTP::HostGET.has_key?(host)
       c = GunkHosts                                                 # start cursor at root
       host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # find leaf in gunk tree
