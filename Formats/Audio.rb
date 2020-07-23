@@ -182,3 +182,22 @@ module Webize
     end
   end
 end
+
+class WebResource
+
+  module HTML
+
+    Markup[Audio] = -> audio, env {
+      src = (if audio.class == WebResource
+             audio
+            elsif audio.class == String && audio.match?(/^http/)
+              audio
+            else
+              audio['https://schema.org/url'] || audio[Schema+'contentURL'] || audio[Schema+'url'] || audio[Link] || audio['uri']
+             end).to_s
+       {class: :audio,
+           c: [{_: :audio, src: src, controls: :true}, '<br>',
+               {_: :a, href: src, c: src.R.basename}]}}
+  end
+
+end

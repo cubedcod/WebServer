@@ -338,5 +338,80 @@ class WebResource
         end}
     end
 
+    Markup[Title] = -> title, env {
+      if title.class == String
+        {_: :h3, class: :title, c: CGI.escapeHTML(title)}
+      end}
+
+    Markup['http://purl.org/dc/terms/created'] = Markup['http://purl.org/dc/terms/modified'] = Markup[Date] = -> date, env=nil {
+      {_: :a, class: :date, c: date, href: 'http://' + (ENV['HOSTNAME'] || 'localhost') + ':8000/' + date[0..13].gsub(/[-T:]/,'/')}}
+
+    Markup[Creator] = Markup[To] = Markup['http://xmlns.com/foaf/0.1/maker'] = -> c, env {
+      if c.class == Hash || c.respond_to?(:uri)
+        u = c.R env
+        basename = u.basename if u.path
+        host = u.host
+        name = u.fragment ||
+               (basename && !['','/'].member?(basename) && basename) ||
+               (host && host.sub(/\.com$/,'')) ||
+               'user'
+        avatar = nil
+        {_: :a, href: u.href,
+         id: 'a' + Digest::SHA2.hexdigest(rand.to_s),
+         class: avatar ? :avatar : :fromto,
+         style: avatar ? '' : (env[:colors][name] ||= HTML.colorize),
+         c: avatar ? {_: :img, class: :avatar, src: avatar} : name}
+      else
+        CGI.escapeHTML (c||'')
+      end}
+
+    Markup[Post] = -> post, env {
+      post.delete Type
+      uri = post.delete('uri') || ('#' + Digest::SHA2.hexdigest(rand.to_s))
+      resource = uri.R env
+      titles = (post.delete(Title)||[]).map(&:to_s).map(&:strip).compact.-([""]).uniq
+      abstracts = post.delete(Abstract) || []
+      date = (post.delete(Date) || [])[0]
+      from = post.delete(Creator) || []
+      to = post.delete(To) || []
+      images = post.delete(Image) || []
+      links = post.delete(Link) || []
+      content = post.delete(Content) || []
+      htmlcontent = post.delete(SIOC + 'richContent') || []
+      uri_hash = 'r' + Digest::SHA2.hexdigest(uri)
+      hasPointer = false
+      local_id = if !resource.path || (resource.host == env[:base].host && resource.path == env[:base].path)
+                   resource.fragment
+                 else
+                   uri_hash
+                 end
+      {class: :post, id: local_id,
+       c: ["\n",
+           titles.map{|title|
+             title = title.to_s.sub(/\/u\/\S+ on /,'')
+             unless env[:title] == title
+               env[:title] = title
+               hasPointer = true
+               [{_: :a,  id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: :title, type: :node,
+                 href: resource.href, c: CGI.escapeHTML(title)}, " \n"]
+             end},
+           ({_: :a, class: :id, type: :node, c: '🔗', href: resource.href, id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} unless hasPointer), "\n", # pointer
+           abstracts,
+           ([{_: :a, class: :date, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date}, "\n"] if date),
+           images.map{|i| Markup[Image][i,env]},
+           {_: :table,
+            c: {_: :tr,
+                c: [{_: :td,
+                     c: from.map{|f|Markup[Creator][f,env]},
+                     class: :from}, "\n",
+                    {_: :td, c: '&rarr;'},
+                    {_: :td,
+                     c: [to.map{|f|Markup[To][f,env]},
+                         post.delete(SIOC+'reply_of')],
+                     class: :to}, "\n"]}}, "\n",
+           (env[:cacherefs] ? [content, htmlcontent].flatten.compact.map{|c| Webize::HTML.cacherefs c, env} : [content, htmlcontent]).compact.join('<hr>'),
+           MarkupLinks[links, env],
+           (["<br>\n", HTML.keyval(post,env)] unless post.keys.size < 1)]}}
+
   end
 end

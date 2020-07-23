@@ -81,3 +81,30 @@ module Webize
     end
   end
 end
+class WebResource
+  module HTML
+
+    Markup[Video] = -> video, env {
+      if v = if video.class == WebResource || (video.class == String && video.match?(/^http/))
+               video
+             else
+               video['https://schema.org/url'] || video[Schema+'contentURL'] || video[Schema+'url'] || video[Link] || video['uri']
+             end
+        if v.to_s.match? /v.redd.it/
+          v += '/DASHPlaylist.mpd'
+          dash = true
+        end
+        v = v.R env
+        if v.uri.match? /youtu/
+          id = (v.query_values||{})['v'] || v.parts[-1]
+          {_: :iframe, width: 560, height: 315, src: "https://www.youtube.com/embed/#{id}", frameborder: 0, allow: 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture', allowfullscreen: :true}
+        else
+          [dash ? '<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>' : nil,
+           {class: :video,
+            c: [{_: :video, src: v.href, controls: :true}.update(dash ? {'data-dashjs-player' => 1} : {}), '<br>',
+                ({_: :a, href: v.href, c: v.basename} if v.path)]}]
+        end
+      end}
+
+  end
+end

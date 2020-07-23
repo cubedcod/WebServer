@@ -478,58 +478,6 @@ class WebResource
       end
     end
 
-    # Hash -> Markup
-    def self.tabular graph, env
-      graph = graph.values if graph.class == Hash
-      keys = graph.select{|r|r.respond_to? :keys}.map{|r|r.keys}.flatten.uniq - [Abstract, Content, DC+'hasFormat', DC+'identifier', Image, Link, Video, SIOC+'reply_of', SIOC+'richContent', SIOC+'user_agent', Title]
-      keys = [Creator, *(keys - [Creator])] if keys.member? Creator
-      if env[:sort]
-        attr = env[:sort]
-        attr = Date if %w(date new).member? attr
-        attr = Content if attr == 'content'
-        graph = graph.sort_by{|r| (r[attr]||'').to_s}.reverse
-      end
-
-      {_: :table, class: :tabular,
-       c: [{_: :thead,
-            c: {_: :tr, c: keys.map{|p|
-                  p = p.R
-                  slug = p.fragment || (p.path && p.basename) || ' '
-                  icon = Icons[p.uri] || slug
-                  [{_: :th, c: {_: :a, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}, "\n"]}}}, "\n",
-           {_: :tbody,
-            c: graph.map{|resource|
-
-              re = (resource['uri'] || ('#' + Digest::SHA2.hexdigest(rand.to_s))).R env
-              local_id = re.path == env['REQUEST_PATH'] && re.fragment || ('r' + Digest::SHA2.hexdigest(re.uri))
-
-              [{_: :tr, id: local_id, c: keys.map{|k|
-                 [{_: :td, property: k,
-                  c: if k == 'uri'
-                   tCount = 0
-                   [(resource[Title]||[]).map{|title|
-                      title = title.to_s.sub(/\/u\/\S+ on /, '').sub /^Re: /, ''
-                      unless env[:title] == title # show topic if changed from previous post
-                        env[:title] = title; tCount += 1
-                        {_: :a, href: re.href, class: :title, type: :node, c: CGI.escapeHTML(title), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}
-                      end},
-                    ({_: :a, href: re.href, class: :id, type: :node, c: '🔗', id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} if tCount == 0),
-                    (resource[SIOC+'reply_of']||[]).map{|r|
-                      {_: :a, href: r.to_s, c: Icons[SIOC+'reply_of']} if r.class == RDF::URI || r.class == WebResource},
-                    resource[Abstract] ? [resource[Abstract], '<br>'] : '',
-                    [Image,
-                     Video].map{|t|(resource[t]||[]).map{|i|
-                                         Markup[t][i,env]}},
-                    (env[:cacherefs] ? [resource[Content],
-                                        resource[SIOC+'richContent']].flatten.compact.map{|c|
-                                         Webize::HTML.cacherefs c, env} : [resource[Content],
-                                                                           resource[SIOC+'richContent']]).compact.join('<hr>'),
-                    MarkupLinks[(resource[Link]||[]),env]]
-                 else
-                   (resource[k]||[]).map{|v|value k, v, env }
-                   end}, "\n" ]}}, "\n" ]}}]}
-    end
-
     # values -> Markup
 
     def self.value type, v, env
@@ -560,51 +508,6 @@ class WebResource
 
     Markup['uri'] = -> uri, env=nil {uri.R}
 
-    Markup[Audio] = -> audio, env {
-      src = (if audio.class == WebResource
-             audio
-            elsif audio.class == String && audio.match?(/^http/)
-              audio
-            else
-              audio['https://schema.org/url'] || audio[Schema+'contentURL'] || audio[Schema+'url'] || audio[Link] || audio['uri']
-             end).to_s
-       {class: :audio,
-           c: [{_: :audio, src: src, controls: :true}, '<br>',
-               {_: :a, href: src, c: src.R.basename}]}
-    }
-
-    Markup[LDP + 'Container'] = -> dir , env { uri = (dir.delete('uri') || '').R
-      [Type, Title,
-       W3 + 'ns/posix/stat#mtime',
-       W3 + 'ns/posix/stat#size'].map{|p|dir.delete p}
-      {class: :container,
-       c: [{_: :a, id: 'container' + Digest::SHA2.hexdigest(rand.to_s), class: :title, href: uri.path, type: :node, c: uri.basename},
-           {class: :body, c: HTML.keyval(dir, env)}]}}
-
-    Markup[Creator] = Markup[To] = Markup['http://xmlns.com/foaf/0.1/maker'] = -> c, env {
-      if c.class == Hash || c.respond_to?(:uri)
-        u = c.R env
-        basename = u.basename if u.path
-        host = u.host
-        name = u.fragment ||
-               (basename && !['','/'].member?(basename) && basename) ||
-               (host && host.sub(/\.com$/,'')) ||
-               'user'
-        avatar = nil
-        {_: :a, href: u.href,
-         id: 'a' + Digest::SHA2.hexdigest(rand.to_s),
-         class: avatar ? :avatar : :fromto,
-         style: avatar ? '' : (env[:colors][name] ||= HTML.colorize),
-         c: avatar ? {_: :img, class: :avatar, src: avatar} : name}
-      else
-        CGI.escapeHTML (c||'')
-      end}
-
-    Markup[Date] = -> date, env=nil {
-      {_: :a, class: :date, c: date, href: 'http://' + (ENV['HOSTNAME'] || 'localhost') + ':8000/' + date[0..13].gsub(/[-T:]/,'/')}}
-
-    Markup['http://purl.org/dc/terms/created'] = Markup['http://purl.org/dc/terms/modified'] = Markup[Date]
-
     Markup[DC+'language'] = -> lang, env=nil {
       {'de' => '🇩🇪',
        'en' => '🇬🇧',
@@ -633,65 +536,6 @@ class WebResource
                list['https://schema.org/itemListElement']||[]).map{|l|
                 l.respond_to?(:uri) && env[:graph][l.uri] || (l.class == WebResource ? {'uri' => l.uri, Title => [l.uri]} : l)}, env)}
 
-    Markup[Post] = -> post, env {
-      post.delete Type
-      uri = post.delete('uri') || ('#' + Digest::SHA2.hexdigest(rand.to_s))
-      resource = uri.R env
-      titles = (post.delete(Title)||[]).map(&:to_s).map(&:strip).compact.-([""]).uniq
-      abstracts = post.delete(Abstract) || []
-      date = (post.delete(Date) || [])[0]
-      from = post.delete(Creator) || []
-      to = post.delete(To) || []
-      images = post.delete(Image) || []
-      links = post.delete(Link) || []
-      content = post.delete(Content) || []
-      htmlcontent = post.delete(SIOC + 'richContent') || []
-      uri_hash = 'r' + Digest::SHA2.hexdigest(uri)
-      hasPointer = false
-      local_id = if !resource.path || (resource.host == env[:base].host && resource.path == env[:base].path)
-                   resource.fragment
-                 else
-                   uri_hash
-                 end
-      {class: :post, id: local_id,
-       c: ["\n",
-           titles.map{|title|
-             title = title.to_s.sub(/\/u\/\S+ on /,'')
-             unless env[:title] == title
-               env[:title] = title
-               hasPointer = true
-               [{_: :a,  id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: :title, type: :node,
-                 href: resource.href, c: CGI.escapeHTML(title)}, " \n"]
-             end},
-           ({_: :a, class: :id, type: :node, c: '🔗', href: resource.href, id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} unless hasPointer), "\n", # pointer
-           abstracts,
-           ([{_: :a, class: :date, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date}, "\n"] if date),
-           images.map{|i| Markup[Image][i,env]},
-           {_: :table,
-            c: {_: :tr,
-                c: [{_: :td,
-                     c: from.map{|f|Markup[Creator][f,env]},
-                     class: :from}, "\n",
-                    {_: :td, c: '&rarr;'},
-                    {_: :td,
-                     c: [to.map{|f|Markup[To][f,env]},
-                         post.delete(SIOC+'reply_of')],
-                     class: :to}, "\n"]}}, "\n",
-           (env[:cacherefs] ? [content, htmlcontent].flatten.compact.map{|c| Webize::HTML.cacherefs c, env} : [content, htmlcontent]).compact.join('<hr>'),
-           MarkupLinks[links, env],
-           (["<br>\n", HTML.keyval(post,env)] unless post.keys.size < 1)]}}
-
-    Markup[Stat+'File'] = -> file, env {
-      [({class: :file,
-         c: [{_: :a, href: file['uri'], class: :icon, c: Icons[Stat+'File']},
-             {_: :span, class: :name, c: file['uri'].R.basename}]} if file['uri']),
-       (HTML.keyval file, env)]}
-
-    Markup[Title] = -> title, env {
-      if title.class == String
-        {_: :h3, class: :title, c: CGI.escapeHTML(title)}
-      end}
-
     Markup[Type] = -> t, env=nil {
       if t.class == WebResource
         {_: :a, href: t.uri, c: Icons[t.uri] || t.fragment || (t.path && t.basename)}.update(Icons[t.uri] ? {class: :icon} : {})
@@ -699,41 +543,6 @@ class WebResource
         CGI.escapeHTML t.to_s
       end}
 
-    Markup[Image] = -> image, env {
-      if img = if image.class == WebResource
-                 image
-               elsif image.class == String && image.match?(/^([\/]|http)/)
-                 image
-               else
-                 image['https://schema.org/url'] || image[Schema+'url'] || image[Link] || image['uri']
-               end
-        src = env[:base].join(img).R env
-        [{class: :thumb,
-          c: {_: :a, href: src.href,
-              c: {_: :img, src: src.href}}}, " \n"]
-      end}
-
-    Markup[Video] = -> video, env {
-      if v = if video.class == WebResource || (video.class == String && video.match?(/^http/))
-               video
-             else
-               video['https://schema.org/url'] || video[Schema+'contentURL'] || video[Schema+'url'] || video[Link] || video['uri']
-             end
-        if v.to_s.match? /v.redd.it/
-          v += '/DASHPlaylist.mpd'
-          dash = true
-        end
-        v = v.R env
-        if v.uri.match? /youtu/
-          id = (v.query_values||{})['v'] || v.parts[-1]
-          {_: :iframe, width: 560, height: 315, src: "https://www.youtube.com/embed/#{id}", frameborder: 0, allow: 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture', allowfullscreen: :true}
-        else
-          [dash ? '<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>' : nil,
-           {class: :video,
-            c: [{_: :video, src: v.href, controls: :true}.update(dash ? {'data-dashjs-player' => 1} : {}), '<br>',
-                ({_: :a, href: v.href, c: v.basename} if v.path)]}]
-        end
-      end}
   end
 
   include HTML

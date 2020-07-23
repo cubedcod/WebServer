@@ -102,4 +102,21 @@ class WebResource
     end
 
   end
+  module HTML
+
+    Markup[LDP + 'Container'] = -> dir , env { uri = (dir.delete('uri') || '').R
+      [Type, Title,
+       W3 + 'ns/posix/stat#mtime',
+       W3 + 'ns/posix/stat#size'].map{|p|dir.delete p}
+      {class: :container,
+       c: [{_: :a, id: 'container' + Digest::SHA2.hexdigest(rand.to_s), class: :title, href: uri.path, type: :node, c: uri.basename},
+           {class: :body, c: HTML.keyval(dir, env)}]}}
+
+    Markup[Stat+'File'] = -> file, env {
+      [({class: :file,
+         c: [{_: :a, href: file['uri'], class: :icon, c: Icons[Stat+'File']},
+             {_: :span, class: :name, c: file['uri'].R.basename}]} if file['uri']),
+       (HTML.keyval file, env)]}
+
+  end
 end
