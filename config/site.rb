@@ -95,12 +95,6 @@ t.co ti.me tinyurl.com trib.al
 w.bos.gl wired.trib.al
 ).map{|s| GET s, NoQuery}
 
-    # video APIs
-    %w(entitlement.auth.adobe.com sp.auth.adobe.com tkx.apis.anvato.net
-edge.api.brightcove.com players.brightcove.net secure.brightcove.com
-api.lbry.com api.lbry.tv lbry.tv
-graphql.api.dailymotion.com).map{|h| Allow h}
-
     GET 'gitter.im', -> r {
       r.env[:sort] = 'date'
       r.env[:view] = 'table'
@@ -123,8 +117,6 @@ graphql.api.dailymotion.com).map{|h| Allow h}
     GET 'gate.sc', GotoURL
 
     if ENV.has_key? 'GOOGLE'
-      %w(aa books groups).map{|h|                                               Allow h + '.google.com' }
-      %w(update).map{|h|                                                        Allow h + '.googleapis.com' }
       %w(cse developers dl docs drive images kh khms0 khms1 khms2 khms3 lh3 maps news photos sites).map{|h|
                                                                                   GET h + '.google.com' }
       %w(encrypted-tbn0 encrypted-tbn1 encrypted-tbn2 encrypted-tbn3 encrypted-vtbn3 maps ssl www).map{|h|
@@ -339,40 +331,6 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
     ['#fixed_sidebar'].map{|s|doc.css(s).map &:remove}
   end
 
-  def Chan doc
-    doc.css('.post, .postCell').map{|post|
-      number = post.css('a.post_no, .postNum a')[0]
-      subject = join(number ? number['href'] : ('#' + (post['id'] || (Digest::SHA2.hexdigest post.to_s))))
-      graph = ['https://', subject.host, subject.path, '/', subject.fragment].join.R
-
-      yield subject, Type, Post.R, graph
-
-      post.css('.name, .post_author').map{|name|
-        yield subject, Creator, name.inner_text, graph }
-
-      post.css('time, .dateTime').map{|date|
-        yield subject, Date,
-              (date['datetime'] || Time.at((date['data-utc'] ||
-                                            date['unixtime']).to_i).iso8601), graph }
-
-      post.css('.labelCreated').map{|created|
-        yield subject, Date, Chronic.parse(created.inner_text).iso8601, graph}
-
-      post.css('.post_title, .subject, .title').map{|subj|
-        yield subject, Title, subj.inner_text, graph }
-
-      post.css('.body, .divMessage, .postMessage, .text').map{|msg|
-        yield subject, Content, msg, graph }
-
-      post.css('.fileThumb, .imgLink').map{|a|
-        yield subject, Image, a['href'].R, graph if a['href'] }
-
-      post.css('.post_image, .post-image').map{|img|
-        yield subject, Image, img.parent['href'].R, graph}
-
-      post.remove }
-  end
-
   def Drudge doc
   end
 
@@ -534,39 +492,11 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
       post.remove }
   end
 
-  def HFeed doc
-    doc.css('.entry').map{|post|
-      if info = post.css('.status__info > a')[0]
-
-        subject = graph = info['href'].R
-
-        yield subject, Type, Post.R, graph
-
-        post.css('.p-author').map{|author|
-          author.css('a').map{|a|
-            yield subject, Creator, a['href'].R, graph}
-          yield subject, Creator, author.inner_text, graph}
-
-        post.css('time').map{|date|
-          yield subject, Date, date['datetime'], graph }
-
-        post.css('.e-content').map{|msg|
-          yield subject, Content, Webize::HTML.format(msg.inner_html, self), graph }
-
-        post.css('img').map{|img|
-          yield subject, Image, img['src'].R, graph }
-
-        post.remove
-
-      end}
-  end
-
-  IGgraph = /^window._sharedData = /
-
   def InstagramHTML doc, &b
+    objvar = /^window._sharedData = /
     doc.css('script').map{|script|
-      if script.inner_text.match? IGgraph
-        InstagramJSON ::JSON.parse(script.inner_text.sub(IGgraph,'')[0..-2]), &b
+      if script.inner_text.match? objvar
+        InstagramJSON ::JSON.parse(script.inner_text.sub(objvar, '')[0..-2]), &b
       end}
   end
 

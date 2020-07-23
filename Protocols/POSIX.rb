@@ -98,7 +98,7 @@ class WebResource
         end
         Pathname.glob globPath
        end).map{|p|             # map path to URI-space
-        (((host && host != 'localhost') ? ('https://' + host) : '') + '/' + p.to_s[pathIndex..-1].gsub(':','%3A').gsub('#','%23')).R env }
+        (((host && host != 'localhost') ? ('https://' + host) : '') + '/' + p.to_s[pathIndex..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env }
     end
 
   end

@@ -3,8 +3,6 @@
 class WebResource
   module HTTP
     include URIs
-
-    AllowedHosts = {}
     HostGET = {}
 
     def self.action_icon action, fetched=true
@@ -22,12 +20,8 @@ class WebResource
       end
     end
 
-    def self.Allow host
-      AllowedHosts[host] = true
-    end
-
     def allowCookies?
-      AllowedHosts.has_key?(host) || HostGET.has_key?(host) || ENV.has_key?('COOKIES')
+      HostGET.has_key?(host) || ENV.has_key?('COOKIES')
     end
 
     def allowedOrigin
@@ -392,27 +386,11 @@ class WebResource
     def notfound; [404, {'Content-Type' => 'text/html'}, [htmlDocument]] end
 
     def OPTIONS
-      if AllowedHosts.has_key? host
-        self.OPTIONSthru
-      else
-        env[:deny] = true
-        [204, {'Access-Control-Allow-Credentials' => 'true',
-               'Access-Control-Allow-Headers' => AllowedHeaders,
-               'Access-Control-Allow-Origin' => allowedOrigin},
-         []]
-      end
-    end
-
-    def OPTIONSthru
       r = HTTParty.options uri, headers: headers, body: env['rack.input'].read
       [r.code, (headers r.headers), [r.body]]
     end
 
     def POST
-      (ENV.has_key?('POST') || AllowedHosts.has_key?(host) || host.match?(/\.ttvnw.net$/)) && !path.match?(/\/jot\//) && self.POSTthru || denyPOST
-    end
-
-    def POSTthru
       head = headers
       body = env['rack.input'].read
       env.delete 'rack.input'
@@ -422,18 +400,6 @@ class WebResource
     end
 
     def PUT
-      if AllowedHosts.has_key? host
-        self.PUTthru
-      else
-        env[:deny] = true
-        [204, {'Access-Control-Allow-Credentials' => 'true',
-               'Access-Control-Allow-Headers' => AllowedHeaders,
-               'Access-Control-Allow-Origin' => allowedOrigin},
-         []]
-      end
-    end
-
-    def PUTthru
       r = HTTParty.put uri, headers: headers, body: env['rack.input'].read
       [r.code, (headers r.headers), [r.body]]
     end

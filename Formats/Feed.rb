@@ -259,6 +259,40 @@ end
 class WebResource
   module HTML
 
+    def Chan doc
+      doc.css('.post, .postCell').map{|post|
+        number = post.css('a.post_no, .postNum a')[0]
+        subject = join(number ? number['href'] : ('#' + (post['id'] || (Digest::SHA2.hexdigest post.to_s))))
+        graph = ['https://', subject.host, subject.path, '/', subject.fragment].join.R
+
+        yield subject, Type, Post.R, graph
+
+        post.css('.name, .post_author').map{|name|
+          yield subject, Creator, name.inner_text, graph }
+
+        post.css('time, .dateTime').map{|date|
+          yield subject, Date,
+                (date['datetime'] || Time.at((date['data-utc'] ||
+                                              date['unixtime']).to_i).iso8601), graph }
+
+        post.css('.labelCreated').map{|created|
+          yield subject, Date, Chronic.parse(created.inner_text).iso8601, graph}
+
+        post.css('.post_title, .subject, .title').map{|subj|
+          yield subject, Title, subj.inner_text, graph }
+
+        post.css('.body, .divMessage, .postMessage, .text').map{|msg|
+          yield subject, Content, msg, graph }
+
+        post.css('.fileThumb, .imgLink').map{|a|
+          yield subject, Image, a['href'].R, graph if a['href'] }
+
+        post.css('.post_image, .post-image').map{|img|
+          yield subject, Image, img.parent['href'].R, graph}
+
+        post.remove }
+    end
+
     def feedDocument
       HTML.render ['<?xml version="1.0" encoding="utf-8"?>',
                    {_: :feed,xmlns: 'http://www.w3.org/2005/Atom',
@@ -277,6 +311,32 @@ class WebResource
                                     c: d[Content]}}]}}]}]
     end
 
-  end
+    def HFeed doc
+      doc.css('.entry').map{|post|
+        if info = post.css('.status__info > a')[0]
 
+          subject = graph = info['href'].R
+
+          yield subject, Type, Post.R, graph
+
+          post.css('.p-author').map{|author|
+            author.css('a').map{|a|
+              yield subject, Creator, a['href'].R, graph}
+            yield subject, Creator, author.inner_text, graph}
+
+          post.css('time').map{|date|
+            yield subject, Date, date['datetime'], graph }
+
+          post.css('.e-content').map{|msg|
+            yield subject, Content, Webize::HTML.format(msg.inner_html, self), graph }
+
+          post.css('img').map{|img|
+            yield subject, Image, img['src'].R, graph }
+
+          post.remove
+
+        end}
+    end
+
+  end
 end
