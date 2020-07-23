@@ -52,7 +52,8 @@ class WebResource
                                                                            resource[SIOC+'richContent']]).compact.join('<hr>'),
                     MarkupLinks[(resource[Link]||[]),env]]
                  else
-                   (resource[k]||[]).map{|v|value k, v, env }
+                   (resource[k]||[]).map{|v|
+                     markup k, v, env }
                    end}, "\n" ]}}, "\n" ]}}]}
     end
 

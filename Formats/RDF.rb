@@ -166,6 +166,33 @@ class WebResource < RDF::URI
   end
   module HTML
 
+    # RDF -> Markup
+    def self.markup type, v, env
+      if [Abstract, Content, 'http://rdfs.org/sioc/ns#richContent'].member? type
+        (env[:cacherefs] && v.class == String) ? Webize::HTML.cacherefs(v, env) : v
+      elsif Markup[type] # markup lambda defined for explicit type argument
+        Markup[type][v,env]
+      elsif v.class == Hash # data
+        types = (v[Type] || []).map{|t|
+          MarkupMap[t.to_s] || t.to_s } # normalize typetags for unified renderer selection
+        seen = false
+        [types.map{|type|
+          if f = Markup[type] # markup lambda defined for RDF type
+            seen = true
+            f[v,env]
+          end},
+         (keyval v, env unless seen)] # default key-value renderer
+      elsif v.class == WebResource # resource-reference arguments
+        if v.path && %w{jpeg jpg JPG png PNG webp}.member?(v.ext)
+          Markup[Image][v, env]    # image reference
+        else
+          v                        # generic reference
+        end
+      else # undefined renderer
+        CGI.escapeHTML v.to_s
+      end
+    end
+
     include URIs
 
     Markup = {} # markup lambdas for RDF types
