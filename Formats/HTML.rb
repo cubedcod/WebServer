@@ -295,36 +295,6 @@ class WebResource
       W3 + '2000/01/rdf-schema#Resource' => '🌐',
     }
 
-    MarkupMap = {
-      'article' => Post,
-      'http://schema.org/Comment' => Post,
-      'http://schema.org/ProfilePage' => Person,
-      'https://schema.org/BreadcrumbList' => List,
-      'https://schema.org/Comment' => Post,
-      'https://schema.org/ImageObject' => Image,
-      'https://schema.org/NewsArticle' => Post,
-      'https://schema.org/Person' => Person,
-      FOAF + 'Image' => Image,
-      SIOC + 'MicroblogPost' => Post,
-      SIOC + 'BlogPost' => Post,
-      SIOC + 'MailMessage' => Post,
-      SIOC + 'UserAccount' => Person,
-      Schema + 'Answer' => Post,
-      Schema + 'Article' => Post,
-      Schema + 'BlogPosting' => Post,
-      Schema + 'BreadcrumbList' => List,
-      Schema + 'Code' => Post,
-      Schema + 'DiscussionForumPosting' => Post,
-      Schema + 'ImageObject' => Image,
-      Schema + 'ItemList' => List,
-      Schema + 'NewsArticle' => Post,
-      Schema + 'Person' => Person,
-      Schema + 'Review' => Post,
-      Schema + 'UserComments' => Post,
-      Schema + 'VideoObject' => Video,
-      Schema + 'WebPage' => Post,
-    }
-
     def self.colorize color = '#%06x' % (rand 16777216)
       "color: black; background-color: #{color}; border-color: #{color}"
     end
@@ -440,14 +410,6 @@ class WebResource
         CGI.escapeHTML x.to_s
       end
     end
-
-    Markup[DC+'language'] = -> lang, env=nil {
-      {'de' => '🇩🇪',
-       'en' => '🇬🇧',
-       'fr' => '🇫🇷',
-       'ja' => '🇯🇵',
-      }[lang] || lang
-    }
 
   end
 

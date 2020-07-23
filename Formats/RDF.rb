@@ -166,6 +166,36 @@ class WebResource < RDF::URI
   end
   module HTML
 
+    MarkupMap = {
+      'article' => Post,
+      'http://schema.org/Comment' => Post,
+      'http://schema.org/ProfilePage' => Person,
+      'https://schema.org/BreadcrumbList' => List,
+      'https://schema.org/Comment' => Post,
+      'https://schema.org/ImageObject' => Image,
+      'https://schema.org/NewsArticle' => Post,
+      'https://schema.org/Person' => Person,
+      FOAF + 'Image' => Image,
+      SIOC + 'MicroblogPost' => Post,
+      SIOC + 'BlogPost' => Post,
+      SIOC + 'MailMessage' => Post,
+      SIOC + 'UserAccount' => Person,
+      Schema + 'Answer' => Post,
+      Schema + 'Article' => Post,
+      Schema + 'BlogPosting' => Post,
+      Schema + 'BreadcrumbList' => List,
+      Schema + 'Code' => Post,
+      Schema + 'DiscussionForumPosting' => Post,
+      Schema + 'ImageObject' => Image,
+      Schema + 'ItemList' => List,
+      Schema + 'NewsArticle' => Post,
+      Schema + 'Person' => Person,
+      Schema + 'Review' => Post,
+      Schema + 'UserComments' => Post,
+      Schema + 'VideoObject' => Video,
+      Schema + 'WebPage' => Post,
+    }
+
     # RDF -> Markup
     def self.markup type, v, env
       if [Abstract, Content, 'http://rdfs.org/sioc/ns#richContent'].member? type
@@ -197,16 +227,23 @@ class WebResource < RDF::URI
 
     Markup = {} # markup lambdas for RDF types
 
-    Markup['uri'] = -> uri, env=nil {uri.R}
+    Markup['uri'] = -> uri, env {uri.R}
 
-    MarkupLinks = -> links, env=nil{
+    Markup[DC+'language'] = -> lang, env {
+      {'de' => '🇩🇪',
+       'en' => '🇬🇧',
+       'fr' => '🇫🇷',
+       'ja' => '🇯🇵',
+      }[lang] || lang}
+
+    MarkupLinks = -> links, env {
       {_: :table, class: :links,
        c: links.group_by{|l|l.R.host}.map{|host, paths|
          {_: :tr,
           c: [{_: :td, class: :host, c: host ? {_: :a, href: '//' + host, c: host, style: (env[:colors][host] ||= HTML.colorize)[14..-1].sub('background-','')} : []},
               {_: :td, c: paths.map{|path| Markup[Link][path,env]}}]}}}}
 
-    Markup[Link] = -> ref, env=nil {
+    Markup[Link] = -> ref, env {
       u = ref.to_s
       re = u.R env
       [{_: :a, href: re.href, c: (re.path||'/')[0..79], title: u,
@@ -214,7 +251,7 @@ class WebResource < RDF::URI
         style: env[:colors][re.host] ||= HTML.colorize},
        " \n"]}
 
-    Markup[Type] = -> t, env=nil {
+    Markup[Type] = -> t, env {
       if t.class == WebResource
         {_: :a, href: t.uri, c: Icons[t.uri] || t.fragment || (t.path && t.basename)}.update(Icons[t.uri] ? {class: :icon} : {})
       else
