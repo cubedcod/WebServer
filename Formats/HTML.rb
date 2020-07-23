@@ -263,7 +263,6 @@ class WebResource
   end
 
   module HTML
-    include URIs
 
     # single-character representation of URI
     Icons = {
@@ -295,8 +294,6 @@ class WebResource
       Video => '🎞',
       W3 + '2000/01/rdf-schema#Resource' => '🌐',
     }
-
-    Markup = {} # markup-generator lambdas
 
     MarkupMap = {
       'article' => Post,
@@ -358,7 +355,6 @@ class WebResource
       title_resource = [path, host && path && ('https://' + host + path)].compact.find{|uri|
         graph.has_key?(uri) && graph[uri].has_key?(Title)}
 
-      # Markup -> HTML string
       HTML.render ["<!DOCTYPE html>\n",
                    {_: :html,
                     c: [{_: :head,
@@ -404,41 +400,7 @@ class WebResource
                              {_: :script, c: SiteJS}]}]}]
     end
 
-    def htmlGrep
-      graph = env[:graph]
-      qs = query_values || {}
-      q = qs['Q'] || qs['q']
-      return unless graph && q
-      abbreviated = !qs.has_key?('fullContent')
-
-      # query
-      wordIndex = {}
-      args = q.shellsplit rescue q.split(/\W/)
-      args.each_with_index{|arg,i| wordIndex[arg] = i }
-      pattern = /(#{args.join '|'})/i
-
-      # trim graph to matching resources
-      graph.map{|k,v|
-        graph.delete k unless (k.to_s.match pattern) || (v.to_s.match pattern)}
-
-      # trim content to matching lines
-      graph.values.map{|r|
-        (r[Content]||r[Abstract]||[]).map{|v|v.respond_to?(:lines) ? v.lines : nil}.flatten.compact.grep(pattern).yield_self{|lines|
-          r[Abstract] = lines[0..7].map{|line|
-            line.gsub(/<[^>]+>/,'')[0..512].gsub(pattern){|g| # mark up matches
-              HTML.render({_: :span, class: "w#{wordIndex[g.downcase]}", c: g})
-            }
-          } if lines.size > 0
-        }
-        r.delete Content if abbreviated
-      }
-
-      # CSS
-      graph['#abstracts'] = {Abstract => [HTML.render({_: :style, c: wordIndex.values.map{|i|
-                                                        ".w#{i} {background-color: #{'#%06x' % (rand 16777216)}; color: white}\n"}})]}
-    end
-
-    # Hash -> Markup
+    # {k => v} -> Markup
     def self.keyval t, env
       {_: :table, class: :kv,
        c: t.map{|k,vs|
@@ -478,8 +440,7 @@ class WebResource
       end
     end
 
-    # values -> Markup
-
+    # RDF -> Markup
     def self.value type, v, env
       if [Abstract, Content, 'http://rdfs.org/sioc/ns#richContent'].member? type
         (env[:cacherefs] && v.class == String) ? Webize::HTML.cacherefs(v, env) : v
@@ -506,8 +467,6 @@ class WebResource
       end
     end
 
-    Markup['uri'] = -> uri, env=nil {uri.R}
-
     Markup[DC+'language'] = -> lang, env=nil {
       {'de' => '🇩🇪',
        'en' => '🇬🇧',
@@ -515,28 +474,6 @@ class WebResource
        'ja' => '🇯🇵',
       }[lang] || lang
     }
-
-    MarkupLinks = -> links, env=nil{
-      {_: :table, class: :links,
-       c: links.group_by{|l|l.R.host}.map{|host, paths|
-         {_: :tr,
-          c: [{_: :td, class: :host, c: host ? {_: :a, href: '//' + host, c: host, style: (env[:colors][host] ||= HTML.colorize)[14..-1].sub('background-','')} : []},
-              {_: :td, c: paths.map{|path| Markup[Link][path,env]}}]}}}}
-
-    Markup[Link] = -> ref, env=nil {
-      u = ref.to_s
-      re = u.R env
-      [{_: :a, href: re.href, c: (re.path||'/')[0..79], title: u,
-        id: 'l' + Digest::SHA2.hexdigest(rand.to_s),
-        style: env[:colors][re.host] ||= HTML.colorize},
-       " \n"]}
-
-    Markup[Type] = -> t, env=nil {
-      if t.class == WebResource
-        {_: :a, href: t.uri, c: Icons[t.uri] || t.fragment || (t.path && t.basename)}.update(Icons[t.uri] ? {class: :icon} : {})
-      else
-        CGI.escapeHTML t.to_s
-      end}
 
   end
 

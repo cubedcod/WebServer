@@ -145,6 +145,7 @@ class WebResource < RDF::URI
   include URIs
 
   module HTTP
+
     def graphResponse
       return notfound if !env.has_key?(:repository) || env[:repository].empty?
       format = selectFormat
@@ -161,7 +162,40 @@ class WebResource < RDF::URI
           env[:repository].dump RDF::Writer.for(content_type: format).to_sym, base_uri: self
         end}
     end
+
   end
+  module HTML
+
+    include URIs
+
+    Markup = {} # markup lambdas for RDF types
+
+    Markup['uri'] = -> uri, env=nil {uri.R}
+
+    MarkupLinks = -> links, env=nil{
+      {_: :table, class: :links,
+       c: links.group_by{|l|l.R.host}.map{|host, paths|
+         {_: :tr,
+          c: [{_: :td, class: :host, c: host ? {_: :a, href: '//' + host, c: host, style: (env[:colors][host] ||= HTML.colorize)[14..-1].sub('background-','')} : []},
+              {_: :td, c: paths.map{|path| Markup[Link][path,env]}}]}}}}
+
+    Markup[Link] = -> ref, env=nil {
+      u = ref.to_s
+      re = u.R env
+      [{_: :a, href: re.href, c: (re.path||'/')[0..79], title: u,
+        id: 'l' + Digest::SHA2.hexdigest(rand.to_s),
+        style: env[:colors][re.host] ||= HTML.colorize},
+       " \n"]}
+
+    Markup[Type] = -> t, env=nil {
+      if t.class == WebResource
+        {_: :a, href: t.uri, c: Icons[t.uri] || t.fragment || (t.path && t.basename)}.update(Icons[t.uri] ? {class: :icon} : {})
+      else
+        CGI.escapeHTML t.to_s
+      end}
+
+  end
+
 end
 
 class Array
