@@ -166,6 +166,37 @@ class WebResource < RDF::URI
   end
   module HTML
 
+    # single-character representation of URI
+    Icons = {
+      Abstract => '✍',
+      Audio => '🔊',
+      Content => '',
+      Creator => '👤',
+      DC + 'hasFormat' => '≈',
+      DC + 'identifier' => '☸',
+      DC + 'rights' => '⚖️',
+      Date => '⌚', 'http://purl.org/dc/terms/created' => '⌚', 'http://purl.org/dc/terms/modified' => '⌚',
+      Image => '🖼️',
+      LDP + 'Container' => '📁',
+      LDP + 'contains' => '📁',
+      Link => '☛',
+      Post => '📝',
+      SIOC + 'BlogPost' => '📝',
+      SIOC + 'MailMessage' => '✉️',
+      SIOC + 'MicroblogPost' => '🐦',
+      SIOC + 'attachment' => '✉',
+      SIOC + 'reply_of' => '↩',
+      SIOC + 'richContent' => '',
+      Schema + 'height' => '↕',
+      Schema + 'width' => '↔',
+      Schema + 'DiscussionForumPosting' => '📝',
+      Stat + 'File' => '📄',
+      To => '☇',
+      Type => '📕',
+      Video => '🎞',
+      W3 + '2000/01/rdf-schema#Resource' => '🌐',
+    }
+
     MarkupMap = {
       'article' => Post,
       'http://schema.org/Comment' => Post,
