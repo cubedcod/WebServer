@@ -52,7 +52,6 @@ class WebResource
     # handler lambdas
     GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['u']||r.query_values['q'])}, []]}
     NoGunk  = -> r {r.send r.uri.match?(Gunk) ? :deny : :fetch}
-
     NoQuery = -> r {
       if !r.query                         # request
         NoGunk[r].yield_self{|s,h,b|      #  inspect response
@@ -62,7 +61,6 @@ class WebResource
       else                                # request has query
         [302, {'Location' => r.path}, []] #  redirect to path
       end}
-
     Resizer = -> r {
       if r.parts[0] == 'resizer'
         parts = r.path.split /\/\d+x\d+\/((filter|smart)[^\/]*\/)?/
@@ -97,9 +95,8 @@ w.bos.gl wired.trib.al
 
     %w(bostonglobe-prod.cdn.arcpublishing.com).map{|host| GET host, Resizer }
 
-    if ENV.has_key? 'FACEBOOK'
-      GET 'www.facebook.com'
-    end
+    GET 'www.facebook.com' if ENV.has_key? 'FACEBOOK'
+
     %w(l.facebook.com l.instagram.com).map{|host| GET host, GotoURL}
 
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
@@ -120,34 +117,23 @@ w.bos.gl wired.trib.al
     GET 'www.google.com', -> r {![nil, *%w(logos maps search url)].member?(r.parts[0]) ? r.deny : (r.path == '/url' ? GotoURL : NoGunk)[r]}
     GET 'www.googleadservices.com', GotoAdURL
 
-    GET 'developer.mozilla.org'
-
-    GET 'old.reddit.com', -> r {
-      cr = r.env[:cacherefs]
-      r.env[:cacherefs] = false # preserve original references
+    GET 'old.reddit.com', -> r {   # goto page (pointers missing in HEAD (old+new UI) and HTML+RSS body (new UI TODO guess theyre buried in JSON inside a script tag?))
+      cr = r.env[:cacherefs]; r.env[:cacherefs] = false # prefer original references in HTTP response
       r.fetch.yield_self{|status,head,body|
         if status.to_s.match? /^30/
           [status, head, body]
-        else # find page pointers missing in HEAD (old + new UI) and HTML/RSS bodies (new UI)
+        else
           links = []
           body[0].scan(/href="([^"]+after=[^"]+)/){|link|links << CGI.unescapeHTML(link[0]).R} # find links
           link = links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]         # sort links
-          nextPage = ['https://www.reddit.com', link.path, '?', link.query].join.R r.env       # page reference
-          r.env[:cacherefs] = cr # restore reference-locality prefs
-          [302, {'Location' => nextPage.href}, []]
+          nextPage = ['https://www.reddit.com', link.path, '?', link.query].join.R r.env       # destination
+          r.env[:cacherefs] = cr ; [302, {'Location' => nextPage.href}, []]                    # redir to dest
         end}}
 
     GET 'www.reddit.com', -> r {
-      cookie = 'reddit/.cookie'.R
-      if cookie.node.exist?
-        r.env['HTTP_COOKIE'] = cookie.readFile
-      elsif r.env['HTTP_COOKIE']
-        cookie.writeFile r.env['HTTP_COOKIE']
-      end
-      submitUI = r.parts[-1] == 'submit'
-      r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination pointer
-      r.path += '.rss' if !r.path.index('.rss') && %w(r u user).member?(r.parts[0]) && !submitUI && !(r.query_values||{}).has_key?('UI') # request RSS format on user and thread pages
-      r.fetchHTTP transformable: !submitUI}
+      r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # previous-page pointer
+      r.path += '.rss' if !r.path.index('.rss') && %w(r u user).member?(r.parts[0]) # prefer RSS format
+      NoGunk[r]}
 
     GET 's4.reutersmedia.net', -> r {
       args = r.query_values || {}
