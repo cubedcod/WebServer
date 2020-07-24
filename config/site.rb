@@ -146,7 +146,7 @@ w.bos.gl wired.trib.al
       end
       submitUI = r.parts[-1] == 'submit'
       r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # pagination pointer
-      r.path += '.rss' if r.ext.empty? && %w(r u user).member?(r.parts[0]) && !submitUI && !(r.query_values||{}).has_key?('UI') # request RSS format on user and thread pages
+      r.path += '.rss' if !r.path.index('.rss') && %w(r u user).member?(r.parts[0]) && !submitUI && !(r.query_values||{}).has_key?('UI') # request RSS format on user and thread pages
       r.fetchHTTP transformable: !submitUI}
 
     GET 's4.reutersmedia.net', -> r {
@@ -243,6 +243,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
       ps = r.path.split /https?:\/+/
       ps.size > 1 ? [301, {'Location' => ('https://' + ps[-1]).R(r.env).href}, []] : r.deny}
 
+    GET 'm.youtube.com', -> r {[301, {'Location' => ['http://localhost:8000/www.youtube.com', r.path, '?', r.query].join}, []]}
     GET 'www.youtube.com', -> r {
       path = r.parts[0]
       if %w{attribution_link redirect}.member? path
