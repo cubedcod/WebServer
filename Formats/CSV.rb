@@ -64,8 +64,9 @@ class WebResource
                                                                            resource[SIOC+'richContent']]).compact.join('<hr>'),
                     MarkupGroup[Link][(resource[Link]||[]),env]]
                   else
-                    if k == Type && resource[k][0] == Audio.R
-                      {_: :a, href: '#', c: '▶️', onclick: 'document.getElementById("player").src="' + re.uri + '"; document.getElementById("player").play()'}
+                    if k == Type && [Audio.R, Video.R].member?(resource[k][0])
+                      player = resource[k][0] == Audio.R ?  'audio' : 'video'
+                      {_: :a, href: '#', c: '▶️', onclick: 'var player = document.getElementById("' + player + '"); player.src="' + re.uri + '"; player.play()'}
                     else
                       (resource[k]||[]).map{|v| markup k, v, env }
                     end

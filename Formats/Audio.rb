@@ -188,9 +188,8 @@ class WebResource
   module HTML
 
     MarkupGroup[Audio] = -> files, env {
-      [{_: :audio, style: 'width: 100%', controls: :true, id: :player, name: :player},
-       tabular(files, env)
-      ]}
+      [{_: :audio, style: 'width: 100%', controls: :true, id: :audio},
+       tabular(files, env)]}
 
     Markup[Audio] = -> audio, env {
       src = (if audio.class == WebResource

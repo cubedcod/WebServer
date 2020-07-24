@@ -84,6 +84,10 @@ end
 class WebResource
   module HTML
 
+    MarkupGroup[Video] = -> files, env {
+      [{_: :video, style: 'width: 100%', controls: :true, id: :video},
+       tabular(files, env)]}
+
     Markup[Video] = -> video, env {
       if v = if video.class == WebResource || (video.class == String && video.match?(/^http/))
                video
