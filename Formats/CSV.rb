@@ -8,7 +8,10 @@ class WebResource
     def self.tabular graph, env
       graph = graph.values if graph.class == Hash
       keys = graph.select{|r|r.respond_to? :keys}.map{|r|r.keys}.flatten.uniq - [Abstract, Content, DC+'hasFormat', DC+'identifier', Image, Link, Video, SIOC+'reply_of', SIOC+'richContent', SIOC+'user_agent', Title]
+
       keys = [Creator, *(keys - [Creator])] if keys.member? Creator
+      keys = [Type,    *(keys - [Type])]    if keys.member? Type
+
       if env[:sort]
         attr = env[:sort]
         attr = Date if %w(date new).member? attr
@@ -60,9 +63,12 @@ class WebResource
                                          Webize::HTML.cacherefs c, env} : [resource[Content],
                                                                            resource[SIOC+'richContent']]).compact.join('<hr>'),
                     MarkupGroup[Link][(resource[Link]||[]),env]]
-                 else
-                   (resource[k]||[]).map{|v|
-                     markup k, v, env }
+                  else
+                    if k == Type && resource[k][0] == Audio.R
+                      {_: :a, href: '#', c: '▶️', onclick: 'document.getElementById("player").src="' + re.uri + '"; document.getElementById("player").play()'}
+                    else
+                      (resource[k]||[]).map{|v| markup k, v, env }
+                    end
                    end}, "\n" ]}}, "\n" ]}}]}
     end
 

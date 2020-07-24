@@ -50,7 +50,7 @@ class WebResource < RDF::URI
     if node.file?
       stat = node.stat
       unless ext == 'ttl'
-        graph << RDF::Statement.new(self, Title.R, basename)
+        graph << RDF::Statement.new(self, Title.R, Rack::Utils.unescape_path(basename))
         graph << RDF::Statement.new(self, Date.R, stat.mtime.iso8601)
         graph << RDF::Statement.new(self, (Stat + 'size').R, stat.size)
       end
