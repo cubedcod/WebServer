@@ -261,9 +261,11 @@ class WebResource
 
     def Chan doc
       doc.css('.post, .postCell').map{|post|
-        number = post.css('a.post_no, .postNum a')[0]
+        number = post.css('a.linkSelf, a.post_no, .postNum a')[0]
+
         subject = join(number ? number['href'] : ('#' + (post['id'] || (Digest::SHA2.hexdigest post.to_s))))
-        graph = ['https://', subject.host, subject.path, '/', subject.fragment].join.R
+
+        graph = ['https://', subject.host, subject.path.sub(/\.html$/, ''), '/', subject.fragment].join.R
 
         yield subject, Type, Post.R, graph
 
