@@ -260,12 +260,16 @@ class WebResource
   module HTML
 
     def Chan doc
+      #puts "chan  doc at  #{uri}"
+
       doc.css('.post, .postCell').map{|post|
         number = post.css('a.linkSelf, a.post_no, .postNum a')[0]
 
         subject = join(number ? number['href'] : ('#' + (post['id'] || (Digest::SHA2.hexdigest post.to_s))))
 
         graph = ['https://', subject.host, subject.path.sub(/\.html$/, ''), '/', subject.fragment].join.R
+
+        #puts :chan,  subject,graph
 
         yield subject, Type, Post.R, graph
 
@@ -371,6 +375,8 @@ class WebResource
       post.delete Type
       uri = post.delete('uri') || ('#' + Digest::SHA2.hexdigest(rand.to_s))
       resource = uri.R env
+      #puts :POST, [resource.host, resource.path].join(' '), [env[:base].host, env[:base].path].join(' ')
+
       titles = (post.delete(Title)||[]).map(&:to_s).map(&:strip).compact.-([""]).uniq
       abstracts = post.delete(Abstract) || []
       date = (post.delete(Date) || [])[0]
@@ -382,11 +388,13 @@ class WebResource
       htmlcontent = post.delete(SIOC + 'richContent') || []
       uri_hash = 'r' + Digest::SHA2.hexdigest(uri)
       hasPointer = false
+
       local_id = if !resource.path || (resource.host == env[:base].host && resource.path == env[:base].path)
                    resource.fragment
                  else
                    uri_hash
                  end
+
       {class: :post, id: local_id,
        c: ["\n",
            titles.map{|title|
