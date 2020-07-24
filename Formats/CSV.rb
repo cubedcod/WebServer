@@ -59,7 +59,7 @@ class WebResource
                                         resource[SIOC+'richContent']].flatten.compact.map{|c|
                                          Webize::HTML.cacherefs c, env} : [resource[Content],
                                                                            resource[SIOC+'richContent']]).compact.join('<hr>'),
-                    MarkupLinks[(resource[Link]||[]),env]]
+                    MarkupGroup[Link][(resource[Link]||[]),env]]
                  else
                    (resource[k]||[]).map{|v|
                      markup k, v, env }

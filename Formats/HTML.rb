@@ -239,7 +239,7 @@ end
 
 class WebResource
 
-  # RDF data -> Hash tree indexed on s -> p -> o
+  # RDF graph -> tree indexed on s -> p -> o
   def treeFromGraph graph = nil
     graph ||= env[:repository]
     return {} unless graph
@@ -322,18 +322,27 @@ class WebResource
                              link[:next, '&#9654;'], "\n",
                              if graph.empty?
                                HTML.keyval (Webize::HTML.webizeHash env), env
-                             elsif (env[:view] || qs['view']) == 'table'
-                               env[:sort] ||= qs['sort']
-                               groups = {}
+                             else
+                               groups = {} # resources grouped by type
                                graph.map{|uri, resource|
                                  (resource[Type]||[:untyped]).map{|type|
+                                   type = type.to_s
                                    groups[type] ||= []
                                    groups[type].push resource }}
-                               groups.map{|type, resources|
-                                 HTML.tabular resources, env}
-                             else
-                               graph.values.sort_by!{|r| (r[Content] || [0])[0].size}.map{|resource|
-                                 HTML.markup nil, resource, env}
+
+                               if (env[:view] || qs['view']) == 'table' # tabular view
+                                 env[:sort] ||= qs['sort']
+                                 groups.map{|type, resources|
+                                   HTML.tabular resources, env}
+                               else
+                                 groups.map{|type, resources|
+                                   if MarkupGroup.has_key? type
+                                     MarkupGroup[type][resources, env]
+                                   else
+                                     resources.map{|resource|
+                                       HTML.markup nil, resource, env}
+                                   end}
+                               end
                              end, expander,
                              {_: :script, c: SiteJS}]}]}]
     end
@@ -349,7 +358,7 @@ class WebResource
                 {_: :td, class: 'k',
                  c: Markup[Type][type, env]}, "\n",
                 {_: :td, class: 'v',
-                 c: k==Link ? MarkupLinks[vs, env] : vs.map{|v|
+                 c: k==Link ? MarkupGroup[Link][vs, env] : vs.map{|v|
                    [(markup k, v, env), ' ']}}]}, "\n"] unless k == 'uri' && vs[0] && vs[0].to_s.match?(/^_:/))}} # hide bnode internal-identifiers
     end
 

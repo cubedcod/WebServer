@@ -251,12 +251,13 @@ class WebResource < RDF::URI
         else
           v                        # generic reference
         end
-      else # undefined renderer
+      else # renderer undefined
         CGI.escapeHTML v.to_s
       end
     end
 
     Markup = {} # markup lambdas for RDF types
+    MarkupGroup = {}
 
     Markup['uri'] = -> uri, env {uri.R}
 
@@ -267,7 +268,7 @@ class WebResource < RDF::URI
        'ja' => '🇯🇵',
       }[lang] || lang}
 
-    MarkupLinks = -> links, env {
+    MarkupGroup[Link] = -> links, env {
       {_: :table, class: :links,
        c: links.group_by{|l|l.R.host}.map{|host, paths|
          {_: :tr,
