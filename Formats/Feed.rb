@@ -263,38 +263,32 @@ class WebResource
       #puts "chan  doc at  #{uri}"
 
       doc.css('.post, .postCell').map{|post|
-        number = post.css('a.linkSelf, a.post_no, .postNum a')[0]
+        num = post.css('a.linkSelf, a.post_no, .postNum a')[0]
 
-        subject = join(number ? number['href'] : ('#' + (post['id'] || (Digest::SHA2.hexdigest post.to_s))))
+        subject = join(num ? num['href'] : ('#' + (post['id'] || (Digest::SHA2.hexdigest post.to_s))))
 
         graph = ['https://', subject.host, subject.path.sub(/\.html$/, ''), '/', subject.fragment].join.R
 
-        #puts :chan,  subject,graph
-
         yield subject, Type, Post.R, graph
-
-        post.css('.name, .post_author').map{|name|
-          yield subject, Creator, name.inner_text, graph }
 
         post.css('time, .dateTime').map{|date|
           yield subject, Date,
                 (date['datetime'] || Time.at((date['data-utc'] ||
                                               date['unixtime']).to_i).iso8601), graph }
 
-        post.css('.labelCreated').map{|created|
-          yield subject, Date, Chronic.parse(created.inner_text).iso8601, graph}
+        post.css('.labelCreated').map{|created| yield subject, Date, Chronic.parse(created.inner_text).iso8601, graph}
 
-        post.css('.post_title, .subject, .title').map{|subj|
-          yield subject, Title, subj.inner_text, graph }
+        post.css('.name, .post_author').map{|name| yield subject, Creator, name.inner_text, graph}
 
-        post.css('.body, .divMessage, .postMessage, .text').map{|msg|
-          yield subject, Content, msg, graph }
+        post.css('.post_title, .subject, .title').map{|subj| yield subject, Title, subj.inner_text, graph }
 
-        post.css('.fileThumb, .imgLink').map{|a|
-          yield subject, Image, (join a['href']), graph if a['href'] }
+        post.css('.body, .divMessage, .postMessage, .text').map{|msg| yield subject, Content, msg, graph }
 
-        post.css('.post_image, .post-image').map{|img|
-          yield subject, Image, (join img.parent['href']), graph}
+        post.css('.fileThumb, .imgLink').map{|a| yield subject, Image, (join a['href']), graph if a['href'] }
+
+        post.css('.post_image, .post-image').map{|img| yield subject, Image, (join img.parent['href']), graph}
+
+        post.css('[href$=]').map{|img| yield subject, Image, (join img.parent['href']), graph}
 
         post.remove }
     end
