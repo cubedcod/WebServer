@@ -47,12 +47,6 @@ class WebResource
       end
     end
 
-    def cacheURL
-      return self unless h = host || env['SERVER_NAME']
-      return self if h == 'localhost'
-      ['http://localhost:8000/', h, path, (query ? ['?',query] : nil), (fragment ? ['#', fragment] : nil) ].join
-    end
-
     def self.call env
       return [405,{},[]] unless %w(GET HEAD).member? env['REQUEST_METHOD']      # allowed HTTP methods
       uri = RDF::URI('http' + (env['SERVER_NAME'] == 'localhost' ? '' : 's') + '://' + env['HTTP_HOST']).join env['REQUEST_PATH'] # resource identifier

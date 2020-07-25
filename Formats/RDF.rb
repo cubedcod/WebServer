@@ -33,6 +33,11 @@ class WebResource < RDF::URI
     Schema   = 'http://schema.org/'
 
     def basename; File.basename path end
+    def cacheURL
+      return self unless h = host || env['SERVER_NAME']
+      return self if h == 'localhost'
+      ['http://localhost:8000/', h, path, (query ? ['?',query] : nil), (fragment ? ['#', fragment] : nil) ].join # TODO support other hosts as cache-location (Depends on MIA auth-module, Rust rewrite, etc)
+    end
     def ext; path ? (File.extname(path)[1..-1] || '') : '' end
     def extension; '.' + ext end
     def parts; path ? (path.split('/') - ['']) : [] end

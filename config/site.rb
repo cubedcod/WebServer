@@ -117,21 +117,22 @@ w.bos.gl wired.trib.al
     GET 'www.google.com', -> r {![nil, *%w(logos maps search url)].member?(r.parts[0]) ? r.deny : (r.path == '/url' ? GotoURL : NoGunk)[r]}
     GET 'www.googleadservices.com', GotoAdURL
 
-    GET 'old.reddit.com', -> r {   # goto page (pointers missing in HEAD (old+new UI) and HTML+RSS body (new UI TODO guess theyre buried in JSON inside a script tag?))
+    GET 'old.reddit.com', -> r {
       cr = r.env[:cacherefs]; r.env[:cacherefs] = false # prefer original references in HTTP response
       r.fetch.yield_self{|status,head,body|
         if status.to_s.match? /^30/
+          head['Location'] = head['Location'].R.cacheURL if head['Location']
           [status, head, body]
-        else
+        else # find page pointer missing in HEAD (old+new UI) and HTML+RSS body (new UI) TODO maybe it's buried in JSON inside a script tag or some followon XHR?
           links = []
           body[0].scan(/href="([^"]+after=[^"]+)/){|link|links << CGI.unescapeHTML(link[0]).R} # find links
           link = links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]         # sort links
-          nextPage = ['https://www.reddit.com', link.path, '?', link.query].join.R r.env       # destination
-          r.env[:cacherefs] = cr ; [302, {'Location' => nextPage.href}, []]                    # redir to dest
+          nextPage = ['https://www.reddit.com', link.path, '?', link.query].join.R r.env       # destination page
+          r.env[:cacherefs] = cr ; [302, {'Location' => nextPage.href}, []]                    # goto page
         end}}
 
     GET 'www.reddit.com', -> r {
-      r.env[:links][:prev] = ['https://old.reddit.com',r.path,'?',r.query].join # previous-page pointer
+      r.env[:links][:prev] = ['http://localhost:8000/old.reddit.com', r.path.sub('.rss',''), '?',r.query].join # page pointer in old HTML
       r.path += '.rss' if !r.path.index('.rss') && %w(r u user).member?(r.parts[0]) # prefer RSS format
       NoGunk[r]}
 
