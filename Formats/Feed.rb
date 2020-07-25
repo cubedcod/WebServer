@@ -288,7 +288,7 @@ class WebResource
 
         post.css('.post_image, .post-image').map{|img| yield subject, Image, (join img.parent['href']), graph}
 
-        post.css('[href$=]').map{|img| yield subject, Image, (join img.parent['href']), graph}
+        post.css('[href$="mp4"], [href$="webm"]').map{|a| yield subject, Video, (join a['href']), graph}
 
         post.remove }
     end

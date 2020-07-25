@@ -1,7 +1,8 @@
+.lbry.tv
+.pscp.tv
 aa.google.com
 ajax.googleapis.com
 api.lbry.com
-api.lbry.tv
 api.twitch.tv
 api.twitter.com
 books.google.com
@@ -13,12 +14,10 @@ graphql.api.dailymotion.com
 groups.google.com
 khms0.googleapis.com
 khms1.googleapis.com
-lbry.tv
 maps.google.com
 maps.googleapis.com
 maps.gstatic.com
 players.brightcove.net
-proxsee.pscp.tv
 secure.brightcove.com
 sp.auth.adobe.com
 storage.googleapis.com
