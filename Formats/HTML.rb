@@ -8,7 +8,7 @@ module Webize
     # set references to cache location
     def self.cacherefs doc, env, serialize=true
       doc = Nokogiri::HTML.fragment doc if doc.class == String
-      doc.css('a, form, img, link, script').map{|e| # ref element
+      doc.css('a, form, iframe, img, link, script').map{|e| # ref element
         %w(action href src).map{|attr|              # ref attribute
           if e[attr]
             ref = e[attr].R                           # reference

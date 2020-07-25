@@ -20,10 +20,6 @@ class WebResource
       end
     end
 
-    def allowCookies?
-      HostGET.has_key?(host) || ENV.has_key?('COOKIES')
-    end
-
     def allowedOrigin
       if env['HTTP_ORIGIN']
         env['HTTP_ORIGIN']
@@ -159,6 +155,7 @@ class WebResource
 
     # fetch from cache or remote server
     def fetch
+      return cacheResponse if ENV.has_key? 'OFFLINE'
       if StaticFormats.member? ext.downcase                                                  # static representation valid in cache if exists:
         return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has resource in browser-cache
         return fileResponse if node.file?                                                    # server has static node - direct hit
@@ -189,12 +186,10 @@ class WebResource
                      RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
                    end
           formatExt = Suffixes[format] || Suffixes_Rack[format] # format-suffix
-
           body = HTTP.decompress h, response.read                     # read body
           if format && reader = RDF::Reader.for(content_type: format) # read data from body
             reader.new(body, base_uri: self){|_| (env[:repository] ||= RDF::Repository.new) << _ }
           end
-
           if cache
             c = fsPath.R                             # cache URI
             c += query_hash                          # append query-hash
@@ -203,17 +198,14 @@ class WebResource
             #puts "CACHE #{uri}  -> #{c}"
             saveRDF                                  # cache RDF graph(s)
           end
+          return unless response # fetch and read/parse/cache only
 
-          return unless response                                                           # HTTP response:
-          %w(Access-Control-Allow-Origin
-             Access-Control-Allow-Credentials
-             Content-Type ETag).map{|k|
-            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}                              # upstream headers
-
-          env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin                      # CORS header
-          env[:resp]['Set-Cookie'] ||= h['set-cookie'] if h['set-cookie'] && allowCookies? # Set-Cookie header
-
-          h['link'] && h['link'].split(',').map{|link|                                     # Link header: parse and merge
+          # upstream metadata
+          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials
+             Content-Type ETag Set-Cookie).map{|k|
+            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}
+          env[:resp]['Access-Control-Allow-Origin']||=allowedOrigin # CORS header
+          h['link'] && h['link'].split(',').map{|link|              # parse and merge Link header
             ref, type = link.split(';').map &:strip
             if ref && type
               ref = ref.sub(/^</,'').sub />$/, ''
@@ -221,9 +213,10 @@ class WebResource
               env[:links][type.to_sym] = ref
             end}
 
-          if transformable &&                                 # conneg-via-proxy enabled (default)
-             !(format||'').match?(/audio|image|script|video/) # exempt media formats TODO ffmpeg/convert frontend
-            env[:origin_format] = format                      # note original format for log
+          # response
+          if transformable &&                                 # conneg-via-proxy with transcodes (default)
+             !(format||'').match?(/audio|image|script|video/) # exempt media-formats TODO ffmpeg/convert frontend
+            env[:origin_format] = format                      # original format for logging
             graphResponse                                     # response with data in requested format
           else
             if format == 'text/html'                          # upstream HTML
@@ -352,11 +345,6 @@ class WebResource
         head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base cacherefs colors connection downloadable feeds fetched graph host images keep-alive links origin-format path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # external multi-hop headers
 
       head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # accept Turtle
-
-      unless allowCookies?
-        head.delete 'Cookie'
-        head.delete 'Set-Cookie'
-      end
 
       case host
       when /wsj\.com$/
