@@ -42,7 +42,9 @@ class WebResource
         '🖼️'
       elsif %w(aac flac m4a mp3 ogg opus).member?(x) || mime.match?(/^audio/)
         '🔉'
-      elsif %w(mp4 webm).member?(x) || mime.match?(/^video/)
+      elsif %w(mkv mp4 ts webm).member?(x) || mime.match?(/^video/)
+        '🎞️'
+      elsif %w(m3u8).member? x
         '🎬'
       elsif x == 'txt' || mime.match?(/text\/plain/)
         '🇹'

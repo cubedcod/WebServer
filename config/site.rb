@@ -231,6 +231,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
       ps.size > 1 ? [301, {'Location' => ('https://' + ps[-1]).R(r.env).href}, []] : r.deny}
 
     GET 'm.youtube.com', -> r {[301, {'Location' => ['http://localhost:8000/www.youtube.com', r.path, '?', r.query].join}, []]}
+
     GET 'www.youtube.com', -> r {
       path = r.parts[0]
       if %w{attribution_link redirect}.member? path
