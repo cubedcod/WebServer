@@ -291,10 +291,10 @@ class WebResource
           yield subject, Content, msg, graph }
 
         post.css('.fileThumb, .imgLink').map{|a|
-          yield subject, Image, a['href'].R, graph if a['href'] }
+          yield subject, Image, (join a['href']), graph if a['href'] }
 
         post.css('.post_image, .post-image').map{|img|
-          yield subject, Image, img.parent['href'].R, graph}
+          yield subject, Image, (join img.parent['href']), graph}
 
         post.remove }
     end
