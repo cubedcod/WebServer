@@ -312,7 +312,7 @@ class WebResource
                                  parts.map{|p|
                                     bc.path += p + '/'
                                     [{_: :a, class: :breadcrumb, href: bc.href, c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, "\n ",]},
-                                 ({_: :a, href: HTTP.qs(qs.merge({'dl' => env[:downloadable]})), c: '&darr;', id: :download, class: :icon} if env.has_key? :downloadable), "\n",
+                                 ({_: :a, href: join(HTTP.qs(qs.merge({'dl' => env[:downloadable]}))).R(env).href, c: '&darr;', id: :download, class: :icon} if env.has_key? :downloadable), "\n",
                                  ({_: :a, href: uri, c: '🔗', class: :icon, id: :directlink} if env.has_key?(:cacherefs) && host != 'localhost'), "\n",
                                  if qs.has_key?('Q') || qs.has_key?('q')
                                    {_: :form, c: qs.map{|k,v|
