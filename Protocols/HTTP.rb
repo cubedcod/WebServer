@@ -44,29 +44,26 @@ class WebResource
     end
 
     def self.call env
-      return [405,{},[]] unless %w(GET HEAD).member? env['REQUEST_METHOD']      # allowed HTTP methods
+      return [405,{},[]] unless %w(GET HEAD).member? env['REQUEST_METHOD'] # allowed HTTP methods
       uri = RDF::URI('http' + (env['SERVER_NAME'] == 'localhost' ? '' : 's') + '://' + env['HTTP_HOST']).join env['REQUEST_PATH'] # resource identifier
       uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading + consecutive & from qs so URI library doesn't freak out
-      resource = uri.R env                                                      # bind resource and environment
-      env[:base] = resource                                                     # base URI
-      env[:refhost] = env['HTTP_REFERER'].R.host if env.has_key? 'HTTP_REFERER' # referring host
-      env[:resp] = {}; env[:feeds] = []; env[:links] = {}                       # response-header storage
-      resource.send(env['REQUEST_METHOD']).yield_self{|status, head, body|      # dispatch request
-        format = resource.format_icon head['Content-Type']                      # log response
+      env[:base] = resource = uri.R env                                    # base URI and environment
+      env[:resp] = {}; env[:feeds] = []; env[:links] = {}                  # response-header storage
+      resource.send(env['REQUEST_METHOD']).yield_self{|status, head, body| # dispatch request
+        format = resource.format_icon head['Content-Type']                 # log response
         color = env[:deny] ? '31;1' : (format_color format)
         unless [204, 304].member? status
           puts [env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]),
-                (status_icon status),
-                format,
+                (status_icon status),  format,
                 env[:repository] ? (env[:repository].size.to_s + '⋮') : nil,
-                env[:refhost] ? ["\e[#{color}m", env[:refhost], "\e[0m→"] : nil,
-                "\e[#{color}#{env[:refhost] != resource.host ? ';7' : ''}m",
+                env['HTTP_REFERER'] ? ["\e[#{color}m", env['HTTP_REFERER'], "\e[0m→"] : nil,
+                "\e[#{color}#{env['HTTP_REFERER'] && !env['HTTP_REFERER'].index(resource.host) && ';7' || ''}m",
                 resource.uri, "\e[0m",
                 head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil,
                 [env['HTTP_ACCEPT'], env[:origin_format], head['Content-Type']].compact.join(' → ')
                ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
         end
-        [status, head, body]}                                                   # response
+        [status, head, body]}                                              # response
     rescue Exception => e
       msg = [uri, e.class, e.message].join " "
       trace = e.backtrace.join "\n"
@@ -342,7 +339,7 @@ class WebResource
           end
           t                                       # token
         }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
-        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base cacherefs colors connection downloadable feeds fetched graph host images keep-alive links origin-format path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles refhost remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # external multi-hop headers
+        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base cacherefs colors connection downloadable feeds fetched graph host images keep-alive links origin-format path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # external multi-hop headers
 
       head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # accept Turtle
 
