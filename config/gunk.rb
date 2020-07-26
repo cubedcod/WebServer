@@ -78,7 +78,7 @@ module Webize
     # script pattern
     GunkExec = %r(_0x[0-9a-f]|(\b|[_'"])(
 3gl|6sc|
-ad(dtoany|nxs)|.*analytic.*|apptentive.*|auction|aswpsdkus|
+ad(dtoany|miral|nxs)|.*analytic.*|apptentive.*|auction|aswpsdkus|
 bid(d(er|ing)|s)?|bing|bouncee?x.*|
 cedexis|chartbeat|clickability|cloudfront|COMSCORE|consent|cr(azyegg|iteo)|c(rss)?pxl?|crwdcntrl|
 doubleclick|d[fm]p|driftt|
