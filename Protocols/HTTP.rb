@@ -198,7 +198,7 @@ class WebResource
             #puts "CACHE #{uri}  -> #{c}"
             saveRDF                                  # cache RDF graph(s)
           end
-          return unless response # fetch and read/parse/cache only
+          return unless response # fetch/read/parse/cache only
 
           # upstream metadata
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials
@@ -213,7 +213,7 @@ class WebResource
               env[:links][type.to_sym] = ref
             end}
 
-          # response
+          # HTTP response
           if transformable &&                                 # conneg-via-proxy with transcodes (default)
              !(format||'').match?(/audio|image|script|video/) # exempt media-formats TODO ffmpeg/convert frontend
             env[:origin_format] = format                      # original format for logging
