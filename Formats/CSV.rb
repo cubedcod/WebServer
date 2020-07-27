@@ -17,7 +17,7 @@ class WebResource
         attr = Date if %w(date new).member? attr
         attr = Content if attr == 'content'
         sortable, unsorted = graph.partition{|r|r.has_key? attr}
-        graph = [*unsorted, *sortable.select.sort_by{|r|r[attr]}.reverse]
+        graph = [*sortable.sort_by{|r| r[attr] }.reverse, *unsorted]
       end
 
       {_: :table, class: :tabular,
@@ -63,9 +63,9 @@ class WebResource
                                                                            resource[SIOC+'richContent']]).compact.join('<hr>'),
                     MarkupGroup[Link][(resource[Link]||[]),env]]
                   else
-                    if k == Type && [Audio.R, Video.R].member?(resource[k][0])
-                      player = resource[k][0] == Audio.R ?  'audio' : 'video'
-                      {_: :a, href: '#', c: '▶️', onclick: 'var player = document.getElementById("' + player + '"); player.src="' + re.uri + '"; player.play()'}
+                    if Type == k && resource.has_key?(Type) && [Audio.R, Video.R].member?(resource[Type][0])
+                      playerType = resource[Type][0] == Audio.R ?  'audio' : 'video'
+                      {_: :a, href: '#', c: '▶️', onclick: 'var player = document.getElementById("' + playerType + '"); player.src="' + re.uri + '"; player.play()'}
                     else
                       (resource[k]||[]).yield_self{|r|r.class == Array ? r : [r]}.map{|v| markup k, v, env }
                     end
