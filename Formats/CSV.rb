@@ -16,7 +16,8 @@ class WebResource
         attr = env[:sort]
         attr = Date if %w(date new).member? attr
         attr = Content if attr == 'content'
-        graph = graph.sort_by{|r|r[attr]}.reverse
+        sortable, unsorted = graph.partition{|r|r.has_key? attr}
+        graph = [*unsorted, *sortable.select.sort_by{|r|r[attr]}.reverse]
       end
 
       {_: :table, class: :tabular,
@@ -55,9 +56,7 @@ class WebResource
                       {_: :a, href: r.to_s,
                        c: Icons[SIOC+'reply_of']} if r.class == RDF::URI || r.class == WebResource},
                     resource[Abstract] ? [resource[Abstract], '<br>'] : '',
-                    [Image,
-                     Video].map{|t|(resource[t]||[]).map{|i|
-                                         Markup[t][i,env]}},
+                    [Image, Video].map{|t|(resource[t]||[]).map{|i|Markup[t][i,env]}},
                     (env[:cacherefs] ? [resource[Content],
                                         resource[SIOC+'richContent']].flatten.compact.map{|c|
                                          Webize::HTML.cacherefs c, env} : [resource[Content],
