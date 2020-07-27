@@ -284,7 +284,7 @@ class WebResource
         p = parts[0]
         if !p
           [301, {'Location' => '/h'}, []]
-        elsif %w{m d h}.member? p                 # timeline redirect
+        elsif %w{m d h}.member? p              # goto current day/hour/min
           dateDir
         elsif p == 'favicon.ico'
           SiteDir.join('favicon.ico').R(env).fileResponse
