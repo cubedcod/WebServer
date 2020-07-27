@@ -44,26 +44,23 @@ class WebResource
     end
 
     def self.call env
-      return [405,{},[]] unless %w(GET HEAD).member? env['REQUEST_METHOD'] # allowed HTTP methods
-      uri = RDF::URI('http' + (env['SERVER_NAME'] == 'localhost' ? '' : 's') + '://' + env['HTTP_HOST']).join env['REQUEST_PATH'] # resource identifier
+      return [405,{},[]] unless %w(GET HEAD).member? env['REQUEST_METHOD'] # allow HTTP methods
+      uri = RDF::URI('http' + (env['SERVER_NAME'] == 'localhost' ? '' : 's') + '://' + env['HTTP_HOST']).join(env['REQUEST_PATH']).R env # resource
       uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading + consecutive & from qs so URI library doesn't freak out
-      env[:base] = resource = uri.R env                                    # base URI and environment
-      env[:resp] = {}; env[:feeds] = []; env[:links] = {}                  # response-header storage
-      resource.send(env['REQUEST_METHOD']).yield_self{|status, head, body| # dispatch request
-        format = resource.format_icon head['Content-Type']                 # log response
+      env.update({base: uri, cacherefs: true, feeds: [], links: {}, resp: {}}) # response metadata
+      uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body|      # dispatch request
+        format = uri.format_icon head['Content-Type']                      # log response
         color = env[:deny] ? '31;1' : (format_color format)
         unless [204, 304].member? status
-          puts [env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]),
-                (status_icon status),  format,
+          puts [env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]), (status_icon status), format,
                 env[:repository] ? (env[:repository].size.to_s + '⋮') : nil,
                 env['HTTP_REFERER'] ? ["\e[#{color}m", env['HTTP_REFERER'], "\e[0m→"] : nil,
-                "\e[#{color}#{env['HTTP_REFERER'] && !env['HTTP_REFERER'].index(resource.host) && ';7' || ''}m",
-                resource.uri, "\e[0m",
-                head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil,
+                "\e[#{color}#{env['HTTP_REFERER'] && !env['HTTP_REFERER'].index(uri.host) && ';7' || ''}m",
+                uri, "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil,
                 [env['HTTP_ACCEPT'], env[:origin_format], head['Content-Type']].compact.join(' → ')
                ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
         end
-        [status, head, body]}                                              # response
+        [status, head, body]}
     rescue Exception => e
       msg = [uri, e.class, e.message].join " "
       trace = e.backtrace.join "\n"
@@ -218,7 +215,7 @@ class WebResource
           else
             if format == 'text/html'                          # upstream HTML
               doc = Webize::HTML.clean body, self, false      # clean upstream doc
-              Webize::HTML.cacherefs doc, env, false if env[:cacherefs] # content relocation
+              Webize::HTML.cacherefs doc, env, false          # set content location
               body = doc.to_html
             end
             env[:resp]['Content-Length'] = body.bytesize.to_s # Content-Length header
@@ -284,7 +281,6 @@ class WebResource
         env[:links][:up] = up
       end
       if localNode?
-        env[:cacherefs] = true
         p = parts[0]
         if !p
           [301, {'Location' => '/h'}, []]
