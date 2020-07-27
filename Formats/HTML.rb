@@ -239,28 +239,6 @@ end
 
 class WebResource
 
-  # RDF graph -> tree indexed on s -> p -> o
-  def treeFromGraph graph = nil
-    graph ||= env[:repository]
-    return {} unless graph
-
-    tree = {}
-
-    graph.each_triple{|s,p,o|
-      s = s.to_s               # subject URI
-      p = p.to_s               # predicate URI
-      o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object URI or literal
-      tree[s] ||= {'uri' => s} # insert subject
-      tree[s][p] ||= []        # insert predicate
-      if tree[s][p].class == Array
-        tree[s][p].push o unless tree[s][p].member? o # insert in object array
-          else
-            tree[s][p] = [tree[s][p],o] unless tree[s][p] == o # new object array
-      end}
-
-    tree
-  end
-
   module HTML
 
     def self.colorize color = '#%06x' % (rand 16777216)

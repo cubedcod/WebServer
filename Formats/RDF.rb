@@ -147,6 +147,28 @@ class WebResource < RDF::URI
   end
   alias_method :summarize, :summary
 
+  # graph -> tree (s -> p -> o)
+  def treeFromGraph graph = nil
+    graph ||= env[:repository]
+    return {} unless graph
+
+    tree = {}
+
+    graph.each_triple{|s,p,o|
+      s = s.to_s               # subject
+      p = p.to_s               # predicate
+      o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object
+      tree[s] ||= {'uri' => s} # insert subject
+      tree[s][p] ||= []        # insert predicate
+      if tree[s][p].class == Array
+        tree[s][p].push o unless tree[s][p].member? o # insert in object-list
+          else
+            tree[s][p] = [tree[s][p],o] unless tree[s][p] == o # new object-list
+      end}
+
+    tree
+  end
+
   include URIs
 
   module HTTP
