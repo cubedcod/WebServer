@@ -15,6 +15,7 @@ module Webize
         'gitter.im' => :GitterHTML,
         'news.ycombinator.com' => :HackerNews,
         'universalhub.com' => :UHub,
+        'www.aliexpress.com' => :AX,
         'www.apnews.com' => :AP,
         'www.city-data.com' => :CityData,
         'www.google.com' => :GoogleHTML,
@@ -278,6 +279,13 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
           end
           yield s,p,o
         end}}
+  end
+
+  def AX doc, &b
+    doc.css('script').map{|script|
+      if script.inner_text.match? /.*window.runParams = /
+        Webize::JSON::Reader.new(script.inner_text.lines.grep(/^\s*data/)[0].sub(/^[^{]+/,'')[0...-2], base_uri: self).scanContent &b
+      end}
   end
 
   def CityData doc
