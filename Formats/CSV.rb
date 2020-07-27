@@ -16,7 +16,7 @@ class WebResource
         attr = env[:sort]
         attr = Date if %w(date new).member? attr
         attr = Content if attr == 'content'
-        graph = graph.sort_by{|r| (r[attr]||'').to_s}.reverse
+        graph = graph.sort_by{|r|r[attr]}.reverse
       end
 
       {_: :table, class: :tabular,
@@ -68,7 +68,7 @@ class WebResource
                       player = resource[k][0] == Audio.R ?  'audio' : 'video'
                       {_: :a, href: '#', c: '▶️', onclick: 'var player = document.getElementById("' + player + '"); player.src="' + re.uri + '"; player.play()'}
                     else
-                      (resource[k]||[]).map{|v| markup k, v, env }
+                      (resource[k]||[]).yield_self{|r|r.class == Array ? r : [r]}.map{|v| markup k, v, env }
                     end
                    end}, "\n" ]}}, "\n" ]}}]}
     end

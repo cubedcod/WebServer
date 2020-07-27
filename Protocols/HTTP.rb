@@ -274,7 +274,7 @@ class WebResource
 
     def GET
       return [204,{},[]] if path.match? /gen(erate)?_?204$/ # connectivity-check
-      unless path == '/'                                    # container reference
+      unless path == '/'                                    # containing-node reference
         up = File.dirname path
         up += '/' unless up == '/'
         up += '?' + query if query
@@ -284,34 +284,43 @@ class WebResource
         p = parts[0]
         if !p
           [301, {'Location' => '/h'}, []]
-        elsif %w{m d h}.member? p              # goto current day/hour/min
+        elsif %w{m d h}.member? p              # goto local-cache current day/hour/min
           dateDir
-        elsif p == 'favicon.ico'
+        elsif p == 'favicon.ico'               # local icon-file
           SiteDir.join('favicon.ico').R(env).fileResponse
-        elsif node.file?
+        elsif node.file?                       # local file
           fileResponse
         elsif p.match? /^(\d\d\d\d|msg)$/
-          cacheResponse                        # local node
-        elsif p == 'log' && parts.size == 2
-          [200, {'Content-Type' => 'text/html'}, [`grep -i #{Shellwords.escape parts[1]} ~/web/web.log | tr -s ' ' | cut -d ' ' -f 7 | sort | uniq`.hrefs]]
+          cacheResponse                        # local graph-node
+        elsif p == 'log'                       # local search
+          env.update({sort: sizeAttr = '#size', view: 'table'})
+          results = {}
+          if q = (query_values||{})['q']
+            `grep -i #{Shellwords.escape 'http.*' + q} ~/web/web.log | tr -s ' ' | cut -d ' ' -f 7 `.each_line{|uri| u = uri.R
+              results[uri] ||=  {'uri' => uri, sizeAttr => 0, Title => [[u.host, u.path, (u.query ? ['?', u.query] : nil)].join]}
+              results[uri][sizeAttr] += 1}
+          else
+            env[:searchable] = true
+          end
+          [200, {'Content-Type' => 'text/html'}, [(htmlDocument results)]]
         else
-          (env[:base] = remoteURL).hostHandler # remote node
+          (env[:base] = remoteURL).hostHandler # host handler (rebased on local)
         end
       else
-        hostHandler
+        hostHandler                            # host handler (direct)
       end
     end
 
     def hostHandler
       if handler = HostGET[host]               # host handler
         handler[self]
-      elsif gunk?                              # gunk handler
+      elsif gunk?
         if gunkQuery?
           [301, {'Location' => ['//', host, path].join.R(env).href}, []]
         else
           deny
         end
-      else                                     # fetch remote
+      else                                     # remote graph-node
         fetch
       end
     end

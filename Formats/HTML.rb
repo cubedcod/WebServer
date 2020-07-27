@@ -291,9 +291,10 @@ class WebResource
                                     [{_: :a, class: :breadcrumb, href: bc.href, c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, "\n ",]},
                                  ({_: :a, href: join(HTTP.qs(qs.merge({'dl' => env[:downloadable]}))).R(env).href, c: '&darr;', id: :download, class: :icon} if env.has_key? :downloadable), "\n",
                                  ({_: :a, href: uri, c: '🔗', class: :icon, id: :directlink} if env.has_key?(:cacherefs) && host != 'localhost'), "\n",
-                                 if qs.has_key?('Q') || qs.has_key?('q')
+                                 if env.has_key?(:searchable) || qs.has_key?('Q') || qs.has_key?('q')
+                                   qs['q'] ||= ''
                                    {_: :form, c: qs.map{|k,v|
-                                      ["\n", {_: :input, name: k, value: v}.update((k=='q' || k == 'Q') ? {} : {type: :hidden})]}}
+                                      ["\n", {_: :input, name: k, value: v}.update((k=='Q' || k == 'q') ? {} : {type: :hidden})]}}
                                  end, "\n"]}, "\n",
                              link[:prev, '&#9664;'], "\n",
                              link[:next, '&#9654;'], "\n",
