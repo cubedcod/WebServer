@@ -266,12 +266,18 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
       end}
   end
 
-  def AP doc, &f
+  def AP doc
     doc.css('script').map{|script|
-      script.inner_text.scan(/window\['[-a-z]+'\] = ([^\n]+)/){|data|
+      script.inner_text.scan(/window\['[-a-z]+'\] = ([^\n]+)/){|data| # find the JSON
         data = data[0]
         data = data[0..-2] if data[-1] == ';'
-        Webize::JSON::Reader.new(data, base_uri: self).scanContent &f}}
+        Webize::JSON::Reader.new(data, base_uri: self).scanContent do |s,p,o| # call JSON triplr
+          if p == 'gcsBaseUrl' # bind image URL
+            p = Image
+            o += '3000.jpeg'
+          end
+          yield s,p,o
+        end}}
   end
 
   def CityData doc
