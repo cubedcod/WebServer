@@ -284,13 +284,13 @@ class WebResource
         p = parts[0]
         if !p
           [301, {'Location' => '/h'}, []]
-        elsif %w{m d h}.member? p              # goto local-cache current day/hour/min
+        elsif %w{m d h}.member? p              # local-cache current day/hour/min (redirect)
           dateDir
         elsif p == 'favicon.ico'               # local icon-file
           SiteDir.join('favicon.ico').R(env).fileResponse
         elsif node.file?                       # local file
           fileResponse
-        elsif p.match? /^(\d\d\d\d|msg)$/
+        elsif p.match? /^(\d\d\d\d|a|msg|v)$/
           cacheResponse                        # local graph-node
         elsif p == 'log'                       # local search
           env.update({sort: sizeAttr = '#size', view: 'table'})

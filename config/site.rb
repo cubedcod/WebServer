@@ -119,12 +119,12 @@ w.bos.gl wired.trib.al
     GET 'www.googleadservices.com', GotoAdURL
 
     GET 'old.reddit.com', -> r {
-      cr = r.env[:cacherefs]; r.env[:cacherefs] = false # prefer original references in HTTP response
+      cr = r.env[:cacherefs]; r.env[:cacherefs] = false # preserve original references in HTTP body
       r.fetch.yield_self{|status,head,body|
         if status.to_s.match? /^30/
           head['Location'] = head['Location'].R.cacheURL if head['Location']
           [status, head, body]
-        else # find page pointer missing in HEAD (old+new UI) and HTML+RSS body (new UI) TODO maybe it's buried in JSON inside a script tag or some followon XHR?
+        else # find page pointer missing in HEAD (old+new UI) and HTML+RSS body (new UI) TODO find it presumably buried in JSON inside a script tag or some followon XHR
           links = []
           body[0].scan(/href="([^"]+after=[^"]+)/){|link|links << CGI.unescapeHTML(link[0]).R} # find links
           link = links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]         # sort links
@@ -133,8 +133,8 @@ w.bos.gl wired.trib.al
         end}}
 
     GET 'www.reddit.com', -> r {
-      r.env[:links][:prev] = ['http://localhost:8000/old.reddit.com', r.path.sub('.rss',''), '?',r.query].join # page pointer in old HTML
-      r.path += '.rss' if !r.path.index('.rss') && %w(r u user).member?(r.parts[0]) # prefer RSS format
+      r.env[:links][:prev] = ['http://localhost:8000/old.reddit.com', r.path.sub('.rss',''), '?',r.query].join # page pointer
+      r.path += '.rss' if !r.path.index('.rss') && %w(r u user).member?(r.parts[0]) # request RSS representation
       NoGunk[r]}
 
     GET 's4.reutersmedia.net', -> r {
@@ -235,9 +235,9 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
     GET 'm.youtube.com', -> r {[301, {'Location' => ['http://localhost:8000/www.youtube.com', r.path, '?', r.query].join}, []]}
 
     GET 'www.youtube.com', -> r {
-      path = r.parts[0]
+      path = r.parts[0]; qs = r.query_values || {}
       if %w{attribution_link redirect}.member? path
-        [301, {'Location' => r.query_values['q'] || r.query_values['u']}, []]
+        [301, {'Location' => qs['q'] || qs['u']}, []]
       elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results s user watch watch_videos yts).member?(path) || !path
         cookie = 'youtube/.cookie'.R
         if cookie.node.exist?
@@ -247,17 +247,14 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
         end
         if path == 'embed'
           r.fetchHTTP transformable: false
-        elsif path == 'watch' && (r.query_values || {}).has_key?('dl')
-          storage = [r.fsPath, r.query_hash].join.R
+        elsif path == 'watch' && qs.has_key?('dl')
+          storage = 'a/youtube/' + (qs['list'] || qs['v'])
           unless File.directory? storage
+            FileUtils.mkdir_p storage
             pid = spawn "youtube-dl -o '#{storage}/%(title)s.%(ext)s' -x \"#{r.uri}\""
             Process.detach pid
           end
-          if file = storage.node.exist? && storage.node.children[0]
-            file.R(r.env).fileResponse
-          else
-            [404, {'Content-Type' => 'text/html'}, ['downloading..']]
-          end
+          [301, {'Location' => '/' + storage + '/'}, []]
         else
           r.env[:downloadable] = :audio
           r.fetch
