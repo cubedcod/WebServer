@@ -9,7 +9,7 @@
 .breadcrumb {color: #ddd}
 .container {margin: .1em}
 .container > .head {border-radius: .4em .4em 0 0; background-color: #000; color: #fff; font-weight: bold; font-size: 1.1em; padding: .1em .3em .1em .3em}
-.container > .body {border-radius: 0 .3em .3em .3em; width: 100%; background-color: #000; color: #fff}
+.container > .body {border-radius: 0 .3em .38em .38em; width: 100%; background-color: #000; color: #fff}
 .container.main > .head {font-size: 1.6em; background-color: #fff; color: #000}
 .container.main > .body {background-color: #fff; color: #000; border-radius: 0 .5em .5em .5em; padding: .2em}
 .file > .icon {font-size: 4.2em; background-color: #000; color: #fff}
