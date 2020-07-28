@@ -292,12 +292,14 @@ class WebResource
           fileResponse
         elsif p.match? /^(\d\d\d\d|a|msg|v)$/
           cacheResponse                        # local graph-node
-        elsif p == 'log'                       # local search
+        elsif p == 'log'                       # search log
           env.update({sort: sizeAttr = '#size', view: 'table'})
           results = {}
           if q = (query_values||{})['q']
             `grep -i #{Shellwords.escape 'http.*' + q} ~/web/web.log | tr -s ' ' | cut -d ' ' -f 7 `.each_line{|uri| u = uri.R
-              results[uri] ||=  {'uri' => uri, sizeAttr => 0, Title => [[u.host, u.path, (u.query ? ['?', u.query] : nil)].join]}
+              results[uri] ||=  {'uri' => uri,
+                                 sizeAttr => 0,
+                                 Title => [[u.host, u.path, (u.query ? ['?', u.query] : nil)].join]}
               results[uri][sizeAttr] += 1}
           else
             env[:searchable] = true
