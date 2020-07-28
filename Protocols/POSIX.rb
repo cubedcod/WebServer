@@ -93,22 +93,24 @@ class WebResource
         globPath = fsPath
         unless globPath.match /[\*\{\[]/ # parametric glob
           env[:summary] = false          # default glob
-          globPath += query_hash unless pathIndex == 0 # add hashed-qs slug to prevent collision in nonlocal-URL storage
+          globPath += query_hash unless pathIndex == 0 # hashed-qs slug to prevent collision on remote-path storage
           globPath += '*'
         end
         Pathname.glob globPath
-       end).map{|p|             # map path to URI-space
-        (((host && host != 'localhost') ? ('https://' + host) : '') + '/' + p.to_s[pathIndex..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env }
+       end).map{|p| # join path to URI space
+        join('/' + p.to_s[pathIndex..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env}
     end
 
   end
   module HTML
 
     MarkupGroup[LDP+'Container'] = -> dirs, env {
-      if this = dirs.find{|d| d['uri'] == env[:base].uri}
-        puts this
+      if this = dirs.find{|d| d['uri'] == env[:base].uri.split('?')[0]}
+        {class: 'main container',
+         c: [{_: :span, class: :head, c: this['uri'].R.basename},
+             {class: :body, c: dirs.select{|d| d['uri'] != this['uri']}.map{|dir| Markup[LDP+'Container'][dir,env]}}]}
       else
-        dirs.map{|dir|  Markup[LDP+'Container'][dir,env] }
+        dirs.map{|dir| Markup[LDP+'Container'][dir,env]}
       end
     }
 
@@ -119,7 +121,7 @@ class WebResource
        W3 + 'ns/posix/stat#mtime',
        W3 + 'ns/posix/stat#size'].map{|p|dir.delete p}
       {class: :container,
-       c: [{_: :a, id: 'container' + Digest::SHA2.hexdigest(rand.to_s), class: :title, href: uri.href, type: :node, c: uri.basename},
+       c: [{_: :a, id: 'container' + Digest::SHA2.hexdigest(rand.to_s), class: :head, href: uri.href, type: :node, c: uri.basename},
            {class: :body, c: HTML.keyval(dir, env)}]}}
 
     Markup[Stat+'File'] = -> file, env {

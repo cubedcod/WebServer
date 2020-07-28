@@ -93,7 +93,6 @@ class WebResource < RDF::URI
     elsif node.directory?
       subject = self
       subject += '/' unless subject.to_s[-1] == '/'
-      puts "dir #{subject}"
       graph << RDF::Statement.new(subject, Type.R, (LDP + 'Container').R)
       graph << RDF::Statement.new(subject, Title.R, basename)
       graph << RDF::Statement.new(subject, Date.R, node.stat.mtime.iso8601)
