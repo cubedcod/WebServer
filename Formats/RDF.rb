@@ -1,6 +1,6 @@
 # coding: utf-8
 require 'linkeddata'
-
+require 'taglib'
 class WebResource < RDF::URI
 
   module URIs # URI constants
@@ -63,6 +63,19 @@ class WebResource < RDF::URI
         graph << RDF::Statement.new(self, Type.R, Video.R)
       elsif %w(m4a mp3 ogg opus).member? ext
         graph << RDF::Statement.new(self, Type.R, Audio.R)
+        TagLib::FileRef.open(fsPath) do |fileref|
+          unless fileref.null?
+            tag = fileref.tag
+            graph << RDF::Statement.new(self, Title.R, tag.title)
+            graph << RDF::Statement.new(self, Creator.R, tag.artist)
+            graph << RDF::Statement.new(self, Date.R, tag.year)
+            graph << RDF::Statement.new(self, Content.R, tag.comment)
+            graph << RDF::Statement.new(self, (Schema+'album').R, tag.album)
+            graph << RDF::Statement.new(self, (Schema+'track').R, tag.track)
+            graph << RDF::Statement.new(self, (Schema+'genre').R, tag.genre)
+            graph << RDF::Statement.new(self, (Schema+'length').R, fileref.audio_properties.length_in_seconds)
+          end
+        end
       else
         formatHint = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # path-derived format hints when suffix is ambiguous or missing
                        :mail # procmail doesnt have configurable SUFFIX (.eml), only PREFIX? - presumably due to some sort of maildir suffix-renames to denote state?
