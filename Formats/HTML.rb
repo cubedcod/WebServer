@@ -264,18 +264,14 @@ class WebResource
           [{_: :a, href: url.R(env).href, id: key, class: :icon, c: content},
            "\n"]
         end}
-
       htmlGrep if localNode?
-
-      title_resource = [path, host && path && ('https://' + host + path)].compact.find{|uri|
-        graph.has_key?(uri) && graph[uri].has_key?(Title)}
 
       HTML.render ["<!DOCTYPE html>\n",
                    {_: :html,
                     c: [{_: :head,
                          c: [{_: :base, href: uri},
                              {_: :meta, charset: 'utf-8'},
-                            ({_: :title, c: CGI.escapeHTML(graph[title_resource][Title].map(&:to_s).join ' ')} if title_resource),
+                            ({_: :title, c: CGI.escapeHTML(graph[uri][Title].map(&:to_s).join ' ')} if graph.has_key?(uri) && graph[uri].has_key?(Title)),
                              {_: :style, c: ["\n", SiteCSS]}, "\n",
                              env[:links].map{|type, resource|
                                [{_: :link, rel: type, href: CGI.escapeHTML(resource.R(env).href)}, "\n"]}]}, "\n",
