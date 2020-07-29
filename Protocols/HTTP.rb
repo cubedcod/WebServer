@@ -208,18 +208,18 @@ class WebResource
             end}
 
           # HTTP response
-          if transformable &&                                 # conneg-via-proxy with transcodes (default)
+          if transformable &&                                 # conneg-via-proxy (default)
              !(format||'').match?(/audio|image|script|video/) # exempt media-formats TODO ffmpeg/convert frontend
-            env[:origin_format] = format                      # original format for logging
-            graphResponse                                     # response with data in requested format
-          else
-            if format == 'text/html'                          # upstream HTML
-              doc = Webize::HTML.clean body, self, false      # clean upstream doc
+            env[:origin_format] = format                      # note original format for logger
+            graphResponse                                     # locally-generated document
+          else                                                # content-type fixed by upstream
+            if format == 'text/html'                          # HTML document
+              doc = Webize::HTML.clean body, self, false      # clean document
               Webize::HTML.cacherefs doc, env, false          # set content location
               body = doc.to_html
             end
-            env[:resp]['Content-Length'] = body.bytesize.to_s # Content-Length header
-            [200, env[:resp], [body]]                         # upstream doc
+            env[:resp]['Content-Length'] = body.bytesize.to_s # set Content-Length
+            [200, env[:resp], [body]]                         # upstream document
           end
         end
       end

@@ -22,6 +22,7 @@ module Webize
         'www.instagram.com' => :InstagramHTML,
         'www.qrz.com' => :QRZ,
         'www.universalhub.com' => :UHub,
+        'www.youtube.com' => :YouTube,
       }
     end
   end
@@ -254,7 +255,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
             pid = spawn "youtube-dl -o '#{storage}/%(title)s.%(ext)s' -x \"#{r.uri}\""
             Process.detach pid
           end
-          [301, {'Location' => '/' + storage + '/'}, []]
+          [302, {'Location' => '/' + storage + '/'}, []]
         else
           r.env[:downloadable] = :audio
           r.fetch
@@ -575,6 +576,13 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
   def UHub doc
     doc.css('.pager-next > a[href]').map{|n| env[:links][:next] ||= n['href'] }
     doc.css('.pager-previous > a[href]').map{|p| env[:links][:prev] ||= p['href'] }
+  end
+
+  def YouTube doc, &b; dataVar = /window..ytInitial/
+    doc.css('script').map{|script|
+      if script.inner_text.match? dataVar
+        Webize::JSON::Reader.new(script.inner_text.lines.grep(dataVar)[0].sub(/^[^{]+/,'')[0...-2], base_uri: self).scanContent &b
+      end}
   end
 
 end
