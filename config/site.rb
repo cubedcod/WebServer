@@ -581,7 +581,8 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
   def YouTube doc, &b; dataVar = /window..ytInitial/
     doc.css('script').map{|script|
       if script.inner_text.match? dataVar
-        Webize::JSON::Reader.new(script.inner_text.lines.grep(dataVar)[0].sub(/^[^{]+/,'')[0...-2], base_uri: self).scanContent &b
+        script.inner_text.lines.grep(dataVar).map{|line|
+          Webize::JSON::Reader.new(line.sub(/^[^{]+/,'')[0...-2], base_uri: self).scanContent &b}
       end}
   end
 
