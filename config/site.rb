@@ -14,6 +14,7 @@ module Webize
         'github.com' => :GitHub,
         'gitter.im' => :GitterHTML,
         'news.ycombinator.com' => :HackerNews,
+        'spinitron.com' => :Spinitron,
         'universalhub.com' => :UHub,
         'www.aliexpress.com' => :AX,
         'www.apnews.com' => :AP,
@@ -524,6 +525,10 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
     doc.css('script').map{|script|
       script.inner_text.scan(%r(biodata'\).html\(\s*Base64.decode\("([^"]+))xi){|data|
         yield self, Content, Base64.decode64(data[0]).encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ')}}
+  end
+
+  def Spinitron doc
+
   end
 
   def TwitterJSON tree, &b
