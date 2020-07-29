@@ -1,5 +1,6 @@
 .lbry.tv
 .pscp.tv
+.storage.googleapis.com
 aa.google.com
 ajax.googleapis.com
 api.lbry.com
@@ -21,7 +22,7 @@ maps.gstatic.com
 players.brightcove.net
 secure.brightcove.com
 sp.auth.adobe.com
-storage.googleapis.com
+talk.zerohedge.com
 tkx.apis.anvato.net
 update.googleapis.com
 usher.ttvnw.net
