@@ -41,7 +41,6 @@ class WebResource
     AllowedHeaders = 'authorization, client-id, content-type, device-fp, device-id, x-access-token, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-csrf-token, x-device-id, x-goog-authuser, x-guest-token, x-hostname, x-lib-version, x-locale, x-twitter-active-user, x-twitter-client-language, x-twitter-utcoffset, x-requested-with' # TODO populate from preflight
 
     # local resources
-    SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
     FeedIcon = SiteDir.join('feed.svg').read
     SiteFont = SiteDir.join('fonts/hack-regular-subset.woff2').read
     SiteIcon = SiteDir.join('favicon.ico').read
@@ -98,7 +97,7 @@ w.bos.gl wired.trib.al
 
     %w(bostonglobe-prod.cdn.arcpublishing.com).map{|host| GET host, Resizer }
 
-    GET 'www.facebook.com' if ENV.has_key? 'FACEBOOK'
+    DenyDomains['com'].delete 'facebook' if ENV.has_key? 'FACEBOOK'
 
     %w(l.facebook.com l.instagram.com).map{|host| GET host, GotoURL}
 
