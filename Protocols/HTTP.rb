@@ -213,11 +213,15 @@ class WebResource
             env[:origin_format] = format                      # note original format for logger
             graphResponse                                     # locally-generated document
           else                                                # content-type fixed by upstream
-            if format == 'text/html'                          # HTML document
+            case format                                       # clean doc & locate references
+            when 'text/css'
+              Webize::CSS.cacherefs doc, env, false           # set location references
+            when 'text/html'                                  # HTML document
               doc = Webize::HTML.clean body, self, false      # clean document
-              Webize::HTML.cacherefs doc, env, false          # set content location
+              Webize::HTML.cacherefs doc, env, false          # set location references
               body = doc.to_html
             end
+
             env[:resp]['Content-Length'] = body.bytesize.to_s # set Content-Length
             [200, env[:resp], [body]]                         # upstream document
           end
@@ -252,7 +256,7 @@ class WebResource
       when '📃'
         '34;1'
       when '📜'
-        '36;1'
+        '38;5;51'
       when '🗒'
         '38;5;128'
       when '🐢'
