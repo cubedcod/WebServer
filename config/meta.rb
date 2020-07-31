@@ -651,6 +651,7 @@ class WebResource
       OG + 'video:secure_url' => Video,
       Podcast + 'author' => Creator,
       Podcast + 'subtitle' => Title,
+      Podcast + 'summary' => Content,
       Podcast + 'title' => Title,
       RSS + 'category' => Abstract,
       RSS + 'comments' => Link,
