@@ -390,6 +390,7 @@ class WebResource
       'note' => Content,
       'og:article:author' => Creator,
       'og:article:published_time' => Date,
+      'og:article:modified_time' => Date,
       'og:author' => Creator,
       'og:description' => Abstract,
       'og:fb_appid' => :drop,

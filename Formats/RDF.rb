@@ -232,6 +232,7 @@ class WebResource < RDF::URI
       Schema + 'height' => '↕',
       Schema + 'width' => '↔',
       Schema + 'DiscussionForumPosting' => '📝',
+      Schema + 'sameAs' => '=',
       Stat + 'File' => '📄',
       To => '☇',
       Type => '📕',
