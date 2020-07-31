@@ -308,8 +308,8 @@ class WebResource
     def hostHandler
       if handler = HostGET[host]               # host handler
         handler[self]
-      elsif gunk?
-        if gunkQuery?
+      elsif deny?
+        if deny_query?
           [301, {'Location' => ['//', host, path].join.R(env).href}, []]
         else
           deny

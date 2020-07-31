@@ -30,6 +30,48 @@ module Webize
       serialize ? doc.to_html : doc
     end
 
+    # clean HTML :: String
+    def self.clean body, base=nil, serialize=true
+      doc = Nokogiri::HTML.parse body.encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ') # parse ass Nokogiri doc
+      if content_type = doc.css('meta[http-equiv="Content-Type"]')[0] # in-band content-type tag found
+        if content = content_type['content']
+          if charset_tag = content.split(';')[1]
+            if charset = charset_tag.split('=')[1]
+              unless charset.match? /utf.?8/i
+                doc = Nokogiri::HTML.parse body.force_encoding(charset).encode('UTF-8') # re-read with specified charset
+              end
+            end
+          end
+        end
+      end
+      clean_doc doc, base
+      serialize ? doc.to_html : doc
+    end
+
+    # clean HTML :: Nokogiri
+    def self.clean_doc doc, base=nil
+      doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove # fonts and preload directives
+      log = []
+      doc.css("iframe, img, [type='image'], link, script").map{|s|
+        text = s.inner_text     # inline gunk
+        if s['type'] != 'application/json' && s['type'] != 'application/ld+json' && !text.match?(InitialState) && text.match?(GunkExec)
+          log << "🚩 " + s.to_s.size.to_s + ' ' + (text.match(GunkExec)[2]||'')[0..42]
+          s.remove
+        end
+        %w(href src).map{|attr| # referenced gunk
+          if s[attr]
+            src = s[attr].R
+            if src.deny_domain?
+              log << "🚫 \e[31;1;7m" + src.host + "\e[0m"
+              s.remove
+            elsif src.uri.match? Gunk
+              log << "🚫 \e[31;1m" + src.uri + "\e[0m"
+              s.remove
+            end
+          end}}
+      puts log.join ' ' unless log.empty?
+    end
+
     # format to local conventions
     def self.format body, base
       html = Nokogiri::HTML.fragment body
@@ -166,7 +208,7 @@ module Webize
         n.css('frame, iframe').map{|frame|
           if src = frame.attr('src')
             src = src.R
-            yield subject, Link, src unless src.gunk?
+            yield subject, Link, src unless src.deny?
           end}
 
         # typed references
