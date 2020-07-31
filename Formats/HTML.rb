@@ -22,15 +22,10 @@ module Webize
           url, _ = i.split ' '
           url = env[:base].join(url).R env
           [url.cacheURL, _].join ' '
-        }.join(',')
-      }
+        }.join(',')}
 
-      doc.css('style').map{|style|
-        if style.content.match? /url\(/
-          style.content = style.content.gsub(/url\(['"]?([^'"\)]+)['"]?\)/){
-            m = Regexp.last_match
-            ['url(', m[1].R(env).cacheURL, ')'].join}
-        end}
+      doc.css('style').map{|css|
+        css.content = Webize::CSS.cacherefs css.content, env if css.content.match? /url\(/}
 
       serialize ? doc.to_html : doc
     end

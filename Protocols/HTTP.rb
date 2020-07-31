@@ -162,9 +162,8 @@ class WebResource
     end
 
     # fetch from remote                               options:
-    def fetchHTTP cache: !ENV.has_key?('NOCACHE'),   # cache representation and mapped RDF graph(s)
-                  response: true,                    # construct HTTP response
-                  transformable: !(query_values||{}).has_key?('notransform') # allow representation transformation: format conversions & same-format (HTML reformatting, script pretty-print) rewriting
+    def fetchHTTP response: true,                    # construct HTTP response
+                  transformable: !(query_values||{}).has_key?('notransform') # allow transformation: format conversions & same-format (HTML reformat, script pretty-print) rewrites
 
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                            # upstream metadata
@@ -179,51 +178,40 @@ class WebResource
                    elsif RDF::Format.file_extensions.has_key? ext.to_sym # path extension
                      RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
                    end
-          formatExt = Suffixes[format] || Suffixes_Rack[format] # format-suffix
           body = HTTP.decompress h, response.read                     # read body
           if format && reader = RDF::Reader.for(content_type: format) # read data from body
             reader.new(body, base_uri: self){|_| (env[:repository] ||= RDF::Repository.new) << _ }
-          end
-          if cache
-            c = fsPath.R                             # cache URI
-            c += query_hash                          # append query-hash
-            c += formatExt if formatExt && c.R.extension != formatExt # affix format-suffix
-            c.R.writeFile body                       # cache representation
-            #puts "CACHE #{uri}  -> #{c}"
-            saveRDF                                  # cache RDF graph(s)
-          end
-          return unless response # fetch/read/parse/cache only
+          end; return unless response                                 # skip HTTP Response
 
-          # upstream metadata
-          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials
-             Content-Type ETag Set-Cookie).map{|k|
-            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}
-          env[:resp]['Access-Control-Allow-Origin']||=allowedOrigin # CORS header
-          h['link'] && h['link'].split(',').map{|link|              # parse and merge Link header
+          # HTTP response
+          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie).map{|k|
+            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # upstream metadata
+          env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin # CORS header
+          h['link'] && h['link'].split(',').map{|link|                # parse+merge Link header
             ref, type = link.split(';').map &:strip
             if ref && type
               ref = ref.sub(/^</,'').sub />$/, ''
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
             end}
-
-          # HTTP response
-          if transformable &&                                 # conneg-via-proxy (default)
-             !(format||'').match?(/audio|image|script|video/) # exempt media-formats TODO ffmpeg/convert frontend
+          if transformable && !(format||'').match?(/audio|css|image|script|video/) # conneg-via-proxy (default except for media formats TODO ffmpeg frontend)
             env[:origin_format] = format                      # note original format for logger
-            graphResponse                                     # locally-generated document
-          else                                                # content-type fixed by upstream
-            case format                                       # clean doc & locate references
+            saveRDF.graphResponse                             # cache graph and return
+          else                                                # format fixed by upstream
+            case format                                       # clean doc & set content location
             when 'text/css'
-              Webize::CSS.cacherefs doc, env, false           # set location references
-            when 'text/html'                                  # HTML document
-              doc = Webize::HTML.clean body, self, false      # clean document
-              Webize::HTML.cacherefs doc, env, false          # set location references
+              body = Webize::CSS.cacherefs body, env          # set location references in CSS
+            when 'text/html'
+              doc = Webize::HTML.clean body, self, false      # clean HTML document
+              Webize::HTML.cacherefs doc, env, false          # set location references in HTML
               body = doc.to_html
             end
-
-            env[:resp]['Content-Length'] = body.bytesize.to_s # set Content-Length
-            [200, env[:resp], [body]]                         # upstream document
+            c = fsPath.R; c += query_hash                     # cache location
+            fExt = Suffixes[format] || Suffixes_Rack[format]  # format-suffix
+            c += fExt if fExt && c.R.extension != fExt        # affix format-suffix if incorrect or missing
+            c.R.writeFile body                                # cache static representation
+            env[:resp]['Content-Length'] = body.bytesize.to_s # Content-Length header
+            [200, env[:resp], [body]]                         # return upstream document
           end
         end
       end
