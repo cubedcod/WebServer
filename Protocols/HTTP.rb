@@ -275,7 +275,7 @@ class WebResource
           dateDir
         elsif p == 'favicon.ico'               # local icon-file
           SiteDir.join('favicon.ico').R(env).fileResponse
-        elsif node.file? || (p.match? /^(\d\d\d\d|a|msg|v)$/)
+        elsif node.file? || (p.match? /^(\d\d\d\d|a|msg|sent|v)$/)
           cacheResponse                        # local graph-node
         elsif p == 'log'
           log_search                           # search log
