@@ -365,12 +365,18 @@ class WebResource
         CGI.escapeHTML (c||'')
       end}
 
+    MarkupGroup[Post] = -> posts, env {
+      if env[:view] == 'table'
+        HTML.tabular posts, env
+      else
+        posts.sort_by!{|r|(r[Content] || [0])[0]. size}.map{|post|
+          Markup[Post][post,env]}
+      end}
+
     Markup[Post] = -> post, env {
       post.delete Type
       uri = post.delete('uri') || ('#' + Digest::SHA2.hexdigest(rand.to_s))
       resource = uri.R env
-      #puts :POST, [resource.host, resource.path].join(' '), [env[:base].host, env[:base].path].join(' ')
-
       titles = (post.delete(Title)||[]).map(&:to_s).map(&:strip).compact.-([""]).uniq
       abstracts = post.delete(Abstract) || []
       date = (post.delete(Date) || [])[0]
@@ -382,7 +388,6 @@ class WebResource
       htmlcontent = post.delete(SIOC + 'richContent') || []
       uri_hash = 'r' + Digest::SHA2.hexdigest(uri)
       hasPointer = false
-
       local_id = if !resource.path || (resource.host == env[:base].host && resource.path == env[:base].path)
                    resource.fragment
                  else

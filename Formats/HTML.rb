@@ -287,6 +287,8 @@ class WebResource
     def htmlDocument graph=nil
       graph ||= env[:graph] = treeFromGraph
       qs = query_values || {}
+      env[:view] ||= qs['view']
+      env[:sort] ||= qs['sort']
       env[:colors] ||= {}
       if env[:summary] || ((qs.has_key?('Q')||qs.has_key?('q')) && !qs.has_key?('fullContent'))      # pointer to unabbreviated form
         expanded = HTTP.qs qs.merge({'fullContent' => nil})
@@ -307,7 +309,7 @@ class WebResource
       HTML.render ["<!DOCTYPE html>\n",
                    {_: :html,
                     c: [{_: :head,
-                         c: [{_: :base, href: uri},
+                         c: [{_: :base, href: href},
                              {_: :meta, charset: 'utf-8'},
                             ({_: :title, c: CGI.escapeHTML(graph[uri][Title].map(&:to_s).join ' ')} if graph.has_key?(uri) && graph[uri].has_key?(Title)),
                              {_: :style, c: ["\n", SiteCSS]}, "\n",
@@ -335,26 +337,26 @@ class WebResource
                              if graph.empty?
                                HTML.keyval (Webize::HTML.webizeHash env), env
                              else
-                               groups = {} # resources grouped by type
+                               groups = {} # group resources by type
                                graph.map{|uri, resource|
                                  (resource[Type]||[:untyped]).map{|type|
                                    type = type.to_s
                                    groups[type] ||= []
                                    groups[type].push resource }}
 
-                               if (env[:view] || qs['view']) == 'table' # tabular view
-                                 env[:sort] ||= qs['sort']
-                                 groups.map{|type, resources|
-                                   HTML.tabular resources, env}
-                               else
-                                 groups.map{|type, resources|
-                                   if MarkupGroup.has_key? type
-                                     MarkupGroup[type][resources, env]
+                               # graph to markup
+                               groups.map{|type, resources|
+                                 type = MarkupMap[type] || type
+                                 if MarkupGroup.has_key? type
+                                   MarkupGroup[type][resources, env]   # typed-collection markup
+                                 else
+                                   if env[:view] == 'table'
+                                     HTML.tabular resources, env       # tabular view
                                    else
                                      resources.map{|resource|
-                                       HTML.markup nil, resource, env}
-                                   end}
-                               end
+                                       HTML.markup nil, resource, env} # singleton-resource markup
+                                   end
+                                 end}
                              end, expander,
                              {_: :script, c: SiteJS}]}]}]
     end
