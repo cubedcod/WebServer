@@ -61,6 +61,7 @@ class WebResource
     end
 
     def nodeSet
+      return [self] if node.file?
       pathIndex = localNode? ? 0 : hostPath.size
       qs = query_values || {}                      # query arguments
       env[:summary] = !(qs.has_key? 'fullContent') # summarize multi-node sets

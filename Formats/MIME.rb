@@ -60,5 +60,15 @@ class WebResource
         mime
       end
     end
+
+    def named_format # format in filename suffix
+      x = ext.to_sym
+      RDF::Format.file_extensions[x][0].content_type[0] if RDF::Format.file_extensions.has_key? x
+    end
+
+    def static_node? # format and content is static - no transcode or invalidation - mint new URI for new version
+      %w(bin css geojson gif ico jpeg jpg js m3u8 m4a mp3 mp4 opus pem pdf png svg ts webm webp .ico .gif .jpg .png .mp4 .js).member? ext.downcase
+    end
+
   end
 end

@@ -31,11 +31,10 @@ class WebResource
     end
 
     def cacheResponse
-      return fileResponse if StaticFormats.member?(ext.downcase) && node.file? # direct node
-      nodes = nodeSet                                                          # indirect nodes
-      if nodes.size == 1 && (StaticFormats.member?(nodes[0].ext) || (selectFormat == 'text/turtle' && nodes[0].ext == 'ttl'))
-        nodes[0].fileResponse           # nothing to merge or transform
-      else                              # transform and/or merge nodes
+      nodes = nodeSet                   # find cached nodes
+      if nodes.size == 1 && (nodes[0].static_node? || nodes[0].named_format == selectFormat)
+        nodes[0].fileResponse           # no merge or transcode needed
+      else                              # transform and/or merge graph-data
         nodes = nodes.map &:summary if env[:summary] # summarize nodes
         nodes.map &:loadRDF             # node(s) -> Graph
         timeMeta                        # reference temporally-adjacent nodes
@@ -150,12 +149,9 @@ class WebResource
     # fetch from cache or remote server
     def fetch
       return cacheResponse if ENV.has_key? 'OFFLINE'
-      if StaticFormats.member? ext.downcase                                                  # static representation valid in cache if exists:
-        return [304,{},[]] if env.has_key?('HTTP_IF_NONE_MATCH')||env.has_key?('HTTP_IF_MODIFIED_SINCE') # client has resource in browser-cache
-        return fileResponse if node.file?                                                    # server has static node - direct hit
-      end
+      return [304,{},[]] if (env.has_key?('HTTP_IF_NONE_MATCH') || env.has_key?('HTTP_IF_MODIFIED_SINCE')) && static_node? # client has static node in cache
       nodes = nodeSet
-      return nodes[0].fileResponse if nodes.size == 1 && StaticFormats.member?(nodes[0].ext) # server has static-node in 1-element set
+      return nodes[0].fileResponse if nodes.size == 1 && nodes[0].static_node?                                             # server has static node in cache
       fetchHTTP                                                                 # fetch via HTTPS
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
       ['http://', host, path, query ? ['?', query] : nil].join.R(env).fetchHTTP # fetch via HTTP
@@ -175,14 +171,13 @@ class WebResource
                      'application/atom+xml'          # Atom/RSS content-type
                    elsif h.has_key? 'content-type'
                      h['content-type'].split(/;/)[0] # content-type in HTTP header
-                   elsif RDF::Format.file_extensions.has_key? ext.to_sym # path extension
-                     RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
+                   elsif named_format
+                     named_format
                    end
           body = HTTP.decompress h, response.read                     # read body
           if format && reader = RDF::Reader.for(content_type: format) # read data from body
             reader.new(body, base_uri: self){|_| (env[:repository] ||= RDF::Repository.new) << _ }
           end; return unless response                                 # skip HTTP Response
-
           # HTTP response
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # upstream metadata
@@ -280,23 +275,10 @@ class WebResource
           dateDir
         elsif p == 'favicon.ico'               # local icon-file
           SiteDir.join('favicon.ico').R(env).fileResponse
-        elsif node.file?                       # local file
-          fileResponse
-        elsif p.match? /^(\d\d\d\d|a|msg|v)$/
+        elsif node.file? || (p.match? /^(\d\d\d\d|a|msg|v)$/)
           cacheResponse                        # local graph-node
-        elsif p == 'log'                       # search log
-          env.update({sort: sizeAttr = '#size', view: 'table'})
-          results = {}
-          if q = (query_values||{})['q']
-            `grep -i #{Shellwords.escape 'http.*' + q} ~/web/web.log | tr -s ' ' | cut -d ' ' -f 7 `.each_line{|uri| u = uri.R
-              results[uri] ||=  {'uri' => uri,
-                                 sizeAttr => 0,
-                                 Title => [[u.host, u.path, (u.query ? ['?', u.query] : nil)].join]}
-              results[uri][sizeAttr] += 1}
-          else
-            env[:searchable] = true
-          end
-          [200, {'Content-Type' => 'text/html'}, [(htmlDocument results)]]
+        elsif p == 'log'
+          log_search                           # search log
         else
           (env[:base] = remoteURL).hostHandler # host handler (rebased on local)
         end
@@ -354,6 +336,21 @@ class WebResource
 
     def href
       env[:cacherefs] ? cacheURL : uri
+    end
+
+    def log_search
+      env.update({sort: sizeAttr = '#size', view: 'table'})
+      results = {}
+      if q = (query_values||{})['q']
+        `grep -i #{Shellwords.escape 'http.*' + q} ~/web/web.log | tr -s ' ' | cut -d ' ' -f 7 `.each_line{|uri| u = uri.R
+          results[uri] ||=  {'uri' => uri,
+                             sizeAttr => 0,
+                             Title => [[u.host, u.path, (u.query ? ['?', u.query] : nil)].join]}
+          results[uri][sizeAttr] += 1}
+      else
+        env[:searchable] = true
+      end
+      [200, {'Content-Type' => 'text/html'}, [(htmlDocument results)]]
     end
 
     def notfound; [404, {'Content-Type' => 'text/html'}, [htmlDocument]] end
