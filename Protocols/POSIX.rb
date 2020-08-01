@@ -107,9 +107,16 @@ class WebResource
 
     MarkupGroup[LDP+'Container'] = -> dirs, env {
       if this = dirs.find{|d| d['uri'] == env[:base].uri.split('?')[0]}
+        rest = dirs.select{|d| d['uri'] != this['uri']}
         {class: 'main container',
          c: [{_: :span, class: :head, c: this['uri'].R.basename},
-             {class: :body, c: dirs.select{|d| d['uri'] != this['uri']}.map{|dir| Markup[LDP+'Container'][dir,env]}}]}
+             {class: :body,
+              c: if env[:view] == 'table'
+               HTML.tabular rest, env
+             else
+               rest.map{|dir| Markup[LDP+'Container'][dir,env]}
+              end
+             }]}
       else
         dirs.map{|dir| Markup[LDP+'Container'][dir,env]}
       end
