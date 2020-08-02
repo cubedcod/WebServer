@@ -531,9 +531,13 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
       yield subject, Schema+'Artist', data['a'], graph
       yield subject, Schema+'Song', data['s'], graph
       yield subject, Schema+'Release', data['r'], graph
+      yield subject, Schema+'Year', spin.css['released'][0].inner_text, graph
       yield subject, Date, date, graph
       spin.css('img').map{|img|
         yield subject, Image, img['src'].R, graph}
+      if note = spin.css['.note'][0]
+        yield subject, Content, note.inner_html
+      end
       spin.remove }
   end
 
