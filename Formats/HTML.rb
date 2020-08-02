@@ -215,13 +215,15 @@ module Webize
         n.css('[rel][href]').map{|m|
           if rel = m.attr("rel") # predicate
             if v = m.attr("href") # object
+              v = @base.join v
               rel.split(/[\s,]+/).map{|k|
+                @base.env[:links][:icon] ||= v if k.match? /^(fav)?icon?$/i
                 @base.env[:links][:prev] ||= v if k.match? /prev(ious)?/i
                 @base.env[:links][:next] ||= v if k.downcase == 'next'
-                @base.env[:feeds].push @base.join v if k == 'alternate' && ((m['type']&.match?(/atom|rss/)) || (v.R.path&.match?(/^\/feed\/?$/)))
+                @base.env[:feeds].push v if k == 'alternate' && ((m['type']&.match?(/atom|rss/)) || (v.path&.match?(/^\/feed\/?$/)))
                 k = MetaMap[k] || k
                 puts [k, v].join "\t" unless k.to_s.match? /^(drop|http)/
-                yield subject, k, v.R unless k == :drop}
+                yield subject, k, v unless k == :drop}
             end
           end}
 
@@ -298,7 +300,6 @@ class WebResource
       tabularUI = join(HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))).R env
       upstreamUI = join(HTTP.qs(qs.merge({'notransform' => nil}))).R env                             # pointer to upstream UI
       bc   = ('//' + (host || 'localhost') + (port ? (':' + port.to_s) : '') + '/').R env            # breadcrumb-trail startpoint
-      icon = ('//' + (host || 'localhost') + (port ? (':' + port.to_s) : '') + '/favicon.ico').R env # icon location
       link = -> key, content { # render Link reference
         if url = env[:links] && env[:links][key]
           [{_: :a, href: url.R(env).href, id: key, class: :icon, c: content},
@@ -317,7 +318,7 @@ class WebResource
                                [{_: :link, rel: type, href: CGI.escapeHTML(resource.R(env).href)}, "\n"]}]}, "\n",
                         {_: :body,
                          c: [{class: :toolbox,
-                              c: [{_: :a, href: bc.href, id: :host, c: (icon.node.exist? && icon.node.size != 0) ? {_: :img, src: icon.href} : host}, "\n",
+                              c: [{_: :a, href: bc.href, id: :host, c: {_: :img, src: env[:links][:icon]}}, "\n",
                                  ({_: :a, id: :tabular, class: :icon, c: '↨', href: tabularUI.href} unless qs['view'] == 'table'), "\n",
                                  env[:feeds].map{|feed|
                                     {_: :a, href: feed.R.cacheURL, title: feed.path, class: :icon, c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange; margin-right: .1em'} : {})}, "\n",

@@ -361,7 +361,7 @@ class WebResource
       'localLinkUrl' => Link,
       'locked' => :drop,
       'managementId' => :drop,
-      'manifest' => :drop,
+      'manifest' => Schema+'manifest',
       'manifest-validation' => :drop,
       'mask-icon' => Image,
       'me' => Creator,
