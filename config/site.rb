@@ -248,7 +248,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
         Webize::JSON::Reader.new(data, base_uri: self).scanContent do |s,p,o| # call JSON triplr
           if p == 'gcsBaseUrl' # bind image URL
             p = Image
-            o += '3000.jpeg'
+            o += '2000.jpeg'
           end
           yield s,p,o
         end}}

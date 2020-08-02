@@ -4,8 +4,11 @@ class WebResource
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
 
     AllowFile = SiteDir.join 'allow_domains'
-    AllowHosts = {}
-    AllowFile.each_line{|l| AllowHosts[l.chomp] = true }
+    AllowDomains = {}
+    AllowFile.each_line{|l|
+      cursor = AllowDomains
+      l.chomp.sub(/^\./,'').split('.').reverse.map{|name|
+        cursor = cursor[name] ||= {}}}
 
     DenyFile = SiteDir.join 'deny_domains'
     DenyDomains = {}
@@ -42,6 +45,11 @@ zerg(net)?)
 
     InitialState = /(app|bio|boot(loader|strap)|broadcast(er)?|client|global|init(ial)?|meta|page|player|preload(ed)?|shared|site).?(con(fig|tent)|data|env|node|props|st(ate|ore))|app.bundle|environment|hydrat|SCRIPTS_LOADED|__typename/i
 
+    def allow_domain?
+      c = AllowDomains                                              # start cursor at root
+      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # search for leaf in domain tree
+    end
+
     def deny?
       return true if deny_domain?
       return true if uri.match? Gunk
@@ -49,7 +57,7 @@ zerg(net)?)
     end
 
     def deny_domain?
-      return false if !host || AllowHosts.has_key?(host) || WebResource::HTTP::HostGET.has_key?(host)
+      return false if !host || WebResource::HTTP::HostGET.has_key?(host) || allow_domain?
       c = DenyDomains                                               # start cursor at root
       host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # search for leaf in domain tree
     end
