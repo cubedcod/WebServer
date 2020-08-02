@@ -502,7 +502,39 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
   end
 
   def Spinitron doc
+    if show = doc.css('.show-title > a')[0]
+      show_name = show.inner_text
+      show_url = join show['href']
+      station = show_url.R.parts[0]
+    end
 
+    if dj = doc.css('.dj-name > a')[0]
+      dj_name = dj.inner_text
+      dj_url = join dj['href']
+    end
+
+    if timeslot = doc.css('.timeslot')[0]
+      day = timeslot.inner_text.split(' ')[0..2].join(' ') + ' '
+    end
+
+    doc.css('.spin-item').map{|spin|
+      spintime = spin.css('.spin-time > a')[0]
+      date = Chronic.parse(day + spintime.inner_text).iso8601
+      subject = join spintime['href']
+      graph = [date.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), station, show_name.split(' ')].join('.').R # graph URI
+      data = JSON.parse spin['data-spin']
+      yield subject, Type, Post.R, graph
+      yield subject, Creator, dj_url, graph
+      yield subject, Creator, dj_name, graph
+      yield subject, To, show_url, graph
+      yield subject, To, show_name, graph
+      yield subject, Schema+'Artist', data['a'], graph
+      yield subject, Schema+'Song', data['s'], graph
+      yield subject, Schema+'Release', data['r'], graph
+      yield subject, Date, date, graph
+      spin.css('img').map{|img|
+        yield subject, Image, img['src'].R, graph}
+      spin.remove }
   end
 
   def TwitterJSON tree, &b

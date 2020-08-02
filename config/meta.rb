@@ -613,6 +613,7 @@ class WebResource
       'visitor-hmac' => :drop,
       'visitor-payload' => :drop,
       'vr:canonical' => Link,
+      'webPageType' => Type,
       'width' => :drop,
       'wlwmanifest' => :drop,
       'xxUpdated' => Date,
