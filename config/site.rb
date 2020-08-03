@@ -13,6 +13,7 @@ module Webize
         'fosstodon.org' => :HFeed,
         'github.com' => :GitHub,
         'gitter.im' => :GitterHTML,
+        'lobste.rs' => :Lobsters,
         'news.ycombinator.com' => :HackerNews,
         'spinitron.com' => :Spinitron,
         'universalhub.com' => :UHub,
@@ -492,6 +493,20 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
                 end}.join(' ')
         end rescue nil
       end
+    }
+  end
+
+  def Lobsters doc
+    doc.css('div.comment[id]').map{|comment|
+      post_id, avatar, author, post_link = comment.css('.byline > a')
+      subject = join post_link['href']
+      yield subject, Type, Post.R
+      yield subject, To, (join subject.path)
+      yield subject, Creator, (join author['href'])
+      yield subject, Creator, author.inner_text
+      yield subject, Image, (join avatar.css('img')[0]['src'])
+      yield subject, Date, Time.parse(comment.css('.byline > span[title]')[0]['title']).iso8601
+      yield subject, Content, comment.css('.comment_text')[0].inner_html
     }
   end
 
