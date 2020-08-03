@@ -33,7 +33,7 @@
 .toolbox form input {background-color: #000; color: #fff; border-radius: .5em; border: 1px solid #444}
 :target {background-color: #2ef !important; color: #000 !important}
 a {text-decoration: none; border-radius: .14em}
-a.date {float: right; white-space: nowrap; color: #999; border-radius: .2em; font-size: .8em}
+a.date {float: right; white-space: nowrap; color: #aaa; border-radius: .2em; font-size: .8em}
 a.id {float: right}
 a.idlink {color: #aaa; font-size: .72em; vertical-align: bottom}
 a.title:visited, a.uri:visited, a.uri.path:visited {background-color: #0f5}

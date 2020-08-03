@@ -506,8 +506,8 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
       yield subject, Creator, author.inner_text
       yield subject, Image, (join avatar.css('img')[0]['src'])
       yield subject, Date, Time.parse(comment.css('.byline > span[title]')[0]['title']).iso8601
-      yield subject, Content, comment.css('.comment_text')[0].inner_html
-    }
+      yield subject, Content, (Webize::HTML.format comment.css('.comment_text')[0].inner_html, self)
+      comment.remove }
   end
 
   def QRZ doc, &b
