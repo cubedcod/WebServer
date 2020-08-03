@@ -84,6 +84,8 @@ t.co ti.me tinyurl.com trib.al
 w.bos.gl wired.trib.al
 ).map{|s| GET s, NoQuery}
 
+    DenyDomains['com'].delete 'amazon' if ENV.has_key? 'AMAZON'
+
     GET 'gitter.im', -> r {
       r.env[:sort] = 'date'
       r.env[:view] = 'table'
