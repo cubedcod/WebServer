@@ -260,8 +260,6 @@ class WebResource
   module HTML
 
     def Chan doc
-      #puts "chan  doc at  #{uri}"
-
       doc.css('.post, .postCell').map{|post|
         num = post.css('a.linkSelf, a.post_no, .postNum a')[0]
 

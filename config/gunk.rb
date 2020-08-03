@@ -45,27 +45,6 @@ zerg(net)?)
 
     InitialState = /(app|bio|boot(loader|strap)|broadcast(er)?|client|global|init(ial)?|meta|page|player|preload(ed)?|shared|site).?(con(fig|tent)|data|env|node|props|st(ate|ore))|app.bundle|environment|hydrat|SCRIPTS_LOADED|__typename/i
 
-    def allow_domain?
-      c = AllowDomains                                              # start cursor at root
-      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # search for leaf in domain tree
-    end
-
-    def deny?
-      return true if deny_domain?
-      return true if uri.match? Gunk
-      false
-    end
-
-    def deny_domain?
-      return false if !host || WebResource::HTTP::HostGET.has_key?(host) || allow_domain?
-      c = DenyDomains                                               # start cursor at root
-      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # search for leaf in domain tree
-    end
-
-    def deny_query?
-      !(query_values||{}).keys.grep(/^utm/).empty?
-    end
-
   end
 end
 module Webize

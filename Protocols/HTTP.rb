@@ -20,6 +20,11 @@ class WebResource
       end
     end
 
+    def allow_domain?
+      c = AllowDomains                                              # start cursor at root
+      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # search for leaf in domain tree
+    end
+
     def allowedOrigin
       if env['HTTP_ORIGIN']
         env['HTTP_ORIGIN']
@@ -106,13 +111,23 @@ class WebResource
        [content]]
     end
 
-    def denyPOST
-      env[:deny] = true
-      [202, {'Access-Control-Allow-Credentials' => 'true',
-             'Access-Control-Allow-Origin' => allowedOrigin}, []]
+    def deny?
+      return true if deny_domain?
+      return true if uri.match? Gunk
+      false
     end
 
-    # if needed, return lazily-generated entity, via Rack handler if file-reference
+    def deny_domain?
+      return false if !host || WebResource::HTTP::HostGET.has_key?(host) || allow_domain?
+      c = DenyDomains                                               # start cursor at root
+      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # search for leaf in domain tree
+    end
+
+    def deny_query?
+      !(query_values||{}).keys.grep(/^utm/).empty?
+    end
+
+    # if needed, generate and return entity. delegate to Rack handler for file references
     def entity generator = nil
       if env['HTTP_IF_NONE_MATCH']&.strip&.split(/\s*,\s*/)&.include? env[:resp]['ETag']
         [304, {}, []]                            # unmodified entity
