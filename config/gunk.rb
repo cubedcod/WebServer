@@ -50,7 +50,6 @@ end
 module Webize
   module HTML
 
-    # script pattern
     GunkExec = %r(_0x[0-9a-f]|(\b|[_'"])(
 3gl|6sc|
 ad(dtoany|miral|nxs)|.*analytic.*|apptentive.*|auction|aswpsdkus|

@@ -497,6 +497,11 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
   end
 
   def Lobsters doc
+    doc.css('.h-entry').map{|entry|
+      avatar, author, archive, post = comment.css('.byline > a')
+      subject = join post['href']
+      entry.remove }
+
     doc.css('div.comment[id]').map{|comment|
       post_id, avatar, author, post_link = comment.css('.byline > a')
       subject = join post_link['href']
