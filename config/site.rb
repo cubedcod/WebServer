@@ -498,8 +498,21 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
 
   def Lobsters doc
     doc.css('.h-entry').map{|entry|
-      avatar, author, archive, post = comment.css('.byline > a')
+      avatar, author, archive, post = entry.css('.byline a')
+      post = archive unless post
       subject = join post['href']
+      yield subject, Type, Post.R
+      yield subject, Creator, (join author['href'])
+      yield subject, Creator, author.inner_text
+      yield subject, Image, (join avatar.css('img')[0]['src'])
+      yield subject, Date, Time.parse(entry.css('.byline > span[title]')[0]['title']).iso8601
+      entry.css('.link > a').map{|link|
+        yield subject, Link, (join link['href'])
+        yield subject, Title, link.inner_text}
+      entry.css('.tags > a').map{|tag|
+        yield subject, To, (join tag['href'])
+        yield subject, Abstract, tag['title']}
+
       entry.remove }
 
     doc.css('div.comment[id]').map{|comment|
@@ -512,6 +525,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
       yield subject, Image, (join avatar.css('img')[0]['src'])
       yield subject, Date, Time.parse(comment.css('.byline > span[title]')[0]['title']).iso8601
       yield subject, Content, (Webize::HTML.format comment.css('.comment_text')[0].inner_html, self)
+
       comment.remove }
   end
 
