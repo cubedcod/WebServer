@@ -337,7 +337,7 @@ class WebResource
                                  if env.has_key?(:searchable) || qs.has_key?('Q') || qs.has_key?('q')
                                    qs['q'] ||= ''
                                    {_: :form, c: qs.map{|k,v|
-                                      ["\n", {_: :input, name: k, value: v}.update((k=='Q' || k == 'q') ? {} : {type: :hidden})]}}
+                                      ["\n", {_: :input, name: k, value: v}.update((k=='Q' || k == 'q') ? {autofocus: true} : {type: :hidden})]}}
                                  end, "\n"]}, "\n",
                              link[:prev, '&#9664;'], "\n",
                              link[:next, '&#9654;'], "\n",
