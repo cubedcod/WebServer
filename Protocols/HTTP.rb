@@ -275,15 +275,10 @@ class WebResource
     end
 
     def GET
-      return [204,{},[]] if path.match? /gen(erate)?_?204$/ # connectivity-check
       if local_node?
         p = parts[0]
-        if !p
-          [301, {'Location' => '/h'}, []]
-        elsif %w{m d h}.member? p              # local-cache current day/hour/min (redirect)
+        if %w{m d h}.member? p                 # local-cache day/hour/min (redirect)
           dateDir
-        elsif p == 'favicon.ico'               # local icon-file
-          SiteDir.join('favicon.ico').R(env).fileResponse
         elsif node.file? || (p.match? /^(\d\d\d\d|a|msg|sent|v)$/)
           cacheResponse                        # local graph-node
         elsif p == 'log'
@@ -312,7 +307,7 @@ class WebResource
 
     def HEAD
       self.GET.yield_self{|s, h, _|
-                          [s, h, []]} # return header
+                          [s, h, []]} # status and header
     end
 
     # headers cleaned/filtered for export
