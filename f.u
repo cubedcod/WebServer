@@ -8,4 +8,4 @@ apollo gql
 http://localhost:8000/web.mit.edu/Saltzer/www/publications/endtoend/endtoend.pdf (pdf webize)
 indicate offline + cached results are in use
 fatt pings - mqtt? hypercore?
-
+store fetch status (incl redirects) & last-update of feeds to aid list gc/maintenance (autoupdate source loc on redirect?)
