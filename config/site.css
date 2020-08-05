@@ -38,9 +38,10 @@ a.id {float: right}
 a.idlink {color: #aaa; font-size: .72em; vertical-align: bottom}
 a.title:visited, a.uri:visited, a.uri.path:visited {background-color: #0f5}
 a.uri > span.uri {font-size: 0.8em; font-weight: normal; color: #777}
-a.uri {border-radius: .28em; background-color: #ddd; color: #000; max-width: 42ex; overflow: hidden; margin: .1em; font-weight: bold; padding-left: .15em; padding-right: .15em}
+a.uri {border-radius: .28em; border: 1px solid #000; background-color: #d8d8d8; color: #000; max-width: 42ex; overflow: hidden; margin: .1em; font-weight: bold; padding-left: .1em; padding-right: .1em}
 a.uri.path > span.uri {color: #aaa}
-a.uri.path {background-color: #222; color: #fff; border: 1px solid #333}
+a.uri.path {background-color: #222; color: #fff; border-color: #333}
+a.uri:hover {border-color: #0ff; background-color: #0ff}
 blockquote {border-radius: .2em; border-width: 0 0 0 .5em; border-style: solid; border-color: #444; margin: 0 0 0 .1em; background-color: #2c2c2c; color: #fff}
 body {font-family: sans-serif; margin: 2em; color: #fff; background: repeating-linear-gradient(-45deg, #000, #000 .62em, #555 .62em, #555 1em)}
 div, a, svg, form, li, table, textarea { display: inline-block }

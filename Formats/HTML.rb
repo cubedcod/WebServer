@@ -292,7 +292,7 @@ class WebResource
       env[:view] ||= qs['view']
       env[:sort] ||= qs['sort']
       env[:colors] ||= {}
-      unless path == '/'                                                                             # pointer to parent
+      unless !path || path == '/'                                                                    # pointer to container
         up = File.dirname path
         up += '/' unless up == '/'
         up += '?' + query if query
