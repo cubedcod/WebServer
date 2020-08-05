@@ -6,14 +6,14 @@ class WebResource
 
     # URI -> file path
     def fsPath      ## host part
-      (if localNode? # localhost
+      (if local_node?
        ''
       else           # host dir
         hostPath
        end) +       ## path part
-        (if !path || path =='/' # root dir
+        (if !path || path =='/' # root node
          %w(index)
-        elsif localNode?
+        elsif local_node?
           if parts[0] == 'msg'  # Message-ID to path
             id = Digest::SHA2.hexdigest Rack::Utils.unescape_path parts[1]
             ['mail', id[0..1], id[2..-1]]
@@ -32,7 +32,7 @@ class WebResource
       host.split('.').-(%w(com net org www)).reverse.join('/') + '/'
     end
 
-    def localNode?
+    def local_node?
       !host || LocalAddress.member?(host)
     end
 
@@ -61,45 +61,45 @@ class WebResource
     end
 
     def nodeSet
-      return [self] if node.file?
-      pathIndex = localNode? ? 0 : hostPath.size
-      qs = query_values || {}                      # query arguments
-      env[:summary] = !(qs.has_key? 'fullContent') # summarize multi-node sets
-      (if node.directory?
-       if qs.has_key?('f') && !qs['f'].empty? && path != '/'          # FIND (case-insensitive)
-         `find #{shellPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
-       elsif qs.has_key?('find') && !qs['find'].empty? && path != '/' #  substring (case-insensitive)
-         `find #{shellPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
-       elsif (qs.has_key?('Q') || qs.has_key?('q')) && path != '/'    # GREP
-         env[:summary] = false # keep full content for HTML highlighting of matched fields
-         q = qs['Q'] || qs['q']
-         args = q.shellsplit rescue q.split(/\W/)
-         case args.size
-         when 0
-           return []
-         when 2 # two unordered terms
-           cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -il #{Shellwords.escape args[1]}"
-         when 3 # three unordered terms
-           cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -il #{Shellwords.escape args[2]}"
-         when 4 # four unordered terms
-           cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -ilZ #{Shellwords.escape args[2]} | xargs -0 grep -il #{Shellwords.escape args[3]}"
-         else   # N ordered terms
-           cmd = "grep -ril -- #{Shellwords.escape args.join '.*'} #{shellPath}"
+      if node.file?
+        [self]
+      else
+        qs = query_values || {}
+        (if node.directory?
+         if qs.has_key?('f') && !qs['f'].empty? && path != '/'          # FIND
+           `find #{shellPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
+         elsif qs.has_key?('find') && !qs['find'].empty? && path != '/' # FIND case-insensitive substring
+           `find #{shellPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
+         elsif (qs.has_key?('Q') || qs.has_key?('q')) && path != '/'    # GREP
+           q = qs['Q'] || qs['q']
+           args = q.shellsplit rescue q.split(/\W/)
+           case args.size
+           when 0
+             return []
+           when 2 # two unordered terms
+             cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -il #{Shellwords.escape args[1]}"
+           when 3 # three unordered terms
+             cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -il #{Shellwords.escape args[2]}"
+           when 4 # four unordered terms
+             cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -ilZ #{Shellwords.escape args[2]} | xargs -0 grep -il #{Shellwords.escape args[3]}"
+           else   # N ordered terms
+             cmd = "grep -ril -- #{Shellwords.escape args.join '.*'} #{shellPath}"
+           end
+           `#{cmd} | head -n 1024`.lines.map &:chomp
+         else                              # LS
+           env[:summary] = !qs.has_key?('fullContent') # summarize dir entries
+           [node, *node.children]
          end
-         `#{cmd} | head -n 1024`.lines.map &:chomp
-       else                     # LS
-         [node, *node.children]
-       end
-      else                      # GLOB
-        globPath = fsPath
-        unless globPath.match /[\*\{\[]/ # parametric glob
-          env[:summary] = false          # default glob
-          globPath += query_hash unless pathIndex == 0 # hashed-qs slug to prevent collision on remote-path storage
-          globPath += '*'
-        end
-        Pathname.glob globPath
-       end).map{|p| # join path to URI space
-        join('/' + p.to_s[pathIndex..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env}
+        else
+          globPath = fsPath
+          unless globPath.match /[\*\{\[]/ # GLOB
+            globPath += query_hash if static_node? && !local_node?
+            globPath += '.*'               # default document-set
+          end
+          Pathname.glob globPath
+         end).map{|p| # join relative path to URI-space
+          join('/' + p.to_s[(local_node? ? 0 : hostPath.size)..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env}
+      end
     end
 
   end

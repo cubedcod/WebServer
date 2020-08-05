@@ -276,13 +276,7 @@ class WebResource
 
     def GET
       return [204,{},[]] if path.match? /gen(erate)?_?204$/ # connectivity-check
-      unless path == '/'                                    # containing-node reference
-        up = File.dirname path
-        up += '/' unless up == '/'
-        up += '?' + query if query
-        env[:links][:up] = up
-      end
-      if localNode?
+      if local_node?
         p = parts[0]
         if !p
           [301, {'Location' => '/h'}, []]

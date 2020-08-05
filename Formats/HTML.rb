@@ -292,20 +292,26 @@ class WebResource
       env[:view] ||= qs['view']
       env[:sort] ||= qs['sort']
       env[:colors] ||= {}
+      unless path == '/'                                                                             # pointer to parent
+        up = File.dirname path
+        up += '/' unless up == '/'
+        up += '?' + query if query
+        env[:links][:up] = up
+      end
       if env[:summary] || ((qs.has_key?('Q')||qs.has_key?('q')) && !qs.has_key?('fullContent'))      # pointer to unabbreviated form
         expanded = HTTP.qs qs.merge({'fullContent' => nil})
         env[:links][:full] = expanded
         expander = {_: :a, id: :expand, c: '&#11206;', href: expanded}
       end
       tabularUI = join(HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))).R env
-      upstreamUI = join(HTTP.qs(qs.merge({'notransform' => nil}))).R env                             # pointer to upstream UI
+      upstreamUI = join(HTTP.qs(qs.merge({'notransform' => nil}))).R env                             # pointer to upstream HTML
       bc   = ('//' + (host || 'localhost') + (port ? (':' + port.to_s) : '') + '/').R env            # breadcrumb-trail startpoint
       link = -> key, content { # render Link reference
         if url = env[:links] && env[:links][key]
           [{_: :a, href: url.R(env).href, id: key, class: :icon, c: content},
            "\n"]
         end}
-      htmlGrep if localNode?
+      htmlGrep if local_node?
 
       HTML.render ["<!DOCTYPE html>\n",
                    {_: :html,
@@ -322,7 +328,7 @@ class WebResource
                                  ({_: :a, id: :tabular, class: :icon, c: '↨', href: tabularUI.href} unless qs['view'] == 'table'), "\n",
                                  env[:feeds].map{|feed|
                                     {_: :a, href: feed.R.cacheURL, title: feed.path, class: :icon, c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange; margin-right: .1em'} : {})}, "\n",
-                                 ({_: :a, href: upstreamUI.href, c: '⚗️', id: :UI, class: :icon} unless localNode?), "\n",
+                                 ({_: :a, href: upstreamUI.href, c: '⚗️', id: :UI, class: :icon} unless local_node?), "\n",
                                  parts.map{|p|
                                     bc.path += p + '/'
                                     [{_: :a, class: :breadcrumb, href: bc.href, c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, "\n ",]},

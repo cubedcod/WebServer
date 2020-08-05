@@ -17,6 +17,7 @@ bugs.chromium.org
 cdnjs.cloudflare.com
 developer.mozilla.org
 docs.google.com
+drive.google.com
 edge.api.brightcove.com
 entitlement.auth.adobe.com
 feedproxy.google.com
@@ -27,6 +28,7 @@ groups.google.com
 .hls.ttvnw.net
 khms0.googleapis.com
 khms1.googleapis.com
+lh3.google.com
 lh3.googleusercontent.com
 maps.google.com
 maps.googleapis.com
@@ -35,9 +37,12 @@ photos.google.com
 players.brightcove.net
 secure.brightcove.com
 sp.auth.adobe.com
+ssl.gstatic.com
 talk.zerohedge.com
 tkx.apis.anvato.net
 update.googleapis.com
 usher.ttvnw.net
+www.gstatic.com
+www.google.com
 www.mixcloud.com
 www.zillow.com
