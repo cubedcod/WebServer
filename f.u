@@ -1,0 +1,11 @@
+http://l/a/dhs non-localnost cacheURLs
+http://localhost:8000/forum.solidproject.org/t/state-of-the-art-for-querying-large-containers/3320?view=table&sort=date better RDFa blank-node rendering
+http://localhost:8000/lobste.rs/s/mfm2az/what_are_you_doing_this_weekend#c_kcemhu (add graph URIs for msgs)
+http://drudgereport.com/ server-side history, and link timestamps
+http://localhost/twitter.com/beetlenaut (twitterh auth crap)
+mastodon HTML view graphURis (is the fosstodon one generalizable?
+apollo gql 
+http://localhost:8000/web.mit.edu/Saltzer/www/publications/endtoend/endtoend.pdf (pdf webize)
+indicate offline + cached results are in use
+fatt pings - mqtt? hypercore?
+
