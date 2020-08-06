@@ -85,11 +85,12 @@ class WebResource < RDF::URI
                  elsif %w(gemfile makefile rakefile).member? basename.downcase
                    :sourcecode
                  end
-        if ext.empty? && !reader
+        if !reader && ext.empty?
           mime = `file -b --mime-type #{shellPath}`.chomp
           puts "FILE(1) :: #{mime} :: #{fsPath}"
+          reader = :plaintext if mime == 'text/plain'
         end
-        options = {base_uri: uri.gsub(/\.ttl$/,'').R(env)}
+        options = {base_uri: env[:base]}
         options[:format] = reader if reader
         options[:content_type] = mime if mime
         graph.load 'file:' + fsPath, **options
