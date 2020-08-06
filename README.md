@@ -1,24 +1,25 @@
 ## INSTALL
 
-until a release is ready, there is no install step, code is run/edited in checkout dir. to install alpine/arch/debian/termux dependencies:
+code is run/edited in checkout dir. for alpine+arch+debian+termux dependencies:
 
     sh DEPENDENCIES
 
 ## USAGE
 
-daemon: script launches daemon, proxy (if needed) and performs any network configuration 
+daemon launch shortcuts in [bin/](bin/)
 
-    port443       # HTTPS - apps use default port, transparent proxy configuration
-    port8080      # HTTP/HTTPS - explicit proxy configuration
-    port80        # HTTP - assumes you have permission to bind port 80. you probably want a variant:
-    port80_socat  # HTTP - socat redirect from port 80 to high-port daemon
+    port443       # listen on default HTTPS port, configure transparent proxy, gateway, DNS options to taste
+    port8080      # default HTTP/HTTPS forward-proxy port
+    port80        # classic port 80 HTTP - assumes you have bind permissions. you probably want a variant:
+    port80_socat  # HTTP - socat redirect to high-port daemon
     port80_setcap # HTTP - SETCAP(8) allows process to bind port 80
 
-client:
+client launch shortcuts in [bin/browse](bin/browse/)
 
-      http_proxy=http://localhost:8080 https_proxy=http://localhost:8080 firefox
+## NOTES
 
-see [bin/browse](bin/browse/) for more client-launching examples
+google search entrypoint to rewritten-web:
+http://localhost:8000/www.google.com/search?q=%s
 
 ## WHAT
 
