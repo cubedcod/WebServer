@@ -279,7 +279,7 @@ class WebResource
         p = parts[0]
         if %w{m d h}.member? p                 # local-cache day/hour/min (redirect)
           dateDir
-        elsif node.file? || !p || p.match?(/^(\d\d\d\d|a|msg|sent|v)$/)
+        elsif node.file? || !p || p.match?(/^(\d\d\d\d|a|msg|s(ent|rc)|v)$/)
           cacheResponse                        # local graph-node
         elsif p == 'log'
           log_search                           # search log
