@@ -210,6 +210,20 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
       ps = r.path.split /https?:\/+/
       ps.size > 1 ? [301, {'Location' => ('https://' + ps[-1]).R(r.env).href}, []] : r.deny}
 
+    GET 'soundcloud.com', -> r {
+      if (r.query_values || {}).has_key?('dl')
+        storage = 'a/soundcloud' + r.path
+        unless File.directory? storage
+          FileUtils.mkdir_p storage
+          pid = spawn "youtube-dl -o '#{storage}/%(title)s.%(ext)s' -x \"#{r.uri}\""
+          Process.detach pid
+        end
+        [302, {'Location' => '/' + storage + '/'}, []]
+      else
+        r.env[:downloadable] = :audio
+        NoGunk[r]
+      end}
+
     GET 'youtube.com',   -> r {[301, {'Location' => ['http://localhost:8000/www.youtube.com', r.path, '?', r.query].join}, []]}
     GET 'm.youtube.com', -> r {[301, {'Location' => ['http://localhost:8000/www.youtube.com', r.path, '?', r.query].join}, []]}
 

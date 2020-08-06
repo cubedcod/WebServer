@@ -13,5 +13,6 @@ reply_of triple on chan triplr
 hide previously-shown links on news articles (site-nav)
 gemini protocol
 ICAP protocol
+link page into downloadable storage-dir. factor out download hook w/ path template
 add inline images and mpv window for video to X11/Wayland Gemini browsers
 bring back cookie escrow if we can leak them to localhost
