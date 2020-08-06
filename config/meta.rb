@@ -20,7 +20,6 @@ class WebResource
       Schema + 'Article' => Post,
       Schema + 'BlogPosting' => Post,
       Schema + 'BreadcrumbList' => List,
-      Schema + 'Code' => Post,
       Schema + 'DiscussionForumPosting' => Post,
       Schema + 'ImageObject' => Image,
       Schema + 'ItemList' => List,
