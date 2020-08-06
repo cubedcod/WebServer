@@ -113,6 +113,7 @@ module Webize
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri]
         @lang = 'html' if @base.ext == 'erb'
+        @lang = 'shell' if options[:content_type] == 'text/x-shellscript'
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)

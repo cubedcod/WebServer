@@ -50,7 +50,7 @@ class WebResource < RDF::URI
   alias_method :uri, :to_s
 
   # file(s) -> RDF::Repository (in-memory)
-  def loadRDF graph: env[:repository] ||= RDF::Repository.new #; puts "LOAD #{uri} <- #{fsPath}"
+  def loadRDF graph: env[:repository] ||= RDF::Repository.new
     if node.file?
       stat = node.stat
       unless ext == 'ttl'
@@ -76,17 +76,22 @@ class WebResource < RDF::URI
           end
         end
       else
-        formatHint = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # path-derived format hints when suffix is ambiguous or missing
-                       :mail # procmail doesnt have configurable SUFFIX (.eml), only PREFIX? - presumably due to some sort of maildir suffix-renames to denote state?
-                     elsif ext.match? /^html?$/
-                       :html
-                     elsif %w(changelog license readme todo).member? basename.downcase
-                       :plaintext
-                     elsif %w(gemfile makefile rakefile).member? basename.downcase
-                       :sourcecode
-                     end
+        reader = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # path-derived format hints when suffix is ambiguous or missing
+                   :mail # procmail doesnt have configurable SUFFIX (.eml), only PREFIX? - presumably due to some sort of maildir suffix-renames to denote state?
+                 elsif ext.match? /^html?$/
+                   :html
+                 elsif %w(changelog license readme todo).member? basename.downcase
+                   :plaintext
+                 elsif %w(gemfile makefile rakefile).member? basename.downcase
+                   :sourcecode
+                 end
+        if ext.empty? && !reader
+          mime = `file -b --mime-type #{shellPath}`.chomp
+          puts "FILE(1) :: #{mime} :: #{fsPath}"
+        end
         options = {base_uri: uri.gsub(/\.ttl$/,'').R(env)}
-        options[:format] ||= formatHint if formatHint
+        options[:format] = reader if reader
+        options[:content_type] = mime if mime
         graph.load 'file:' + fsPath, **options
       end
     elsif node.directory?
