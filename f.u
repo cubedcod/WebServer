@@ -7,11 +7,11 @@ mastodon HTML view graphURis (is the fosstodon one generalizable?
 apollo gql 
 http://localhost:8000/web.mit.edu/Saltzer/www/publications/endtoend/endtoend.pdf (pdf webize)
 indicate offline + cached results are in use
-fatt pings - mqtt? hypercore?
+fat pings - mqtt? hypercore?
 store fetch status (incl redirects) & last-update of feeds to aid list gc/maintenance (autoupdate source loc on redirect?)
 reply_of triple on chan triplr
 hide previously-shown links on news articles (site-nav)
 gemini protocol
 ICAP protocol
 add inline images and mpv window for video to X11/Wayland Gemini browsers
-bring back cookie escrow if we can leak them to localhost 
+bring back cookie escrow if we can leak them to localhost
