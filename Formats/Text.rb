@@ -101,7 +101,7 @@ module Webize
                    text/x-ruby;q=0.8
                    text/x-shellscript;q=0.8
                    ),
-                   extensions: [:bash, :c, :cpp, :gemspec, :go, :h, :hs, :js, :pl, :proto, :py, :rb, :sh]
+                   extensions: [:bash, :c, :cpp, :erb, :gemspec, :go, :h, :hs, :js, :pl, :proto, :py, :rb, :sh]
       content_encoding 'utf-8'
       reader { Reader }
     end
@@ -112,7 +112,7 @@ module Webize
 
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri]
-        @lang = options[:lang]
+        @lang = 'html' if @base.ext == 'erb'
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)

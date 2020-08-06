@@ -1,3 +1,4 @@
+# coding: utf-8
 %w(exif).map{|_| require _}
 module Webize
   module GIF
@@ -171,8 +172,39 @@ image-src
   end
 end
 class WebResource
-
   module HTML
+
+    # single-character representation of a URI
+    Icons = {
+      Abstract => '✍',
+      Audio => '🔊',
+      Content => '',
+      Creator => '👤',
+      DC + 'hasFormat' => '≈',
+      DC + 'identifier' => '☸',
+      DC + 'rights' => '⚖️',
+      Date => '⌚', 'http://purl.org/dc/terms/created' => '⌚', 'http://purl.org/dc/terms/modified' => '⌚',
+      Image => '🖼️',
+      LDP + 'Container' => '📁',
+      LDP + 'contains' => '📁',
+      Link => '☛',
+      Post => '📝',
+      SIOC + 'BlogPost' => '📝',
+      SIOC + 'MailMessage' => '✉️',
+      SIOC + 'MicroblogPost' => '🐦',
+      SIOC + 'attachment' => '✉',
+      SIOC + 'reply_of' => '↩',
+      SIOC + 'richContent' => '',
+      Schema + 'height' => '↕',
+      Schema + 'width' => '↔',
+      Schema + 'DiscussionForumPosting' => '📝',
+      Schema + 'sameAs' => '=',
+      Stat + 'File' => '📄',
+      To => '☇',
+      Type => '📕',
+      Video => '🎞',
+      W3 + '2000/01/rdf-schema#Resource' => '🌐',
+    }
 
     Markup[Image] = -> image, env {
       if img = if image.class == WebResource
@@ -190,4 +222,21 @@ class WebResource
 
   end
 
+  module HTTP
+
+    def self.status_icon status
+      {202 => '➕',
+       204 => '✅',
+       301 => '➡️',
+       302 => '➡️',
+       303 => '➡️',
+       304 => '✅',
+       401 => '🚫',
+       403 => '🚫',
+       404 => '❓',
+       410 => '❌',
+       500 => '🚩'}[status] || (status == 200 ? nil : status)
+    end
+
+  end
 end

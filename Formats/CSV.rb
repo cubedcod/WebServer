@@ -30,7 +30,6 @@ class WebResource
                     c: {_: :a, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}, "\n"]}}}, "\n", # sorting link
            {_: :tbody,
             c: graph.map{|resource|
-
               re = (resource['uri'] || ('#' + Digest::SHA2.hexdigest(rand.to_s))).R env                      # resource identity
               local_id = re.path == env[:base].path && re.fragment || ('r' + Digest::SHA2.hexdigest(re.uri)) # row identity
 

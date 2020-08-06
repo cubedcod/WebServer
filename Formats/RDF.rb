@@ -50,8 +50,7 @@ class WebResource < RDF::URI
   alias_method :uri, :to_s
 
   # file(s) -> RDF::Repository (in-memory)
-  def loadRDF graph: env[:repository] ||= RDF::Repository.new
-    #puts "LOAD #{uri} <- #{fsPath}"
+  def loadRDF graph: env[:repository] ||= RDF::Repository.new #; puts "LOAD #{uri} <- #{fsPath}"
     if node.file?
       stat = node.stat
       unless ext == 'ttl'
@@ -112,18 +111,16 @@ class WebResource < RDF::URI
     (repository || env[:repository]).each_graph.map{|graph|
       doc = (graph.name || self).R
       turtle = doc.fsPath + '.ttl'
-      # write document
       unless File.exist? turtle
         FileUtils.mkdir_p File.dirname turtle
-        RDF::Writer.for(:turtle).open(turtle){|f|f << graph}
+        RDF::Writer.for(:turtle).open(turtle){|f|f << graph}                                     # write Turtle
         puts "\e[32m#{'%2d' % graph.size}⋮🐢 \e[1m#{doc}\e[0m" if doc.path != path
       end
-      # link off-timeline nodes to timeline
       if !turtle.match?(/^\d\d\d\d\/\d\d\/\d\d/) && timestamp = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value # find timestamp
         tlink = [timestamp.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), # hour-dir container
-                 %w{host path query}.map{|a|doc.send(a).yield_self{|p|p && p.split(/[\W_]/)}}]. # URI slugs
+                 %w{host path query}.map{|a|doc.send(a).yield_self{|p|p && p.split(/[\W_]/)}}].  # named slugs
                   flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.')[0..123] + '.ttl'
-        unless File.exist? tlink
+        unless File.exist? tlink                                                                 # link node to timeline
           FileUtils.mkdir_p File.dirname tlink
           FileUtils.ln turtle, tlink rescue nil
         end
@@ -131,18 +128,16 @@ class WebResource < RDF::URI
     self
   end
 
-  # file -> Turtle file (big) -> Turtle file (small)
+  # file -> Turtle file (small)
   def summary
     sPath = 'summary/' + fsPath + (path == '/' ? 'index' : '')
     sPath += '.ttl' unless ext == 'ttl'
     summary = sPath.R env                          # summary URI
     sNode = Pathname.new sPath                     # summary fs-storage
-    return summary if sNode.exist? && sNode.mtime >= node.mtime # summary up to date, return
+    return summary if sNode.exist? && sNode.mtime >= node.mtime # summary up to date
     fullGraph = RDF::Repository.new                # full-graph
     miniGraph = RDF::Repository.new                # summary-graph
-    puts ['🐢', sNode].join ' '
     loadRDF graph: fullGraph                       # read RDF
-    #saveRDF fullGraph unless ext == 'ttl'          # save RDFized from non-RDF graph(s)
     treeFromGraph(fullGraph).values.map{|resource| # bind subject
       subject = (resource['uri'] || '').R
       ps = [Abstract, Creator, Date, Image, LDP+'contains', Link, Title, To, Type, Video]
@@ -154,7 +149,7 @@ class WebResource < RDF::URI
           (o.class == Array ? o : [o]).map{|o|     # bind object
             miniGraph << RDF::Statement.new(subject,p,o)} # triple -> summary-graph
         end}}
-    FileUtils.mkdir_p sNode.dirname                # allocate fs container
+    FileUtils.mkdir_p sNode.dirname                # allocate fs-container
     RDF::Writer.for(:turtle).open(sPath){|f|f << miniGraph} # write summary
     summary                                        # summary reference
   end
@@ -205,40 +200,7 @@ class WebResource < RDF::URI
 
   end
   module HTML
-
     include URIs
-
-    # single-character representation of URI
-    Icons = {
-      Abstract => '✍',
-      Audio => '🔊',
-      Content => '',
-      Creator => '👤',
-      DC + 'hasFormat' => '≈',
-      DC + 'identifier' => '☸',
-      DC + 'rights' => '⚖️',
-      Date => '⌚', 'http://purl.org/dc/terms/created' => '⌚', 'http://purl.org/dc/terms/modified' => '⌚',
-      Image => '🖼️',
-      LDP + 'Container' => '📁',
-      LDP + 'contains' => '📁',
-      Link => '☛',
-      Post => '📝',
-      SIOC + 'BlogPost' => '📝',
-      SIOC + 'MailMessage' => '✉️',
-      SIOC + 'MicroblogPost' => '🐦',
-      SIOC + 'attachment' => '✉',
-      SIOC + 'reply_of' => '↩',
-      SIOC + 'richContent' => '',
-      Schema + 'height' => '↕',
-      Schema + 'width' => '↔',
-      Schema + 'DiscussionForumPosting' => '📝',
-      Schema + 'sameAs' => '=',
-      Stat + 'File' => '📄',
-      To => '☇',
-      Type => '📕',
-      Video => '🎞',
-      W3 + '2000/01/rdf-schema#Resource' => '🌐',
-    }
 
     # RDF -> Markup
     def self.markup type, v, env

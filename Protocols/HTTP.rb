@@ -189,10 +189,13 @@ class WebResource
                    elsif named_format
                      named_format
                    end
-          body = HTTP.decompress h, response.read                     # read body
+          body = HTTP.decompress h, response.read                     # read body from response
           if format && reader = RDF::Reader.for(content_type: format) # read data from body
-            reader.new(body, base_uri: self){|_| (env[:repository] ||= RDF::Repository.new) << _ }
-          end; return unless response                                 # skip HTTP Response
+            env[:repository] ||= RDF::Repository.new
+            reader.new(body, base_uri: self){|_| env[:repository] << _ }
+          end
+
+          return unless response
           # HTTP response
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # upstream metadata
@@ -391,20 +394,6 @@ class WebResource
             ['application/atom+xml','text/html'].member?(f)}} # non-RDF via writer definition
 
       default                                                 # default
-    end
-
-    def self.status_icon status
-      {202 => '➕',
-       204 => '✅',
-       301 => '➡️',
-       302 => '➡️',
-       303 => '➡️',
-       304 => '✅',
-       401 => '🚫',
-       403 => '🚫',
-       404 => '❓',
-       410 => '❌',
-       500 => '🚩'}[status] || (status == 200 ? nil : status)
     end
 
   end
