@@ -1,7 +1,6 @@
 .lbry.tv
 .pscp.tv
 .storage.googleapis.com
-aa.google.com
 ajax.cloudflare.com
 ajax.googleapis.com
 api.lbry.com
@@ -17,8 +16,6 @@ bugs.chromium.org
 cdnjs.cloudflare.com
 developers.google.com
 developer.mozilla.org
-docs.google.com
-drive.google.com
 edge.api.brightcove.com
 entitlement.auth.adobe.com
 feedproxy.google.com
@@ -27,14 +24,8 @@ gql.twitch.tv
 graphql.api.dailymotion.com
 groups.google.com
 .hls.ttvnw.net
-khms0.googleapis.com
-khms1.googleapis.com
 lh3.google.com
 lh3.googleusercontent.com
-maps.google.com
-maps.googleapis.com
-maps.gstatic.com
-photos.google.com
 players.brightcove.net
 secure.brightcove.com
 sp.auth.adobe.com
@@ -44,6 +35,5 @@ tkx.apis.anvato.net
 update.googleapis.com
 usher.ttvnw.net
 www.gstatic.com
-www.google.com
 www.mixcloud.com
 www.zillow.com
