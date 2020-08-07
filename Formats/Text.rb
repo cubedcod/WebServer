@@ -287,12 +287,12 @@ module Webize
             yield subject, To, @base, graph
           }
         else
-          yield @body, Content, WebResource::HTML.render({_: :pre, style: 'white-space: pre-wrap',
-                                                          c: @doc.each_line{|line|
-                                                            line.hrefs{|p,o| # hypertextize
-                                                              # yield detected links to consumer
-                                                              yield @body, p, o
-                                                              yield o, Type, (W3 + '2000/01/rdf-schema#Resource').R}}})
+          yield @body, Content, Webize::HTML.format(WebResource::HTML.render({_: :pre, style: 'white-space: pre-wrap',
+                                                                              c: @doc.lines.map{|line|
+                                                                                line.hrefs{|p,o| # hypertextize
+                                                                                  # yield detected links to consumer
+                                                                                  yield @body, p, o
+                                                                                  yield o, Type, (W3 + '2000/01/rdf-schema#Resource').R}}}), @base)
         end
       end
     end
