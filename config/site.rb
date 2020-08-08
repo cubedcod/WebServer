@@ -176,6 +176,7 @@ ViolenceNBoston
 WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbhnews wutrain)
 
     GET 'twitter.com', -> r {
+      qs = r.query_values || {}
       cookie = 'twitter/cookie'.R
       cookie.writeFile qs['cookie'] if qs.has_key? 'cookie'
       if cookie.node.exist?
