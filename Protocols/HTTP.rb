@@ -173,7 +173,7 @@ class WebResource
     end
 
     # fetch from remote                               options:
-    def fetchHTTP response: true,                    # construct HTTP response
+    def fetchHTTP thru: true,                        # pass HTTP response to caller
                   transformable: !(query_values||{}).has_key?('notransform') # allow transformation: format conversions & same-format (HTML reformat, script pretty-print) rewrites
 
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
@@ -195,7 +195,8 @@ class WebResource
             reader.new(body, base_uri: self){|_| env[:repository] << _ }
           end
 
-          return unless response
+          return unless thru
+
           # HTTP response
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # upstream metadata
