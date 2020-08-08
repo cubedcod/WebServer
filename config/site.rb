@@ -176,6 +176,18 @@ ViolenceNBoston
 WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbhnews wutrain)
 
     GET 'twitter.com', -> r {
+      cookie = 'twitter/cookie'.R
+      cookie.writeFile qs['cookie'] if qs.has_key? 'cookie'
+      if cookie.node.exist?
+        attrs = {}
+        r.env['HTTP_COOKIE'] = cookie.readFile
+        r.env['HTTP_COOKIE'].split(';').map{|attr|
+          k, v = attr.split('=').map &:strip
+          attrs[k] = v}
+        r.env['authorization'] ||= 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA'
+        r.env['x-csrf-token'] ||= attrs['ct0'] if attrs['ct0']
+        r.env['x-guest-token'] ||= attrs['gt'] if attrs['gt']
+      end
       parts = r.parts
       # feed
       if !r.path || r.path == '/'
@@ -229,16 +241,14 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
     GET 'm.youtube.com', -> r {[301, {'Location' => ['http://localhost:8000/www.youtube.com', r.path, '?', r.query].join}, []]}
 
     GET 'www.youtube.com', -> r {
-      path = r.parts[0]; qs = r.query_values || {}
+      path = r.parts[0]
+      qs = r.query_values || {}
       if %w{attribution_link redirect}.member? path
         [301, {'Location' => qs['q'] || qs['u']}, []]
       elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results s user watch watch_videos yts).member?(path) || !path
-        cookie = 'youtube/.cookie'.R
-        if cookie.node.exist?
-          r.env['HTTP_COOKIE'] = cookie.readFile
-        elsif r.env['HTTP_COOKIE'] && r.env['HTTP_COOKIE'].match?(/LOGIN/)
-          cookie.writeFile r.env['HTTP_COOKIE']
-        end
+        cookie = 'youtube/cookie'.R
+        cookie.writeFile qs['cookie'] if qs.has_key? 'cookie'
+        r.env['HTTP_COOKIE'] = cookie.readFile if cookie.node.exist?
         if path == 'embed'
           r.fetchHTTP transformable: false
         elsif path == 'watch' && qs.has_key?('dl')
