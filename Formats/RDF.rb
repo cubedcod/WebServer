@@ -131,6 +131,7 @@ class WebResource < RDF::URI
 
   # file -> Turtle file (small)
   def summary
+    return self if basename.match /^README/
     sPath = 'summary/' + fsPath + (path == '/' ? 'index' : '')
     sPath += '.ttl' unless ext == 'ttl'
     summary = sPath.R env                          # summary URI
