@@ -246,7 +246,7 @@ class WebResource < RDF::URI
       {_: :table, class: :links,
        c: links.group_by{|l|l.R.host}.map{|host, paths|
          {_: :tr,
-          c: [{_: :td, class: :host, c: host ? {_: :a, href: '//' + host, c: host, style: (env[:colors][host] ||= HTML.colorize)[14..-1].sub('background-','')} : []},
+          c: [{_: :td, class: :host, c: host ? {_: :a, href: '/' + host, c: host, style: (env[:colors][host] ||= HTML.colorize)[14..-1].sub('background-','')} : []},
               {_: :td, c: paths.map{|path| Markup[Link][path,env]}}]}}}}
 
     Markup[Link] = -> ref, env {

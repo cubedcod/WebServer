@@ -292,12 +292,7 @@ class WebResource
       env[:view] ||= qs['view']
       env[:sort] ||= qs['sort']
       env[:colors] ||= {}
-      unless !path || path == '/'                                                                    # pointer to container
-        up = File.dirname path
-        up += '/' unless up == '/'
-        up += '?' + query if query
-        env[:links][:up] = up
-      end
+      env[:links][:up] = [File.dirname(env['REQUEST_PATH']), '/', (query ? ['?', query] : nil)].join unless path == '/' # pointer to container
       if env[:summary] || ((qs.has_key?('Q')||qs.has_key?('q')) && !qs.has_key?('fullContent'))      # pointer to unabbreviated form
         expanded = HTTP.qs qs.merge({'fullContent' => nil})
         env[:links][:full] = expanded
