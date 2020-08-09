@@ -123,7 +123,6 @@ w.bos.gl wired.trib.al
     GET 'www.gstatic.com', -> r {r.path.match?(/204$/) ? [204,{},[]] : NoGunk[r]}
 
     GET 'old.reddit.com', -> r {
-      cr = r.env[:cacherefs]; r.env[:cacherefs] = false # preserve original references in HTTP body
       r.fetch.yield_self{|status,head,body|
         if status.to_s.match? /^30/
           head['Location'] = head['Location'].R.cacheURL if head['Location']
@@ -133,7 +132,7 @@ w.bos.gl wired.trib.al
           body[0].scan(/href="([^"]+after=[^"]+)/){|link|links << CGI.unescapeHTML(link[0]).R} # find links
           link = links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]         # sort links
           nextPage = ['https://www.reddit.com', link.path, '?', link.query].join.R r.env       # destination page
-          r.env[:cacherefs] = cr ; [302, {'Location' => nextPage.href}, []]                    # goto page
+          [302, {'Location' => nextPage.href}, []]                    # goto page
         end}}
 
     GET 'www.reddit.com', -> r {

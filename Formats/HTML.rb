@@ -98,18 +98,18 @@ module Webize
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/)||# strip attributes
                       %w(bgcolor class color height http-equiv layout ping role style tabindex target theme width).member?(a.name)}
-        if e['href']                                                   # resolve and annotate links
-          ref = e['href'].R                                            # show full(er) URL in text
-          e.add_child " <span class='uri'>#{CGI.escapeHTML e['href'].sub(/^https?:..(www.)?/,'')[0..127]}</span> "
-          e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # identify node
-          css = [:uri]; css.push :path if !ref.host || (ref.host == base.host) # style as local or global reference
-          e['href'] = base.join e['href'] unless ref.host              # resolve relative references
-          e['class'] = css.join ' '                                    # node CSS-class
-        elsif e['id']                                                  # identified node without a reference
+        if e['href']; ref = (base.join e['href']).R                    # node w/ href and maybe identifier
+          offsite = ref.host != base.host
+          e.add_child " <span class='uri'>#{CGI.escapeHTML (offsite ? ref.uri.sub(/^https?:..(www.)?/,'') : (ref.path || '/'))[0..127]}</span> " # show URI
+          e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # add identifier unless one exists
+          css = [:uri]; css.push :path unless offsite                  # style as local or global reference
+          e['href'] = ref.href                                         # set href
+          e['class'] = css.join ' '                                    # set CSS style
+        elsif e['id']                                                  # identified node w/o href
           e.set_attribute 'class', 'identified'
           e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id'] unless e.name == 'p'}</span> "
         end
-        e['src'] = base.join e['src'] if e['src'] && !e['src'].R.host} # resolve media locations
+        e['src'] = (base.join e['src']).R.href if e['src']}            # set media reference
 
       html.to_xhtml indent: 0
     end
@@ -333,7 +333,7 @@ class WebResource
                                     bc.path += p + '/'
                                     [{_: :a, class: :breadcrumb, href: bc.href, c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, "\n ",]},
                                  ({_: :a, href: join(HTTP.qs(qs.merge({'dl' => env[:downloadable]}))).R(env).href, c: '&darr;', id: :download, class: :icon} if env.has_key? :downloadable), "\n",
-                                 ({_: :a, href: uri, c: '🔗', class: :icon, id: :directlink} if env.has_key?(:cacherefs) && host != 'localhost'), "\n",
+                                 ({_: :a, href: uri, c: '🔗', class: :icon, id: :directlink} unless host == 'localhost'), "\n",
                                  if env.has_key?(:searchable) || qs.has_key?('q')
                                    qs['q'] ||= ''
                                    {_: :form, c: qs.map{|k,v|

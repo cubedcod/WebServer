@@ -33,11 +33,6 @@ class WebResource < RDF::URI
     Schema   = 'http://schema.org/'
 
     def basename; File.basename path end
-    def cacheURL
-      return self unless h = host || env['SERVER_NAME']
-      return self if h == 'localhost'
-      ['http://localhost:8000/', h, path, (query ? ['?',query] : nil), (fragment ? ['#', fragment] : nil) ].join # TODO support other hosts as cache-location (Depends on MIA auth-module, Rust rewrite, etc)
-    end
     def ext; path ? (File.extname(path)[1..-1] || '') : '' end
     def extension; '.' + ext end
     def parts; path ? (path.split('/') - ['']) : [] end
@@ -211,15 +206,15 @@ class WebResource < RDF::URI
     # RDF -> Markup
     def self.markup type, v, env
       if [Abstract, Content, 'http://rdfs.org/sioc/ns#richContent'].member? type
-        (env[:cacherefs] && v.class == String) ? Webize::HTML.cacherefs(v, env) : v
-      elsif Markup[type] # markup lambda defined for explicit type argument
+        v
+      elsif Markup[type] # markup lambda defined for type-argument
         Markup[type][v,env]
       elsif v.class == Hash # data
         types = (v[Type] || []).map{|t|
           MarkupMap[t.to_s] || t.to_s } # normalize typetags for unified renderer selection
         seen = false
         [types.map{|type|
-          if f = Markup[type] # markup lambda defined for RDF type
+          if f = Markup[type] # markup lambda defined for type
             seen = true
             f[v,env]
           end},
@@ -228,15 +223,15 @@ class WebResource < RDF::URI
         if v.path && %w{jpeg jpg JPG png PNG webp}.member?(v.ext)
           Markup[Image][v, env]    # image reference
         else
-          v                        # generic reference
+          v                        # resource reference
         end
       else # renderer undefined
         CGI.escapeHTML v.to_s
       end
     end
 
-    Markup = {} # markup lambdas for RDF types
-    MarkupGroup = {}
+    # markup lambdas
+    Markup = {}; MarkupGroup = {}
 
     Markup['uri'] = -> uri, env {uri.R}
 

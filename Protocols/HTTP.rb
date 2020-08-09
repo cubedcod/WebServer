@@ -51,9 +51,9 @@ class WebResource
       return [405,{},[]] unless %w(GET HEAD).member? env['REQUEST_METHOD'] # allow HTTP methods
       uri = RDF::URI('http' + (env['SERVER_NAME'] == 'localhost' ? '' : 's') + '://' + env['HTTP_HOST']).join(env['REQUEST_PATH']).R env # resource
       uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading + consecutive & from qs so URI library doesn't freak out
-      env.update({base: uri, cacherefs: true, feeds: [], links: {}, resp: {}}) # response metadata
-      uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body|      # dispatch request
-        format = uri.format_icon head['Content-Type']                      # log response
+      env.update({base: uri, feeds: [], links: {}, resp: {}})         # response metadata
+      uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body| # dispatch request
+        format = uri.format_icon head['Content-Type']                 # log response
         color = env[:deny] ? '31;1' : (format_color format)
         unless [204, 304].member? status
           puts [env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]), (status_icon status), format,
@@ -172,7 +172,7 @@ class WebResource
       ['http://', host, path, query ? ['?', query] : nil].join.R(env).fetchHTTP # fetch via HTTP
     end
 
-    # fetch from remote                               options:
+    # fetch from remote server                        options:
     def fetchHTTP thru: true,                        # pass HTTP response to caller
                   transformable: !(query_values||{}).has_key?('notransform') # allow transformation: format conversions & same-format (HTML reformat, script pretty-print) rewrites
 
@@ -208,7 +208,7 @@ class WebResource
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
             end}
-          if transformable && !(format||'').match?(/audio|css|image|script|video/) # conneg-via-proxy (default except for media formats TODO ffmpeg frontend)
+          if transformable && !(format||'').match?(/audio|css|image|script|video/) # conneg enabled
             env[:origin_format] = format                      # note original format for logger
             saveRDF.graphResponse                             # cache graph and return
           else                                                # format fixed by upstream
@@ -328,7 +328,7 @@ class WebResource
           end
           t                                       # token
         }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
-        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base cacherefs colors connection downloadable feeds fetched graph host images keep-alive links origin-format path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # external multi-hop headers
+        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base colors connection downloadable feeds fetched graph host images keep-alive links origin-format path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # external multi-hop headers
       head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # accept Turtle
       case host
       when /wsj\.com$/
@@ -343,7 +343,8 @@ class WebResource
     end
 
     def href
-      env[:cacherefs] ? cacheURL : uri
+      return self if !host || host == 'localhost'
+      ['/', host, path, (query ? ['?',query] : nil), (fragment ? ['#', fragment] : nil) ].join
     end
 
     def log_search
