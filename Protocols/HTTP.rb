@@ -49,7 +49,8 @@ class WebResource
 
     def self.call env
       return [405,{},[]] unless %w(GET HEAD).member? env['REQUEST_METHOD'] # allow HTTP methods
-      uri = RDF::URI('http' + (env['SERVER_NAME'] == 'localhost' ? '' : 's') + '://' + env['HTTP_HOST']).join(env['REQUEST_PATH']).R env # resource
+      uri = RDF::URI('//' + env['HTTP_HOST']).join(env['REQUEST_PATH']).R env # resource URI
+      uri.scheme = uri.local_node? ? 'http' : 'https'                         # request scheme
       uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading + consecutive & from qs so URI library doesn't freak out
       env.update({base: uri, feeds: [], links: {}, resp: {}})         # response metadata
       uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body| # dispatch request
@@ -343,7 +344,7 @@ class WebResource
     end
 
     def href
-      return self if !host || host == 'localhost'
+      return self if local_node?
       ['/', host, path, (query ? ['?',query] : nil), (fragment ? ['#', fragment] : nil) ].join
     end
 

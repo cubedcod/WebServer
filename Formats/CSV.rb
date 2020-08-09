@@ -61,7 +61,7 @@ class WebResource
                   else
                     if Type == k && resource.has_key?(Type) && [Audio.R, Video.R].member?(resource[Type][0])
                       playerType = resource[Type][0] == Audio.R ?  'audio' : 'video'
-                      {_: :a, href: '#', c: '▶️', onclick: 'var player = document.getElementById("' + playerType + '"); player.src="' + re.uri + '"; player.play()'}
+                      {_: :a, href: '#', c: '▶️', onclick: 'var player = document.getElementById("' + playerType + '"); player.src="' + re.href + '"; player.play()'}
                     else
                       (resource[k]||[]).yield_self{|r|r.class == Array ? r : [r]}.map{|v| markup k, v, env }
                     end

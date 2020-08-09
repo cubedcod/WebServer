@@ -1,4 +1,3 @@
-http://l/a/dhs non-localhost cache URLs
 http://localhost:8000/forum.solidproject.org/t/state-of-the-art-for-querying-large-containers/3320?view=table&sort=date better RDFa blank-node rendering
 http://localhost:8000/lobste.rs/s/mfm2az/what_are_you_doing_this_weekend#c_kcemhu (add graph URIs for msgs)
 http://drudgereport.com/ server-side history, and link timestamps
@@ -13,6 +12,7 @@ reply_of triple on chan triplr
 hide previously-shown links on news articles (site-nav)
 gemini protocol
 ICAP protocol
+searchbox rdfa
 link page into downloadable storage-dir. factor out download hook w/ path template
 add inline images and mpv window for video to X11/Wayland Gemini browsers
-bring back cookie escrow if we can leak them to localhost
+
