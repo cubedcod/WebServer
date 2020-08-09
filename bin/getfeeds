@@ -1,3 +1,3 @@
 #!/bin/sh
 feeds=$(dirname $0)/../config/feeds.u
-cat $feeds | parallel --delay 1 -P 8 "curl -ILsw '%{http_code}\t%{content_type}\t%{url_effective}\n' -o /dev/null -x localhost:8080 http:{}"
+cat $feeds | parallel --delay 1 -P 8 "curl -ILsw '%{http_code}\t%{content_type}\t%{url_effective}\n' -o /dev/null http://localhost:8000/{}"
