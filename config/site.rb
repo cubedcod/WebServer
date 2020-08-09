@@ -130,7 +130,7 @@ w.bos.gl wired.trib.al
         else # find page pointer missing in HEAD (old+new UI) and HTML+RSS body (new UI) TODO find it presumably buried in JSON inside a script tag or some followon XHR
           links = []
           body[0].scan(/href="([^"]+after=[^"]+)/){|link|links << CGI.unescapeHTML(link[0]).R} # find links
-          [302, {'Location' => (links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]).href}, []] # goto link with highest count
+          [302, {'Location' => (links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]).href.to_s.sub('old','www')}, []] # goto link with highest count
         end}}
 
     GET 'www.reddit.com', -> r {

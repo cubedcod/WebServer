@@ -56,7 +56,7 @@ class WebResource
                        c: Icons[SIOC+'reply_of']} if r.class == RDF::URI || r.class == WebResource},
                     resource[Abstract] ? [resource[Abstract], '<br>'] : '',
                     [Image, Video].map{|t|(resource[t]||[]).map{|i|Markup[t][i,env]}},
-                    [resource[Content], resource[SIOC+'richContent']].compact.join('<hr>'),
+                    resource[Content], resource[SIOC+'richContent'],
                     MarkupGroup[Link][(resource[Link]||[]),env]]
                   else
                     if Type == k && resource.has_key?(Type) && [Audio.R, Video.R].member?(resource[Type][0])

@@ -416,7 +416,7 @@ class WebResource
                      c: [to.map{|f|Markup[To][f,env]},
                          post.delete(SIOC+'reply_of')],
                      class: :to}, "\n"]}}, "\n",
-           [content, htmlcontent].compact.join('<hr>'),
+           content, htmlcontent,
            MarkupGroup[Link][links, env],
            (["<br>\n", HTML.keyval(post,env)] unless post.keys.size < 1)]}}
 
