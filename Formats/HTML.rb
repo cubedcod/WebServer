@@ -9,7 +9,7 @@ module Webize
     # set location references on local cache
     def self.cacherefs doc, env, serialize=true
       doc = Nokogiri::HTML.fragment doc if doc.class == String
-      doc.css('a, form, iframe, img, link, script').map{|e| # ref element
+      doc.css('a, form, iframe, img, link, script, source').map{|e| # ref element
         %w(action href src).map{|attr|              # ref attribute
           if e[attr]
             ref = e[attr].R                           # reference
@@ -52,7 +52,7 @@ module Webize
     def self.clean_doc doc, base=nil
       doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove # fonts and preload directives
       log = []
-      doc.css("iframe, img, [type='image'], link, script").map{|s|
+      doc.css("iframe, img, [type='image'], link, script, source").map{|s|
         text = s.inner_text     # inline gunk
         if s['type'] != 'application/json' && s['type'] != 'application/ld+json' && !text.match?(InitialState) && text.match?(GunkExec)
           log << "🚩 " + s.to_s.size.to_s + ' ' + (text.match(GunkExec)[2]||'')[0..42]
@@ -207,7 +207,7 @@ module Webize
         # embeds
         n.css('frame, iframe').map{|frame|
           if src = frame.attr('src')
-            src = src.R
+            src = @base.join(src).R
             yield subject, Link, src unless src.deny?
           end}
 
@@ -264,7 +264,7 @@ module Webize
         # <video>
         ['video[src]', 'video > source[src]'].map{|vsel|
           n.css(vsel).map{|v|
-            yield subject, Video, v.attr('src').R }}
+            yield subject, Video, @base.join(v.attr('src')) }}
 
         # <body>
         if body = n.css('body')[0]
