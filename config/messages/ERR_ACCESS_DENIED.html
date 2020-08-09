@@ -6,7 +6,9 @@
     <a href="http://localhost:8000/%u" style="color: #fff; font-size: 22em; font-weight: bold; text-decoration: none">⌘</a>
     <script>
       document.addEventListener("DOMContentLoaded", function(){
-	  document.querySelector('a').setAttribute('href', 'http://localhost:8000/' + window.location.hostname + window.location.pathname + '?cookie=' + encodeURIComponent(document.cookie));
+	  var url = new URL(document.location);
+	  url.searchParams.set('cookie', document.cookie);
+	  document.querySelector('a').setAttribute('href', 'http://localhost:8000/' + url);
       });
     </script>
   </body>
