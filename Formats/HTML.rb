@@ -14,14 +14,14 @@ module Webize
           if e[attr]
             ref = e[attr].R                           # reference
             ref = env[:base].join ref unless ref.host # resolve host
-            e[attr] = ref.R(env).cacheURL             # cache location
+            e[attr] = ref.R(env).href                 # cache location
           end}}
 
       doc.css('img[srcset]').map{|img|
         img['srcset'] = img['srcset'].split(',').map{|i|
           url, _ = i.split ' '
           url = env[:base].join(url).R env
-          [url.cacheURL, _].join ' '
+          [url.href, _].join ' '
         }.join(',')}
 
       doc.css('style').map{|css|
@@ -322,7 +322,7 @@ class WebResource
                               c: [{_: :a, href: bc.href, id: :host, c: {_: :img, src: env[:links][:icon]}}, "\n",
                                  ({_: :a, id: :tabular, class: :icon, c: '↨', href: tabularUI.href} unless qs['view'] == 'table'), "\n",
                                  env[:feeds].map{|feed|
-                                    {_: :a, href: feed.R.cacheURL, title: feed.path, class: :icon, c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange; margin-right: .1em'} : {})}, "\n",
+                                    {_: :a, href: feed.R.href, title: feed.path, class: :icon, c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange; margin-right: .1em'} : {})}, "\n",
                                  ({_: :a, href: upstreamUI.href, c: '⚗️', id: :UI, class: :icon} unless local_node?), "\n",
                                  parts.map{|p|
                                     bc.path += p + '/'

@@ -125,14 +125,12 @@ w.bos.gl wired.trib.al
     GET 'old.reddit.com', -> r {
       r.fetch.yield_self{|status,head,body|
         if status.to_s.match? /^30/
-          head['Location'] = head['Location'].R.cacheURL if head['Location']
+          head['Location'] = r.join(head['Location']).R.href if head['Location']
           [status, head, body]
         else # find page pointer missing in HEAD (old+new UI) and HTML+RSS body (new UI) TODO find it presumably buried in JSON inside a script tag or some followon XHR
           links = []
           body[0].scan(/href="([^"]+after=[^"]+)/){|link|links << CGI.unescapeHTML(link[0]).R} # find links
-          link = links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]         # sort links
-          nextPage = ['https://www.reddit.com', link.path, '?', link.query].join.R r.env       # destination page
-          [302, {'Location' => nextPage.href}, []]                    # goto page
+          [302, {'Location' => (links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]).href}, []] # goto link with highest count
         end}}
 
     GET 'www.reddit.com', -> r {
