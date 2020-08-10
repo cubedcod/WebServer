@@ -175,10 +175,11 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
     GET 'twitter.com', -> r {
       r.env[:sort] = 'date'
       r.env[:view] = 'table'
+      parts = r.parts
       qs = r.query_values || {}
       cookie = 'twitter/cookie'.R
-      cookie.writeFile qs['cookie'] if qs.has_key? 'cookie'
-      if cookie.node.exist?
+      cookie.writeFile qs['cookie'] if qs.has_key? 'cookie' # update cookie
+      if cookie.node.exist?                                 # set headers from cookie values
         attrs = {}
         r.env['HTTP_COOKIE'] = cookie.readFile
         r.env['HTTP_COOKIE'].split(';').map{|attr|
@@ -188,7 +189,6 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
         r.env['x-csrf-token'] ||= attrs['ct0'] if attrs['ct0']
         r.env['x-guest-token'] ||= attrs['gt'] if attrs['gt']
       end
-      parts = r.parts
       # feed
       if !r.path || r.path == '/'
         Twits.shuffle.each_slice(18){|sub|
