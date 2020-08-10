@@ -319,7 +319,7 @@ class WebResource
                                [{_: :link, rel: type, href: CGI.escapeHTML(resource.R(env).href)}, "\n"]}]}, "\n",
                         {_: :body,
                          c: [{class: :toolbox,
-                              c: [{_: :a, href: bc.href, id: :host, c: {_: :img, src: env[:links][:icon]}}, "\n",
+                              c: [{_: :a, href: bc.href, id: :host, c: {_: :img, src: env[:links][:icon] ? env[:links][:icon].R.href : '/favicon.ico'}}, "\n",
                                  ({_: :a, id: :tabular, class: :icon, c: '↨', href: tabularUI.href} unless qs['view'] == 'table'), "\n",
                                  env[:feeds].map{|feed|
                                     {_: :a, href: feed.R.href, title: feed.path, class: :icon, c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange; margin-right: .1em'} : {})}, "\n",
