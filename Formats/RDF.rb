@@ -44,19 +44,19 @@ class WebResource < RDF::URI
 
   alias_method :uri, :to_s
 
-  # file(s) -> RDF::Repository (in-memory)
+  # filesystem node -> RDF::Repository
   def loadRDF graph: env[:repository] ||= RDF::Repository.new
     if node.file?
       stat = node.stat
-      unless ext == 'ttl'
+      unless ext == 'ttl'                                  # file-metadata triples
         graph << RDF::Statement.new(self, Title.R, Rack::Utils.unescape_path(basename))
         graph << RDF::Statement.new(self, Date.R, stat.mtime.iso8601)
         graph << RDF::Statement.new(self, (Stat + 'size').R, stat.size)
       end
       if %w(mp4 mkv webm).member? ext
-        graph << RDF::Statement.new(self, Type.R, Video.R)
+        graph << RDF::Statement.new(self, Type.R, Video.R) # video-metadata triples
       elsif %w(m4a mp3 ogg opus).member? ext
-        graph << RDF::Statement.new(self, Type.R, Audio.R)
+        graph << RDF::Statement.new(self, Type.R, Audio.R) # audio-metadata triples via taglib
         TagLib::FileRef.open(fsPath) do |fileref|
           unless fileref.null?
             tag = fileref.tag
@@ -71,8 +71,8 @@ class WebResource < RDF::URI
           end
         end
       else
-        reader = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # path-derived format hints when suffix is ambiguous or missing
-                   :mail # procmail doesnt have configurable SUFFIX (.eml), only PREFIX? - presumably due to some sort of maildir suffix-renames to denote state?
+        reader = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # email files
+                   :mail # procmail doesnt have configurable SUFFIX (.eml), only PREFIX? - presumably due to maildir suffix-rewrites to denote state?
                  elsif ext.match? /^html?$/
                    :html
                  elsif %w(changelog license readme todo).member? basename.downcase
@@ -80,28 +80,26 @@ class WebResource < RDF::URI
                  elsif %w(gemfile makefile rakefile).member? basename.downcase
                    :sourcecode
                  end
-        if !reader && ext.empty?
+        if !reader && ext.empty? # still no reader and no file-extension. ask FILE(1) for clue
           mime = `file -b --mime-type #{shellPath}`.chomp
-          puts "FILE(1) :: #{mime} :: #{fsPath}"
           reader = :plaintext if mime == 'text/plain'
         end
-        options = {base_uri: env[:base]}
-        options[:format] = reader if reader
-        options[:content_type] = mime if mime
-        graph.load 'file:' + fsPath, **options
+        options = {base_uri: self}
+        options[:format] = reader if reader    # format hint from filename
+        options[:content_type] = mime if mime  # MIME type from FILE(1)
+        graph.load 'file:' + fsPath, **options # read RDF data
       end
-    elsif node.directory?
-      subject = self
-      subject += '/' unless subject.to_s[-1] == '/'
+    elsif node.directory?                      # directory-entry triples
+      subject = self                           # directory URI
+      subject += '/' unless subject.to_s[-1] == '/' # enforce trailing-slash on dir-name
       graph << RDF::Statement.new(subject, Type.R, (LDP + 'Container').R)
       graph << RDF::Statement.new(subject, Title.R, basename)
       graph << RDF::Statement.new(subject, Date.R, node.stat.mtime.iso8601)
-      node.children.map{|child|
+      node.children.map{|child|                # child nodes
         graph << RDF::Statement.new(subject, (LDP+'contains').R, (subject.join child.basename '.ttl'))}
     end
     self
   rescue RDF::FormatError => e
-    mime = `file -b --mime-type #{shellPath}`.chomp
     puts e.message,"RDF::FormatError :: #{mime} :: #{fsPath}"
     self
   end

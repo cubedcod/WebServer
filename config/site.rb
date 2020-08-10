@@ -544,14 +544,15 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
 
     doc.css('div.comment[id]').map{|comment|
       post_id, avatar, author, post_link = comment.css('.byline > a')
-      subject = join post_link['href']
-      yield subject, Type, Post.R
-      yield subject, To, (join subject.path)
-      yield subject, Creator, (join author['href'])
-      yield subject, Creator, author.inner_text
-      yield subject, Image, (join avatar.css('img')[0]['src'])
-      yield subject, Date, Time.parse(comment.css('.byline > span[title]')[0]['title']).iso8601
-      yield subject, Content, (Webize::HTML.format comment.css('.comment_text')[0].inner_html, self)
+      subject = (join post_link['href']).R
+      graph = subject.join [subject.basename, subject.fragment].join '.'
+      yield subject, Type, Post.R, graph
+      yield subject, To, (join subject.path), graph
+      yield subject, Creator, (join author['href']), graph
+      yield subject, Creator, author.inner_text, graph
+      yield subject, Image, (join avatar.css('img')[0]['src']), graph
+      yield subject, Date, Time.parse(comment.css('.byline > span[title]')[0]['title']).iso8601, graph
+      yield subject, Content, (Webize::HTML.format comment.css('.comment_text')[0].inner_html, self), graph
 
       comment.remove }
   end
