@@ -134,6 +134,10 @@ w.bos.gl wired.trib.al
 
     GET 'www.reddit.com', -> r {
       r.env[:links][:prev] = ['http://localhost:8000/old.reddit.com', r.path.sub('.rss',''), '?',r.query].join # page pointer
+      if r.parts[-1] == 'new'
+        r.env[:sort] = 'date'
+        r.env[:view] = 'table'
+      end
       r.path += '.rss' if !r.path.index('.rss') && %w(r u user).member?(r.parts[0]) # request RSS representation
       NoGunk[r]}
 
