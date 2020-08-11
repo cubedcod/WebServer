@@ -13,6 +13,7 @@ module Webize
         'fosstodon.org' => :HFeed,
         'github.com' => :GitHub,
         'gitter.im' => :GitterHTML,
+        'koyu.space' => :HFeed,
         'lobste.rs' => :Lobsters,
         'news.ycombinator.com' => :HackerNews,
         'spinitron.com' => :Spinitron,

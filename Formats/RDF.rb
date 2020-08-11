@@ -11,6 +11,7 @@ class WebResource < RDF::URI
     RDFs     = W3 + '2000/01/rdf-schema#'
     Stat     = W3 + 'ns/posix/stat#'
     Type     = W3 + '1999/02/22-rdf-syntax-ns#type'
+
     DC       = 'http://purl.org/dc/terms/'
     Abstract = DC + 'abstract'
     Audio    = DC + 'Audio'
@@ -19,13 +20,16 @@ class WebResource < RDF::URI
     Link     = DC + 'link'
     Title    = DC + 'title'
     Video    = DC + 'Video'
+
     SIOC     = 'http://rdfs.org/sioc/ns#'
     Content  = SIOC + 'content'
     Creator  = SIOC + 'has_creator'
     To       = SIOC + 'addressed_to'
     Post     = SIOC + 'Post'
+
     FOAF     = 'http://xmlns.com/foaf/0.1/'
     Person   = FOAF + 'Person'
+
     DOAP     = 'http://usefulinc.com/ns/doap#'
     OG       = 'http://ogp.me/ns#'
     Podcast  = 'http://www.itunes.com/dtds/podcast-1.0.dtd#'
@@ -44,7 +48,7 @@ class WebResource < RDF::URI
 
   alias_method :uri, :to_s
 
-  # filesystem node -> RDF::Repository
+  # fs node -> RDF graph
   def loadRDF graph: env[:repository] ||= RDF::Repository.new
     if node.file?
       stat = node.stat
@@ -62,7 +66,7 @@ class WebResource < RDF::URI
             tag = fileref.tag
             graph << RDF::Statement.new(self, Title.R, tag.title)
             graph << RDF::Statement.new(self, Creator.R, tag.artist)
-            graph << RDF::Statement.new(self, Date.R, tag.year)
+            graph << RDF::Statement.new(self, Date.R, tag.year) unless !tag.year || tag.year == 0
             graph << RDF::Statement.new(self, Content.R, tag.comment)
             graph << RDF::Statement.new(self, (Schema+'album').R, tag.album)
             graph << RDF::Statement.new(self, (Schema+'track').R, tag.track)
@@ -71,23 +75,28 @@ class WebResource < RDF::URI
           end
         end
       else
+        # Reader has an extension-mapping, but sometimes we use hints from elsewhere, prefix, basename, even location (maildir cur/new/tmp)
         reader = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # email files
                    :mail # procmail doesnt have configurable SUFFIX (.eml), only PREFIX? - presumably due to maildir suffix-rewrites to denote state?
                  elsif ext.match? /^html?$/
-                   :html
+                   :html # use our reader class, otherwise it tends to select RDFa
                  elsif %w(changelog license readme todo).member? basename.downcase
                    :plaintext
                  elsif %w(gemfile makefile rakefile).member? basename.downcase
                    :sourcecode
                  end
-        if !reader && ext.empty? # still no reader and no file-extension. ask FILE(1) for clue
+        # still no reader and no file-extension. ask FILE(1) for clue
+        if !reader && ext.empty?
           mime = `file -b --mime-type #{shellPath}`.chomp
           reader = :plaintext if mime == 'text/plain'
         end
-        options = {base_uri: self}
+
+        # configure reader with hints gleaned above
+        options = {base_uri: self}             # base URI for relative resolution
         options[:format] = reader if reader    # format hint from filename
         options[:content_type] = mime if mime  # MIME type from FILE(1)
-        graph.load 'file:' + fsPath, **options # read RDF data
+
+        graph.load 'file:' + fsPath, **options # read RDF from file
       end
     elsif node.directory?                      # directory-entry triples
       subject = self                           # directory URI
@@ -95,7 +104,7 @@ class WebResource < RDF::URI
       graph << RDF::Statement.new(subject, Type.R, (LDP + 'Container').R)
       graph << RDF::Statement.new(subject, Title.R, basename)
       graph << RDF::Statement.new(subject, Date.R, node.stat.mtime.iso8601)
-      node.children.map{|child|                # child nodes
+      node.children.map{|child|                # point to child nodes
         graph << RDF::Statement.new(subject, (LDP+'contains').R, (subject.join child.basename '.ttl'))}
     end
     self
@@ -127,7 +136,7 @@ class WebResource < RDF::URI
     self
   end
 
-  # file -> Turtle file (small)
+  # any-format file (maybe big) -> Turtle file (small)
   def summary
     return self if basename.match /^README/
     sPath = 'summary/' + fsPath + (path == '/' ? 'index' : '')
@@ -155,7 +164,7 @@ class WebResource < RDF::URI
   end
   alias_method :summarize, :summary
 
-  # graph -> tree (s -> p -> o)
+  # graph -> tree (s -> p -> o) structure used by HTML + Feed serializers
   def treeFromGraph graph = nil
     graph ||= env[:repository]
     return {} unless graph
@@ -267,13 +276,7 @@ class WebResource < RDF::URI
 
 end
 
-class Array
-  def R env=nil
-    puts ['Array#R', self].join ' ' if size > 1
-    env ? WebResource.new(self[0].to_s).env(env) : WebResource.new(self[0].to_s)
-  end
-end
-
+# type-normalizers. call #R to ensure you have a WebResource
 class Pathname
   def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
 end
