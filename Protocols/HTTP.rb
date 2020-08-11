@@ -192,8 +192,11 @@ class WebResource
                    end
           body = HTTP.decompress h, response.read                     # read body from response
           if format && reader = RDF::Reader.for(content_type: format) # read data from body
+            timestamp = h['Last-Modified'] || h['last-modified']
             env[:repository] ||= RDF::Repository.new
-            reader.new(body, base_uri: self){|_| env[:repository] << _ }
+            env[:repository] << RDF::Statement.new(self, Date.R, Time.httpdate(timestamp).iso8601) if timestamp
+            reader.new(body, base_uri: self){|data|
+              env[:repository] << data }
           end
 
           return unless thru
@@ -223,8 +226,8 @@ class WebResource
             end
             c = fsPath.R; c += query_hash                     # cache location
             fExt = Suffixes[format] || Suffixes_Rack[format]  # format-suffix
-            c += fExt if fExt && c.R.extension != fExt        # affix format-suffix if incorrect or missing
-            c.R.writeFile body                                # cache static representation
+            c += fExt if fExt && c.R.extension != fExt        # add format-suffix if incorrect or missing
+            c.R.writeFile body                                # cache upstream representation
             env[:resp]['Content-Length'] = body.bytesize.to_s # Content-Length header
             [200, env[:resp], [body]]                         # return upstream document
           end
