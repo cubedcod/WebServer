@@ -16,10 +16,12 @@ daemon launch shortcuts in [bin/](bin/)
 
 client launch shortcuts in [bin/browse](bin/browse/)
 
-## NOTES
+google the rewritten-web (search engine)
+    http://localhost:8000/www.google.com/search?q=%s
 
-google search entrypoint to rewritten-web:
-http://localhost:8000/www.google.com/search?q=%s
+switch to JS-free twitter from upstream UI (bookmarklet)
+    javascript:location.href='http://localhost:8000/'+location.href+'?cookie='+document.cookie
+
 
 ## WHAT
 

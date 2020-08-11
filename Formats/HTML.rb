@@ -182,29 +182,17 @@ module Webize
         subject = @base         # subject URI
         n = Nokogiri::HTML.parse @doc # parse
 
-        # base URI
+        # base URI declaration
         if base = n.css('head base')[0]
           if baseHref = base['href']
             @base = @base.join(baseHref).R @base.env
           end
         end
 
-        # bespoke triplr
+        # site-specific reader
         @base.send Triplr[@base.host], n, &f if Triplr[@base.host]
 
-        # RDFa + JSON-LD
-        unless @base.to_s.match? /\/feed|polymer.*html/ # don't extract RDF from unpopulated templates
-          embeds = RDF::Graph.new
-          n.css('script[type="application/ld+json"]').map{|dataElement|
-            embeds << (::JSON::LD::API.toRdf ::JSON.parse dataElement.inner_text)} rescue "JSON-LD read failure in #{@base}" # find JSON-LD triples
-          RDF::Reader.for(:rdfa).new(@doc, base_uri: @base){|_| embeds << _ } rescue "RDFa read failure in #{@base}"         # find RDFa triples
-          embeds.each_triple{|s,p,o|
-            p = MetaMap[p.to_s] || p # map predicates
-            puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/ # show unresolved property-names
-            yield s, p, o unless p == :drop} # emit triple
-        end
-
-        # embeds
+        # embedded frames
         n.css('frame, iframe').map{|frame|
           if src = frame.attr('src')
             src = @base.join(src).R
@@ -227,6 +215,7 @@ module Webize
             end
           end}
 
+        # page  pointers
         n.css('#next, #nextPage, a.next').map{|nextPage|
           if ref = nextPage.attr("href")
             @base.env[:links][:next] ||= ref
@@ -237,7 +226,7 @@ module Webize
             @base.env[:links][:prev] ||= ref
           end}
 
-        # meta
+        # meta tags
         n.css('meta, [itemprop]').map{|m|
           if k = (m.attr("name") || m.attr("property") || m.attr("itemprop")) # predicate
             if v = (m.attr("content") || m.attr("href"))                      # object
@@ -265,6 +254,21 @@ module Webize
         ['video[src]', 'video > source[src]'].map{|vsel|
           n.css(vsel).map{|v|
             yield subject, Video, @base.join(v.attr('src')) }}
+
+        # HFeed
+        @base.HFeed n, &f 
+
+        # RDFa + JSON-LD
+        unless @base.to_s.match? /\/feed|polymer.*html/ # don't extract RDF from unpopulated templates
+          embeds = RDF::Graph.new
+          n.css('script[type="application/ld+json"]').map{|dataElement|
+            embeds << (::JSON::LD::API.toRdf ::JSON.parse dataElement.inner_text)} rescue "JSON-LD read failure in #{@base}" # find JSON-LD triples
+          RDF::Reader.for(:rdfa).new(@doc, base_uri: @base){|_| embeds << _ } rescue "RDFa read failure in #{@base}"         # find RDFa triples
+          embeds.each_triple{|s,p,o| # inspect  raw triple
+            p = MetaMap[p.to_s] || p # map predicates
+            puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/ # show unresolved property-names
+            yield s, p, o unless p == :drop} # emit triple
+        end
 
         # <body>
         if body = n.css('body')[0]
