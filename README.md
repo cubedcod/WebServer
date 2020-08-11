@@ -23,7 +23,7 @@ google w/ local UI (search engine)
     http://localhost:8000/www.google.com/search?q=%s
 
 jump to local UI from upstream UI (bookmarklet)
-    javascript:location.href='http://localhost:8000/'+location.href+'?cookie='+document.cookie
+    javascript:location.href='http://localhost:8000/'+location.hostname+location.pathname+'?cookie='+encodeURIComponent(document.cookie)
 
 
 ## WHAT

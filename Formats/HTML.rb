@@ -305,9 +305,10 @@ class WebResource
       tabularUI = join(HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))).R env
       upstreamUI = join(HTTP.qs(qs.merge({'notransform' => nil}))).R env                             # pointer to upstream HTML
       bc   = ('//' + (host || 'localhost') + (port ? (':' + port.to_s) : '') + '/').R env            # breadcrumb-trail startpoint
+      favicon = ('//' + host  + '/favicon.ico').R
       icon = if env[:links][:icon]
                env[:links][:icon].R.href
-             elsif (favicon = ('//' + host).R).node.exist?
+             elsif favicon.node.exist?
                favicon.href
              else
                '/favicon.ico'
