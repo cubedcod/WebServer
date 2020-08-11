@@ -305,6 +305,13 @@ class WebResource
       tabularUI = join(HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))).R env
       upstreamUI = join(HTTP.qs(qs.merge({'notransform' => nil}))).R env                             # pointer to upstream HTML
       bc   = ('//' + (host || 'localhost') + (port ? (':' + port.to_s) : '') + '/').R env            # breadcrumb-trail startpoint
+      icon = if env[:links][:icon]
+               env[:links][:icon].R.href
+             elsif (favicon = ('//' + host).R).node.exist?
+               favicon.href
+             else
+               '/favicon.ico'
+             end
       link = -> key, content { # render Link reference
         if url = env[:links] && env[:links][key]
           [{_: :a, href: url.R(env).href, id: key, class: :icon, c: content},
@@ -323,7 +330,7 @@ class WebResource
                                [{_: :link, rel: type, href: CGI.escapeHTML(resource.R(env).href)}, "\n"]}]}, "\n",
                         {_: :body,
                          c: [{class: :toolbox,
-                              c: [{_: :a, href: bc.href, id: :host, c: {_: :img, src: env[:links][:icon] ? env[:links][:icon].R.href : '/favicon.ico'}}, "\n",
+                              c: [{_: :a, href: bc.href, id: :host, c: {_: :img, src: icon}}, "\n",
                                  ({_: :a, id: :tabular, class: :icon, c: '↨', href: tabularUI.href} unless qs['view'] == 'table'), "\n",
                                  env[:feeds].map{|feed|
                                     {_: :a, href: feed.R.href, title: feed.path, class: :icon, c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange; margin-right: .1em'} : {})}, "\n",
