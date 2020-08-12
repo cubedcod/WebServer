@@ -94,6 +94,7 @@ class WebResource
              else
                video['https://schema.org/url'] || video[Schema+'contentURL'] || video[Schema+'url'] || video[Link] || video['uri']
              end
+        v = v[0] if v.class == Array
         if v.to_s.match? /v.redd.it/
           v += '/DASHPlaylist.mpd'
           dash = true
