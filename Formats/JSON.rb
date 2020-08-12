@@ -17,7 +17,7 @@ module Webize
 
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri].R
-        @json = ::JSON.parse(input.respond_to?(:read) ? input.read : input) rescue {}
+        @json = ::JSON.parse(input.respond_to?(:read) ? input.read : input)
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -84,7 +84,6 @@ module Webize
           #puts "JSON triplr - generic for #{@base.host}"
           Webize::HTML.webizeValue(@json){|h|
             if s = h['uri'] || h['url'] || h['link'] || ((h['id']||h['ID']) && ('#' + (h['id']||h['ID']).to_s))
-              puts s if s.class == Array || s.class == Hash
               s = s.to_s.R
               yield s, Type, Post.R if h.has_key? 'content'
               if s.parts[0] == 'users'

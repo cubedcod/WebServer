@@ -4,6 +4,7 @@ class WebResource
 
     MarkupMap = {
       'article' => Post,
+      'ImageRendition' => Image,
       'http://schema.org/Comment' => Post,
       'http://schema.org/ProfilePage' => Person,
       'https://schema.org/BreadcrumbList' => List,
@@ -37,6 +38,7 @@ class WebResource
 
     # metadata-normalization map
     MetaMap = {
+      '__typename' => Type,
       'Author' => Creator,
       'DC.Date' => Date,
       'DC.Date.X-MetadataLastModified' => Date,
@@ -585,6 +587,7 @@ class WebResource
       'twitter:url' => Link,
       'twitterId' => :drop,
       'type' => Type,
+      'typename' => Type,
       'ugc' => Link,
       'unlisted' => :drop,
       'unread' => :drop,

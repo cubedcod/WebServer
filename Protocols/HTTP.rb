@@ -37,8 +37,9 @@ class WebResource
 
     def cacheResponse
       nodes = nodeSet                   # find cached nodes
-      if nodes.size == 1 && (nodes[0].static_node? || nodes[0].named_format == selectFormat)
-        nodes[0].fileResponse           # no merge or transcode needed
+      if nodes.size == 1 && (nodes[0].static_node? || # static node || cached and preferred format match
+                             (nodes[0].named_format == selectFormat && (nodes[0].named_format != 'text/html' || (query_values||{}).has_key?('notransform')))) # require notransform arg for cached-HTML format preservation
+        nodes[0].fileResponse           # no merge or transcode required
       else                              # transform and/or merge graph-data
         nodes = nodes.map &:summary if env[:summary] # summarize nodes
         nodes.map &:loadRDF             # node(s) -> Graph
@@ -164,7 +165,7 @@ class WebResource
 
     # fetch from cache or remote server
     def fetch
-      return cacheResponse if ENV.has_key? 'OFFLINE'
+      return cacheResponse if ENV.has_key?('OFFLINE') || query == 'offline'
       return [304,{},[]] if (env.has_key?('HTTP_IF_NONE_MATCH') || env.has_key?('HTTP_IF_MODIFIED_SINCE')) && static_node? # client has static node in cache
       nodes = nodeSet
       return nodes[0].fileResponse if nodes.size == 1 && nodes[0].static_node?                                             # server has static node in cache

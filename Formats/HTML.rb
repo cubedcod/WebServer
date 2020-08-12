@@ -80,10 +80,11 @@ module Webize
 
       # <img>
       html.css('[style*="background-image"]').map{|node|
-        node['style'].match(/url\(['"]*([^\)'"]+)['"]*\)/).yield_self{|url|                                # CSS bg -> img
+        node['style'].match(/url\(['"]*([^\)'"]+)['"]*\)/).yield_self{|url|                                # CSS background-image -> img
           node.add_child "<img src=\"#{url[1]}\">" if url}}
-      html.css('amp-img').map{|amp|amp.add_child "<img src=\"#{amp['src']}\">"}                            # amp image -> img
-      html.css("div[class*='image'][data-src]").map{|div|div.add_child "<img src=\"#{div['data-src']}\">"} # div image -> img
+      html.css('amp-img').map{|amp| amp.add_child "<img src=\"#{amp['src']}\">"}                           # amp-img -> img
+      html.css("div[class*='image'][data-src]").map{|div|div.add_child "<img src=\"#{div['data-src']}\">"} # div -> img
+      html.css("figure[itemid]").map{|fig| fig.add_child "<img src=\"#{fig['itemid']}\">"}                 # figure -> img
 
       # <p> <pre> <ul> <ol>
       html.css('p').map{|e|   e.set_attribute 'id', 'p'   + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
@@ -110,7 +111,6 @@ module Webize
           e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id'] unless e.name == 'p'}</span> "
         end
         e['src'] = (base.join e['src']).R.href if e['src']}            # set media reference
-
       html.to_xhtml indent: 0
     end
 
@@ -154,8 +154,8 @@ module Webize
       format Format
 
       def initialize(input = $stdin, options = {}, &block)
-        @doc = (input.respond_to?(:read) ? input.read : input).encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ')
         @base = options[:base_uri]
+        @doc = Nokogiri::HTML.parse(input.respond_to?(:read) ? input.read : input.to_s)
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -180,7 +180,7 @@ module Webize
       # HTML -> RDF
       def scanContent &f
         subject = @base         # subject URI
-        n = Nokogiri::HTML.parse @doc # parse
+        n = @doc
 
         # base URI declaration
         if base = n.css('head base')[0]

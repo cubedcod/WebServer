@@ -214,6 +214,7 @@ class WebResource
                else
                  image['https://schema.org/url'] || image[Schema+'url'] || image[Link] || image['uri']
                end
+        img = img[0] if img.class == Array
         src = env[:base].join(img).R env
         [{class: :thumb,
           c: {_: :a, href: src.href,

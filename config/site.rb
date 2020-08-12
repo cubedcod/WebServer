@@ -21,6 +21,7 @@ module Webize
         'www.city-data.com' => :CityData,
         'www.google.com' => :GoogleHTML,
         'www.instagram.com' => :InstagramHTML,
+        'www.nytimes.com' => :NYT,
         'www.qrz.com' => :QRZ,
         'www.universalhub.com' => :UHub,
         'www.youtube.com' => :YouTube,
@@ -558,6 +559,11 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
       yield subject, Content, (Webize::HTML.format comment.css('.comment_text')[0].inner_html, self), graph
 
       comment.remove }
+  end
+
+  def NYT doc, &b
+    doc.css('script').select{|s|s.inner_text.match? /^window.__preload/}.map{|script|
+      Webize::JSON::Reader.new(script.inner_text[25...-1].chomp.sub(/;$/,''), base_uri: self).scanContent &b}
   end
 
   def QRZ doc, &b
