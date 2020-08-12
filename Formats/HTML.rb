@@ -205,9 +205,9 @@ module Webize
             if v = m.attr("href") # object
               v = @base.join v
               rel.split(/[\s,]+/).map{|k|
-                @base.env[:links][:icon] ||= v if k.match? /^(fav)?icon?$/i
                 @base.env[:links][:prev] ||= v if k.match? /prev(ious)?/i
                 @base.env[:links][:next] ||= v if k.downcase == 'next'
+                @base.env[:links][:icon] ||= v.R if k.match? /^(fav)?icon?$/i
                 @base.env[:feeds].push v if k == 'alternate' && ((m['type']&.match?(/atom|rss/)) || (v.path&.match?(/^\/feed\/?$/)))
                 k = MetaMap[k] || k
                 puts [k, v].join "\t" unless k.to_s.match? /^(drop|http)/
@@ -307,7 +307,10 @@ class WebResource
       bc   = ('//' + (host || 'localhost') + (port ? (':' + port.to_s) : '') + '/').R env            # breadcrumb-trail startpoint
       favicon = ('//' + host  + '/favicon.ico').R
       icon = if env[:links][:icon]
-               env[:links][:icon].R.href
+               unless favicon.node.exist?
+                 FileUtils.ln_s (env[:links][:icon].node.relative_path_from favicon.node.dirname), favicon.node
+               end
+               env[:links][:icon].href
              elsif favicon.node.exist?
                favicon.href
              else

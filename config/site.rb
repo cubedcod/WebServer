@@ -133,7 +133,8 @@ w.bos.gl wired.trib.al
         end}}
 
     GET 'www.reddit.com', -> r {
-      r.env[:links][:prev] = ['http://localhost:8000/old.reddit.com', r.path.sub('.rss',''), '?',r.query].join # page pointer
+      r.path = '/' unless r.path
+      r.env[:links][:prev] = ['http://localhost:8000/old.reddit.com', r.path.sub('.rss',''), '?',r.query].join # pointer to previous page
       if r.parts[-1] == 'new'
         r.env[:sort] = 'date'
         r.env[:view] = 'table'
