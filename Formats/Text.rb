@@ -379,8 +379,6 @@ module Webize
           unless line.empty? || line.match?(/^#/)
             resource = line.R
             fn.call RDF::Statement.new @base, Link.R, resource
-            fn.call RDF::Statement.new resource, Type.R, (W3 + '2000/01/rdf-schema#Resource').R
-            fn.call RDF::Statement.new resource, Title.R, line
           end
         }
       end

@@ -71,7 +71,7 @@ class WebResource
         NoGunk[r]
       end}
 
-    # URL shorteners/redirectors
+    # URL shorteners
     %w(
 bit.ly bos.gl
 cbsn.ws
@@ -85,6 +85,7 @@ w.bos.gl wired.trib.al
 ).map{|s| GET s, NoQuery}
 
     DenyDomains['com'].delete 'amazon' if ENV.has_key? 'AMAZON'
+    DenyDomains['com'].delete 'facebook' if ENV.has_key? 'FACEBOOK'
 
     GET 'gitter.im', -> r {
       r.env[:sort] = 'date'
@@ -98,8 +99,6 @@ w.bos.gl wired.trib.al
       NoGunk[r]}
 
     %w(bostonglobe-prod.cdn.arcpublishing.com).map{|host| GET host, Resizer }
-
-    DenyDomains['com'].delete 'facebook' if ENV.has_key? 'FACEBOOK'
 
     %w(l.facebook.com l.instagram.com).map{|host| GET host, GotoURL}
 
@@ -125,7 +124,7 @@ w.bos.gl wired.trib.al
     GET 'old.reddit.com', -> r {
       r.fetch.yield_self{|status,head,body|
         if status.to_s.match? /^30/
-          head['Location'] = r.join(head['Location']).R.href if head['Location']
+          puts "upstream redirect", head
           [status, head, body]
         else # find page pointer missing in HEAD (old+new UI) and HTML+RSS body (new UI) TODO find it presumably buried in JSON inside a script tag or some followon XHR
           links = []
