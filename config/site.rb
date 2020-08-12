@@ -665,11 +665,11 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
     doc.css('.pager-previous > a[href]').map{|p| env[:links][:prev] ||= p['href'] }
   end
 
-  def YouTube doc, &b; dataVar = /window..ytInitial/
+  def YouTube doc, &b; dataVar = /window..ytInitial.*{/
     doc.css('script').map{|script|
       if script.inner_text.match? dataVar
         script.inner_text.lines.grep(dataVar).map{|line|
-          Webize::JSON::Reader.new(line.sub(/^[^{]+/,'')[0...-2], base_uri: self).scanContent &b}
+          Webize::JSON::Reader.new(line.sub(/^[^{]+/,'').chomp.sub(/;$/,''), base_uri: self).scanContent &b}
       end}
   end
 
