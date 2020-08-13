@@ -6,13 +6,13 @@ code is run/edited in checkout dir. for alpine+arch+debian+termux dependencies:
 
 ## USAGE
 
-daemon launch shortcuts in [bin/](bin/)
+server launch shortcuts in [bin/](bin/)
 
-    port443       # listen on default HTTPS port, configure transparent proxy, gateway, DNS options to taste
-    port8080      # default HTTP/HTTPS forward-proxy port
-    port80        # classic port 80 HTTP - assumes you have bind permissions. you probably want a variant:
+    port80        # default HTTP port - assumes you have bind permissions. you probably want a variant:
     port80_socat  # HTTP - socat redirect to high-port daemon
-    port80_setcap # HTTP - SETCAP(8) allows process to bind port 80
+    port80_setcap # HTTP - SETCAP(8) allows process to bind port
+    port443       # default HTTPS port
+    port8080      # default HTTP/HTTPS forward-proxy port
 
 client launch shortcuts in [bin/browse](bin/browse/)
 
@@ -24,7 +24,6 @@ google w/ local UI (search engine)
 
 jump to local UI from upstream UI (bookmarklet)
     javascript:location.href='http://localhost:8000/'+location.hostname+location.pathname+'?cookie='+encodeURIComponent(document.cookie)
-
 
 ## WHAT
 
