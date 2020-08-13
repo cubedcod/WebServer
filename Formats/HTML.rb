@@ -307,7 +307,7 @@ class WebResource
       bc   = ('//' + (host || 'localhost') + (port ? (':' + port.to_s) : '') + '/').R env            # breadcrumb-trail startpoint
       favicon = ('//' + host  + '/favicon.ico').R
       icon = if env[:links][:icon]
-               unless favicon.node.exist?
+               if env[:links][:icon].path != favicon.path && !favicon.node.exist? && !favicon.node.symlink? # link icon to well-known location
                  FileUtils.ln_s (env[:links][:icon].node.relative_path_from favicon.node.dirname), favicon.node
                end
                env[:links][:icon].href

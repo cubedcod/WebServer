@@ -8,8 +8,9 @@
 .avatar {max-height: 2em; background-color: #000}
 .breadcrumb {color: #ddd}
 .container {margin: .1em}
-.container > .head {border-radius: .4em .4em 0 0; background-color: #ddd; color: #000; font-weight: bold; font-size: 1.1em; padding: .1em .3em .1em .3em}
-.container > .body {border-radius: 0 .3em .38em .38em; width: 100%; background-color: #ccc; color: #000}
+.container > .head {border-radius: .4em .4em 0 0; font-weight: bold; font-size: 1.1em; padding: .1em .3em .1em .3em}
+.container > .body {border-radius: 0 .3em .38em .38em; width: 100%}
+.container > .head, .container > .body {background-color: #111; color: #fff}
 .container.main > .head {font-size: 1.6em}
 .container.main > .body {border-radius: 0 .5em .5em .5em; padding: .2em}
 .container.main > .head, .container.main > .body {background-color: #000; color: #fff}
@@ -20,7 +21,7 @@
 .identified, .post {border: 1px solid #222}
 .links .host a {border-width: 1px; border-style: solid}
 .links .host {text-align: right}
-.links .path {background-color: #fff; color: #000}
+.links .path {background-color: #333; color: #fff; font-weight: bold}
 .post { background-color: #000; color: #fff; border-radius: .42em; max-width: 88ex; padding: .2em; margin: .166em}
 .quote {background-color: #ccc; color: #000; padding-left: .3em}
 .greentext, .greenText {background-color: #af0; color: #000; padding-left: .3em}
