@@ -10,8 +10,9 @@
 .container {margin: .1em}
 .container > .head {border-radius: .4em .4em 0 0; background-color: #ddd; color: #000; font-weight: bold; font-size: 1.1em; padding: .1em .3em .1em .3em}
 .container > .body {border-radius: 0 .3em .38em .38em; width: 100%; background-color: #ccc; color: #000}
-.container.main > .head {font-size: 1.6em; background-color: #fff; color: #000}
-.container.main > .body {background-color: #fff; color: #000; border-radius: 0 .5em .5em .5em; padding: .2em}
+.container.main > .head {font-size: 1.6em}
+.container.main > .body {border-radius: 0 .5em .5em .5em; padding: .2em}
+.container.main > .head, .container.main > .body {background-color: #000; color: #fff}
 .file > .icon {font-size: 4.2em; background-color: #000; color: #fff}
 .file > .name {font-size: .8em; position: absolute; top: 4.8em; left: .4em}
 .file {position: relative}
@@ -31,9 +32,9 @@
 .toolbox svg {height: 1em; width: 1em}
 .toolbox { position: fixed; top: 0; z-index: 2 }
 .toolbox form input {background-color: #000; color: #fff; border-radius: .5em; border: 1px solid #444}
-:target {background-color: #2ef !important; color: #000 !important}
+:target {background-color: #2ef !important; color : #000 !important}
 a {text-decoration: none; border-radius: .14em}
-a.date {float: right; white-space: nowrap; color: #aaa; border-radius: .2em; font-size: .8em}
+a.date {float: right; white-space: nowrap; color: #bbb; border-radius: .2em; font-size: .8em}
 a.id {float: right}
 a.idlink {color: #aaa; font-size: .72em; vertical-align: bottom}
 a.title:visited, a.uri:visited, a.uri.path:visited {background-color: #0f5}
@@ -47,7 +48,7 @@ body {font-family: sans-serif; margin: 2em; color: #fff; background: repeating-l
 div, a, svg, form, li, table, textarea { display: inline-block }
 h1,h2,h3,h4,h5,h6 {margin: 0}
 img, video {max-width: 100%}
-p, li, blockquote, textarea, td[property="uri"] {max-width: 92ex}
+p, li, blockquote, textarea, td[property="uri"] {max-width: 92ex; background-color: #000; color: #fff}
 pre, code {white-space: pre-wrap}
 pre, p {margin: .125em}
 span.name {font-size: .8em}

@@ -251,10 +251,10 @@ class WebResource < RDF::URI
       }[lang] || lang}
 
     MarkupGroup[Link] = -> links, env {
-      links.group_by{|l|l.host.split('.')[-1]}.map{|tld, links|
+      links.map(&:R).group_by{|l|links.size > 8 ? (l.host||'').split('.')[-1] : nil}.map{|tld, links|
         [{class: 'container main',
           c: [{class: :head, c: tld},
-              {class: :body, c: links.group_by{|l|links.size > 26 ? (l.host.split('.')[-2]||' ')[0] : ' '}.map{|alpha, links|
+              {class: :body, c: links.group_by{|l|links.size > 25 ? (l.host.split('.')[-2]||' ')[0] : nil}.map{|alpha, links|
                  {class: :container,
                   c: [{class: :head, c: alpha},
                       {class: :body,
