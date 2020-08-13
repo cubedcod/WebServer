@@ -68,10 +68,9 @@ class WebResource
         end
         [status, head, body]}
     rescue Exception => e
-      msg = [uri, e.class, e.message].join " "
-      trace = e.backtrace.join "\n"
-      puts "\e[7;31m500\e[0m " + msg , trace
-      [500, {'Content-Type' => 'text/html'}, env['REQUEST_METHOD'] == 'HEAD' ? [] : ['<html><body style="background-color: red; font-size: 12ex; text-align: center">500</body></html>']]
+      msg = [[uri, e.class, e.message].join(' '), e.backtrace].join "\n"
+      puts "\e[7;31m500\e[0m " + msg
+      [500, {'Content-Type' => 'text/html'}, env['REQUEST_METHOD'] == 'HEAD' ? [] : ["<html><body style='background-color: #f00; font-family: monospace; font-weight: bold'><pre style='margin: auto; color: #000; max-width: 120ex; white-space: pre-wrap'><a href='#{uri}' style='color: #fff; font-size: 12ex; text-decoration: none'>500</a>\n#{CGI.escapeHTML msg}</pre></body></html>"]]
     end
 
     def HTTP.decompress head, body
