@@ -376,11 +376,7 @@ module Webize
 
       def each_statement &fn
         @doc.lines.map(&:chomp).map{|line|
-          unless line.empty? || line.match?(/^#/)
-            resource = line.R
-            fn.call RDF::Statement.new @base, Link.R, resource
-          end
-        }
+          fn.call RDF::Statement.new line.R, Type.R, (W3 + '2000/01/rdf-schema#Resource').R unless line.empty? || line.match?(/^#/)}
       end
     end
   end

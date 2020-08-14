@@ -282,22 +282,21 @@ class WebResource < RDF::URI
 end
 
 # type-normalizers. call #R to ensure you have a WebResource
+class Hash
+  def R env=nil; env ? WebResource.new(self['uri']).env(env) : WebResource.new(self['uri']) end
+end
 class Pathname
   def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
 end
-
 class RDF::URI
   def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
 end
-
 class RDF::Node
   def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
 end
-
 class String
   def R env=nil; env ? WebResource.new(self).env(env) : WebResource.new(self) end
 end
-
 class WebResource
   def R env_=nil; env_ ? env(env_) : self end
 end
