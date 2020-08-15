@@ -103,7 +103,7 @@ class WebResource
                         ['application/json','{}']
                       else
                         ['text/html; charset=utf-8',
-                         "<html><body style='background: repeating-linear-gradient(#{(rand 360).to_s}deg, #000, #000 1.5em, #f00 1.5em, #f00 8em); text-align: center'><a href='#{uri}' style='color: #fff; font-size: 22em; font-weight: bold; text-decoration: none'>⌘</a></body></html>"]
+                         "<html><body class='blocked'>#{HTML.render [{_: :style, c: SiteCSS}, uri_toolbar]}<a class='unblock' href='#{uri}'>⌘</a></body></html>"]
                       end
       [status,
        {'Access-Control-Allow-Credentials' => 'true',

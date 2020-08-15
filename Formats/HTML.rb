@@ -302,20 +302,6 @@ class WebResource
         env[:links][:full] = expanded
         expander = {_: :a, id: :expand, c: '&#11206;', href: expanded}
       end
-      tabularUI = join(HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))).R env
-      upstreamUI = join(HTTP.qs(qs.merge({'notransform' => nil}))).R env                             # pointer to upstream HTML
-      bc   = ('//' + (host || 'localhost') + (port ? (':' + port.to_s) : '') + '/').R env            # breadcrumb-trail startpoint
-      favicon = ('//' + host  + '/favicon.ico').R
-      icon = if env[:links][:icon]
-               if env[:links][:icon].path != favicon.path && !favicon.node.exist? && !favicon.node.symlink? # link icon to well-known location
-                 FileUtils.ln_s (env[:links][:icon].node.relative_path_from favicon.node.dirname), favicon.node
-               end
-               env[:links][:icon].href
-             elsif favicon.node.exist?
-               favicon.href
-             else
-               '/favicon.ico'
-             end
       link = -> key, content { # render Link reference
         if url = env[:links] && env[:links][key]
           [{_: :a, href: url.R(env).href, id: key, class: :icon, c: content},
@@ -333,22 +319,7 @@ class WebResource
                              env[:links].map{|type, resource|
                                [{_: :link, rel: type, href: CGI.escapeHTML(resource.R(env).href)}, "\n"]}]}, "\n",
                         {_: :body,
-                         c: [{class: :toolbox,
-                              c: [{_: :a, href: bc.href, id: :host, c: {_: :img, src: icon}}, "\n",
-                                 ({_: :a, id: :tabular, class: :icon, c: '↨', href: tabularUI.href} unless qs['view'] == 'table'), "\n",
-                                 env[:feeds].map{|feed|
-                                    {_: :a, href: feed.R.href, title: feed.path, class: :icon, c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange; margin-right: .1em'} : {})}, "\n",
-                                 ({_: :a, href: upstreamUI.href, c: '⚗️', id: :UI, class: :icon} unless local_node?), "\n",
-                                 parts.map{|p|
-                                    bc.path += p + '/'
-                                    [{_: :a, class: :breadcrumb, href: bc.href, c: (CGI.escapeHTML Rack::Utils.unescape p), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, "\n ",]},
-                                 ({_: :a, href: join(HTTP.qs(qs.merge({'dl' => env[:downloadable]}))).R(env).href, c: '&darr;', id: :download, class: :icon} if env.has_key? :downloadable), "\n",
-                                 ({_: :a, href: uri, c: '🔗', class: :icon, id: :directlink} unless host == 'localhost'), "\n",
-                                 if env.has_key?(:searchable) || qs.has_key?('q')
-                                   qs['q'] ||= ''
-                                   {_: :form, c: qs.map{|k,v|
-                                      ["\n", {_: :input, name: k, value: v}.update( k == 'q' ? (v.empty? ? {autofocus: true} : {}) : {type: :hidden})]}}
-                                 end, "\n"]}, "\n",
+                         c: [uri_toolbar, "\n",
                              link[:prev, '&#9664;'], "\n",
                              link[:next, '&#9654;'], "\n",
                              if graph.empty?
@@ -376,6 +347,41 @@ class WebResource
                                  end}
                              end, expander,
                              {_: :script, c: SiteJS}]}]}]
+    end
+
+    def uri_toolbar
+      qs = query_values || {}
+      tabularUI = join(HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))).R env
+      upstreamUI = join(HTTP.qs(qs.merge({'notransform' => nil}))).R env                             # pointer to upstream HTML
+      bc   = ('//' + (host || 'localhost') + (port ? (':' + port.to_s) : '') + '/').R env            # breadcrumb-trail startpoint
+      favicon = ('//' + host  + '/favicon.ico').R
+      icon = if env[:links][:icon]
+               if env[:links][:icon].path != favicon.path && !favicon.node.exist? && !favicon.node.symlink? # link icon to well-known location
+                 FileUtils.ln_s (env[:links][:icon].node.relative_path_from favicon.node.dirname), favicon.node
+               end
+               env[:links][:icon].href
+             elsif favicon.node.exist?
+               favicon.href
+             else
+               '/favicon.ico'
+             end
+
+      {class: :toolbox,
+       c: [{_: :a, href: bc.href, id: :host, c: {_: :img, src: icon}}, "\n",
+           ({_: :a, id: :tabular, class: :icon, c: '↨', href: tabularUI.href} unless qs['view'] == 'table'), "\n",
+           env[:feeds].map{|feed|
+             {_: :a, href: feed.R.href, title: feed.path, class: :icon, c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange; margin-right: .1em'} : {})}, "\n",
+           ({_: :a, href: upstreamUI.href, c: '⚗️', id: :UI, class: :icon} unless local_node?), "\n",
+           parts.map{|p|
+             bc.path += p + '/'
+             [{_: :a, class: :breadcrumb, href: bc.href, c: [(CGI.escapeHTML Rack::Utils.unescape p), {_: :span, c: '/'}], id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, "\n",]},
+           ({_: :a, href: join(HTTP.qs(qs.merge({'dl' => env[:downloadable]}))).R(env).href, c: '&darr;', id: :download, class: :icon} if env.has_key? :downloadable), "\n",
+           ({_: :a, href: uri, c: '🔗', class: :icon, id: :directlink} unless host == 'localhost'), "\n",
+           if env.has_key?(:searchable) || qs.has_key?('q')
+             qs['q'] ||= ''
+             {_: :form, c: qs.map{|k,v|
+                ["\n", {_: :input, name: k, value: v}.update( k == 'q' ? (v.empty? ? {autofocus: true} : {}) : {type: :hidden})]}}
+           end, "\n"]}
     end
 
     # {k => v} -> Markup

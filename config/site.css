@@ -6,7 +6,8 @@
 #prev, #next, #expand {font-size: 1.9em; color: #eee}
 #prev:hover, #next:hover {background-color: #333}
 .avatar {max-height: 2em; background-color: #000}
-.breadcrumb {color: #ddd}
+.breadcrumb {color: #eee}
+.breadcrumb > span {font-size: 2em}
 .container {margin-right: 2px}
 .container > .body {border-radius: 0 .3em .4em .4em; width: 100%; background-color: #888}
 .container > .head {border-radius: .4em .4em 0 0; font-weight: bold; font-size: 1.1em; background-color: #aaa}
@@ -42,8 +43,10 @@ a.uri {border-radius: .28em; border: 1px solid #000; background-color: #d8d8d8; 
 a.uri.path > span.uri {color: #aaa}
 a.uri.path {background-color: #222; color: #fff; border-color: #333}
 a.uri:hover {border-color: #0ff; background-color: #0ff}
+a.unblock {color: #fff; font-size: 22em; font-weight: bold; text-decoration: none}
 blockquote {border-radius: .2em; border-width: 0 0 0 .5em; border-style: solid; border-color: #444; margin: 0 0 0 .1em; background-color: #2c2c2c; color: #fff}
 body {font-family: sans-serif; margin-top: 2.6em; margin-left: 2em; margin-right: 2em; color: #fff; background: repeating-linear-gradient(-45deg, #000, #000 .62em, #555 .62em, #555 1em)}
+body.blocked {background: repeating-linear-gradient(45deg, #000, #000 1.5em, #f00 1.5em, #f00 8em); text-align: center}
 div, a, svg, form, li, table, textarea { display: inline-block }
 h1,h2,h3,h4,h5,h6 {margin: 0}
 img, video {max-width: 100%}
