@@ -86,6 +86,7 @@ w.bos.gl wired.trib.al
 
     DenyDomains['com'].delete 'amazon' if ENV.has_key? 'AMAZON'
     DenyDomains['com'].delete 'facebook' if ENV.has_key? 'FACEBOOK'
+    DenyDomains['com'].delete 'google' if ENV.has_key? 'GOOGLE'
 
     GET 'gitter.im', -> r {
       r.env[:sort] = 'date'
@@ -117,7 +118,7 @@ w.bos.gl wired.trib.al
     GET 'googleads.g.doubleclick.net', GotoAdURL
     GET 'googleweblight.com', GotoURL
     GET 'google.com', -> r {[301, {'Location' => ['http://localhost:8000/www.google.com', r.path, '?', r.query].join}, []]}
-    GET 'www.google.com', -> r {![nil, *%w(logos maps search url)].member?(r.parts[0]) ? r.deny : (r.path == '/url' ? GotoURL : NoGunk)[r]}
+    GET 'www.google.com', -> r {r.env[:searchable]='/search'; (r.parts[0] == 'search' || ENV.has_key?('GOOGLE')) ? NoGunk[r] : r.deny}
     GET 'www.googleadservices.com', GotoAdURL
     GET 'www.gstatic.com', -> r {r.path.match?(/204$/) ? [204,{},[]] : NoGunk[r]}
 

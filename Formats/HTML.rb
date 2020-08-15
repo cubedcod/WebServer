@@ -380,7 +380,7 @@ class WebResource
            if env.has_key?(:searchable) || qs.has_key?('q')
              qs['q'] ||= ''
              {_: :form, c: qs.map{|k,v|
-                ["\n", {_: :input, name: k, value: v}.update( k == 'q' ? (v.empty? ? {autofocus: true} : {}) : {type: :hidden})]}}
+                ["\n", {_: :input, name: k, value: v}.update( k == 'q' ? (v.empty? ? {autofocus: true} : {}) : {type: :hidden})]}}.update(env[:searchable] && env[:searchable] != true && {action: join(env[:searchable]).R.href} || {})
            end, "\n"]}
     end
 

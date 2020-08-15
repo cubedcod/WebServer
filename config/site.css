@@ -7,7 +7,7 @@
 #prev:hover, #next:hover {background-color: #333}
 .avatar {max-height: 2em; background-color: #000}
 .breadcrumb {color: #eee}
-.breadcrumb > span {font-size: 2em}
+.breadcrumb > span {font-size: 1.6em}
 .container {margin-right: 2px}
 .container > .body {border-radius: 0 .3em .4em .4em; width: 100%; background-color: #888}
 .container > .head {border-radius: .4em .4em 0 0; font-weight: bold; font-size: 1.1em; background-color: #aaa}
