@@ -251,18 +251,19 @@ class WebResource < RDF::URI
       }[lang] || lang}
 
     MarkupGroup[Link] = -> links, env {
-      links.map(&:R).group_by{|l|links.size > 8 ? (l.host||'').split('.')[-1] : nil}.map{|tld, links|
+      links.map(&:R).group_by{|l|links.size > 8 && l.host && l.host.split('.')[-1] || nil}.map{|tld, links|
         [{class: 'container main',
-          c: [{class: :head, c: tld},
+          c: [({class: :head, _: :span, c: tld} if tld),
               {class: :body, c: links.group_by{|l|links.size > 25 ? (l.host.split('.')[-2]||' ')[0] : nil}.map{|alpha, links|
-                 {class: :container,
-                  c: [{class: :head, c: alpha},
-                      {class: :body,
-                       c: {_: :table, class: :links,
-                           c: links.group_by(&:host).map{|host, paths|
-                             {_: :tr,
-                              c: [{_: :td, class: :host, c: host ? {_: :a, href: '/' + host, c: host, style: env[:colors][alpha] ||= HTML.colorize} : []},
-                                  {_: :td, c: paths.map{|path| Markup[Link][path,env]}}]}}}}]}}}]}, '&nbsp;']}}
+                 ['<table><tr>',
+                  ({_: :td, class: :head, c: alpha} if alpha),
+                  {_: :td, class: :body,
+                   c: {_: :table, class: :links,
+                       c: links.group_by(&:host).map{|host, paths|
+                         {_: :tr,
+                          c: [{_: :td, class: :host, c: host ? {_: :a, href: '/' + host, c: host, style: env[:colors][alpha] ||= HTML.colorize} : []},
+                              {_: :td, c: paths.map{|path| Markup[Link][path,env]}}]}}}},
+                  '</tr></table>']}}]}, '&nbsp;']}}
 
     Markup[Link] = -> ref, env {
       u = ref.to_s

@@ -368,8 +368,9 @@ class WebResource
 
       {class: :toolbox,
        c: [{_: :a, href: join('/').R.href, id: :host, c: {_: :img, src: icon}}, "\n",
-           parts.map{|p|  bc += '/' + p
-             [{_: :a, class: :breadcrumb, href: join(bc).R.href, c: [{_: :span, c: '/'}, (CGI.escapeHTML Rack::Utils.unescape p)], id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, "\n",]},
+           {class: :path,
+            c: parts.map{|p| bc += '/' + p
+              {_: :a, class: :breadcrumb, href: join(bc).R.href, c: [{_: :span, c: '/'}, (CGI.escapeHTML Rack::Utils.unescape p)], id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}}},
            ({_: :a, href: join(HTTP.qs(qs.merge({'dl' => env[:downloadable]}))).R(env).href, c: '&darr;', id: :download, class: :icon} if env.has_key? :downloadable), "\n",
            ({_: :a, id: :tabular, class: :icon, c: '↨', href: tabularUI.href} unless qs['view'] == 'table'), "\n",
            env[:feeds].map{|feed|
