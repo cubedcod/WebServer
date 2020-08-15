@@ -355,14 +355,14 @@ class WebResource
       upstreamUI = join(HTTP.qs(qs.merge({'notransform' => nil}))).R env
       bc = '' # breadcrumb trail
       favicon = ('//' + host  + '/favicon.ico').R
-      icon = if env[:links][:icon]
-               if env[:links][:icon].path != favicon.path && !favicon.node.exist? && !favicon.node.symlink? # link icon to well-known location
-                 FileUtils.ln_s (env[:links][:icon].node.relative_path_from favicon.node.dirname), favicon.node
+      icon = if env[:links][:icon]                                                                          # icon reference provided in upstream HTML
+               if env[:links][:icon].path != favicon.path && !favicon.node.exist? && !favicon.node.symlink? # icon at non-default location?
+                 FileUtils.ln_s (env[:links][:icon].node.relative_path_from favicon.node.dirname), favicon.node # link to default location
                end
-               env[:links][:icon].href
-             elsif favicon.node.exist?
-               favicon.href
-             else
+               env[:links][:icon].node.exist? ? ('/' + env[:links][:icon].fsPath) : env[:links][:icon].href # referenced icon, at cache-location if on file
+             elsif favicon.node.exist?                                                                      # site-icon exists at default location?
+               '/' + favicon.fsPath                                                                         # site-icon
+             else                                                                                           # daemon-icon
                '/favicon.ico'
              end
 
