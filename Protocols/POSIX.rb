@@ -110,13 +110,7 @@ class WebResource
         rest = dirs.select{|d| d['uri'] != this['uri']}
         {class: 'main container',
          c: [{_: :span, class: :head, c: this['uri'].R.basename},
-             {class: :body,
-              c: if env[:view] == 'table'
-               HTML.tabular rest, env
-             else
-               rest.map{|dir| Markup[LDP+'Container'][dir,env]}
-              end
-             }]}
+             {class: :body, c: (HTML.tabular rest, env)}]}
       else
         dirs.map{|dir| Markup[LDP+'Container'][dir,env]}
       end
@@ -129,7 +123,7 @@ class WebResource
        W3 + 'ns/posix/stat#size'].map{|p|dir.delete p}
       {class: :container,
        c: [{_: :a, id: 'container' + Digest::SHA2.hexdigest(rand.to_s), class: :head, href: uri.href, type: :node, c: uri.basename},
-           {style: "display: inline", class: :body, c: HTML.keyval(dir, env)}]}}
+           {class: :body, c: HTML.keyval(dir, env)}]}}
 
     Markup[Stat+'File'] = -> file, env {
       [({class: :file,
