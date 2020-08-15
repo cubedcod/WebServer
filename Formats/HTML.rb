@@ -259,7 +259,7 @@ module Webize
         @base.HFeed n, &f 
 
         # RDFa + JSON-LD
-        unless @base.to_s.match? /\/feed|polymer.*html/ # don't extract RDF from unpopulated templates
+        unless @base.to_s.match? /\/feed|polymer.*html/ # don't look for RDF in unpopulated templates
           embeds = RDF::Graph.new
           n.css('script[type="application/ld+json"]').map{|dataElement|
             embeds << (::JSON::LD::API.toRdf ::JSON.parse dataElement.inner_text)} rescue "JSON-LD read failure in #{@base}" # find JSON-LD triples
