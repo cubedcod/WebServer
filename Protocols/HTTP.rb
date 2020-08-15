@@ -70,7 +70,7 @@ class WebResource
     rescue Exception => e
       msg = [[uri, e.class, e.message].join(' '), e.backtrace].join "\n"
       puts "\e[7;31m500\e[0m " + msg
-      [500, {'Content-Type' => 'text/html'}, env['REQUEST_METHOD'] == 'HEAD' ? [] : ["<html><body style='background-color: #f00; font-family: monospace; font-weight: bold'><pre style='margin: auto; color: #000; max-width: 120ex; white-space: pre-wrap'><a href='#{uri.remoteURL}' style='color: #fff; font-size: 12ex; text-decoration: none'>500</a>\n#{CGI.escapeHTML msg}</pre></body></html>"]]
+      [500, {'Content-Type' => 'text/html'}, env['REQUEST_METHOD'] == 'HEAD' ? [] : ["<html><body class='error'>#{HTML.render [{_: :style, c: SiteCSS}, uri_toolbar]}<pre><a href='#{uri.remoteURL}' >500</a>\n#{CGI.escapeHTML msg}</pre></body></html>"]]
     end
 
     def HTTP.decompress head, body

@@ -47,6 +47,9 @@ a.unblock {color: #fff; font-size: 22em; font-weight: bold; text-decoration: non
 blockquote {border-radius: .2em; border-width: 0 0 0 .5em; border-style: solid; border-color: #444; margin: 0 0 0 .1em; background-color: #2c2c2c; color: #fff}
 body {font-family: sans-serif; margin-top: 2.6em; margin-left: 2em; margin-right: 2em; color: #fff; background: repeating-linear-gradient(-45deg, #000, #000 .62em, #555 .62em, #555 1em)}
 body.blocked {background: repeating-linear-gradient(45deg, #000, #000 1.5em, #f00 1.5em, #f00 8em); text-align: center}
+body.error {background-color: #f00; font-family: monospace; font-weight: bold}
+body.error > pre {margin: auto; color: #000; max-width: 120ex; white-space: pre-wrap}
+body.error > pre > a {color: #fff; font-size: 12ex; text-decoration: none}
 div, a, svg, form, li, table, textarea { display: inline-block }
 h1,h2,h3,h4,h5,h6 {margin: 0}
 img, video {max-width: 100%}

@@ -74,11 +74,11 @@ module Webize
 
     # format to local conventions
     def self.format body, base
-      html = Nokogiri::HTML.fragment body
+      html = Nokogiri::HTML.fragment body rescue Nokogiri::HTML.fragment body.encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
       html.css('iframe, style, link[rel="stylesheet"], ' + Scripts).remove
       clean_doc html
 
-      # <img>
+      # map images to <img> tag
       html.css('[style*="background-image"]').map{|node|
         node['style'].match(/url\(['"]*([^\)'"]+)['"]*\)/).yield_self{|url|                                # CSS background-image -> img
           node.add_child "<img src=\"#{url[1]}\">" if url}}
@@ -86,31 +86,31 @@ module Webize
       html.css("div[class*='image'][data-src]").map{|div|div.add_child "<img src=\"#{div['data-src']}\">"} # div -> img
       html.css("figure[itemid]").map{|fig| fig.add_child "<img src=\"#{fig['itemid']}\">"}                 # figure -> img
 
-      # <p> <pre> <ul> <ol>
+      # identify <p> <pre> <ul> <ol>
       html.css('p').map{|e|   e.set_attribute 'id', 'p'   + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
       html.css('pre').map{|e| e.set_attribute 'id', 'pre' + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
       html.css('ul').map{|e|  e.set_attribute 'id', 'ul'  + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
       html.css('ol').map{|e|  e.set_attribute 'id', 'ol'  + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
 
-      # all nodes
+      # inspect all nodes
       html.traverse{|e|
-        e.attribute_nodes.map{|a| # inspect attrs
-          e.set_attribute 'src', a.value if SRCnotSRC.member? a.name   # map @src-like attributes to @src
+        e.attribute_nodes.map{|a|
+          e.set_attribute 'src', a.value if SRCnotSRC.member? a.name    # map @src-like attributes to @src
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
-          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/)||# strip attributes
+          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/)|| # strip attributes
                       %w(bgcolor class color height http-equiv layout ping role style tabindex target theme width).member?(a.name)}
-        if e['href']; ref = (base.join e['href']).R                    # node w/ href and maybe identifier
+        if e['href']; ref = (base.join e['href']).R                     # node has href and maybe identifier - add identifier for traversal if missing
           offsite = ref.host != base.host
-          e.add_child " <span class='uri'>#{CGI.escapeHTML (offsite ? ref.uri.sub(/^https?:..(www.)?/,'') : (ref.path || '/'))[0..127]}</span> " # show URI
-          e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # add identifier unless one exists
-          css = [:uri]; css.push :path unless offsite                  # style as local or global reference
-          e['href'] = ref.href                                         # set href
-          e['class'] = css.join ' '                                    # set CSS style
-        elsif e['id']                                                  # identified node w/o href
-          e.set_attribute 'class', 'identified'
-          e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id'] unless e.name == 'p'}</span> "
+          e.add_child " <span class='uri'>#{CGI.escapeHTML (offsite ? ref.uri.sub(/^https?:..(www.)?/,'') : (ref.path || '/'))[0..127]}</span> " # show URI in UI
+          e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # add identifier
+          css = [:uri]; css.push :path unless offsite                   # style as local or global reference
+          e['href'] = ref.href                                          # resolve href
+          e['class'] = css.join ' '                                     # add CSS style
+        elsif e['id']                                                   # node has identifier but no href
+          e.set_attribute 'class', 'identified'                         # style as identified node
+          e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id'] unless e.name == 'p'}</span> " # add href to node
         end
-        e['src'] = (base.join e['src']).R.href if e['src']}            # set media reference
+        e['src'] = (base.join e['src']).R.href if e['src']}             # set media reference
       html.to_xhtml indent: 0
     end
 
