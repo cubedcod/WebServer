@@ -352,8 +352,8 @@ class WebResource
     def uri_toolbar
       qs = query_values || {}
       tabularUI = join(HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))).R env
-      upstreamUI = join(HTTP.qs(qs.merge({'notransform' => nil}))).R env                             # pointer to upstream HTML
-      bc   = ('//' + (host || 'localhost') + (port ? (':' + port.to_s) : '') + '/').R env            # breadcrumb-trail startpoint
+      upstreamUI = join(HTTP.qs(qs.merge({'notransform' => nil}))).R env
+      bc = '' # breadcrumb trail
       favicon = ('//' + host  + '/favicon.ico').R
       icon = if env[:links][:icon]
                if env[:links][:icon].path != favicon.path && !favicon.node.exist? && !favicon.node.symlink? # link icon to well-known location
@@ -367,15 +367,14 @@ class WebResource
              end
 
       {class: :toolbox,
-       c: [{_: :a, href: bc.href, id: :host, c: {_: :img, src: icon}}, "\n",
+       c: [{_: :a, href: join('/').R.href, id: :host, c: {_: :img, src: icon}}, "\n",
+           parts.map{|p|  bc += '/' + p
+             [{_: :a, class: :breadcrumb, href: join(bc).R.href, c: [{_: :span, c: '/'}, (CGI.escapeHTML Rack::Utils.unescape p)], id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, "\n",]},
+           ({_: :a, href: join(HTTP.qs(qs.merge({'dl' => env[:downloadable]}))).R(env).href, c: '&darr;', id: :download, class: :icon} if env.has_key? :downloadable), "\n",
            ({_: :a, id: :tabular, class: :icon, c: '↨', href: tabularUI.href} unless qs['view'] == 'table'), "\n",
            env[:feeds].map{|feed|
              {_: :a, href: feed.R.href, title: feed.path, class: :icon, c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange; margin-right: .1em'} : {})}, "\n",
            ({_: :a, href: upstreamUI.href, c: '⚗️', id: :UI, class: :icon} unless local_node?), "\n",
-           parts.map{|p|
-             bc.path += p + '/'
-             [{_: :a, class: :breadcrumb, href: bc.href, c: [(CGI.escapeHTML Rack::Utils.unescape p), {_: :span, c: '/'}], id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, "\n",]},
-           ({_: :a, href: join(HTTP.qs(qs.merge({'dl' => env[:downloadable]}))).R(env).href, c: '&darr;', id: :download, class: :icon} if env.has_key? :downloadable), "\n",
            ({_: :a, href: uri, c: '🔗', class: :icon, id: :directlink} unless host == 'localhost'), "\n",
            if env.has_key?(:searchable) || qs.has_key?('q')
              qs['q'] ||= ''
