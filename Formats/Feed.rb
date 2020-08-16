@@ -164,6 +164,8 @@ module Webize
                capture && capture[1]}
 
             subject = @base.join id
+            subject.query = '' if subject.query && subject.query.match?(/utm[^a-z]/)
+            subject.fragment = '' if subject.fragment && subject.fragment.match?(/utm[^a-z]/)
 
             yield subject, Type, (SIOC + 'BlogPost').R                   # type tag
 
