@@ -118,9 +118,11 @@ module Webize
         timestamp = ([Time, DateTime].member?(date.class) ? date : Time.parse(date.to_s)).iso8601
         yield mail, Date, timestamp, graph
 
-        # write message to maildir
-        mailFile = ('mail/cur/' + timestamp.gsub(/\D/,'.') + Digest::SHA2.hexdigest(id) + '.eml').R
-        mailFile.writeFile body unless mailFile.node.exist?
+        # cache message in canonical locations
+        maildirFile = ('mail/cur/' + timestamp.gsub(/\D/,'.') + Digest::SHA2.hexdigest(id) + '.eml').R
+        eml = (graph.fsPath + '.eml').R
+        maildirFile.writeFile body unless maildirFile.node.exist?
+        eml.writeFile body unless eml.node.exist?
 
         # references
         %w{in_reply_to references}.map{|ref|
