@@ -176,6 +176,7 @@ class WebResource
 
     # single-character representation of a URI
     Icons = {
+      'ArticleGQL' => '📝',
       Abstract => '✍',
       Audio => '🔊',
       Content => '',

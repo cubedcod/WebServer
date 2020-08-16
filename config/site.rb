@@ -23,6 +23,7 @@ module Webize
         'www.instagram.com' => :InstagramHTML,
         'www.nytimes.com' => :NYT,
         'www.qrz.com' => :QRZ,
+        'www.thecrimson.com' => :Apollo,
         'www.universalhub.com' => :UHub,
         'www.youtube.com' => :YouTube,
       }
@@ -271,6 +272,12 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
       else
         r.deny
       end}
+  end
+
+  def Apollo doc, &b
+    doc.css('script').map{|script|
+      script.inner_text.lines.grep(/window[^{]+Apollo[^{]+{/i).map{|line|
+        Webize::JSON::Reader.new(line.sub(/^[^{]+/,'').chomp.sub(/;$/,''), base_uri: self).scanContent &b}}
   end
 
   def AP doc
