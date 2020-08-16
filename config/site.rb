@@ -662,8 +662,8 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
   end
 
   def UHub doc
-    doc.css('.pager-next > a[href]').map{|n| env[:links][:next] ||= n['href'] }
-    doc.css('.pager-previous > a[href]').map{|p| env[:links][:prev] ||= p['href'] }
+    doc.css('.pager-next > a[href]').map{|n|     env[:links][:next] ||= (join n['href'])}
+    doc.css('.pager-previous > a[href]').map{|p| env[:links][:prev] ||= (join p['href'])}
   end
 
   def YouTube doc, &b; dataVar = /window..ytInitial.*{/
