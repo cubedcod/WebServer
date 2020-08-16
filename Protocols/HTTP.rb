@@ -70,7 +70,7 @@ class WebResource
     rescue Exception => e
       msg = [[uri, e.class, e.message].join(' '), e.backtrace].join "\n"
       puts "\e[7;31m500\e[0m " + msg
-      [500, {'Content-Type' => 'text/html'}, env['REQUEST_METHOD'] == 'HEAD' ? [] : ["<html><body class='error'>#{HTML.render [{_: :style, c: SiteCSS}, uri_toolbar]}<pre><a href='#{uri.remoteURL}' >500</a>\n#{CGI.escapeHTML msg}</pre></body></html>"]]
+      [500, {'Content-Type' => 'text/html; charset=utf-8'}, env['REQUEST_METHOD'] == 'HEAD' ? [] : ["<!DOCTYPE html>\n<html><body class='error'>#{HTML.render [{_: :style, c: SiteCSS}, uri.uri_toolbar]}<pre><a href='#{uri.remoteURL}' >500</a>\n#{CGI.escapeHTML msg}</pre></body></html>"]]
     end
 
     def HTTP.decompress head, body
@@ -175,8 +175,7 @@ class WebResource
 
     # fetch from remote server                        options:
     def fetchHTTP thru: true,                        # pass HTTP response to caller
-                  transformable: !(query_values||{}).has_key?('notransform') # allow transformation: format conversions & same-format (HTML reformat, script pretty-print) rewrites
-
+                  transformable: !(query_values||{}).has_key?('notransform') # allow transformation: format conversions & same-format (HTML reformat, code pretty-print) rewrites
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                            # upstream metadata
         if response.status.to_s.match? /206/         # partial response
@@ -198,10 +197,8 @@ class WebResource
             reader.new(body, base_uri: self){|data|
               env[:repository] << data }
           end
-
-          return unless thru
-
-          # HTTP response
+          return unless thru # just fetch/parse/load data
+          # return HTTP response to caller
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # upstream metadata
           env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin # CORS header
@@ -212,20 +209,20 @@ class WebResource
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
             end}
-          if transformable && !(format||'').match?(/audio|css|image|script|video/) # conneg enabled
-            env[:origin_format] = format                      # note original format for logger
-            saveRDF.graphResponse                             # cache graph and return
-          else                                                # format fixed by upstream
-            case format                                       # clean doc & set content location
+          if transformable && !(format||'').match?(/audio|css|image|script|video/) # transformable format?
+            env[:origin_format] = format                      # note original format
+            saveRDF.graphResponse                             # cache data and return in preferred format
+          else                                                # fixed format
+            case format                                       # clean document & resolve content location
             when 'text/css'
-              body = Webize::CSS.cacherefs body, env          # set location references in CSS
+              body = Webize::CSS.cacherefs body, env          # resource references in CSS
             when 'text/html'
               doc = Webize::HTML.clean body, self, false      # clean HTML document
-              Webize::HTML.cacherefs doc, env, false          # set location references in HTML
+              Webize::HTML.cacherefs doc, env, false          # resource references in HTML
               body = doc.to_html
             end
-            c = fsPath.R; c += query_hash                     # cache location
-            fExt = Suffixes[format] || Suffixes_Rack[format]  # format-suffix
+            c = fsPath.R; c += query_hash                     # cache storage-location
+            fExt = Suffixes[format] || Suffixes_Rack[format]  # find format-suffix
             c += fExt if fExt && c.R.extension != fExt        # add format-suffix if incorrect or missing
             c.R.writeFile body                                # cache upstream representation
             env[:resp]['Content-Length'] = body.bytesize.to_s # Content-Length header
