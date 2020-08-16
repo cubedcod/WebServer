@@ -10,8 +10,7 @@
 .breadcrumb {color: #eee}
 .container .body {border-radius: 0 .3em .3em .3em; width: 100%; background-color: #444; color: #fff}
 .container .head {border-radius: .4em 0 0 .4em; font-weight: bold; font-size: 1.1em; background-color: #555; color: #fff}
-.container {margin: 2px}
-.container table {border-spacing: 0}
+.container table {border-spacing: 0; margin: .2em}
 .container.main > .head, .container.main > .body {background-color: #333; color: #fff; border-style: solid; border-color: #555}
 .container.main > .head {border-radius: .4em .4em 0 0; border-width: .1em .1em 0 .1em}
 .container.main > .body {border-width: .1em}

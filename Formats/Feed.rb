@@ -51,29 +51,22 @@ module Webize
       end
 
       def scanContent *f
-        send(*f){|s,p,o|
+        send(*f){|subject, p, o|
           if p==Content && o.class==String
-            subject = s.R
-            object = o.strip
-            # wrap bare text-region in <p>
-            o = object.match(/</) ? object : ('<p>'+object+'</p>')
-            # parse HTML
             content = Nokogiri::HTML.fragment o
-
             # <a>
             content.css('a').map{|a|
               if href = a.attr('href')
                 # resolve URIs
                 link = subject.join href
-                re = link.R
-                a.set_attribute 'href', link
+                a.set_attribute 'href', link.to_s
                 # emit hyperlinks as RDF
-                if re.path && %w{gif jpeg jpg png webp}.member?(re.ext.downcase)
-                  yield s, Image, re
-                elsif re.path && (%w{mp4 webm}.member? re.ext.downcase) || (re.host && re.host.match(/v.redd.it|vimeo|youtu/))
-                  yield s, Video, re
-                elsif re != subject
-                  yield s, DC+'link', re
+                if link.path && %w{gif jpeg jpg png webp}.member?(link.R.ext.downcase)
+                  yield subject, Image, link
+                elsif link.path && (%w{mp4 webm}.member? link.R.ext.downcase) || (link.host && link.host.match(/v.redd.it|vimeo|youtu/))
+                  yield subject, Video, link
+                elsif link != subject
+                  yield subject, DC+'link', link
                 end
               end}
 
@@ -81,24 +74,22 @@ module Webize
             content.css('img').map{|i|
               if src = i.attr('src')
                 src = subject.join src
-                i.set_attribute 'src', src
-                yield s, Image, src.R
+                i.set_attribute 'src', src.to_s
+                yield subject, Image, src
               end}
 
             # <iframe>
             content.css('iframe').map{|i|
               if src = i.attr('src')
-                src = src.R
+                src = subject.join src
                 if src.host && src.host.match(/youtu/)
-                  id = src.parts[-1]
-                  yield s, Video, ('https://www.youtube.com/watch?v='+id).R
+                  id = src.R.parts[-1]
+                  yield subject, Video, ('https://www.youtube.com/watch?v=' + id).R
                 end
               end}
-
-            # full HTML content
-            yield s, p, content.to_xhtml
+            yield subject, p, content.to_xhtml
           else
-            yield s, p, o
+            yield subject, p, o
           end }
       end
 
@@ -164,33 +155,27 @@ module Webize
           attrs = m[2]
           inner = m[3]
           # identifier search
-          u = (attrs && attrs.match(reRDFabout) ||
-               inner.match(reLink) ||
-               inner.match(reLinkCData) ||
-               inner.match(reLinkHref) ||
-               inner.match(reLinkRel) ||
-               inner.match(reId)).yield_self{|capture|
-            capture && capture[1]}
+          if id = (attrs && attrs.match(reRDFabout) ||
+                   inner.match(reLink) ||
+                   inner.match(reLinkCData) ||
+                   inner.match(reLinkHref) ||
+                   inner.match(reLinkRel) ||
+                   inner.match(reId)).yield_self{|capture|
+               capture && capture[1]}
 
-          puts "post-identifier search failed #{@base}" unless u
-          if u # identifier found
-            # resolve URI
-            u = @base.join(u).to_s unless u.match /^http/
-            resource = u.R
+            subject = @base.join id
 
-            # type-tag
-            yield u, Type, (SIOC + 'BlogPost').R
+            yield subject, Type, (SIOC + 'BlogPost').R                   # type tag
 
-            # post target (blog, re-blog)
-            blogs = [resource.join('/')]
-            blogs.push @base.join('/') if @host && @host != resource.host # re-blog
+            blogs = [subject.join('/')]                                  # primary-blog host
+            blogs.push @base.join('/') if @host && @host != subject.host # re-blog host
             blogs.map{|blog|
-              forum = if resource.host&.match /reddit.com$/
-                        ('https://www.reddit.com/' + resource.parts[0..1].join('/')).R
+              forum = if subject.host&.match /reddit.com$/
+                        ('https://www.reddit.com/' + subject.R.parts[0..1].join('/')).R
                       else
                         blog
                       end
-              yield u, WebResource::To, forum}
+              yield subject, WebResource::To, forum}
 
             # media links
             inner.scan(reMedia){|e|
@@ -208,7 +193,7 @@ module Webize
                     else
                       Atom + rel
                     end
-                yield u,p,o unless resource == o
+                yield subject, p, o unless subject == o # emit link unless links to self
               end}
 
             # process XML elements
@@ -236,9 +221,9 @@ module Webize
                     end}
                 end
                 # author(s) -> RDF
-                crs.map{|cr|yield u, Creator, cr}
+                crs.map{|cr|yield subject, Creator, cr}
               else # element -> RDF
-                yield u, p, e[3].yield_self{|o|
+                yield subject, p, e[3].yield_self{|o|
                   case o
                   when isCDATA
                     o.sub reCDATA, '\1'
@@ -269,24 +254,14 @@ class WebResource
 
         yield subject, Type, Post.R, graph
 
-        post.css('time, .dateTime').map{|date|
-          yield subject, Date,
-                (date['datetime'] || Time.at((date['data-utc'] ||
-                                              date['unixtime']).to_i).iso8601), graph }
-
-        post.css('.labelCreated').map{|created| yield subject, Date, Chronic.parse(created.inner_text).iso8601, graph}
-
-        post.css('.name, .post_author').map{|name| yield subject, Creator, name.inner_text, graph}
-
+        post.css('time, .dateTime').map{|date| yield subject, Date, (date['datetime'] || Time.at((date['data-utc'] || date['unixtime']).to_i).iso8601), graph }
+        post.css('.labelCreated').map{|created| yield subject, Date, Chronic.parse(created.inner_text).iso8601, graph }
+        post.css('.name, .post_author').map{|name| yield subject, Creator, name.inner_text, graph }
         post.css('.post_title, .subject, .title').map{|subj| yield subject, Title, subj.inner_text, graph }
-
         post.css('.body, .divMessage, .postMessage, .text').map{|msg| yield subject, Content, msg, graph }
-
         post.css('.fileThumb, .imgLink').map{|a| yield subject, Image, (join a['href']), graph if a['href'] }
-
-        post.css('.post_image, .post-image').map{|img| yield subject, Image, (join img.parent['href']), graph}
-
-        post.css('[href$="mp4"], [href$="webm"]').map{|a| yield subject, Video, (join a['href']), graph}
+        post.css('.post_image, .post-image').map{|img| yield subject, Image, (join img.parent['href']), graph }
+        post.css('[href$="mp4"], [href$="webm"]').map{|a| yield subject, Video, (join a['href']), graph }
 
         post.remove }
     end
