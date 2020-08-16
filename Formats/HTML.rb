@@ -376,7 +376,7 @@ class WebResource
            env[:feeds].map{|feed|
              {_: :a, href: feed.R.href, title: feed.path, class: :icon, c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange; margin-right: .1em'} : {})}, "\n",
            ({_: :a, href: upstreamUI.href, c: '⚗️', id: :UI, class: :icon} unless local_node?), "\n",
-           ({_: :a, href: uri, c: '🔗', class: :icon, id: :directlink} unless host == 'localhost'), "\n",
+           {_: :a, href: uri, c: '🔗', class: :icon, id: :directlink}, "\n",
            if env.has_key?(:searchable) || qs.has_key?('q')
              qs['q'] ||= ''
              {_: :form, c: qs.map{|k,v|

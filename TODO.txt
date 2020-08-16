@@ -1,7 +1,5 @@
 http://localhost:8000/forum.solidproject.org/t/state-of-the-art-for-querying-large-containers/3320?view=table&sort=date better RDFa blank-node rendering
 http://drudgereport.com/ server-side history, and link timestamps
-mastodon HTML view graphURis (is the fosstodon one generalizable?
-apollo gql 
 http://localhost:8000/web.mit.edu/Saltzer/www/publications/endtoend/endtoend.pdf (pdf webize)
 indicate offline + cached results are in use
 fat pings - mqtt? hypercore?

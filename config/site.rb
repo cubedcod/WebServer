@@ -182,12 +182,8 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
       r.env[:sort] = 'date'
       r.env[:view] = 'table'
       parts = r.parts
-      qs = r.query_values || {}
-      cookie = 'twitter/cookie'.R
-      cookie.writeFile qs['cookie'] if qs.has_key? 'cookie' # update cookie
-      if cookie.node.exist?                                 # set headers from cookie values
+      if r.env['HTTP_COOKIE'] # set auth headers
         attrs = {}
-        r.env['HTTP_COOKIE'] = cookie.readFile
         r.env['HTTP_COOKIE'].split(';').map{|attr|
           k, v = attr.split('=').map &:strip
           attrs[k] = v}
@@ -252,9 +248,6 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
       if %w{attribution_link redirect}.member? path
         [301, {'Location' => qs['q'] || qs['u']}, []]
       elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results s user watch watch_videos yts).member?(path) || !path
-        cookie = 'youtube/cookie'.R
-        cookie.writeFile qs['cookie'] if qs.has_key? 'cookie'
-        r.env['HTTP_COOKIE'] = cookie.readFile if cookie.node.exist?
         if path == 'embed'
           r.fetchHTTP transformable: false
         elsif path == 'watch' && qs.has_key?('dl')

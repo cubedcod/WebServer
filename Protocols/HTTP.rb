@@ -70,7 +70,7 @@ class WebResource
     rescue Exception => e
       msg = [[uri, e.class, e.message].join(' '), e.backtrace].join "\n"
       puts "\e[7;31m500\e[0m " + msg
-      [500, {'Content-Type' => 'text/html; charset=utf-8'}, env['REQUEST_METHOD'] == 'HEAD' ? [] : ["<!DOCTYPE html>\n<html><body class='error'>#{HTML.render [{_: :style, c: SiteCSS}, uri.uri_toolbar]}<pre><a href='#{uri.remoteURL}' >500</a>\n#{CGI.escapeHTML msg}</pre></body></html>"]]
+      [500, {'Content-Type' => 'text/html; charset=utf-8'}, env['REQUEST_METHOD'] == 'HEAD' ? [] : ["<!DOCTYPE html>\n<html><body class='error'>#{HTML.render [{_: :style, c: SiteCSS}, {_: :script, c: SiteJS}, uri.uri_toolbar]}<pre><a href='#{uri.remoteURL}' >500</a>\n#{CGI.escapeHTML msg}</pre></body></html>"]]
     end
 
     def HTTP.decompress head, body
@@ -297,6 +297,10 @@ class WebResource
     end
 
     def hostHandler
+      qs = query_values || {}
+      cookie = join('/cookie').R
+      cookie.writeFile qs['cookie'] if qs.has_key? 'cookie' # update cookie
+      env['HTTP_COOKIE'] = cookie.readFile if cookie.node.exist? # read cookie
       if handler = HostGET[host]               # host handler
         handler[self]
       elsif deny?
