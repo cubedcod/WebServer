@@ -128,19 +128,14 @@ w.bos.gl wired.trib.al
         if status.to_s.match? /^30/
           puts "upstream redirect", head
           [status, head, body]
-        else # find page pointer missing in HEAD (old+new UI) and HTML+RSS body (new UI) TODO find it presumably buried in JSON inside a script tag or some followon XHR
+        else # find page pointer missing in HEAD (old+new UI) and HTML+RSS body (new UI)
           links = []
           body[0].scan(/href="([^"]+after=[^"]+)/){|link|links << CGI.unescapeHTML(link[0]).R} # find links
           [302, {'Location' => (links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]).href.to_s.sub('old','www')}, []] # goto link with highest count
         end}}
 
     GET 'www.reddit.com', -> r {
-      r.path = '/' unless r.path
-      r.env[:links][:prev] = ['http://localhost:8000/old.reddit.com', r.path.sub('.rss',''), '?',r.query].join # pointer to previous page
-      if r.parts[-1] == 'new'
-        r.env[:sort] = 'date'
-        r.env[:view] = 'table'
-      end
+      r.env[:links][:prev] = ['http://localhost:8000/old.reddit.com', r.path.sub('.rss',''), '?',r.query].join # prev-page pointer
       r.path += '.rss' if !r.path.index('.rss') && %w(r u user).member?(r.parts[0]) # request RSS representation
       NoGunk[r]}
 

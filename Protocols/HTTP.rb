@@ -297,10 +297,17 @@ class WebResource
     end
 
     def hostHandler
+      path = '/' unless path
       qs = query_values || {}
       cookie = join('/cookie').R
       cookie.writeFile qs['cookie'] if qs.has_key?('cookie') && host.match?(/twitter.com$/) # update cookie
       env['HTTP_COOKIE'] = cookie.readFile if cookie.node.exist? # read cookie
+      if last = parts[-1]
+        if last.match? /^new/
+          env[:sort] ||= 'date'
+          env[:view] ||= 'table'
+        end
+      end
       if handler = HostGET[host]               # host handler
         handler[self]
       elsif deny?
