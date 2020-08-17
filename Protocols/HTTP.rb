@@ -299,7 +299,7 @@ class WebResource
     def hostHandler
       qs = query_values || {}
       cookie = join('/cookie').R
-      cookie.writeFile qs['cookie'] if qs.has_key? 'cookie' # update cookie
+      cookie.writeFile qs['cookie'] if qs.has_key?('cookie') && host.match?(/twitter.com$/) # update cookie
       env['HTTP_COOKIE'] = cookie.readFile if cookie.node.exist? # read cookie
       if handler = HostGET[host]               # host handler
         handler[self]
