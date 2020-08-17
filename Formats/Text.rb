@@ -228,11 +228,11 @@ module Webize
  blog blogs blogspot
  columns co com comment comments
  edu entry
- feed feeds feedproxy forum forums
+ feed feedburner feeds feedproxy forum forums
  go google gov
  html index local medium
  net news org p php post
- r rss rssfeed
+ r reddit rss rssfeed
  sports source status story
  t the threads topic
  uk utm www}
