@@ -28,7 +28,7 @@ g(dpr|eo(ip|locat(e|ion))|igya|pt|tag|tm)|.*(
 header|pre)[-_]?bid.*|hotjar|.*hubspot.*|[hp]b.?js|
 impression|indexww|
 keywee|kr(ux|xd).*|
-(app|s)?m(a(ilchimp|r(feel|keto)|tomo|utic)|e(asurement|trics?)|ms|pulse|tr)|
+(app|s)?m(a(ilchimp|r(feel|keto)|tomo|utic)|etrics?|ms|pulse|tr)|
 newrelic|
 o(m(niture|tr)|nesignal|pt(anon|imera)|utbrain)|
 p(erimeter-?x|iwik|op(down|over|up)|orpoiseant|owaboot|repopulator|ro(fitwell|m(o(tion)?s?|pt))|ub(exchange|matic))|/pv|
