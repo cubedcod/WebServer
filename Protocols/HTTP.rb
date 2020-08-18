@@ -356,7 +356,7 @@ class WebResource
 
     def href
       return self if local_node?
-      ['/', host, path, (query ? ['?', query] : nil), (fragment ? ['#', fragment] : nil) ].join
+      ['http://localhost:8000/', host, path, (query ? ['?', query] : nil), (fragment ? ['#', fragment] : nil) ].join
     end
 
     def log_search

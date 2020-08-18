@@ -118,7 +118,7 @@ w.bos.gl wired.trib.al
 
     GET 'googleads.g.doubleclick.net', GotoAdURL
     GET 'googleweblight.com', GotoURL
-    GET 'google.com', -> r {[301, {'Location' => ['http://localhost:8000/www.google.com', r.path, '?', r.query].join}, []]}
+    GET 'google.com', -> r {[301, {'Location' => ['//www.google.com', r.path, '?', r.query].join.R.href}, []]}
     GET 'www.google.com', -> r {r.env[:searchable]='/search'; (r.parts[0] == 'search' || ENV.has_key?('GOOGLE')) ? NoGunk[r] : r.deny}
     GET 'www.googleadservices.com', GotoAdURL
     GET 'www.gstatic.com', -> r {r.path.match?(/204$/) ? [204,{},[]] : NoGunk[r]}
@@ -131,11 +131,11 @@ w.bos.gl wired.trib.al
         else # find page pointer missing in HEAD (old+new UI) and HTML+RSS body (new UI)
           links = []
           body[0].scan(/href="([^"]+after=[^"]+)/){|link|links << CGI.unescapeHTML(link[0]).R} # find links
-          [302, {'Location' => (links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]).href.to_s.sub('old','www')}, []] # goto link with highest count
+          [302, {'Location' => (links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]).to_s.sub('old','www')}, []] # goto link with highest count
         end}}
 
     GET 'www.reddit.com', -> r {
-      r.env[:links][:prev] = ['http://localhost:8000/old.reddit.com', r.path.sub('.rss',''), '?',r.query].join # prev-page pointer
+      r.env[:links][:prev] = ['//old.reddit.com', r.path.sub('.rss',''), '?',r.query].join.R.href # prev-page pointer
       r.path += '.rss' if !r.path.index('.rss') && %w(r u user).member?(r.parts[0]) # request RSS representation
       NoGunk[r]}
 
@@ -173,7 +173,7 @@ UMassBoston universalhub
 ViolenceNBoston
 WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbhnews wutrain)
 
-    GET 'mobile.twitter.com', -> r {[301, {'Location' => ['http://localhost:8000/twitter.com', r.path].join}, []]}
+    GET 'mobile.twitter.com', -> r {[301, {'Location' => ('//twitter.com' + r.path).R.href}, []]}
     GET 'twitter.com', -> r {
       r.env[:sort] = 'date'
       r.env[:view] = 'table'
@@ -235,8 +235,8 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
         NoGunk[r]
       end}
 
-    GET 'youtube.com',   -> r {[301, {'Location' => ['http://localhost:8000/www.youtube.com', r.path, '?', r.query].join}, []]}
-    GET 'm.youtube.com', -> r {[301, {'Location' => ['http://localhost:8000/www.youtube.com', r.path, '?', r.query].join}, []]}
+    GET 'youtube.com',   -> r {[301, {'Location' => ['//www.youtube.com', r.path, '?', r.query].join.R.href}, []]}
+    GET 'm.youtube.com', -> r {[301, {'Location' => ['//www.youtube.com', r.path, '?', r.query].join.R.href}, []]}
 
     GET 'www.youtube.com', -> r {
       path = r.parts[0]
