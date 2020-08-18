@@ -11,9 +11,9 @@
 .container .body {border-radius: 0 .3em .3em .3em; width: 100%; background-color: #444; color: #fff}
 .container .head {border-radius: .4em 0 0 .4em; font-weight: bold; font-size: 1.1em; background-color: #555; color: #fff}
 .container table {border-spacing: 0; margin: .2em}
-.container.main > .head, .container.main > .body {background-color: #333; color: #fff; border-style: solid; border-color: #555}
-.container.main > .head {border-radius: .4em .4em 0 0; border-width: .1em .1em 0 .1em}
 .container.main > .body {border-width: .1em}
+.container.main > .head {border-radius: .4em .4em 0 0; border-width: .1em .1em 0 .1em}
+.container.main > .head, .container.main > .body {background-color: #333; color: #fff; border-style: solid; border-color: #555}
 .file > .icon {font-size: 4.2em; background-color: #000; color: #fff}
 .file > .name {font-size: .8em; position: absolute; top: 4.8em; left: .4em}
 .file {position: relative}
@@ -29,7 +29,7 @@
 .title {background-color: #fff; color: #000; font-size: 1.08em; font-weight: bold; vertical-align: top; border-radius: .18em }
 .toolbox .path {background-color: #000; border-radius: 0 0 .5em .5em;padding: 0 .2em 0 .2em}
 .toolbox > a, .toolbox form {vertical-align: top}
-.toolbox a.icon {font-size: 1.6em; color: #fff; text-shadow: 1px 1px #000000}
+.toolbox a.icon {font-size: 1.6em; color: #fff; text-shadow: 1px 1px #000000; float: right}
 .toolbox a.icon:target {text-shadow: 0px 0px #000000}
 .toolbox form input {background-color: #000; color: #fff; border-radius: .5em; border: 1px solid #444}
 .toolbox svg {height: 1em; width: 1em}

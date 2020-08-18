@@ -351,8 +351,6 @@ class WebResource
 
     def uri_toolbar
       qs = query_values || {}
-      tabularUI = join(HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))).R env
-      upstreamUI = join(HTTP.qs(qs.merge({'notransform' => nil}))).R env
       bc = '' # breadcrumb trail
       favicon = ('//' + host  + '/favicon.ico').R
       icon = if env[:links][:icon]                                                                          # icon reference provided in upstream HTML
@@ -367,15 +365,15 @@ class WebResource
              end
 
       {class: :toolbox,
-       c: [{_: :a, href: join('/').R.href, id: :host, c: {_: :img, src: icon}}, "\n",
+       c: [({_: :a, id: :tabular, class: :icon, c: '↨', href: join(HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))).R.href} unless qs['view'] == 'table'), "\n",
+           {_: :a, href: join('/').R.href, id: :host, c: {_: :img, src: icon}}, "\n",
            {class: :path,
             c: parts.map{|p| bc += '/' + p
               {_: :a, class: :breadcrumb, href: join(bc).R.href, c: [{_: :span, c: '/'}, (CGI.escapeHTML Rack::Utils.unescape p)], id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}}},
-           ({_: :a, href: join(HTTP.qs(qs.merge({'dl' => env[:downloadable]}))).R(env).href, c: '&darr;', id: :download, class: :icon} if env.has_key? :downloadable), "\n",
-           ({_: :a, id: :tabular, class: :icon, c: '↨', href: tabularUI.href} unless qs['view'] == 'table'), "\n",
+           ({_: :a, href: join(HTTP.qs(qs.merge({'dl' => env[:downloadable]}))).R.href, c: '&darr;', id: :download, class: :icon} if env.has_key? :downloadable), "\n",
            env[:feeds].map{|feed|
              {_: :a, href: feed.R.href, title: feed.path, class: :icon, c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange; margin-right: .1em'} : {})}, "\n",
-           ({_: :a, href: upstreamUI.href, c: '⚗️', id: :UI, class: :icon} unless local_node?), "\n",
+           ({_: :a, href: join(HTTP.qs(qs.merge({'notransform' => nil}))).R.href, c: '⚗️', id: :UI, class: :icon} unless local_node?), "\n",
            {_: :a, href: uri, c: '🔗', class: :icon, id: :directlink}, "\n",
            if env.has_key?(:searchable) || qs.has_key?('q')
              qs['q'] ||= ''
