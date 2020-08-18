@@ -114,35 +114,6 @@ module Webize
       html.to_xhtml indent: 0
     end
 
-    def self.webizeValue v, &y
-      case v.class.to_s
-      when 'Hash'
-        webizeHash v, &y
-      when 'String'
-        webizeString v, &y
-      when 'Array'
-        v.map{|_v| webizeValue _v, &y }
-      else
-        v
-      end
-    end
-
-    def self.webizeHash hash, &y
-      yield hash if block_given?
-      webized = {}
-      hash.map{|key, value|
-        webized[key] = webizeValue value, &y}
-      webized
-    end
-
-    def self.webizeString str, &y
-      if str.match? /^(http|\/)\S+$/
-        str.R
-      else
-        str
-      end
-    end
-
     class Format < RDF::Format
       content_type 'text/html', extensions: [:htm, :html], aliases: %w(text/fragment+html;q=0.8)
       content_encoding 'utf-8'
@@ -237,7 +208,7 @@ module Webize
               when /lytics/
                 k = :drop
               else
-                v = HTML.webizeString v
+                v = Webize::JSON.webizeString v
                 v = @base.join v if v.class == WebResource || v.class == RDF::URI
               end
               puts [k,v].join "\t" unless k.to_s.match? /^(drop|http)/
@@ -323,7 +294,7 @@ class WebResource
                              link[:prev, '&#9664;'], "\n",
                              link[:next, '&#9654;'], "\n",
                              if graph.empty?
-                               HTML.keyval (Webize::HTML.webizeHash env), env
+                               HTML.keyval (Webize::JSON.webizeHash env), env
                              else
                                groups = {} # group resources by type
                                graph.map{|uri, resource|

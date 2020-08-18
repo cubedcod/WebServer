@@ -173,6 +173,7 @@ UMassBoston universalhub
 ViolenceNBoston
 WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbhnews wutrain)
 
+    GET 'mobile.twitter.com', -> r {[301, {'Location' => ['http://localhost:8000/twitter.com', r.path].join}, []]}
     GET 'twitter.com', -> r {
       r.env[:sort] = 'date'
       r.env[:view] = 'table'
@@ -493,7 +494,7 @@ WBUR WBZTraffic WCVB WalkBoston WelcomeToDot WestWalksbury wbz wbznewsradio wgbh
   end
 
   def InstagramJSON tree, &b
-    Webize::HTML.webizeHash(tree){|h|
+    Webize::JSON.webizeHash(tree){|h|
       if tl = h['edge_owner_to_timeline_media']
         end_cursor = tl['page_info']['end_cursor'] rescue nil
         uid = tl["edges"][0]["node"]["owner"]["id"] rescue nil

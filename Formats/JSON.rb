@@ -1,6 +1,37 @@
 require 'json'
 module Webize
   module JSON
+
+    # recursively walk down JSON converting URL-strings to WebResource objects
+    def self.webizeValue v, &y
+      case v.class.to_s
+      when 'Hash'
+        webizeHash v, &y
+      when 'String'
+        webizeString v, &y
+      when 'Array'
+        v.map{|_v| webizeValue _v, &y }
+      else
+        v
+      end
+    end
+
+    def self.webizeHash hash, &y
+      yield hash if block_given?
+      webized = {}
+      hash.map{|key, value|
+        webized[key] = webizeValue value, &y}
+      webized
+    end
+
+    def self.webizeString str, &y
+      if str.match? /^(http|\/)\S+$/
+        str.R
+      else
+        str
+      end
+    end
+
     class Format < RDF::Format
       content_type 'application/json',
                    extension: :json,
@@ -82,7 +113,7 @@ module Webize
           @base.send hostTriples, @json, &f
         else
           #puts "JSON triplr - generic for #{@base.host}"
-          Webize::HTML.webizeValue(@json){|h|
+          Webize::JSON.webizeValue(@json){|h|
             if s = h['uri'] || h['url'] || h['link'] || ((h['id']||h['ID']) && ('#' + (h['id']||h['ID']).to_s))
               s = s.to_s.R
               yield s, Type, Post.R if h.has_key? 'content'
