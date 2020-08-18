@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function(){
 	var selectNextLink = function(){
 	    var cur = null;
 	    if(window.location.hash)
-		cur = document.querySelector(window.location.hash);
+		cur = document.getElementById(location.hash.slice(1));
 	    if(!cur)
 		cur = last;
 	    window.location.hash = cur.attr('next');
@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", function(){
 	var selectPrevLink = function(){
 	    var cur = null;
 	    if(window.location.hash)
-		cur = document.querySelector(window.location.hash);
+		cur = document.getElementById(location.hash.slice(1));
 	    if(!cur)
 		cur = first;
 	    window.location.hash = cur.attr('prev');;
@@ -57,12 +57,12 @@ document.addEventListener("DOMContentLoaded", function(){
 	var selectNextNode = function(){
 	    var cur = null;
 	    if(window.location.hash)
-		cur = document.querySelector(window.location.hash);
+		cur = document.getElementById(location.hash.slice(1));
 	    if(!cur)
 		cur = last;
 	    var start = cur;
 	    do {
-		cur = document.querySelector("[id='" + (cur.attr('next') || '') + "']");
+		cur = document.getElementById(cur.attr('next'));
 	    } while ((cur != start) && (cur.attr('type') != 'node'));
 	    window.location.hash = cur.attr('id');
 	    e.preventDefault();
@@ -70,12 +70,12 @@ document.addEventListener("DOMContentLoaded", function(){
 	var selectPrevNode = function(){
 	    var cur = null;
 	    if(window.location.hash)
-		cur = document.querySelector(window.location.hash);
+		cur = document.getElementById(location.hash.slice(1));
 	    if(!cur)
 		cur = first;
 	    var start = cur;
 	    do {
-		cur = document.querySelector("[id='" + (cur.attr('prev') || '') + "']");
+		cur = document.getElementById(cur.attr('prev'));
 	    } while ((cur != start) && (cur.attr('type') != 'node'));
 	    window.location.hash = cur.attr('id');
 	    e.preventDefault();
@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", function(){
 	};
 	var gotoHref = function(){
 	    if(window.location.hash){
-		cur = document.querySelector(window.location.hash);
+		cur = document.getElementById(location.hash.slice(1));
 		if(cur){
 		    href = cur.attr('href');
 		    if(href)
