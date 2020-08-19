@@ -183,22 +183,23 @@ class WebResource
           [206, h, [response.read]]                  # return part
         else
           format = if path == '/feed' || (query_values||{})['mime'] == 'xml'
-                     'application/atom+xml'          # Atom/RSS content-type
+                     'application/atom+xml'          # Atom/RSS content-type in URL
                    elsif h.has_key? 'content-type'
-                     h['content-type'].split(/;/)[0] # content-type in HTTP header
-                   elsif named_format
+                     h['content-type'].split(/;/)[0] # content-type in HTTP metadata
+                   elsif named_format                # content-type in path extension
                      named_format
                    end
-          body = HTTP.decompress h, response.read                     # read body from response
-          if format && reader = RDF::Reader.for(content_type: format) # read data from body
-            timestamp = h['Last-Modified'] || h['last-modified']
-            env[:repository] ||= RDF::Repository.new
-            env[:repository] << RDF::Statement.new(self, Date.R, Time.httpdate(timestamp).iso8601) if timestamp
-            reader.new(body, base_uri: self){|data|
-              env[:repository] << data }
+          body = HTTP.decompress h, response.read                     # read body
+          if format && reader = RDF::Reader.for(content_type: format) # reader defined for format
+            env[:repository] ||= RDF::Repository.new                  # init RDF repository
+            if timestamp = h['Last-Modified'] || h['last-modified']   # add HTTP metadata to graph
+              env[:repository] << RDF::Statement.new(self, Date.R, Time.httpdate(timestamp.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,'')).iso8601)
+            end
+            reader.new(body,base_uri: self){|g|env[:repository] << g} # read RDF
           end
-          return unless thru # just fetch/parse/load data
-          # return HTTP response to caller
+          return unless thru                                          # just fetch/parse/load to repository
+
+          # HTTP response to caller
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # upstream metadata
           env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin # CORS header
