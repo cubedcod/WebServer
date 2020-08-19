@@ -135,7 +135,7 @@ w.bos.gl wired.trib.al
         end}}
 
     GET 'www.reddit.com', -> r {
-      if %w(/ /r /r/).member? r.path
+      if !r.path || %w(/ /r /r/).member?(r.path)
         r.cacheResponse
       else
         r.env[:links][:prev] = ['//old.reddit.com', r.path.sub('.rss',''), '?',r.query].join.R.href # prev-page pointer

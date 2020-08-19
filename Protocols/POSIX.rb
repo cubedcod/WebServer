@@ -68,11 +68,14 @@ class WebResource
       else
         qs = query_values || {}
         (if node.directory?
-         if qs.has_key?('f') && !qs['f'].empty? && path != '/'          # FIND
+         if qs.has_key?('f') && !qs['f'].empty?     # FIND
+           puts ['FIND exact', qs['f'], fsPath].join ' '
            `find #{shellPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
          elsif qs.has_key?('find') && !qs['find'].empty? && path != '/' # FIND case-insensitive substring
+           puts ['FIND substring', qs['find'], fsPath].join ' '
            `find #{shellPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
-         elsif (qs.has_key?('Q') || qs.has_key?('q')) && path != '/'    # GREP
+         elsif qs.has_key?('Q') || qs.has_key?('q') # GREP
+           puts [:GREP, fsPath].join ' '
            q = qs['Q'] || qs['q']
            args = q.shellsplit rescue q.split(/\W/)
            case args.size
@@ -84,7 +87,8 @@ class WebResource
              cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -il #{Shellwords.escape args[2]}"
            when 4 # four unordered terms
              cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -ilZ #{Shellwords.escape args[2]} | xargs -0 grep -il #{Shellwords.escape args[3]}"
-           else   # N ordered terms
+           else   # N ordered term
+             s
              cmd = "grep -ril -- #{Shellwords.escape args.join '.*'} #{shellPath}"
            end
            `#{cmd} | head -n 1024`.lines.map &:chomp
@@ -94,9 +98,11 @@ class WebResource
          end
         else
           globPath = fsPath
-          unless globPath.match /[\*\{\[]/ # GLOB
+          if globPath.match /[\*\{\[]/ # GLOB
+            puts [:GLOB, fsPath].join ' '
+          else                         # default document-glob
             globPath += query_hash if static_node? && !local_node?
-            globPath += '.*'               # default document-set
+            globPath += '.*'
           end
           Pathname.glob globPath
          end).map{|p| # join relative path to URI-space

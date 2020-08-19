@@ -369,8 +369,6 @@ class WebResource
                              sizeAttr => 0,
                              Title => [[u.host, u.path, (u.query ? ['?', u.query] : nil)].join]}
           results[uri][sizeAttr] += 1}
-      else
-        env[:searchable] = true
       end
       [200, {'Content-Type' => 'text/html'}, [(htmlDocument results)]]
     end

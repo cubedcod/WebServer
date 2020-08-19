@@ -321,7 +321,9 @@ class WebResource
     end
 
     def uri_toolbar
+      search_arg = [nil,'/'].member?(path) ? 'find' : 'q'
       qs = query_values || {}
+      qs[search_arg] ||= ''
       bc = '' # breadcrumb trail
       favicon = ('//' + host  + '/favicon.ico').R
       icon = if env[:links][:icon]                                                                          # icon reference provided in upstream HTML
@@ -334,7 +336,6 @@ class WebResource
              else                                                                                           # daemon-icon
                '/favicon.ico'
              end
-
       {class: :toolbox,
        c: [({_: :a, id: :tabular, class: :icon, c: '↨', href: join(HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))).R.href} unless qs['view'] == 'table'), "\n",
            ({_: :a, href: join(HTTP.qs(qs.merge({'notransform' => nil}))).R.href, c: '⚗️', id: :UI, class: :icon} unless local_node?), "\n",
@@ -346,11 +347,8 @@ class WebResource
            ({_: :a, href: join(HTTP.qs(qs.merge({'dl' => env[:downloadable]}))).R.href, c: '&darr;', id: :download, class: :icon} if env.has_key? :downloadable), "\n",
            env[:feeds].map{|feed|
              {_: :a, href: feed.R.href, title: feed.path, class: :icon, c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange; margin-right: .1em'} : {})}, "\n",
-           if env.has_key?(:searchable) || qs.has_key?('q')
-             qs['q'] ||= ''
-             {_: :form, c: qs.map{|k,v|
-                ["\n", {_: :input, name: k, value: v}.update( k == 'q' ? (v.empty? ? {autofocus: true} : {}) : {type: :hidden})]}}.update(env[:searchable] && env[:searchable] != true && {action: join(env[:searchable]).R.href} || {})
-           end, "\n"]}
+           {_: :form, c: qs.map{|k,v|
+              ["\n", {_: :input, name: k, value: v}.update(k == search_arg ? (v.empty? ? {autofocus: true} : {}) : {type: :hidden})]}}.update(env[:search_base] ? {action: join(env[:search_base]).R.href} : {}), "\n"]}
     end
 
     # {k => v} -> Markup
