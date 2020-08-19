@@ -18,7 +18,8 @@ class WebResource
         cursor = cursor[name] ||= {}}}
 
     Gunk = %r([-._\/'"\s:?&=~%](
-affiliate(link)?s?|ad(obe|toniq|vert.*)?|ak(am|ismet)|.*analytics.*|apester|appnexus|atrk|audience|(app|smart)?
+1x1|
+affiliate(link)?s?|ad(obe|s|toniq|vert.*)?|ak(am|ismet)|.*analytics.*|apester|appnexus|atrk|audience|
 b(lueconic|ouncee?x.*|ugsnag)|.*bid(d(er|ing).*|s)|
 c(edexis|hartbeat.*|mp|ollector|omscore|onsent|ookie.?(c(hoice|onsent)|law|notice)|riteo|xense)|
 de(mandware|t(ect|roitchicago))|dfp|dis(ney(id)?|qus)|doubleclick|

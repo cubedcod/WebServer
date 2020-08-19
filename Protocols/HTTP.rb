@@ -49,7 +49,7 @@ class WebResource
     end
 
     def self.call env
-      return [405,{},[]] unless %w(GET HEAD).member? env['REQUEST_METHOD'] # allow HTTP methods
+      return [405,{},[]] unless %w(GET HEAD POST).member? env['REQUEST_METHOD'] # allow HTTP methods
       uri = RDF::URI('//' + env['HTTP_HOST']).join(env['REQUEST_PATH']).R env # resource URI
       uri.scheme = uri.local_node? ? 'http' : 'https'                         # request scheme
       uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading + consecutive & from qs so URI library doesn't freak out
@@ -103,7 +103,7 @@ class WebResource
                         ['application/json','{}']
                       else
                         ['text/html; charset=utf-8',
-                         "<html><body class='blocked'>#{HTML.render [{_: :style, c: SiteCSS}, uri_toolbar]}<a class='unblock' href='#{uri}'>⌘</a></body></html>"]
+                         "<html><body class='blocked'>#{HTML.render [{_: :style, c: SiteCSS}, {_: :script, c: SiteJS}, uri_toolbar]}<a class='unblock' href='#{uri}'>⌘</a></body></html>"]
                       end
       [status,
        {'Access-Control-Allow-Credentials' => 'true',
@@ -383,6 +383,25 @@ class WebResource
       '?' + h.map{|k,v|
         CGI.escape(k.to_s) + (v ? ('=' + CGI.escape([*v][0].to_s)) : '')
       }.join("&")
+    end
+
+    def POST
+      require 'httparty'
+      if allow_domain?
+        head = headers
+        body = env['rack.input'].read
+        env.delete 'rack.input'
+        head.map{|k,v| puts [k,v.to_s].join "\t" }
+        puts body
+        r = HTTParty.post uri, headers: head, body: body
+        head = headers r.headers
+        head.map{|k,v| puts [k,v.to_s].join "\t" }
+        [r.code, head, [r.body]]
+      else
+        env[:deny] = true
+        [202, {'Access-Control-Allow-Credentials' => 'true',
+               'Access-Control-Allow-Origin' => allowedOrigin}, []]
+      end
     end
 
     def remoteURL

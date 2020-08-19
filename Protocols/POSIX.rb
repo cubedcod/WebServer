@@ -11,19 +11,21 @@ class WebResource
       else           # host dir
         hostPath
        end) +       ## path part
-        (if !path || path =='/' # root node
-         %w(index)
-        elsif local_node?
-          if parts[0] == 'msg'  # Message-ID to path
-            id = Digest::SHA2.hexdigest Rack::Utils.unescape_path parts[1]
-            ['mail', id[0..1], id[2..-1]]
-          else       # local path
-            parts.map{|p| Rack::Utils.unescape_path p}
-          end
-        elsif path.size > 512 || parts.find{|p|p.size > 127} # long path
+       (if local_node?            # local path:
+         if !path || path =='/'   # local root node
+           %w(.)
+         elsif parts[0] == 'msg'  # Message-ID -> path
+           id = Digest::SHA2.hexdigest Rack::Utils.unescape_path parts[1]
+           ['mail', id[0..1], id[2..-1]]
+         else                     # direct local map
+           parts.map{|p| Rack::Utils.unescape_path p}
+         end
+        elsif !path || path=='/'  # remote path:
+          []                      # remote root-node
+        elsif path.size > 512 || parts.find{|p|p.size > 127} # oversized name -> sharded hash
           hash = Digest::SHA2.hexdigest [path, query].join
           [hash[0..1], hash[2..-1]]
-        else         # direct map to local path
+        else                      # direct remote to local map
           parts.map{|p| Rack::Utils.unescape_path p}
          end).join('/')
     end
