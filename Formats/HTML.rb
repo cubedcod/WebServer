@@ -348,7 +348,7 @@ class WebResource
            env[:feeds].map{|feed|
              {_: :a, href: feed.R.href, title: feed.path, class: :icon, c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange; margin-right: .1em'} : {})}, "\n",
            {_: :form, c: qs.map{|k,v|
-              ["\n", {_: :input, name: k, value: v}.update(k == search_arg ? (v.empty? ? {autofocus: true} : {}) : {type: :hidden})]}}.update(env[:search_base] ? {action: join(env[:search_base]).R.href} : {}), "\n"]}
+              ["\n", {_: :input, name: k, value: v}.update(k == search_arg ? ((env[:searchable] && v.empty?) ? {autofocus: true} : {}) : {type: :hidden})]}}.update(env[:search_base] ? {action: join(env[:search_base]).R.href} : {}), "\n"]}
     end
 
     # {k => v} -> Markup
