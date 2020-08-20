@@ -332,7 +332,8 @@ class WebResource
       if creator.respond_to? :R
         uri = creator.R
         name = uri.display_name
-        {_: :a, href: uri.href, id: 'a' + Digest::SHA2.hexdigest(rand.to_s), class: :fromto, style: (env[:colors][name] ||= HTML.colorize), c: name}
+        color = env[:colors][name] ||= '#%06x' % (rand 16777216)
+        {_: :a, href: uri.href, id: 'a' + Digest::SHA2.hexdigest(rand.to_s), class: :fromto, style: "background-color: #{color}; color: black", c: name}
       else
         CGI.escapeHTML creator.to_s
       end}
@@ -342,7 +343,8 @@ class WebResource
         HTML.tabular posts, env
       else
         posts.group_by{|p|(p[To] || [''.R])[0]}.map{|to, posts|
-          {style: (env[:colors][to.R.display_name] ||= HTML.colorize), c: posts.sort_by!{|r|(r[Content] || [0])[0]. size}.map{|post|
+          color = env[:colors][to.R.display_name] ||= '#%06x' % (rand 16777216)
+          {style: "background: repeating-linear-gradient(-45deg, #000, #000 .7em, #{color} .7em, #{color} 1em)", c: posts.sort_by!{|r|(r[Content] || [0])[0]. size}.map{|post|
              Markup[Post][post,env]}}}
       end}
 

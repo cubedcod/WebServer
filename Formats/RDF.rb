@@ -261,7 +261,7 @@ class WebResource < RDF::URI
                    c: {_: :table, class: :links,
                        c: links.group_by(&:host).map{|host, paths|
                          {_: :tr,
-                          c: [{_: :td, class: :host, c: host ? {_: :a, href: '/' + host, c: host, style: env[:colors][alpha] ||= HTML.colorize} : []},
+                          c: [{_: :td, class: :host, c: host ? {_: :a, href: '/' + host, c: host} : []},
                               {_: :td, c: paths.map{|path| Markup[Link][path,env]}}]}}}},
                   '</tr></table>']}}]}, '&nbsp;']}}
 

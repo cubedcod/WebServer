@@ -256,10 +256,6 @@ class WebResource
 
   module HTML
 
-    def self.colorize color = '#%06x' % (rand 16777216)
-      "color: black; background-color: #{color}; border-color: #{color}"
-    end
-
     # Graph -> HTML
     def htmlDocument graph=nil
       graph ||= env[:graph] = treeFromGraph
