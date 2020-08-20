@@ -344,8 +344,8 @@ class WebResource
       else
         posts.group_by{|p|(p[To] || [''.R])[0]}.map{|to, posts|
           color = env[:colors][to.R.display_name] ||= (posts.size == 1 ? '#444' : ('#%06x' % (rand 16777216)))
-          {style: "background: repeating-linear-gradient(-45deg, #000, #000 .7em, #{color} .7em, #{color} 1em)",
-           c: posts.sort_by!{|r|(r[Content] || [0])[0]. size}.map{|post|
+          {style: "background: repeating-linear-gradient(-45deg, #000, #000 .875em, #{color} .875em, #{color} 1em)",
+           c: posts.sort_by!{|r|(r[Content] || r[Image] || [0])[0]. size}.map{|post|
              Markup[Post][post,env]}}}
       end}
 
@@ -353,15 +353,7 @@ class WebResource
       post.delete Type
       uri = post.delete('uri') || ('#' + Digest::SHA2.hexdigest(rand.to_s))
       resource = uri.R env
-      titles = (post.delete(Title)||[]).map(&:to_s).map(&:strip).compact.-([""]).uniq
-      abstracts = post.delete(Abstract) || []
       date = (post.delete(Date) || [])[0]
-      from = post.delete(Creator) || []
-      to = post.delete(To) || []
-      images = post.delete(Image) || []
-      links = post.delete(Link) || []
-      content = post.delete(Content) || []
-      htmlcontent = post.delete(SIOC + 'richContent') || []
       uri_hash = 'r' + Digest::SHA2.hexdigest(uri)
       hasPointer = false
       local_id = if !resource.path || (resource.host == env[:base].host && resource.path == env[:base].path)
@@ -372,7 +364,7 @@ class WebResource
 
       {class: :post, id: local_id,
        c: ["\n",
-           titles.map{|title|
+           (post.delete(Title)||[]).map(&:to_s).map(&:strip).compact.-([""]).uniq.map{|title|
              title = title.to_s.sub(/\/u\/\S+ on /,'')
              unless env[:title] == title
                env[:title] = title
@@ -381,21 +373,21 @@ class WebResource
                  href: resource.href, c: CGI.escapeHTML(title)}, " \n"]
              end},
            ({_: :a, class: :id, type: :node, c: '🔗', href: resource.href, id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} unless hasPointer), "\n", # pointer
-           abstracts,
+           post.delete(Abstract),
            ([{_: :a, class: :date, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date}, "\n"] if date),
-           images.map{|i| Markup[Image][i,env]},
+           (post.delete(Image) || []).map{|i| Markup[Image][i,env]},
            {_: :table,
             c: {_: :tr,
                 c: [{_: :td,
-                     c: from.map{|f|Markup[Creator][f,env]},
+                     c: (post.delete(Creator) || []).map{|f|Markup[Creator][f,env]},
                      class: :from}, "\n",
                     {_: :td, c: '&rarr;'},
                     {_: :td,
-                     c: [to.map{|f|Markup[To][f,env]},
+                     c: [(post.delete(To) || []).map{|f|Markup[To][f,env]},
                          post.delete(SIOC+'reply_of')],
                      class: :to}, "\n"]}}, "\n",
-           content, htmlcontent,
-           MarkupGroup[Link][links, env],
+           post.delete(Content), post.delete(SIOC + 'richContent'),
+           MarkupGroup[Link][post.delete(Link) || [], env],
            (["<br>\n", HTML.keyval(post,env)] unless post.keys.size < 1)]}}
 
   end
