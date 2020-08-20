@@ -321,31 +321,29 @@ class WebResource
     Markup['http://purl.org/dc/terms/created'] = Markup['http://purl.org/dc/terms/modified'] = Markup[Date] = -> date, env {
       {_: :a, class: :date, c: date, href: 'http://' + (ENV['HOSTNAME'] || 'localhost') + ':8000/' + date[0..13].gsub(/[-T:]/,'/')}}
 
-    Markup[Creator] = Markup[To] = Markup['http://xmlns.com/foaf/0.1/maker'] = -> c, env {
-      if c.class == Hash || c.respond_to?(:uri)
-        u = c.R env
-        basename = u.basename if u.path
-        host = u.host
-        name = u.fragment ||
-               (basename && !['','/'].member?(basename) && basename) ||
-               (host && host.sub(/\.com$/,'')) ||
-               'user'
-        avatar = nil
-        {_: :a, href: u.href,
-         id: 'a' + Digest::SHA2.hexdigest(rand.to_s),
-         class: avatar ? :avatar : :fromto,
-         style: avatar ? '' : (env[:colors][name] ||= HTML.colorize),
-         c: avatar ? {_: :img, class: :avatar, src: avatar} : name}
+    def display_name
+      return fragment if fragment && !fragment.empty?
+      return basename if path && basename && !['','/'].member?(basename)
+      return host.sub(/^www\./,'').sub(/\.com$/,'') if host
+      'user'
+    end
+
+    Markup[Creator] = Markup[To] = Markup['http://xmlns.com/foaf/0.1/maker'] = -> creator, env {
+      if creator.respond_to? :R
+        uri = creator.R
+        name = uri.display_name
+        {_: :a, href: uri.href, id: 'a' + Digest::SHA2.hexdigest(rand.to_s), class: :fromto, style: (env[:colors][name] ||= HTML.colorize), c: name}
       else
-        CGI.escapeHTML (c||'')
+        CGI.escapeHTML creator.to_s
       end}
 
     MarkupGroup[Post] = -> posts, env {
       if env[:view] == 'table'
         HTML.tabular posts, env
       else
-        posts.sort_by!{|r|(r[Content] || [0])[0]. size}.map{|post|
-          Markup[Post][post,env]}
+        posts.group_by{|p|(p[To] || [''.R])[0]}.map{|to, posts|
+          {style: (env[:colors][to.R.display_name] ||= HTML.colorize), c: posts.sort_by!{|r|(r[Content] || [0])[0]. size}.map{|post|
+             Markup[Post][post,env]}}}
       end}
 
     Markup[Post] = -> post, env {
