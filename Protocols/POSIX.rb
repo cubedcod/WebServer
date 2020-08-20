@@ -88,7 +88,6 @@ class WebResource
            when 4 # four unordered terms
              cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -ilZ #{Shellwords.escape args[2]} | xargs -0 grep -il #{Shellwords.escape args[3]}"
            else   # N ordered term
-             s
              cmd = "grep -ril -- #{Shellwords.escape args.join '.*'} #{shellPath}"
            end
            `#{cmd} | head -n 1024`.lines.map &:chomp
