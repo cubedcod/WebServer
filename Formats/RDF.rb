@@ -139,7 +139,7 @@ class WebResource < RDF::URI
 
   # any-format file (maybe big) -> Turtle file (small)
   def summary
-    return self if basename.match /^README/
+    return self if basename.match(/^README/) || !node.exist?
     sPath = 'summary/' + fsPath + (path == '/' ? 'index' : '')
     sPath += '.ttl' unless ext == 'ttl'
     summary = sPath.R env                          # summary URI

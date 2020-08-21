@@ -89,6 +89,8 @@ w.bos.gl wired.trib.al
     DenyDomains['com'].delete 'facebook' if ENV.has_key? 'FACEBOOK'
     DenyDomains['com'].delete 'google' if ENV.has_key? 'GOOGLE'
 
+    %w(www.instagram.com).map{|host| GET host, -> r { (!r.path || r.path == '/') ? r.cacheResponse : NoGunk[r]}}
+
     GET 'gitter.im', -> r {
       r.env[:sort] = 'date'
       r.env[:view] = 'table'

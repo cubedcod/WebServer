@@ -37,13 +37,13 @@ class WebResource
 
     def cacheResponse
       nodes = nodeSet                   # find cached nodes
-      if nodes.size == 1 && (nodes[0].static_node? || # static node || cached and preferred format match
-                             (nodes[0].named_format == selectFormat && (nodes[0].named_format != 'text/html' || (query_values||{}).has_key?('notransform')))) # require notransform arg for cached-HTML format preservation
-        nodes[0].fileResponse           # no merge or transcode required
-      else                              # transform and/or merge graph-data
+      if nodes.size == 1 && (nodes[0].static_node? || # single node and it's nontransformable or cached and requested formats match
+                             (nodes[0].named_format == selectFormat && (nodes[0].named_format != 'text/html' || (query_values||{}).has_key?('notransform')))) # HTML is transformable without notransform argument
+        nodes[0].fileResponse           # response on file
+      else                              # transform and/or merge data
         nodes = nodes.map &:summary if env[:summary] # summarize nodes
         nodes.map &:loadRDF             # node(s) -> Graph
-        timeMeta                        # reference temporally-adjacent nodes
+        timeMeta                        # reference temporally-adjacent nodes in HTTP metadata
         graphResponse                   # HTTP Response
       end
     end
