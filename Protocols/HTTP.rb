@@ -164,7 +164,7 @@ class WebResource
 
     # fetch from cache or remote server
     def fetch
-      return cacheResponse if ENV.has_key?('OFFLINE') || query == 'offline'
+      return cacheResponse if offline?
       return [304,{},[]] if (env.has_key?('HTTP_IF_NONE_MATCH') || env.has_key?('HTTP_IF_MODIFIED_SINCE')) && static_node? # client has static node in cache
       nodes = nodeSet
       return nodes[0].fileResponse if nodes.size == 1 && nodes[0].static_node?                                             # server has static node in cache
@@ -374,6 +374,10 @@ class WebResource
     end
 
     def notfound; [404, {'Content-Type' => 'text/html'}, [htmlDocument]] end
+
+    def offline?
+      ENV.has_key?('OFFLINE') || (query_values||{}).has_key?('offline')
+    end
 
     # Hash -> querystring
     def HTTP.qs h
