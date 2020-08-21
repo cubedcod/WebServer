@@ -118,7 +118,8 @@ class WebResource < RDF::URI
     return self unless repository || env[:repository]
     (repository || env[:repository]).each_graph.map{|graph|
       doc = (graph.name || self).R
-      turtle = doc.fsPath + '.ttl'
+      doc.path = '/index' if !doc.path || doc.path == '/' # basename for turtle file
+      turtle = doc.fsPath + '.ttl'                        # map to filesystem path
       unless File.exist? turtle
         FileUtils.mkdir_p File.dirname turtle
         RDF::Writer.for(:turtle).open(turtle){|f|f << graph}                                     # write Turtle
