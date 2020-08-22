@@ -166,8 +166,7 @@ class WebResource
     def fetch
       return cacheResponse if offline?
       return [304,{},[]] if (env.has_key?('HTTP_IF_NONE_MATCH') || env.has_key?('HTTP_IF_MODIFIED_SINCE')) && static_node? # client has static node in cache
-      nodes = nodeSet
-      return nodes[0].fileResponse if nodes.size == 1 && nodes[0].static_node?                                             # server has static node in cache
+      nodes = nodeSet; return nodes[0].fileResponse if nodes.size == 1 && nodes[0].static_node?                            # server has static node in cache
       fetchHTTP                                                                 # fetch via HTTPS
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
       ['http://', host, path, query ? ['?', query] : nil].join.R(env).fetchHTTP # fetch via HTTP
@@ -176,6 +175,7 @@ class WebResource
     # fetch from remote server                        options:
     def fetchHTTP thru: true,                        # pass HTTP response to caller
                   transformable: !(query_values||{}).has_key?('notransform') # allow transformation: format conversions & same-format (HTML reformat, code pretty-print) rewrites
+      #puts "FETCH #{uri}"
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                            # upstream metadata
         if response.status.to_s.match? /206/         # partial response
@@ -190,6 +190,7 @@ class WebResource
                      named_format
                    end
           body = HTTP.decompress h, response.read                     # read body
+
           if format && reader = RDF::Reader.for(content_type: format) # reader defined for format
             env[:repository] ||= RDF::Repository.new                  # init RDF repository
             if timestamp = h['Last-Modified'] || h['last-modified']   # add HTTP metadata to graph
@@ -197,12 +198,14 @@ class WebResource
             end
             reader.new(body,base_uri: self){|g|env[:repository] << g} # read RDF
           end
+
           return unless thru                                          # just fetch/parse/load to repository
 
           # HTTP response to caller
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # upstream metadata
           env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin # CORS header
+
           h['link'] && h['link'].split(',').map{|link|                # parse+merge Link header
             ref, type = link.split(';').map &:strip
             if ref && type
@@ -210,6 +213,7 @@ class WebResource
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
             end}
+
           if transformable && !(format||'').match?(/audio|css|image|script|video/) # transformable format?
             env[:origin_format] = format                      # note original format
             saveRDF.graphResponse                             # cache data and return in preferred format

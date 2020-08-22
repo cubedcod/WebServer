@@ -333,18 +333,18 @@ class WebResource
                '/favicon.ico'
              end
       {class: :toolbox,
-       c: [({_: :a, id: :tabular, class: :icon, c: '↨', href: join(HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))).R.href} unless qs['view'] == 'table'), "\n",
-           ({_: :a, href: join(HTTP.qs(qs.merge({'notransform' => nil}))).R.href, c: '⚗️', id: :UI, class: :icon} unless local_node?), "\n",
-           {_: :a, href: uri, c: '🔗', class: :icon, id: :directlink}, "\n",
-           {_: :a, href: join('/').R.href, id: :host, c: {_: :img, src: icon}}, "\n",
+       c: [({_: :a, id: :tabular, class: :icon, c: '↨', href: env[:base].join(HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))).R.href} unless qs['view'] == 'table'), "\n",
+           ({_: :a, href: env[:base].join(HTTP.qs(qs.merge({'notransform' => nil}))).R.href, c: '⚗️', id: :UI, class: :icon} unless local_node?), "\n",
+           {_: :a, href: env[:base].uri, c: '🔗', class: :icon, id: :directlink}, "\n",
+           {_: :a, href: env[:base].join('/').R.href, id: :host, c: {_: :img, src: icon}}, "\n",
            {class: :path,
-            c: parts.map{|p| bc += '/' + p
-              {_: :a, class: :breadcrumb, href: join(bc).R.href, c: [{_: :span, c: '/'}, (CGI.escapeHTML Rack::Utils.unescape p)], id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}}},
-           ({_: :a, href: join(HTTP.qs(qs.merge({'dl' => env[:downloadable]}))).R.href, c: '&darr;', id: :download, class: :icon} if env.has_key? :downloadable), "\n",
+            c: env[:base].parts.map{|p| bc += '/' + p
+              {_: :a, class: :breadcrumb, href: env[:base].join(bc).R.href, c: [{_: :span, c: '/'}, (CGI.escapeHTML Rack::Utils.unescape p)], id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}}},
+           ({_: :a, href: env[:base].join(HTTP.qs(qs.merge({'dl' => env[:downloadable]}))).R.href, c: '&darr;', id: :download, class: :icon} if env.has_key? :downloadable), "\n",
            env[:feeds].map{|feed|
              {_: :a, href: feed.R.href, title: feed.path, class: :icon, c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange; margin-right: .1em'} : {})}, "\n",
            {_: :form, c: qs.map{|k,v|
-              ["\n", {_: :input, name: k, value: v}.update(k == search_arg ? ((env[:searchable] && v.empty?) ? {autofocus: true} : {}) : {type: :hidden})]}}.update(env[:search_base] ? {action: join(env[:search_base]).R.href} : {}), "\n"]}
+              ["\n", {_: :input, name: k, value: v}.update(k == search_arg ? ((env[:searchable] && v.empty?) ? {autofocus: true} : {}) : {type: :hidden})]}}.update(env[:search_base] ? {action: env[:base].join(env[:search_base]).R.href} : {}), "\n"]}
     end
 
     # {k => v} -> Markup

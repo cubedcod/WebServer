@@ -343,8 +343,9 @@ class WebResource
         HTML.tabular posts, env
       else
         posts.group_by{|p|(p[To] || [''.R])[0]}.map{|to, posts|
-          color = env[:colors][to.R.display_name] ||= (posts.size == 1 ? '#444' : ('#%06x' % (rand 16777216)))
-          {style: "background: repeating-linear-gradient(-45deg, #000, #000 .875em, #{color} .875em, #{color} 1em)",
+          grouped = posts.size != 1
+          color = env[:colors][to.R.display_name] ||= (grouped ? ('#%06x' % (rand 16777216)) : '#444')
+          {style: "background: repeating-linear-gradient(-45deg, #000, #000 .875em, #{color} .875em, #{color} 1em); #{grouped ? 'padding: .42em' : ''}",
            c: posts.sort_by!{|r|(r[Content] || r[Image] || [0])[0]. size}.map{|post|
              Markup[Post][post,env]}}}
       end}
