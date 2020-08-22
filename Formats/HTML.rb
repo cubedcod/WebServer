@@ -17,17 +17,21 @@ module Webize
             e[attr] = ref.R(env).href                 # cache location
           end}}
 
-      doc.css('img[srcset]').map{|img|
-        img['srcset'] = img['srcset'].split(',').map{|i|
-          url, _ = i.split ' '
-          url = env[:base].join(url).R env
-          [url.href, _].join ' '
-        }.join(',')}
+      doc.css('img[srcset]').map{|img|srcset img, env[:base]}
 
       doc.css('style').map{|css|
         css.content = Webize::CSS.cacherefs css.content, env if css.content.match? /url\(/}
 
       serialize ? doc.to_html : doc
+    end
+
+    def self.srcset node, base
+      node['srcset'] = node['srcset'].split(',').map{|i|
+        url, _ = i.split ' '
+        url = base.join(url).R
+        [url.href, _].join ' '
+      }.join(',')
+      nil
     end
 
     # clean HTML :: String
@@ -61,13 +65,7 @@ module Webize
         %w(href src).map{|attr| # referenced gunk
           if s[attr]
             src = s[attr].R
-            if src.deny_domain?
-              log << "🚫 \e[31;1;7m" + src.host + "\e[0m"
-              s.remove
-            elsif src.uri.match? Gunk
-              log << "🚫 \e[31;1m" + src.uri + "\e[0m"
-              s.remove
-            end
+            s.remove if src.deny?
           end}}
       puts log.join ' ' unless log.empty?
     end
@@ -110,7 +108,9 @@ module Webize
           e.set_attribute 'class', 'identified'                         # style as identified node
           e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id'] unless e.name == 'p'}</span> " # add href to node
         end
-        e['src'] = (base.join e['src']).R.href if e['src']}             # set media reference
+        e['src'] = (base.join e['src']).R.href if e['src']              # set src references
+        srcset e, base if e['srcset']
+      }
       html.to_xhtml indent: 0
     end
 
