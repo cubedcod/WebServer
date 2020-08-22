@@ -1,0 +1,9 @@
+#!/bin/sh
+cd $HOME/src/WebServer
+rm $HOME/web/squid*
+tmux new-session -s HTTP -d
+tmux send-keys -t HTTP:0 port8080 C-m
+tmux new-window -t HTTP:1 -d port80
+tmux new-window -t HTTP:2 -d logtail
+tmux new-window -t HTTP:3 -d emacs -nw .
+tmux attach-session -t HTTP
