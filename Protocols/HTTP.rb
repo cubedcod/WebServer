@@ -291,6 +291,8 @@ class WebResource
           dateDir
         elsif node.file? || !p || p.match?(/^(\d\d\d\d|a|msg|s(ent|rc)|v)$/)
           cacheResponse                        # local graph-node
+        elsif p == 'favicon.ico'
+          [200, {'Content-Type' => 'image/png'}, [SiteIcon]]
         elsif p == 'log'
           log_search                           # search log
         else
