@@ -264,7 +264,7 @@ class WebResource
       env[:sort] ||= qs['sort']
       env[:colors] ||= {}
       env[:links][:up] = [File.dirname(env['REQUEST_PATH']), '/', (query ? ['?', query] : nil)].join unless path == '/' # pointer to container
-      if env[:summary] || ((qs.has_key?('Q')||qs.has_key?('q')) && !qs.has_key?('fullContent'))      # pointer to unabbreviated form
+      if env[:summary] || ((qs.has_key?('Q')||qs.has_key?('q')) && !qs.has_key?('fullContent'))                         # pointer to unabbreviated form
         expanded = HTTP.qs qs.merge({'fullContent' => nil})
         env[:links][:full] = expanded
         expander = {_: :a, id: :expand, c: '&#11206;', href: expanded}
@@ -334,8 +334,8 @@ class WebResource
              end
       {class: :toolbox,
        c: [({_: :a, id: :tabular, class: :icon, c: '↨', href: env[:base].join(HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))).R.href} unless qs['view'] == 'table'), "\n",
-           ({_: :a, href: env[:base].join(HTTP.qs(qs.merge({'notransform' => nil}))).R.href, c: '⚗️', id: :UI, class: :icon} unless local_node?), "\n",
            {_: :a, href: env[:base].uri, c: '🔗', class: :icon, id: :directlink}, "\n",
+           ({_: :a, href: env[:base].join(HTTP.qs(qs.merge({'notransform' => nil}))).R.href, c: '⚗️', id: :UI, class: :icon} unless local_node?), "\n",
            {_: :a, href: env[:base].join('/').R.href, id: :host, c: {_: :img, src: icon}}, "\n",
            {class: :path,
             c: env[:base].parts.map{|p| bc += '/' + p
