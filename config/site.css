@@ -9,8 +9,8 @@
 .breadcrumb > span {font-size: 1.4em; color: #888}
 .breadcrumb {color: #eee}
 .container .body {border-radius: 0 .3em .3em .3em; width: 100%; background-color: #444; color: #fff}
-.container .head {border-radius: .4em 0 0 .4em; font-weight: bold; font-size: 1.1em; background-color: #555; color: #fff}
-.container table {border-spacing: 0; margin: .2em}
+.container .head {border-radius: .4em 0 0 .4em; font-weight: bold; font-size: 1.1em; background-color: #555; color: #fff; padding-left: .1em; padding-right: .1em}
+.container {margin: .2em}
 .container.main > .body {border-width: .1em}
 .container.main > .head {border-radius: .4em .4em 0 0; border-width: .1em .1em 0 .1em}
 .container.main > .head, .container.main > .body {background-color: #333; color: #fff; border-style: solid; border-color: #555}
@@ -20,7 +20,7 @@
 .fromto:only-child {padding: .1em 64ex 256ex 64ex; margin: 0 -64ex -256ex -64ex}
 .greentext, .greenText {background-color: #af0; color: #000; padding-left: .3em}
 .identified, .post {border: 1px solid #222}
-.links .host a {border-width: 1px; border-style: solid}
+.links .host a {background-color: #ccc; color: #000}
 .links .host {text-align: right}
 .links .path {background-color: #000; color: #fff}
 .post { background-color: #000; color: #fff; border-radius: .42em; max-width: 88ex; padding: .2em; margin: .166em}
@@ -45,7 +45,7 @@ a.uri > span.uri {font-size: 0.8em; font-weight: normal; color: #777}
 a.uri {border-radius: .28em; border: 1px solid #000; background-color: #d8d8d8; color: #000; max-width: 42ex; overflow: hidden; margin: .1em; font-weight: bold; padding-left: .1em; padding-right: .1em}
 a.uri.path > span.uri {color: #aaa}
 a.uri.path {background-color: #222; color: #fff; border-color: #333}
-a:hover {border-color: #0ff; background-color: #0ff}
+a:hover, a.uri:hover {border-color: #0ff; background-color: #0ff}
 blockquote {border-radius: .2em; border-width: 0 0 0 .5em; border-style: solid; border-color: #444; margin: 0 0 0 .1em; background-color: #2c2c2c; color: #fff}
 body {font-family: sans-serif; margin-top: 2.6em; margin-left: 2em; margin-right: 2em; color: #fff; background: repeating-linear-gradient(-45deg, #000, #000 .62em, #444 .62em, #444 1em)}
 body.blocked {background: repeating-linear-gradient(45deg, #000, #000 1.5em, #f00 1.5em, #f00 8em); text-align: center}
