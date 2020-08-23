@@ -214,7 +214,7 @@ class WebResource
               env[:links][type.to_sym] = ref
             end}
 
-          if transformable && !(format||'').match?(/audio|css|image|script|video/) # transformable format?
+          if transformable && !(format||'').match?(/audio|css|image|octet|script|video/) # transformable format?
             env[:origin_format] = format                      # note original format
             saveRDF.graphResponse                             # cache data and return in preferred format
           else                                                # fixed format
@@ -306,14 +306,14 @@ class WebResource
       qs = query_values || {}
       cookie = join('/cookie').R
       cookie.writeFile qs['cookie'] if qs.has_key?('cookie') && host.match?(/twitter.com$/) # update cookie
-      env['HTTP_COOKIE'] = cookie.readFile if cookie.node.exist? # read cookie
+      env['HTTP_COOKIE'] = cookie.readFile if cookie.node.exist?                            # read cookie
       if last = parts[-1]
         if last.match? /^new/
           env[:sort] ||= 'date'
           env[:view] ||= 'table'
         end
       end
-      if handler = HostGET[host]               # host handler
+      if handler = HostGET[host]               # host lambda
         handler[self]
       elsif deny?
         if deny_query?
@@ -414,26 +414,6 @@ class WebResource
       ['https:/' , path.sub(/^\/https?:\//,''),
        (query ? ['?', query] : nil),
        (fragment ? ['#', fragment] : nil) ].join.R env
-    end
-
-    def selectFormat default = 'text/html'
-      return default unless env.has_key? 'HTTP_ACCEPT' # no preference specified
-
-      index = {} # q-value -> format
-
-      env['HTTP_ACCEPT'].split(/,/).map{|e| # split to (MIME,q) pairs
-        format, q = e.split /;/             # split (MIME,q) pair
-        i = q && q.split(/=/)[1].to_f || 1  # q-value with default
-        index[i] ||= []                     # init index
-        index[i].push format.strip}         # index on q-value
-
-      index.sort.reverse.map{|q,formats| # formats sorted on descending q-value
-        formats.sort_by{|f|{'text/turtle'=>0}[f]||1}.map{|f|  # tiebreak with 🐢-winner
-          return default if f == '*/*'                        # default via wildcard
-          return f if RDF::Writer.for(:content_type => f) ||  # RDF via writer definition
-            ['application/atom+xml','text/html'].member?(f)}} # non-RDF via writer definition
-
-      default                                                 # default
     end
 
   end
