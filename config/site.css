@@ -64,7 +64,7 @@ svg, img[src*="svg"] {max-width:2em; max-height: 2em}
 table {border-spacing: 1px; border-radius: .2em}
 td {overflow: hidden; vertical-align: top; border-radius: .2em}
 td.k a {color: #ccc; max-width: 28ex}
-td.k, th:first-child {text-align: right; font-weight: bold}
+td.k {text-align: right; font-weight: bold}
 td[property="http://rdfs.org/sioc/ns#has_creator"], td[property="http://rdfs.org/sioc/ns#addressed_to"] {text-align: center}
 thead a {color: #eee}
 tr:hover td {background: #444}
