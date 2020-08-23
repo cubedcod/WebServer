@@ -275,6 +275,12 @@ class WebResource
            "\n"]
         end}
       htmlGrep if local_node?
+      groups = {}
+      graph.map{|uri, resource| # group resources by type
+        (resource[Type]||[:untyped]).map{|type|
+          type = type.to_s
+          groups[type] ||= []
+          groups[type].push resource }}
 
       HTML.render ["<!DOCTYPE html>\n",
                    {_: :html,
@@ -287,32 +293,20 @@ class WebResource
                                [{_: :link, rel: type, href: CGI.escapeHTML(resource.R(env).href)}, "\n"]}]}, "\n",
                         {_: :body,
                          c: [uri_toolbar, "\n",
-                             link[:prev, '&#9664;'], "\n",
-                             link[:next, '&#9654;'], "\n",
-                             if graph.empty?
-                               HTML.keyval (Webize::JSON.webizeHash env), env
-                             else
-                               groups = {} # group resources by type
-                               graph.map{|uri, resource|
-                                 (resource[Type]||[:untyped]).map{|type|
-                                   type = type.to_s
-                                   groups[type] ||= []
-                                   groups[type].push resource }}
-
-                               # graph to markup
-                               groups.map{|type, resources|
-                                 type = MarkupMap[type] || type
-                                 if MarkupGroup.has_key? type
-                                   MarkupGroup[type][resources, env]   # typed-collection markup
+                             link[:prev, '&#9664;'], "\n", link[:next, '&#9654;'], "\n",
+                             groups.map{|type, resources|
+                               type = MarkupMap[type] || type
+                               if MarkupGroup.has_key? type
+                                 MarkupGroup[type][resources, env]   # typed-collection markup
+                               else
+                                 if env[:view] == 'table'
+                                   HTML.tabular resources, env       # tabular view
                                  else
-                                   if env[:view] == 'table'
-                                     HTML.tabular resources, env       # tabular view
-                                   else
-                                     resources.map{|resource|
-                                       HTML.markup nil, resource, env} # singleton-resource markup
-                                   end
-                                 end}
-                             end, expander,
+                                   resources.map{|resource|
+                                     HTML.markup nil, resource, env} # singleton-resource markup
+                                 end
+                               end},
+                             expander,
                              {_: :script, c: SiteJS}]}]}]
     end
 
