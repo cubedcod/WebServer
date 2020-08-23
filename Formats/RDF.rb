@@ -117,7 +117,7 @@ class WebResource < RDF::URI
   def saveRDF repository = nil
     return self unless repository || env[:repository]
     (repository || env[:repository]).each_graph.map{|graph|
-      doc = (graph.name || self).R
+      doc = (graph.name || uri).R
       doc.path = '/index' if !doc.path || doc.path == '/' # basename for turtle file
       turtle = doc.fsPath + '.ttl'                        # map to filesystem path
       unless File.exist? turtle
