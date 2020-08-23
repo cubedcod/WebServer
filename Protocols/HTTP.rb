@@ -222,9 +222,7 @@ class WebResource
             when 'text/css'
               body = Webize::CSS.cacherefs body, env          # resource references in CSS
             when 'text/html'
-              doc = Webize::HTML.clean body, self, false      # clean HTML document
-              Webize::HTML.cacherefs doc, env, false          # resource references in HTML
-              body = doc.to_html
+              body = Webize::HTML.cacherefs body, env         # resource references in HTML
             end
             c = fsPath.R; c += query_hash                     # cache storage-location
             fExt = Suffixes[format] || Suffixes_Rack[format]  # find format-suffix
