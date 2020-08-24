@@ -418,7 +418,6 @@ w.bos.gl wired.trib.al
   end
 
   def GoogleHTML doc
-    doc.css('svg').map &:remove
     doc.css('div.rc').map{|rc|
       if r = rc.css('div.r > a')[0]
         subject = r['href']
@@ -437,6 +436,7 @@ w.bos.gl wired.trib.al
     if pagenext = doc.css('#pnnext')[0]
       env[:links][:next] ||= join pagenext['href']
     end
+    doc.css('#footcnt, #searchform, svg').map &:remove
   end
 
   def HackerNews doc
