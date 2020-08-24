@@ -1,12 +1,9 @@
 # coding: utf-8
 module Webize
-
   module HTML
     include WebResource::URIs
 
-    Scripts = "a[href^='javascript'], a[onclick], link[type='text/javascript'], link[as='script'], script" # CSS selector for script elements
-
-    # set location references on local cache
+    # set location references to local cache
     def self.cacherefs doc, env, serialize=true
       doc = Nokogiri::HTML.fragment doc if doc.class == String
       doc.css('a, form, iframe, img, link, script, source').map{|e| # ref element
@@ -34,49 +31,12 @@ module Webize
       nil
     end
 
-    # clean HTML :: String
-    def self.clean body, base=nil, serialize=true
-      doc = Nokogiri::HTML.parse body.encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ') # parse ass Nokogiri doc
-      if content_type = doc.css('meta[http-equiv="Content-Type"]')[0] # in-band content-type tag found
-        if content = content_type['content']
-          if charset_tag = content.split(';')[1]
-            if charset = charset_tag.split('=')[1]
-              unless charset.match? /utf.?8/i
-                doc = Nokogiri::HTML.parse body.force_encoding(charset).encode('UTF-8') # re-read with specified charset
-              end
-            end
-          end
-        end
-      end
-      clean_doc doc, base
-      serialize ? doc.to_html : doc
-    end
-
-    # clean HTML :: Nokogiri
-    def self.clean_doc doc, base=nil
-      doc.css("link[href*='font'], link[rel*='preconnect'], link[rel*='prefetch'], link[rel*='preload'], [class*='cookie'], [id*='cookie']").map &:remove # fonts and preload directives
-      log = []
-      doc.css("iframe, img, [type='image'], link, script, source").map{|s|
-        text = s.inner_text     # inline gunk
-        if s['type'] != 'application/json' && s['type'] != 'application/ld+json' && !text.match?(InitialState) && text.match?(GunkExec)
-          log << "🚩 " + s.to_s.size.to_s + ' ' + (text.match(GunkExec)[2]||'')[0..42]
-          s.remove
-        end
-        %w(href src).map{|attr| # referenced gunk
-          if s[attr]
-            src = s[attr].R
-            s.remove if src.deny?
-          end}}
-      puts log.join ' ' unless log.empty?
-    end
-
-    # format to local conventions
-    def self.format body, base
+    def self.format body, base; log = []
       html = Nokogiri::HTML.fragment body rescue Nokogiri::HTML.fragment body.encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
-      html.css('iframe, style, link[rel="stylesheet"], ' + Scripts).remove
-      clean_doc html
+      # strip upstream styles and scripts
+      html.css('iframe, script, style, a[href^="javascript"], a[onclick], link[rel="stylesheet"], link[type="text/javascript"], link[as="script"]').remove
 
-      # map images to <img> tag
+      # <img> normalisation
       html.css('[style*="background-image"]').map{|node|
         node['style'].match(/url\(['"]*([^\)'"]+)['"]*\)/).yield_self{|url|                                # CSS background-image -> img
           node.add_child "<img src=\"#{url[1]}\">" if url}}
@@ -84,33 +44,50 @@ module Webize
       html.css("div[class*='image'][data-src]").map{|div|div.add_child "<img src=\"#{div['data-src']}\">"} # div -> img
       html.css("figure[itemid]").map{|fig| fig.add_child "<img src=\"#{fig['itemid']}\">"}                 # figure -> img
 
-      # identify <p> <pre> <ul> <ol>
+      # identify all <p> <pre> <ul> <ol> elements
       html.css('p').map{|e|   e.set_attribute 'id', 'p'   + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
       html.css('pre').map{|e| e.set_attribute 'id', 'pre' + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
       html.css('ul').map{|e|  e.set_attribute 'id', 'ul'  + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
       html.css('ol').map{|e|  e.set_attribute 'id', 'ol'  + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
 
-      html.traverse{|e|                                                 # inspect nodes
+      # visit nodes
+      html.traverse{|e|                                                 # inspect node
         e.attribute_nodes.map{|a|                                       # inspect attributes
           e.set_attribute 'src', a.value if SRCnotSRC.member? a.name    # map src-like attributes to src
           e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name # map srcset-like attributes srcset
           a.unlink if a.name=='id' && a.value.match?(Gunk)              # strip attributes
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) ||
                       %w(bgcolor class color height http-equiv layout ping role style tabindex target theme width).member?(a.name)}
-        if e['href']; ref = (base.join e['href']).R                     # node has href and maybe identifier
-          offsite = ref.host != base.host
-          e.add_child " <span class='uri'>#{CGI.escapeHTML (offsite ? ref.uri.sub(/^https?:..(www.)?/,'') : (ref.path || '/'))[0..127]}</span> " # show URI in UI
-          e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # mint identifier
-          css = [:uri]; css.push :path unless offsite                   # style as local or global reference
-          e['href'] = ref.href                                          # resolve href
-          e['class'] = css.join ' '                                     # add CSS style
-        elsif e['id']                                                   # node has identifier but no href
+        if e['src']                                                     # src attribute
+          src = (base.join e['src']).R                                  # resolve src location
+          if src.deny?
+            log << "🚩 " + src
+            e.remove                                                    # strip blocked src
+          else
+            e['src'] = src.href                                         # update src to resolved location
+          end
+        end
+        srcset e, base if e['srcset']                                   # srcset attribute
+        if e['href']                                                    # href attribute
+          ref = (base.join e['href']).R                                 # resolve href location
+          if ref.deny?
+            log << "🚩 " + ref
+            e.remove                                                    # strip blocked href
+          else
+            offsite = ref.host != base.host
+            e.add_child " <span class='uri'>#{CGI.escapeHTML (offsite ? ref.uri.sub(/^https?:..(www.)?/,'') : (ref.path || '/'))[0..127]}</span> " # show URI in UI
+            e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # mint identifier
+            css = [:uri]; css.push :path unless offsite                 # style as local or global reference
+            e['href'] = ref.href                                        # update href to resolved location
+            e['class'] = css.join ' '                                   # add CSS style
+          end
+        elsif e['id']                                                   # id attribute
           e.set_attribute 'class', 'identified'                         # style as identified node
           e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id'] unless e.name == 'p'}</span> " # add href to node
         end
-        e['src'] = (base.join e['src']).R.href if e['src']              # set src references
-        srcset e, base if e['srcset']
       }
+
+      puts log.join ' ' unless log.empty?
       html.to_xhtml indent: 0
     end
 
