@@ -122,7 +122,7 @@ w.bos.gl wired.trib.al
     GET 'googleweblight.com', GotoURL
     GET 'google.com', GotoGoogle
     GET 'maps.google.com', GotoGoogle
-    GET 'www.google.com', -> r {r.env[:searchable]='/search'; %w(images maps search).member?(r.parts[0]) ? NoGunk[r] : r.deny}
+    GET 'www.google.com', -> r {r.env[:searchable]='/search'; %w(dl images maps search).member?(r.parts[0]) ? NoGunk[r] : r.deny}
     GET 'www.googleadservices.com', GotoAdURL
     GET 'www.gstatic.com', -> r {r.path.match?(/204$/) ? [204,{},[]] : NoGunk[r]}
 
