@@ -329,13 +329,13 @@ class WebResource
     end
 
     Markup[Creator] = Markup[To] = Markup['http://xmlns.com/foaf/0.1/maker'] = -> creator, env {
-      if creator.respond_to? :R
+      if creator.class == String || !creator.respond_to?(:R)
+        CGI.escapeHTML creator.to_s
+      else
         uri = creator.R
         name = uri.display_name
         color = env[:colors][name] ||= '#%06x' % (rand 16777216)
         {_: :a, href: uri.href, id: 'a' + Digest::SHA2.hexdigest(rand.to_s), class: :fromto, style: "background-color: #{color}; color: black", c: name}
-      else
-        CGI.escapeHTML creator.to_s
       end}
 
     MarkupGroup[Post] = -> posts, env {

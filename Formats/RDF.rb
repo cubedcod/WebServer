@@ -105,7 +105,7 @@ class WebResource < RDF::URI
       graph << RDF::Statement.new(subject, Title.R, basename)
       graph << RDF::Statement.new(subject, Date.R, node.stat.mtime.iso8601)
       node.children.map{|child|                # point to child nodes
-        graph << RDF::Statement.new(subject, (LDP+'contains').R, (subject.join child.basename '.ttl'))}
+        graph << RDF::Statement.new(subject, (LDP+'contains').R, (subject.join child.basename('.ttl').to_s.gsub(' ','%20').gsub('#','%23')))}
     end
     self
   rescue RDF::FormatError => e
