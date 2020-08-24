@@ -325,13 +325,6 @@ class WebResource
     Markup['http://purl.org/dc/terms/created'] = Markup['http://purl.org/dc/terms/modified'] = Markup[Date] = -> date, env {
       {_: :a, class: :date, c: date, href: 'http://' + (ENV['HOSTNAME'] || 'localhost') + ':8000/' + date[0..13].gsub(/[-T:]/,'/')}}
 
-    def display_name
-      return fragment if fragment && !fragment.empty?
-      return basename if path && basename && !['','/'].member?(basename)
-      return host.sub(/^www\./,'').sub(/\.com$/,'') if host
-      'user'
-    end
-
     Markup[Creator] = Markup[To] = Markup['http://xmlns.com/foaf/0.1/maker'] = -> creator, env {
       if creator.class == String || !creator.respond_to?(:R)
         CGI.escapeHTML creator.to_s

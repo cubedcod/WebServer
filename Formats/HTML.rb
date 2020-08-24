@@ -230,6 +230,13 @@ class WebResource
 
   module HTML
 
+    def display_name
+      return fragment if fragment && !fragment.empty?
+      return basename if path && basename && !['','/'].member?(basename)
+      return host.sub(/^www\./,'').sub(/\.com$/,'') if host
+      'user'
+    end
+
     # Graph -> HTML
     def htmlDocument graph=nil
       graph ||= env[:graph] = treeFromGraph
@@ -346,7 +353,7 @@ class WebResource
       when Array
         x.map{|n|render n}.join
       when WebResource
-        render [{_: :a, href: x.uri, c: (%w{gif ico jpeg jpg png webp}.member?(x.path && x.ext.downcase) ? {_: :img, src: x.uri} : CGI.escapeHTML((x.query || (x.path && x.basename != '/' && x.basename) || (x.path && x.path != '/' && x.path) || x.host || x.to_s)[0..48]))}, ' ']
+        render [{_: :a, href: x.uri, c: x.display_name}, ' ']
       when NilClass
         ''
       when FalseClass
