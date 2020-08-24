@@ -294,7 +294,7 @@ class WebResource
           [200, {'Content-Type' => 'image/png'}, [SiteIcon]]
         elsif p == 'log'
           log_search                           # search log
-        elsif !p || !p.match?(/\./)
+        elsif !p || !p.match?(/[.:]/)
           cacheResponse                        # local graph-node
         else
           (env[:base] = remoteURL).hostHandler # host handler (rebased on local)
