@@ -22,20 +22,10 @@ module Webize
       serialize ? doc.to_html : doc
     end
 
-    def self.srcset node, base
-      node['srcset'] = node['srcset'].split(',').map{|i|
-        url, _ = i.split ' '
-        url = base.join(url).R
-        [url.href, _].join ' '
-      }.join(',')
-      nil
-    end
-
     def self.format body, base; log = []
       html = Nokogiri::HTML.fragment body rescue Nokogiri::HTML.fragment body.encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
       # strip upstream styles and scripts
       html.css('iframe, script, style, a[href^="javascript"], a[onclick], link[rel="stylesheet"], link[type="text/javascript"], link[as="script"]').remove
-
       # <img> normalisation
       html.css('[style*="background-image"]').map{|node|
         node['style'].match(/url\(['"]*([^\)'"]+)['"]*\)/).yield_self{|url|                                # CSS background-image -> img
@@ -43,21 +33,18 @@ module Webize
       html.css('amp-img').map{|amp| amp.add_child "<img src=\"#{amp['src']}\">"}                           # amp-img -> img
       html.css("div[class*='image'][data-src]").map{|div|div.add_child "<img src=\"#{div['data-src']}\">"} # div -> img
       html.css("figure[itemid]").map{|fig| fig.add_child "<img src=\"#{fig['itemid']}\">"}                 # figure -> img
-
       # identify all <p> <pre> <ul> <ol> elements
       html.css('p').map{|e|   e.set_attribute 'id', 'p'   + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
       html.css('pre').map{|e| e.set_attribute 'id', 'pre' + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
       html.css('ul').map{|e|  e.set_attribute 'id', 'ul'  + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
       html.css('ol').map{|e|  e.set_attribute 'id', 'ol'  + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
-
-      # visit nodes
+      # inspect nodes
       html.traverse{|e|                                                 # inspect node
         e.attribute_nodes.map{|a|                                       # inspect attributes
           e.set_attribute 'src', a.value if SRCnotSRC.member? a.name    # map src-like attributes to src
-          e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name # map srcset-like attributes srcset
+          e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name # map srcset-like attributes to srcset
           a.unlink if a.name=='id' && a.value.match?(Gunk)              # strip attributes
-          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) ||
-                      %w(bgcolor class color height http-equiv layout ping role style tabindex target theme width).member?(a.name)}
+          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w(bgcolor class color height http-equiv layout ping role style tabindex target theme width).member?(a.name)}
         if e['src']                                                     # src attribute
           src = (base.join e['src']).R                                  # resolve src location
           if src.deny?
@@ -84,11 +71,19 @@ module Webize
         elsif e['id']                                                   # id attribute
           e.set_attribute 'class', 'identified'                         # style as identified node
           e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id'] unless e.name == 'p'}</span> " # add href to node
-        end
-      }
-
+        end}
       puts log.join ' ' unless log.empty?
       html.to_xhtml indent: 0
+    end
+
+    # resolve srcset location
+    def self.srcset node, base
+      node['srcset'] = node['srcset'].split(',').map{|i|
+        url, _ = i.split ' '
+        url = base.join(url).R
+        [url.href, _].join ' '
+      }.join(',')
+      nil
     end
 
     class Format < RDF::Format
