@@ -90,7 +90,7 @@ class WebResource
     end
 
     def static_node? # format and content is static - no transcode or invalidation - mint new URI for new version
-      %w(bin css geojson ico jpeg jpg js m3u8 m4a mp3 mp4 opus pem pdf png svg ts webm webp .ico .jpg .png .mp4 .js).member? ext.downcase
+      %w(bin css geojson ico jpeg jpg js m3u8 m4a mp3 mp4 opus pem pdf png svg ts wav webm webp .ico .jpg .png .mp4 .js).member? ext.downcase
     end
 
   end

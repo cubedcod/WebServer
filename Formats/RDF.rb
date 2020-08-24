@@ -59,7 +59,7 @@ class WebResource < RDF::URI
       end
       if %w(mp4 mkv webm).member? ext
         graph << RDF::Statement.new(self, Type.R, Video.R) # video-metadata triples
-      elsif %w(m4a mp3 ogg opus).member? ext
+      elsif %w(m4a mp3 ogg opus wav).member? ext
         graph << RDF::Statement.new(self, Type.R, Audio.R) # audio-metadata triples via taglib
         TagLib::FileRef.open(fsPath) do |fileref|
           unless fileref.null?
