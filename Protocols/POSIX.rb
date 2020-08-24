@@ -93,7 +93,7 @@ class WebResource
            `#{cmd} | head -n 1024`.lines.map &:chomp
          else                              # LS
            env[:summary] = !qs.has_key?('fullContent') # summarize dir entries
-           [node, *node.children]
+           (path=='/' && local_node?) ? [node] : [node, *node.children]
          end
         else
           globPath = fsPath
@@ -114,10 +114,9 @@ class WebResource
 
     MarkupGroup[LDP+'Container'] = -> dirs, env {
       if this = dirs.find{|d| d['uri'] == env[:base].uri.split('?')[0]}
-        rest = dirs.select{|d| d['uri'] != this['uri']}
         {class: 'main container',
          c: [{_: :span, class: :head, c: this['uri'].R.basename},
-             {class: :body, c: (HTML.tabular rest, env)}]}
+             {class: :body, c: (HTML.tabular dirs, env)}]}
       else
         dirs.map{|dir| Markup[LDP+'Container'][dir,env]}
       end
