@@ -248,7 +248,7 @@ class WebResource
         [304, {}, []]
       when /4\d\d/ # Not Found/Allowed
         if e.io.meta['content-type'].match? /text\/html/
-          env[:repository] << RDF::Statement.new(self, Content.R, Webize::HTML.format(e.io.read, self))
+          env[:repository] << RDF::Statement.new(self, Content.R, Webize::HTML.format(HTTP.decompress(e.io.meta, e.io.read), self))
         end
         cacheResponse
       when /300|5\d\d/ # upstream multiple choices or server error
