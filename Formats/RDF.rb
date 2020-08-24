@@ -228,12 +228,8 @@ class WebResource < RDF::URI
             f[v,env]
           end},
          (keyval v, env unless seen)] # default key-value renderer
-      elsif v.class == WebResource # resource-reference arguments
-        if v.path && %w{jpeg jpg JPG png PNG webp}.member?(v.ext)
-          Markup[Image][v, env]    # image reference
-        else
-          v                        # resource reference
-        end
+      elsif v.class == WebResource # resource-reference
+        v
       else # renderer undefined
         CGI.escapeHTML v.to_s
       end
