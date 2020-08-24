@@ -30,12 +30,12 @@ header|pre)[-_]?bid.*|hotjar|.*hubspot.*|[hp]b.?js|
 impression|indexww|
 keywee|kr(ux|xd).*|
 (app|s)?m(a(ilchimp|r(feel|keto)|tomo|utic)|etrics?|ms|pulse|tr)|
-newrelic|
+new(relic|sletter)|
 o(m(niture|tr)|nesignal|pt(anon|imera)|utbrain)|
 p(erimeter-?x|iwik|op(down|over|up)|orpoiseant|owaboot|repopulator|ro(fitwell|mo(tion)?s?)|ub(exchange|matic))|/pv|
 quantcast|
 recaptcha|record(event|stats?)|re?t(ar)?ge?t(ing)?|(rich)?relevance|recirc.*|rubicon.*|
-s(a(fe[-_]?browsing|ilthru)|erv(edby|ice[-_]?worker)|(har|tag)e(aholic|count|daddy)|i(ftscience|gnalr|tenotice)|ourcepoint|ponsor(ed)?|w.js)|
+s(a(fe[-_]?browsing|ilthru)|erv(edby|ice[-_]?worker)|(har|tag)e(aholic|count|daddy)|i(ftscience|gnalr|tenotice)|ourcepoint|ponsor(ed)?|urveys?|w.js)|
 t(aboola.*|rack(ers?|ing).*|ampering|ealium|inypass|ra?c?k?ing(data)?|ricorder|rustx|ype(face|kit))|autotrack|
 u(rchin|s(abilla|er[-_]?(context|location))|tm)|
 web(font|trends)|wp-?(json|rum)|
