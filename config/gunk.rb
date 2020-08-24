@@ -17,7 +17,7 @@ class WebResource
       l.chomp.sub(/^\./,'').split('.').reverse.map{|name|
         cursor = cursor[name] ||= {}}}
 
-    Gunk = %r((^|[-._\/'"\s:?&=~%])(
+    Gunk = %r((^|[-._\/'"\s:?&=~%+])(
 1x1|
 affiliate(link)?s?|ad(obe|s|toniq|vert.*)?|ak(am|ismet)|.*analytics.*|apester|appnexus|atrk|audience|
 b(lueconic|ouncee?x.*|ugsnag)|.*bid(d(er|ing).*|s)|

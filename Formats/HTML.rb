@@ -57,6 +57,8 @@ module Webize
         srcset e, base if e['srcset']                                   # srcset attribute
         if e['href']                                                    # href attribute
           ref = (base.join e['href']).R                                 # resolve href location
+          ref.query = '' if ref.query&.match?(/utm[^a-z]/)
+          ref.fragment = '' if ref.fragment&.match?(/utm[^a-z]/)
           if ref.deny?
             log << "🚩 " + ref
             e.remove                                                    # strip blocked href
