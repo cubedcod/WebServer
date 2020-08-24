@@ -90,17 +90,17 @@ module Webize
       html.css('ul').map{|e|  e.set_attribute 'id', 'ul'  + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
       html.css('ol').map{|e|  e.set_attribute 'id', 'ol'  + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
 
-      # inspect all nodes
-      html.traverse{|e|
-        e.attribute_nodes.map{|a|
-          e.set_attribute 'src', a.value if SRCnotSRC.member? a.name    # map @src-like attributes to @src
-          e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name
-          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/)|| # strip attributes
+      html.traverse{|e|                                                 # inspect nodes
+        e.attribute_nodes.map{|a|                                       # inspect attributes
+          e.set_attribute 'src', a.value if SRCnotSRC.member? a.name    # map src-like attributes to src
+          e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name # map srcset-like attributes srcset
+          a.unlink if a.name=='id' && a.value.match?(Gunk)              # strip attributes
+          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) ||
                       %w(bgcolor class color height http-equiv layout ping role style tabindex target theme width).member?(a.name)}
-        if e['href']; ref = (base.join e['href']).R                     # node has href and maybe identifier - add identifier for traversal if missing
+        if e['href']; ref = (base.join e['href']).R                     # node has href and maybe identifier
           offsite = ref.host != base.host
           e.add_child " <span class='uri'>#{CGI.escapeHTML (offsite ? ref.uri.sub(/^https?:..(www.)?/,'') : (ref.path || '/'))[0..127]}</span> " # show URI in UI
-          e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # add identifier
+          e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # mint identifier
           css = [:uri]; css.push :path unless offsite                   # style as local or global reference
           e['href'] = ref.href                                          # resolve href
           e['class'] = css.join ' '                                     # add CSS style
