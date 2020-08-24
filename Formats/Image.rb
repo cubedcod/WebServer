@@ -52,7 +52,7 @@ image-src
   module JPEG
     class Format < RDF::Format
       content_type 'image/jpeg',
-                   extensions: [:jpeg, :jpg],
+                   extensions: [:jpeg, :jpg, :JPG],
                    aliases: %w(
                    image/jpg;q=0.8
                    image/x-icon;q=0.2)

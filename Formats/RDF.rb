@@ -96,6 +96,7 @@ class WebResource < RDF::URI
         options[:format] = reader if reader    # format hint from filename
         options[:content_type] = mime if mime  # MIME type from FILE(1)
 
+        #puts :LOAD, fsPath, options
         graph.load 'file:' + fsPath, **options # read RDF from file
       end
     elsif node.directory?                      # directory-entry triples
