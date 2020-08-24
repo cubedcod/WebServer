@@ -175,6 +175,7 @@ class WebResource
     # fetch from remote server                        options:
     def fetchHTTP thru: true,                        # pass HTTP response to caller
                   transformable: !(query_values||{}).has_key?('notransform') # allow transformation: format conversions & same-format (HTML reformat, code pretty-print) rewrites
+      env[:repository] ||= RDF::Repository.new                  # init RDF repository
       #puts "FETCH #{uri}"
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                            # upstream metadata
@@ -192,7 +193,6 @@ class WebResource
           body = HTTP.decompress h, response.read                     # read body
 
           if format && reader = RDF::Reader.for(content_type: format) # reader defined for format
-            env[:repository] ||= RDF::Repository.new                  # init RDF repository
             if timestamp = h['Last-Modified'] || h['last-modified']   # add HTTP metadata to graph
               env[:repository] << RDF::Statement.new(self, Date.R, Time.httpdate(timestamp.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,'')).iso8601)
             end
@@ -247,6 +247,9 @@ class WebResource
       when /304/ # Not Modified
         [304, {}, []]
       when /4\d\d/ # Not Found/Allowed
+        if e.io.meta['content-type'].match? /text\/html/
+          env[:repository] << RDF::Statement.new(self, Content.R, Webize::HTML.format(e.io.read, self))
+        end
         cacheResponse
       when /300|5\d\d/ # upstream multiple choices or server error
         [status.to_i, (headers e.io.meta), [e.io.read]]
