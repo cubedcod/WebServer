@@ -22,6 +22,7 @@ module Webize
       serialize ? doc.to_html : doc
     end
 
+    # format HTML to local preferences
     def self.format body, base; log = []
       html = Nokogiri::HTML.fragment body rescue Nokogiri::HTML.fragment body.encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
       # strip upstream styles and scripts
@@ -94,6 +95,7 @@ module Webize
       reader { Reader }
     end
 
+    # HTML document -> RDF
     class Reader < RDF::Reader
       include WebResource::URIs
       format Format
@@ -119,10 +121,9 @@ module Webize
                                       o.class == RDF::URI) ? o : (l = RDF::Literal o
                                                                   l.datatype=RDF.XMLLiteral if p == Content
                                                                   l),
-                                     :graph_name => g ? g.R : @base)}
+                                     graph_name: g ? g.R : @base)}
       end
 
-      # HTML -> RDF
       def scanContent &f
         subject = @base         # subject URI
         n = @doc
@@ -230,13 +231,6 @@ class WebResource
 
   module HTML
 
-    def display_name
-      return fragment if fragment && !fragment.empty?
-      return basename if path && basename && !['','/'].member?(basename)
-      return host.sub(/^www\./,'').sub(/\.com$/,'') if host
-      'user'
-    end
-
     # Graph -> HTML
     def htmlDocument graph=nil
       graph ||= env[:graph] = treeFromGraph
@@ -289,52 +283,6 @@ class WebResource
                                end},
                              expander,
                              {_: :script, c: SiteJS}]}]}]
-    end
-
-    def uri_toolbar
-      search_arg = [nil,'/'].member?(path) ? 'find' : 'q'
-      qs = query_values || {}
-      qs[search_arg] ||= ''
-      bc = '' # breadcrumb trail
-      favicon = ('//' + host  + '/favicon.ico').R
-      icon = if env[:links][:icon]                                                                          # icon reference provided in upstream HTML
-               if env[:links][:icon].path != favicon.path && !favicon.node.exist? && !favicon.node.symlink? # icon at non-default location?
-                 FileUtils.ln_s (env[:links][:icon].node.relative_path_from favicon.node.dirname), favicon.node # link to default location
-               end
-               env[:links][:icon].node.exist? ? ('/' + env[:links][:icon].fsPath) : env[:links][:icon].href # referenced icon, at cache-location if on file
-             elsif favicon.node.exist?                                                                      # site-icon exists at default location?
-               '/' + favicon.fsPath                                                                         # site-icon
-             else                                                                                           # daemon-icon
-               '/favicon.ico'
-             end
-      {class: :toolbox,
-       c: [({_: :a, id: :tabular, class: :icon, c: '↨', href: env[:base].join(HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))).R.href} unless qs['view'] == 'table'), "\n",
-           {_: :a, href: env[:base].uri, c: '🔗', class: :icon, id: :directlink}, "\n",
-           ({_: :a, href: env[:base].join(HTTP.qs(qs.merge({'notransform' => nil}))).R.href, c: '⚗️', id: :UI, class: :icon} unless local_node?), "\n",
-           {_: :a, href: env[:base].join('/').R.href, id: :host, c: {_: :img, src: icon}}, "\n",
-           {class: :path,
-            c: env[:base].parts.map{|p| bc += '/' + p
-              {_: :a, class: :breadcrumb, href: env[:base].join(bc).R.href, c: [{_: :span, c: '/'}, (CGI.escapeHTML Rack::Utils.unescape p)], id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}}},
-           ({_: :a, href: env[:base].join(HTTP.qs(qs.merge({'dl' => env[:downloadable]}))).R.href, c: '&darr;', id: :download, class: :icon} if env.has_key? :downloadable), "\n",
-           env[:feeds].map{|feed|
-             {_: :a, href: feed.R.href, title: feed.path, class: :icon, c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange; margin-right: .1em'} : {})}, "\n",
-           {_: :form, c: qs.map{|k,v|
-              ["\n", {_: :input, name: k, value: v}.update(k == search_arg ? ((env[:searchable] && v.empty?) ? {autofocus: true} : {}) : {type: :hidden})]}}.update(env[:search_base] ? {action: env[:base].join(env[:search_base]).R.href} : {}), "\n"]}
-    end
-
-    # {k => v} -> Markup
-    def self.keyval t, env
-      {_: :table, class: :kv,
-       c: t.map{|k,vs|
-         vs = (vs.class == Array ? vs : [vs]).compact
-         type = (k ? k.to_s : '#notype').R
-         ([{_: :tr, name: type.fragment || (type.path && type.basename),
-            c: ["\n",
-                {_: :td, class: 'k',
-                 c: Markup[Type][type, env]}, "\n",
-                {_: :td, class: 'v',
-                 c: k==Link ? MarkupGroup[Link][vs, env] : vs.map{|v|
-                   [(markup k, v, env), ' ']}}]}, "\n"] unless k == 'uri' && vs[0] && vs[0].to_s.match?(/^_:/))}} # hide bnode internal-identifiers
     end
 
     # Markup -> HTML

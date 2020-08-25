@@ -384,7 +384,7 @@ class WebResource
                      c: [(post.delete(To) || []).map{|f|Markup[To][f,env]},
                          post.delete(SIOC+'reply_of')],
                      class: :to}, "\n"]}}, "\n",
-           post.delete(Content), post.delete(SIOC + 'richContent'),
+           {class: :content, c: [post.delete(Content), post.delete(SIOC + 'richContent')]},
            MarkupGroup[Link][post.delete(Link) || [], env],
            (["<br>\n", HTML.keyval(post,env)] unless post.keys.size < 1)]}}
 

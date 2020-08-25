@@ -3,8 +3,24 @@ class WebResource
 
   module HTML
 
-    # Graph -> Markup
+    # RDF -> (tabular) Markup
 
+    # resource -> (colA: key, colB: val) table
+    def self.keyval t, env
+      {_: :table, class: :kv,
+       c: t.map{|k,vs|
+         vs = (vs.class == Array ? vs : [vs]).compact
+         type = (k ? k.to_s : '#notype').R
+         ([{_: :tr, name: type.fragment || (type.path && type.basename),
+            c: ["\n",
+                {_: :td, class: 'k',
+                 c: Markup[Type][type, env]}, "\n",
+                {_: :td, class: 'v',
+                 c: k==Link ? MarkupGroup[Link][vs, env] : vs.map{|v|
+                   [(markup k, v, env), ' ']}}]}, "\n"] unless k == 'uri' && vs[0] && vs[0].to_s.match?(/^_:/))}} # hide bnode internal-identifiers
+    end
+
+    # graph -> ( property -> column, resource -> row) table
     def self.tabular graph, env
       graph = graph.values if graph.class == Hash
       keys = graph.select{|r|r.respond_to? :keys}.map{|r|r.keys}.flatten.uniq - [Abstract, Content, DC+'hasFormat', DC+'identifier', Image, Link, Video, SIOC+'reply_of', SIOC+'richContent', SIOC+'user_agent', Title]

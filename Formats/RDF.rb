@@ -1,54 +1,8 @@
 # coding: utf-8
-require 'linkeddata'
 require 'taglib'
-class WebResource < RDF::URI
+class WebResource
 
-  module URIs # URI constants
-    W3       = 'http://www.w3.org/'
-    Atom     = W3 + '2005/Atom#'
-    LDP      = W3 + 'ns/ldp#'
-    List     = W3 + '1999/02/22-rdf-syntax-ns#List'
-    RDFs     = W3 + '2000/01/rdf-schema#'
-    Stat     = W3 + 'ns/posix/stat#'
-    Type     = W3 + '1999/02/22-rdf-syntax-ns#type'
-
-    DC       = 'http://purl.org/dc/terms/'
-    Abstract = DC + 'abstract'
-    Audio    = DC + 'Audio'
-    Date     = DC + 'date'
-    Image    = DC + 'Image'
-    Link     = DC + 'link'
-    Title    = DC + 'title'
-    Video    = DC + 'Video'
-
-    SIOC     = 'http://rdfs.org/sioc/ns#'
-    Content  = SIOC + 'content'
-    Creator  = SIOC + 'has_creator'
-    To       = SIOC + 'addressed_to'
-    Post     = SIOC + 'Post'
-
-    FOAF     = 'http://xmlns.com/foaf/0.1/'
-    Person   = FOAF + 'Person'
-
-    DOAP     = 'http://usefulinc.com/ns/doap#'
-    OG       = 'http://ogp.me/ns#'
-    Podcast  = 'http://www.itunes.com/dtds/podcast-1.0.dtd#'
-    RSS      = 'http://purl.org/rss/1.0/'
-    Schema   = 'http://schema.org/'
-
-    def basename; File.basename path end
-    def ext; path ? (File.extname(path)[1..-1] || '') : '' end
-    def extension; '.' + ext end
-    def parts; path ? (path.split('/') - ['']) : [] end
-    def query_hash
-      return '' unless query && !query.empty?
-      '.' + Digest::SHA2.hexdigest(query)[0..15]
-    end
-  end
-
-  alias_method :uri, :to_s
-
-  # fs node -> RDF graph
+  # local node -> RDF::Repository
   def loadRDF graph: env[:repository] ||= RDF::Repository.new
     if node.file?
       stat = node.stat
@@ -211,7 +165,6 @@ class WebResource < RDF::URI
 
   end
   module HTML
-    include URIs
 
     # RDF -> Markup
     def self.markup type, v, env
@@ -235,11 +188,6 @@ class WebResource < RDF::URI
         CGI.escapeHTML v.to_s
       end
     end
-
-    # markup lambdas
-    Markup = {}; MarkupGroup = {}
-
-    Markup['uri'] = -> uri, env {uri.R}
 
     Markup[DC+'language'] = -> lang, env {
       {'de' => '🇩🇪',
@@ -278,24 +226,4 @@ class WebResource < RDF::URI
 
   end
 
-end
-
-# type-normalizers. call #R to ensure you have a WebResource
-class Hash
-  def R env=nil; env ? WebResource.new(self['uri']).env(env) : WebResource.new(self['uri']) end
-end
-class Pathname
-  def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
-end
-class RDF::URI
-  def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
-end
-class RDF::Node
-  def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
-end
-class String
-  def R env=nil; env ? WebResource.new(self).env(env) : WebResource.new(self) end
-end
-class WebResource
-  def R env_=nil; env_ ? env(env_) : self end
 end

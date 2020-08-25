@@ -24,7 +24,8 @@
 .links .host a {background-color: #ccc; color: #000}
 .links .host {text-align: right}
 .links .path {background-color: #000; color: #fff}
-.post { background-color: #000; color: #fff; border-radius: .42em; max-width: 88ex; padding: .2em; margin: .166em}
+.post {padding: .2em; margin: .166em}
+.post > .content {background-color: #000; color: #fff; border-radius: 0 0 .42em .42em; max-width: 88ex}
 .quote {background-color: #ccc; color: #000; padding-left: .3em}
 .thumb {max-width: 22em}
 .title {background-color: #fff; color: #000; font-size: 1.08em; font-weight: bold; vertical-align: top; border-radius: .18em }
