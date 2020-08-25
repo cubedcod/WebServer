@@ -184,8 +184,7 @@ module Webize
               when /lytics/
                 k = :drop
               else
-                v = Webize::JSON.webizeString v
-                v = @base.join v if v.class == WebResource || v.class == RDF::URI
+                v = @base.join v if v.match? /^(http|\/)\S+$/
               end
               puts [k,v].join "\t" unless k.to_s.match? /^(drop|http)/
               yield subject, k, v unless k == :drop

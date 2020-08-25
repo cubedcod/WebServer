@@ -501,6 +501,7 @@ class WebResource
       'resource-type' => Type,
       'revisit-after' => :drop,
       'robots' => :drop,
+      'rootVe' => :drop,
       'safe_content' => Content,
       'sailthru.author' => Creator,
       'sailthru.contentid' => :drop,

@@ -99,11 +99,10 @@ class WebResource < RDF::URI
 
     Markup['uri'] = -> uri, env {uri.R}
 
-
   end
 end
 
-# call #R on an object to cast to a WebResource
+# cast-method to a WebResource
 class Hash
   def R env=nil; env ? WebResource.new(self['uri']).env(env) : WebResource.new(self['uri']) end
 end

@@ -488,7 +488,7 @@ w.bos.gl wired.trib.al
   end
 
   def InstagramJSON tree, &b
-    Webize::JSON.webizeHash(tree){|h|
+    Webize::JSON.scan(tree){|h|
       if tl = h['edge_owner_to_timeline_media']
         end_cursor = tl['page_info']['end_cursor'] rescue nil
         uid = tl["edges"][0]["node"]["owner"]["id"] rescue nil

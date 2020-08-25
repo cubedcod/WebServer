@@ -2,33 +2,13 @@ require 'json'
 module Webize
   module JSON
 
-    # recursively walk down JSON converting URL-strings to WebResource objects
-    def self.webizeValue v, &y
+    def self.scan v, &y
       case v.class.to_s
       when 'Hash'
-        webizeHash v, &y
-      when 'String'
-        webizeString v, &y
+        yield v
+        v.values.map{|_v| scan _v, &y }
       when 'Array'
-        v.map{|_v| webizeValue _v, &y }
-      else
-        v
-      end
-    end
-
-    def self.webizeHash hash, &y
-      yield hash if block_given?
-      webized = {}
-      hash.map{|key, value|
-        webized[key] = webizeValue value, &y}
-      webized
-    end
-
-    def self.webizeString str, &y
-      if str.match? /^(http|\/)\S+$/
-        str.R
-      else
-        str
+        v.map{|_v| scan _v, &y }
       end
     end
 
@@ -113,7 +93,7 @@ module Webize
           @base.send hostTriples, @json, &f
         else
           #puts "JSON triplr - generic for #{@base.host}"
-          Webize::JSON.webizeValue(@json){|h|
+          Webize::JSON.scan(@json){|h|
             if s = h['uri'] || h['url'] || h['link'] || ((h['id']||h['ID']) && ('#' + (h['id']||h['ID']).to_s))
               s = @base.join(s).R
               yield s, Type, Post.R if h.has_key? 'content'
@@ -126,9 +106,14 @@ module Webize
                 unless %w(id uri).member? p
                   p = MetaMap[p] || p
                   (v.class == Array ? v : [v]).map{|o|
-                    unless [Hash, NilClass].member?(o.class) || (o.class == String && o.empty?)
-                      o = @base.join o if o.class == String && o.match?(/^(http|\/)\S+$/)
-                      o = Webize::HTML.format o, @base if p == Content && o.class == String
+                    unless [Hash, NilClass].member?(o.class) || (o.class == String && o.empty?) # each non-nil terminal value
+                      o = @base.join o if o.class == String && o.match?(/^(http|\/)\S+$/)       # resolve URI
+                      case p
+                      when Content
+                        o = Webize::HTML.format o, @base if o.class == String
+                      when Link
+                        p = Image if o.class == RDF::URI && %w(jpg png webp).member?(o.R.ext)
+                      end
                       yield s, p, o
                     end} unless p == :drop
                 end}
