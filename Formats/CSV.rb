@@ -63,9 +63,7 @@ class WebResource
                          c: CGI.escapeHTML(title), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}
                       end},
                     ({_: :a, href: re.href,                                      # link to row
-                      class: :id,
-                      type: :node,
-                      c: '🔗',
+                      class: :id, type: :node, c: '🔗',
                       id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} if tCount == 0),
                     (resource[SIOC+'reply_of']||[]).map{|r|
                       {_: :a, href: r.to_s,
