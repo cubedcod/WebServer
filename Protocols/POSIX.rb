@@ -114,7 +114,7 @@ class WebResource
 
     MarkupGroup[LDP+'Container'] = -> dirs, env {
       if this = dirs.find{|d| d['uri'] == env[:base].uri.split('?')[0]}
-        {class: 'main container',
+        {class: :container,
          c: [{_: :span, class: :head, c: this['uri'].R.basename},
              {class: :body, c: (HTML.tabular dirs, env)}]}
       else

@@ -198,7 +198,7 @@ class WebResource
 
     MarkupGroup[Link] = -> links, env {
       links.map(&:R).group_by{|l|links.size > 8 && l.host && l.host.split('.')[-1] || nil}.map{|tld, links|
-        [{class: 'container main',
+        [{class: :container,
           c: [({class: :head, _: :span, c: tld} if tld),
               {class: :body, c: links.group_by{|l|links.size > 25 ? (l.host.split('.')[-2]||' ')[0] : nil}.map{|alpha, links|
                  ['<table><tr>',
