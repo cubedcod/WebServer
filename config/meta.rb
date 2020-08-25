@@ -283,6 +283,7 @@ class WebResource
       'go-import' => :drop,
       'google-site-verification' => :drop,
       'googlebot' => :drop,
+      'googlebot-news' => :drop,
       'gpt:category:exclusions' => :drop,
       'gpt:params' => :drop,
       'group' => To,

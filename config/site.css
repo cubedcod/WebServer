@@ -5,7 +5,7 @@
 #prev, #next {position: fixed; height: 100%; background-color: #222}
 #prev, #next, #expand {font-size: 1.9em; color: #eee}
 #prev:hover, #next:hover {background-color: #333}
-.avatar {max-height: 2em; background-color: #000}
+.abstract {background-color: #aaa; color: #fff; border-radius: .3em}
 .breadcrumb > span {font-size: 1.4em; color: #888}
 .breadcrumb {color: #eee}
 .container .body {border-radius: 0 .4em .4em .4em; width: 100%; border-width: .1em}
@@ -20,7 +20,6 @@
 .identified, .post {border: 1px solid #282828}
 .links .host {text-align: right}
 .links .path {background-color: #000; color: #fff}
-.post .abstract {background-color: #aaa; color: #fff; border-radius: .3em}
 .post .body {background: repeating-linear-gradient(-45deg, #000, #000 .875em, #222 .875em, #222 1em); color: #fff}
 .post .pointer {float: right}
 .post { max-width: 88ex; margin: .166em}

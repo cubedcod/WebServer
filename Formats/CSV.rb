@@ -70,7 +70,7 @@ class WebResource
                     (resource[SIOC+'reply_of']||[]).map{|r|
                       {_: :a, href: r.to_s,
                        c: Icons[SIOC+'reply_of']} if r.class == RDF::URI || r.class == WebResource},
-                    resource[Abstract] ? [resource[Abstract], '<br>'] : '',
+                    {class: :abstract, c: resource[Abstract]},
                     [Image, Video].map{|t|(resource[t]||[]).map{|i|Markup[t][i,env]}},
                     resource[Content], resource[SIOC+'richContent'],
                     MarkupGroup[Link][(resource[Link]||[]),env]]

@@ -85,9 +85,9 @@ t.co ti.me tinyurl.com trib.al
 w.bos.gl wired.trib.al
 ).map{|s| GET s, NoQuery}
 
-    DenyDomains['com'].delete 'amazon' if ENV.has_key? 'AMAZON'
+    DenyDomains['com'].delete 'amazon'   if ENV.has_key? 'AMAZON'
     DenyDomains['com'].delete 'facebook' if ENV.has_key? 'FACEBOOK'
-    DenyDomains['com'].delete 'google' if ENV.has_key? 'GOOGLE'
+    DenyDomains['com'].delete 'google'   if ENV.has_key? 'GOOGLE'
 
     %w(www.instagram.com).map{|host| GET host, -> r { (!r.path || r.path == '/') ? r.cacheResponse : NoGunk[r]}}
 
