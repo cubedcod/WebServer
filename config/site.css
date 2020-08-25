@@ -24,8 +24,9 @@
 .links .host a {background-color: #ccc; color: #000}
 .links .host {text-align: right}
 .links .path {background-color: #000; color: #fff}
-.post {padding: .2em; margin: .166em}
-.post > .content {background-color: #000; color: #fff; border-radius: 0 0 .42em .42em; max-width: 88ex}
+.post { max-width: 88ex; padding: .2em; margin: .166em}
+.post > .content {background-color: #000; color: #fff; border-radius: 0 0 .42em .42em}
+.post > .pointer {float: right}
 .quote {background-color: #ccc; color: #000; padding-left: .3em}
 .thumb {max-width: 22em}
 .title {background-color: #fff; color: #000; font-size: 1.08em; font-weight: bold; vertical-align: top; border-radius: .18em }
@@ -38,8 +39,7 @@
 .toolbox { position: fixed; top: 0; z-index: 2}
 :target {background-color: #2ef !important; color : #000 !important}
 a {text-decoration: none; border-radius: .14em}
-a.date {float: right; white-space: nowrap; color: #bbb; border-radius: .2em; font-size: .8em}
-a.id {float: right}
+a.date {white-space: nowrap; background-color: #000; vertical-align: bottom; color: #bbb; border-radius: .2em .2em 0 0; font-size: .8em}
 a.idlink {color: #aaa; font-size: .72em; vertical-align: bottom}
 a.title:visited, a.uri:visited, a.uri.path:visited {background-color: #0f5}
 a.unblock {color: #fff; font-size: 22em; font-weight: bold; text-decoration: none}
