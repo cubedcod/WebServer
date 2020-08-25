@@ -269,7 +269,7 @@ class WebResource
 
         post.remove }
 
-      doc.css('#boardNavMobile, #delform, #absbot, #navtopright, #postingForm, #actionsForm, #thread-interactions').map &:remove
+      doc.css('#boardNavMobile, #delform, #absbot, #navtopright, #postForm, #postingForm, #actionsForm, #thread-interactions').map &:remove
     end
 
     def feedDocument

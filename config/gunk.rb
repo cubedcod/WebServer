@@ -22,7 +22,7 @@ class WebResource
 affiliate(link)?s?|ad(obe|s|toniq|vert.*)?|ak(am|ismet)|.*analytics.*|apester|appnexus|atrk|audience|
 b(lueconic|ouncee?x.*|ugsnag)|.*bid(d(er|ing).*|s)|
 c(edexis|hartbeat.*|mp|ollector|omscore|onsent|ookie.?(c(hoice|onsent)|law|notice)|riteo|xense)|
-de(mandware|t(ect|roitchicago))|dfp|dis(ney(id)?|qus)|doubleclick|
+de(mandware|t(ect|roitchicago))|dfp|dis(countcode|ney(id)?|qus)|doubleclick|
 e(moji|nsighten|proof|scenic|vidon|zoic)|
 facebook|fbcdn.*gif|frosmo|
 g(dpr|eo(ip|locat(e|ion))|igya|pt|tag|tm)|.*(
@@ -30,12 +30,12 @@ header|pre)[-_]?bid.*|hotjar|.*hubspot.*|[hp]b.?js|
 impression|indexww|
 keywee|kr(ux|xd).*|
 (app|s)?m(a(ilchimp|r(feel|keto)|tomo|utic)|etrics?|ms|pulse|tr)|
-new(relic|sletter)|
+new(relic|sletters?)|
 o(m(niture|tr)|nesignal|pt(anon|imera)|utbrain)|
 p(erimeter-?x|iwik|op(down|over|up)|orpoiseant|owaboot|repopulator|ro(fitwell|mo(tion)?s?)|ub(exchange|matic))|/pv|
 quantcast|
 recaptcha|record(event|stats?)|re?t(ar)?ge?t(ing)?|(rich)?relevance|recirc.*|rubicon.*|
-s(a(fe[-_]?browsing|ilthru)|erv(edby|ice[-_]?worker)|(har|tag)e(aholic|count|daddy)|i(ftscience|gnalr|tenotice)|ourcepoint|ponsor(ed)?|urveys?|w.js)|
+s(a(fe[-_]?browsing|ilthru)|erv(edby|ice[-_]?worker)|(har|tag)e(aholic|count|daddy)|i(ftscience|gnalr|tenotice)|ourcepoint|ponsor(ed)?|u(bscribe|rveys?)|w.js)|
 t(aboola.*|rack(ers?|ing).*|ampering|ealium|inypass|ra?c?k?ing(data)?|ricorder|rustx|ype(face|kit))|autotrack|
 u(rchin|s(abilla|er[-_]?(context|location))|tm)|
 web(font|trends)|wp-?(json|rum)|
