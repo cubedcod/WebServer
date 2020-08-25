@@ -88,7 +88,7 @@ class WebResource
       [{_: :video, style: 'width: 100%', controls: :true, id: :video},
        tabular(files, env)]}
 
-    Markup[Video] = -> video, env {
+    Markup[Video] = Markup['WEB_PAGE_TYPE_WATCH'] = -> video, env {
       if v = if video.class == WebResource || (video.class == String && video.match?(/^http/))
                video
              else

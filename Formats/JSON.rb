@@ -115,7 +115,7 @@ module Webize
           #puts "JSON triplr - generic for #{@base.host}"
           Webize::JSON.webizeValue(@json){|h|
             if s = h['uri'] || h['url'] || h['link'] || ((h['id']||h['ID']) && ('#' + (h['id']||h['ID']).to_s))
-              s = s.to_s.R
+              s = @base.join(s).R
               yield s, Type, Post.R if h.has_key? 'content'
               if s.parts[0] == 'users'
                 host = ('https://' + s.host).R
@@ -127,7 +127,7 @@ module Webize
                   p = MetaMap[p] || p
                   (v.class == Array ? v : [v]).map{|o|
                     unless [Hash, NilClass].member?(o.class) || (o.class == String && o.empty?)
-                      o = o.R if o.class == String && o.match?(/^(http|\/)\S+$/)
+                      o = @base.join o if o.class == String && o.match?(/^(http|\/)\S+$/)
                       o = Webize::HTML.format o, @base if p == Content && o.class == String
                       yield s, p, o
                     end} unless p == :drop
