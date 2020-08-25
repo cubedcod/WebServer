@@ -249,9 +249,7 @@ class WebResource
     def Chan doc
       doc.css('.post, .postCell').map{|post|
         num = post.css('a.linkSelf, a.post_no, .postNum a')[0]
-
         subject = join(num ? num['href'] : ('#' + (post['id'] || (Digest::SHA2.hexdigest post.to_s))))
-
         graph = ['https://', subject.host, subject.path.sub(/\.html$/, ''), '/', subject.fragment].join.R
 
         yield subject, Type, Post.R, graph
@@ -270,6 +268,8 @@ class WebResource
           yield subject, Content, msg, graph }
 
         post.remove }
+
+      doc.css('#boardNavMobile, #delform, #absbot, #navtopright, #postingForm, #actionsForm, #thread-interactions').map &:remove
     end
 
     def feedDocument
