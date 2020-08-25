@@ -89,10 +89,8 @@ module Webize
 
       def scanContent &f
         if hostTriples = Triplr[@base.host]
-          #puts "JSON triplr - custom for #{@base.host}"
           @base.send hostTriples, @json, &f
         else
-          #puts "JSON triplr - generic for #{@base.host}"
           Webize::JSON.scan(@json){|h|
             if s = h['uri'] || h['url'] || h['link'] || ((h['id']||h['ID']) && ('#' + (h['id']||h['ID']).to_s))
               s = @base.join(s).R
@@ -110,9 +108,9 @@ module Webize
                       o = @base.join o if o.class == String && o.match?(/^(http|\/)\S+$/)       # resolve URI
                       case p
                       when Content
-                        o = Webize::HTML.format o, @base if o.class == String
+                        o = Webize::HTML.format o, @base if o.class == String                   # format HTML
                       when Link
-                        p = Image if o.class == RDF::URI && %w(jpg png webp).member?(o.R.ext)
+                        p = Image if o.class == RDF::URI && %w(jpg png webp).member?(o.R.ext)   # image pointers
                       end
                       yield s, p, o
                     end} unless p == :drop
