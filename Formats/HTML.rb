@@ -23,7 +23,8 @@ module Webize
     end
 
     # format HTML to local preferences
-    def self.format body, base; log = []
+    def self.format body, base
+      #log = []
       html = Nokogiri::HTML.fragment body rescue Nokogiri::HTML.fragment body.encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
       # strip upstream styles and scripts
       html.css('iframe, script, style, a[href^="javascript"], a[onclick], link[rel="stylesheet"], link[type="text/javascript"], link[as="script"]').remove
@@ -49,7 +50,7 @@ module Webize
         if e['src']                                                     # src attribute
           src = (base.join e['src']).R                                  # resolve src location
           if src.deny?
-            log << "🚩 " + src
+            #log << "🚩 " + src
             e.remove                                                    # strip blocked src
           else
             e['src'] = src.href                                         # update src to resolved location
@@ -61,7 +62,7 @@ module Webize
           ref.query = '' if ref.query&.match?(/utm[^a-z]/)
           ref.fragment = '' if ref.fragment&.match?(/utm[^a-z]/)
           if ref.deny?
-            log << "🚩 " + ref
+            #log << "🚩 " + ref
             e.remove                                                    # strip blocked href
           else
             offsite = ref.host != base.host
@@ -75,7 +76,7 @@ module Webize
           e.set_attribute 'class', 'identified'                         # style as identified node
           e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id'] unless e.name == 'p'}</span> " # add href to node
         end}
-      puts log.join ' ' unless log.empty?
+      #puts log.join ' ' unless log.empty?
       html.to_xhtml indent: 0
     end
 

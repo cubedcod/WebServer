@@ -8,8 +8,8 @@
 .avatar {max-height: 2em; background-color: #000}
 .breadcrumb > span {font-size: 1.4em; color: #888}
 .breadcrumb {color: #eee}
-.container .body {border-radius: 0 .3em .3em .3em; width: 100%; border-width: .1em}
-.container .head {border-radius: .4em .4em 0 0; border-width: .1em .1em 0 .1em; font-weight: bold; font-size: 1.1em; padding-left: .1em; padding-right: .1em}
+.container .body {border-radius: 0 .4em .4em .4em; width: 100%; border-width: .1em}
+.container .head {border-radius: .4em .4em 0 0; border-width: .1em .1em 0 .1em; font-weight: bold; font-size: 1.1em; padding-left: .16em; padding-right: .16em}
 .container > .head, .container > .body {background-color: #000; color: #fff; border-style: solid; border-color: #555}
 .container td.head {border-radius: .4em 0 0 .4em}
 .container {margin: .2em}
@@ -20,10 +20,11 @@
 .identified, .post {border: 1px solid #282828}
 .links .host {text-align: right}
 .links .path {background-color: #000; color: #fff}
-.post > .abstract {background-color: #aaa; color: #fff; border-radius: .3em}
-.post > .content {background-color: #000; color: #fff; border-radius: 0 0 .42em .42em}
-.post > .pointer {float: right}
-.post { max-width: 88ex; padding: .2em; margin: .166em}
+.post .abstract {background-color: #aaa; color: #fff; border-radius: .3em}
+.post .content {background-color: #000; color: #fff; border-radius: 0 0 .42em .42em}
+.post .pointer {float: right}
+.post .body {background: repeating-linear-gradient(-45deg, #000, #000 .875em, #333 .875em, #333 1em)}
+.post { max-width: 88ex; margin: .166em}
 .quote {background-color: #ccc; color: #000; padding-left: .3em}
 .thumb {max-width: 22em}
 .title {background-color: #fff; color: #000; font-size: 1.08em; font-weight: bold; vertical-align: top; border-radius: .18em }
