@@ -264,7 +264,7 @@ class WebResource
         post.css('.post_image, .post-image').map{|img|      yield subject, Image, (join img.parent['href']), graph }
         post.css('[href$="mp4"], [href$="webm"]').map{|a|   yield subject, Video, (join a['href']), graph }
         post.css('.body, .divMessage, .postMessage, .text').map{|msg|
-          msg.css('a[onclick*="Reply"], .quotelink').map{|reply_of|
+          msg.css('a[onclick*="Reply"], .quotelink, .quoteLink').map{|reply_of|
             yield subject, To, (join reply_of['href']), graph
             reply_of.remove}
           yield subject, Content, msg, graph }
@@ -373,18 +373,18 @@ class WebResource
            {class: :pointer,
             c: [({_: :a, class: :date, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date} if date), ' ',
                 ({_: :a, type: :node, c: '🔗', href: resource.href, id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} unless hasPointer)]},
+           {_: :table, class: :fromto,
+            c: {_: :tr,
+                c: [{_: :td,
+                     c: (post.delete(Creator)||[]).map{|f|Markup[Creator][f,env]},
+                     class: :from}, "\n",
+                    {_: :td, c: '&rarr;'},
+                    {_: :td,
+                     c: [(post.delete(To)||[]).map{|f|Markup[To][f,env]},
+                         post.delete(SIOC+'reply_of')],
+                     class: :to}, "\n"]}},
            {class: :body,
-            c: [{_: :table, class: :fromto,
-                 c: {_: :tr,
-                     c: [{_: :td,
-                          c: (post.delete(Creator)||[]).map{|f|Markup[Creator][f,env]},
-                          class: :from}, "\n",
-                         {_: :td, c: '&rarr;'},
-                         {_: :td,
-                          c: [(post.delete(To)||[]).map{|f|Markup[To][f,env]},
-                              post.delete(SIOC+'reply_of')],
-                          class: :to}, "\n"]}}, "\n",
-                {class: :abstract, c: post.delete(Abstract)},
+            c: [{class: :abstract, c: post.delete(Abstract)},
                 (post.delete(Image) || []).map{|i|
                   Markup[Image][i,env]},
                 {class: :content, c: [post.delete(Content),

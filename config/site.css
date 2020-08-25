@@ -21,10 +21,10 @@
 .links .host {text-align: right}
 .links .path {background-color: #000; color: #fff}
 .post .abstract {background-color: #aaa; color: #fff; border-radius: .3em}
-.post .content {background-color: #000; color: #fff; border-radius: 0 0 .42em .42em}
+.post .body {background: repeating-linear-gradient(-45deg, #000, #000 .875em, #222 .875em, #222 1em); color: #fff}
 .post .pointer {float: right}
-.post .body {background: repeating-linear-gradient(-45deg, #000, #000 .875em, #333 .875em, #333 1em)}
 .post { max-width: 88ex; margin: .166em}
+.post:target .body {background: repeating-linear-gradient(-45deg, #000, #000 .875em, #178 .875em, #178 1em)}
 .quote {background-color: #ccc; color: #000; padding-left: .3em}
 .thumb {max-width: 22em}
 .title {background-color: #fff; color: #000; font-size: 1.08em; font-weight: bold; vertical-align: top; border-radius: .18em }
