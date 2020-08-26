@@ -305,7 +305,6 @@ class WebResource
     end
 
     def hostHandler
-      path = '/' unless path
       qs = query_values || {}
       cookie = join('/cookie').R
       cookie.writeFile qs['cookie'] if qs.has_key?('cookie') && host.match?(/twitter.com$/) # update cookie
@@ -320,7 +319,7 @@ class WebResource
         handler[self]
       elsif deny?
         if deny_query?
-          [301, {'Location' => ['//', host, path].join.R(env).href}, []]
+          [302, {'Location' => ['//', host, path].join.R(env).href}, []]
         else
           deny
         end
