@@ -68,10 +68,10 @@ class WebResource
       else
         qs = query_values || {}
         (if node.directory?
-         if qs.has_key?('f') && !qs['f'].empty?     # FIND
+         if qs['f'] && !qs['f'].empty?     # FIND
            puts ['FIND exact', qs['f'], fsPath].join ' '
            `find #{shellPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
-         elsif qs.has_key?('find') && !qs['find'].empty? && path != '/' # FIND case-insensitive substring
+         elsif qs['find'] && !qs['find'].empty? && path != '/' # FIND case-insensitive substring
            puts ['FIND substring', qs['find'], fsPath].join ' '
            `find #{shellPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
          elsif qs.has_key?('Q') || qs.has_key?('q') # GREP
