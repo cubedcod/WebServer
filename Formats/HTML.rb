@@ -154,7 +154,7 @@ module Webize
               rel.split(/[\s,]+/).map{|k|
                 @base.env[:links][:prev] ||= v if k.match? /prev(ious)?/i
                 @base.env[:links][:next] ||= v if k.downcase == 'next'
-                @base.env[:links][:icon] ||= v.R if k.match? /^(fav)?icon?$/i
+                @base.env[:links][:icon] ||= v if k.match? /^(fav)?icon?$/i
                 @base.env[:feeds].push v if k == 'alternate' && ((m['type']&.match?(/atom|rss/)) || (v.path&.match?(/^\/feed\/?$/)))
                 k = MetaMap[k] || k
                 puts [k, v].join "\t" unless k.to_s.match? /^(drop|http)/
