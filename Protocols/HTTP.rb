@@ -41,9 +41,7 @@ class WebResource
                              (nodes[0].named_format == selectFormat && (nodes[0].named_format != 'text/html' || (query_values||{}).has_key?('notransform')))) # HTML is transformable without notransform argument
         nodes[0].fileResponse           # response on file
       else                              # transform and/or merge data
-        nodes = nodes.map &:summary if env[:summary] # summarize nodes
         nodes.map &:loadRDF             # node(s) -> Graph
-        timeMeta                        # reference temporally-adjacent nodes in HTTP metadata
         graphResponse                   # HTTP Response
       end
     end
@@ -294,7 +292,8 @@ class WebResource
           [200, {'Content-Type' => 'image/png'}, [SiteIcon]]
         elsif p == 'log'
           log_search                           # search log
-        elsif !p || !p.match?(/[.:]/)
+        elsif !p || !p.match?(/[.:]/)          # local path?
+          timeMeta                             # reference temporally-adjacent nodes
           cacheResponse                        # local graph-node
         else
           (env[:base] = remoteURL).hostHandler # host handler (rebased on local)
