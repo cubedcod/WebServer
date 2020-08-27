@@ -420,7 +420,7 @@ w.bos.gl wired.trib.al
   def GoogleHTML doc
     doc.css('div.rc').map{|rc|
       if r = rc.css('div.r > a')[0]
-        subject = r['href']
+        subject = r['href'].R
         yield subject, Type, Post.R
         if title = r.css('h3')[0]
           yield subject, Title, title.inner_text
@@ -431,6 +431,9 @@ w.bos.gl wired.trib.al
         if s = rc.css('div.s')[0]
           yield subject, Content, Webize::HTML.format(s.inner_html, self)
           rc.remove
+        end
+        if ('//' + subject.host + '/favicon.ico').R.node.exist?
+          puts :icon,subject.host
         end
       end}
     if pagenext = doc.css('#pnnext')[0]
