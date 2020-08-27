@@ -406,7 +406,7 @@ w.bos.gl wired.trib.al
       date = item['sent']
       uid = item['fromUser']
       user = tree['lookups']['users'][uid]
-      graph = [date.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), 'gitter', user['username'], id].join('.').R # graph URI
+      graph = ['/' + date.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), 'gitter', user['username'], id].join('.').R # graph on timeline
       subject = 'http://gitter.im' + path + '?at=' + id # subject URI
       yield subject, Date, date, graph
       yield subject, Type, Post.R, graph
@@ -583,7 +583,7 @@ w.bos.gl wired.trib.al
       spintime = spin.css('.spin-time > a')[0]
       date = Chronic.parse(day + spintime.inner_text).iso8601
       subject = join spintime['href']
-      graph = [date.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), station, show_name.split(' ')].join('.').R # graph URI
+      graph = ['/' + date.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), station, show_name.split(' ')].join('.').R # graph URI
       data = JSON.parse spin['data-spin']
       yield subject, Type, Post.R, graph
       yield subject, Date, date, graph

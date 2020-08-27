@@ -79,7 +79,7 @@ class WebResource
         RDF::Writer.for(:turtle).open(turtle){|f|f << graph}                                     # write Turtle
         puts "\e[32m#{'%2d' % graph.size}⋮🐢 \e[1m#{graphURI}\e[0m" if path != graphURI.path
       end
-      if !graphURI.match?(/^\/\d\d\d\d\/\d\d\/\d\d/) && timestamp = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value # find timestamp if graph not on timeline
+      if !graphURI.to_s.match?(/^\/\d\d\d\d\/\d\d\/\d\d/) && timestamp = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value # find timestamp if graph not on timeline
         tlink = [timestamp.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), # hour-dir
                 %w{host path query}.map{|a|graphURI.send(a).yield_self{|p|p&&p.split(/[\W_]/)}}].# graph name-slugs for timeline link
                   flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.')[0..123] + '.ttl'

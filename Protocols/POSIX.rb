@@ -91,7 +91,7 @@ class WebResource
            `#{cmd} | head -n 1024`.lines.map &:chomp
          else                          # LS
            env[:summary] = !qs.has_key?('fullContent')
-           (path=='/' && local_node?) ? [node] : [node, *(env[:summary] ? node.children.map(&:summary) : node.children)]
+           (path=='/' && local_node?) ? [node] : [node, *node.children]
          end
         else
           globPath = fsPath
