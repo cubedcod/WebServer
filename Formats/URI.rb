@@ -74,9 +74,9 @@ class WebResource < RDF::URI
                  FileUtils.ln_s (env[:links][:icon].node.relative_path_from favicon.node.dirname), favicon.node # link to default location
                end
                env[:links][:icon].href                                                                      # referenced icon
-             elsif favicon.node.exist?                                                                      # icon found at default location for host
+             elsif favicon.node.exist?                                                                      # host icon exists?
                favicon.href                                                                                 # host icon
-             else                                                                                           # daemon icon
+             else                                                                                           # default icon
                '/favicon.ico'
              end
 

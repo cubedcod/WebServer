@@ -52,7 +52,7 @@ module Webize
         htmlFiles, parts = m.all_parts.push(m).partition{|p| p.mime_type == 'text/html' }
         htmlCount = 0
         htmlFiles.map{|p|
-          html = ('/' + graph.fsPath + ".#{htmlCount}.html").R # HTML-file
+          html = '/'.R.join(graph.fsPath + ".#{htmlCount}.html").R # HTMLfile URI
           yield mail, DC + 'hasFormat', html, graph   # reference
           html.writeFile p.decoded unless html.node.exist? # store
           htmlCount += 1 }
@@ -118,11 +118,9 @@ module Webize
         timestamp = ([Time, DateTime].member?(date.class) ? date : Time.parse(date.to_s)).iso8601
         yield mail, Date, timestamp, graph
 
-        # cache message in canonical locations
-        maildirFile = ('mail/cur/' + timestamp.gsub(/\D/,'.') + Digest::SHA2.hexdigest(id) + '.eml').R
-        eml = (graph.fsPath + '.eml').R
+        # store message to maildir for legacy clients
+        maildirFile = ('/mail/cur/' + timestamp.gsub(/\D/,'.') + Digest::SHA2.hexdigest(id) + '.eml').R
         maildirFile.writeFile body unless maildirFile.node.exist?
-        eml.writeFile body unless eml.node.exist?
 
         # references
         %w{in_reply_to references}.map{|ref|
@@ -138,7 +136,7 @@ module Webize
           ::Mail::Encodings.defined?(p.body.encoding)}.map{|p|     # decodability check
           name = p.filename && !p.filename.empty? && p.filename || # attachment name
                  (Digest::SHA2.hexdigest(rand.to_s) + (Rack::Mime::MIME_TYPES.invert[p.mime_type] || '.bin').to_s) # generate name
-          file = ('/' + graph.fsPath + '.' + name).R   # file location
+          file =  '/'.R.join(graph.fsPath + '.' + name).R  # file URI
           unless file.node.exist?              # store file
             file.writeFile p.body.decoded.force_encoding 'UTF-8'
           end
