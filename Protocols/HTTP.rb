@@ -289,10 +289,12 @@ class WebResource
         p = parts[0]
         if %w{m d h}.member? p                 # local-cache day/hour/min (redirect)
           dateDir
-        elsif p == 'favicon.ico'
+        elsif path == '/favicon.ico'
           [200, {'Content-Type' => 'image/png'}, [SiteIcon]]
-        elsif p == 'log'
+        elsif path == '/log'
           log_search                           # search log
+        elsif path == '/mail'                  # goto inbox
+          [302, {'Location' => '/d?f=msg*'}, []]
         elsif !p || !p.match?(/[.:]/)          # local path?
           timeMeta                             # reference temporally-adjacent nodes
           cacheResponse                        # local graph-node
