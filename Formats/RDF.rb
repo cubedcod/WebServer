@@ -50,8 +50,7 @@ class WebResource
         options[:format] = reader if reader    # format hint from filename
         options[:content_type] = mime if mime  # MIME type from FILE(1)
 
-        #puts :LOAD, fsPath, options
-        graph.load 'file:' + fsPath, **options # read RDF from file
+        graph.load 'file:' + fsPath, **options # load RDF from file
       end
     elsif node.directory?                      # directory-entry triples
       subject = self                           # directory URI
@@ -175,7 +174,7 @@ class WebResource
         Markup[type][v,env]
       elsif v.class == Hash # data
         types = (v[Type] || []).map{|t|
-          MarkupMap[t.to_s] || t.to_s } # normalize typetags for unified renderer selection
+          MarkupMap[t.to_s] || t.to_s } # normalize types for renderer application
         seen = false
         [types.map{|type|
           if f = Markup[type] # markup lambda defined for type
