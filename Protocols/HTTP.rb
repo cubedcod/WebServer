@@ -25,7 +25,7 @@ class WebResource
       host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # search for leaf in domain tree
     end
 
-    def allowedOrigin
+    def allowed_origin
       if env['HTTP_ORIGIN']
         env['HTTP_ORIGIN']
       elsif referer = env['HTTP_REFERER']
@@ -105,7 +105,7 @@ class WebResource
                       end
       [status,
        {'Access-Control-Allow-Credentials' => 'true',
-        'Access-Control-Allow-Origin' => allowedOrigin,
+        'Access-Control-Allow-Origin' => allowed_origin,
         'Content-Type' => type},
        [content]]
     end
@@ -177,7 +177,7 @@ class WebResource
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                            # upstream metadata
         if response.status.to_s.match? /206/         # partial response
-          h['Access-Control-Allow-Origin'] = allowedOrigin unless h['Access-Control-Allow-Origin'] || h['access-control-allow-origin']
+          h['Access-Control-Allow-Origin'] = allowed_origin unless h['Access-Control-Allow-Origin'] || h['access-control-allow-origin']
           [206, h, [response.read]]                  # return part
         else
           format = if path == '/feed' || (query_values||{})['mime'] == 'xml'
@@ -202,7 +202,7 @@ class WebResource
           # HTTP response to caller
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # upstream metadata
-          env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin # CORS header
+          env[:resp]['Access-Control-Allow-Origin'] ||= allowed_origin # CORS header
 
           h['link'] && h['link'].split(',').map{|link|                # parse+merge Link header
             ref, type = link.split(';').map &:strip
@@ -407,7 +407,7 @@ class WebResource
       else
         env[:deny] = true
         [202, {'Access-Control-Allow-Credentials' => 'true',
-               'Access-Control-Allow-Origin' => allowedOrigin}, []]
+               'Access-Control-Allow-Origin' => allowed_origin}, []]
       end
     end
 

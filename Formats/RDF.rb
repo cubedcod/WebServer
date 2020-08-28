@@ -150,7 +150,7 @@ class WebResource
     def graphResponse
       return notfound if !env.has_key?(:repository) || env[:repository].empty?
       format = selectFormat
-      env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
+      env[:resp]['Access-Control-Allow-Origin'] ||= allowed_origin
       env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
       env[:resp].update({'Link' => env[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !env[:links] || env[:links].empty?
       entity ->{

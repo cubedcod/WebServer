@@ -55,7 +55,7 @@ class WebResource
   module HTTP
 
     def fileResponse
-      env[:resp]['Access-Control-Allow-Origin'] ||= allowedOrigin
+      env[:resp]['Access-Control-Allow-Origin'] ||= allowed_origin
       env[:resp]['ETag'] ||= Digest::SHA2.hexdigest [uri, node.stat.mtime, node.size].join
       entity
     end
