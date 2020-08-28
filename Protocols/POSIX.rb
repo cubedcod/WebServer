@@ -14,7 +14,7 @@ class WebResource
            id = Digest::SHA2.hexdigest Rack::Utils.unescape_path parts[1]
            ['/mail/', id[0..1], '/', id[2..-1]]
          else                  # direct map
-           path
+           Rack::Utils.unescape_path path
          end                                   # remote path:
        elsif path.size > 512 || parts.find{|p|p.size > 127} # oversize names -> sharded-hash path
          hash = Digest::SHA2.hexdigest [path, query].join

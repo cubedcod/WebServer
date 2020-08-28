@@ -4,7 +4,6 @@ http://localhost:8000/web.mit.edu/Saltzer/www/publications/endtoend/endtoend.pdf
 indicate offline + cached results are in use
 fat pings - mqtt? hypercore?
 store fetch status (incl redirects) & last-update of feeds to aid list gc/maintenance (autoupdate source loc on redirect?)
-reply_of triple on chan triplr
 hide previously-shown links on news articles (site-nav)
 gemini protocol
 ICAP protocol
