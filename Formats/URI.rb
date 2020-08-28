@@ -69,14 +69,14 @@ class WebResource < RDF::URI
       favicon = ('//' + host + '/favicon.ico').R
       icon = if env[:links][:icon]                                                                          # icon reference provided in upstream HTML
                env[:links][:icon] = env[:links][:icon].R
-               if env[:links][:icon].path != favicon.path && !favicon.node.exist? && !favicon.node.symlink? # icon at non-default location?
+               if env[:links][:icon].path != favicon.path && !favicon.node.exist? && !favicon.node.symlink? # icon at non-default location
                  FileUtils.mkdir_p File.dirname favicon.fsPath
                  FileUtils.ln_s (env[:links][:icon].node.relative_path_from favicon.node.dirname), favicon.node # link to default location
                end
-               env[:links][:icon].node.exist? ? ('/' + env[:links][:icon].fsPath) : env[:links][:icon].href # referenced icon, at cache-location if on file
-             elsif favicon.node.exist?                                                                      # site-icon exists at default location?
-               '/' + favicon.fsPath                                                                         # site-icon
-             else                                                                                           # daemon-icon
+               env[:links][:icon].href                                                                      # referenced icon
+             elsif favicon.node.exist?                                                                      # icon found at default location for host
+               favicon.href                                                                                 # host icon
+             else                                                                                           # daemon icon
                '/favicon.ico'
              end
 
