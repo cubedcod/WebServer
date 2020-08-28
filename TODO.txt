@@ -11,5 +11,4 @@ ICAP protocol
 searchbox rdfa
 link page into downloadable storage-dir. factor out download hook w/ path template
 add inline images and mpv window for video to X11/Wayland Gemini browsers
-
 http://localhost:8000/javascript.info/cross-window-communication

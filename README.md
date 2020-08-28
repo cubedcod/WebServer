@@ -16,9 +16,6 @@ server launch shortcuts in [bin/](bin/)
 
 client launch shortcuts in [bin/browse](bin/browse/)
 
-email 'inbox'. today's messages (bookmark)
- [http://localhost:8000/d?f=msg*](http://localhost:8000/d?f=msg*)
-
 google w/ local UI (search engine)
     http://localhost:8000/www.google.com/search?q=%s
 
