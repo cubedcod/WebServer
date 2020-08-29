@@ -25,7 +25,7 @@
 .post { max-width: 88ex; margin: .166em}
 .post:target .body {background: repeating-linear-gradient(-45deg, #000, #000 .875em, #178 .875em, #178 1em)}
 .quote {background-color: #ccc; color: #000; padding-left: .3em}
-.thumb {max-width: 22em}
+.thumb, .thumb * {float: left; max-width: 22em}
 .title {background-color: #fff; color: #000; font-size: 1.08em; font-weight: bold; vertical-align: top; border-radius: .18em }
 .toolbox .path {background-color: #000; border-radius: 0 0 .5em .5em;padding: 0 .2em 0 .2em}
 .toolbox > a, .toolbox form {vertical-align: top}

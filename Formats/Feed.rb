@@ -385,10 +385,10 @@ class WebResource
                      class: :to}, "\n"]}},
            {class: :body,
             c: [{class: :abstract, c: post.delete(Abstract)},
-                (post.delete(Image) || []).map{|i|
-                  Markup[Image][i,env]},
-                {class: :content, c: [post.delete(Content),
-                                      post.delete(SIOC + 'richContent')]},
+                {class: :content,
+                 c: [(post.delete(Image) || []).map{|i| Markup[Image][i,env]},
+                     post.delete(Content),
+                     post.delete(SIOC + 'richContent')]},
                 MarkupGroup[Link][post.delete(Link) || [], env],
                 (["<br>\n", HTML.keyval(post,env)] unless post.keys.size < 1)]}]}}
 

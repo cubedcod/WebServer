@@ -613,6 +613,7 @@ class WebResource
       'ugc' => Link,
       'unlisted' => :drop,
       'unread' => :drop,
+      'updated' => Date,
       'updated_at' => Date,
       'updated_time' => Date,
       'uploadDate' => Date,
