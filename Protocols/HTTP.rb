@@ -174,7 +174,6 @@ class WebResource
     # fetch from remote server                        options:
     def fetchHTTP thru: true,                        # pass HTTP response to caller
                   transformable: !(query_values||{}).has_key?('notransform') # allow transformation: format conversions & same-format (HTML reformat, code pretty-print) rewrites
-      #puts "FETCH #{uri}"
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                            # upstream metadata
         if response.status.to_s.match? /206/         # partial response
@@ -203,9 +202,9 @@ class WebResource
           # HTTP response to caller
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # upstream metadata
-          env[:resp]['Access-Control-Allow-Origin'] ||= allowed_origin # CORS header
+          env[:resp]['Access-Control-Allow-Origin'] ||= allowed_origin # set CORS header
 
-          h['link'] && h['link'].split(',').map{|link|                # parse+merge Link header
+          h['link'] && h['link'].split(',').map{|link|                # parse and merge Link headers to environment
             ref, type = link.split(';').map &:strip
             if ref && type
               ref = ref.sub(/^</,'').sub />$/, ''
@@ -213,22 +212,22 @@ class WebResource
               env[:links][type.to_sym] = ref
             end}
 
-          if transformable && !(format||'').match?(/audio|css|image|octet|script|video/) # transformable format?
-            env[:origin_format] = format                      # note original format
-            saveRDF.graphResponse                             # cache data and return in preferred format
-          else                                                # fixed format
-            case format                                       # clean document & resolve content location
+          if transformable && !(format||'').match?(/audio|css|image|octet|script|video/) # flexible format:
+            env[:origin_format] = format                      # note original format for logger
+            saveRDF.graphResponse                             # store graph-data and return in requested format
+          else
+            case format                                       # fixed format:
             when 'text/css'
-              body = Webize::CSS.cacherefs body, env          # resource references in CSS
+              body = Webize::CSS.cacherefs body, env          # resolve references in CSS
             when 'text/html'
-              body = Webize::HTML.cacherefs body, env         # resource references in HTML
+              body = Webize::HTML.cacherefs body, env         # resolve references in HTML
             end
-            c = fsPath.R; c += query_hash                     # cache storage-location
-            fExt = Suffixes[format] || Suffixes_Rack[format]  # find format-suffix
-            c += fExt if fExt && c.R.extension != fExt        # add format-suffix if incorrect or missing
-            c.R.writeFile body                                # cache upstream representation
-            env[:resp]['Content-Length'] = body.bytesize.to_s # Content-Length header
-            [200, env[:resp], [body]]                         # return upstream document
+            c = fsPath.R; c += query_hash                     # storage location
+            fExt = Suffixes[format] || Suffixes_Rack[format]  # find format suffix
+            c += fExt if fExt && c.R.extension != fExt        # append suffix if incorrect or missing
+            c.R.writeFile body                                # store upstream representation
+            env[:resp]['Content-Length'] = body.bytesize.to_s # set Content-Length header
+            [200, env[:resp], [body]]                         # return upstream representation
           end
         end
       end
@@ -289,7 +288,7 @@ class WebResource
         p = parts[0]
         if !p
           [302, {'Location' => '/d'}, []]
-        elsif %w{m d h}.member? p                 # local-cache day/hour/min (redirect)
+        elsif %w{m d h}.member? p              # goto current day/hour/min dir
           dateDir
         elsif path == '/favicon.ico'
           [200, {'Content-Type' => 'image/png'}, [SiteIcon]]
