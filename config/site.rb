@@ -432,8 +432,8 @@ w.bos.gl wired.trib.al
           yield subject, Content, Webize::HTML.format(s.inner_html, self)
           rc.remove
         end
-        if ('//' + subject.host + '/favicon.ico').R.node.exist?
-          puts :icon,subject.host
+        if (icon = ('//' + subject.host + '/favicon.ico').R).node.exist?
+          yield subject, Image, icon
         end
       end}
     if pagenext = doc.css('#pnnext')[0]
