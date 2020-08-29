@@ -224,7 +224,7 @@ module Webize
   module Plaintext
 
     BasicSlugs = %w{
- article archives articles
+ amp article archives articles
  blog blogs blogspot
  columns co com comment comments
  edu entry
@@ -234,7 +234,7 @@ module Webize
  net news org p php post
  r reddit rss rssfeed
  sports source status story
- t the threads topic
+ t the thread threads topic twitter
  uk utm www}
 
     class Format < RDF::Format

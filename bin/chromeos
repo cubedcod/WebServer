@@ -1,4 +1,5 @@
 #!/bin/sh
+cd
 sommelier --master --display=wayland-0 --socket=wayland-1 &
 sleep 1
 termite -e webd &
