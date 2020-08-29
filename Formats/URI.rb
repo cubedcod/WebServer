@@ -88,8 +88,8 @@ class WebResource < RDF::URI
               {_: :a, class: :breadcrumb, href: env[:base].join(bc).R.href, c: [{_: :span, c: '/'}, (CGI.escapeHTML Rack::Utils.unescape p)], id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}}},
            env[:feeds].map{|feed|
              {_: :a, href: feed.R.href, title: feed.path, class: :icon, c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange; margin-right: .1em'} : {})}, "\n",
-           (search_arg = [nil, '/'].member?(path) ? 'find' : 'q' # find (less expensive) at root path
-            qs[search_arg] ||= ''                                # initialize search field
+           (search_arg = %w(f find q search_query).find{|k|qs.has_key? k} || ([nil, '/'].member?(path) ? 'find' : 'q') # query arg
+            qs[search_arg] ||= ''                                                                                      # initialize query field
             {_: :form, c: qs.map{|k,v|
                ["\n", {_: :input, name: k, value: v}.update(k == search_arg ? ((env[:searchable] && v.empty?) ? {autofocus: true} : {}) : {type: :hidden})]}}.update(env[:search_base] ? {action: env[:base].join(env[:search_base]).R.href} : {})), "\n"]}
     end

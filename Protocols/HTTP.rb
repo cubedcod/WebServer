@@ -287,7 +287,9 @@ class WebResource
     def GET
       if local_node?
         p = parts[0]
-        if %w{m d h}.member? p                 # local-cache day/hour/min (redirect)
+        if !p
+          [302, {'Location' => '/d'}, []]
+        elsif %w{m d h}.member? p                 # local-cache day/hour/min (redirect)
           dateDir
         elsif path == '/favicon.ico'
           [200, {'Content-Type' => 'image/png'}, [SiteIcon]]
@@ -295,7 +297,7 @@ class WebResource
           log_search                           # search log
         elsif path == '/mail'                  # goto inbox
           [302, {'Location' => '/d?f=msg*'}, []]
-        elsif !p || !p.match?(/[.:]/)          # local path?
+        elsif !p.match? /[.:]/                 # no hostname/scheme characters
           timeMeta                             # reference temporally-adjacent nodes
           cacheResponse                        # local graph-node
         else
