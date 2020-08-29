@@ -96,7 +96,7 @@ class WebResource
     return self if basename.match(/^(index|README)/) || !node.exist? # don't summarize index or README file
     s = ('/summary/' + fsPath).R.turtleFile          # summary file
     unless File.exist?(s) && File.mtime(s) >= node.mtime # summary up to date
-      fullGraph = RDF::Repository.new; miniGraph = RDF::Repository.new # graph storage 
+      fullGraph = RDF::Repository.new; miniGraph = RDF::Repository.new # allocate graph storage
       loadRDF graph: fullGraph                       # read RDF
       treeFromGraph(fullGraph).values.map{|resource| # bind subject
         subject = (resource['uri'] || '').R

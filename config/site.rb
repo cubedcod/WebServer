@@ -416,18 +416,22 @@ w.bos.gl wired.trib.al
       if r = rc.css('div.r > a')[0]
         subject = r['href'].R
         yield subject, Type, Post.R
+
         if title = r.css('h3')[0]
           yield subject, Title, title.inner_text
         end
+
         if cite = r.css('cite')[0]
           yield subject, Link, cite.inner_text.R
         end
+
         if s = rc.css('div.s')[0]
           yield subject, Content, Webize::HTML.format(s.inner_html, self)
           rc.remove
         end
+
         if (icon = ('//' + subject.host + '/favicon.ico').R).node.exist?
-          yield subject, Image, icon
+          yield subject, Schema+'icon', icon
         end
       end}
     if pagenext = doc.css('#pnnext')[0]

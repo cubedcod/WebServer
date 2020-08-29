@@ -521,6 +521,7 @@ class WebResource
       'search' => Link,
       'searchable' => :drop,
       'section' => Abstract,
+      'self' => Link,
       'sensitive' => :drop,
       'sent' => Date,
       'share-image' => :drop,
