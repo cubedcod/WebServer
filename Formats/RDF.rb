@@ -52,14 +52,15 @@ class WebResource
 
         graph.load 'file:' + fsPath, **options # load RDF from file
       end
-    elsif node.directory?                      # directory-entry triples
+    elsif node.directory?                      # directory
       subject = self                           # directory URI
-      subject += '/' unless subject.to_s[-1] == '/' # enforce trailing-slash on dir-name
+      subject += '/' unless subject.to_s[-1] == '/' # enforce trailing-slash on directory name
       graph << RDF::Statement.new(subject, Type.R, (LDP + 'Container').R)
       graph << RDF::Statement.new(subject, Title.R, basename)
       graph << RDF::Statement.new(subject, Date.R, node.stat.mtime.iso8601)
       node.children.map{|child|                # point to child nodes
-        graph << RDF::Statement.new(subject, (LDP+'contains').R, (subject.join child.basename('.ttl').to_s.gsub(' ','%20').gsub('#','%23')))}
+        graph << RDF::Statement.new(subject, (LDP+'contains').R, (subject.join child.basename('.ttl').to_s.gsub(' ','%20').gsub('#','%23')))
+      }
     end
     self
   rescue RDF::FormatError => e

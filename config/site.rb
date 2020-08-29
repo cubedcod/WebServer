@@ -53,7 +53,7 @@ class WebResource
   module HTTP
 
     # handler lambdas
-    GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['u']||r.query_values['q'])}, []]}
+    GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['u']||r.query_values['q']).R.href}, []]}
     NoGunk  = -> r {r.send r.uri.match?(Gunk) ? :deny : :fetch}
     NoQuery = -> r {
       if !r.query                         # request
