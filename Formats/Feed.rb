@@ -368,7 +368,7 @@ class WebResource
                env[:title] = title
                hasPointer = true
                [{_: :a,  id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: :title, type: :node,
-                 href: resource.href, c: CGI.escapeHTML(title)}, " \n"]
+                 href: resource.href, c: [(post.delete(Schema+'icon')||[]).map{|i|{_: :img, src: i.href}},CGI.escapeHTML(title)]}, " \n"]
              end},
            {class: :pointer,
             c: [({_: :a, class: :date, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date} if date), ' ',
