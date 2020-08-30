@@ -318,7 +318,9 @@ class WebResource
           env[:view] ||= 'table'
         end
       end
-      if handler = HostGET[host] # host lambda
+      if path == '/favicon.ico' && node.exist?
+        fileResponse
+      elsif handler = HostGET[host] # host lambda
         handler[self]
       elsif deny?
         if deny_query?
