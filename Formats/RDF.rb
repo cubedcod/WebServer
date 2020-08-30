@@ -58,9 +58,13 @@ class WebResource
       graph << RDF::Statement.new(subject, Type.R, (LDP + 'Container').R)
       graph << RDF::Statement.new(subject, Title.R, basename)
       graph << RDF::Statement.new(subject, Date.R, node.stat.mtime.iso8601)
-      node.children.map{|child|                # point to child nodes
-        graph << RDF::Statement.new(subject, (LDP+'contains').R, (subject.join child.basename('.ttl').to_s.gsub(' ','%20').gsub('#','%23')))
-      }
+      nodes = node.children
+      if nodes.size <= 8
+        nodes.map{|child|                # point to child nodes
+          graph << RDF::Statement.new(subject, (LDP+'contains').R, (subject.join child.basename('.ttl').to_s.gsub(' ','%20').gsub('#','%23')))}
+      else
+        puts :BIG
+      end
     end
     self
   rescue RDF::FormatError => e
