@@ -230,11 +230,11 @@ module Webize
  edu entry
  feed feedburner feeds feedproxy forum forums
  go google gov
- html index local medium
+ html in index irc is local medium
  net news org p php post
- r reddit rss rssfeed
- sports source status story
- t the thread threads topic twitter
+ r reddit rs rss rssfeed
+ s sports source status story
+ t the thread threads to top topic twitter type
  uk utm www}
 
     class Format < RDF::Format
