@@ -1,5 +1,30 @@
 %w(fileutils pathname shellwords).map{|d| require d }
 class WebResource
+
+  def dir_triples
+    graph = env[:repository]
+    subject = self                           # directory URI
+    subject += '/' unless subject.to_s[-1] == '/' # enforce trailing-slash on directory name
+    graph << RDF::Statement.new(subject, Type.R, (LDP + 'Container').R)
+    graph << RDF::Statement.new(subject, Title.R, basename)
+    graph << RDF::Statement.new(subject, Date.R, node.stat.mtime.iso8601)
+    nodes = node.children
+    if nodes.size <= 8
+      nodes.map{|child|                      # point to all child-nodes
+        graph << RDF::Statement.new(subject, (LDP+'contains').R, (subject.join child.basename('.ttl').to_s.gsub(' ','%20').gsub('#','%23')))}
+    else                                     # abbreviated pointers
+      slugs = {}
+      nodes.map{|n|
+        n.basename('.ttl').to_s.split(/[\W_]/).grep(/^\D/).map{|t|
+          slugs[t] ||= 0
+          slugs[t] += 1}}
+      slugs.select{|s,count| count > 2}.sort_by{|s,c|c}.reverse[0..16].map{|slug,c|
+        #puts [a,b].join "\t"
+        graph << RDF::Statement.new(subject, (LDP+'contains').R, (subject.join '*' + slug + '*'))
+      }
+    end
+  end
+
   module URIs
 
     LocalAddress = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).concat(ENV.has_key?('HOSTNAME') ? [ENV['HOSTNAME']] : []).uniq
