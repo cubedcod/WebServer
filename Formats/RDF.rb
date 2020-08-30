@@ -65,10 +65,12 @@ class WebResource
       else
         slugs = {}
         nodes.map{|n|
-          n.to_s.split('.').map{|t|
+          n.basename('.ttl').to_s.split('.').grep(/^\D/).map{|t|
             slugs[t] ||= 0
             slugs[t] += 1}}
-        puts slugs
+        slugs.select{|s,count| count > 2}.sort_by{|s,c|c}.reverse[0..16].map{|a,b|
+          
+        }
       end
     end
     self
