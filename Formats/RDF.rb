@@ -29,28 +29,28 @@ class WebResource
           end
         end
       else
-        # Reader has an extension-mapping, but sometimes we use hints from elsewhere, prefix, basename, even location (maildir cur/new/tmp)
-        reader = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # email files
-                   :mail # procmail doesnt have configurable SUFFIX (.eml), only PREFIX? - presumably due to maildir suffix-rewrites to denote state?
-                 elsif ext.match? /^html?$/
-                   :html # use our reader class, otherwise it tends to select RDFa
+        # Reader has an extension-mapping. in times of ambiguity we have hints from prefix, basename, even location (maildir {cur,new,tmp})
+        reader = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # email files w/ procmail PREFIX or sent-folder location
+                   :mail
+                 elsif ext.match? /^html?$/ # use our reader class, otherwise it tends to select RDF:: RDFa
+                   :html
                  elsif %w(changelog license readme todo).member? basename.downcase
                    :plaintext
                  elsif %w(gemfile makefile rakefile).member? basename.downcase
                    :sourcecode
                  end
-        # still no reader and no file-extension. ask FILE(1) for clue
+        # still no reader and no file-extension. ask FILE(1) for clues
         if !reader && ext.empty?
           mime = `file -b --mime-type #{shellPath}`.chomp
           reader = :plaintext if mime == 'text/plain'
         end
 
         # configure reader with hints gleaned above
-        options = {base_uri: self}             # base URI for relative resolution
-        options[:format] = reader if reader    # format hint from filename
-        options[:content_type] = mime if mime  # MIME type from FILE(1)
+        options = {base_uri: self}             # base URI
+        options[:format] = reader if reader    # format hint
+        options[:content_type] = mime if mime  # MIME type
 
-        graph.load 'file:' + fsPath, **options # load RDF from file
+        graph.load 'file:' + fsPath, **options # load RDF
       end
     elsif node.directory?                      # directory
       subject = self                           # directory URI
@@ -60,16 +60,17 @@ class WebResource
       graph << RDF::Statement.new(subject, Date.R, node.stat.mtime.iso8601)
       nodes = node.children
       if nodes.size <= 8
-        nodes.map{|child|                # point to child nodes
+        nodes.map{|child|                      # point to all child-nodes
           graph << RDF::Statement.new(subject, (LDP+'contains').R, (subject.join child.basename('.ttl').to_s.gsub(' ','%20').gsub('#','%23')))}
-      else
+      else                                     # abbreviated pointers
         slugs = {}
         nodes.map{|n|
-          n.basename('.ttl').to_s.split('.').grep(/^\D/).map{|t|
+          n.basename('.ttl').to_s.split(/[\W_]/).grep(/^\D/).map{|t|
             slugs[t] ||= 0
             slugs[t] += 1}}
-        slugs.select{|s,count| count > 2}.sort_by{|s,c|c}.reverse[0..16].map{|a,b|
-          
+        slugs.select{|s,count| count > 2}.sort_by{|s,c|c}.reverse[0..16].map{|slug,c|
+          #puts [a,b].join "\t"
+          graph << RDF::Statement.new(subject, (LDP+'contains').R, (subject.join '*' + slug + '*'))
         }
       end
     end
