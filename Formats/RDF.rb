@@ -63,7 +63,12 @@ class WebResource
         nodes.map{|child|                # point to child nodes
           graph << RDF::Statement.new(subject, (LDP+'contains').R, (subject.join child.basename('.ttl').to_s.gsub(' ','%20').gsub('#','%23')))}
       else
-        puts :BIG
+        slugs = {}
+        nodes.map{|n|
+          n.to_s.split('.').map{|t|
+            slugs[t] ||= 0
+            slugs[t] += 1}}
+        puts slugs
       end
     end
     self
