@@ -1,7 +1,7 @@
 module Webize
-  module Playlist
+  module ArchiveFile
     class Format < RDF::Format
-      content_type 'application/zip', :extension => :zip
+      content_type 'application/x-tar', :extension => :tar
       content_encoding 'utf-8'
       reader { Reader }
     end
@@ -25,7 +25,7 @@ module Webize
       def each_triple &block; each_statement{|s| block.call *s.to_triple} end
 
       def each_statement &fn
-        zipfile_triples{|s,p,o|
+        archive_triples{|s,p,o|
           fn.call RDF::Statement.new(@subject, p.R,
                                      (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal o
                                                                                             l.datatype=RDF.XMLLiteral if p == Content
@@ -33,7 +33,7 @@ module Webize
                                      :graph_name => @subject)}
       end
 
-      def zipfile_triples
+      def archive_triples
       end
     end
   end

@@ -2,7 +2,7 @@
 class WebResource
 
   def dir_triples
-    graph = env[:repository]
+    graph = env[:repository] ||= RDF::Repository.new
     subject = self                           # directory URI
     subject += '/' unless subject.to_s[-1] == '/' # enforce trailing-slash on directory name
     graph << RDF::Statement.new(subject, Type.R, (LDP + 'Container').R)
