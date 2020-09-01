@@ -78,7 +78,7 @@ class WebResource < RDF::URI
                '/favicon.ico'
              end
       {class: :toolbox,
-       c: [({_: :span, c: env[:origin_status], style: 'font-weight: bold; font-size: 2em'} if env[:origin_status]),
+       c: [({_: :span, c: env[:origin_status], style: 'font-weight: bold', class: :icon} if env[:origin_status]),
            ({_: :a, id: :tabular, class: :icon, c: '↨', href: env[:base].join(HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))).R.href} unless qs['view'] == 'table'),
            {_: :a, href: env[:base].uri, c: '🔗', class: :icon, id: :directlink},
            ({_: :a, href: env[:base].join(HTTP.qs(qs.merge({'notransform' => nil}))).R.href, c: '⚗️', id: :UI, class: :icon} unless local_node?),

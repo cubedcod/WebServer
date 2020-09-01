@@ -27,9 +27,9 @@
 .quote {background-color: #ccc; color: #000; padding-left: .3em}
 .thumb, .thumb * {float: left; max-width: 22em}
 .title {background-color: #fff; color: #000; font-size: 1.08em; font-weight: bold; vertical-align: top; border-radius: .18em }
+.toolbox .icon {font-size: 1.6em; color: #fff; text-shadow: 1px 1px #000000; float: right}
 .toolbox .path {background-color: #000; border-radius: 0 0 .5em .5em;padding: 0 .2em 0 .2em}
 .toolbox > a, .toolbox form {vertical-align: top}
-.toolbox a.icon {font-size: 1.6em; color: #fff; text-shadow: 1px 1px #000000; float: right}
 .toolbox a.icon:target {text-shadow: 0px 0px #000000}
 .toolbox form input {background-color: #000; color: #fff; border-radius: .5em; border: 1px solid #444}
 .toolbox svg {height: 1em; width: 1em}
