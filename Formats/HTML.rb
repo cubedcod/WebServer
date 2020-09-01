@@ -155,7 +155,7 @@ module Webize
                 @base.env[:links][:prev] ||= v if k.match? /prev(ious)?/i
                 @base.env[:links][:next] ||= v if k.downcase == 'next'
                 @base.env[:links][:icon] ||= v if k.match? /^(fav)?icon?$/i
-                @base.env[:feeds].push v if k == 'alternate' && ((m['type']&.match?(/atom|rss/)) || (v.path&.match?(/^\/feed\/?$/)))
+                @base.env[:feeds].push v if k == 'alternate' && ((m['type']&.match?(/atom|rss/)) || (v.path&.match?(/^\/feed\/?$/))) && !@base.env[:feeds].member?(v)
                 k = MetaMap[k] || k
                 puts [k, v].join "\t" unless k.to_s.match? /^(drop|http)/
                 yield subject, k, v unless k == :drop}
