@@ -197,6 +197,7 @@ class WebResource
       SIOC + 'reply_of' => '↩',
       SIOC + 'richContent' => '',
       Schema + 'height' => '↕',
+      Schema + 'ImageObject' => '🖼️',
       Schema + 'width' => '↔',
       Schema + 'DiscussionForumPosting' => '📝',
       Schema + 'sameAs' => '=',

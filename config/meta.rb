@@ -620,6 +620,7 @@ class WebResource
       'uploadDate' => Date,
       'url' => Link,
       'user-login' => :drop,
+      'userInteractionCount' => :drop,
       'username' => Creator,
       'v' => :drop,
       'validatedAt' => Date,
