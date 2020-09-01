@@ -245,7 +245,7 @@ class WebResource
       when /304/ # Not Modified
         [304, {}, []]
       when /4\d\d/ # Not Found/Allowed
-        if e.io.meta['content-type'].match? /text\/html/
+        if e.io.meta['content-type']&.match? /text\/html/
           (env[:repository] ||= RDF::Repository.new) << RDF::Statement.new(self, Content.R, Webize::HTML.format(HTTP.decompress(e.io.meta, e.io.read), self))
         end
         cacheResponse

@@ -4,6 +4,7 @@ class WebResource
 
   module URIs
 
+    DayDir  = /^\/\d\d\d\d\/\d\d\/\d\d\/$/
     HourDir = /^\/\d\d\d\d\/\d\d\/\d\d\/\d\d\/$/
 
   end
