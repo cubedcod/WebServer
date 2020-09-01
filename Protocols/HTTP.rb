@@ -88,7 +88,8 @@ class WebResource
       ''
     end
  
-    def deny status=200, type=nil
+    def deny status = 200, type = nil
+      return [302, {'Location' => ['//', host, path].join.R(env).href}, []] if deny_query?
       env[:deny] = true
       type, content = if type == :stylesheet || ext == 'css'
                         ['text/css', '']
@@ -319,11 +320,7 @@ class WebResource
       elsif handler = HostGET[host] # host lambda
         handler[self]
       elsif deny?
-        if deny_query?
-          [302, {'Location' => ['//', host, path].join.R(env).href}, []]
-        else
-          deny
-        end
+        deny
       else                       # remote graph-node
         fetch
       end
