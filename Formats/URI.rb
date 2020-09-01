@@ -78,7 +78,8 @@ class WebResource < RDF::URI
                '/favicon.ico'
              end
       {class: :toolbox,
-       c: [({_: :a, id: :tabular, class: :icon, c: '↨', href: env[:base].join(HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))).R.href} unless qs['view'] == 'table'),
+       c: [({_: :span, c: env[:origin_status], style: 'font-weight: bold; font-size: 2em'} if env[:origin_status]),
+           ({_: :a, id: :tabular, class: :icon, c: '↨', href: env[:base].join(HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))).R.href} unless qs['view'] == 'table'),
            {_: :a, href: env[:base].uri, c: '🔗', class: :icon, id: :directlink},
            ({_: :a, href: env[:base].join(HTTP.qs(qs.merge({'notransform' => nil}))).R.href, c: '⚗️', id: :UI, class: :icon} unless local_node?),
            ({_: :a, href: env[:base].join(HTTP.qs(qs.merge({'dl' => env[:downloadable]}))).R.href, c: '&darr;', id: :download, class: :icon} if env.has_key? :downloadable),
@@ -91,7 +92,8 @@ class WebResource < RDF::URI
            (search_arg = %w(f find q search_query).find{|k|qs.has_key? k} || ([nil, '/'].member?(path) ? 'find' : 'q') # query arg
             qs[search_arg] ||= ''                                                                                      # initialize query field
             {_: :form, c: qs.map{|k,v|
-               ["\n", {_: :input, name: k, value: v}.update(k == search_arg ? ((env[:searchable] && v.empty?) ? {autofocus: true} : {}) : {type: :hidden})]}}.update(env[:search_base] ? {action: env[:base].join(env[:search_base]).R.href} : {})), "\n"]}
+               ["\n", {_: :input, name: k, value: v}.update(k == search_arg ? ((env[:searchable] && v.empty?) ? {autofocus: true} : {}) : {type: :hidden})]}}.update(env[:search_base] ? {action: env[:base].join(env[:search_base]).R.href} : {})), "\n",
+          ]}
     end
     
     # URI -> markup-lambda index

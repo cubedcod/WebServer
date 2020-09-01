@@ -249,6 +249,7 @@ class WebResource
           [{_: :a, href: url.R(env).href, id: key, class: :icon, c: content},
            "\n"]
         end}
+      bgcolor = {401 => :orange, 403 => :yellow, 404 => :gray}[env[:origin_status]] || '#444'
       htmlGrep if local_node?
       groups = {}
       graph.map{|uri, resource| # group resources by type
@@ -266,7 +267,7 @@ class WebResource
                              {_: :style, c: ["\n", SiteCSS]}, "\n",
                              env[:links].map{|type, resource|
                                [{_: :link, rel: type, href: CGI.escapeHTML(resource.R(env).href)}, "\n"]}]}, "\n",
-                        {_: :body,
+                        {_: :body, style: "background: repeating-linear-gradient(-45deg, #000, #000 .62em, #{bgcolor} .62em, #{bgcolor} 1em)",
                          c: [uri_toolbar, "\n",
                              link[:prev, '&#9664;'], "\n", link[:next, '&#9654;'], "\n",
                              groups.map{|type, resources|

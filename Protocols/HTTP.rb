@@ -188,7 +188,6 @@ class WebResource
                      named_format
                    end
           body = HTTP.decompress h, response.read                     # read body
-
           if format && reader = RDF::Reader.for(content_type: format) # reader defined for format
             env[:repository] ||= RDF::Repository.new                  # init RDF repository
             if timestamp = h['Last-Modified'] || h['last-modified']   # add HTTP metadata to graph
@@ -196,14 +195,11 @@ class WebResource
             end
             reader.new(body,base_uri: self){|g|env[:repository] << g} # read RDF
           end
-
           return unless thru                                          # just fetch/parse/load to repository
-
           # HTTP response to caller
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # upstream metadata
           env[:resp]['Access-Control-Allow-Origin'] ||= allowed_origin # set CORS header
-
           h['link'] && h['link'].split(',').map{|link|                # parse and merge Link headers to environment
             ref, type = link.split(';').map &:strip
             if ref && type
@@ -211,7 +207,6 @@ class WebResource
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
             end}
-
           if transformable && !(format||'').match?(/audio|css|image|octet|script|video/) # flexible format:
             env[:origin_format] = format                      # note original format for logger
             saveRDF.graphResponse                             # store graph-data and return in requested format
@@ -245,6 +240,7 @@ class WebResource
       when /304/ # Not Modified
         [304, {}, []]
       when /4\d\d/ # Not Found/Allowed
+        env[:origin_status] = status.to_i
         if e.io.meta['content-type']&.match? /text\/html/
           (env[:repository] ||= RDF::Repository.new) << RDF::Statement.new(self, Content.R, Webize::HTML.format(HTTP.decompress(e.io.meta, e.io.read), self))
         end
@@ -352,7 +348,7 @@ class WebResource
           end
           t                                       # token
         }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
-        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base colors connection downloadable feeds fetched graph host images keep-alive links origin-format path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles remote-addr repository request-method request-path request-uri resp script-name searchable server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # external multi-hop headers
+        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base colors connection downloadable feeds fetched graph host images keep-alive links origin-format origin-status path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles remote-addr repository request-method request-path request-uri resp script-name searchable server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # external multi-hop headers
       head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # accept Turtle
       case host
       when /wsj\.com$/

@@ -48,7 +48,7 @@ a.uri.path > span.uri {color: #aaa}
 a.uri.path {background-color: #222; color: #fff; border-color: #333}
 a:hover, a.uri:hover {border-color: #0ff; background-color: #0ff}
 blockquote {border-radius: .2em; border-width: 0 0 0 .5em; border-style: solid; border-color: #444; margin: 0 0 0 .1em; background-color: #2c2c2c; color: #fff}
-body {font-family: sans-serif; margin-top: 2.6em; margin-left: 2em; margin-right: 2em; color: #fff; background: repeating-linear-gradient(-45deg, #000, #000 .62em, #444 .62em, #444 1em)}
+body {font-family: sans-serif; margin-top: 2.6em; margin-left: 2em; margin-right: 2em; color: #fff}
 body.blocked {background: repeating-linear-gradient(45deg, #000, #000 1.5em, #f00 1.5em, #f00 8em); text-align: center}
 body.error > pre > a {color: #fff; font-size: 12ex; text-decoration: none}
 body.error > pre {margin: auto; max-width: 120ex; white-space: pre-wrap}
