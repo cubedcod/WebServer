@@ -204,12 +204,13 @@ module Webize
         # HFeed
         @base.HFeed n, &f 
 
-        # RDFa + JSON-LD
+        # RDFa + JSON-LD + Microdata
         unless @base.to_s.match? /\/feed|polymer.*html/ # don't look for RDF in unpopulated templates
           embeds = RDF::Graph.new
           n.css('script[type="application/ld+json"]').map{|dataElement|
-            embeds << (::JSON::LD::API.toRdf ::JSON.parse dataElement.inner_text)} rescue "JSON-LD read failure in #{@base}" # find JSON-LD triples
-          RDF::Reader.for(:rdfa).new(@doc, base_uri: @base){|_| embeds << _ } rescue "RDFa read failure in #{@base}"         # find RDFa triples
+            embeds << (::JSON::LD::API.toRdf ::JSON.parse dataElement.inner_text)} rescue "JSON-LD read failure in #{@base}"   # JSON-LD triples
+          RDF::Reader.for(:rdfa).new(@doc, base_uri: @base){|_| embeds << _ } rescue "RDFa read failure in #{@base}"           # RDFa triples
+          RDF::Reader.for(:microdata).new(@doc, base_uri: @base){|_| embeds << _ } rescue "Microdata read failure in #{@base}" # Microdata triples
           embeds.each_triple{|s,p,o| # inspect  raw triple
             p = MetaMap[p.to_s] || p # map predicates
             puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/ # show unresolved property-names
