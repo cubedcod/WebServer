@@ -174,10 +174,10 @@ module Webize
           end}
 
         # meta tags
-        n.css('meta, [itemprop]').map{|m|
-          if k = (m.attr("name") || m.attr("property") || m.attr("itemprop")) # predicate
-            if v = (m.attr("content") || m.attr("href"))                      # object
-              k = MetaMap[k] || k                               # normalize property-name
+        n.css('meta').map{|m|
+          if k = (m.attr("name") || m.attr("property"))  # predicate
+            if v = (m.attr("content") || m.attr("href")) # object
+              k = MetaMap[k] || k                        # map property-names
               case k
               when Abstract
                 v = v.hrefs
