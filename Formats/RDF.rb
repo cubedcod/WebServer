@@ -53,7 +53,7 @@ class WebResource
         graph.load 'file:' + fsPath, **options # load RDF
       end
     elsif node.directory?                      # directory
-      dir_triples
+      dir_triples graph
     end
     self
   rescue RDF::FormatError => e

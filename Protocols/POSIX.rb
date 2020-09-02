@@ -1,8 +1,7 @@
 %w(fileutils pathname shellwords).map{|d| require d }
 class WebResource
 
-  def dir_triples
-    graph = env[:repository] ||= RDF::Repository.new
+  def dir_triples graph
     subject = self                           # directory URI
     subject += '/' unless subject.to_s[-1] == '/' # enforce trailing-slash on directory name
     graph << RDF::Statement.new(subject, Type.R, (LDP + 'Container').R)
