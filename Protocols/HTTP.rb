@@ -89,7 +89,7 @@ class WebResource
     end
  
     def deny status = 200, type = nil
-      return [302, {'Location' => ['//', host, path].join.R(env).href}, []] if deny_query?
+      return [302, {'Location' => ['//', host, path].join.R(env).href}, []] if query&.match? Gunk # strip query
       env[:deny] = true
       type, content = if type == :stylesheet || ext == 'css'
                         ['text/css', '']
@@ -122,10 +122,6 @@ class WebResource
       return false if !host || WebResource::HTTP::HostGET.has_key?(host) || allow_domain?
       c = DenyDomains                                               # start cursor at root
       host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # search for leaf in domain tree
-    end
-
-    def deny_query?
-      !(query_values||{}).keys.grep(/^utm/).empty?
     end
 
     # if needed, generate and return entity. delegate to Rack handler for file references
