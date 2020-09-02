@@ -319,7 +319,7 @@ class WebResource
 
     Markup[Title] = -> title, env {
       if title.class == String
-        {_: :h3, class: :title, c: CGI.escapeHTML(title)}
+        [{_: :span, class: :title, c: CGI.escapeHTML(title)}, ' ']
       end}
 
     Markup['http://purl.org/dc/terms/created'] = Markup['http://purl.org/dc/terms/modified'] = Markup[Date] = -> date, env {

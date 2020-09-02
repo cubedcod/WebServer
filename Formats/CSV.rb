@@ -16,8 +16,7 @@ class WebResource
                 {_: :td, class: 'k',
                  c: Markup[Type][type, env]}, "\n",
                 {_: :td, class: 'v',
-                 c: k==Link ? MarkupGroup[Link][vs, env] : vs.map{|v|
-                   [(markup k, v, env), ' ']}}]}, "\n"] unless k == 'uri' && vs[0] && vs[0].to_s.match?(/^_:/))}} # hide bnode internal-identifiers
+                 c: k==Link ? MarkupGroup[Link][vs, env] : vs.map{|v|markup k, v, env}}]}, "\n"] unless k == 'uri' && vs[0] && vs[0].to_s.match?(/^_:/))}} # hide bnode internal-identifiers
     end
 
     # graph -> ( property -> column, resource -> row) table
@@ -57,10 +56,10 @@ class WebResource
                       title = title.to_s.sub(/\/u\/\S+ on /, '').sub /^Re: /, ''
                       unless env[:title] == title
                         env[:title] = title; tCount += 1
-                        {_: :a, href: re.href,                                   # link to row with title (changed from prior row)
-                         class: :title,
-                         type: :node,
-                         c: CGI.escapeHTML(title), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}
+                        [{_: :a, href: re.href,                                   # link to row with title (changed from prior row)
+                          class: :title,
+                          type: :node,
+                          c: CGI.escapeHTML(title), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']
                       end},
                     ({_: :a, href: re.href,                                      # link to row
                       class: :id, type: :node, c: '🔗',
