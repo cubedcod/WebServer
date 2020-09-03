@@ -26,7 +26,7 @@ module Webize
     def self.format body, base
       html = Nokogiri::HTML.fragment body rescue Nokogiri::HTML.fragment body.encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
       # strip upstream styles and scripts
-      html.css('iframe, script, style, a[href^="javascript"], a[onclick], link[rel="stylesheet"], link[type="text/javascript"], link[as="script"]').map{|e| puts "🚩 " + e.to_s}
+      html.css('iframe, script, style, a[href^="javascript"], a[onclick], link[rel="stylesheet"], link[type="text/javascript"], link[as="script"]').map{|e| puts "🚩 " + e.to_s} if ENV['VERBOSE']
       html.css('iframe, script, style, a[href^="javascript"], a[onclick], link[rel="stylesheet"], link[type="text/javascript"], link[as="script"]').remove
       # <img> normalisation
       html.css('[style*="background-image"]').map{|node|
@@ -50,7 +50,7 @@ module Webize
         if e['src']                                                     # src attribute
           src = (base.join e['src']).R                                  # resolve src location
           if src.deny?
-            puts "🚩 " + e.to_s
+            puts "🚩 " + e.to_s if ENV['VERBOSE']
             e.remove                                                    # strip blocked src
           else
             e['src'] = src.href                                         # update src to resolved location
@@ -62,7 +62,7 @@ module Webize
           ref.query = '' if ref.query&.match?(/utm[^a-z]/)
           ref.fragment = '' if ref.fragment&.match?(/utm[^a-z]/)
           if ref.deny?
-            puts "🚩 " + e.to_s
+            puts "🚩 " + e.to_s if ENV['VERBOSE']
             e.remove                                                    # strip blocked href
           else
             offsite = ref.host != base.host
