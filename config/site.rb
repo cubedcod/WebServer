@@ -94,7 +94,7 @@ w.bos.gl wired.trib.al
       r.env[:sort] = 'date'
       r.env[:view] = 'table'
       if r.parts[0] == 'api'
-        token = ('//' + r.host + '/.token').R
+        token = r.join('/token').R
         if !r.env.has_key?('x-access-token') && token.node.exist?
           r.env['x-access-token'] = token.readFile
         end
@@ -351,14 +351,18 @@ w.bos.gl wired.trib.al
       if text.match? /^window.gitterClientEnv/
         if token = text.match(/accessToken":"([^"]+)/)
           token = token[1]
-          tFile = 'im/gitter/.token'.R
+          tFile = join('/token').R
           unless tFile.node.exist? && tFile.readFile == token
             tFile.writeFile token
             puts ['🎫 ', host, token].join ' '
           end
         end
         if room = text.match(/"id":"([^"]+)/)
-          env[:links][:prev] = 'http://gitter.im/api/v1/rooms/' + room[1] + '/chatMessages?lookups%5B%5D=user&includeThreads=false&limit=47'
+          room_id = room[1]                              # room identifier
+          room = ('http://gitter.im/rooms/' + room_id).R # room URI
+          env[:links][:prev] = 'http://gitter.im/api/v1/rooms/' + room_id + '/chatMessages?lookups%5B%5D=user&includeThreads=false&limit=47'
+          yield room, Schema + 'sameAs', self, room # point room integer-id to URI
+          yield room, Type, (SIOC + 'ChatChannel').R
         end
       end}
 
@@ -387,8 +391,10 @@ w.bos.gl wired.trib.al
     return if tree.class == Array
     return unless items = tree['items']
     items.map{|item|
-      id = item['id']
-      env[:links][:prev] ||= 'http://gitter.im/api/v1/rooms/' + parts[3] + '/chatMessages?lookups%5B%5D=user&includeThreads=false&beforeId=' + id + '&limit=47'
+      id = item['id']                              # message identifier
+      room_id = parts[3]                           # room identifier
+      room = ('http://gitter.im/rooms/'  + room_id).R # room URI
+      env[:links][:prev] ||= 'http://gitter.im/api/v1/rooms/' + room_id + '/chatMessages?lookups%5B%5D=user&includeThreads=false&beforeId=' + id + '&limit=47'
       date = item['sent']
       uid = item['fromUser']
       user = tree['lookups']['users'][uid]
@@ -398,6 +404,7 @@ w.bos.gl wired.trib.al
       yield subject, Type, Post.R, graph
       yield subject, Creator, join(user['url']), graph
       yield subject, Creator, user['displayName'], graph
+      yield subject, To, room, graph
       yield subject, Image, user['avatarUrl'], graph
       yield subject, Content, (Webize::HTML.format item['html'], self), graph
     }
