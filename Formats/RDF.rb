@@ -14,20 +14,7 @@ class WebResource
       if %w(mp4 mkv webm).member? ext
         graph << RDF::Statement.new(self, Type.R, Video.R) # video-metadata triples
       elsif %w(m4a mp3 ogg opus wav).member? ext
-        graph << RDF::Statement.new(self, Type.R, Audio.R) # audio-metadata triples via taglib
-        TagLib::FileRef.open(fsPath) do |fileref|
-          unless fileref.null?
-            tag = fileref.tag
-            graph << RDF::Statement.new(self, Title.R, tag.title)
-            graph << RDF::Statement.new(self, Creator.R, tag.artist)
-            graph << RDF::Statement.new(self, Date.R, tag.year) unless !tag.year || tag.year == 0
-            graph << RDF::Statement.new(self, Content.R, tag.comment)
-            graph << RDF::Statement.new(self, (Schema+'album').R, tag.album)
-            graph << RDF::Statement.new(self, (Schema+'track').R, tag.track)
-            graph << RDF::Statement.new(self, (Schema+'genre').R, tag.genre)
-            graph << RDF::Statement.new(self, (Schema+'length').R, fileref.audio_properties.length_in_seconds)
-          end
-        end
+        tag_triples graph
       else
         # Reader has an extension-mapping. in times of ambiguity we have hints from prefix, basename, even location (maildir {cur,new,tmp})
         reader = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # email files w/ procmail PREFIX or sent-folder location

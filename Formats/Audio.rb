@@ -185,6 +185,23 @@ end
 
 class WebResource
 
+  def tag_triples graph
+    graph << RDF::Statement.new(self, Type.R, Audio.R) # audio-metadata triples via taglib
+    TagLib::FileRef.open(fsPath) do |fileref|
+      unless fileref.null?
+        tag = fileref.tag
+        graph << RDF::Statement.new(self, Title.R, tag.title)
+        graph << RDF::Statement.new(self, Creator.R, tag.artist)
+        graph << RDF::Statement.new(self, Date.R, tag.year) unless !tag.year || tag.year == 0
+        graph << RDF::Statement.new(self, Content.R, tag.comment)
+        graph << RDF::Statement.new(self, (Schema+'album').R, tag.album)
+        graph << RDF::Statement.new(self, (Schema+'track').R, tag.track)
+        graph << RDF::Statement.new(self, (Schema+'genre').R, tag.genre)
+        graph << RDF::Statement.new(self, (Schema+'length').R, fileref.audio_properties.length_in_seconds)
+      end
+    end
+  end
+
   module HTML
 
     MarkupGroup[Audio] = -> files, env {
