@@ -145,7 +145,7 @@ class WebResource
     }
 
     Markup[LDP+'Container'] = -> dir, env {
-      uri = dir.delete('uri').R env
+      uri = (dir.delete('uri') || env[:base]).R env
       [Type, Title,
        W3 + 'ns/posix/stat#mtime',
        W3 + 'ns/posix/stat#size'].map{|p|dir.delete p}
