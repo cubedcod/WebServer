@@ -92,7 +92,7 @@ module Webize
           @base.send hostTriples, @json, &f
         else
           Webize::JSON.scan(@json){|h|
-            if s = h['uri'] || h['url'] || h['link'] || ((h['id']||h['ID']) && ('#' + (h['id']||h['ID']).to_s))
+            if s = h['uri'] || h['url'] || h['link'] || h['canonical_url'] || ((h['id']||h['ID']||h['_id']) && ('#' + (h['id']||h['ID']||h['_id']).to_s))
               s = @base.join(s).R
               yield s, Type, Post.R if h.has_key? 'content'
               if s.parts[0] == 'users'
@@ -101,7 +101,7 @@ module Webize
                 yield s, To, host
               end
               h.map{|p, v|
-                unless %w(id uri).member? p
+                unless %w(_id id uri).member? p
                   p = MetaMap[p] || p
                   (v.class == Array ? v : [v]).map{|o|
                     unless [Hash, NilClass].member?(o.class) || (o.class == String && o.empty?) # each non-nil terminal value
