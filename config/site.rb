@@ -91,8 +91,6 @@ w.bos.gl wired.trib.al
     %w(www.instagram.com).map{|host| GET host, -> r { (!r.path || r.path == '/') ? r.cacheResponse : NoGunk[r]}}
 
     GET 'gitter.im', -> r {
-      r.env[:sort] = 'date'
-      r.env[:view] = 'table'
       if r.parts[0] == 'api'
         token = r.join('/token').R
         if !r.env.has_key?('x-access-token') && token.node.exist?
@@ -359,8 +357,8 @@ w.bos.gl wired.trib.al
         end
         if room = text.match(/"id":"([^"]+)/)
           room_id = room[1]                              # room identifier
-          room = ('http://gitter.im/rooms/' + room_id).R # room URI
-          env[:links][:prev] = 'http://gitter.im/api/v1/rooms/' + room_id + '/chatMessages?lookups%5B%5D=user&includeThreads=false&limit=47'
+          room = ('http://gitter.im/api/v1/rooms/' + room_id).R # room URI
+          env[:links][:prev] = room.uri + '/chatMessages?lookups%5B%5D=user&includeThreads=false&limit=47'
           yield room, Schema + 'sameAs', self, room # point room integer-id to URI
           yield room, Type, (SIOC + 'ChatChannel').R
         end
@@ -393,8 +391,8 @@ w.bos.gl wired.trib.al
     items.map{|item|
       id = item['id']                              # message identifier
       room_id = parts[3]                           # room identifier
-      room = ('http://gitter.im/rooms/'  + room_id).R # room URI
-      env[:links][:prev] ||= 'http://gitter.im/api/v1/rooms/' + room_id + '/chatMessages?lookups%5B%5D=user&includeThreads=false&beforeId=' + id + '&limit=47'
+      room = ('http://gitter.im/api/v1/rooms/'  + room_id).R # room URI
+      env[:links][:prev] ||= room.uri + '/chatMessages?lookups%5B%5D=user&includeThreads=false&beforeId=' + id + '&limit=47'
       date = item['sent']
       uid = item['fromUser']
       user = tree['lookups']['users'][uid]
