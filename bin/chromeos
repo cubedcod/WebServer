@@ -1,6 +1,7 @@
 #!/bin/sh
 export WAYLAND_DISPLAY=wayland-1
-XDG_RUNTIME_DIR=/var/run/chrome sommelier --master --display=wayland-0 --socket=wayland-1 &
+export XDG_RUNTIME_DIR=/var/run/chrome
+sommelier --master --display=wayland-0 --socket=wayland-1 &
 sleep 0.2
 termite -e webd &
 termite -e 'emacs -nw ~/src/WebServer' &
