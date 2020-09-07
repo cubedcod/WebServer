@@ -208,14 +208,16 @@ class WebResource
             env[:origin_format] = format                      # note original format for logger
             saveRDF.graphResponse                             # store graph-data and return in requested format
           else
-            case format                                       # fixed format:
+=begin
+            case format
             when 'text/css'
-              body = Webize::CSS.cacherefs body, env          # resolve references in CSS
+              body = Webize::CSS.cacherefs body, env          # rebase hrefs in CSS
             when 'text/html'
-              body = Webize::HTML.cacherefs body, env         # resolve references in HTML
+              body = Webize::HTML.cacherefs body, env         # rebase hrefs in HTML
             end
+=end
             c = fsPath.R; c += query_hash                     # storage location
-            fExt = Suffixes[format] || Suffixes_Rack[format]  # find format suffix
+            fExt = Suffixes[format] || Suffixes_Rack[format]  # lookup format suffix
             c += fExt if fExt && c.R.extension != fExt        # append suffix if incorrect or missing
             c.R.writeFile body                                # store upstream representation
             env[:resp]['Content-Length'] = body.bytesize.to_s # set Content-Length header
