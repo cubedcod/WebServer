@@ -31,7 +31,8 @@ module Webize
   end
   module HTML
 
-    # img @src attributes
+    # alternate names for src and srcset attributes
+
     SRCnotSRC = %w(
 data-baseurl
 data-delayed-url
@@ -47,6 +48,8 @@ data-raw-src
 data-src
 image-src
 )
+
+    SRCSET = %w{data-lazy-srcset data-srcset}
 
   end
   module JPEG

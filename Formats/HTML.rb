@@ -44,7 +44,7 @@ module Webize
       html.traverse{|e|                                                 # inspect node
         e.attribute_nodes.map{|a|                                       # inspect attributes
           e.set_attribute 'src', a.value if SRCnotSRC.member? a.name    # map src-like attributes to src
-          e.set_attribute 'srcset', a.value if %w{data-srcset}.member? a.name # map srcset-like attributes to srcset
+          e.set_attribute 'srcset', a.value if SRCSET.member? a.name    # map srcset-like attributes to srcset
           a.unlink if a.name=='id' && a.value.match?(Gunk)              # strip attributes
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w(bgcolor class color height http-equiv layout ping role style tabindex target theme width).member?(a.name)}
         if e['src']                                                     # src attribute
