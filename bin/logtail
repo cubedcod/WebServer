@@ -11,17 +11,15 @@ File::Tail::Logfile.tail(ENV['HOME'] + '/web/web.log') do |line|
     method = t[5]
     estatus = t[3]
     status = estatus.split('/')[-1].to_i
-    format = url.format_icon t[9]
+    denied = estatus.match? /DENIED|NONE/
     fetched = !estatus.match?(/HIT/)
-    if estatus.match? /DENIED|NONE/
-      puts "🛑 \e[31;1m#{url}\e[0m"
-    else
-      puts [(WebResource::HTTP.action_icon method, fetched),
-            (WebResource::HTTP.status_icon status),
-            format,
-            "\e[#{WebResource::HTTP.format_color format}m",
-            url,
-            "\e[0m"].join ' '
-    end
+    format = url.format_icon t[9]
+
+    puts [denied ? '🛑' : (WebResource::HTTP.action_icon method, fetched),
+          (WebResource::HTTP.status_icon status),
+          format,
+          "\e[#{denied ? '31;1' : WebResource::HTTP.format_color(format)}m",
+          url,
+          "\e[0m"].join ' '
   end
 end
