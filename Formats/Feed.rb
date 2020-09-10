@@ -372,7 +372,7 @@ class WebResource
              end},
            {class: :pointer,
             c: [({_: :a, class: :date, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date} if date), ' ',
-                ({_: :a, type: :node, c: '🔗', href: resource.href, id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} unless hasPointer)]},
+                ({_: :a, type: :node, c: '☚', href: resource.href, id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} unless hasPointer)]},
            {_: :table, class: :fromto,
             c: {_: :tr,
                 c: [{_: :td,
