@@ -26,9 +26,9 @@ module Webize
     def self.format body, base
       html = Nokogiri::HTML.fragment body rescue Nokogiri::HTML.fragment body.encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
       # strip upstream styles and scripts
-      html.css('iframe, script, style, a[href^="javascript"], a[onclick], link[rel="stylesheet"], link[type="text/javascript"], link[as="script"]').map{|e| puts "🚩 " + e.to_s} if ENV['VERBOSE']
-      html.css('iframe, script, style, a[href^="javascript"], a[onclick], link[rel="stylesheet"], link[type="text/javascript"], link[as="script"]').remove
-      # <img> normalisation
+      html.css('iframe, script, style, a[href^="javascript"], link[rel="stylesheet"], link[type="text/javascript"], link[as="script"]').map{|e| puts "🚩 " + e.to_s} if ENV['VERBOSE']
+      html.css('iframe, script, style, a[href^="javascript"], link[rel="stylesheet"], link[type="text/javascript"], link[as="script"]').remove
+      # <img> mappings
       html.css('[style*="background-image"]').map{|node|
         node['style'].match(/url\(['"]*([^\)'"]+)['"]*\)/).yield_self{|url|                                # CSS background-image -> img
           node.add_child "<img src=\"#{url[1]}\">" if url}}
@@ -46,7 +46,7 @@ module Webize
           e.set_attribute 'src', a.value if SRCnotSRC.member? a.name    # map src-like attributes to src
           e.set_attribute 'srcset', a.value if SRCSET.member? a.name    # map srcset-like attributes to srcset
           a.unlink if a.name=='id' && a.value.match?(Gunk)              # strip attributes
-          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w(bgcolor class color height http-equiv layout ping role style tabindex target theme width).member?(a.name)}
+          a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w(bgcolor class color height http-equiv layout loading ping role style tabindex target theme width).member?(a.name)}
         if e['src']                                                     # src attribute
           src = (base.join e['src']).R                                  # resolve src location
           if src.deny?
