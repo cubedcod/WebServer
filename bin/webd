@@ -2,6 +2,7 @@
 rm $HOME/web/squid.pid
 tmux new-session -s HTTP -d
 tmux send-keys -t HTTP:0 port8080 C-m
-tmux new-window -t HTTP:1 -d port80
+tmux new-window -t HTTP:1 -d syncthing
 tmux new-window -t HTTP:2 -d logtail
+tmux new-window -t HTTP:3 -d sudo socat -d TCP-LISTEN:80,fork TCP:127.0.0.1:8000
 tmux attach-session -t HTTP
