@@ -158,7 +158,9 @@ w.bos.gl wired.trib.al
     GET 'twitter.com', -> r {
       r.env[:sort] = 'date'
       r.env[:view] = 'table'
-      parts = r.parts; qs = r.query_values || {}
+      parts = r.parts
+      qs = r.query_values || {}
+      cursorArg = qs.has_key?('cursor') ? ('&cursor=' + qs['cursor']) : ''
       if r.env['HTTP_COOKIE'] # auth headers
         attrs = {}
         r.env['HTTP_COOKIE'].split(';').map{|attr|
@@ -182,7 +184,7 @@ w.bos.gl wired.trib.al
           URI.open(uidQuery, r.headers){|response|
             body = HTTP.decompress response.meta, response.read; json = ::JSON.parse body
             uid = json['data']['user']['rest_id']
-            ('https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20&ext=mediaStats%2CcameraMoment').R(r.env).fetch}
+            ('https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20' + cursorArg + '&ext=mediaStats%2CcameraMoment').R(r.env).fetch}
         end
       elsif parts.member?('status') || parts.member?('statuses')                                                    # tweet / conversation
         if parts.size == 2
@@ -605,7 +607,8 @@ w.bos.gl wired.trib.al
   end
 
   def TwitterJSON tree, &b
-    if objects = (tree.class != Array) && tree['globalObjects']
+    return if tree.class == Array
+    if objects = tree['globalObjects']
       users = objects['users'] || {}
       (objects['tweets'] || {}).map{|id, tweet|
         id = tweet['id_str']
@@ -648,6 +651,11 @@ w.bos.gl wired.trib.al
           end
         }
       }
+    end
+    if timeline = tree['timeline']
+      if c = timeline['instructions'][0]['addEntries']['entries'].find{|e|e['content'].has_key?('operation') && e['content']['operation']['cursor']['cursorType'] == 'Bottom'}
+        env[:links][:prev] = '?cursor=' + c['content']['operation']['cursor']['value']
+      end
     end
   end
 
