@@ -4,7 +4,7 @@
 which apk && su -c 'apk add alpine-sdk iptables ip6tables graphicsmagick ruby ruby-dev python python3-dev py3-cffi py3-pip openssl-dev rsync libexif-dev libxslt-dev taglib squid'
 
 # Arch https://www.archlinux.org/
-which pacman && su -c 'pacman -S graphicsmagick base-devel ruby ruby-bundler ruby-rdoc python-pip pkg-config pygmentize socat taglib squid make'
+which pacman && su -c 'pacman -S graphicsmagick base-devel ruby ruby-bundler ruby-rdoc parallel python-pip pkg-config pygmentize socat taglib squid make'
 which pacman && su -c '/usr/lib/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB'
 
 # Debian https://www.debian.org/
