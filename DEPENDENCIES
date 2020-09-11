@@ -20,3 +20,6 @@ bundle install
 # so mutt thinks there's mail in cur/
 mkdir -p ~/web/mail/new
 mkdir ~/web/mail/tmp
+
+# generate cert
+./bin/certificate
