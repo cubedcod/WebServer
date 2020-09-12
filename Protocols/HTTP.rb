@@ -112,18 +112,6 @@ class WebResource
        [content]]
     end
 
-    def deny?
-      return true if deny_domain?
-      return true if uri.match? Gunk
-      false
-    end
-
-    def deny_domain?
-      return false if !host || WebResource::HTTP::HostGET.has_key?(host) || allow_domain?
-      c = DenyDomains                                               # start cursor at root
-      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # search for leaf in domain tree
-    end
-
     # if needed, generate and return entity. delegate to Rack handler for file references
     def entity generator = nil
       if env['HTTP_IF_NONE_MATCH']&.strip&.split(/\s*,\s*/)&.include? env[:resp]['ETag']

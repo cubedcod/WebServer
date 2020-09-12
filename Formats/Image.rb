@@ -241,7 +241,8 @@ class WebResource
        403 => '🚫',
        404 => '❓',
        410 => '❌',
-       500 => '🚩'}[status] || (status == 200 ? nil : status)
+       500 => '🚩',
+       503 => '🔌'}[status] || (status == 200 ? nil : status)
     end
 
   end

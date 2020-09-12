@@ -121,6 +121,7 @@ class WebResource
       'apple-touch-startup-image' => Image,
       'apple:content_id' => :drop,
       'application-name' => :drop,
+      'archives' => Link,
       'article.created' => Date,
       'article.headline' => Title,
       'article.origheadline' => Title,
