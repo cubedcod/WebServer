@@ -1,2 +1,6 @@
 #!/bin/sh
-http_proxy=http://localhost:8080 https_proxy=http://localhost:8080 no_proxy=l,localhost MOZ_USE_XINPUT2=1 firefox "$@"
+export MOZ_USE_XINPUT2=1
+
+firefox "http://localhost:8000/$1"
+
+#http_proxy=http://localhost:8080 https_proxy=http://localhost:8080 no_proxy=l,localhost firefox "$@"
