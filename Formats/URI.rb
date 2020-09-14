@@ -106,6 +106,11 @@ class WebResource < RDF::URI
 
   module HTTP
 
+    def allow_domain?
+      c = AllowDomains                                              # start cursor at root
+      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # search for leaf in domain tree
+    end
+
     def deny?
       return true if deny_domain?
       return true if uri.match? Gunk

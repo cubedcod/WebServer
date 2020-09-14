@@ -3,27 +3,8 @@
 class WebResource
   module HTTP
     include URIs
+
     HostGET = {}
-
-    def self.action_icon action, fetched=true
-      case action
-      when 'HEAD'
-        '🗣'
-      when 'OPTIONS'
-        '🔧'
-      when 'POST'
-        '📝'
-      when 'GET'
-        fetched ? '🐕' : ' '
-      else
-        action
-      end
-    end
-
-    def allow_domain?
-      c = AllowDomains                                              # start cursor at root
-      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # search for leaf in domain tree
-    end
 
     def allowed_origin
       if env['HTTP_ORIGIN']
@@ -156,7 +137,7 @@ class WebResource
       ['http://', host, path, query ? ['?', query] : nil].join.R(env).fetchHTTP # fetch via HTTP
     end
 
-    # fetch from remote server                        options:
+    # fetch from remote                            options:
     def fetchHTTP thru: true,                        # pass HTTP response to caller
                   transformable: !(query_values||{}).has_key?('notransform') # allow transformation: format conversions & same-format (HTML reformat, code pretty-print) rewrites
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
@@ -236,29 +217,6 @@ class WebResource
         [status.to_i, (headers e.io.meta), [e.io.read]]
       else
         raise
-      end
-    end
-
-    def self.format_color format_icon
-      case format_icon
-      when '➡️'
-        '38;5;7'
-      when '📃'
-        '34;1'
-      when '📜'
-        '38;5;51'
-      when '🗒'
-        '38;5;128'
-      when '🐢'
-        '32;1'
-      when '🎨'
-        '38;5;227'
-      when '🖼️'
-        '38;5;226'
-      when '🎬'
-        '38;5;208'
-      else
-        '35;1'
       end
     end
 

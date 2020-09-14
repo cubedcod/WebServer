@@ -175,9 +175,10 @@ image-src
   end
 end
 class WebResource
+
   module HTML
 
-    # single-character representation of a URI
+    # URI -> emoji
     Icons = {
       'ArticleGQL' => '📝',
       Abstract => '✍',
@@ -228,7 +229,81 @@ class WebResource
 
   end
 
+  module  URIs
+
+    def format_icon mime=nil
+      mime ||= ''
+      x = path ? ext.downcase : ''
+      if x == 'css' || mime.match?(/text\/css/)
+        '🎨'
+      elsif x == 'js' || mime.match?(/script/)
+        '📜'
+      elsif x == 'json' || mime.match?(/json/)
+        '🗒'
+      elsif %w(gif jpeg jpg png svg webp).member?(x) || mime.match?(/^image/)
+        '🖼️'
+      elsif %w(aac flac m4a mp3 ogg opus).member?(x) || mime.match?(/^audio/)
+        '🔉'
+      elsif %w(mkv mp4 ts webm).member?(x) || mime.match?(/^video/)
+        '🎞️'
+      elsif %w(m3u8).member? x
+        '🎬'
+      elsif x == 'txt' || mime.match?(/text\/plain/)
+        '🇹'
+      elsif x == 'ttl' || mime.match?(/text\/turtle/)
+        '🐢'
+      elsif %w(htm html).member?(x) || mime.match?(/html/)
+        '📃'
+      elsif mime.match? /^(application\/)?font/
+        '🇦'
+      elsif mime.match? /octet.stream/
+        '🧱'
+      else
+        mime
+      end
+    end
+
+  end
+
   module HTTP
+
+    def self.action_icon action, fetched=true
+      case action
+      when 'HEAD'
+        '🗣'
+      when 'OPTIONS'
+        '🔧'
+      when 'POST'
+        '📝'
+      when 'GET'
+        fetched ? '🐕' : ' '
+      else
+        action
+      end
+    end
+
+    def self.format_color format_icon
+      case format_icon
+      when '➡️'
+        '38;5;7'
+      when '📃'
+        '38;5;40'
+      when '📜'
+        '38;5;51'
+      when '🗒'
+        '38;5;128'
+      when '🐢'
+        '32;1'
+      when '🎨'
+        '38;5;227'
+      when '🖼️'
+        '38;5;226'
+      when '🎬'
+        '38;5;208'
+      else
+        '35;1'
+      end
+    end
 
     def self.status_icon status
       {202 => '➕',

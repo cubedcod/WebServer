@@ -52,38 +52,6 @@ class WebResource
 
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
 
-    def format_icon mime=nil
-      mime ||= ''
-      x = path ? ext.downcase : ''
-      if x == 'css' || mime.match?(/text\/css/)
-        '🎨'
-      elsif x == 'js' || mime.match?(/script/)
-        '📜'
-      elsif x == 'json' || mime.match?(/json/)
-        '🗒'
-      elsif %w(gif jpeg jpg png svg webp).member?(x) || mime.match?(/^image/)
-        '🖼️'
-      elsif %w(aac flac m4a mp3 ogg opus).member?(x) || mime.match?(/^audio/)
-        '🔉'
-      elsif %w(mkv mp4 ts webm).member?(x) || mime.match?(/^video/)
-        '🎞️'
-      elsif %w(m3u8).member? x
-        '🎬'
-      elsif x == 'txt' || mime.match?(/text\/plain/)
-        '🇹'
-      elsif x == 'ttl' || mime.match?(/text\/turtle/)
-        '🐢'
-      elsif %w(htm html).member?(x) || mime.match?(/html/)
-        '📃'
-      elsif mime.match? /^(application\/)?font/
-        '🇦'
-      elsif mime.match? /octet.stream/
-        '🧱'
-      else
-        mime
-      end
-    end
-
     def named_format # format in filename suffix
       x = ext.to_sym
       RDF::Format.file_extensions[x][0].content_type[0] if RDF::Format.file_extensions.has_key? x
