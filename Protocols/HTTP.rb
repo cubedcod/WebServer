@@ -147,12 +147,14 @@ class WebResource
           [206, h, [response.read]]                  # return part
         else
           format = if path == '/feed' || (query_values||{})['mime'] == 'xml'
-                     'application/atom+xml'          # Atom/RSS content-type in URL
+                     'application/atom+xml'          # Atom/RSS content-type via URL
                    elsif h.has_key? 'content-type'
                      h['content-type'].split(/;/)[0] # content-type in HTTP metadata
-                   elsif named_format                # content-type in path extension
+                   elsif named_format                # content-type in name extension
                      named_format
                    end
+
+          # read fetched data into graph
           body = HTTP.decompress h, response.read                     # read body
           if format && reader = RDF::Reader.for(content_type: format) # reader defined for format
             env[:repository] ||= RDF::Repository.new                  # init RDF repository
@@ -161,11 +163,18 @@ class WebResource
             end
             reader.new(body,base_uri: self){|g|env[:repository] << g} # read RDF
           end
-          return unless thru                                          # just fetch/parse/load to repository
-          # HTTP response to caller
+          return unless thru                                          # fetched to runtime graph only, no HTTP response returned through to caller
+
+          # cache fill
+          c = fsPath.R; c += query_hash                               # cache location
+          formatExt = Suffixes[format] || Suffixes_Rack[format]       # format suffix
+          c += formatExt if formatExt && c.R.extension != formatExt   # adjust suffix if incorrect or missing
+          c.R.writeFile body                                          # store upstream entity
+
+          # response metadata
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # upstream metadata
-          env[:resp]['Access-Control-Allow-Origin'] ||= allowed_origin # set CORS header
+          env[:resp]['Access-Control-Allow-Origin'] ||= allowed_origin # CORS header
           h['link'] && h['link'].split(',').map{|link|                # parse and merge Link headers to environment
             ref, type = link.split(';').map &:strip
             if ref && type
@@ -173,22 +182,12 @@ class WebResource
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
             end}
+
+          # response
           if transformable && !(format||'').match?(/audio|css|image|octet|script|video/) # flexible format:
             env[:origin_format] = format                      # note original format for logger
             saveRDF.graphResponse                             # store graph-data and return in requested format
           else
-#=begin
-            case format
-            when 'text/css'
-              body = Webize::CSS.cacherefs body, env          # rebase hrefs in CSS
-            when 'text/html'
-              body = Webize::HTML.cacherefs body, env         # rebase hrefs in HTML
-            end
-#=end
-            c = fsPath.R; c += query_hash                     # storage location
-            fExt = Suffixes[format] || Suffixes_Rack[format]  # lookup format suffix
-            c += fExt if fExt && c.R.extension != fExt        # append suffix if incorrect or missing
-            c.R.writeFile body                                # store upstream representation
             env[:resp]['Content-Length'] = body.bytesize.to_s # set Content-Length header
             [200, env[:resp], [body]]                         # return upstream representation
           end
