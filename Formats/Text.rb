@@ -111,7 +111,7 @@ module Webize
       format Format
 
       def initialize(input = $stdin, options = {}, &block)
-        @base = options[:base_uri]
+        @base = options[:base_uri].R
         @lang = 'html' if @base.ext == 'erb'
         @lang = 'ruby' if options[:content_type] == 'text/x-ruby'
         @lang = 'shell' if options[:content_type] == 'text/x-shellscript'
