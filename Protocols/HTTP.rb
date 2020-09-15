@@ -188,8 +188,8 @@ class WebResource
             env[:origin_format] = format                      # note original format for logger
             saveRDF.graphResponse                             # store graph-data and return in requested format
           else
-            env[:resp]['Content-Length'] = body.bytesize.to_s # set Content-Length header
-            [200, env[:resp], [body]]                         # return upstream representation
+            env[:resp]['Content-Length'] = body.bytesize.to_s # we decompressed body so Content-Length changes
+            [200, env[:resp], [body]]                         # upstream representation
           end
         end
       end
