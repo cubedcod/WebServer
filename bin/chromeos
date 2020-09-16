@@ -1,7 +1,6 @@
 #!/bin/sh
-sommelier --master --socket=w0 &
-export WAYLAND_DISPLAY=w0
+sommelier --shm-driver=noop --drm-device=/dev/dri/renderD128 --master --socket=w0 &
 sleep 0.2
-termite -e webd &
-termite -e 'emacs -nw ~/src/WebServer' &
-termite &
+WAYLAND_DISPLAY=w0 Xwayland &
+sleep 0.2
+DISPLAY=:0 i3 &
