@@ -2,7 +2,7 @@
 # start an i3 session on a chromeOS device without a Google account for the "Linux" thing
 # assuming username 'web' and arch userspace at /home/os, launch with:
 # sudo /home/os/bin/arch-chroot /home/os/ /bin/su -lc '~/src/WebServer/bin/chrome_i3' web
-sommelier --shm-driver=noop --drm-device=/dev/dri/renderD128 --master --socket=w0 &
+sommelier --data-driver=noop --shm-driver=noop --drm-device=/dev/dri/renderD128 --master --socket=w0 &
 sleep 0.2
 WAYLAND_DISPLAY=w0 Xwayland -nolisten tcp &
 sleep 0.2
