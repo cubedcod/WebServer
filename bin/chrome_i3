@@ -1,9 +1,7 @@
 #!/bin/sh
-# start an i3 session on a chromeOS device without a Google account for the "Linux" thing
+# launch i3 session on guest-mode chromeOS without Google account/login required for the "Penguin" VM+container setup
 # assuming username 'web' and arch userspace at /home/os, launch with:
 # sudo /home/os/bin/arch-chroot /home/os/ /bin/su -lc '~/src/WebServer/bin/chrome_i3' web
-sommelier --data-driver=noop --shm-driver=noop --drm-device=/dev/dri/renderD128 --master --socket=w0 &
-sleep 0.2
-WAYLAND_DISPLAY=w0 Xwayland -nolisten tcp &
+XDG_RUNTIME_DIR=/run/chrome sommelier --data-driver=noop --shm-driver=noop --drm-device=/dev/dri/renderD128 --display=wayland-0 --virtwl-device=/dev/null Xwayland -nolisten tcp &
 sleep 0.2
 DISPLAY=:0 i3
