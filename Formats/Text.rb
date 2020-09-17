@@ -296,7 +296,7 @@ module Webize
       end
     end
   end
-
+#                     autolog_path ~/web/%Y/%m/%d/%H/$tag.$0.irc
   module VTT
     class Format < RDF::Format
       content_type 'text/vtt', :extension => :vtt
