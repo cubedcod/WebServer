@@ -1,6 +1,6 @@
 #!/bin/sh
 sommelier --shm-driver=noop --drm-device=/dev/dri/renderD128 --master --socket=w0 &
 sleep 0.2
-WAYLAND_DISPLAY=w0 Xwayland &
+WAYLAND_DISPLAY=w0 Xwayland -nolisten tcp &
 sleep 0.2
-DISPLAY=:0 i3 &
+DISPLAY=:0 i3
