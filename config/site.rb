@@ -119,7 +119,16 @@ w.bos.gl wired.trib.al
     GET 'googleweblight.com', GotoURL
     GET 'google.com', GotoGoogle
     GET 'maps.google.com', GotoGoogle
-    GET 'www.google.com', -> r {r.env[:searchable]='/search'; %w(dl images maps search).member?(r.parts[0]) ? NoGunk[r] : r.deny}
+    GET 'www.google.com', -> r {
+      p = r.parts[0]
+      q = r.query_values || {}
+      if %w(dl images maps search).member? p
+        NoGunk[r]
+      elsif p == 'imgres' && q.has_key?('imgurl')
+        [302, {'Location' => q['imgurl']}, []]
+      else
+        r.deny
+      end}
     GET 'www.googleadservices.com', GotoAdURL
     GET 'www.gstatic.com', -> r {r.path.match?(/204$/) ? [204,{},[]] : NoGunk[r]}
 
