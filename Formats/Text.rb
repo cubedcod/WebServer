@@ -264,7 +264,7 @@ module Webize
 
       def each_statement &fn
         text_triples{|s, p, o, graph=nil|
-          fn.call RDF::Statement.new(s, p.R,
+          fn.call RDF::Statement.new(s.R, p.R,
                                      (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal o
                                                                                             l.datatype=RDF.XMLLiteral if p == Content
                                                                                             l),
@@ -286,7 +286,20 @@ module Webize
             yield subject, To, @base, graph
           }
         elsif @base.ext == 'irc' # irssi: /set autolog_path ~/web/%Y/%m/%d/%H/$tag.$0.irc
-
+          chan = Rack::Utils.unescape_path(@base.basename.split('.')[1])[1..-1]
+          day = @base.parts[0..2].join('-') + 'T'
+          lines = 0
+          @doc.lines.map{|message|
+            time, nick, msg = message.split /\s+/, 3
+            nick = nick.sub(/^</,'').sub(/>$/,'')
+            timestamp = day + time
+            subject = '#' + chan + (lines += 1).to_s
+            yield subject, Type, (SIOC + 'InstantMessage').R
+            yield subject, Date, timestamp
+            yield subject, Creator, '#' + nick
+            yield subject, To, '#' + chan
+            yield subject, Content, Webize::HTML.format(msg.hrefs, @base)
+          }
         else # basic text content
           yield @body, Content, Webize::HTML.format(WebResource::HTML.render({_: :pre, style: 'white-space: pre-wrap',
                                                                               c: @doc.lines.map{|line|
