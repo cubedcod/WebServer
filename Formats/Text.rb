@@ -274,7 +274,7 @@ module Webize
       def text_triples
         basename = File.basename @base.path, '.txt'
         dirname = File.dirname @base.path
-        if basename == 'twtxt'
+        if basename == 'twtxt' # https://twtxt.readthedocs.io/
           @doc.lines.grep(/^[^#]/).map{|line|
             date, msg = line.split /\t/
             graph = @base.join (dirname == '/' ? '' : dirname) + '/twtxt.' + date.gsub(/\D/,'.')
@@ -285,7 +285,9 @@ module Webize
             yield subject, Creator, (@base.host + dirname).split(/\W/).join('.'), graph
             yield subject, To, @base, graph
           }
-        else
+        elsif @base.ext == 'irc' # irssi: /set autolog_path ~/web/%Y/%m/%d/%H/$tag.$0.irc
+
+        else # basic text content
           yield @body, Content, Webize::HTML.format(WebResource::HTML.render({_: :pre, style: 'white-space: pre-wrap',
                                                                               c: @doc.lines.map{|line|
                                                                                 line.hrefs{|p,o| # hypertextize
@@ -296,7 +298,7 @@ module Webize
       end
     end
   end
-#                     autolog_path ~/web/%Y/%m/%d/%H/$tag.$0.irc
+
   module VTT
     class Format < RDF::Format
       content_type 'text/vtt', :extension => :vtt
