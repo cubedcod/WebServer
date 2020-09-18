@@ -15,31 +15,38 @@ class WebResource
         graph << RDF::Statement.new(self, Type.R, Video.R) # video-metadata triples
       elsif %w(m4a mp3 ogg opus wav).member? ext
         tag_triples graph
-      else
-        # Reader has an extension-mapping. in times of ambiguity we have hints from prefix, basename, even location (maildir {cur,new,tmp})
-        reader = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # email files w/ procmail PREFIX or sent-folder location
+      else # read using RDF::Reader
+        options = {base_uri: self} # reader options
+        # format hints in name prefix/basename/location
+        if format = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # email files w/ procmail PREFIX or sent-folder location
                    :mail
-                 elsif ext.match? /^html?$/ # use our reader class, otherwise it tends to select RDF:: RDFa
+                 elsif ext.match? /^html?$/
                    :html
                  elsif %w(changelog license readme todo).member? basename.downcase
                    :plaintext
                  elsif %w(gemfile makefile rakefile).member? basename.downcase
                    :sourcecode
-                 end
-        # still no reader and no file-extension. ask FILE(1) for clues
-        if !reader && ext.empty?
-          mime = `file -b --mime-type #{shellPath}`.chomp
-          reader = :plaintext if mime == 'text/plain'
+                    end
+          options[:format] = format
+        else # no format hints found
+          if ext.empty? # no extension. ask FILE(1)
+            mime = `file -b --mime-type #{shellPath}`.chomp
+            options[:format] = :plaintext if mime == 'text/plain'
+            options[:content_type] = mime # format from FILE(1)
+          elsif mime = named_format
+            options[:content_type] = mime # format from extension
+          end
         end
-
-        # configure reader with hints gleaned above
-        options = {base_uri: self}             # base URI
-        options[:format] = reader if reader    # format hint
-        options[:content_type] = mime if mime  # MIME type
-
-        graph.load 'file:' + fsPath, **options # load RDF
+        loc = fsPath
+        if loc.index '#' # path contains chars disallowed in path portion of URI
+          if reader = RDF::Reader.for(**options) # initialize reader
+            reader.new(File.open(loc).read, base_uri: self){|_|graph << _} # read RDF
+          end
+        else
+          graph.load 'file:' + loc, **options # load file: URI
+        end
       end
-    elsif node.directory?                      # directory
+    elsif node.directory?                     # directory
       dir_triples graph
     end
     self

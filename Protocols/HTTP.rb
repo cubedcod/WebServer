@@ -161,15 +161,15 @@ class WebResource
             if timestamp = h['Last-Modified'] || h['last-modified']   # add HTTP metadata to graph
               env[:repository] << RDF::Statement.new(self, Date.R, Time.httpdate(timestamp.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,'')).iso8601) rescue nil
             end
-            reader.new(body,base_uri: self){|g|env[:repository] << g} # read RDF
+            reader.new(body,base_uri: self){|g|env[:repository] << g} # parse and load RDF
           end
-          return unless thru                                          # fetched to runtime graph only, no HTTP response returned through to caller
+          return unless thru                                          # fetch to runtime graph only, no HTTP response returned to caller
 
           # cache fill
-          c = fsPath.R; c += query_hash                               # cache location
+          c = fsPath.R; c += query_hash                               # storage location
           formatExt = Suffixes[format] || Suffixes_Rack[format]       # format suffix
           c += formatExt if formatExt && c.R.extension != formatExt   # adjust suffix if incorrect or missing
-          c.R.writeFile body                                          # store upstream entity
+          c.R.writeFile body                                          # cache upstream entity
 
           # response metadata
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie).map{|k|
