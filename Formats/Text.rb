@@ -286,8 +286,9 @@ module Webize
             yield subject, To, @base, graph
           }
         elsif @base.ext == 'irc' # irssi: /set autolog_path ~/web/%Y/%m/%d/%H/$tag.$0.irc
-          net, chan = @base.basename.split '.'
-          chan = ('/irc/' + net + '/' + Rack::Utils.unescape_path(chan)[1..-1]).R
+          net, channame = @base.basename.split '.'
+          channame = Rack::Utils.unescape_path(channame)[1..-1]
+          chan = (@base + '#' + channame).R
           day = @base.parts[0..2].join('-') + 'T'
           lines = 0
           @doc.lines.grep(/^[^-]/).map{|msg|
@@ -298,17 +299,18 @@ module Webize
               msg = tokens[2..-1].join ' '
               msg = '/me ' + msg if tokens[0] == '*'
             else
-              re = tokens.join(' ').match /<[\s@+*]*([^>]+)> (.*)/
-              nick = re[1]
-              msg = re[2]
+              if re = tokens.join(' ').match(/<[\s@+*]*([^>]+)>\s*(.*)?/)
+                nick = re[1]
+                msg = re[2]
+              end
             end
             timestamp = day + time
-            subject = '#' + chan + (lines += 1).to_s
+            subject = '#' + channame + (lines += 1).to_s
             yield subject, Type, (SIOC + 'InstantMessage').R
             yield subject, Date, timestamp
-            yield subject, Creator, ('/irc/' + net + '/users/' + nick).R
             yield subject, To, chan
-            yield subject, Content, Webize::HTML.format(msg.hrefs, @base) if msg
+            yield subject, Creator, ('/irc/' + net + '/users/' + nick).R
+            yield subject, Content, Webize::HTML.format(msg.hrefs{|p,o| yield subject, p, o}, @base) if msg
           }
         else # basic text content
           yield @body, Content, Webize::HTML.format(WebResource::HTML.render({_: :pre, style: 'white-space: pre-wrap',

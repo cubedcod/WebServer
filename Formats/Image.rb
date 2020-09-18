@@ -196,6 +196,7 @@ class WebResource
       Post => '📝',
       SIOC + 'BlogPost' => '📝',
       SIOC + 'MailMessage' => '✉️',
+      SIOC + 'InstantMessage' => '🐦',
       SIOC + 'MicroblogPost' => '🐦',
       SIOC + 'attachment' => '✉',
       SIOC + 'reply_of' => '↩',
