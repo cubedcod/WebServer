@@ -4,7 +4,7 @@ module Webize
     include WebResource::URIs
 
     # set location references to local cache
-    def self.cacherefs doc, env, serialize=true
+    def self.cacherefs doc, env
       doc = Nokogiri::HTML.fragment doc if doc.class == String
       doc.css('a, form, iframe, img, link, script, source').map{|e| # ref element
         %w(action href src).map{|attr|              # ref attribute
@@ -19,12 +19,14 @@ module Webize
       doc.css('style').map{|css|
         css.content = Webize::CSS.cacherefs css.content, env if css.content.match? /url\(/}
 
-      serialize ? doc.to_html : doc
+      doc.to_html
     end
 
     # format HTML to local preferences
-    def self.format body, base
-      html = Nokogiri::HTML.fragment body rescue Nokogiri::HTML.fragment body.encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
+    def self.format html, base
+      if html.class == String
+        html = Nokogiri::HTML.fragment html #rescue Nokogiri::HTML.fragment html.encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
+      end
 
       # strip externally-originated styles and scripts
       html.css('iframe, script, style, a[href^="javascript"], link[rel="stylesheet"], link[type="text/javascript"], link[as="script"]').map{|e| puts "🚩 " + e.to_s} if ENV['VERBOSE']
@@ -220,9 +222,9 @@ module Webize
 
         # <body>
         if body = n.css('body')[0]
-          yield subject, Content, HTML.format(body.inner_html, @base).gsub(/<\/?noscript[^>]*>/i, '')
+          yield subject, Content, HTML.format(body, @base).gsub(/<\/?noscript[^>]*>/i, '')
         else # no <body> element
-          yield subject, Content, HTML.format(n.inner_html, @base).gsub(/<\/?noscript[^>]*>/i, '')
+          yield subject, Content, HTML.format(n, @base).gsub(/<\/?noscript[^>]*>/i, '')
         end
       end
     end
