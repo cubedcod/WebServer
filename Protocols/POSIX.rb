@@ -84,6 +84,30 @@ class WebResource
       entity
     end
 
+    # URI -> pathnames
+    def nodeGrep files = nil
+      files = [fsPath] if !files || files.empty?
+      qs = query_values || {}
+      q = qs['Q'] || qs['q']
+      args = q.shellsplit rescue q.split(/\W/)
+      file_arg = files.map{|file| Shellwords.escape file.to_s }.join ' '
+      case args.size
+      when 0
+        return []
+      when 2 # two unordered terms
+        cmd = "grep -rilZ #{Shellwords.escape args[0]} #{file_arg} | xargs -0 grep -il #{Shellwords.escape args[1]}"
+      when 3 # three unordered terms
+        cmd = "grep -rilZ #{Shellwords.escape args[0]} #{file_arg} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -il #{Shellwords.escape args[2]}"
+      when 4 # four unordered terms
+        cmd = "grep -rilZ #{Shellwords.escape args[0]} #{file_arg} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -ilZ #{Shellwords.escape args[2]} | xargs -0 grep -il #{Shellwords.escape args[3]}"
+      else   # N ordered term
+        cmd = "grep -ril -- #{Shellwords.escape args.join '.*'} #{file_arg}"
+      end
+      puts [:GREP, cmd].join ' '
+      `#{cmd} | head -n 1024`.lines.map &:chomp
+    end
+
+    # URI -> nodes
     def nodeSet
       if node.file?
         [self]
@@ -91,37 +115,24 @@ class WebResource
         qs = query_values || {}
         (if node.directory?
          if qs['f'] && !qs['f'].empty?     # FIND
-           #puts ['FIND exact', qs['f'], fsPath].join ' '
            `find #{shellPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
          elsif qs['find'] && !qs['find'].empty? && path != '/' # FIND case-insensitive substring
-           #puts ['FIND substring', qs['find'], fsPath].join ' '
            `find #{shellPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
-         elsif qs.has_key?('Q') || qs.has_key?('q') # GREP
-           #puts [:GREP, fsPath].join ' '
-           q = qs['Q'] || qs['q']
-           args = q.shellsplit rescue q.split(/\W/)
-           case args.size
-           when 0
-             return []
-           when 2 # two unordered terms
-             cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -il #{Shellwords.escape args[1]}"
-           when 3 # three unordered terms
-             cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -il #{Shellwords.escape args[2]}"
-           when 4 # four unordered terms
-             cmd = "grep -rilZ #{Shellwords.escape args[0]} #{shellPath} | xargs -0 grep -ilZ #{Shellwords.escape args[1]} | xargs -0 grep -ilZ #{Shellwords.escape args[2]} | xargs -0 grep -il #{Shellwords.escape args[3]}"
-           else   # N ordered term
-             cmd = "grep -ril -- #{Shellwords.escape args.join '.*'} #{shellPath}"
-           end
-           `#{cmd} | head -n 1024`.lines.map &:chomp
+         elsif qs.has_key?('Q') || qs.has_key?('q') # GREP directory
+           nodeGrep
          else                          # LS
            env[:summary] = !qs.has_key?('fullContent')
            (path=='/' && local_node?) ? [node] : [node, *node.children]
          end
         else
           globPath = fsPath
-          if globPath.match /[\*\{\[]/ # GLOB
-            #puts [:GLOB, fsPath].join ' '
-          else                         # default document-glob
+          if globPath.match GlobChars
+            if qs.has_key?('Q') || qs.has_key?('q') # GREP files
+              nodeGrep Pathname.glob globPath
+            else
+              # GLOB parametric
+            end
+          else   # GLOB default document set
             globPath += query_hash if static_node? && !local_node?
             globPath += '.*'
           end

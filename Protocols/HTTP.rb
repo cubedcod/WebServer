@@ -227,7 +227,7 @@ class WebResource
       if local_node?
         p = parts[0]
         if !p
-          [302, {'Location' => '/d'}, []]
+          [302, {'Location' => '/h'}, []]
         elsif %w{m d h}.member? p              # goto current day/hour/min dir
           dateDir
         elsif path == '/favicon.ico'

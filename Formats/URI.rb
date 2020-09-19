@@ -2,7 +2,12 @@
 require 'linkeddata'
 class WebResource < RDF::URI
 
-  module URIs # URI constants
+  module URIs
+
+    GlobChars = /[\*\{\[]/
+
+    # common URIs
+
     W3       = 'http://www.w3.org/'
     Atom     = W3 + '2005/Atom#'
     LDP      = W3 + 'ns/ldp#'

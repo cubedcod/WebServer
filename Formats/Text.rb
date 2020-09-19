@@ -292,6 +292,7 @@ module Webize
           day = @base.parts[0..2].join('-') + 'T'
           lines = 0
           @doc.lines.grep(/^[^-]/).map{|msg|
+puts msg
             tokens = msg.split /\s+/
             time = tokens.shift
             if ['*','-!-'].member? tokens[0]
