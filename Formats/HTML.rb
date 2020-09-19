@@ -259,6 +259,7 @@ class WebResource
       graph.map{|uri, resource| # group resources by type
         (resource[Type]||[:untyped]).map{|type|
           type = type.to_s
+          type = MarkupMap[type] || type
           groups[type] ||= []
           groups[type].push resource }}
 
@@ -275,7 +276,6 @@ class WebResource
                          c: [uri_toolbar, "\n",
                              link[:prev, '&#9664;'], "\n", link[:next, '&#9654;'], "\n",
                              groups.map{|type, resources|
-                               type = MarkupMap[type] || type
                                if MarkupGroup.has_key? type
                                  MarkupGroup[type][resources, env]   # collection markup
                                else
