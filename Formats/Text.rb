@@ -292,13 +292,15 @@ module Webize
           day = @base.parts[0..2].join('-') + 'T'
           lines = 0
           @doc.lines.grep(/^[^-]/).map{|msg|
-puts msg
             tokens = msg.split /\s+/
             time = tokens.shift
-            if ['*','-!-'].member? tokens[0]
+            if ['*','-!-'].member? tokens[0] # actions, joins, parts
               nick = tokens[1]
               msg = tokens[2..-1].join ' '
               msg = '/me ' + msg if tokens[0] == '*'
+            elsif tokens[0].match? /^-.*:.*-$/ # notices
+              nick = tokens[0][1..tokens[0].index(':')-1]
+              msg = tokens[1..-1].join ' '
             else
               if re = tokens.join(' ').match(/<[\s@+*]*([^>]+)>\s*(.*)?/)
                 nick = re[1]
