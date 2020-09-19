@@ -286,9 +286,10 @@ module Webize
             yield subject, To, @base, graph
           }
         elsif @base.ext == 'irc' # irssi: /set autolog_path ~/web/%Y/%m/%d/%H/$tag.$0.irc
+          base = @base.to_s
           net, channame = @base.basename.split '.'
           channame = Rack::Utils.unescape_path(channame)[1..-1]
-          chan = (@base + '#' + channame).R
+          chan = (base + '#' + channame).R
           day = @base.parts[0..2].join('-') + 'T'
           lines = 0
           @doc.lines.grep(/^[^-]/).map{|msg|
@@ -308,11 +309,11 @@ module Webize
               end
             end
             timestamp = day + time
-            subject = '#' + channame + (lines += 1).to_s
+            subject = base + '#' + channame + (lines += 1).to_s
             yield subject, Type, (SIOC + 'InstantMessage').R
             yield subject, Date, timestamp
             yield subject, To, chan
-            yield subject, Creator, ('/irc/' + net + '/users/' + nick).R
+            yield subject, Creator, (dirname + '?q=' + nick + '&sort=date&view=table#' + nick).R
             yield subject, Content, Webize::HTML.format(msg.hrefs{|p,o| yield subject, p, o}, @base) if msg
           }
         else # basic text content
@@ -410,4 +411,46 @@ module Webize
       end
     end
   end
+end
+
+class WebResource
+
+  module HTML
+
+    def htmlGrep
+      graph = env[:graph]
+      qs = query_values || {}
+      q = qs['Q'] || qs['q']
+      return unless graph && q
+      abbreviated = !qs.has_key?('fullContent')
+
+      # query
+      wordIndex = {}
+      args = q.shellsplit rescue q.split(/\W/)
+      args.each_with_index{|arg,i| wordIndex[arg] = i }
+      pattern = /(#{args.join '|'})/i
+
+      # trim graph to matching resources
+      graph.map{|k,v|
+        graph.delete k unless (k.to_s.match pattern) || (v.to_s.match pattern)}
+
+      # trim content to matching lines
+      graph.values.map{|r|
+        (r[Content]||r[Abstract]||[]).map{|v|v.respond_to?(:lines) ? v.lines : nil}.flatten.compact.grep(pattern).yield_self{|lines|
+          r[Abstract] = lines[0..7].map{|line|
+            line.gsub(/<[^>]+>/,'')[0..512].gsub(pattern){|g| # mark up matches
+              HTML.render({_: :span, class: "w#{wordIndex[g.downcase]}", c: g})
+            }
+          } if lines.size > 0
+        }
+        r.delete Content if abbreviated
+      }
+
+      # CSS
+      graph['#abstracts'] = {Abstract => [HTML.render({_: :style, c: wordIndex.values.map{|i|
+                                                        ".w#{i} {background-color: #{'#%06x' % (rand 16777216)}; color: white}\n"}})]}
+    end
+
+  end
+
 end
