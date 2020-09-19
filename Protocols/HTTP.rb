@@ -18,6 +18,7 @@ class WebResource
 
     def cacheResponse
       nodes = nodeSet                   # find cached nodes
+puts :nodes, nodes
       if nodes.size == 1 && (nodes[0].static_node? || # single node and it's nontransformable or cached and requested formats match
                              (nodes[0].named_format == selectFormat && (nodes[0].named_format != 'text/html' || (query_values||{}).has_key?('notransform')))) # HTML is transformable without notransform argument
         nodes[0].fileResponse           # response on file

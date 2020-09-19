@@ -1,3 +1,4 @@
+
 %w(fileutils pathname shellwords).map{|d| require d }
 class WebResource
 
@@ -103,7 +104,6 @@ class WebResource
       else   # N ordered term
         cmd = "grep -ril -- #{Shellwords.escape args.join '.*'} #{file_arg}"
       end
-      #puts [:GREP, cmd].join ' '
       `#{cmd} | head -n 1024`.lines.map &:chomp
     end
 
@@ -114,7 +114,7 @@ class WebResource
       else
         qs = query_values || {}
         (if node.directory?
-         if qs['f'] && !qs['f'].empty?     # FIND
+         if qs['f'] && !qs['f'].empty? # FIND
            `find #{shellPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
          elsif qs['find'] && !qs['find'].empty? && path != '/' # FIND case-insensitive substring
            `find #{shellPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
@@ -127,18 +127,20 @@ class WebResource
         else
           globPath = fsPath
           if globPath.match GlobChars
-            if qs.has_key?('Q') || qs.has_key?('q') # GREP files
-              nodeGrep Pathname.glob globPath
+            if qs.has_key?('Q') || qs.has_key?('q')
+              nodeGrep Pathname.glob globPath # GREP within GLOB
             else
-              # GLOB parametric
+              Pathname.glob globPath # parametric GLOB
             end
-          else   # GLOB default document set
+          else # default document GLOB
             globPath += query_hash if static_node? && !local_node?
             globPath += '.*'
+            Pathname.glob globPath
           end
-          Pathname.glob globPath
-         end).map{|p| # join relative path to URI-space
-          join(p.to_s[hostDir.size..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env}
+         end).map{|p| # join path to URI-space
+          puts p,          join(p.to_s[hostDir.size..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R(env)
+          join(p.to_s[hostDir.size..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env
+        }
       end
     end
 
