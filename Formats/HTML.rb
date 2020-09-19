@@ -277,13 +277,13 @@ class WebResource
                              groups.map{|type, resources|
                                type = MarkupMap[type] || type
                                if MarkupGroup.has_key? type
-                                 MarkupGroup[type][resources, env]   # typed-collection markup
+                                 MarkupGroup[type][resources, env]   # collection markup
                                else
                                  if env[:view] == 'table'
                                    HTML.tabular resources, env       # tabular view
                                  else
                                    resources.map{|resource|
-                                     HTML.markup nil, resource, env} # singleton-resource markup
+                                     HTML.markup nil, resource, env} # singleton markup
                                  end
                                end},
                              expander,
