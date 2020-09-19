@@ -1,11 +1,6 @@
 http://localhost:8000/forum.solidproject.org/t/state-of-the-art-for-querying-large-containers/3320?view=table&sort=date better RDFa blank-node rendering
 http://drudgereport.com/ link timestamps
-http://localhost:8000/web.mit.edu/Saltzer/www/publications/endtoend/endtoend.pdf (pdf webize)
-store fetch status (incl redirects) & last-update of feeds to aid list gc/maintenance (autoupdate source loc on redirect?)
 hide previously-shown links on news articles (site-nav)
-gemini protocol
-ICAP protocol
-searchbox rdfa
-link page into downloadable storage-dir. factor out download hook w/ path template
-add inline images and mpv window for video to X11/Wayland Gemini browsers
+link page into downloadable storage-dir. factor out download hook (w/ path template?)
+
 

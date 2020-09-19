@@ -387,11 +387,11 @@ w.bos.gl wired.trib.al
       if username = msg.css('.chat-item__username')[0]
         yield subject, Creator, ('https://github.com/' + username.inner_text.sub(/^@/,'')).R
       end
-      yield subject, Content, (Webize::HTML.format msg.css('.chat-item__text')[0], self)
       if image = msg.css('.avatar__image')[0]
         yield subject, Image, image['src'].R
       end
       yield subject, Date, '%03d' % messageCount += 1
+      yield subject, Content, (Webize::HTML.format msg.css('.chat-item__text')[0], self)
       msg.remove }
     doc.css('header').map &:remove
   end
