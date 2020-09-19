@@ -306,11 +306,11 @@ class WebResource
           post.css('time').map{|date|
             yield subject, Date, date['datetime'], graph }
 
-          post.css('.e-content').map{|msg|
-            yield subject, Content, Webize::HTML.format(msg.inner_html, self), graph }
-
           post.css('img').map{|img|
             yield subject, Image, img['src'].R, graph }
+
+          post.css('.e-content').map{|msg|
+            yield subject, Content, Webize::HTML.format(msg, self), graph }
 
           post.remove
 

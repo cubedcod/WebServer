@@ -283,8 +283,6 @@ w.bos.gl wired.trib.al
       post.css('a.bigusername').map{|user|
         yield subject, Creator, (join user['href'])
         yield subject, Creator, user.inner_text }
-      post.css("div[id^='post_message']").map{|content|
-        yield subject, Content, Webize::HTML.format(content.inner_html, self)}
       if headers = post.css('td.thead > div.normal')
         if datetime = headers[1]
           datetime = datetime.inner_text.strip
@@ -306,6 +304,8 @@ w.bos.gl wired.trib.al
           yield subject, Date, "#{year}-#{'%02d' % month}-#{'%02d' % day}T#{'%02d' % hour}:#{'%02d' % min}:00+00:00"
         end
       end
+      post.css("div[id^='post_message']").map{|content|
+        yield subject, Content, Webize::HTML.format(content, self)}
       post.remove }
     ['#fixed_sidebar'].map{|s|doc.css(s).map &:remove}
   end
@@ -338,8 +338,6 @@ w.bos.gl wired.trib.al
         yield subject, Link, join(title['href'])
         title.remove}
 
-      yield subject, Content, Webize::HTML.format((item.css('.comment-body')[0] || item).inner_html, self)
-
       if time = item.css('[datetime]')[0]
         yield subject, Date, time['datetime']
       end
@@ -350,6 +348,8 @@ w.bos.gl wired.trib.al
       end
 
       yield subject, To, self
+      yield subject, Content, Webize::HTML.format((item.css('.comment-body')[0] || item), self)
+
       item.remove
     }
   end
@@ -387,7 +387,7 @@ w.bos.gl wired.trib.al
       if username = msg.css('.chat-item__username')[0]
         yield subject, Creator, ('https://github.com/' + username.inner_text.sub(/^@/,'')).R
       end
-      yield subject, Content, (Webize::HTML.format msg.css('.chat-item__text')[0].inner_html, self)
+      yield subject, Content, (Webize::HTML.format msg.css('.chat-item__text')[0], self)
       if image = msg.css('.avatar__image')[0]
         yield subject, Image, image['src'].R
       end
@@ -434,7 +434,7 @@ w.bos.gl wired.trib.al
         end
 
         if s = rc.css('div.s')[0]
-          yield subject, Content, Webize::HTML.format(s.inner_html, self)
+          yield subject, Content, Webize::HTML.format(s, self)
           rc.remove
         end
 
@@ -471,7 +471,6 @@ w.bos.gl wired.trib.al
       subject = base + date['href']
       comment.css('.reply').remove
       yield subject, Type, Post.R
-      yield subject, Content, (Webize::HTML.format comment.inner_html, self)
       if user = post.css('.hnuser')[0]
         yield subject, Creator, (base + user['href']).R
         yield subject, Creator, user.inner_text
@@ -487,6 +486,7 @@ w.bos.gl wired.trib.al
       if time = Chronic.parse(date.inner_text.sub(/^on /,''))
         yield subject, Date, time.iso8601
       end
+      yield subject, Content, (Webize::HTML.format comment, self)
       post.remove }
   end
 
@@ -558,7 +558,7 @@ w.bos.gl wired.trib.al
       yield subject, Creator, author.inner_text, graph
       yield subject, Image, (join avatar.css('img')[0]['src']), graph
       yield subject, Date, Time.parse(comment.css('.byline > span[title]')[0]['title']).iso8601, graph
-      yield subject, Content, (Webize::HTML.format comment.css('.comment_text')[0].inner_html, self), graph
+      yield subject, Content, (Webize::HTML.format comment.css('.comment_text')[0], self), graph
 
       comment.remove }
   end
