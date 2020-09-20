@@ -287,11 +287,11 @@ puts [:source_highlight, @base, @lang].join ' '
             yield subject, To, @base, graph
           }
         elsif @base.ext == 'irc' # irssi: /set autolog_path ~/web/%Y/%m/%d/%H/$tag.$0.irc
-          base = @base.to_s
-          net, channame = @base.basename.split '.'
-          channame = Rack::Utils.unescape_path(channame)[1..-1]
-          chan = (base + '#' + channame).R
+          network, channame = @base.basename.split '.'
+          channame = Rack::Utils.unescape_path(channame).gsub('#','')
+          chan = ('#' + channame).R
           day = @base.parts[0..2].join('-') + 'T'
+          hourslug = @base.parts[0..3].join
           lines = 0
           @doc.lines.grep(/^[^-]/).map{|msg|
             tokens = msg.split /\s+/
@@ -310,7 +310,7 @@ puts [:source_highlight, @base, @lang].join ' '
               end
             end
             timestamp = day + time
-            subject = base + '#' + channame + (lines += 1).to_s
+            subject = '#' + channame + hourslug + (lines += 1).to_s
             yield subject, Type, (SIOC + 'InstantMessage').R
             yield subject, Date, timestamp
             yield subject, To, chan

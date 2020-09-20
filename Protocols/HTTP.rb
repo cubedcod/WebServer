@@ -23,7 +23,6 @@ class WebResource
         nodes[0].fileResponse           # response on file
       else                              # load graph
         (env[:summary] ? nodes.map(&:summary) : nodes).map &:loadRDF
-        puts env[:repository].size, nodes.size, nodes
         saveRDF if env[:updates]
         graphResponse                   # graph response
       end

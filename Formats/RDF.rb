@@ -104,7 +104,7 @@ class WebResource
             miniGraph << RDF::Statement.new(subject.R,predicate.R,o)} # triple in summary-graph
         end} if [Image, Abstract, Title, Link].find{|p|resource.has_key? p}}
 
-    summary_node.writeFile miniGraph.dump(:turtle, standard_prefixes: true) # store summary
+    summary_node.writeFile miniGraph.dump(:turtle, base_uri: self, standard_prefixes: true) # store summary
     summary_node
   end
 
