@@ -40,9 +40,11 @@ class WebResource
         loc = fsPath
         if loc.index '#' # path contains chars disallowed in path portion of URI
           if reader = RDF::Reader.for(**options) # initialize reader
+#            puts "READ #{fsPath}"
             reader.new(File.open(loc).read, base_uri: self){|_|graph << _} # read RDF
           end
         else
+#          puts "LOAD #{fsPath}"
           graph.load 'file:' + loc, **options # load file: URI
         end
       end
@@ -86,7 +88,7 @@ class WebResource
   def summary
     return self if basename.match(/^(index|README)/) || !node.exist? || node.size < 2048 # don't summarize README or index files or small nodes
 
-    summary_node = join(['.preview', basename, ext == 'ttl' ? nil : 'ttl'].compact.join '.').R
+    summary_node = join(['.preview', basename, ext == 'ttl' ? nil : 'ttl'].compact.join '.').R env
     🐢 = summary_node.fsPath                                               # summary file
     return summary_node if File.exist?(🐢) && File.mtime(🐢) >= node.mtime # summary up to date
 
@@ -100,7 +102,7 @@ class WebResource
         if o = resource[predicate]
           (o.class == Array ? o : [o]).map{|o|       # summary objects
             miniGraph << RDF::Statement.new(subject.R,predicate.R,o)} # triple in summary-graph
-        end}}
+        end} if [Image, Abstract, Title, Link].find{|p|resource.has_key? p}}
 
     summary_node.writeFile miniGraph.dump(:turtle, standard_prefixes: true) # store summary
     summary_node
