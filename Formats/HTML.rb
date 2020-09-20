@@ -243,7 +243,7 @@ class WebResource
       env[:sort] ||= qs['sort']
       env[:colors] ||= {}
       env[:links][:up] = [File.dirname(env['REQUEST_PATH']), '/', (query ? ['?', query] : nil)].join unless path == '/' # pointer to container
-      if env[:summary] || ((qs.has_key?('Q')||qs.has_key?('q')) && !qs.has_key?('fullContent'))                         # pointer to unabbreviated form
+      if env[:summary]                                                                                                  # pointer to unabridged content
         expanded = HTTP.qs qs.merge({'fullContent' => nil})
         env[:links][:full] = expanded
         expander = {_: :a, id: :expand, c: '&#11206;', href: expanded}

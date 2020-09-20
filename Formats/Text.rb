@@ -423,7 +423,6 @@ class WebResource
       qs = query_values || {}
       q = qs['Q'] || qs['q']
       return unless graph && q
-      abbreviated = !qs.has_key?('fullContent')
 
       # query
       wordIndex = {}
@@ -444,7 +443,6 @@ class WebResource
             }
           } if lines.size > 0
         }
-        r.delete Content if abbreviated
       }
 
       # CSS
