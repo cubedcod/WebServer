@@ -115,6 +115,7 @@ module Webize
         @lang = 'html' if @base.ext == 'erb'
         @lang = 'ruby' if options[:content_type] == 'text/x-ruby'
         @lang = 'shell' if options[:content_type] == 'text/x-shellscript'
+puts [:source_highlight, @base, @lang].join ' '
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)

@@ -60,46 +60,50 @@ class WebResource
     return self unless repository || env[:repository]
     (repository || env[:repository]).each_graph.map{|graph|
       graphURI = (graph.name || self).R
-      turtle = graphURI.turtleFile                                                               # storage location
-      unless File.exist? turtle
-        FileUtils.mkdir_p File.dirname turtle
-        RDF::Writer.for(:turtle).open(turtle){|f|f << graph}                                     # write Turtle
+      fsBase = graphURI.fsPath                                                                  # storage location
+      fsBase += '/index' if fsBase[-1] == '/'
+      🐢 = fsBase + '.ttl'
+      unless File.exist? 🐢
+        FileUtils.mkdir_p File.dirname 🐢
+        RDF::Writer.for(:turtle).open(🐢){|f|f << graph}                                        # write 🐢
         puts "\e[32m#{'%2d' % graph.size}⋮🐢 \e[1m#{'http://localhost:8000' if !graphURI.host}#{graphURI}\e[0m" if path != graphURI.path
       end
       if !graphURI.to_s.match?(/^\/\d\d\d\d\/\d\d\/\d\d/) && timestamp = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value # find timestamp if graph not on timeline
-        tlink = [timestamp.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), # hour-dir
-                %w{host path query}.map{|a|graphURI.send(a).yield_self{|p|p&&p.split(/[\W_]/)}}].# graph name-slugs for timeline link
-                  flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.')[0..123] + '.ttl'
-        unless File.exist? tlink                                                                 # link node to timeline
-          FileUtils.mkdir_p File.dirname tlink
-          FileUtils.ln turtle, tlink rescue nil
+        🕒 = [timestamp.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'),   # hour-dir
+              %w{host path query}.map{|a|graphURI.send(a).yield_self{|p|p&&p.split(/[\W_]/)}}]. # graph name-slugs for timeline link
+               flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.')[0..123] + '.ttl'
+        unless File.exist? 🕒                                                                   # link 🐢 to timeline
+          FileUtils.mkdir_p File.dirname 🕒
+          FileUtils.ln 🐢, 🕒 rescue nil
         end
       end}
     self
   end
 
-  # file (big) -> Turtle file (small)
+  SummaryFields = [Abstract, Creator, Date, Image, LDP+'contains', Link, Title, To, Type, Video]
+
+  # node (big) -> node (small)
   def summary
-    return self if basename.match(/^(index|README)/) || !node.exist? # don't summarize index or README file
-    s = ('/summary/' + fsPath).R.turtleFile          # summary file
-    unless File.exist?(s) && File.mtime(s) >= node.mtime # summary up to date
-      fullGraph = RDF::Repository.new; miniGraph = RDF::Repository.new # allocate graph storage
-      loadRDF graph: fullGraph                       # read RDF
-      treeFromGraph(fullGraph).values.map{|resource| # bind subject
-        subject = (resource['uri'] || '').R
-        ps = [Abstract, Creator, Date, Image, LDP+'contains', Link, Title, To, Type, Video]
-        type = resource[Type]
-        type = [type] unless type.class == Array
-        ps.push Content if type.member? (SIOC + 'MicroblogPost').R
-        ps.map{|p|                                   # bind predicate
-          if o = resource[p] ; p = p.R
-            (o.class == Array ? o : [o]).map{|o|     # bind object
-              miniGraph << RDF::Statement.new(subject,p,o)} # triple -> summary-graph
-          end}}
-      FileUtils.mkdir_p File.dirname s               # allocate fs-container
-      RDF::Writer.for(:turtle).open(s){|f|f << miniGraph} # write summary
-    end
-    ('/' + s).R env
+    return self if basename.match(/^(index|README)/) || !node.exist? || node.size < 2048 # don't summarize README or index files or small nodes
+
+    summary_node = join(['.preview', basename, ext == 'ttl' ? nil : 'ttl'].compact.join '.').R
+    🐢 = summary_node.fsPath                                               # summary file
+    return summary_node if File.exist?(🐢) && File.mtime(🐢) >= node.mtime # summary up to date
+
+    fullGraph = RDF::Repository.new # full graph
+    miniGraph = RDF::Repository.new # summary graph
+    loadRDF graph: fullGraph        # load full graph
+
+    # summarize graph
+    treeFromGraph(fullGraph).map{|subject, resource| # all subjects
+      SummaryFields.map{|predicate|                  # summary predicates
+        if o = resource[predicate]
+          (o.class == Array ? o : [o]).map{|o|       # summary objects
+            miniGraph << RDF::Statement.new(subject.R,predicate.R,o)} # triple in summary-graph
+        end}}
+
+    summary_node.writeFile miniGraph.dump(:turtle, standard_prefixes: true) # store summary
+    summary_node
   end
 
   # graph -> tree (s -> p -> o) structure used by HTML + Feed serializers
@@ -122,12 +126,6 @@ class WebResource
       end}
 
     tree
-  end
-
-  def turtleFile
-    base  = fsPath
-    base += '/index' if base[-1] == '/'
-    base +  '.ttl'
   end
 
   include URIs

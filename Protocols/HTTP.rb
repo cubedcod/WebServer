@@ -18,6 +18,7 @@ class WebResource
 
     def cacheResponse
       nodes = nodeSet                   # find cached nodes
+      puts nodes
       if nodes.size == 1 && (nodes[0].static_node? || # single node and it's nontransformable or cached and requested formats match
                              (nodes[0].named_format == selectFormat && (nodes[0].named_format != 'text/html' || (query_values||{}).has_key?('notransform')))) # HTML is transformable without notransform argument
         nodes[0].fileResponse           # response on file
@@ -206,14 +207,12 @@ class WebResource
         end
       when /304/ # Not Modified
         [304, {}, []]
-      when /4\d\d/ # Not Found/Allowed
+      when /300|[45]\d\d/ # Not Found/Allowed or upstream error
         env[:origin_status] = status.to_i
         if e.io.meta['content-type']&.match? /text\/html/
-          (env[:repository] ||= RDF::Repository.new) << RDF::Statement.new(self, Content.R, Webize::HTML.format(HTTP.decompress(e.io.meta, e.io.read), self))
+          (env[:repository] ||= RDF::Repository.new) << RDF::Statement.new(self, Content.R, Webize::HTML.format(HTTP.decompress(e.io.meta, e.io.read), self)) # upstream message
         end
         cacheResponse
-      when /300|5\d\d/ # upstream multiple choices or server error
-        [status.to_i, (headers e.io.meta), [e.io.read]]
       else
         raise
       end

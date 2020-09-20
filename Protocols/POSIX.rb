@@ -8,7 +8,7 @@ class WebResource
     graph << RDF::Statement.new(subject, Type.R, (LDP + 'Container').R)
     graph << RDF::Statement.new(subject, Title.R, basename)
     graph << RDF::Statement.new(subject, Date.R, node.stat.mtime.iso8601)
-    nodes = node.children
+    nodes = node.children.select{|n|n.basename.to_s[0] != '.'}
     if nodes.size <= 8
       nodes.map{|child|                      # point to all child-nodes
         graph << RDF::Statement.new(subject, (LDP+'contains').R, (subject.join child.basename('.ttl').to_s.gsub(' ','%20').gsub('#','%23')))}
@@ -122,7 +122,7 @@ class WebResource
            nodeGrep
          else                          # LS
            env[:summary] = !qs.has_key?('fullContent')
-           (path=='/' && local_node?) ? [node] : [node, *node.children]
+           (path=='/' && local_node?) ? [node] : [node, *node.children.select{|n|n.basename.to_s[0] != '.'}]
          end
         else
           globPath = fsPath
@@ -138,7 +138,6 @@ class WebResource
             Pathname.glob globPath
           end
          end).map{|p| # join path to URI-space
-          puts p,          join(p.to_s[hostDir.size..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R(env)
           join(p.to_s[hostDir.size..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env
         }
       end
