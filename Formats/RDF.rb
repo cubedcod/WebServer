@@ -6,13 +6,13 @@ class WebResource
   def loadRDF graph: env[:repository] ||= RDF::Repository.new
     if node.file?
       stat = node.stat
-      unless ext == 'ttl'                                  # file-metadata triples
+      unless ['🐢','ttl'].member? ext                     # file metadata
         graph << RDF::Statement.new(self, Title.R, Rack::Utils.unescape_path(basename))
         graph << RDF::Statement.new(self, Date.R, stat.mtime.iso8601)
         graph << RDF::Statement.new(self, (Stat + 'size').R, stat.size)
       end
       if %w(mp4 mkv webm).member? ext
-        graph << RDF::Statement.new(self, Type.R, Video.R) # video-metadata triples
+        graph << RDF::Statement.new(self, Type.R, Video.R) # video-file metadata
       elsif %w(m4a mp3 ogg opus wav).member? ext
         tag_triples graph
       else # read using RDF::Reader
@@ -90,7 +90,7 @@ class WebResource
   def summary
     return self if basename.match(/^(index|README)/) || !node.exist? # don't summarize README or index files or dangling symlinks
 
-    summary_node = join(['.preview', basename, ['🐢','ttl'].member?('ext') ? nil : '🐢'].compact.join '.').R env
+    summary_node = join(['.preview', basename, ['🐢','ttl'].member?(ext) ? nil : '🐢'].compact.join '.').R env
     file = summary_node.fsPath                                                 # summary file
     return summary_node if File.exist?(file) && File.mtime(file) >= node.mtime # summary up to date
 
@@ -112,7 +112,7 @@ class WebResource
 
   # turtle representation of node
   def 🐢
-    return self if ['🐢','ttl'].member? 'ext'
+    return self if ['🐢','ttl'].member? ext
     turtle_node = join(['', basename, '🐢'].join '.').R env
     file = turtle_node.fsPath                                                 # summary file
     return turtle_node if File.exist?(file) && File.mtime(file) >= node.mtime # summary up to date

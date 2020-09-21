@@ -1,3 +1,4 @@
+# coding: utf-8
 
 %w(fileutils pathname shellwords).map{|d| require d }
 class WebResource
@@ -38,6 +39,8 @@ class WebResource
          if parts[0] == 'msg'  # Message-ID -> path
            id = Digest::SHA2.hexdigest Rack::Utils.unescape_path parts[1]
            ['/mail/', id[0..1], '/', id[2..-1]]
+         elsif path[-1] == '🐢'
+           '/cache' + Rack::Utils.unescape_path(path)
          else                  # direct map
            Rack::Utils.unescape_path path
          end                                   # remote path:
