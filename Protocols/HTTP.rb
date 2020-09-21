@@ -22,7 +22,8 @@ class WebResource
                              (nodes[0].named_format == selectFormat && (nodes[0].named_format != 'text/html' || (query_values||{}).has_key?('notransform')))) # HTML is transformable without notransform argument
         nodes[0].fileResponse           # response on file
       else                              # load graph
-        (env[:summary] ? nodes.map(&:summary) : nodes).map &:loadRDF
+        nodes.map{|n|
+          env[:summary] ? n.summary : n.🐢}.map &:loadRDF
         saveRDF if env[:updates]
         graphResponse                   # graph response
       end

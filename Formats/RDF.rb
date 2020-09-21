@@ -26,6 +26,8 @@ class WebResource
                    :plaintext
                  elsif %w(gemfile makefile rakefile).member? basename.downcase
                    :sourcecode
+                 elsif ext == '🐢'
+                   :🐢
                     end
           options[:format] = format
         else # no format hints found
@@ -64,10 +66,10 @@ class WebResource
       graphURI = (graph.name || self).R
       fsBase = graphURI.fsPath                                                                  # storage location
       fsBase += '/index' if fsBase[-1] == '/'
-      🐢 = fsBase + '.ttl'
-      unless File.exist? 🐢
-        FileUtils.mkdir_p File.dirname 🐢
-        RDF::Writer.for(:turtle).open(🐢){|f|f << graph}                                        # write 🐢
+      f = fsBase + '.ttl'
+      unless File.exist? f
+        FileUtils.mkdir_p File.dirname f
+        RDF::Writer.for(:turtle).open(f){|f|f << graph}                                        # write 🐢
         puts "\e[32m#{'%2d' % graph.size}⋮🐢 \e[1m#{'http://localhost:8000' if !graphURI.host}#{graphURI}\e[0m" if path != graphURI.path
       end
       if !graphURI.to_s.match?(/^\/\d\d\d\d\/\d\d\/\d\d/) && timestamp = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value # find timestamp if graph not on timeline
@@ -76,7 +78,7 @@ class WebResource
                flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.')[0..123] + '.ttl'
         unless File.exist? 🕒                                                                   # link 🐢 to timeline
           FileUtils.mkdir_p File.dirname 🕒
-          FileUtils.ln 🐢, 🕒 rescue nil
+          FileUtils.ln f, 🕒 rescue nil
         end
       end}
     self
@@ -84,13 +86,13 @@ class WebResource
 
   SummaryFields = [Abstract, Creator, Date, Image, LDP+'contains', Link, Title, To, Type, Video]
 
-  # node (big) -> node (small)
+  # summary node
   def summary
-    return self if basename.match(/^(index|README)/) || !node.exist? || node.size < 2048 # don't summarize README or index files or small nodes
+    return self if basename.match(/^(index|README)/) || !node.exist? # don't summarize README or index files or dangling symlinks
 
-    summary_node = join(['.preview', basename, ext == 'ttl' ? nil : 'ttl'].compact.join '.').R env
-    🐢 = summary_node.fsPath                                               # summary file
-    return summary_node if File.exist?(🐢) && File.mtime(🐢) >= node.mtime # summary up to date
+    summary_node = join(['.preview', basename, ['🐢','ttl'].member?('ext') ? nil : '🐢'].compact.join '.').R env
+    file = summary_node.fsPath                                                 # summary file
+    return summary_node if File.exist?(file) && File.mtime(file) >= node.mtime # summary up to date
 
     fullGraph = RDF::Repository.new # full graph
     miniGraph = RDF::Repository.new # summary graph
@@ -106,6 +108,18 @@ class WebResource
 
     summary_node.writeFile miniGraph.dump(:turtle, base_uri: self, standard_prefixes: true) # store summary
     summary_node
+  end
+
+  # turtle representation of node
+  def 🐢
+    return self if ['🐢','ttl'].member? 'ext'
+    turtle_node = join(['', basename, '🐢'].join '.').R env
+    file = turtle_node.fsPath                                                 # summary file
+    return turtle_node if File.exist?(file) && File.mtime(file) >= node.mtime # summary up to date
+    graph = RDF::Repository.new                                               # read RDF
+    loadRDF graph: graph
+    turtle_node.writeFile graph.dump(:turtle, base_uri: self, standard_prefixes: true) # store turtle
+    turtle_node
   end
 
   # graph -> tree (s -> p -> o) structure used by HTML + Feed serializers
