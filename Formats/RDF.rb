@@ -26,8 +26,8 @@ class WebResource
                    :plaintext
                  elsif %w(gemfile makefile rakefile).member? basename.downcase
                    :sourcecode
-                 elsif ext == '🐢'
-                   :🐢
+                 elsif %w(ttl 🐢).member? ext
+                   :turtle
                     end
           options[:format] = format
         else # no format hints found
@@ -53,9 +53,6 @@ class WebResource
     elsif node.directory?                     # directory
       dir_triples graph
     end
-    self
-  rescue RDF::FormatError => e
-    puts e.message,"RDF::FormatError :: #{mime} :: #{fsPath}"
     self
   end
 

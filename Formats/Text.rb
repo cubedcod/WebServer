@@ -329,18 +329,6 @@ puts [:source_highlight, @base, @lang].join ' '
     end
   end
 
-  module Turtle
-    class Format < RDF::Turtle::Format
-      content_type 'text/turtle', extension: :🐢
-      content_encoding 'utf-8'
-      reader { RDF::Turtle::Reader }
-      writer { RDF::Turtle::Writer }
-      def self.symbols
-        [:🐢]
-      end
-    end
-  end
-
   module VTT
     class Format < RDF::Format
       content_type 'text/vtt', :extension => :vtt
