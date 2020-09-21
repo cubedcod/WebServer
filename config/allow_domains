@@ -13,7 +13,6 @@ api2.weather.com
 api3.weather.com
 api-v2.soundcloud.com
 cdnjs.cloudflare.com
-clients2.google.com
 edge.api.brightcove.com
 encrypted-tbn0.gstatic.com
 entitlement.auth.adobe.com
@@ -23,8 +22,6 @@ gql.twitch.tv
 graphql.api.dailymotion.com
 jobs.lever.co
 .hls.ttvnw.net
-maps.googleapis.com
-maps.gstatic.com
 .myworkdayjobs.com
 news.yahoo.com
 .nextdoor.com
