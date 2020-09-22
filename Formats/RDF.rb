@@ -16,9 +16,10 @@ class WebResource
       elsif %w(m4a mp3 ogg opus wav).member? ext           # audio-file metadata
         tag_triples graph
       else # read w/ RDF::Reader
-        options = {base_uri: self} # reader options
-        # format hints in name prefix/basename/location
-        if format = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # email files w/ procmail PREFIX or sent-folder location
+        options = {}
+        options[:base_uri] = self
+        # format hints
+        if format = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # email procmail PREFIX or maildir containment
                    :mail
                  elsif ext.match? /^html?$/
                    :html
@@ -29,25 +30,19 @@ class WebResource
                  elsif %w(ttl 🐢).member? ext
                    :turtle
                     end
-          options[:format] = format
-        else # no format hints found
-          if ext.empty? # no extension. ask FILE(1)
-            mime = `file -b --mime-type #{shellPath}`.chomp
-            options[:format] = :plaintext if mime == 'text/plain'
-            options[:content_type] = mime # format from FILE(1)
-          elsif mime = named_format
-            options[:content_type] = mime # format from extension
-          end
+        elsif ext.empty? # no extension. ask FILE(1)
+          mime = `file -b --mime-type #{shellPath}`.chomp
+          format = :plaintext if mime == 'text/plain'
+          options[:content_type] = mime # format from FILE(1)
+        elsif mime = named_format
+          options[:content_type] = mime # format from extension
         end
-        loc = fsPath
-        if loc.index '#' # path contains chars disallowed in path portion of URI
-          if reader = RDF::Reader.for(**options) # initialize reader
-            reader.new(File.open(loc).read, base_uri: self){|_|graph << _} # read RDF
-          else
-            puts :no_reader, loc, options
-          end
+        file = fsPath
+        if file.index '#'
+          (format ? RDF::Reader.for(format) : RDF::Reader.for(**options)).new(File.open(file).read, **options){|_|graph << _} # load path
         else
-          graph.load 'file:' + loc, **options # load file: URI
+          options[:format] = format if format
+          graph.load 'file:' + file, **options # load fileURI
         end
       end
     elsif node.directory?                     # directory
