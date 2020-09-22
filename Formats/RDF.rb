@@ -5,17 +5,17 @@ class WebResource
   # local node -> RDF::Repository
   def loadRDF graph: env[:repository] ||= RDF::Repository.new
     if node.file?
-      stat = node.stat
       unless ['🐢','ttl'].member? ext                     # file metadata
+        stat = node.stat
         graph << RDF::Statement.new(self, Title.R, Rack::Utils.unescape_path(basename))
         graph << RDF::Statement.new(self, Date.R, stat.mtime.iso8601)
         graph << RDF::Statement.new(self, (Stat + 'size').R, stat.size)
       end
       if %w(mp4 mkv webm).member? ext
         graph << RDF::Statement.new(self, Type.R, Video.R) # video-file metadata
-      elsif %w(m4a mp3 ogg opus wav).member? ext
+      elsif %w(m4a mp3 ogg opus wav).member? ext           # audio-file metadata
         tag_triples graph
-      else # read using RDF::Reader
+      else # read w/ RDF::Reader
         options = {base_uri: self} # reader options
         # format hints in name prefix/basename/location
         if format = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # email files w/ procmail PREFIX or sent-folder location
@@ -42,11 +42,11 @@ class WebResource
         loc = fsPath
         if loc.index '#' # path contains chars disallowed in path portion of URI
           if reader = RDF::Reader.for(**options) # initialize reader
-#            puts "READ #{fsPath}"
             reader.new(File.open(loc).read, base_uri: self){|_|graph << _} # read RDF
+          else
+            puts :no_reader, loc, options
           end
         else
-#          puts "LOAD #{fsPath}"
           graph.load 'file:' + loc, **options # load file: URI
         end
       end
