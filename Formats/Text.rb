@@ -93,15 +93,13 @@ module Webize
 
   module Sourcecode
     class Format < RDF::Format
-      content_type 'application/javascript',
+      content_type 'application/ruby',
                    aliases: %w(
-                   application/x-javascript;q=0.8
-                   text/javascript;q=0.8
                    text/x-perl;q=0.8
                    text/x-ruby;q=0.8
                    text/x-shellscript;q=0.8
                    ),
-                   extensions: [:bash, :c, :cpp, :erb, :gemspec, :go, :h, :hs, :js, :pl, :proto, :py, :rb, :sh]
+                   extensions: [:bash, :c, :cpp, :erb, :gemspec, :go, :h, :hs, :pl, :proto, :py, :rb, :sh]
       content_encoding 'utf-8'
       reader { Reader }
     end
@@ -115,7 +113,6 @@ module Webize
         @lang = 'html' if @base.ext == 'erb'
         @lang = 'ruby' if options[:content_type] == 'text/x-ruby'
         @lang = 'shell' if options[:content_type] == 'text/x-shellscript'
-puts [:source_highlight, @base, @lang].join ' '
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)

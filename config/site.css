@@ -5,7 +5,7 @@
 #prev, #next {position: fixed; height: 100%; background-color: #222}
 #prev, #next, #expand {font-size: 1.9em; color: #eee}
 #prev:hover, #next:hover {background-color: #333}
-.abstract {background-color: #aaa; color: #fff; border-radius: .3em}
+.abstract {background-color: #bbb; color: #000; border-radius: .3em}
 .breadcrumb > span {font-size: 1.4em; color: #888}
 .breadcrumb {color: #eee}
 .container .body {border-radius: 0 .4em .4em .4em; width: 100%; border-width: .1em}
