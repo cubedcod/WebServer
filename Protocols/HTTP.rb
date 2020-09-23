@@ -18,13 +18,13 @@ class WebResource
 
     def cacheResponse
       nodes = nodeSet                   # find cached nodes
-      if nodes.size == 1 && (nodes[0].static_node? || # single node and it's nontransformable or cached and requested formats match
-                             (nodes[0].named_format == selectFormat && (nodes[0].named_format != 'text/html' || (query_values||{}).has_key?('notransform')))) # HTML is transformable without notransform argument
-        nodes[0].fileResponse           # response on file
+      if nodes.size == 1 && (nodes[0].static_node? || # one node and it's nontransformable or cached and requested formats match
+                             (nodes[0].named_format == selectFormat && (nodes[0].named_format != 'text/html' || (query_values||{}).has_key?('notransform')))) # HTML transformable w/o 'notransform' flag
+        nodes[0].fileResponse           # static response on file
       else                              # load graph
         nodes.map{|n|
-          env[:summary] ? n.summary : n.🐢}.map &:loadRDF
-        saveRDF if env[:updates]
+          env[:summary] ? n.summary : n.🐢}.map &:loadRDF # RDFize and summarize
+        saveRDF if env[:updates]        # cache new graph-data found in RDFize process
         graphResponse                   # graph response
       end
     end
@@ -34,7 +34,7 @@ class WebResource
       uri = RDF::URI('//' + env['HTTP_HOST']).join(env['REQUEST_PATH']).R env # resource URI
       uri.scheme = uri.local_node? ? 'http' : 'https'                         # request scheme
       uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading + consecutive & from qs so URI library doesn't freak out
-      env.update({base: uri, feeds: [], links: {}, resp: {}, 'HTTP_COOKIE' => 'chocolate'}) # environment
+      env.update({base: uri, feeds: [], links: {}, resp: {}, 'HTTP_COOKIE' => '🍪'}) # environment
       uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body| # dispatch request
         format = uri.format_icon head['Content-Type']                 # log response
         color = env[:deny] ? '31;1' : (format_color format)
@@ -42,8 +42,8 @@ class WebResource
           puts [env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]), (status_icon status), format,
                 env[:repository] ? (env[:repository].size.to_s + '⋮') : nil,
                 env['HTTP_REFERER'] ? ["\e[#{color}m", env['HTTP_REFERER'], "\e[0m→"] : nil,
-                "\e[#{color}#{env['HTTP_REFERER'] && !env['HTTP_REFERER'].index(uri.host) && ';7' || ''}m",
-                uri, "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil,
+                "\e[#{color}#{env['HTTP_REFERER'] && !env['HTTP_REFERER'].index(env[:base].host) && ';7' || ''}m",
+                env[:base], "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil,
                 [env['HTTP_ACCEPT'], env[:origin_format], head['Content-Type']].compact.join(' → ')
                ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
         end
@@ -141,6 +141,7 @@ class WebResource
     # fetch from remote                            options:
     def fetchHTTP thru: true,                        # pass HTTP response to caller
                   transformable: !(query_values||{}).has_key?('notransform') # allow transformation: format conversions & same-format (HTML reformat, code pretty-print) rewrites
+puts headers
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                            # upstream metadata
         if response.status.to_s.match? /206/         # partial response
@@ -239,6 +240,7 @@ class WebResource
           timeMeta                             # reference temporally-adjacent nodes
           cacheResponse                        # local graph-node
         else
+          env['HTTP_REFERER'] = env['HTTP_REFERER'].R.remoteURL.to_s if env['HTTP_REFERER']
           (env[:base] = remoteURL).hostHandler # host handler (rebased on local)
         end
       else
@@ -288,7 +290,7 @@ class WebResource
           t                                       # token
         }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
         head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base colors connection downloadable feeds fetched graph host images keep-alive links origin-format origin-status path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles remote-addr repository request-method request-path request-uri resp script-name searchable server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # external multi-hop headers
-      head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # accept Turtle
+      #head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # accept Turtle
       case host
       when /wsj\.com$/
         head['Referer'] = 'http://drudgereport.com/'
