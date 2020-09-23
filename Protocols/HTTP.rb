@@ -141,7 +141,6 @@ class WebResource
     # fetch from remote                            options:
     def fetchHTTP thru: true,                        # pass HTTP response to caller
                   transformable: !(query_values||{}).has_key?('notransform') # allow transformation: format conversions & same-format (HTML reformat, code pretty-print) rewrites
-puts headers
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                            # upstream metadata
         if response.status.to_s.match? /206/         # partial response

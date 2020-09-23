@@ -120,7 +120,7 @@ module Webize
 
       def each_statement &fn
         scanContent{|s,p,o,g=nil|
-          if p.to_s == Date
+          if p.to_s == Date && o.class == String
             o = Time.parse(o).utc.iso8601
           end
           fn.call RDF::Statement.new(s.R, p.R,
