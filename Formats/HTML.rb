@@ -120,6 +120,9 @@ module Webize
 
       def each_statement &fn
         scanContent{|s,p,o,g=nil|
+          if p.to_s == Date
+            o = Time.parse(o).utc.iso8601
+          end
           fn.call RDF::Statement.new(s.R, p.R,
                                      (o.class == WebResource || o.class == RDF::Node ||
                                       o.class == RDF::URI) ? o : (l = RDF::Literal o
