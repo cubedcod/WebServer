@@ -220,6 +220,10 @@ module Webize
             yield s, p, o unless p == :drop} # emit triple
         end
 
+        # JSON
+        n.css('script[type="application/json"], script[type="text/json"]').map{|json|
+          Webize::JSON::Reader.new(json.inner_text.strip, base_uri: @base).scanContent &f}
+
         # <body>
         if body = n.css('body')[0]
           yield subject, Content, HTML.format(body, @base).gsub(/<\/?noscript[^>]*>/i, '')
