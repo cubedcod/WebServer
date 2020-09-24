@@ -45,39 +45,39 @@ module Webize
       html.css('ul').map{|e|  e.set_attribute 'id', 'ul'  + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
       html.css('ol').map{|e|  e.set_attribute 'id', 'ol'  + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
       # inspect nodes
-      html.traverse{|e|                                                 # inspect node
-        e.attribute_nodes.map{|a|                                       # inspect attributes
-          e.set_attribute 'src', a.value if SRCnotSRC.member? a.name    # map src-like attributes to src
-          e.set_attribute 'srcset', a.value if SRCSET.member? a.name    # map srcset-like attributes to srcset
-          a.unlink if a.name=='id' && a.value.match?(Gunk)              # strip attributes
+      html.traverse{|e|                                              # inspect node
+        e.attribute_nodes.map{|a|                                    # inspect attributes
+          e.set_attribute 'src', a.value if SRCnotSRC.member? a.name # map src-like attributes to src
+          e.set_attribute 'srcset', a.value if SRCSET.member? a.name # map srcset-like attributes to srcset
+          a.unlink if a.name=='id' && a.value.match?(Gunk)           # strip attributes
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w(bgcolor class color height http-equiv layout loading ping role style tabindex target theme width).member?(a.name)}
-        if e['src']                                                     # src attribute
-          src = (base.join e['src']).R                                  # resolve src location
+        if e['src']                                                  # src attribute
+          src = (base.join e['src']).R                               # resolve src location
           if src.deny?
             puts "🚩 " + e.to_s if ENV['VERBOSE']
-            e.remove                                                    # strip blocked src
+            e.remove                                                 # strip blocked src
           else
-            e['src'] = src.href                                         # update src to resolved location
+            e['src'] = src.href                                      # update src to resolved location
           end
         end
-        srcset e, base if e['srcset']                                   # srcset attribute
-        if e['href']                                                    # href attribute
-          ref = (base.join e['href']).R                                 # resolve href location
+        srcset e, base if e['srcset']                                # srcset attribute
+        if e['href']                                                 # href attribute
+          ref = (base.join e['href']).R                              # resolve href location
           ref.query = '' if ref.query&.match?(/utm[^a-z]/)
           ref.fragment = '' if ref.fragment&.match?(/utm[^a-z]/)
 #          if ref.deny?
 #            puts "🚩 " + e.to_s if ENV['VERBOSE']
-#            e.remove                                                    # strip blocked href
+#            e.remove                                                # strip blocked href
 #          else
             offsite = ref.host != base.host
             e.add_child " <span class='uri'>#{CGI.escapeHTML (offsite ? ref.uri.sub(/^https?:..(www.)?/,'') : (ref.path || '/'))[0..127]}</span> " # show URI in HTML
             e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # mint identifier
-            css = [:uri]; css.push :path unless offsite                 # style as local or global reference
-            e['href'] = ref.href                                        # update href to resolved location
-            e['class'] = css.join ' '                                   # add CSS style
+            css = [:uri]; css.push :path unless offsite              # style as local or global reference
+            e['href'] = ref.href                                     # update href to resolved location
+            e['class'] = css.join ' '                                # add CSS style
 #          end
-        elsif e['id']                                                   # id attribute
-          e.set_attribute 'class', 'identified'                         # style as identified node
+        elsif e['id']                                                # id attribute
+          e.set_attribute 'class', 'identified'                      # style as identified node
           e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id'] unless e.name == 'p'}</span> " # add href to node
         end}
       html.to_xhtml indent: 0
@@ -106,7 +106,13 @@ module Webize
 
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri]
-        @doc = Nokogiri::HTML.parse(input.respond_to?(:read) ? input.read : input.to_s)
+        doc = input.respond_to?(:read) ? input.read : input.to_s
+        if charset = doc[0..2048].match(/<meta[^>]+charset=([^'">]+)/)
+          encoding = charset[1]
+          doc.force_encoding encoding
+          doc = doc.encode 'UTF-8' unless encoding.match?(/utf.*8/i)
+        end
+        @doc = Nokogiri::HTML.parse(doc)
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
