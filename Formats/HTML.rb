@@ -225,7 +225,7 @@ module Webize
 
         # JSON
         n.css('script[type="application/json"], script[type="text/json"]').map{|json|
-          Webize::JSON::Reader.new(json.inner_text.strip, base_uri: @base).scanContent &f}
+          Webize::JSON::Reader.new(json.inner_text.strip.sub(/^<!--/,'').sub(/-->$/,''), base_uri: @base).scanContent &f}
 
         # <body>
         if body = n.css('body')[0]
