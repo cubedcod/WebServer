@@ -130,6 +130,7 @@ class WebResource
       'article.summary' => Abstract,
       'article.type' => Type,
       'article.updated' => Date,
+      'article_author' => Creator,
       'article:author' => Creator,
       'article:author_name' => Creator,
       'article:content-tier' => :drop,

@@ -17,15 +17,15 @@ class WebResource
     end
 
     def cacheResponse
-      nodes = nodeSet                   # find cached nodes
+      nodes = nodeSet            # find cached nodes
       if nodes.size == 1 && (nodes[0].static_node? || # one node and it's nontransformable or cached and requested formats match
                              (nodes[0].named_format == selectFormat && (nodes[0].named_format != 'text/html' || (query_values||{}).has_key?('notransform')))) # HTML transformable w/o 'notransform' flag
-        nodes[0].fileResponse           # static response on file
-      else                              # load graph
+        nodes[0].fileResponse    # static response on file
+      else                       # load graph
         nodes.map{|n|
-          env[:summary] ? n.summary : n.🐢}.map &:loadRDF # RDFize and summarize
-        saveRDF if env[:updates]        # cache new graph-data found in RDFize process
-        graphResponse                   # graph response
+          env[:summary] ? n.summary : n.🐢}.map &:loadRDF # load RDF
+        saveRDF if env[:updates] # cache new graph-data found in RDFize process
+        graphResponse            # graph response
       end
     end
 

@@ -204,7 +204,7 @@ class WebResource
                           c: [{_: :td, class: :host,
                                c: host ? (name = ('//' + host).R.display_name
                                           color = env[:colors][name] ||= '#%06x' % (rand 16777216)
-                                          {_: :a, href: '/' + host, c: host, style: "background-color: #{color}; color: black"}) : []},
+                                          {_: :a, href: '/' + host, c: name, style: "background-color: #{color}; color: black"}) : []},
                               {_: :td, c: paths.map{|path| Markup[Link][path,env]}}]}}}},
                   '</tr></table>']}}]}, '&nbsp;']}}
 
