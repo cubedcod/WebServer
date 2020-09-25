@@ -290,6 +290,7 @@ module Webize
           day = @base.parts[0..2].join('-') + 'T'
           hourslug = @base.parts[0..3].join
           lines = 0
+          ts = {}
           @doc.lines.grep(/^[^-]/).map{|msg|
             tokens = msg.split /\s+/
             time = tokens.shift
@@ -309,7 +310,9 @@ module Webize
             timestamp = day + time
             subject = '#' + channame + hourslug + (lines += 1).to_s
             yield subject, Type, (SIOC + 'InstantMessage').R
-            yield subject, Date, timestamp
+            ts[timestamp] ||= 0
+            yield subject, Date, [timestamp, ts[timestamp]].join('.')
+            ts[timestamp] += 1
             yield subject, To, chan
             yield subject, Creator, (dirname + '?q=' + nick + '&sort=date&view=table#' + nick).R
             yield subject, Content, Webize::HTML.format(msg.hrefs{|p,o| yield subject, p, o}, @base) if msg
