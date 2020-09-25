@@ -23,32 +23,32 @@ class WebResource
     def self.tabular graph, env
       graph = graph.values if graph.class == Hash
       keys = graph.select{|r|r.respond_to? :keys}.map{|r|r.keys}.flatten.uniq - [Abstract, Content, DC+'hasFormat', DC+'identifier', Image, Link, Video, SIOC+'reply_of', SIOC+'richContent', SIOC+'user_agent', Title]
-
       keys = [Creator, *(keys - [Creator])] if keys.member? Creator
-      #keys = [Type,    *(keys - [Type])]    if keys.member? Type
 
       if env[:sort]
+        ascending = (env[:base].query_values||{})['order'] == 'asc'
         attr = env[:sort]
         attr = Date if %w(date new).member? attr
         attr = Content if attr == 'content'
         sortable, unsorted = graph.partition{|r|r.has_key? attr}
-        graph = [*sortable.sort_by{|r| r[attr] }.reverse, *unsorted]
+        sorted = sortable.sort_by{|r|r[attr]}
+        sorted.reverse! unless ascending
+        graph = [*sorted, *unsorted]
       end
 
       {_: :table, class: :tabular,
        c: [{_: :thead,
-            c: {_: :tr, c: keys.map{|p|                                          # header
+            c: {_: :tr, c: keys.map{|p|               # table header
                   p = p.R
                   slug = p.fragment || (p.path && p.basename) || ' '
                   icon = Icons[p.uri] || slug
                   [{_: :th,
-                    c: {_: :a, id: 'sort_by_' + slug, href: '?view=table&sort='+CGI.escape(p.uri), c: icon}}, "\n"]}}}, "\n", # sorting link
+                    c: {_: :a, id: 'sort_by_' + slug, href: '?view=table&sort=' + CGI.escape(p.uri) + '&order=' + (ascending ? 'desc' : 'asc'), c: icon}}, "\n"]}}}, "\n", # sorting link
            {_: :tbody,
             c: graph.map{|resource|
               re = (resource['uri'] || ('#' + Digest::SHA2.hexdigest(rand.to_s))).R env                      # resource identity
               local_id = re.path == env[:base].path && re.fragment || ('r' + Digest::SHA2.hexdigest(re.uri)) # row identity
-
-              [{_: :tr, id: local_id, c: keys.map{|k|                            # row
+              [{_: :tr, id: local_id, c: keys.map{|k| # row
                  [{_: :td, property: k,
                   c: if k == 'uri'
                    tCount = 0
@@ -56,12 +56,12 @@ class WebResource
                       title = title.to_s.sub(/\/u\/\S+ on /, '').sub /^Re: /, ''
                       unless env[:title] == title
                         env[:title] = title; tCount += 1
-                        [{_: :a, href: re.href,                                   # link to row with title (changed from prior row)
+                        [{_: :a, href: re.href,       # link to resource with title
                           class: :title,
                           type: :node,
                           c: CGI.escapeHTML(title), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']
                       end},
-                    ({_: :a, href: re.href,                                      # pointer
+                    ({_: :a, href: re.href,           # basic pointer to resource
                       class: :id, type: :node, c: '☛',
                       id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} if tCount == 0),
                     (resource[SIOC+'reply_of']||[]).map{|r|

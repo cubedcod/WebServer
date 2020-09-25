@@ -311,7 +311,7 @@ module Webize
             subject = '#' + channame + hourslug + (lines += 1).to_s
             yield subject, Type, (SIOC + 'InstantMessage').R
             ts[timestamp] ||= 0
-            yield subject, Date, [timestamp, ts[timestamp]].join('.')
+            yield subject, Date, [timestamp, '%02d' % ts[timestamp]].join('.')
             ts[timestamp] += 1
             yield subject, To, chan
             yield subject, Creator, (dirname + '?q=' + nick + '&sort=date&view=table#' + nick).R
