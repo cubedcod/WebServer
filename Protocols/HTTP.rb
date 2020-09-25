@@ -260,6 +260,15 @@ class WebResource
       end
       if path == '/favicon.ico' && node.exist?
         fileResponse
+      elsif qs['download'] == 'audio'
+        storageURI = join(basename + (qs['list'] || qs['v'] || '')+ '.audio').R env
+        storage = storageURI.fsPath
+        unless File.directory? storage
+          FileUtils.mkdir_p storage
+          pid = spawn "youtube-dl -o '#{storage}/%(title)s.%(ext)s' -x \"#{uri}\""
+          Process.detach pid
+        end
+        [302, {'Location' => storageURI.href + '?offline'}, []]
       elsif handler = HostGET[host] # host lambda
         handler[self]
       elsif deny?

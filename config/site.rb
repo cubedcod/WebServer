@@ -214,20 +214,6 @@ w.bos.gl wired.trib.al
       ps = r.path.split /https?:\/+/
       ps.size > 1 ? [301, {'Location' => ('https://' + ps[-1]).R(r.env).href}, []] : r.deny}
 
-    GET 'soundcloud.com', -> r {
-      if (r.query_values || {}).has_key?('dl')
-        storage = 'a/soundcloud' + r.path
-        unless File.directory? storage
-          FileUtils.mkdir_p storage
-          pid = spawn "youtube-dl -o '#{storage}/%(title)s.%(ext)s' -x \"#{r.uri}\""
-          Process.detach pid
-        end
-        [302, {'Location' => '/' + storage + '/'}, []]
-      else
-        r.env[:downloadable] = :audio
-        NoGunk[r]
-      end}
-
     GET 'youtube.com',   -> r {[301, {'Location' => ['//www.youtube.com', r.path, '?', r.query].join.R.href}, []]}
     GET 'm.youtube.com', -> r {[301, {'Location' => ['//www.youtube.com', r.path, '?', r.query].join.R.href}, []]}
 
@@ -239,16 +225,7 @@ w.bos.gl wired.trib.al
       elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results s user watch watch_videos yts).member?(path) || !path
         if path == 'embed'
           r.fetchHTTP transformable: false
-        elsif path == 'watch' && qs.has_key?('dl')
-          storage = 'a/youtube/' + (qs['list'] || qs['v'])
-          unless File.directory? storage
-            FileUtils.mkdir_p storage
-            pid = spawn "youtube-dl -o '#{storage}/%(title)s.%(ext)s' -x \"#{r.uri}\""
-            Process.detach pid
-          end
-          [302, {'Location' => '/' + storage + '/'}, []]
         else
-          r.env[:downloadable] = :audio
           r.fetch
         end
       else
