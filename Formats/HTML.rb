@@ -107,7 +107,7 @@ module Webize
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri]
         doc = input.respond_to?(:read) ? input.read : input.to_s
-        if charset = doc[0..2048].match(/<meta[^>]+charset=([^'">]+)/)
+        if charset = doc[0..2048].match(/<meta[^>]+charset=([^'">]+)/i)
           encoding = charset[1]
           doc.force_encoding encoding
           doc = doc.encode 'UTF-8' unless encoding.match?(/utf.*8/i)
