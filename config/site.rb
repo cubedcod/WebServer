@@ -165,9 +165,12 @@ w.bos.gl wired.trib.al
 
     GET 'mobile.twitter.com', -> r {[301, {'Location' => ('//twitter.com' + r.path).R.href}, []]}
     GET 'twitter.com', -> r {
+      r.env[:sort] = 'date'
+      r.env[:view] = 'table'
       parts = r.parts
       qs = r.query_values || {}
       cursor = qs.has_key?('cursor') ? ('&cursor=' + qs['cursor']) : ''
+
       if r.env['HTTP_COOKIE'] # auth headers
         attrs = {}
         r.env['HTTP_COOKIE'].split(';').map{|attr|
@@ -177,11 +180,11 @@ w.bos.gl wired.trib.al
         r.env['x-csrf-token'] ||= attrs['ct0'] if attrs['ct0']
         r.env['x-guest-token'] ||= attrs['gt'] if attrs['gt']
       end
+
       searchURL = -> q {
         ('https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_ext_alt_text=true&include_quote_count=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweet=true&q='+q+'&tweet_search_mode=live&count=20' + cursor + '&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2ChighlightedLabel').R(r.env)}
+
       if !r.path || r.path == '/'                                                                                   # feed
-        r.env[:sort] = 'date'
-        r.env[:view] = 'table'
         Twits.shuffle.each_slice(18){|t|print '🐦'; searchURL[t.map{|u|'from%3A'+u}.join('%2BOR%2B')].fetchHTTP thru: false}
         r.saveRDF.graphResponse
       elsif parts.size == 1 && !%w(favicon.ico manifest.json push_service_worker.js search sw.js).member?(parts[0]) # user
