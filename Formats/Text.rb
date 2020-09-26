@@ -21,9 +21,9 @@ end
 
 class String
 
-  # text -> HTML, while yielding found (rel, href) tuples to block
-  def hrefs &blk # wrapping <>()[] and trailing ,. chars not captured in URL
-    pre, link, post = self.partition(/(https?:\/\/(\([^)>\s]*\)|[,.]\S|[^\s),.”\'\"<>\]])+)/)
+  # text -> HTML, yielding found (rel, href) tuples to block
+  def hrefs &blk
+    pre, link, post = self.partition(/(https?:\/\/(\([^)>\s]*\)|[,.]\S|[^\s),.”\'\"<>\]])+)/) # wrapping <>()[] and trailing ,. not captured
     pre.gsub('&','&amp;').gsub('<','&lt;').gsub('>','&gt;').gsub("\n",'<br>') + # pre-match
       (link.empty? && '' ||
        '<a href="' + link.gsub('&','&amp;').gsub('<','&lt;').gsub('>','&gt;') + '">' +
@@ -214,7 +214,7 @@ module Webize
       end
 
       def nfo_triples
-        yield Content, WebResource::HTML.render({_: :pre, style: 'white-space: pre-wrap', c: @doc})
+        yield Content, WebResource::HTML.render({_: :pre, c: @doc})
       end
     end
   end
@@ -301,11 +301,9 @@ module Webize
             elsif tokens[0].match? /^-.*:.*-$/ # notices
               nick = tokens[0][1..tokens[0].index(':')-1]
               msg = tokens[1..-1].join ' '
-            else
-              if re = tokens.join(' ').match(/<[\s@+*]*([^>]+)>\s*(.*)?/)
-                nick = re[1]
-                msg = re[2]
-              end
+            elsif re = msg.match(/<[\s@+*]*([^>]+)>\s?(.*)?/)
+              nick = re[1]
+              msg = re[2]
             end
             timestamp = day + time
             subject = '#' + channame + hourslug + (lines += 1).to_s
@@ -315,13 +313,15 @@ module Webize
             ts[timestamp] += 1
             yield subject, To, chan
             yield subject, Creator, (dirname + '?q=' + nick + '&sort=date&view=table#' + nick).R
-            yield subject, Content, Webize::HTML.format(msg.hrefs{|p,o| yield subject, p, o}, @base) if msg
+            yield subject, Content, ['<pre>',
+                                     msg.hrefs{|p,o| yield subject, p, o},
+#                                     Webize::HTML.format(msg.hrefs{|p,o| yield subject, p, o}, @base),
+                                     '</pre>'].join if msg
           }
         else # basic text content
-          yield @body, Content, Webize::HTML.format(WebResource::HTML.render({_: :pre, style: 'white-space: pre-wrap',
+          yield @body, Content, Webize::HTML.format(WebResource::HTML.render({_: :pre,
                                                                               c: @doc.lines.map{|line|
-                                                                                line.hrefs{|p,o| # hypertextize
-                                                                                  # yield detected links to consumer
+                                                                                line.hrefs{|p,o| # yield detected links to caller
                                                                                   yield @body, p, o
                                                                                   yield o, Type, (W3 + '2000/01/rdf-schema#Resource').R}}}), @base)
         end

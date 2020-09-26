@@ -63,11 +63,11 @@ class WebResource
                       end},
                     ({_: :a, href: re.href,           # basic pointer to resource
                       class: :id, type: :node, c: '☛',
-                      id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} if tCount == 0),
+                      id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} if tCount == 0), "\n",
                     (resource[SIOC+'reply_of']||[]).map{|r|
                       {_: :a, href: r.to_s,
                        c: Icons[SIOC+'reply_of']} if r.class == RDF::URI || r.class == WebResource},
-                    {class: :abstract, c: resource[Abstract]},
+                    ({class: :abstract, c: resource[Abstract]} if resource.has_key? Abstract),
                     [Image, Video].map{|t|(resource[t]||[]).map{|i|Markup[t][i,env]}},
                     resource[Content], resource[SIOC+'richContent'],
                     MarkupGroup[Link][(resource[Link]||[]),env]]
