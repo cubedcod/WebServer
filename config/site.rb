@@ -84,6 +84,10 @@ t.co ti.me tinyurl.com trib.al
 w.bos.gl wired.trib.al
 ).map{|s| GET s, NoQuery}
 
+    %w(
+c212.net gate.sc
+).map{|s| GET s, GotoURL}
+
     DenyDomains['com'].delete 'amazon'   if ENV.has_key? 'AMAZON'
     DenyDomains['com'].delete 'facebook' if ENV.has_key? 'FACEBOOK'
     DenyDomains['com'].delete 'google'   if ENV.has_key? 'GOOGLE'
@@ -104,7 +108,6 @@ w.bos.gl wired.trib.al
     %w(l.facebook.com l.instagram.com).map{|host| GET host, GotoURL}
 
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
-    GET 'gate.sc', GotoURL
 
     GotoAdURL =  -> r {
       if url = (r.query_values || {})['adurl']

@@ -24,7 +24,7 @@ class WebResource
                    :mail
                  elsif ext.match? /^html?$/
                    :html
-                 elsif %w(changelog license readme todo).member? basename.downcase
+                 elsif %w(changelog license readme todo).member?(basename.downcase) || ext == 'txt'
                    :plaintext
                  elsif %w(gemfile makefile rakefile).member? basename.downcase
                    :sourcecode
