@@ -109,8 +109,11 @@ module Webize
         doc = input.respond_to?(:read) ? input.read : input.to_s
         if charset = doc[0..2048].encode('UTF-8', undef: :replace, invalid: :replace).match(/<meta[^>]+charset=([^'">]+)/i) # scan for charset tag
           encoding = charset[1]
-          doc.force_encoding encoding
-          doc = doc.encode 'UTF-8' unless encoding.match?(/utf.*8/i)
+          unless encoding.match? /utf.*8/i
+            puts "transcoding #{encoding} to UTF-8"
+            doc.force_encoding encoding
+            doc.encode! 'UTF-8'
+          end
         end
         @doc = Nokogiri::HTML.parse(doc)
         if block_given?
