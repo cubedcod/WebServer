@@ -11,7 +11,8 @@ class WebResource
         graph << RDF::Statement.new(self, Date.R, stat.mtime.iso8601)
         graph << RDF::Statement.new(self, (Stat + 'size').R, stat.size)
       end
-      if %w(mp4 mkv webm).member? ext
+      if %w(svg).member? ext
+      elsif %w(mp4 mkv webm).member? ext
         graph << RDF::Statement.new(self, Type.R, Video.R) # video-file metadata
       elsif %w(m4a mp3 ogg opus wav).member? ext           # audio-file metadata
         tag_triples graph
