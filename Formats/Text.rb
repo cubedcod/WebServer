@@ -305,6 +305,7 @@ module Webize
               nick = re[1]
               msg = re[2]
             end
+            nick = CGI.escape nick
             timestamp = day + time
             subject = '#' + channame + hourslug + (lines += 1).to_s
             yield subject, Type, (SIOC + 'InstantMessage').R
@@ -312,7 +313,7 @@ module Webize
             yield subject, Date, [timestamp, '%02d' % ts[timestamp]].join('.')
             ts[timestamp] += 1
             yield subject, To, chan
-            yield subject, Creator, (dirname + '?q=' + nick + '&sort=date&view=table#' + nick).R
+            yield subject, Creator, (dirname + '/*irc?q=' + nick + '&sort=date&view=table#' + nick).R
             yield subject, Content, ['<pre>',
                                      msg.hrefs{|p,o| yield subject, p, o},
 #                                     Webize::HTML.format(msg.hrefs{|p,o| yield subject, p, o}, @base),
