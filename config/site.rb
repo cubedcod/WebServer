@@ -213,9 +213,12 @@ w.bos.gl wired.trib.al
         NoGunk[r]
       end}
 
-    GET 's.yimg.com', -> r {
+    ImgRehost = -> r {
       ps = r.path.split /https?:\/+/
       ps.size > 1 ? [301, {'Location' => ('https://' + ps[-1]).R(r.env).href}, []] : r.deny}
+
+    GET 'cdn.shortpixel.ai', ImgRehost
+    GET 's.yimg.com', ImgRehost
 
     GET 'youtube.com',   -> r {[301, {'Location' => ['//www.youtube.com', r.path, '?', r.query].join.R.href}, []]}
     GET 'm.youtube.com', -> r {[301, {'Location' => ['//www.youtube.com', r.path, '?', r.query].join.R.href}, []]}
