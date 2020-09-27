@@ -179,6 +179,7 @@ class WebResource
       'bylines' => Creator,
       'calloutText' => Abstract,
       'canonical' => Link,
+      'canonical_path' => Link,
       'caption' => Abstract,
       'card_name' => :drop,
       'category' => Abstract,

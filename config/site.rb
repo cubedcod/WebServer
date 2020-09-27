@@ -127,6 +127,8 @@ c212.net gate.sc
       q = r.query_values || {}
       if %w(dl images maps search).member? p
         NoGunk[r]
+      elsif p == 'amp'
+        [302, {'Location' => 'https://' + r.path[7..-5]}, []]
       elsif p == 'imgres' && q.has_key?('imgurl')
         [302, {'Location' => q['imgurl']}, []]
       else

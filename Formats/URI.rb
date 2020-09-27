@@ -86,8 +86,8 @@ class WebResource < RDF::URI
        c: [({_: :span, c: env[:origin_status], style: 'font-weight: bold', class: :icon} if env[:origin_status]),
            ({_: :a, id: :tabular, class: :icon, c: '↨', href: env[:base].join(HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))).R.href} unless qs['view'] == 'table'),
            {_: :a, href: env[:base].uri, c: '☝', class: :icon, id: :upstream},
-           ({_: :a, href: env[:base].join(HTTP.qs(qs.merge({'notransform' => nil}))).R.href, c: '⚗️', id: :UI, class: :icon} unless local_node?),
-           ({_: :a, href: env[:base].join(HTTP.qs(qs.merge({'download' => 'audio'}))).R.href, c: '&darr;', id: :download, class: :icon} if host.match?(/(^|\.)(bandcamp|(mix|sound)cloud|youtube).com/)),
+           ({_: :a, href: HTTP.qs(qs.merge({'notransform' => nil})), c: '⚗️', id: :UI, class: :icon} unless local_node?),
+           ({_: :a, href: HTTP.qs(qs.merge({'download' => 'audio'})), c: '&darr;', id: :download, class: :icon} if host.match?(/(^|\.)(bandcamp|(mix|sound)cloud|youtube).com/)),
            {_: :a, href: env[:base].join('/').R.href, id: :host, c: {_: :img, src: icon, style: 'z-index: -1'}},
            {class: :path,
             c: env[:base].parts.map{|p| bc += '/' + p

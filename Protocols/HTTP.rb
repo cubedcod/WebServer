@@ -44,7 +44,7 @@ class WebResource
                 env['HTTP_REFERER'] ? ["\e[#{color}m", env['HTTP_REFERER'], "\e[0m→"] : nil,
                 "\e[#{color}#{env['HTTP_REFERER'] && !env['HTTP_REFERER'].index(env[:base].host) && ';7' || ''}m",
                 env[:base], "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil,
-                [env['HTTP_ACCEPT'], env[:origin_format], head['Content-Type']].compact.join(' → ')
+                [env['HTTP_ACCEPT'], head['Content-Type']].compact.join(' → ')
                ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
         end
         [status, head, body]}
@@ -171,9 +171,10 @@ class WebResource
           formatExt = Suffixes[format] || Suffixes_Rack[format]       # format suffix
           c += formatExt if formatExt && c.R.extension != formatExt   # adjust suffix if incorrect or missing
           c.R.writeFile body                                          # cache upstream entity
+          saveRDF                                                     # cache discovered graph-data
 
           # response metadata
-          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag Set-Cookie).map{|k|
+          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # upstream metadata
           env[:resp]['Access-Control-Allow-Origin'] ||= allowed_origin # CORS header
           h['link'] && h['link'].split(',').map{|link|                # parse and merge Link headers to environment
@@ -185,12 +186,12 @@ class WebResource
             end}
 
           # response
-          if transformable && !(format||'').match?(/audio|css|image|octet|script|video/) # flexible format:
-            env[:origin_format] = format                      # note original format for logger
-            saveRDF.graphResponse                             # store graph-data and return in requested format
+          if transformable && !(format||'').match?(/audio|css|image|octet|script|video/)
+            graphResponse                                     # local format
           else
-            env[:resp]['Content-Length'] = body.bytesize.to_s # we decompressed body so Content-Length changes
-            [200, env[:resp], [body]]                         # upstream representation
+            body = Webize::HTML.cacherefs body, env           # resolve cache references
+            env[:resp]['Content-Length'] = body.bytesize.to_s # update Content-Length
+            [200, env[:resp], [body]]                         # upstream format
           end
         end
       end
@@ -297,7 +298,7 @@ class WebResource
           end
           t                                       # token
         }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
-        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base colors connection downloadable feeds fetched graph host images keep-alive links origin-format origin-status path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles remote-addr repository request-method request-path request-uri resp script-name searchable server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # external multi-hop headers
+        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base colors connection downloadable feeds fetched graph host images keep-alive links origin-status path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles remote-addr repository request-method request-path request-uri resp script-name searchable server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # external multi-hop headers
       #head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # accept Turtle
       case host
       when /wsj\.com$/

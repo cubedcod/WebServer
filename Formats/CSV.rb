@@ -22,11 +22,12 @@ class WebResource
     # graph -> ( property -> column, resource -> row) table
     def self.tabular graph, env
       graph = graph.values if graph.class == Hash
+      qs = env[:base].query_values || {}
       keys = graph.select{|r|r.respond_to? :keys}.map{|r|r.keys}.flatten.uniq - [Abstract, Content, DC+'hasFormat', DC+'identifier', Image, Link, Video, SIOC+'reply_of', SIOC+'richContent', SIOC+'user_agent', Title]
       keys = [Creator, *(keys - [Creator])] if keys.member? Creator
 
       if env[:sort]
-        ascending = (env[:base].query_values||{})['order'] == 'asc'
+        ascending = qs['order'] == 'asc'
         attr = env[:sort]
         attr = Date if %w(date new).member? attr
         attr = Content if attr == 'content'
@@ -36,18 +37,18 @@ class WebResource
         graph = [*sorted, *unsorted]
       end
 
-      {_: :table, class: :tabular,
+      {_: :table, class: :tabular,                    # table
        c: [{_: :thead,
-            c: {_: :tr, c: keys.map{|p|               # table header
+            c: {_: :tr, c: keys.map{|p|               # header
                   p = p.R
-                  slug = p.fragment || (p.path && p.basename) || ' '
+                  slug = p.display_name
                   icon = Icons[p.uri] || slug
                   [{_: :th,
-                    c: {_: :a, id: 'sort_by_' + slug, href: '?view=table&sort=' + CGI.escape(p.uri) + '&order=' + (ascending ? 'desc' : 'asc'), c: icon}}, "\n"]}}}, "\n", # sorting link
+                    c: {_: :a, id: 'sort_by_' + slug, href: HTTP.qs(qs.merge({'sort' => p.uri, 'order' => ascending ? 'desc' : 'asc'})), c: icon}}, "\n"]}}}, "\n", # pointer to sorted representation
            {_: :tbody,
             c: graph.map{|resource|
               re = (resource['uri'] || ('#' + Digest::SHA2.hexdigest(rand.to_s))).R env                      # resource identity
-              local_id = re.path == env[:base].path && re.fragment || ('r' + Digest::SHA2.hexdigest(re.uri)) # row identity
+              local_id = re.path == env[:base].path && re.fragment || ('r' + Digest::SHA2.hexdigest(re.uri)) # local-row identity
               [{_: :tr, id: local_id, c: keys.map{|k| # row
                  [{_: :td, property: k,
                   c: if k == 'uri'
