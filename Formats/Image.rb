@@ -224,7 +224,7 @@ class WebResource
         img = img[0] if img.class == Array
         src = env[:base].join(img).R env
         [{class: :thumb,
-          c: {_: :a, href: src.href,
+          c: {_: :a, href: src.uri,
               c: {_: :img, src: src.href}}}, " \n"]
       end}
 

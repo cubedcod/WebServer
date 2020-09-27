@@ -217,7 +217,7 @@ class WebResource
 
     Markup[Type] = -> t, env {
       if t.class == WebResource
-        {_: :a, href: t.uri, c: Icons[t.uri] || t.fragment || (t.path && t.basename)}.update(Icons[t.uri] ? {class: :icon} : {})
+        {_: :a, href: t.uri, c: Icons[t.uri] || t.display_name}.update(Icons[t.uri] ? {class: :icon} : {})
       else
         CGI.escapeHTML t.to_s
       end}

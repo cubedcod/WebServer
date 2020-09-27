@@ -11,7 +11,7 @@ class WebResource
        c: t.map{|k,vs|
          vs = (vs.class == Array ? vs : [vs]).compact
          type = (k ? k.to_s : '#notype').R
-         ([{_: :tr, name: type.fragment || (type.path && type.basename),
+         ([{_: :tr, name: type.display_name,
             c: ["\n",
                 {_: :td, class: 'k',
                  c: Markup[Type][type, env]}, "\n",
