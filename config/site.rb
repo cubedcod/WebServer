@@ -85,7 +85,8 @@ w.bos.gl wired.trib.al
 ).map{|s| GET s, NoQuery}
 
     %w(
-c212.net gate.sc
+c212.net gate.sc googleweblight.com
+l.facebook.com l.instagram.com
 ).map{|s| GET s, GotoURL}
 
     DenyDomains['com'].delete 'amazon'   if ENV.has_key? 'AMAZON'
@@ -105,8 +106,6 @@ c212.net gate.sc
 
     %w(bostonglobe-prod.cdn.arcpublishing.com).map{|host| GET host, Resizer }
 
-    %w(l.facebook.com l.instagram.com).map{|host| GET host, GotoURL}
-
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     GotoAdURL =  -> r {
@@ -117,11 +116,15 @@ c212.net gate.sc
       else
         r.deny
       end}
-    GotoGoogle = -> r {[301, {'Location' => ['//www.google.com', r.path, '?', r.query].join.R.href}, []]}
+
     GET 'googleads.g.doubleclick.net', GotoAdURL
-    GET 'googleweblight.com', GotoURL
+    GET 'www.googleadservices.com', GotoAdURL
+
+    GotoGoogle = -> r {[301, {'Location' => ['//www.google.com', r.path, '?', r.query].join.R.href}, []]}
+
     GET 'google.com', GotoGoogle
     GET 'maps.google.com', GotoGoogle
+
     GET 'www.google.com', -> r {
       p = r.parts[0]
       q = r.query_values || {}
@@ -134,7 +137,7 @@ c212.net gate.sc
       else
         r.deny
       end}
-    GET 'www.googleadservices.com', GotoAdURL
+
     GET 'www.gstatic.com', -> r {r.path.match?(/204$/) ? [204,{},[]] : NoGunk[r]}
 
     GET 'old.reddit.com', -> r {
