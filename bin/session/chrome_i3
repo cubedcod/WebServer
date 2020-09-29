@@ -1,5 +1,17 @@
 #!/bin/sh
-# launch i3 session on guest-mode chromeOS:
+# jump to environment from firmware:
+# see http://mrchromebox.tech/ for RW_LEGACY payloads
+
+# jump to environment from boot loader:
+# see https://chrx.org for partitioning (cgpt wrapper) and installer script
+# compile a monolithic (make localyesconfig) kernel in linux/
+# kargs:
+# console=tty1 root=/dev/nvme0n1p7 rootfstype=ext4 rootwait rw init=/sbin/init
+# vbutil_kernel --pack KERN-C --keyblock /usr/share/vboot/devkeys/kernel.keyblock --version 1 --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk --config=kargs --vmlinuz linux/arch/x86_64/boot/bzImage --bootloader empty
+# dd if=KERN-C of=/dev/nvme0n1p6
+# cgpt add -i 6 -P 3 -S 0 -T 1 /dev/nvme0n1
+
+# jump to environment from OS guest login:
 # sudo /home/os/bin/arch-chroot /home/os/ /bin/su -lc '~/src/WebServer/bin/session/chrome_i3' web
 XDG_RUNTIME_DIR=/run/chrome sommelier --data-driver=noop --shm-driver=noop --drm-device=/dev/dri/renderD128 --display=wayland-0 --virtwl-device=/dev/null Xwayland -nolisten tcp &
 sleep 0.2
