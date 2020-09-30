@@ -89,12 +89,6 @@ c212.net gate.sc googleweblight.com
 l.facebook.com l.instagram.com
 ).map{|s| GET s, GotoURL}
 
-    DenyDomains['com'].delete 'amazon'   if ENV.has_key? 'AMAZON'
-    DenyDomains['com'].delete 'facebook' if ENV.has_key? 'FACEBOOK'
-    DenyDomains['com'].delete 'google'   if ENV.has_key? 'GOOGLE'
-
-    %w(www.instagram.com).map{|host| GET host, -> r { (!r.path || r.path == '/') ? r.cacheResponse : NoGunk[r]}}
-
     GET 'gitter.im', -> r {
       if r.parts[0] == 'api'
         token = r.join('/token').R
@@ -150,6 +144,8 @@ l.facebook.com l.instagram.com
           body[0].scan(/href="([^"]+after=[^"]+)/){|link|links << CGI.unescapeHTML(link[0]).R} # find links
           [302, {'Location' => (links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]).to_s.sub('old','www')}, []] # goto link with highest count
         end}}
+
+    GET 'instagram.com', -> r {[301, {'Location' => ['//www.instagram.com', r.path].join.R.href}, []]}
 
     GET 'www.reddit.com', -> r {
       if !r.path || %w(/ /r /r/).member?(r.path)
