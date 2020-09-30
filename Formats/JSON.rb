@@ -17,6 +17,7 @@ module Webize
                    extension: :json,
                    aliases: %w(
                     application/manifest+json;q=0.8
+                    application/vnd.imgur.v1+json;q=0.1
                     text/javascript;q=0.8)
       content_encoding 'utf-8'
       reader { Reader }

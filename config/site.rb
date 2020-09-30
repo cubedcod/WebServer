@@ -110,6 +110,7 @@ l.facebook.com l.instagram.com
       else
         r.deny
       end}
+
     GET 'ad.doubleclick.net', -> r {[301, {'Location' => ('//www.youtube.com/watch?v=' + r.uri.match(/youtube.com\/video\/([^;]+)/)[1]).R.href}, []]}
     GET 'googleads.g.doubleclick.net', GotoAdURL
     GET 'www.googleadservices.com', GotoAdURL

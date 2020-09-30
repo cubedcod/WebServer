@@ -154,15 +154,19 @@ class WebResource
                    elsif named_format                # content-type in name extension
                      named_format
                    end
-
-          # read fetched data into graph
           body = HTTP.decompress h, response.read                     # read body
-          if format && reader = RDF::Reader.for(content_type: format) # reader defined for format
-            env[:repository] ||= RDF::Repository.new                  # init RDF repository
-            if timestamp = h['Last-Modified'] || h['last-modified']   # add HTTP metadata to graph
-              env[:repository] << RDF::Statement.new(self, Date.R, Time.httpdate(timestamp.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,'')).iso8601) rescue nil
+          if format
+            if reader = RDF::Reader.for(content_type: format) # reader defined for format
+              env[:repository] ||= RDF::Repository.new                  # init RDF repository
+              if timestamp = h['Last-Modified'] || h['last-modified']   # add HTTP metadata to graph
+                env[:repository] << RDF::Statement.new(self, Date.R, Time.httpdate(timestamp.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,'')).iso8601) rescue nil
+              end
+              reader.new(body,base_uri: self){|g|env[:repository] << g} # read RDF
+            else
+              puts "RDF::Reader undefined for #{format}"
             end
-            reader.new(body,base_uri: self){|g|env[:repository] << g} # parse and load RDF
+          else
+            puts "format unguessable for #{uri}"
           end
           return unless thru                                          # fetch to runtime graph only, no HTTP response returned to caller
 
