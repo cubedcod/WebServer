@@ -244,7 +244,10 @@ class WebResource
           timeMeta                             # reference temporally-adjacent nodes
           cacheResponse                        # local graph-node
         else
-          env['HTTP_REFERER'] = env['HTTP_REFERER'].R.remoteURL.to_s if env['HTTP_REFERER']&.index '//localhost'
+          if referer = env['HTTP_REFERER']
+            referer = referer.R
+            env['HTTP_REFERER'] = referer.remoteURL.to_s if referer.host == 'localhost' && referer.path != '/'
+          end
           (env[:base] = remoteURL).hostHandler # host handler (rebased on local)
         end
       else

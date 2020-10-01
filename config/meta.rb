@@ -356,6 +356,7 @@ class WebResource
       'imageMimeType' => :drop,
       'image_src' => Image,
       'image_type' => Type,
+      'image_url' => Image,
       'import' => :drop,
       'in_reply_to_account_id' => SIOC+'reply_of',
       'in_reply_to_id' => SIOC+'reply_of',
