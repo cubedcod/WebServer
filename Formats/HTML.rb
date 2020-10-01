@@ -46,7 +46,7 @@ module Webize
       html.css('ol').map{|e|  e.set_attribute 'id', 'ol'  + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
       # inspect nodes
       html.traverse{|e|                                              # inspect node
-        e.attribute_nodes.map{|a|                                    # inspect attributes
+        e.respond_to?(:attribute_nodes) && e.attribute_nodes.map{|a| # inspect attributes
           e.set_attribute 'src', a.value if SRCnotSRC.member? a.name # map src-like attributes to src
           e.set_attribute 'srcset', a.value if SRCSET.member? a.name # map srcset-like attributes to srcset
           a.unlink if a.name=='id' && a.value.match?(Gunk)           # strip attributes
