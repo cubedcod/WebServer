@@ -34,7 +34,9 @@ class WebResource
       uri = RDF::URI('//' + env['HTTP_HOST']).join(env['REQUEST_PATH']).R env # resource URI
       uri.scheme = uri.local_node? ? 'http' : 'https'                         # request scheme
       uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading + consecutive & from qs so URI library doesn't freak out
-      env.update({base: uri, feeds: [], links: {}, resp: {}, 'HTTP_COOKIE' => '🍪'}) # environment
+      env.update({base: uri, feeds: [], links: {}, resp: {},
+                  'HTTP_COOKIE' => '🍪'
+                 }) # environment
       uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body| # dispatch request
         format = uri.format_icon head['Content-Type']                 # log response
         color = env[:deny] ? '31;1' : (format_color format)
@@ -256,6 +258,39 @@ class WebResource
       end
     end
 
+    def HEAD
+      self.GET.yield_self{|s, h, _|
+                          [s, h, []]} # status and header
+    end
+
+    # headers cleaned/filtered for export
+    def headers raw = nil
+      raw ||= env || {} # raw headers
+      head = {}         # clean headers
+      raw.map{|k,v|     # inspect headers
+        k = k.to_s
+        key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|t| # strip prefix, tokenize
+          if %w{cl dfe dnt id spf utc xsrf}.member? t # acronyms
+            t = t.upcase                          # upcase
+          else
+            t[0] = t[0].upcase                    # capitalize
+          end
+          t                                       # token
+        }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
+        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base colors connection downloadable feeds fetched graph host images keep-alive links origin-status path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles remote-addr repository request-method request-path request-uri resp script-name searchable server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # external multi-hop headers
+      #head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # accept Turtle
+      case host
+      when /wsj\.com$/
+        head['Referer'] = 'http://drudgereport.com/'
+      when /youtube.com$/
+        head['Referer'] = 'https://www.youtube.com/'
+      end
+      head['Referer'] = 'https://' + host + '/' if %w(gif jpeg jpg png svg webp).member? ext.downcase
+      head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # we want redirection in HTTP, not Javascript,
+      head.delete 'User-Agent' if host == 't.co'            # so don't advertise a JS-capable user-agent
+      head
+    end
+
     def hostHandler
       qs = query_values || {}
       cookie = join('/cookie').R
@@ -285,39 +320,6 @@ class WebResource
       else                       # remote graph-node
         fetch
       end
-    end
-
-    def HEAD
-      self.GET.yield_self{|s, h, _|
-                          [s, h, []]} # status and header
-    end
-
-    # headers cleaned/filtered for export
-    def headers raw = nil
-      raw ||= env || {} # raw headers
-      head = {}         # clean headers
-      raw.map{|k,v|     # inspect headers
-        k = k.to_s
-        key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|t| # strip prefix, tokenize
-          if %w{cl dfe id spf utc xsrf}.member? t # acronym?
-            t = t.upcase                          # upcase
-          else
-            t[0] = t[0].upcase                    # capitalize
-          end
-          t                                       # token
-        }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
-        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base colors connection downloadable feeds fetched graph host images keep-alive links origin-status path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles remote-addr repository request-method request-path request-uri resp script-name searchable server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # external multi-hop headers
-      #head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # accept Turtle
-      case host
-      when /wsj\.com$/
-        head['Referer'] = 'http://drudgereport.com/'
-      when /youtube.com$/
-        head['Referer'] = 'https://www.youtube.com/'
-      end
-      head['Referer'] = 'https://' + host + '/' if %w(gif jpeg jpg png svg webp).member? ext.downcase
-      head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # we want redirection in HTTP, not Javascript,
-      head.delete 'User-Agent' if host == 't.co'            # so don't advertise a JS-capable user-agent
-      head
     end
 
     def href
