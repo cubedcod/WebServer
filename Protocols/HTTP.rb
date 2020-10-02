@@ -173,11 +173,20 @@ class WebResource
           return unless thru                                          # fetch to runtime graph only, no HTTP response returned to caller
 
           # cache fill
-          c = fsPath.R; c += query_hash                               # storage location
-          formatExt = Suffixes[format] || Suffixes_Rack[format]       # format suffix
-          c += formatExt if formatExt && c.R.extension != formatExt   # adjust suffix if incorrect or missing
-          puts c
-          c.R.writeFile body                                          # cache upstream entity
+          if formatExt = Suffixes[format] || Suffixes_Rack[format]    # format suffix
+            if extension == formatExt
+              cache = self
+            else # suffix incorrect or missing
+              cache = uri
+              cache += 'index' if uri[-1] == '/'
+              cache += formatExt
+              cache = cache.R
+            end
+            puts "caching #{uri} at #{cache.fsPath}"
+            cache.writeFile body                                    # cache upstream entity
+          else
+            puts "extension undefined for #{format}"
+          end
           saveRDF                                                     # cache discovered graph-data
 
           # response metadata
