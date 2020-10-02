@@ -173,21 +173,19 @@ class WebResource
           return unless thru                                          # fetch to runtime graph only, no HTTP response returned to caller
 
           # cache fill
-          if formatExt = Suffixes[format] || Suffixes_Rack[format]    # format suffix
+          if formatExt = Suffixes[format] || Suffixes_Rack[format]    # find format suffix
             if extension == formatExt
               cache = self
-            else # suffix incorrect or missing
+            else                                                      # suffix incorrect or missing
               cache = uri
               cache += 'index' if uri[-1] == '/'
-              cache += formatExt
-              cache = cache.R
+              cache += formatExt                                      # append correct suffix
             end
-            puts "caching #{uri} at #{cache.fsPath}"
-            cache.writeFile body                                    # cache upstream entity
+            cache.R.writeFile body                                    # cache raw upstream entity
           else
-            puts "extension undefined for #{format}"
+            puts "extension undefined for #{format}"                  # warn on undefined extensionns
           end
-          saveRDF                                                     # cache discovered graph-data
+          saveRDF                                                     # cache distilled graph-data
 
           # response metadata
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
