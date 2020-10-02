@@ -426,6 +426,8 @@ l.facebook.com l.instagram.com
           if (icon = ('//' + subject.host + '/favicon.ico').R).node.exist?
             yield subject, Schema+'icon', icon
           end
+        else
+          puts "local link in Google results: #{subject}"
         end
       end}
     if pagenext = doc.css('#pnnext')[0]

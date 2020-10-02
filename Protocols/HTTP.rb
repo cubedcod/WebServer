@@ -174,6 +174,7 @@ class WebResource
           c = fsPath.R; c += query_hash                               # storage location
           formatExt = Suffixes[format] || Suffixes_Rack[format]       # format suffix
           c += formatExt if formatExt && c.R.extension != formatExt   # adjust suffix if incorrect or missing
+          puts c
           c.R.writeFile body                                          # cache upstream entity
           saveRDF                                                     # cache discovered graph-data
 
