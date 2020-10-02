@@ -181,7 +181,7 @@ class WebResource
               cache += 'index' if uri[-1] == '/'
               cache += formatExt                                      # append correct suffix
             end
-            cache.R.writeFile body                                    # cache raw upstream entity
+            #cache.R.writeFile body                                    # cache raw upstream entity
           else
             puts "extension undefined for #{format}"                  # warn on undefined extensionns
           end
