@@ -409,27 +409,21 @@ l.facebook.com l.instagram.com
 
   def GoogleHTML doc
     doc.css('div.rc').map{|rc|
-      if r = rc.css('div.r > a')[0]
+      rc.css('a').map{|r|
         subject = r['href'].R
         if subject.host
           yield subject, Type, Post.R
           if title = r.css('h3')[0]
             yield subject, Title, title.inner_text
           end
-          if cite = r.css('cite')[0]
-            yield subject, Link, cite.inner_text.R
-          end
-          if s = rc.css('div.s')[0]
-            yield subject, Content, Webize::HTML.format(s, self)
-            rc.remove
-          end
+          yield subject, Content, Webize::HTML.format(r.inner_html, self)
           if (icon = ('//' + subject.host + '/favicon.ico').R).node.exist?
             yield subject, Schema+'icon', icon
           end
+          rc.remove
         else
           puts "local link in Google results: #{subject}"
-        end
-      end}
+        end}}
     if pagenext = doc.css('#pnnext')[0]
       env[:links][:next] ||= join pagenext['href']
     end
