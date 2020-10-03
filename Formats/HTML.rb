@@ -128,7 +128,15 @@ module Webize
 
       def each_statement &fn
         scanContent{|s,p,o,g=nil|
-          o = Time.parse(o.to_s).utc.iso8601 if p.to_s == Date # normalize date formats
+          if p.to_s == Date # normalize date formats
+            o = o.to_s
+            o = if o.match?(/^\d+$/) # unixtime
+                  Time.at o.to_i
+                else
+                  Time.parse o
+                end
+            o = o.utc.iso8601
+          end
           fn.call RDF::Statement.new(s.R, p.R,
                                      (o.class == WebResource || o.class == RDF::Node ||
                                       o.class == RDF::URI) ? o : (l = RDF::Literal o
