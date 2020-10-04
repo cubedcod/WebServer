@@ -25,7 +25,7 @@ module Webize
     # format HTML to local preferences
     def self.format html, base
       if html.class == String
-        html = Nokogiri::HTML.fragment html #rescue Nokogiri::HTML.fragment html.encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
+        html = Nokogiri::HTML.fragment html
       end
 
       # strip externally-originated styles and scripts
