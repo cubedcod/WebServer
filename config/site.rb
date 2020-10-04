@@ -22,6 +22,7 @@ module Webize
         'www.instagram.com' => :InstagramHTML,
         'www.nytimes.com' => :NYT,
         'www.qrz.com' => :QRZ,
+        'www.scmp.com' => :Apollo,
         'www.thecrimson.com' => :Apollo,
         'www.universalhub.com' => :UHub,
         'www.youtube.com' => :YouTube,
