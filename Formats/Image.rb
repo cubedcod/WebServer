@@ -36,6 +36,7 @@ module Webize
     SRCnotSRC = %w(
 data-baseurl
 data-delayed-url
+data-gl-src
 data-hi-res-src
 data-image
 data-img-src
@@ -49,7 +50,7 @@ data-src
 image-src
 )
 
-    SRCSET = %w{data-lazy-srcset data-srcset}
+    SRCSET = %w{data-gl-srcset data-lazy-srcset data-srcset}
 
   end
   module JPEG
