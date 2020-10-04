@@ -112,7 +112,6 @@ l.facebook.com l.instagram.com
         r.deny
       end}
 
-    GET 'ad.doubleclick.net', -> r {[301, {'Location' => ('//www.youtube.com/watch?v=' + r.uri.match(/youtube.com\/video\/([^;]+)/)[1]).R.href}, []]}
     GET 'googleads.g.doubleclick.net', GotoAdURL
     GET 'www.googleadservices.com', GotoAdURL
 
@@ -226,8 +225,10 @@ l.facebook.com l.instagram.com
     GET 'cdn.shortpixel.ai', ImgRehost
     GET 's.yimg.com', ImgRehost
 
-    GET 'youtube.com',   -> r {[301, {'Location' => ['//www.youtube.com', r.path, '?', r.query].join.R.href}, []]}
-    GET 'm.youtube.com', -> r {[301, {'Location' => ['//www.youtube.com', r.path, '?', r.query].join.R.href}, []]}
+    GotoYT = -> r {[301, {'Location' => ['//www.youtube.com', r.path, '?', r.query].join.R.href}, []]}
+    GET 'm.youtube.com', GotoYT
+    GET 'yewtu.be', GotoYT
+    GET 'youtube.com', GotoYT
 
     GET 'www.youtube.com', -> r {
       path = r.parts[0]
