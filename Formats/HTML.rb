@@ -132,6 +132,8 @@ module Webize
             o = o.to_s
             o = if o.match?(/^\d+$/) # unixtime
                   Time.at o.to_i
+                elsif o.empty?
+                  Time.now
                 else
                   Time.parse o
                 end
