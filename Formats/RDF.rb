@@ -223,5 +223,39 @@ class WebResource
       end}
 
   end
+end
+module Webize
+
+  module URIlist
+    class Format < RDF::Format
+      content_type 'text/uri-list',
+                   extension: :u
+      content_encoding 'utf-8'
+      reader { Reader }
+    end
+    class Reader < RDF::Reader
+      include WebResource::URIs
+      format Format
+
+      def initialize(input = $stdin, options = {}, &block)
+        @base = options[:base_uri].R.path.sub(/.u$/,'').R
+        @doc = input.respond_to?(:read) ? input.read : input
+        if block_given?
+          case block.arity
+          when 0 then instance_eval(&block)
+          else block.call(self)
+          end
+        end
+        nil
+      end
+
+      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
+
+      def each_statement &fn
+        @doc.lines.map(&:chomp).map{|line|
+          fn.call RDF::Statement.new line.R, Type.R, (W3 + '2000/01/rdf-schema#Resource').R unless line.empty? || line.match?(/^#/)}
+      end
+    end
+  end
 
 end
