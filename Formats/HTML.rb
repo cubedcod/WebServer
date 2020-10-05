@@ -69,7 +69,7 @@ module Webize
           ref.fragment = '' if ref.fragment&.match?(/utm[^a-z]/)
           if ref.deny?
             puts "🚩 " + e.to_s
-            e.remove                                                # strip blocked href
+            e.remove                                                 # strip blocked href
           else
             offsite = ref.host != base.host
             e.add_child " <span class='uri'>#{CGI.escapeHTML (offsite ? ref.uri.sub(/^https?:..(www.)?/,'') : (ref.path || '/'))[0..127]}</span> " # show URI in HTML
