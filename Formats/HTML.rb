@@ -32,18 +32,20 @@ module Webize
       html.css('iframe, script, style, a[href^="javascript"], link[rel="stylesheet"], link[type="text/javascript"], link[as="script"]').map{|e| puts "🚩 " + e.to_s} if ENV['VERBOSE']
       html.css('iframe, script, style, a[href^="javascript"], link[rel="stylesheet"], link[type="text/javascript"], link[as="script"]').remove unless [nil,'localhost'].member? base.host # locally-originated scripts only
 
-      # <img> mappings
+      # <img> mapping
       html.css('[style*="background-image"]').map{|node|
         node['style'].match(/url\(['"]*([^\)'"]+)['"]*\)/).yield_self{|url|                                # CSS background-image -> img
           node.add_child "<img src=\"#{url[1]}\">" if url}}
       html.css('amp-img').map{|amp| amp.add_child "<img src=\"#{amp['src']}\">"}                           # amp-img -> img
       html.css("div[class*='image'][data-src]").map{|div|div.add_child "<img src=\"#{div['data-src']}\">"} # div -> img
       html.css("figure[itemid]").map{|fig| fig.add_child "<img src=\"#{fig['itemid']}\">"}                 # figure -> img
+
       # identify all <p> <pre> <ul> <ol> elements
       html.css('p').map{|e|   e.set_attribute 'id', 'p'   + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
       html.css('pre').map{|e| e.set_attribute 'id', 'pre' + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
       html.css('ul').map{|e|  e.set_attribute 'id', 'ul'  + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
       html.css('ol').map{|e|  e.set_attribute 'id', 'ol'  + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
+
       # inspect nodes
       html.traverse{|e|                                              # inspect node
         e.respond_to?(:attribute_nodes) && e.attribute_nodes.map{|a| # inspect attributes
@@ -245,6 +247,22 @@ module Webize
 
         # <body>
         if body = n.css('body')[0]
+          links = {}
+          linkfile = ('//' + @base.host + '/.links.u').R
+
+          if linkfile.node.exist?
+            site_links = {}
+            linkfile.node.each_line{|l| site_links[l.chomp] = true}
+
+            body.css('a[href]').map{|a|
+              links[a['href']] = true
+              a.remove if site_links.has_key?(a['href'])}
+          else
+            body.css('a[href]').map{|a|links[a['href']] = true}
+          end
+
+          linkfile.writeFile links.keys.join "\n" # update linkfile
+
           yield subject, Content, HTML.format(body, @base).gsub(/<\/?noscript[^>]*>/i, '')
         else # no <body> element
           yield subject, Content, HTML.format(n, @base).gsub(/<\/?noscript[^>]*>/i, '')
