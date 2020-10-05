@@ -247,20 +247,36 @@ module Webize
 
         # <body>
         if body = n.css('body')[0]
+          hashed_nodes = 'div, footer, h1, h2, h3, nav, p, section'
+          hashs = {}
           links = {}
+          hashfile = ('//' + @base.host + '/.hashes').R
           linkfile = ('//' + @base.host + '/.links.u').R
 
           if linkfile.node.exist?
             site_links = {}
             linkfile.node.each_line{|l| site_links[l.chomp] = true}
-
             body.css('a[href]').map{|a|
               links[a['href']] = true
               a.remove if site_links.has_key?(a['href'])}
           else
-            body.css('a[href]').map{|a|links[a['href']] = true}
+            body.css('a[href]').map{|a|
+              links[a['href']] = true}
+          end
+          if hashfile.node.exist?
+            site_hash = {}
+            hashfile.node.each_line{|l| site_hash[l.chomp] = true}
+            body.css(hashed_nodes).map{|n|
+              hash = Digest::SHA2.hexdigest n.to_s
+              hashs[hash] = true
+              n.remove if site_hash.has_key?(hash)}
+          else
+            body.css(hashed_nodes).map{|n|
+              hash = Digest::SHA2.hexdigest n.to_s
+              hashs[hash] = true}
           end
 
+          hashfile.writeFile hashs.keys.join "\n" # update hashfile
           linkfile.writeFile links.keys.join "\n" # update linkfile
 
           yield subject, Content, HTML.format(body, @base).gsub(/<\/?noscript[^>]*>/i, '')
