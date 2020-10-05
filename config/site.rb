@@ -415,17 +415,18 @@ l.facebook.com l.instagram.com
         subject = r['href'].R
         if subject.host
           yield subject, Type, Post.R
+          yield subject, Content, Webize::HTML.format(r.inner_html, self)
           if title = r.css('h3')[0]
             yield subject, Title, title.inner_text
+            yield subject, Content, rc.inner_text
           end
-          yield subject, Content, Webize::HTML.format(r.inner_html, self)
           if (icon = ('//' + subject.host + '/favicon.ico').R).node.exist?
             yield subject, Schema+'icon', icon
           end
-          r.remove
         else
           puts "local link in Google results: #{subject}"
-        end}}
+        end}
+      rc.remove}
     if pagenext = doc.css('#pnnext')[0]
       env[:links][:next] ||= join pagenext['href']
     end
