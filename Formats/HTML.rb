@@ -137,7 +137,7 @@ module Webize
                 elsif o.empty?
                   Time.now
                 else
-                  Time.parse o
+                  Time.parse o rescue Time.now
                 end
             o = o.utc.iso8601
           end
