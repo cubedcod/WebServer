@@ -56,7 +56,7 @@ module Webize
         if e['src']                                                  # src attribute
           src = (base.join e['src']).R                               # resolve src location
           if src.deny?
-            puts "🚩 " + e.to_s if ENV['VERBOSE']
+            puts "🚩 " + e.to_s
             e.remove                                                 # strip blocked src
           else
             e['src'] = src.href                                      # update src to resolved location
@@ -67,17 +67,17 @@ module Webize
           ref = (base.join e['href']).R                              # resolve href location
           ref.query = '' if ref.query&.match?(/utm[^a-z]/)
           ref.fragment = '' if ref.fragment&.match?(/utm[^a-z]/)
-#          if ref.deny?
-#            puts "🚩 " + e.to_s if ENV['VERBOSE']
-#            e.remove                                                # strip blocked href
-#          else
+          if ref.deny?
+            puts "🚩 " + e.to_s
+            e.remove                                                # strip blocked href
+          else
             offsite = ref.host != base.host
             e.add_child " <span class='uri'>#{CGI.escapeHTML (offsite ? ref.uri.sub(/^https?:..(www.)?/,'') : (ref.path || '/'))[0..127]}</span> " # show URI in HTML
             e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # mint identifier
             css = [:uri]; css.push :path unless offsite              # style as local or global reference
             e['href'] = ref.href                                     # update href to resolved location
             e['class'] = css.join ' '                                # add CSS style
-#          end
+          end
         elsif e['id']                                                # id attribute
           e.set_attribute 'class', 'identified'                      # style as identified node
           e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id'] unless e.name == 'p'}</span> " # add href to node
@@ -247,7 +247,7 @@ module Webize
 
         # <body>
         if body = n.css('body')[0]
-          hashed_nodes = 'div, footer, h1, h2, h3, nav, p, section'
+          hashed_nodes = 'div, footer, h1, h2, h3, nav, p, section, span'
           hashs = {}
           links = {}
           hashfile = ('//' + @base.host + '/.hashes').R
