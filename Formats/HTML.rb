@@ -125,18 +125,19 @@ module Webize
             o = if o.match?(/^\d+$/) # unixtime
                   Time.at o.to_i
                 elsif o.empty?
-                  Time.now
+                  nil
                 else
-                  Time.parse o rescue Time.now
+                  Time.parse o rescue puts("failed to parse time: #{o}")
                 end
-            o = o.utc.iso8601
+            o = o.utc.iso8601 if o
           end
           fn.call RDF::Statement.new(s.R, p.R,
                                      (o.class == WebResource || o.class == RDF::Node ||
                                       o.class == RDF::URI) ? o : (l = RDF::Literal o
                                                                   l.datatype=RDF.XMLLiteral if p == Content
                                                                   l),
-                                     graph_name: g ? g.R : @base)}
+                                     graph_name: g ? g.R : @base) if o
+        }
       end
 
       def scanContent &f

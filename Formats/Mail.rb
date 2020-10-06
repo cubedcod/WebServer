@@ -116,13 +116,14 @@ module Webize
           yield mail, Title, subject, graph}
 
         # Date
-        date = m.date || Time.now rescue Time.now
-        timestamp = ([Time, DateTime].member?(date.class) ? date : Time.parse(date.to_s)).iso8601
-        yield mail, Date, timestamp, graph
+        if date = m.date
+          timestamp = ([Time, DateTime].member?(date.class) ? date : Time.parse(date.to_s)).iso8601
+          yield mail, Date, timestamp, graph
 
-        # store message to maildir for legacy clients
-        maildirFile = ('/mail/cur/' + timestamp.gsub(/\D/,'.') + Digest::SHA2.hexdigest(id) + '.eml').R
-        maildirFile.writeFile body unless maildirFile.node.exist?
+          # cache message in maildir
+          maildirFile = ('/mail/cur/' + timestamp.gsub(/\D/,'.') + Digest::SHA2.hexdigest(id) + '.eml').R
+          maildirFile.writeFile body unless maildirFile.node.exist?
+        end
 
         # references
         %w{in_reply_to references}.map{|ref|
