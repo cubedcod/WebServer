@@ -52,6 +52,14 @@ image-src
 
     SRCSET = %w{data-gl-srcset data-lazy-srcset data-srcset}
 
+    # resolve srcset references to local cache
+    def self.srcset node, base
+      node['srcset'] = node['srcset'].scan(/\s*(\S+)\s+([^,]+),*/).map{|url, size|
+        [base.join(url).R.href, size].join ' '
+      }.join(', ')
+      nil
+    end
+
   end
   module JPEG
     class Format < RDF::Format

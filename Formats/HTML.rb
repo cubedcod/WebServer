@@ -85,16 +85,6 @@ module Webize
       html.to_xhtml indent: 0
     end
 
-    # resolve srcset location
-    def self.srcset node, base
-      node['srcset'] = node['srcset'].split(',').map{|i|
-        url, _ = i.split ' '
-        url = base.join(url).R
-        [url.href, _].join ' '
-      }.join(',')
-      nil
-    end
-
     class Format < RDF::Format
       content_type 'text/html', extensions: [:htm, :html], aliases: %w(text/fragment+html;q=0.8)
       content_encoding 'utf-8'
@@ -247,38 +237,37 @@ module Webize
 
         # <body>
         if body = n.css('body')[0]
-          hashed_nodes = 'div, footer, h1, h2, h3, nav, p, section, span'
-          hashs = {}
-          links = {}
-          hashfile = ('//' + @base.host + '/.hashes').R
-          linkfile = ('//' + @base.host + '/.links.u').R
-
-          if linkfile.node.exist?
-            site_links = {}
-            linkfile.node.each_line{|l| site_links[l.chomp] = true}
-            body.css('a[href]').map{|a|
-              links[a['href']] = true
-              a.remove if site_links.has_key?(a['href'])}
-          else
-            body.css('a[href]').map{|a|
-              links[a['href']] = true}
+          unless @base.local_node? || (@base.query_values||{}).has_key?('fullContent') # hide upstream site-gunk
+            hashed_nodes = 'div, footer, h1, h2, h3, nav, p, section, span'
+            hashs = {}
+            links = {}
+            hashfile = ('//' + @base.host + '/.hashes').R
+            linkfile = ('//' + @base.host + '/.links.u').R
+            if linkfile.node.exist?
+              site_links = {}
+              linkfile.node.each_line{|l| site_links[l.chomp] = true}
+              body.css('a[href]').map{|a|
+                links[a['href']] = true
+                a.remove if site_links.has_key?(a['href'])}
+            else
+              body.css('a[href]').map{|a|
+                links[a['href']] = true}
+            end
+            if hashfile.node.exist?
+              site_hash = {}
+              hashfile.node.each_line{|l| site_hash[l.chomp] = true}
+              body.css(hashed_nodes).map{|n|
+                hash = Digest::SHA2.hexdigest n.to_s
+                hashs[hash] = true
+                n.remove if site_hash.has_key?(hash)}
+            else
+              body.css(hashed_nodes).map{|n|
+                hash = Digest::SHA2.hexdigest n.to_s
+                hashs[hash] = true}
+            end
+            hashfile.writeFile hashs.keys.join "\n" # update hashfile
+            linkfile.writeFile links.keys.join "\n" # update linkfile
           end
-          if hashfile.node.exist?
-            site_hash = {}
-            hashfile.node.each_line{|l| site_hash[l.chomp] = true}
-            body.css(hashed_nodes).map{|n|
-              hash = Digest::SHA2.hexdigest n.to_s
-              hashs[hash] = true
-              n.remove if site_hash.has_key?(hash)}
-          else
-            body.css(hashed_nodes).map{|n|
-              hash = Digest::SHA2.hexdigest n.to_s
-              hashs[hash] = true}
-          end
-
-          hashfile.writeFile hashs.keys.join "\n" # update hashfile
-          linkfile.writeFile links.keys.join "\n" # update linkfile
-
           yield subject, Content, HTML.format(body, @base).gsub(/<\/?noscript[^>]*>/i, '')
         else # no <body> element
           yield subject, Content, HTML.format(n, @base).gsub(/<\/?noscript[^>]*>/i, '')

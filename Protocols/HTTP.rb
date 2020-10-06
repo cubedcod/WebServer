@@ -173,25 +173,26 @@ class WebResource
           return unless thru                                          # fetch to runtime graph only, no HTTP response returned to caller
 
           # cache fill
-          if formatExt = Suffixes[format] || Suffixes_Rack[format]    # find format suffix
-            if extension == formatExt
+          if formatExt = Suffixes[format] || Suffixes_Rack[format]    # lookup format suffix
+            if extension == formatExt                                 # suffix match
               cache = self
             else                                                      # suffix incorrect or missing
               cache = uri
-              cache += 'index' if uri[-1] == '/'
-              cache += formatExt                                      # append correct suffix
+              cache += 'index' if uri[-1] == '/'                      # append directory-index slug
+              cache += formatExt                                      # append format-suffix
+              cache = cache.R                                         # cache pointer
             end
-            #cache.R.writeFile body                                    # cache raw upstream entity
+            cache.writeFile body if cache.static_node?                # cache upstream entity
           else
-            puts "extension undefined for #{format}"                  # warn on undefined extensionns
+            puts "extension undefined for #{format}"                  # notice on undefined extension
           end
-          saveRDF                                                     # cache distilled graph-data
+          saveRDF                                                     # cache graph-data
 
           # response metadata
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # upstream metadata
           env[:resp]['Access-Control-Allow-Origin'] ||= allowed_origin # CORS header
-          h['link'] && h['link'].split(',').map{|link|                # parse and merge Link headers to environment
+          h['link'] && h['link'].split(',').map{|link|                # parse and merge upstream Link headers to request-environment
             ref, type = link.split(';').map &:strip
             if ref && type
               ref = ref.sub(/^</,'').sub />$/, ''
