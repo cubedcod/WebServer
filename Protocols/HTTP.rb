@@ -38,15 +38,13 @@ class WebResource
       uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body| # dispatch request
         format = uri.format_icon head['Content-Type']                 # log response
         color = env[:deny] ? '31;1' : (format_color format)
-        unless [204, 304].member? status
-          puts [env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]), (status_icon status), format,
-                env[:repository] ? (env[:repository].size.to_s + '⋮') : nil,
-                env['HTTP_REFERER'] ? ["\e[#{color}m", env['HTTP_REFERER'], "\e[0m→"] : nil,
-                "\e[#{color}#{env['HTTP_REFERER'] && !env['HTTP_REFERER'].index(env[:base].host) && ';7' || ''}m",
-                env[:base], "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil,
-                [env['HTTP_ACCEPT'], head['Content-Type']].compact.join(' → ')
-               ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
-        end
+        puts [env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]), (status_icon status), format,
+              env[:repository] ? (env[:repository].size.to_s + '⋮') : nil,
+              env['HTTP_REFERER'] ? ["\e[#{color}m", env['HTTP_REFERER'], "\e[0m→"] : nil,
+              "\e[#{color}#{env['HTTP_REFERER'] && !env['HTTP_REFERER'].index(env[:base].host) && ';7' || ''}m",
+              env[:base], "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil,
+              [env['HTTP_ACCEPT'], head['Content-Type']].compact.join(' → ')
+             ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
         [status, head, body]}
     rescue Exception => e
       msg = [[uri, e.class, e.message].join(' '), e.backtrace].join "\n"
