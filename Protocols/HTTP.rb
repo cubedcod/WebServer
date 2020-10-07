@@ -34,9 +34,7 @@ class WebResource
       uri = RDF::URI('//' + env['HTTP_HOST']).join(env['REQUEST_PATH']).R env # resource URI
       uri.scheme = uri.local_node? ? 'http' : 'https'                         # request scheme
       uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading + consecutive & from qs so URI library doesn't freak out
-      env.update({base: uri, feeds: [], links: {}, resp: {},
-                  'HTTP_COOKIE' => '🍪'
-                 }) # environment
+      env.update({base: uri, feeds: [], links: {}, resp: {}})         # request environment
       uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body| # dispatch request
         format = uri.format_icon head['Content-Type']                 # log response
         color = env[:deny] ? '31;1' : (format_color format)
