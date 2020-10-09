@@ -17,14 +17,14 @@ class WebResource
     end
 
     def cacheResponse
-      nodes = nodeSet            # find cached nodes
-      if nodes.size == 1 && (nodes[0].static_node? || # one node and it's nontransformable or cached and requested formats match
-                             (nodes[0].named_format == selectFormat && (nodes[0].named_format != 'text/html' || (query_values||{}).has_key?('notransform')))) # HTML transformable w/o 'notransform' flag
+      nodes = nodeSet            # find local nodes
+      if nodes.size == 1 && (nodes[0].static_node? || # one node and it's nontransformable or in the preferred-via-conneg format
+                            (nodes[0].named_format == selectFormat && (no_transform? || nodes[0].named_format != 'text/html')))
         nodes[0].fileResponse    # static response on file
       else                       # load graph
         nodes.map{|n|
           env[:summary] ? n.summary : n.🐢}.map &:loadRDF # load RDF
-        saveRDF if env[:updates] # cache new graph-data found in RDFize process
+        saveRDF if env[:updates] # cache new graph-data found in RDF-loading process
         graphResponse            # graph response
       end
     end
@@ -138,7 +138,7 @@ class WebResource
 
     # fetch from remote                            options:
     def fetchHTTP thru: true,                        # pass HTTP response to caller
-                  transformable: !(query_values||{}).has_key?('notransform') # allow transformation: format conversions & same-format (HTML reformat, code pretty-print) rewrites
+                  transformable: !no_transform?      # allow transforms: format conversions and same-format (HTML reformat, code pretty-print) rewrites
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                            # upstream metadata
         if response.status.to_s.match? /206/         # partial response
@@ -290,8 +290,12 @@ class WebResource
         head['Referer'] = 'https://www.youtube.com/'
       end
       head['Referer'] = 'https://' + host + '/' if %w(gif jpeg jpg png svg webp).member? ext.downcase
-      head['User-Agent'] = 'curl/7.65.1' if host == 'po.st' # we want redirection in HTTP, not Javascript,
-      head.delete 'User-Agent' if host == 't.co'            # so don't advertise a JS-capable user-agent
+      head['User-Agent'] = if host == 'po.st' # we want shortlink-expansion redirects via HTTP, not Javascript,
+                             'curl/7.65.1'
+                           else
+                             'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
+                           end
+      head.delete 'User-Agent' if host == 't.co' # so don't advertise a JS-capable user-agent
       head
     end
 
@@ -343,6 +347,8 @@ class WebResource
       end
       [200, {'Content-Type' => 'text/html'}, [(htmlDocument results)]]
     end
+
+    def no_transform?; (query_values||{}).has_key? 'notransform' end
 
     def notfound; [404, {'Content-Type' => 'text/html'}, [htmlDocument]] end
 

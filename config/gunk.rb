@@ -24,7 +24,7 @@ b(lueconic|ouncee?x.*|ugsnag)|.*bid(d(er|ing).*|s)|
 c(edexis|hartbeat.*|mp|ollector|omscore|onsent|ookie.?(c(hoice|onsent)|law|notice)|riteo|xense)|
 de(mandware|t(ect|roitchicago))|dfp|dis(countcode|ney(id)?|qus)|doubleclick|
 e(moji|nsighten|proof|scenic|vidon|zoic)|
-fbcdn.*gif|frosmo|
+f(acebook|bcdn)|frosmo|
 g(dpr|eo(ip|locat(e|ion))|igya|pt|tag|tm)|.*(
 header|pre)[-_]?bid.*|hotjar|.*hubspot.*|[hp]b.?js|
 impression|indexww|
