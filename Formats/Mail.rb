@@ -98,12 +98,16 @@ module Webize
           } if fr.respond_to? :addrs}
 
         # To
-        %w{to cc bcc resent_to}.map{|p|      # recipient fields
-          m.send(p).yield_self{|r|           # recipient lookup
+        %w{to cc bcc resent_to}.map{|p|      # recipient accessor-methods
+          m.send(p).yield_self{|r|           # recipient(s)
             ((r.class == Array || r.class == ::Mail::AddressContainer) ? r : [r]).compact.map{|r| # recipient
               yield mail, To, ('/m/*/*/msg*?q=' + r + '#' + r).R, graph
             }}}
-        m['X-BeenThere'].yield_self{|b|(b.class == Array ? b : [b]).compact.map{|r|to.push r.to_s}} # anti-loop recipient
+        m['X-BeenThere'].yield_self{|b|      # anti-loop recipient property
+          (b.class == Array ? b : [b]).compact.map{|r|
+            r = r.to_s
+            yield mail, To, ('/m/*/*/msg*?q=' + r + '#' + r).R, graph
+          }}
         m['List-Id'] && m['List-Id'].yield_self{|name|
           yield mail, To, name.decoded.sub(/<[^>]+>/,'').gsub(/[<>&]/,''), graph} # mailinglist name
 
