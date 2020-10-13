@@ -14,8 +14,8 @@ client launch shortcuts in [bin/browse](bin/browse/)
 launch 'webd' for a common configuration
 
 browser settings:
-google w/ local UI (search engine)  http://localhost:8000/www.google.com/search?q=%s
-jump to local UI from upstream UI [bookmarklet](javascript:location.href='http://localhost:8000/'+location.hostname+location.pathname+'?cookie='+encodeURIComponent(document.cookie))
+google (search engine) http://localhost:8000/www.google.com/search?q=%s
+[local UI](javascript:location.href='http://localhost:8000/'+location.hostname+location.pathname+'?cookie='+encodeURIComponent(document.cookie)) bookmarklet
 
 ## WHAT
 

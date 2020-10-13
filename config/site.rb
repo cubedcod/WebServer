@@ -193,7 +193,7 @@ l.facebook.com l.instagram.com
         Twits.shuffle.each_slice(18){|t|print '🐦'; searchURL[t.map{|u|'from%3A'+u}.join('%2BOR%2B')].fetchHTTP thru: false}
         r.saveRDF.graphResponse
       elsif parts.size == 1 && !%w(favicon.ico manifest.json push_service_worker.js search sw.js).member?(parts[0]) # user
-        if qs.has_key? 'q' # query local cache
+        if qs.has_key? 'q' # query tweets in local cache
           r.cacheResponse
         else # find uid
           uid = nil
