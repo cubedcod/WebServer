@@ -1,17 +1,17 @@
 #!/bin/sh
 
 # Alpine https://www.alpinelinux.org/
-which apk && su -c 'apk add alpine-sdk iptables ip6tables graphicsmagick ruby ruby-dev python python3-dev py3-cffi py3-pip openssl-dev rsync libexif-dev libxslt-dev taglib squid'
+which apk && su -c 'apk add alpine-sdk iptables ip6tables graphicsmagick ruby ruby-dev python python3-dev py3-cffi py3-pip openssl-dev socat syncthing libexif-dev libxslt-dev taglib squid'
 
 # Arch https://www.archlinux.org/
-which pacman && su -c 'pacman -S graphicsmagick base-devel ruby ruby-bundler ruby-rdoc parallel python-pip pkg-config pygmentize socat taglib squid make'
+which pacman && su -c 'pacman -S graphicsmagick base-devel ruby ruby-bundler ruby-rdoc parallel python-pip pkg-config pygmentize socat syncthing taglib squid make'
 which pacman && su -c '/usr/lib/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB'
 
 # Debian https://www.debian.org/
-which apt-add-repository && su -c 'apt-get install graphicsmagick git ruby ruby-dev bundler grep file pkg-config libexif-dev libssl-dev libtag1-dev libxslt-dev libzip-dev squid make rsync libffi-dev python3-pip python-dev'
+which apt-add-repository && su -c 'apt-get install graphicsmagick git ruby ruby-dev bundler grep file pkg-config libexif-dev libssl-dev libtag1-dev libxslt-dev libzip-dev socat squid make syncthing libffi-dev python3-pip python-dev'
 
 # Termux https://termux.com/
-which pkg && pkg install graphicsmagick git ruby grep file findutils pkg-config libiconv libexif libprotobuf libxslt clang taglib squid make rsync libffi python libcap libcrypt openssl-tool zlib
+which pkg && pkg install graphicsmagick git ruby grep file findutils pkg-config libiconv libexif libprotobuf libxslt clang taglib squid make syncthing libffi python libcap libcrypt openssl-tool zlib
 
 # Ruby
 which bundle || gem install bundler
