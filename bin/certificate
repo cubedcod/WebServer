@@ -23,3 +23,6 @@ if [ -x "$(command -v pkg)" ]; then
     su -c "cp  $cert /system/etc/security/cacerts/$hash.0"
     su -c "chmod 644 /system/etc/security/cacerts/$hash.0"
 fi
+
+# Void
+which xbps-query && su -c "trust anchor --store $cert"

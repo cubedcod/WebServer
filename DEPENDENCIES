@@ -21,7 +21,7 @@ which bundle || gem install bundler
 bundle install
 
 # create maildir
-mkdir -p ~/web/mail/new/{cur,new,tmp}
+mkdir -p ~/web/mail/{cur,new,tmp}
 
 # generate and import certificate
 ./bin/certificate
