@@ -1,20 +1,21 @@
 #!/bin/sh
 
 # Alpine https://www.alpinelinux.org/
-which apk && sudo apk add alpine-sdk iptables ip6tables graphicsmagick ruby ruby-dev openssl-dev socat syncthing libexif-dev libxslt-dev taglib squid
+which apk && sudo apk add alpine-sdk iptables ip6tables graphicsmagick ruby ruby-dev openssl-dev socat syncthing libexif-dev libxslt-dev squid taglib tmux
 
 # Arch https://www.archlinux.org/
-which pacman && sudo pacman -S base-devel git graphicsmagick parallel pygmentize ruby ruby-bundler ruby-rdoc socat squid syncthing taglib
+which pacman && sudo pacman -S base-devel git graphicsmagick parallel pygmentize ruby ruby-bundler ruby-rdoc socat squid syncthing taglib tmux
 which pacman && sudo /usr/lib/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB
 
 # Debian https://www.debian.org/
-which apt-add-repository && sudo apt-get install build-essential graphicsmagick git ruby ruby-dev bundler grep file libexif-dev libssl-dev libtag1-dev libxslt-dev libzip-dev socat squid make syncthing libffi-dev
+which apt-add-repository && sudo apt-get install build-essential graphicsmagick git ruby ruby-dev bundler grep file libexif-dev libssl-dev libtag1-dev libxslt-dev libzip-dev socat squid make syncthing tmux libffi-dev
 
 # Termux https://termux.com/
-which pkg && pkg install graphicsmagick git ruby grep file findutils pkg-config libiconv libexif libprotobuf libxslt clang taglib squid make syncthing libffi libcap libcrypt openssl-tool zlib
+which pkg && pkg install graphicsmagick git ruby grep file findutils pkg-config libiconv libexif libprotobuf libxslt clang taglib squid make syncthing libffi libcap libcrypt openssl-tool tmux zlib
 
 # Void https://voidlinux.org
-which xbps-install && sudo xbps-install -S base-devel curl git GraphicsMagick libexif-devel parallel python3-Pygments ruby ruby-devel socat squid syncthing taglib-devel
+which xbps-install && sudo xbps-install -S base-devel curl git GraphicsMagick libexif-devel parallel python3-Pygments ruby ruby-devel socat squid syncthing taglib-devel tmux
+which xbps-install && sudo /usr/libexec/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB
 
 # Ruby
 which bundle || gem install bundler
