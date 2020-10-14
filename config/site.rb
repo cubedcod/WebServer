@@ -359,7 +359,7 @@ l.facebook.com l.instagram.com
         if room = text.match(/"id":"([^"]+)/)
           room_id = room[1]                              # room identifier
           room = ('http://gitter.im/api/v1/rooms/' + room_id).R # room URI
-          env[:links][:prev] = room.uri + '/chatMessages?lookups%5B%5D=user&includeThreads=false&limit=47'
+          env[:links][:prev] = room.uri + '/chatMessages?lookups%5B%5D=user&includeThreads=false&limit=31'
           yield room, Schema + 'sameAs', self, room # point room integer-id to URI
           yield room, Type, (SIOC + 'ChatChannel').R
         end
@@ -393,7 +393,7 @@ l.facebook.com l.instagram.com
       id = item['id']                              # message identifier
       room_id = parts[3]                           # room identifier
       room = ('http://gitter.im/api/v1/rooms/'  + room_id).R # room URI
-      env[:links][:prev] ||= room.uri + '/chatMessages?lookups%5B%5D=user&includeThreads=false&beforeId=' + id + '&limit=47'
+      env[:links][:prev] ||= room.uri + '/chatMessages?lookups%5B%5D=user&includeThreads=false&beforeId=' + id + '&limit=31'
       date = item['sent']
       uid = item['fromUser']
       user = tree['lookups']['users'][uid]
