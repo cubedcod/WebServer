@@ -1,7 +1,11 @@
 module Webize
   module ArchiveFile
     class Format < RDF::Format
-      content_type 'application/x-tar', :extension => :tar
+      content_type 'application/x-tar',
+                   aliases: %w(
+                   application/x-gzip;q=0.8
+),
+                   extensions: [:gz,:tar]
       content_encoding 'utf-8'
       reader { Reader }
     end
@@ -13,6 +17,7 @@ module Webize
       def initialize(input = $stdin, options = {}, &block)
         @doc = input.respond_to?(:read) ? input.read : input
         @subject = (options[:base_uri] || '#zip').R
+puts :Archive, @subject
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)

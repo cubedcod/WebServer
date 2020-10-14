@@ -24,7 +24,7 @@ class WebResource
       else                       # load graph
         nodes.map{|n|
           env[:summary] ? n.summary : n.🐢}.map &:loadRDF # load RDF
-        saveRDF if env[:updates] # cache new graph-data found in RDF-loading process
+        saveRDF if env[:updates] # cache new resources found during RDF-ization
         graphResponse            # graph response
       end
     end
@@ -92,7 +92,7 @@ class WebResource
        [content]]
     end
 
-    # if needed, generate and return entity. delegate to Rack handler for file references
+    # if needed, generate and return entity. delegated to Rack handler if file reference
     def entity generator = nil
       if env['HTTP_IF_NONE_MATCH']&.strip&.split(/\s*,\s*/)&.include? env[:resp]['ETag']
         [304, {}, []]                            # unmodified entity
@@ -129,8 +129,8 @@ class WebResource
     # fetch from cache or remote server
     def fetch
       return cacheResponse if offline?
-      return [304,{},[]] if (env.has_key?('HTTP_IF_NONE_MATCH') || env.has_key?('HTTP_IF_MODIFIED_SINCE')) && static_node? # client has static node in cache
-      nodes = nodeSet; return nodes[0].fileResponse if nodes.size == 1 && nodes[0].static_node?                            # server has static node in cache
+      return [304,{},[]] if (env.has_key?('HTTP_IF_NONE_MATCH') || env.has_key?('HTTP_IF_MODIFIED_SINCE')) && static_node? # client has static node cached
+      nodes = nodeSet; return nodes[0].fileResponse if nodes.size == 1 && nodes[0].static_node?                            # server has static node cached
       fetchHTTP                                                                 # fetch via HTTPS
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
       ['http://', host, path, query ? ['?', query] : nil].join.R(env).fetchHTTP # fetch via HTTP
@@ -152,11 +152,11 @@ class WebResource
                    elsif named_format                # content-type in name extension
                      named_format
                    end
-          body = HTTP.decompress h, response.read                     # read body
+          body = HTTP.decompress h, response.read    # read body
           if format
             if reader = RDF::Reader.for(content_type: format) # reader defined for format
-              env[:repository] ||= RDF::Repository.new                  # init RDF repository
-              if timestamp = h['Last-Modified'] || h['last-modified']   # add HTTP metadata to graph
+              env[:repository] ||= RDF::Repository.new                # init RDF repository
+              if timestamp = h['Last-Modified'] || h['last-modified'] # add HTTP metadata to graph
                 env[:repository] << RDF::Statement.new(self, Date.R, Time.httpdate(timestamp.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,'')).iso8601) rescue nil
               end
               reader.new(body,base_uri: self){|g|env[:repository] << g} # read RDF
@@ -164,7 +164,7 @@ class WebResource
               puts "RDF::Reader undefined for #{format}"
             end
           else
-            puts "format unguessable for #{uri}"
+            puts "ERROR format unknown for #{uri}"
           end
           return unless thru                                          # fetch to runtime graph only, no HTTP response returned to caller
 
