@@ -12,7 +12,7 @@ class WebResource
   module HTTP
 
     def dateDir
-      time = Time.now
+      time = Time.now.utc
       loc = time.strftime(case parts[0][0].downcase
                           when 'y'
                             '/%Y/'
