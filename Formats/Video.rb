@@ -106,8 +106,8 @@ class WebResource
         else
           [dash ? '<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>' : nil,
            {class: :video,
-            c: [{_: :video, src: v.href, controls: :true}.update(dash ? {'data-dashjs-player' => 1} : {}), '<br>',
-                ({_: :a, href: v.href, c: v.basename} if v.path)]}]
+            c: [{_: :video, src: v.uri, controls: :true}.update(dash ? {'data-dashjs-player' => 1} : {}), '<br>',
+                {_: :a, href: v.uri, c: v.display_name}]}]
         end
       end}
 

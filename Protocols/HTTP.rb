@@ -30,11 +30,12 @@ class WebResource
     end
 
     def self.call env
-      return [405,{},[]] unless %w(GET HEAD POST).member? env['REQUEST_METHOD'] # allow HTTP methods
-      uri = RDF::URI('//' + env['HTTP_HOST']).join(env['REQUEST_PATH']).R env # resource URI
-      uri.scheme = uri.local_node? ? 'http' : 'https'                         # request scheme
+      return [405,{},[]] unless %w(GET HEAD POST).member? env['REQUEST_METHOD'] # permit HTTP methods
+      uri = RDF::URI('//' + env['HTTP_HOST']).join(env['REQUEST_PATH']).R env # URI
+      uri.scheme = uri.local_node? ? 'http' : 'https'                         # scheme
       uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading + consecutive & from qs so URI library doesn't freak out
-      env.update({base: uri, feeds: [], links: {}, resp: {}})         # request environment
+      env.update({base: uri, feeds: [], links: {}, resp: {}})                 # environment
+
       uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body| # dispatch request
         format = uri.format_icon head['Content-Type']                 # log response
         color = env[:deny] ? '31;1' : (format_color format)
@@ -45,7 +46,9 @@ class WebResource
               env[:base], "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil,
               [env['HTTP_ACCEPT'], head['Content-Type']].compact.join(' → ')
              ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
-        [status, head, body]}
+
+        [status, head, body]} # response
+
     rescue Exception => e
       msg = [[uri, e.class, e.message].join(' '), e.backtrace].join "\n"
       puts "\e[7;31m500\e[0m " + msg
