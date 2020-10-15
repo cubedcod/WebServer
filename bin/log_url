@@ -1,2 +1,0 @@
-#!/bin/sh
-echo "$1" >> $HOME/web/$(date +%Y/%m/%d/%H/links.u)

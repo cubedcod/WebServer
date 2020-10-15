@@ -1,8 +1,14 @@
 #!/bin/sh
-rm $HOME/web/squid.pid
+cd ~/web
+conf=../src/WebServer/config
+uid=$(id -u)
+rules=$(realpath ~/src/WebServer/bin/transparent.rules.sh)
+#su -c "sh $rules $uid"
+squid -f $conf/squid.conf
 tmux new-session -s HTTP -d
-tmux send-keys -t HTTP:0 'port80_socat &' C-m
-tmux send-keys -t HTTP:0 port8080 C-m
+tmux send-keys -t HTTP:0 'sudo socat TCP-LISTEN:80,fork TCP:127.0.0.1:8000 &' C-m
+tmux send-keys -t HTTP:0 'sudo socat TCP-LISTEN:443,fork TCP:127.0.0.1:8081 &' C-m
 tmux new-window -t HTTP:1 -d syncthing -no-browser
 tmux new-window -t HTTP:2 -d logtail
+tmux new-window -t HTTP:3 -d unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c $conf/unicorn.rb $conf/rack.ru
 tmux attach-session -t HTTP
