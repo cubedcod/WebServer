@@ -252,7 +252,7 @@ class WebResource
           [302, {'Location' => '/d?f=msg*'}, []]
         elsif !p.match? /[.:]/                 # no hostname/scheme characters
           timeMeta                             # reference temporally-adjacent nodes
-          cacheResponse                        # local graph-node
+          cacheResponse                        # local node
         else
           if referer = env['HTTP_REFERER']
             referer = referer.R
@@ -261,7 +261,7 @@ class WebResource
           (env[:base] = remoteURL).hostHandler # host handler (rebased on local)
         end
       else
-        hostHandler                            # host handler (direct)
+        hostHandler                            # host handler
       end
     end
 
@@ -293,12 +293,11 @@ class WebResource
         head['Referer'] = 'https://www.youtube.com/'
       end
       head['Referer'] = 'https://' + host + '/' if %w(gif jpeg jpg png svg webp).member? ext.downcase
-      head['User-Agent'] = if host == 'po.st' # we want shortlink-expansion redirects via HTTP, not Javascript,
+      head['User-Agent'] = if %w(po.st t.co).member? host # we want shortlink-expansion via HTTP-redirect, not Javascript, so don't advertise a JS-capable user-agent
                              'curl/7.65.1'
                            else
                              'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
                            end
-      head.delete 'User-Agent' if host == 't.co' # so don't advertise a JS-capable user-agent
       head
     end
 
