@@ -2,8 +2,8 @@
 cd ~/web
 conf=../src/WebServer/config
 uid=$(id -u)
-rules=$(realpath ~/src/WebServer/bin/transparent.rules.sh)
-su -c "sh $rules $uid"
+rules=$(realpath $conf/transparent_proxy)
+#su -c "sh $rules $uid"
 
 squid -f $conf/squid.conf
 
