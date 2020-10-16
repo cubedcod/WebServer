@@ -1,0 +1,13 @@
+#!/bin/sh
+exec tail -n +3 $0
+# This file provides an easy way to add custom menu entries.  Simply type the
+# menu entries you want to add after this comment.  Be careful not to change
+# the 'exec tail' line above.
+search --no-floppy --set android -f /android/kernel
+export android
+menuentry "android" --class android-x86 {
+                savedefault
+                set root=$android
+                linux /android/kernel root=/dev/ram0 androidboot.hardware=android_x86_64
+                initrd /android/initrd.img
+}
