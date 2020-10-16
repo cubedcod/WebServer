@@ -1,10 +1,9 @@
 #!/bin/sh
 cd ~/web
 conf=../src/WebServer/config
-
-#uid=$(id -u)
-#rules=$(realpath ~/src/WebServer/bin/transparent.rules.sh)
-#su -c "sh $rules $uid"
+uid=$(id -u)
+rules=$(realpath ~/src/WebServer/bin/transparent.rules.sh)
+su -c "sh $rules $uid"
 
 squid -f $conf/squid.conf
 
