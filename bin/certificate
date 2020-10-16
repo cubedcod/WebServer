@@ -19,7 +19,7 @@ which apt-add-repository && sudo cp $cert /usr/local/share/ca-certificates/CA.cr
 # Termux
 if [ -x "$(command -v pkg)" ]; then
     su -c "mount -o rw,remount /"
-    su -c "mount -o rw,remount /system"
+#    su -c "mount -o rw,remount /system"
     su -c "cp  $cert /system/etc/security/cacerts/$hash.0"
     su -c "chmod 644 /system/etc/security/cacerts/$hash.0"
 fi
