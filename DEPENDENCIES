@@ -8,7 +8,7 @@ which pacman && sudo pacman -S base-devel git graphicsmagick parallel pygmentize
 which pacman && sudo /usr/lib/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB
 
 # Chromebrew https://github.com/skycocker/chromebrew
-which crew && crew install buildessential graphicsmagick libexif socat syncthing taglib tmux
+which crew && crew install buildessential graphicsmagick libexif parallel socat syncthing taglib tmux
 
 # Debian https://www.debian.org/
 which apt-add-repository && sudo apt-get install build-essential graphicsmagick git ruby ruby-dev bundler grep file libexif-dev libssl-dev libtag1-dev libxslt-dev libzip-dev socat squid make syncthing tmux libffi-dev

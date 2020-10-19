@@ -1,3 +1,6 @@
 #!/bin/sh
-feeds=$(dirname $0)/../config/feeds.u
-shuf $feeds | parallel --delay 1 -P 8 "curl -ILsw '%{http_code}\t%{content_type}\t%{url_effective}\n' -o /dev/null http://localhost:8000/{}"
+#feeds=$(dirname $0)/../config/feeds.u
+feeds=~/src/WebServer/config/feeds.u
+
+#shuf $feeds | parallel --delay 1 -P 8 "curl -ILsw '%{http_code}\t%{content_type}\t%{url_effective}\n' -o /dev/null http://localhost:8000/{}"
+shuf $feeds | xargs -i curl -ILsw '%{http_code}\t%{content_type}\t%{url_effective}\n' -o /dev/null http://localhost:8000/{}
