@@ -125,8 +125,8 @@ l.facebook.com l.instagram.com
       q = r.query_values || {}
       if %w(dl images maps search).member? p
         NoGunk[r]
-      elsif p == 'amp'
-        [302, {'Location' => 'https://' + r.path[7..-5]}, []]
+      elsif r.path.index('/amp/s/') == 0
+        [302, {'Location' => 'https://' + r.path[7..-1]}, []]
       elsif p == 'imgres' && q.has_key?('imgurl')
         [302, {'Location' => q['imgurl']}, []]
       else
