@@ -36,6 +36,7 @@ module Webize
     SRCnotSRC = %w(
 data-baseurl
 data-delayed-url
+data-ezsrc
 data-gl-src
 data-hi-res-src
 data-image
@@ -50,7 +51,12 @@ data-src
 image-src
 )
 
-    SRCSET = %w{data-gl-srcset data-lazy-srcset data-srcset}
+    SRCSET = %w{
+data-ezsrcset
+data-gl-srcset
+data-lazy-srcset
+data-srcset
+}
 
     # resolve srcset references to local cache
     def self.srcset node, base
