@@ -1,7 +1,0 @@
-#!/bin/sh
-# launch sway session on a chromeOS device without a Google account for the "Linux" thing
-# assuming username 'web' and arch userspace at /home/os, launch with:
-# sudo /home/os/bin/arch-chroot /home/os/ /bin/su -lc '~/src/WebServer/bin/session/chrome_sway' web
-sommelier --shm-driver=noop --drm-device=/dev/dri/renderD128 --master --socket=w0 &
-sleep 0.2
-WAYLAND_DISPLAY=w0 WLR_BACKENDS=wayland sway 
