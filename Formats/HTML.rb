@@ -102,6 +102,7 @@ module Webize
         if charset = doc[0..2048].encode('UTF-8', undef: :replace, invalid: :replace).match(/<meta[^>]+charset=['"]?([^'">]+)/i) # scan for charset tag
           encoding = charset[1]
           unless encoding.match? /utf.*8/i
+            encoding = 'Shift_JIS' if encoding.match? /sjis/
             puts "transcoding #{encoding} to UTF-8"
             doc.encode! 'UTF-8', encoding, invalid: :replace, undef: :replace
           end
