@@ -1,7 +1,6 @@
 #!/bin/sh
-
 # Alpine https://www.alpinelinux.org/
-which apk && sudo apk add alpine-sdk iptables ip6tables graphicsmagick linux-headers ruby ruby-dev ruby-bundler openssl-dev py3-pip socat syncthing libexif-dev libxslt-dev squid taglib taglib-dev tmux
+which apk && sudo apk add alpine-sdk iptables ip6tables graphicsmagick linux-headers ruby ruby-dev ruby-json ruby-bigdecimal ruby-bundler openssl-dev py3-pip socat syncthing libexif-dev libxslt-dev squid taglib taglib-dev tmux
 
 # Arch https://www.archlinux.org/
 which pacman && sudo pacman -S base-devel git graphicsmagick libexif parallel pygmentize ruby ruby-bundler ruby-rdoc socat squid syncthing taglib tmux
