@@ -1,6 +1,7 @@
 #!/bin/sh
 # Alpine https://www.alpinelinux.org/
 which apk && sudo apk add alpine-sdk iptables ip6tables graphicsmagick linux-headers ruby ruby-dev ruby-json ruby-bigdecimal ruby-bundler openssl-dev py3-pip socat syncthing libexif-dev libxslt-dev squid taglib taglib-dev tmux shadow wayland-libs-client wayland-libs-server wayland-dev waylandpp-dev pixman-dev libxkbcommon-dev xdg-utils libxdg-basedir-dev libxcb-dev xcb-util-dev xorg-server-xwayland dmenu i3wm i3lock i3status i3wm-dev mesa mesa-glapi mesa-vulkan-intel  mesa-gbm mesa-egl mesa-dri-intel mesa-dev mesa-demos mesa-gles mesa-gl termite chromium firefox
+which apk && sudo /usr/lib/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB
 
 # Arch https://www.archlinux.org/
 which pacman && sudo pacman -S base-devel git graphicsmagick libexif parallel pygmentize ruby ruby-bundler ruby-rdoc socat squid syncthing taglib tmux
