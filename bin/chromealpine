@@ -2,6 +2,7 @@
 sudo mount -o remount,suid,exec /home/chronos/user
 sudo mount -o bind /dev /home/chronos/user/alps/dev
 sudo mount -o bind /dev/pts /home/chronos/user/alps/dev/pts
+sudo mount -o bind /dev/shm /home/chronos/user/alps/dev/shm
 sudo mount -o bind /proc /home/chronos/user/alps/proc
 sudo mount -o bind /sys /home/chronos/user/alps/sys
 sudo mount -o bind /run /home/chronos/user/alps/run
