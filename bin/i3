@@ -1,0 +1,4 @@
+#!/bin/sh
+XDG_RUNTIME_DIR=/run/chrome sommelier --data-driver=noop --shm-driver=noop --drm-device=/dev/dri/renderD128 --display=wayland-0 --virtwl-device=/dev/null Xwayland -nolisten tcp &
+sleep 0.2
+DISPLAY=:0 i3
