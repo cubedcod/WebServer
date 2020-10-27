@@ -207,16 +207,17 @@ module Webize
             yield subject, To, chan
             yield subject, Creator, (dirname + '/*irc?q=' + nick + '&sort=date&view=table#' + nick).R
             yield subject, Content, ['<pre>',
-                                     msg.hrefs{|p,o| yield subject, p, o},
-#                                     Webize::HTML.format(msg.hrefs{|p,o| yield subject, p, o}, @base),
+                                     msg.hrefs{|p,o|
+                                       yield subject, p, o},
                                      '</pre>'].join if msg
           }
         else # basic text content
           yield @body, Content, Webize::HTML.format(WebResource::HTML.render({_: :pre,
                                                                               c: @doc.lines.map{|line|
-                                                                                line.hrefs{|p,o| # yield detected links to caller
-                                                                                  yield @body, p, o
-                                                                                  yield o, Type, (W3 + '2000/01/rdf-schema#Resource').R}}}), @base)
+                                                                                line.hrefs{|p,o| # emit references as RDF
+                                                                                  yield @body, p, o  unless o.deny?
+                                                                                  # yield o, Type, (W3+'2000/01/rdf-schema#Resource').R
+                                                                                }}}), @base)
         end
       end
     end

@@ -117,7 +117,7 @@ class WebResource < RDF::URI
 
     def deny?
       return true if deny_domain?
-      return true if uri.match? Gunk
+#      return true if uri.match? Gunk
       false
     end
 
