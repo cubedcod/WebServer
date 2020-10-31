@@ -197,7 +197,7 @@ module Webize
               nick = re[1]
               msg = re[2]
             end
-            nick = CGI.escape nick
+            nick = CGI.escape(nick || 'anonymous')
             timestamp = day + time
             subject = '#' + channame + hourslug + (lines += 1).to_s
             yield subject, Type, (SIOC + 'InstantMessage').R
