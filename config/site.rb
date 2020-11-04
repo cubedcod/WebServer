@@ -148,6 +148,13 @@ l.facebook.com l.instagram.com
 
     GET 'instagram.com', -> r {[301, {'Location' => ['//www.instagram.com', r.path].join.R.href}, []]}
 
+    GET 'www.instagram.com', -> r {
+      if !r.path || r.path=='/'
+        r.cacheResponse
+      else
+        NoGunk[r]
+      end}
+
     GET 'www.reddit.com', -> r {
       if !r.path || %w(/ /r /r/).member?(r.path)
         r.cacheResponse
