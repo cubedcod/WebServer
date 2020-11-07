@@ -1,5 +1,10 @@
 #!/bin/sh
 source /etc/profile
+export XDG_RUNTIME_DIR=/run/chrome
+export WAYLAND_DISPLAY=w0
+export MOZ_ENABLE_WAYLAND=1
+export QT_QPA_PLATFORM=wayland
+
 conf=../src/WebServer/config
 
 #uid=$(id -u)
@@ -18,12 +23,8 @@ tmux new-window -t HTTP:1 -d httpd
 tmux new-window -t HTTP:2 -d syncthing -no-browser
 tmux new-window -t HTTP:3 -d logtail
 
-export XDG_RUNTIME_DIR=/run/chrome
-export WAYLAND_DISPLAY=w0
-export MOZ_ENABLE_WAYLAND=1
-export QT_QPA_PLATFORM=wayland
 sommelier --data-driver=noop --shm-driver=noop --drm-device=/dev/dri/renderD128 --display=wayland-0 --virtwl-device=/dev/null --master --socket=w0 &
 sleep 0.3
 termite -e tmux attach-session -t HTTP &
-falkon_ &
+#falkon_ &
 #midori_ &
