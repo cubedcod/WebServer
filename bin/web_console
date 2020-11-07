@@ -1,9 +1,6 @@
 #!/bin/sh
 source /etc/profile
 export XDG_RUNTIME_DIR=/run/chrome
-export WAYLAND_DISPLAY=w0
-export MOZ_ENABLE_WAYLAND=1
-export QT_QPA_PLATFORM=wayland
 conf=~/src/WebServer/config
 sommelier --data-driver=noop --shm-driver=noop --drm-device=/dev/dri/renderD128 --display=wayland-0 --virtwl-device=/dev/null --master --socket=w0 &
 echo 1024000 | sudo tee /proc/sys/fs/inotify/max_user_watches
@@ -14,4 +11,4 @@ tmux new-window -t HTTP:1 -d unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c $conf
 tmux new-window -t HTTP:2 -d syncthing -no-browser
 tmux new-window -t HTTP:3 -d logtail
 tmux new-window -t HTTP:4 -c $conf -d squid -f squid.conf
-termite -e tmux attach-session -t HTTP &
+WAYLAND_DISPLAY=w0 termite -e 'tmux attach-session -t HTTP' &
