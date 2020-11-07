@@ -141,12 +141,12 @@ class WebResource
 
     # fetch from remote                            options:
     def fetchHTTP thru: true,                        # pass HTTP response to caller
-                  transformable: !no_transform?      # allow transforms: format conversions and same-format (HTML reformat, code pretty-print) rewrites
+                  transformable: !no_transform?      # allow transform (format conversion or same-format (HTML reformat, code pretty-print) rewrite)
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
-        h = response.meta                            # upstream metadata
+        h = response.meta                            # upstream response header
         if response.status.to_s.match? /206/         # partial response
           h['Access-Control-Allow-Origin'] = allowed_origin unless h['Access-Control-Allow-Origin'] || h['access-control-allow-origin']
-          [206, h, [response.read]]                  # return part
+          [206, h, [response.read]]                  # response with part
         else
           format = if path == '/feed' || (query_values||{})['mime'] == 'xml'
                      'application/atom+xml'          # Atom/RSS content-type via URL
@@ -156,24 +156,10 @@ class WebResource
                      named_format
                    end
           body = HTTP.decompress h, response.read    # read body
-          if format
-            if reader = RDF::Reader.for(content_type: format) # reader defined for format
-              env[:repository] ||= RDF::Repository.new                # init RDF repository
-              if timestamp = h['Last-Modified'] || h['last-modified'] # add HTTP metadata to graph
-                env[:repository] << RDF::Statement.new(self, Date.R, Time.httpdate(timestamp.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,'')).iso8601) rescue nil
-              end
-              reader.new(body,base_uri: self){|g|env[:repository] << g} # read RDF
-            else
-              puts "RDF::Reader undefined for #{format}"
-            end
-          else
-            puts "ERROR format unknown for #{uri}"
-          end
-          return unless thru                                          # fetch to runtime graph only, no HTTP response returned to caller
 
-          # cache fill
-          if formatExt = Suffixes[format] || Suffixes_Rack[format]    # lookup format suffix
-            if extension == formatExt                                 # suffix match
+          # cache and scan
+          if formatExt = Suffixes[format] || Suffixes_Rack[format]    # lookup format-suffix
+            if extension == formatExt                                 # suffix correct
               cache = self
             else                                                      # suffix incorrect or missing
               cache = uri
@@ -183,11 +169,26 @@ class WebResource
             end
             cache.writeFile body if cache.static_node?                # cache upstream entity
           else
-            puts "extension undefined for #{format}"                  # notice on undefined extension
+            puts "extension undefined for #{format}"                  # warn on undefined suffix
           end
-          saveRDF                                                     # cache graph-data
+          if format
+            if reader = RDF::Reader.for(content_type: format)         # reader defined for format
+              env[:repository] ||= RDF::Repository.new                # init RDF repository
+              if timestamp = h['Last-Modified'] || h['last-modified'] # HTTP metadata to RDF-graph
+                env[:repository] << RDF::Statement.new(self, Date.R, Time.httpdate(timestamp.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,'')).iso8601) rescue nil
+              end
+              reader.new(body,base_uri: self){|g|env[:repository] << g} # read RDF
+            else
+              puts "RDF::Reader undefined for #{format}"              # warn on undefined Reader
+            end
+          else
+            puts "ERROR format undefined on #{uri}"                   # warn on undefined format
+          end
 
-          # response metadata
+          return unless thru                                          # no HTTP response to caller
+          saveRDF                                                     # commit graph-data
+
+          # response header
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
             env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # upstream metadata
           env[:resp]['Access-Control-Allow-Origin'] ||= allowed_origin # CORS header
@@ -199,13 +200,12 @@ class WebResource
               env[:links][type.to_sym] = ref
             end}
 
-          # response
           if transformable && !(format||'').match?(/audio|css|image|octet|script|video/)
-            graphResponse                                     # local format
+            graphResponse                                     # response in local format
           else
             body = Webize::HTML.cacherefs body, env if format == 'text/html' # resolve cache references
             env[:resp]['Content-Length'] = body.bytesize.to_s # update Content-Length
-            [200, env[:resp], [body]]                         # upstream format
+            [200, env[:resp], [body]]                         # rsponse in upstream format
           end
         end
       end
