@@ -1,4 +1,7 @@
 #!/bin/sh
+
+## Distribution packages
+
 # Alpine https://www.alpinelinux.org/
 which apk && sudo apk add alpine-sdk iptables ip6tables graphicsmagick linux-headers ruby ruby-dev ruby-json ruby-bigdecimal ruby-bundler openssl-dev py3-pip findutils grep socat syncthing libexif-dev libxslt-dev squid taglib taglib-dev tmux shadow wayland-libs-client wayland-libs-server wayland-dev waylandpp-dev pixman-dev libxkbcommon-dev xdg-utils libxdg-basedir-dev libxcb-dev xcb-util-dev xorg-server-xwayland dmenu i3wm i3lock i3status i3wm-dev mesa mesa-glapi mesa-vulkan-intel  mesa-gbm mesa-egl mesa-dri-intel mesa-dev mesa-demos mesa-gles mesa-gl termite chromium firefox font-noto-emoji font-noto-cjk
 which apk && sudo /usr/lib/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB
@@ -20,15 +23,16 @@ which pkg && pkg install graphicsmagick git ruby grep file findutils pkg-config 
 which xbps-install && sudo xbps-install -S base-devel curl git GraphicsMagick libexif-devel libltdl-devel libressl-devel parallel poppler-utils python3-Pygments ruby ruby-devel socat squid syncthing taglib-devel tmux
 which xbps-install && sudo /usr/libexec/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB
 
-# python
+## Language packages
+
+# Python
 which pygmentize || pip install pygments
 
 # Ruby
 which bundle || gem install bundler
 bundle install
 
-# create maildir
+## file state
 mkdir -p ~/web/mail/{cur,new,tmp}
-
-# generate and import certificate
+touch ~/web/web.log
 ./bin/certificate
