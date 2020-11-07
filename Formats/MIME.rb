@@ -47,6 +47,7 @@ class WebResource
       'text/javascript' => '.js',
       'text/json' => '.json',
       'text/turtle' => '.ttl',
+      'text/x-c' => '.cc',
       'text/xml' => '.rss',
       'video/MP2T' => '.ts',
     }
@@ -59,7 +60,7 @@ class WebResource
     end
 
     def static_node? # format and content is static - no transcodes or invalidation, mint new URI for new version
-      %w(bin css geojson ico jpeg jpg js m3u8 m4a mp3 mp4 opus pem pdf png rb svg tar ts wav webm webp).member? ext.downcase
+      %w(bin c cc css geojson h ico jpeg jpg js m3u8 m4a mp3 mp4 opus pem pdf png rb svg tar ts wav webm webp).member? ext.downcase
     end
 
   end
