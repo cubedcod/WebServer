@@ -19,6 +19,11 @@ tmux new-window -t HTTP:2 -d syncthing -no-browser
 tmux new-window -t HTTP:3 -d logtail
 
 export XDG_RUNTIME_DIR=/run/chrome
+export WAYLAND_DISPLAY=w0
+export MOZ_ENABLE_WAYLAND=1
+export QT_QPA_PLATFORM=wayland
 sommelier --data-driver=noop --shm-driver=noop --drm-device=/dev/dri/renderD128 --display=wayland-0 --virtwl-device=/dev/null --master --socket=w0 &
 sleep 0.3
-WAYLAND_DISPLAY=w0 termite -e tmux attach-session -t HTTP
+termite -e tmux attach-session -t HTTP &
+falkon_ &
+#midori_ &

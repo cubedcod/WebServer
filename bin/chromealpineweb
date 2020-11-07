@@ -1,5 +1,4 @@
 #!/bin/sh
-# make localyesconfig a kernel in linux/
 # echo console=tty1 root=/dev/nvme0n1p7 rootfstype=ext4 rootwait rw init=/sbin/init > kargs
 # vbutil_kernel --pack KERN-C --keyblock /usr/share/vboot/devkeys/kernel.keyblock --version 1 --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk --config=kargs --vmlinuz linux/arch/x86_64/boot/bzImage --bootloader empty
 # dd if=KERN-C of=/dev/nvme0n1p6
@@ -15,4 +14,4 @@ sudo mount -o bind /dev/shm dev/shm
 sudo mount -o bind /proc proc
 sudo mount -o bind /sys sys
 sudo mount -o bind /run run
-sudo chroot . /bin/su -lc web_console user &
+sudo chroot . /bin/su -lc web_console user
