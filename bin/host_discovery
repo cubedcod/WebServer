@@ -4,7 +4,7 @@ STDOUT.sync = true
 require_relative '../index'
 require 'file-tail'
 hosts = {}
-File::Tail::Logfile.tail(ENV['HOME'] + '/web/web.log') do |line|
+File::Tail::Logfile.tail('web.log') do |line|
   t = line.split /\s+/
   url = t[6]
   if url&.match? /^http/
