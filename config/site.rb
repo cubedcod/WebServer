@@ -147,22 +147,12 @@ l.facebook.com l.instagram.com
         end}}
 
     GET 'instagram.com', -> r {[301, {'Location' => ['//www.instagram.com', r.path].join.R.href}, []]}
-
-    GET 'www.instagram.com', -> r {
-      if !r.path || r.path=='/'
-        r.cacheResponse
-      else
-        NoGunk[r]
-      end}
+    GET 'www.instagram.com', -> r {(!r.path || r.path=='/') ? r.cacheResponse : NoGunk[r]}
 
     GET 'www.reddit.com', -> r {
-      if !r.path || %w(/ /r /r/).member?(r.path)
-        r.cacheResponse
-      else
-        r.env[:links][:prev] = ['//old.reddit.com', r.path.sub('.rss',''), '?',r.query].join.R.href # prev-page pointer
-        r.path += '.rss' if !r.path.index('.rss') && %w(r u user).member?(r.parts[0]) # request RSS representation
-        NoGunk[r]
-      end}
+      r.env[:links][:prev] = ['//old.reddit.com', r.path.sub('.rss',''), '?',r.query].join.R.href # prev-page pointer
+      r.path += '.rss' if !r.path.index('.rss') && %w(r u user).member?(r.parts[0]) # request RSS representation
+      NoGunk[r]}
 
     GET 's4.reutersmedia.net', -> r {
       args = r.query_values || {}
