@@ -246,7 +246,7 @@ class WebResource
           dateDir
         elsif path == '/favicon.ico'
           [200, {'Content-Type' => 'image/png'}, [SiteIcon]]
-        elsif path == '/log'
+        elsif path == '/log' || path == '/log/'
           log_search                           # search log
         elsif path == '/mail'                  # goto inbox
           [302, {'Location' => '/d?f=msg*'}, []]
@@ -343,7 +343,8 @@ class WebResource
       env.update({searchable: true, sort: sizeAttr = '#size', view: 'table'})
       results = {}
       if q = (query_values||{})['q']
-        `grep --text -i #{Shellwords.escape 'http.*' + q} web.log | tr -s ' ' | cut -d ' ' -f 7 `.each_line{|uri| u = uri.R
+        `grep --text -i #{Shellwords.escape 'http.*' + q} web.log | tr -s ' ' | cut -d ' ' -f 7 `.each_line{|uri|
+          u = uri.R
           results[uri] ||=  {'uri' => uri,
                              sizeAttr => 0,
                              Title => [[u.host, u.path, (u.query ? ['?', u.query] : nil)].join]}
