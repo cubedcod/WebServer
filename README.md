@@ -10,7 +10,7 @@ code can be run in checkout dir or moved to your preferred location. to install 
 
 client launch shortcuts in [bin/browse](bin/browse/)
 
-./bin/web_console to bring up daemon, proxy and log-viewer
+./bin/web_console to bring up daemon, proxy-frontend and log viewer
 
 browser settings:
 google (search engine) http://localhost:8000/www.google.com/search?q=%s
@@ -18,7 +18,7 @@ google (search engine) http://localhost:8000/www.google.com/search?q=%s
 
 ## WHAT
 
-fix the web in post-production
+fix the web in post-production. some have suggested we just [abandon the web](https://drewdevault.com/2020/11/01/What-is-Gemini-anyway.html), but we're going to at least try to fix it first, using a localhost webserver and a proxy and some custom code
 
 ## WHY
 
