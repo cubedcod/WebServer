@@ -8,10 +8,9 @@ code can be run in checkout dir or moved to your preferred location. to install 
 
 ## USAGE
 
-server launch shortcuts in [bin/](bin/)
 client launch shortcuts in [bin/browse](bin/browse/)
 
-launch 'webd' for a common configuration
+./bin/web_console to bring up daemon, proxy and log-viewer
 
 browser settings:
 google (search engine) http://localhost:8000/www.google.com/search?q=%s

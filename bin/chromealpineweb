@@ -3,11 +3,6 @@
 # vbutil_kernel --pack KERN-C --keyblock /usr/share/vboot/devkeys/kernel.keyblock --version 1 --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk --config=kargs --vmlinuz linux/arch/x86_64/boot/bzImage --bootloader empty
 # dd if=KERN-C of=/dev/nvme0n1p6
 # cgpt add -i 6 -P 3 -S 0 -T 1 /dev/nvme0n1
-
-cd ~/alps
-
-sudo mount -o remount,suid,exec ..
-sudo mount -o bind .. home/user
 sudo mount -o bind /dev dev
 sudo mount -o bind /dev/pts dev/pts
 sudo mount -o bind /dev/shm dev/shm
