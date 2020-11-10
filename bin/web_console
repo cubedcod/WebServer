@@ -1,10 +1,10 @@
 #!/bin/sh
 source /etc/profile
-export XDG_RUNTIME_DIR=/run/chrome
-export WAYLAND_DISPLAY=w0
+
 conf=~/src/WebServer/config
 srv=~/web
-sommelier --data-driver=noop --shm-driver=noop --drm-device=/dev/dri/renderD128 --display=wayland-0 --virtwl-device=/dev/null --master --socket=w0 &
+
+XDG_RUNTIME_DIR=/run/chrome sommelier --data-driver=noop --shm-driver=noop --drm-device=/dev/dri/renderD128 --display=wayland-0 --virtwl-device=/dev/null Xwayland &
 echo 1024000 | sudo tee /proc/sys/fs/inotify/max_user_watches
 tmux new-session -s HTTP -d
 tmux send-keys -t HTTP:0 'sudo socat TCP-LISTEN:80,fork TCP:127.0.0.1:8000 &' C-m
@@ -13,4 +13,6 @@ tmux send-keys -t HTTP:0 "cd $conf; squid -f squid.conf" C-m
 tmux new-window -t HTTP:1 -c $srv -d unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c $conf/unicorn.rb $conf/rack.ru
 tmux new-window -t HTTP:2 -d syncthing -no-browser
 tmux new-window -t HTTP:3 -c $srv -d logtail
-termite -e 'tmux attach-session -t HTTP' &
+
+DISPLAY=:0 i3 &
+termite --display=:0 -e 'tmux attach-session -t HTTP' &

@@ -10,8 +10,8 @@ hash=$(openssl x509 -inform PEM -subject_hash_old -in $cert -noout)
 
 ## Install
 
-# Arch
-which pacman && sudo trust anchor --store $cert
+# p11-kit-trust
+which trust && sudo trust anchor --store $cert
 
 # Debian
 which apt-add-repository && sudo cp $cert /usr/local/share/ca-certificates/CA.crt && update-ca-certificates
@@ -23,6 +23,3 @@ if [ -x "$(command -v pkg)" ]; then
     su -c "cp  $cert /system/etc/security/cacerts/$hash.0"
     su -c "chmod 644 /system/etc/security/cacerts/$hash.0"
 fi
-
-# Void
-which xbps-query && sudo trust anchor --store $cert
