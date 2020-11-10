@@ -13,6 +13,6 @@ tmux send-keys -t HTTP:0 "cd $conf; squid -f squid.conf" C-m
 tmux new-window -t HTTP:1 -c $srv -d unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c $conf/unicorn.rb $conf/rack.ru
 tmux new-window -t HTTP:2 -d syncthing -no-browser
 tmux new-window -t HTTP:3 -c $srv -d logtail
-
+sleep 0.2
 DISPLAY=:0 i3 &
 termite --display=:0 -e 'tmux attach-session -t HTTP' &
