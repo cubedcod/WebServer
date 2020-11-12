@@ -1,12 +1,14 @@
 #!/bin/sh
-# echo console=tty1 root=/dev/nvme0n1p7 rootfstype=ext4 rootwait rw init=/sbin/init > kargs
-# vbutil_kernel --pack KERN-C --keyblock /usr/share/vboot/devkeys/kernel.keyblock --version 1 --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk --config=kargs --vmlinuz linux/arch/x86_64/boot/bzImage --bootloader empty
+
+# vbutil_kernel --pack KERN-C --keyblock /usr/share/vboot/devkeys/kernel.keyblock --version 1 --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk --config=.kargs.galaxy --vmlinuz ../../linux/arch/x86_64/boot/bzImage --bootloader .bootstub.galaxy
 # dd if=KERN-C of=/dev/nvme0n1p6
 # cgpt add -i 6 -P 3 -S 0 -T 1 /dev/nvme0n1
+
 sudo mount -o bind /dev dev
 sudo mount -o bind /dev/pts dev/pts
 sudo mount -o bind /dev/shm dev/shm
 sudo mount -o bind /proc proc
 sudo mount -o bind /sys sys
 sudo mount -o bind /run run
+
 sudo chroot . /bin/su -lc web_console user

@@ -1,0 +1,1 @@
+console=tty0 cros_efi oops=panic panic=0 root=/dev/nvme0n1p7 rootwait ro noinitrd cros_debug kern_guid=%U add_efi_memmap boot=local noresume noswap i915.modeset=1 nmi_watchdog=panic,lapic nosplash
