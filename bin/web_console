@@ -4,9 +4,11 @@ echo 1024000 | sudo tee /proc/sys/fs/inotify/max_user_watches
 conf=~/src/WebServer/config
 srv=~/web
 
+# start a GUI environment. comment out if you already have one running
+export DISPLAY=:0
 XDG_RUNTIME_DIR=/run/chrome sommelier --data-driver=noop --shm-driver=noop --drm-device=/dev/dri/renderD128 --display=wayland-0 --virtwl-device=/dev/null Xwayland &
 sleep 0.2
-DISPLAY=:0 i3 &
+i3 &
 
 tmux new-session -s HTTP -d
 tmux send-keys -t HTTP:0 'sudo socat TCP-LISTEN:80,fork TCP:127.0.0.1:8000 &' C-m
