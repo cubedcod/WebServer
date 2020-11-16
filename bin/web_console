@@ -4,11 +4,11 @@ echo 1024000 | sudo tee /proc/sys/fs/inotify/max_user_watches
 conf=~/src/WebServer/config
 srv=~/web
 
-# start a GUI environment. comment out if you already have one running
-export DISPLAY=:0
-XDG_RUNTIME_DIR=/run/chrome sommelier --data-driver=noop --shm-driver=noop --drm-device=/dev/dri/renderD128 --display=wayland-0 --virtwl-device=/dev/null Xwayland &
-sleep 0.2
-i3 &
+# launch GUI environment on chromeOS
+#export DISPLAY=:0
+#XDG_RUNTIME_DIR=/run/chrome sommelier --data-driver=noop --shm-driver=noop --drm-device=/dev/dri/renderD128 --display=wayland-0 --virtwl-device=/dev/null Xwayland &
+#sleep 0.2
+#i3 &
 
 tmux new-session -s HTTP -d
 tmux send-keys -t HTTP:0 'sudo socat TCP-LISTEN:80,fork TCP:127.0.0.1:8000 &' C-m
@@ -17,8 +17,8 @@ tmux send-keys -t HTTP:0 "cd $conf; squid -f squid.conf" C-m
 tmux new-window -t HTTP:1 -d syncthing -no-browser
 #tmux new-window -t HTTP:2 -c $srv -d unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c $conf/unicorn.rb $conf/rack.ru
 #tmux new-window -t HTTP:3 -c $srv -d logtail
-#termite --display=:0 -e 'tmux attach-session -t HTTP' &
+#termite -e 'tmux attach-session -t HTTP' &
 
 cd $srv
-termite --display=:0 -e "unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c $conf/unicorn.rb $conf/rack.ru" &
-termite --display=:0 -e logtail &
+termite -e "unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c $conf/unicorn.rb $conf/rack.ru" &
+termite -e logtail &
