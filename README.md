@@ -1,24 +1,24 @@
 ## INSTALL
 
     git clone https://gitlab.com/ix/WebServer.git
-
     cd WebServer
-
-    sh DEPENDENCIES
+    ./DEPENDENCIES
 
 ## USAGE
 
-client launch shortcuts in [bin/browse](bin/browse/)
-
+server:
 ./bin/web_console to bring up daemon, proxy-frontend and log viewer
 
-browser settings:
+client:
+launch shortcuts in [bin/browse](bin/browse/)
+
+browser configuration:
 google (search engine) http://localhost:8000/www.google.com/search?q=%s
 [local UI](javascript:location.href='http://localhost:8000/'+location.hostname+location.pathname+'?cookie='+encodeURIComponent(document.cookie)) bookmarklet
 
 ## WHAT
 
-fix the web in post-production. some have suggested we just [abandon it](https://drewdevault.com/2020/11/01/What-is-Gemini-anyway.html), but we're going to at least try to fix it first, using a localhost webserver and a proxy and some custom code
+fix the web in post-production. some have suggested we just [abandon it](https://drewdevault.com/2020/11/01/What-is-Gemini-anyway.html), but we're going to try to fix it first, using a localhost webserver to rewrite web behaviors at request-time
 
 ## WHY
 
