@@ -1,1 +1,1 @@
-console=tty0 root=/dev/nvme0n1p7 rootwait rw noinitrd
+console=tty0 root=/dev/nvme0n1p7 rootwait rw noinitrd i915.enable_dpcd_backlight=1
