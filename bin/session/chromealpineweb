@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# vbutil_kernel --pack KERN-C --keyblock /usr/share/vboot/devkeys/kernel.keyblock --version 1 --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk --config=.kargs.galaxy --vmlinuz ../../linux/arch/x86_64/boot/bzImage --bootloader .bootstub.galaxy
-# dd if=KERN-C of=/dev/nvme0n1p6
-# cgpt add -i 6 -P 3 -S 0 -T 1 /dev/nvme0n1
+# vbutil_kernel --pack kern --keyblock /usr/share/vboot/devkeys/kernel.keyblock --version 1 --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk --config=.kargs --vmlinuz ../../linux/arch/x86_64/boot/bzImage --bootloader .bootstub
+# dd if=kern of=/dev/nvme0n1p2
+# cgpt add -i 2 -P 2 -S 0 -T 1 /dev/nvme0n1
 
 sudo mount -o bind /dev dev
 sudo mount -o bind /dev/pts dev/pts
