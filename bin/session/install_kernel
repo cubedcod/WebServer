@@ -1,0 +1,9 @@
+vbutil_kernel --pack kern --keyblock /usr/share/vboot/devkeys/kernel.keyblock --version 1 --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk --config=.kargs --vmlinuz ../../linux/arch/x86_64/boot/bzImage --bootloader .bootstub
+
+sudo dd if=kern of=/dev/nvme0n1p4
+sudo cgpt add -i 2 -P 1 -S 1 -T 0 /dev/nvme0n1
+sudo cgpt add -i 4 -P 2 -S 0 -T 1 /dev/nvme0n1
+
+sudo dd if=kern of=/dev/nvme0n1p2
+sudo cgpt add -i 2 -P 2 -S 0 -T 1 /dev/nvme0n1
+sudo cgpt add -i 4 -P 1 -S 1 -T 0 /dev/nvme0n1
