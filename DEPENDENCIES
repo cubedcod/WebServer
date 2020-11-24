@@ -3,7 +3,7 @@
 ## install Distro packagess
 
 # Alpine https://www.alpinelinux.org/
-which apk && sudo apk add alpine-sdk iptables ip6tables graphicsmagick linux-headers ruby ruby-dev ruby-json ruby-bigdecimal ruby-bundler openssl-dev py3-pip findutils grep socat syncthing libexif-dev libxslt-dev squid taglib taglib-dev tmux shadow wayland-libs-client wayland-libs-server wayland-dev waylandpp-dev pixman-dev py3-pygments libxkbcommon-dev xdg-utils libxdg-basedir-dev libxcb-dev xcb-util-dev xorg-server-xwayland dmenu i3wm i3lock i3status i3wm-dev mesa mesa-glapi mesa-vulkan-intel  mesa-gbm mesa-egl mesa-dri-intel mesa-dev mesa-demos mesa-gles mesa-gl p11-kit-trust termite terminus-font chromium elinks falkon firefox links lynx midori w3m
+which apk && sudo apk add alpine-sdk iptables ip6tables linux-headers ruby ruby-dev ruby-json ruby-bigdecimal ruby-bundler openssl-dev py3-pip findutils grep socat syncthing libexif-dev libxslt-dev squid taglib taglib-dev tmux py3-pygments p11-kit-trust
 which apk && sudo /usr/lib/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB
 
 # Arch https://www.archlinux.org/
@@ -11,16 +11,16 @@ which pacman && sudo pacman -S --needed base-devel git libexif parallel pygmenti
 which pacman && sudo /usr/lib/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB
 
 # Chromebrew https://github.com/skycocker/chromebrew
-which crew && crew install buildessential graphicsmagick libexif parallel socat syncthing taglib tmux
+which crew && crew install buildessential libexif parallel socat syncthing taglib tmux
 
 # Debian https://www.debian.org/
-which apt-add-repository && sudo apt-get install build-essential graphicsmagick git ruby ruby-dev bundler grep file libexif-dev libssl-dev libtag1-dev libxslt-dev libzip-dev socat squid make syncthing tmux libffi-dev
+which apt-add-repository && sudo apt-get install build-essential git ruby ruby-dev bundler grep file libexif-dev libssl-dev libtag1-dev libxslt-dev libzip-dev socat squid make syncthing tmux libffi-dev
 
 # Termux https://termux.com/
-which pkg && pkg install graphicsmagick git ruby grep file findutils pkg-config libiconv libexif libprotobuf libxslt parallel clang taglib squid make syncthing libffi libcap libcrypt openssl-tool tmux tsu zlib
+which pkg && pkg install git ruby grep file findutils pkg-config libiconv libexif libprotobuf libxslt parallel clang taglib squid make syncthing libffi libcap libcrypt openssl-tool tmux tsu zlib
 
 # Void https://voidlinux.org
-which xbps-install && sudo xbps-install -S base-devel curl git GraphicsMagick libexif-devel libltdl-devel libressl-devel parallel poppler-utils python3-Pygments ruby ruby-devel socat squid syncthing taglib-devel tmux
+which xbps-install && sudo xbps-install -S base-devel curl git libexif-devel libltdl-devel libressl-devel parallel poppler-utils python3-Pygments ruby ruby-devel socat squid syncthing taglib-devel tmux
 which xbps-install && sudo /usr/libexec/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB
 
 ## install Language packages
