@@ -309,7 +309,7 @@ class WebResource
       cookie.writeFile qs['cookie'] if qs.has_key? 'cookie'      # update cookie
       env['HTTP_COOKIE'] = cookie.readFile if cookie.node.exist? # read cookie
       if last = parts[-1]
-        if last.match? /^new/
+        if last.match? /^new|rss/i
           env[:sort] ||= 'date'
           env[:view] ||= 'table'
         end
