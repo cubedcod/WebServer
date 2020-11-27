@@ -1,6 +1,6 @@
 #!/bin/sh
 
-## install Distro packagess
+## install Distro packages
 
 # Alpine https://www.alpinelinux.org/
 which apk && sudo apk add alpine-sdk iptables ip6tables linux-headers ruby ruby-dev ruby-json ruby-bigdecimal ruby-bundler openssl-dev parallel py3-pip findutils grep socat syncthing libexif-dev libxslt-dev squid taglib taglib-dev tmux py3-pygments p11-kit-trust
@@ -14,7 +14,7 @@ which pacman && sudo /usr/lib/squid/security_file_certgen -c -s /var/cache/squid
 which crew && crew install buildessential libexif parallel socat syncthing taglib tmux
 
 # Debian https://www.debian.org/
-which apt-add-repository && sudo apt-get install build-essential git ruby ruby-dev bundler grep file libexif-dev libssl-dev libtag1-dev libxslt-dev libzip-dev socat squid make syncthing tmux libffi-dev
+which apt-add-repository && sudo apt-get install build-essential git parallel ruby ruby-dev bundler grep file libexif-dev libssl-dev libtag1-dev libxslt-dev libzip-dev socat squid make syncthing tmux libffi-dev
 
 # Termux https://termux.com/
 which pkg && pkg install git ruby grep file findutils pkg-config libiconv libexif libprotobuf libxslt parallel clang taglib squid make syncthing libffi libcap libcrypt openssl-tool tmux tsu zlib
