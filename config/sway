@@ -4,9 +4,8 @@ exec bluetoothctl power on
 set $mod Mod1
 font pango:Noto Sans Mono 8
 
-# backlight controls
+# enable backlight controls
 exec sudo chown 1000:1000 /sys/class/backlight/intel_backlight/brightness /sys/class/leds/chromeos::kbd_backlight/brightness
-exec brightness 120
 
 # idle timers
 exec swayidle timeout 120 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"'
@@ -152,3 +151,5 @@ input "1452:597:Apple_Wireless_Keyboard" {
 
 output eDP-1 scale 1
 output eDP-1 bg #000000 solid_color
+
+exec brightness 120
