@@ -45,6 +45,10 @@ bindsym $mod+Shift+Down move down
 bindsym $mod+Shift+Up move up
 bindsym $mod+Shift+Right move right
 
+# emulate PageUp/Down for Apple and Chromebook kbds
+bindsym $mod+Up exec ydotool key PageUp
+bindsym $mod+Down exec ydotool key PageDown
+
 # split in horizontal orientation
 bindsym $mod+h split h
 
@@ -152,4 +156,5 @@ input "1452:597:Apple_Wireless_Keyboard" {
 output eDP-1 scale 1
 output eDP-1 bg #000000 solid_color
 
+exec ydotoold
 exec brightness 120

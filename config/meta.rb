@@ -469,6 +469,7 @@ class WebResource
       'og:video:width' => :drop,
       'oneLine' => Abstract,
       'opened' => :drop,
+      'optimizely-datafile' => :drop,
       'optimizely-sdk-key' => :drop,
       'p:domain_verify' => :drop,
       'page:primary_channel' => Abstract,
