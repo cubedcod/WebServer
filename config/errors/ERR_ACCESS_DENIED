@@ -3,7 +3,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   </head>
   <body style="background: repeating-linear-gradient(45deg, #000, #000 6.5em, #f00 6.5em, #f00 8em); text-align: center">
-    <a href="http://localhost:8000/%u" style="color: #fff; font-size: 22em; font-weight: bold; text-decoration: none">⌘</a>
+    <a href="http://localhost:8000/%u" style="color: #fff; font-size: 22em; font-weight: normal; text-decoration: none">⌘</a>
     <script>
       document.addEventListener("DOMContentLoaded", function(){
 	  var url = new URL(document.location);
