@@ -1,7 +1,12 @@
-xwayland disable
-set $mod Mod1
+#xwayland disable
+exec bluetoothctl power on
 
+set $mod Mod1
 font pango:Noto Sans Mono 8
+
+# backlight controls
+exec sudo chown 1000:1000 /sys/class/backlight/intel_backlight/brightness /sys/class/leds/chromeos::kbd_backlight/brightness
+exec brightness 120
 
 # idle timers
 exec swayidle timeout 120 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"'

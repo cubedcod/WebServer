@@ -1,2 +1,2 @@
 #!/bin/sh
-echo 32 | sudo tee /sys/class/leds/chromeos::kbd_backlight/brightness
+echo 32 > /sys/class/leds/chromeos::kbd_backlight/brightness
