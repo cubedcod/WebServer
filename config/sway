@@ -1,5 +1,6 @@
 #xwayland disable
-exec bluetoothctl power on
+
+client.focused #008800 #008800 #ffffff #0000ff #000000
 
 set $mod Mod1
 font pango:Noto Sans Mono 8
