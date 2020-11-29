@@ -221,6 +221,7 @@ l.facebook.com l.instagram.com
 
     GET 'cdn.shortpixel.ai', ImgRehost
     GET 's.yimg.com', ImgRehost
+    GET 'res.cloudinary.com', ImgRehost
 
     GotoYT = -> r {[301, {'Location' => ['//www.youtube.com', r.path, '?', r.query].join.R.href}, []]}
     GET 'm.youtube.com', GotoYT
