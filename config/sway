@@ -5,9 +5,6 @@ client.focused #008800 #008800 #ffffff #0000ff #000000
 set $mod Mod1
 font pango:Noto Sans Mono 8
 
-# enable backlight controls
-exec sudo chown 1000:1000 /sys/class/backlight/intel_backlight/brightness /sys/class/leds/chromeos::kbd_backlight/brightness
-
 # idle timers
 exec swayidle timeout 120 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"'
 exec swayidle timeout 15 kbd_dark resume kbd_lit
