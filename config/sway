@@ -1,4 +1,4 @@
-xwayland disable
+#xwayland disable
 
 client.focused #008800 #008800 #ffffff #0000ff #000000
 
