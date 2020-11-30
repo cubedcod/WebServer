@@ -1,2 +1,5 @@
 ml mbox extract curl -I https://www.redhat.com/archives/dm-devel/2020-November.txt.gz
 automod killfile
+use distro-squid (install conf file)
+openrc/systemd unit for web daemon
+unified log.. to syslog presumably

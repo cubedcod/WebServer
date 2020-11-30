@@ -4324,7 +4324,7 @@ CONFIG_STAGING_MEDIA=y
 #
 # Android
 #
-CONFIG_ASHMEM=y
+# CONFIG_ASHMEM is not set
 # CONFIG_ION is not set
 # end of Android
 
