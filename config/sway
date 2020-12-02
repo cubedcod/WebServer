@@ -1,13 +1,16 @@
-#xwayland disable
-
+xwayland disable
+output eDP-1 scale 1
+output eDP-1 bg #000000 solid_color
 client.focused #008800 #008800 #ffffff #0000ff #000000
-
+font pango:Terminus 8
 set $mod Mod1
-font pango:Noto Sans Mono 8
 
-# idle timers
-exec swayidle timeout 120 'swaymsg "output * dpms off"' idlehint 120 resume 'swaymsg "output * dpms on"'
-exec swayidle timeout 15 kbd_dark resume kbd_lit
+#lighting
+exec swayidle timeout 120 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
+     	      timeout 115 'echo 0 > /sys/class/leds/chromeos::kbd_backlight/brightness' resume 'echo 32 > /sys/class/leds/chromeos::kbd_backlight/brightness' \
+	      idlehint 120
+bindsym F6 exec light -U 1
+bindsym F7 exec light -A 1
 
 # media keys
 bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +1%
@@ -43,7 +46,8 @@ bindsym $mod+Shift+Down move down
 bindsym $mod+Shift+Up move up
 bindsym $mod+Shift+Right move right
 
-# emulate PageUp/Down for Apple and Chromebook kbds
+# simulate PageUp/Down for Apple and Chromebook kbds
+exec ydotoold
 bindsym $mod+Up exec ydotool key PageUp
 bindsym $mod+Down exec ydotool key PageDown
 
@@ -151,8 +155,4 @@ input "1452:597:Apple_Wireless_Keyboard" {
     xkb_options altwin:swap_alt_win,ctrl:nocaps
 }
 
-output eDP-1 scale 1
-output eDP-1 bg #000000 solid_color
 
-exec ydotoold
-exec brightness 120
