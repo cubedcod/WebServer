@@ -6,7 +6,7 @@ set $mod Mod1
 font pango:Noto Sans Mono 8
 
 # idle timers
-exec swayidle timeout 120 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"'
+exec swayidle timeout 120 'swaymsg "output * dpms off"' idlehint 120 resume 'swaymsg "output * dpms on"'
 exec swayidle timeout 15 kbd_dark resume kbd_lit
 
 # media keys

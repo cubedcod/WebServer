@@ -27,4 +27,4 @@ alias y='cd ~/src/WebServer'
 alias m=mpv
 alias mp='mpv -shuffle .'
 alias tp='cat /sys/devices/virtual/thermal/thermal_zone*/temp'
-if [[ -z $DISPLAY ]] && [[ $(tty) = /dev/tty1 ]]; then exec sway; fi
+#if [[ -z $DISPLAY ]] && [[ $(tty) = /dev/tty1 ]]; then exec sway; fi
