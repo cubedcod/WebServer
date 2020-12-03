@@ -1,20 +1,30 @@
 xwayland disable
+
+# output
 output eDP-1 scale 1
 output eDP-1 bg #000000 solid_color
+
+# style
 client.focused #008800 #008800 #ffffff #0000ff #000000
 font pango:Terminus 8
+
 set $mod Mod1
 
 #lighting
-exec swayidle timeout 120 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
-     	      timeout 115 'echo 0 > /sys/class/leds/chromeos::kbd_backlight/brightness' resume 'echo 32 > /sys/class/leds/chromeos::kbd_backlight/brightness' \
+exec light -N 0.5
+bindsym F6 exec light -U 0.5
+bindsym F7 exec light -A 0.5
+bindsym $mod+F6 exec light -U 1 -s sysfs/leds/chromeos::kbd_backlight
+bindsym $mod+F7 exec light -A 1 -s sysfs/leds/chromeos::kbd_backlight
+exec swayidle timeout 120 'light -O; light -S 0.5' resume 'light -I' \
+     	      timeout 3 'light -O -s sysfs/leds/chromeos::kbd_backlight; light -S 0 -s sysfs/leds/chromeos::kbd_backlight' resume 'light -I -s sysfs/leds/chromeos::kbd_backlight' \
 	      idlehint 120
-bindsym F6 exec light -U 1
-bindsym F7 exec light -A 1
 
-# media keys
-bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +1%
-bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -1%
+# sound control
+bindsym F9  exec pactl set-sink-volume @DEFAULT_SINK@ -0.5%
+bindsym F10 exec pactl set-sink-volume @DEFAULT_SINK@ +0.5%
+bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -0.5%
+bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +0.5%
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
@@ -46,7 +56,7 @@ bindsym $mod+Shift+Down move down
 bindsym $mod+Shift+Up move up
 bindsym $mod+Shift+Right move right
 
-# simulate PageUp/Down for Apple and Chromebook kbds
+# simulate PageUp/Down for Apple and Google kbds
 exec ydotoold
 bindsym $mod+Up exec ydotool key PageUp
 bindsym $mod+Down exec ydotool key PageDown
@@ -143,6 +153,7 @@ bar {
 	position top
 }
 
+#  input
 input type:touchpad {
     tap enabled
 }
@@ -154,5 +165,3 @@ input "type:keyboard" {
 input "1452:597:Apple_Wireless_Keyboard" {
     xkb_options altwin:swap_alt_win,ctrl:nocaps
 }
-
-
