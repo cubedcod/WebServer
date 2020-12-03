@@ -3,6 +3,7 @@ xwayland disable
 # output
 output eDP-1 scale 1
 output eDP-1 bg #000000 solid_color
+exec mkfifo $SWAYSOCK.wob && tail -f $SWAYSOCK.wob | wob
 
 # style
 client.focused #008800 #008800 #ffffff #0000ff #000000
@@ -12,9 +13,8 @@ set $mod Mod1
 
 #lighting
 set $kb sysfs/leds/chromeos::kbd_backlight
-exec light -N 0.5
-bindsym F6 exec light -U 0.5
-bindsym F7 exec light -A 0.5
+bindsym F6 exec light -U 0.5 && light -G | cut -d'.' -f1 > $SWAYSOCK.wob
+bindsym F7 exec light -A 0.5 && light -G | cut -d'.' -f1 > $SWAYSOCK.wob
 bindsym $mod+F6 exec light -U 1 -s $kb
 bindsym $mod+F7 exec light -A 1 -s $kb
 exec swayidle timeout 120 'light -O; light -S 0.5' resume 'light -I' \
@@ -22,10 +22,10 @@ exec swayidle timeout 120 'light -O; light -S 0.5' resume 'light -I' \
 	      idlehint 120
 
 # sound control
-bindsym F9  exec pactl set-sink-volume @DEFAULT_SINK@ -0.5%
-bindsym F10 exec pactl set-sink-volume @DEFAULT_SINK@ +0.5%
-bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -0.5%
-bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +0.5%
+bindsym F9  exec pactl set-sink-volume @DEFAULT_SINK@ -0.5% && pamixer --get-volume > $SWAYSOCK.wob
+bindsym F10 exec pactl set-sink-volume @DEFAULT_SINK@ +0.5% && pamixer --get-volume > $SWAYSOCK.wob
+bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -0.5% && pamixer --get-volume > $SWAYSOCK.wob
+bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +0.5% && pamixer --get-volume > $SWAYSOCK.wob
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
