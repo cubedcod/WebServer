@@ -13,12 +13,12 @@ set $mod Mod1
 
 #lighting
 set $kb sysfs/leds/chromeos::kbd_backlight
-bindsym F6 exec light -U 0.5 && light -G | cut -d'.' -f1 > $SWAYSOCK.wob
-bindsym F7 exec light -A 0.5 && light -G | cut -d'.' -f1 > $SWAYSOCK.wob
+bindsym F6 exec light -U 0.5 && light -G | cut -d . -f1 > $SWAYSOCK.wob
+bindsym F7 exec light -A 0.5 && light -G | cut -d . -f1 > $SWAYSOCK.wob
 bindsym $mod+F6 exec light -U 1 -s $kb
 bindsym $mod+F7 exec light -A 1 -s $kb
-exec swayidle timeout 120 'light -O; light -S 0.5' resume 'light -I' \
-     	      timeout 3 "light -O -s $kb; light -S 0 -s $kb" resume "light -I -s $kb" \
+exec swayidle timeout 120 'light -O && light -S 0.5' resume 'light -I' \
+     	      timeout 3 "light -O -s $kb && light -S 0 -s $kb" resume "light -I -s $kb" \
 	      idlehint 120
 
 # sound control
