@@ -31,6 +31,8 @@ bindsym F6 exec light -U 0.25 && light -G | cut -d . -f1 > $SWAYSOCK.wob
 bindsym F7 exec light -A 0.25 && light -G | cut -d . -f1 > $SWAYSOCK.wob
 bindsym $mod+F6 exec light -U 1 -s $kb
 bindsym $mod+F7 exec light -A 1 -s $kb
+bindsym XF86PowerOff output * dpms off
+bindsym XF86Tools output * dpms on
 exec swayidle timeout 120 'light -O && light -S 0.5' resume 'light -I' \
      	      timeout 12 "light -O -s $kb && light -S 0 -s $kb" resume "light -I -s $kb" \
 	      idlehint 120
