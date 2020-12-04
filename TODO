@@ -8,3 +8,4 @@ tools for feedlist maintenance - query recent log for errors/redirects / no new 
 AUR comments
 deterministic deploy/install - nix X systemd --user ?
 weeechat hourdir log-rotating
+path visualization
