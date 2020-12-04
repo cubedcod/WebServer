@@ -1,24 +1,38 @@
-xwayland disable
+#  input
+input type:touchpad {
+      tap enabled
+}
+input "type:keyboard" {
+      xkb_options ctrl:nocaps
+}
+input "1452:597:Apple_Wireless_Keyboard" {
+    xkb_options altwin:swap_alt_win,ctrl:nocaps
+}
+set $mod Mod1
+exec ydotoold
 
 # output
 output eDP-1 scale 1
 output eDP-1 bg #000000 solid_color
 exec mkfifo $SWAYSOCK.wob && tail -f $SWAYSOCK.wob | wob
+xwayland disable
+bar {
+        status_command i3status
+	position top
+}
 
 # style
 client.focused #008800 #008800 #ffffff #0000ff #000000
 font pango:Terminus 8
 
-set $mod Mod1
-
-#lighting
+#lighting control
 set $kb sysfs/leds/chromeos::kbd_backlight
-bindsym F6 exec light -U 0.5 && light -G | cut -d . -f1 > $SWAYSOCK.wob
-bindsym F7 exec light -A 0.5 && light -G | cut -d . -f1 > $SWAYSOCK.wob
+bindsym F6 exec light -U 0.25 && light -G | cut -d . -f1 > $SWAYSOCK.wob
+bindsym F7 exec light -A 0.25 && light -G | cut -d . -f1 > $SWAYSOCK.wob
 bindsym $mod+F6 exec light -U 1 -s $kb
 bindsym $mod+F7 exec light -A 1 -s $kb
 exec swayidle timeout 120 'light -O && light -S 0.5' resume 'light -I' \
-     	      timeout 3 "light -O -s $kb && light -S 0 -s $kb" resume "light -I -s $kb" \
+     	      timeout 12 "light -O -s $kb && light -S 0 -s $kb" resume "light -I -s $kb" \
 	      idlehint 120
 
 # sound control
@@ -27,142 +41,57 @@ bindsym F10 exec pactl set-sink-volume @DEFAULT_SINK@ +0.5% && pamixer --get-vol
 bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -0.5% && pamixer --get-volume > $SWAYSOCK.wob
 bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +0.5% && pamixer --get-volume > $SWAYSOCK.wob
 
-# Use Mouse+$mod to drag floating windows to their wanted position
+# window control
 floating_modifier $mod
-
-# start a terminal
 bindsym $mod+Return exec termite
-
-# kill focused window
 bindsym $mod+Shift+q kill
-
-# program launcher
 bindsym $mod+d exec dmenu-wl_run
-
-# change focus
 bindsym $mod+j focus left
 bindsym $mod+k focus down
 bindsym $mod+l focus up
 bindsym $mod+semicolon focus right
-
-# move focused window
-bindsym $mod+Shift+j move left
-bindsym $mod+Shift+k move down
-bindsym $mod+Shift+l move up
-bindsym $mod+Shift+semicolon move right
-
-# alternatively, you can use the cursor keys:
 bindsym $mod+Shift+Left move left
 bindsym $mod+Shift+Down move down
 bindsym $mod+Shift+Up move up
 bindsym $mod+Shift+Right move right
-
-# simulate PageUp/Down for Apple and Google kbds
-exec ydotoold
 bindsym $mod+Up exec ydotool key PageUp
 bindsym $mod+Down exec ydotool key PageDown
-
-# split in horizontal orientation
 bindsym $mod+h split h
-
-# split in vertical orientation
 bindsym $mod+v split v
-
-# enter fullscreen mode for the focused container
 bindsym $mod+f fullscreen toggle
-
-# change container layout (stacked, tabbed, toggle split)
 bindsym $mod+s layout stacking
 bindsym $mod+w layout tabbed
 bindsym $mod+e layout toggle split
-
-# toggle tiling / floating
 bindsym $mod+Shift+space floating toggle
-
-# change focus between tiling / floating windows
 bindsym $mod+space focus mode_toggle
-
-# focus the parent container
 bindsym $mod+a focus parent
-
-# Define names for default workspaces for which we configure key bindings later on.
-# We use variables to avoid repeating the names in multiple places.
-set $ws1 "1"
-set $ws2 "2"
-set $ws3 "3"
-set $ws4 "4"
-set $ws5 "5"
-set $ws6 "6"
-set $ws7 "7"
-set $ws8 "8"
-set $ws9 "9"
-set $ws10 "10"
-
-# switch to workspace
-bindsym $mod+1 workspace number $ws1
-bindsym $mod+2 workspace number $ws2
-bindsym $mod+3 workspace number $ws3
-bindsym $mod+4 workspace number $ws4
-bindsym $mod+5 workspace number $ws5
-bindsym $mod+6 workspace number $ws6
-bindsym $mod+7 workspace number $ws7
-bindsym $mod+8 workspace number $ws8
-bindsym $mod+9 workspace number $ws9
-bindsym $mod+0 workspace number $ws10
-
-# move focused container to workspace
-bindsym $mod+Shift+1 move container to workspace number $ws1
-bindsym $mod+Shift+2 move container to workspace number $ws2
-bindsym $mod+Shift+3 move container to workspace number $ws3
-bindsym $mod+Shift+4 move container to workspace number $ws4
-bindsym $mod+Shift+5 move container to workspace number $ws5
-bindsym $mod+Shift+6 move container to workspace number $ws6
-bindsym $mod+Shift+7 move container to workspace number $ws7
-bindsym $mod+Shift+8 move container to workspace number $ws8
-bindsym $mod+Shift+9 move container to workspace number $ws9
-bindsym $mod+Shift+0 move container to workspace number $ws10
-
-# resize window (you can also use the mouse for that)
+bindsym $mod+1 workspace number 1
+bindsym $mod+2 workspace number 2
+bindsym $mod+3 workspace number 3
+bindsym $mod+4 workspace number 4
+bindsym $mod+5 workspace number 5
+bindsym $mod+6 workspace number 6
+bindsym $mod+7 workspace number 7
+bindsym $mod+8 workspace number 8
+bindsym $mod+9 workspace number 9
+bindsym $mod+0 workspace number 10
+bindsym $mod+Shift+1 move container to workspace number 1
+bindsym $mod+Shift+2 move container to workspace number 2
+bindsym $mod+Shift+3 move container to workspace number 3
+bindsym $mod+Shift+4 move container to workspace number 4
+bindsym $mod+Shift+5 move container to workspace number 5
+bindsym $mod+Shift+6 move container to workspace number 6
+bindsym $mod+Shift+7 move container to workspace number 7
+bindsym $mod+Shift+8 move container to workspace number 8
+bindsym $mod+Shift+9 move container to workspace number 9
+bindsym $mod+Shift+0 move container to workspace number 10
 mode "resize" {
-        # These bindings trigger as soon as you enter the resize mode
-
-        # Pressing left will shrink the window’s width.
-        # Pressing right will grow the window’s width.
-        # Pressing up will shrink the window’s height.
-        # Pressing down will grow the window’s height.
-        bindsym j resize shrink width 10 px or 10 ppt
-        bindsym k resize grow height 10 px or 10 ppt
-        bindsym l resize shrink height 10 px or 10 ppt
-        bindsym semicolon resize grow width 10 px or 10 ppt
-
-        # same bindings, but for the arrow keys
         bindsym Left resize shrink width 10 px or 10 ppt
         bindsym Down resize grow height 10 px or 10 ppt
         bindsym Up resize shrink height 10 px or 10 ppt
         bindsym Right resize grow width 10 px or 10 ppt
-
-        # back to normal: Enter or Escape or $mod+r
         bindsym Return mode "default"
         bindsym Escape mode "default"
         bindsym $mod+r mode "default"
 }
-
 bindsym $mod+r mode "resize"
-
-bar {
-        status_command i3status
-	position top
-}
-
-#  input
-input type:touchpad {
-    tap enabled
-}
-
-input "type:keyboard" {
-    xkb_options ctrl:nocaps
-}
-
-input "1452:597:Apple_Wireless_Keyboard" {
-    xkb_options altwin:swap_alt_win,ctrl:nocaps
-}
