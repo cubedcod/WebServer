@@ -27,6 +27,8 @@ font pango:Terminus 8
 
 #lighting control
 set $kb sysfs/leds/chromeos::kbd_backlight
+bindsym F1 exec light -U 0.25 && light -G | cut -d . -f1 > $SWAYSOCK.wob
+bindsym F2 exec light -A 0.25 && light -G | cut -d . -f1 > $SWAYSOCK.wob
 bindsym F6 exec light -U 0.25 && light -G | cut -d . -f1 > $SWAYSOCK.wob
 bindsym F7 exec light -A 0.25 && light -G | cut -d . -f1 > $SWAYSOCK.wob
 bindsym $mod+F6 exec light -U 1 -s $kb
@@ -40,6 +42,8 @@ exec swayidle timeout 120 'light -O && light -S 0.5' resume 'light -I' \
 # sound control
 bindsym F9  exec pactl set-sink-volume @DEFAULT_SINK@ -0.5% && pamixer --get-volume > $SWAYSOCK.wob
 bindsym F10 exec pactl set-sink-volume @DEFAULT_SINK@ +0.5% && pamixer --get-volume > $SWAYSOCK.wob
+bindsym F11  exec pactl set-sink-volume @DEFAULT_SINK@ -0.5% && pamixer --get-volume > $SWAYSOCK.wob
+bindsym F12 exec pactl set-sink-volume @DEFAULT_SINK@ +0.5% && pamixer --get-volume > $SWAYSOCK.wob
 bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -0.5% && pamixer --get-volume > $SWAYSOCK.wob
 bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +0.5% && pamixer --get-volume > $SWAYSOCK.wob
 
