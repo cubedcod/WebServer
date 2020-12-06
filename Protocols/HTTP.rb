@@ -101,7 +101,7 @@ class WebResource
         [304, {}, []]                            # unmodified entity
       else
         body = generator ? generator.call : self # generate entity
-        if body.class == WebResource             # file-reference?
+        if body.class == WebResource             # entity is a resource-reference
           Rack::Files.new('.').serving(Rack::Request.new(env), body.fsPath).yield_self{|s,h,b|
             if 304 == s
               [304, {}, []]                      # unmodified file
@@ -112,11 +112,11 @@ class WebResource
                 h['Content-Type'] = RDF::Format.file_extensions[body.ext.to_sym][0].content_type[0]
               end
               env[:resp]['Content-Length'] = body.node.size.to_s
-              [s, h.update(env[:resp]), b]       # file
+              [s, h.update(env[:resp]), b]       # return file
             end}
         else
           env[:resp]['Content-Length'] = body.bytesize.to_s
-          [200, env[:resp], [body]]              # inline data
+          [200, env[:resp], [body]]              # return data
         end
       end
     end
