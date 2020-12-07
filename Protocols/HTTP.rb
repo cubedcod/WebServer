@@ -308,7 +308,7 @@ class WebResource
     def hostHandler
       qs = query_values || {}
       cookie = join('/cookie').R
-      cookie.writeFile qs['cookie'] if qs.has_key?('cookie') && !qs['cookie'].empty? # cache cookie
+      cookie.writeFile qs['cookie'] if qs['cookie'] && !qs['cookie'].empty? # cache cookie
       env['HTTP_COOKIE'] = cookie.readFile if cookie.node.exist? # fetch cookie from jar
       if last = parts[-1]
         if last.match? /^new|message|rss/i
