@@ -295,10 +295,12 @@ class WebResource
         head['Referer'] = 'https://www.youtube.com/'
       end
       head['Referer'] = 'https://' + host + '/' if %w(gif jpeg jpg png svg webp).member? ext.downcase
+
+      #puts head['User-Agent']
       head['User-Agent'] = if %w(po.st t.co).member? host # we want shortlink-expansion via HTTP-redirect, not Javascript, so advertise a basic user-agent
                              'curl/7.65.1'
                            else
-                             'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
+                             'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36'
                            end
       head
     end
@@ -306,8 +308,8 @@ class WebResource
     def hostHandler
       qs = query_values || {}
       cookie = join('/cookie').R
-      cookie.writeFile qs['cookie'] if qs.has_key? 'cookie'      # update cookie
-      env['HTTP_COOKIE'] = cookie.readFile if cookie.node.exist? # read cookie
+      cookie.writeFile qs['cookie'] if qs.has_key?('cookie') && !qs['cookie'].empty? # cache cookie
+      env['HTTP_COOKIE'] = cookie.readFile if cookie.node.exist? # fetch cookie from jar
       if last = parts[-1]
         if last.match? /^new|message|rss/i
           env[:sort] ||= 'date'
