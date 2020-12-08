@@ -175,7 +175,11 @@ module Webize
             yield subject, Creator, (@base.host + dirname).split(/\W/).join('.'), graph
             yield subject, To, @base, graph
           }
-        elsif @base.ext == 'irc' # irssi: /set autolog_path ~/web/%Y/%m/%d/%H/$tag.$0.irc
+        elsif @base.ext == 'irc'
+          # irssi:
+          #  /set autolog_path ~/web/%Y/%m/%d/%H/$tag.$0.irc
+          # weechat:
+          # /set logger.mask.irc "%Y/%m/%d/%H/$server.$channel.irc"
           network, channame = @base.basename.split '.'
           channame = Rack::Utils.unescape_path(channame).gsub('#','')
           chan = ('#' + channame).R
