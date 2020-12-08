@@ -11,5 +11,4 @@ weeechat hourdir log-rotating
 path visualization
 port 443 termination - direct handling since https peer-proxy suppoort in squid is iffy
 mixcloud grahql to RDF
-highlight droplist
 grouping shortcuts in uri so url-hacking isnt needed

@@ -150,14 +150,12 @@ class WebResource
   module HTML
 
     MarkupGroup[LDP+'Container'] = -> dirs, env {
-      if this = dirs.find{|d| d['uri'] == env[:base].uri.split('?')[0]}
-        {class: :container,
-         c: [{_: :span, class: :head, c: this['uri'].R.basename},
-             {class: :body, c: (HTML.tabular dirs, env)}]}
+      if env[:view] == 'table'
+        HTML.tabular dirs, env
       else
-        dirs.map{|dir| Markup[LDP+'Container'][dir,env]}
-      end
-    }
+        dirs.map{|d|
+          Markup[LDP+'Container'][d, env]}
+      end}
 
     Markup[LDP+'Container'] = -> dir, env {
       uri = (dir.delete('uri') || env[:base]).R env
