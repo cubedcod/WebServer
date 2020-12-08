@@ -56,7 +56,7 @@ module Webize
         if e['src']                                                  # src attribute
           src = (base.join e['src']).R                               # resolve src location
           if src.deny?
-            puts "🚩 " + e.to_s
+            puts "🚩 \e[30;1m" + e.to_s.gsub((src.deny_domain? ? /\/\/[^'"\/]+/ : Gunk), "\e[31m\\0\e[30m") + "\e[0m"
             e.remove                                                 # strip blocked src
           else
             e['src'] = src.href                                      # update src to resolved location
@@ -68,7 +68,7 @@ module Webize
           ref.query = '' if ref.query&.match?(/utm[^a-z]/)
           ref.fragment = '' if ref.fragment&.match?(/utm[^a-z]/)
           if ref.deny?
-            puts "🚩 " + e.to_s
+            puts "🚩 \e[30;1m" + e.to_s.gsub((ref.deny_domain? ? /\/\/[^'"\/]+/ : Gunk), "\e[31m\\0\e[30m") + "\e[0m"
             e.remove                                                 # strip blocked href
           else
             offsite = ref.host != base.host
