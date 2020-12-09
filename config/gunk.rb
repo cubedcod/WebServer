@@ -30,7 +30,7 @@ header|pre)[-_]?bid.*|hotjar|.*hubspot.*|[hp]b.?js|
 impression|indexww|
 keywee|kr(ux|xd).*|
 (app|s)?m(a(ilchimp|r(feel|keto)|tomo|utic)|etrics?|ms|pulse|tr)|
-new(relic|sletters?)|
+newrelic|
 o(m(niture|tr)|nesignal|pt(anon|imera)|utbrain)|
 p(erimeter-?x|iwik|op(down|over|up)|orpoiseant|owaboot|repopulator|ro(fitwell|mo(tion)?s?)|ub(exchange|matic))|/pv|
 quantcast|
