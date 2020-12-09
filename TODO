@@ -14,3 +14,4 @@ mixcloud grahql to RDF
 grouping shortcuts in uri so url-hacking isnt needed
 offline icon , e.g. to stop redirect and use local cache on  http://localhost:8000/lobste.rs/threads/?view=table&sort=date&offline  
 fix IRC triplr for weechat (and still work in irssi?)
+automatic twitter credential harvesting (Switch back to HTTPS termination mode), and/or token generation (SEe gallery-dl / nitter )
