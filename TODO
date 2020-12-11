@@ -1,19 +1,16 @@
 if-modified-since on getfeeds
 ml mbox extract curl -I https://www.redhat.com/archives/dm-devel/2020-November.txt.gz
-automod killfile
 use distro-squid (install conf file)
 openrc/systemd unit for web daemon
 unified log.. to syslog/systemd-journal
 tools for feedlist maintenance - query recent log for errors/redirects / no new data
-AUR comments
 deterministic deploy/install - nix X systemd --user ?
-weeechat hourdir log-rotating
 path visualization
 port 443 termination - direct handling since https peer-proxy suppoort in squid is iffy
 mixcloud grahql to RDF
 grouping shortcuts in uri so url-hacking isnt needed
 offline icon , e.g. to stop redirect and use local cache on  http://localhost:8000/lobste.rs/threads/?view=table&sort=date&offline  http://localhost:8000/www.universalhub.com/comment
-fix IRC triplr for weechat (and still work in irssi?)
+fix IRC triplr and hourdir rotate for weechat
 automatic twitter credential harvesting (Switch back to HTTPS termination mode), and/or token generation (SEe gallery-dl / nitter )
 PDF text : http://localhost:8000/www.bitsavers.org/pdf/learSiegler/ADM_3/DP2880486F_ADM3A_UM_Apr86.pdf
 fix blank entries in google triplr
