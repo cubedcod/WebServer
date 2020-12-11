@@ -366,6 +366,7 @@ class WebResource
       post.delete Type
       uri = post.delete('uri') || ('#' + Digest::SHA2.hexdigest(rand.to_s))
       resource = uri.R env
+      authors = post.delete(Creator) || []
       date = (post.delete(Date) || [])[0]
       uri_hash = 'r' + Digest::SHA2.hexdigest(uri)
       hasPointer = false
@@ -374,38 +375,41 @@ class WebResource
                  else
                    uri_hash
                  end
-
-      {class: :post, id: local_id,
-       c: ["\n",
-           (post.delete(Title)||[]).map(&:to_s).map(&:strip).compact.-([""]).uniq.map{|title|
-             title = title.to_s.sub(/\/u\/\S+ on /,'')
-             unless env[:title] == title
-               env[:title] = title
-               hasPointer = true
-               [{_: :a,  id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: :title, type: :node,
-                 href: resource.href, c: [(post.delete(Schema+'icon')||[]).map{|i|{_: :img, src: i.href}},CGI.escapeHTML(title)]}, " \n"]
-             end},
-           {class: :pointer,
-            c: [({_: :a, class: :date, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date} if date), ' ',
-                ({_: :a, type: :node, c: '☚', href: resource.href, id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} unless hasPointer)]},
-           {_: :table, class: :fromto,
-            c: {_: :tr,
-                c: [{_: :td,
-                     c: (post.delete(Creator)||[]).map{|f|Markup[Creator][f,env]},
-                     class: :from}, "\n",
-                    {_: :td, c: '&rarr;'},
-                    {_: :td,
-                     c: [(post.delete(To)||[]).map{|f|Markup[To][f,env]},
-                         post.delete(SIOC+'reply_of')],
-                     class: :to}, "\n"]}},
-           {class: :body,
-            c: [{class: :abstract, c: post.delete(Abstract)},
-                {class: :content,
-                 c: [(post.delete(Image) || []).map{|i| Markup[Image][i,env]},
-                     post.delete(Content),
-                     post.delete(SIOC + 'richContent')]},
-                MarkupGroup[Link][post.delete(Link) || [], env],
-                (["<br>\n", HTML.keyval(post,env)] unless post.keys.size < 1)]}]}}
+      if authors.find{|a| KillFile.member? a.to_s}
+        authors.map{|a| CGI.escapeHTML a.R.display_name if a.respond_to? :R}
+      else
+        {class: :post, id: local_id,
+         c: ["\n",
+             (post.delete(Title)||[]).map(&:to_s).map(&:strip).compact.-([""]).uniq.map{|title|
+               title = title.to_s.sub(/\/u\/\S+ on /,'')
+               unless env[:title] == title
+                 env[:title] = title
+                 hasPointer = true
+                 [{_: :a,  id: 'r' + Digest::SHA2.hexdigest(rand.to_s), class: :title, type: :node,
+                   href: resource.href, c: [(post.delete(Schema+'icon')||[]).map{|i|{_: :img, src: i.href}},CGI.escapeHTML(title)]}, " \n"]
+               end},
+             {class: :pointer,
+              c: [({_: :a, class: :date, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date} if date), ' ',
+                  ({_: :a, type: :node, c: '☚', href: resource.href, id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} unless hasPointer)]},
+             {_: :table, class: :fromto,
+              c: {_: :tr,
+                  c: [{_: :td,
+                       c: authors.map{|f|Markup[Creator][f,env]},
+                       class: :from}, "\n",
+                      {_: :td, c: '&rarr;'},
+                      {_: :td,
+                       c: [(post.delete(To)||[]).map{|f|Markup[To][f,env]},
+                           post.delete(SIOC+'reply_of')],
+                       class: :to}, "\n"]}},
+             {class: :body,
+              c: [{class: :abstract, c: post.delete(Abstract)},
+                  {class: :content,
+                   c: [(post.delete(Image) || []).map{|i| Markup[Image][i,env]},
+                       post.delete(Content),
+                       post.delete(SIOC + 'richContent')]},
+                  MarkupGroup[Link][post.delete(Link) || [], env],
+                  (["<br>\n", HTML.keyval(post,env)] unless post.keys.size < 1)]}]}
+      end}
 
   end
 end
