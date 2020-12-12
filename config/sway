@@ -1,6 +1,7 @@
 #  input
 input type:touchpad {
       tap enabled
+      events disabled
 }
 input "type:keyboard" {
       xkb_options ctrl:nocaps
