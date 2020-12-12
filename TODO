@@ -14,3 +14,4 @@ fix IRC triplr and hourdir rotate for weechat
 automatic twitter credential harvesting (Switch back to HTTPS termination mode), and/or token generation (SEe gallery-dl / nitter )
 PDF text : http://localhost:8000/www.bitsavers.org/pdf/learSiegler/ADM_3/DP2880486F_ADM3A_UM_Apr86.pdf
 fix blank entries in google triplr
+replace ?fullContent URL query with trailing vs no-trailing-slash convention? not much addl hassle since we recalc relURIs everywehre anyway
