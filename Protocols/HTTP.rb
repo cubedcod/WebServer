@@ -227,7 +227,7 @@ class WebResource
         if e.io.meta['content-type']&.match? /text\/html/
           (env[:repository] ||= RDF::Repository.new) << RDF::Statement.new(self, Content.R, Webize::HTML.format(HTTP.decompress(e.io.meta, e.io.read), self)) # upstream message
         end
-        cacheResponse
+        env[:base].cacheResponse
       else
         raise
       end
