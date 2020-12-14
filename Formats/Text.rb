@@ -177,9 +177,10 @@ module Webize
           }
         elsif @base.ext == 'irc'
           # irssi:
+          #  /set autolog on
           #  /set autolog_path ~/web/%Y/%m/%d/%H/$tag.$0.irc
           # weechat:
-          # /set logger.mask.irc "%Y/%m/%d/%H/$server.$channel.irc"
+          #  /set logger.mask.irc "%Y/%m/%d/%H/$server.$channel.irc"
           network, channame = @base.basename.split '.'
           channame = Rack::Utils.unescape_path(channame).gsub('#','')
           chan = ('#' + channame).R
