@@ -4,19 +4,18 @@ module Webize
       content_type 'application/pdf', :extension => :pdf
       reader { Reader }
     end
-
     class Reader < RDF::Reader
       include WebResource::URIs
       format Format
 
       def initialize(input = $stdin, options = {}, &block)
-        require 'pdf/reader'
-        @subject = (options[:base_uri] || '#image').R
-        @doc = begin
-                 ::PDF::Reader.new input
-               rescue Exception => e
-                 puts e.class, e.message
-               end
+        @base = options[:base_uri].R
+#        require 'pdf/reader'
+#        @doc = begin
+#                 ::PDF::Reader.new input
+#               rescue Exception => e
+#                 puts e.class, e.message
+#               end
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -29,13 +28,13 @@ module Webize
       def each_triple &block; each_statement{|s| block.call *s.to_triple} end
 
       def each_statement &fn
-        pdf_tuples{|p, o|
-          fn.call RDF::Statement.new(@subject, p.R,
-                                     (o.class == WebResource || o.class == RDF::URI) ? o : RDF::Literal(o),
-                                     :graph_name => @subject)}
+        pdf_tuples{|p,o|
+          fn.call RDF::Statement.new(@base, p, o, :graph_name => @base)}
       end
 
       def pdf_tuples
+=begin
+        ## use PDF library
         return unless @doc && @doc.respond_to?(:info)
         (@doc.info || []).map{|k,v|
           k = {
@@ -48,8 +47,12 @@ module Webize
         @doc.pages.each do |page|
           yield Content, page.text.hrefs
         end
+=end
+        ## use poppler-utils
+        html = RDF::Literal '<pre>' + `pdftotext #{@base.shellPath} -` + '</pre>'
+        html.datatype = RDF.XMLLiteral
+        yield Content.R, html
       end
-
     end
   end
 end

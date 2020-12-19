@@ -11,7 +11,6 @@ mixcloud grahql to RDF
 grouping shortcuts in uri so url-hacking isnt needed
 offline icon , e.g. to stop redirect and use local cache on  http://localhost:8000/lobste.rs/threads/?view=table&sort=date&offline  http://localhost:8000/www.universalhub.com/comment
 automatic twitter credential harvesting (Switch back to HTTPS termination mode), and/or token generation (SEe gallery-dl / nitter )
-PDF text : http://localhost:8000/www.bitsavers.org/pdf/learSiegler/ADM_3/DP2880486F_ADM3A_UM_Apr86.pdf
 replace ?fullContent URL query with trailing vs no-trailing-slash convention? not much addl hassle since we recalc relURIs everywehre anyway
 gemini
 nntp
