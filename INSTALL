@@ -32,9 +32,9 @@ which pygmentize || pip install pygments
 which bundle || gem install bundler
 bundle install
 
-## initial file state
+## initialize file state
 mkdir -p ~/web/mail/{cur,new,tmp}
 touch ~/web/web.log
 
-## HTTPS certificate
+## install HTTPS certificate
 ./bin/certificate
