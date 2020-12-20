@@ -2,7 +2,7 @@
 
     git clone https://gitlab.com/ix/WebServer.git
     cd WebServer
-    ./DEPENDENCIES
+    ./INSTALL
 
 ## USAGE
 
@@ -18,7 +18,7 @@ google (search engine) http://localhost:8000/www.google.com/search?q=%s
 
 ## WHAT
 
-fix the web in post-production. many have suggested we [abandon it](https://drewdevault.com/2020/11/01/What-is-Gemini-anyway.html) - we're attempting to fix it by presenting a server with the desired capabilities on a local host which can make use of incomplete or semibroken origin servers to facilitate its implementation. this also effectively inserts the local cache [into a hierarchy](https://gist.github.com/paniq/bf5b291949be14771344b19a38f042c0) ahead of the global web and facilitates offline and archival scenarios.
+fix the web in post-production. many have suggested we [abandon it](https://drewdevault.com/2020/11/01/What-is-Gemini-anyway.html) - we're attempting to fix it by presenting a server with the desired capabilities at localhost which can make use of incomplete or semibroken origin servers to facilitate its implementation. this also effectively inserts the local cache [into a hierarchy](https://gist.github.com/paniq/bf5b291949be14771344b19a38f042c0) ahead of the global web and facilitates offline and automatic-archival scenarios.
 
 ## WHY
 
