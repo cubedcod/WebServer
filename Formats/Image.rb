@@ -228,7 +228,7 @@ class WebResource
       W3 + '2000/01/rdf-schema#Resource' => '🌐',
     }
 
-    Markup[Image] = -> image, env {
+    Markup[Image] = Markup[Schema+'icon'] =  -> image, env {
       if img = if image.class == WebResource
                  image
                elsif image.class == String && image.match?(/^([\/]|http)/)
