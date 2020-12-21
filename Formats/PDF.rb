@@ -49,7 +49,10 @@ module Webize
         end
 =end
         ## use poppler-utils
-        html = RDF::Literal '<pre>' + `pdftotext #{@base.shellPath} -` + '</pre>'
+        location = @base.shellPath
+        location += '.pdf' unless @base.ext == 'pdf'
+        html = RDF::Literal `pdftohtml -s -stdout #{location}`
+        #html = RDF::Literal '<pre>' + `pdftotext #{location} -` + '</pre>'
         html.datatype = RDF.XMLLiteral
         yield Content.R, html
       end
