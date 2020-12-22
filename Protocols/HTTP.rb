@@ -258,7 +258,7 @@ class WebResource
             referer = referer.R
             env['HTTP_REFERER'] = referer.remoteURL.to_s if referer.host == 'localhost' && referer.path != '/'
           end
-          (env[:base] = remoteURL).hostHandler # host handler (rebased on local)
+          (env[:base] = remoteURL).hostHandler # host handler (rebased on local host)
         end
       else
         hostHandler                            # host handler
