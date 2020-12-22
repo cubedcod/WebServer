@@ -68,18 +68,23 @@ class WebResource < RDF::URI
       qs = query_values || {}
       bc = '' # breadcrumb trail
       favicon = ('//' + host + '/favicon.ico').R
-      icon = if env[:links][:icon]                                                                          # icon reference provided in upstream HTML
-               env[:links][:icon] = env[:links][:icon].R
-               if env[:links][:icon].path != favicon.path && !favicon.node.exist? && !favicon.node.symlink? # icon at non-default location
-                 FileUtils.mkdir_p File.dirname favicon.fsPath
-                 FileUtils.ln_s (env[:links][:icon].node.relative_path_from favicon.node.dirname), favicon.node # link to default location
+      icon = if env[:links][:icon]                       # icon reference in resource metadata
+               env[:links][:icon] = env[:links][:icon].R # icon resource
+               if env[:links][:icon].uri.index('data:') == 0 # data URI?
+                 env[:links][:icon].uri                      # data URI
+               else
+                 if env[:links][:icon].path != favicon.path && !favicon.node.exist? && !favicon.node.symlink? # default location unlinked?
+                   FileUtils.mkdir_p File.dirname favicon.fsPath
+                   FileUtils.ln_s (env[:links][:icon].node.relative_path_from favicon.node.dirname), favicon.node # link default location
+                 end
+                 env[:links][:icon].href                 # cached page icon
                end
-               env[:links][:icon].href                                                                      # referenced icon
-             elsif favicon.node.exist?                                                                      # host icon exists?
-               favicon.href                                                                                 # host icon
-             else                                                                                           # default icon
+             elsif favicon.node.exist?                   # host icon exists?
+               favicon.href                              # host icon
+             else                                        # default icon
                '/favicon.ico'
              end
+
       {class: :toolbox,
        c: [({_: :span, c: env[:origin_status], style: 'font-weight: bold', class: :icon} if env[:origin_status]),
            ({_: :a, id: :tabular, class: :icon, c: '↨', href: env[:base].join(HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))).R.href} unless qs['view'] == 'table'),
