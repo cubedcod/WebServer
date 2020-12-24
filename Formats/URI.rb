@@ -91,12 +91,12 @@ class WebResource < RDF::URI
            ({_: :a, href: env[:base].uri, c: '☝', class: :icon, id: :upstream} unless local_node?),
            {_: :a, href: HTTP.qs(qs.merge({'notransform' => nil})), c: '⚗️', id: :UI, class: :icon},
            ({_: :a, href: HTTP.qs(qs.merge({'download' => 'audio'})), c: '&darr;', id: :download, class: :icon} if host.match?(/(^|\.)(bandcamp|(mix|sound)cloud|youtube).com/)),
+           env[:feeds].map{|feed|
+             {_: :a, href: feed.R.href, title: feed.path, class: :icon, c: FeedIcon, id: 'feed' + Digest::SHA2.hexdigest(feed.to_s)}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange'} : {})}, "\n",
            {_: :a, href: env[:base].join('/').R.href, id: :host, c: {_: :img, src: icon, style: 'z-index: -1'}},
            {class: :path,
             c: env[:base].parts.map{|p| bc += '/' + p
               {_: :a, class: :breadcrumb, href: env[:base].join(bc).R.href, c: [{_: :span, c: '/'}, (CGI.escapeHTML Rack::Utils.unescape p)], id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}}},
-           env[:feeds].map{|feed|
-             {_: :a, href: feed.R.href, title: feed.path, class: :icon, c: FeedIcon, id: 'feed' + Digest::SHA2.hexdigest(feed.to_s)}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange'} : {})}, "\n",
            (search_arg = %w(f find q search_query).find{|k|qs.has_key? k} || ([nil, '/'].member?(path) ? 'find' : 'q') # query arg
             qs[search_arg] ||= ''                                                                                      # initialize query field
             {_: :form, c: qs.map{|k,v|
