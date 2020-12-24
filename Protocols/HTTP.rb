@@ -336,10 +336,10 @@ class WebResource
       end
     end
 
-    def href
-      return self if local_node?
-      ['http://localhost:8000/', host, path, (query ? ['?', query] : nil), (fragment ? ['#', fragment] : nil) ].join
-    end
+#    def href
+#      return self if local_node?
+#      ['http://localhost:8000/', host, path, (query ? ['?', query] : nil), (fragment ? ['#', fragment] : nil) ].join
+#    end
 
     def log_search
       env.update({searchable: true, sort: sizeAttr = '#size', view: 'table'})

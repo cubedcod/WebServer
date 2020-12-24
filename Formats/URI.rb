@@ -60,6 +60,7 @@ class WebResource < RDF::URI
   end
 
   alias_method :uri, :to_s
+  alias_method :href, :to_s
 
   module HTML
     include URIs
