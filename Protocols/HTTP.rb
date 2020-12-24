@@ -203,9 +203,9 @@ class WebResource
           if transformable && !(format||'').match?(/audio|css|image|octet|script|video/)
             graphResponse                                     # response in local format
           else
-            body = Webize::HTML.cacherefs body, env if format == 'text/html' # resolve cache references
+            body = Webize::HTML.clean body, self if format == 'text/html' # clean doc
             env[:resp]['Content-Length'] = body.bytesize.to_s # update Content-Length
-            [200, env[:resp], [body]]                         # rsponse in upstream format
+            [200, env[:resp], [body]]                         # response in origin format
           end
         end
       end

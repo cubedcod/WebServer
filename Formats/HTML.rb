@@ -3,21 +3,25 @@ module Webize
   module HTML
     include WebResource::URIs
 
-    # set location references to local cache
-    def self.cacherefs doc, env
-      doc = Nokogiri::HTML.fragment doc if doc.class == String
-      doc.css('a, form, iframe, img, link, script, source').map{|e| # ref element
-        %w(action href src).map{|attr|              # ref attribute
-          if e[attr]
-            ref = e[attr].R                           # reference
-            ref = env[:base].join ref unless ref.host # resolve host
-            e[attr] = ref.R(env).href                 # cache location
-          end}}
+    def self.clean doc, base
+      doc = Nokogiri::HTML.parse doc
+      doc.traverse{|e|
 
-      doc.css('img[srcset]').map{|img|srcset img, env[:base]}
+        if e['src']                                                  # src attribute
+          src = (base.join e['src']).R                               # resolve src location
+          if src.deny?
+            puts "🚩 \e[30;1m" + e.to_s.gsub((src.deny_domain? ? /\/\/[^'"\/]+/ : Gunk), "\e[31m\\0\e[30m") + "\e[0m" if Verbose
+            e.remove                                                 # strip blocked src
+          end
+        end
 
-      doc.css('style').map{|css|
-        css.content = Webize::CSS.cacherefs css.content, env if css.content.match? /url\(/}
+        if e['href']                                                 # href attribute
+          ref = (base.join e['href']).R                              # resolve href location
+          if ref.deny?
+            puts "🚩 \e[30;1m" + e.to_s.gsub((ref.deny_domain? ? /\/\/[^'"\/]+/ : Gunk), "\e[31m\\0\e[30m") + "\e[0m" if Verbose
+            e.remove                                                 # strip blocked href
+          end
+        end}
 
       doc.to_html
     end
@@ -53,6 +57,7 @@ module Webize
           e.set_attribute 'srcset', a.value if SRCSET.member? a.name # map srcset-like attributes to srcset
           a.unlink if a.name=='id' && a.value.match?(Gunk)           # strip attributes
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w(bgcolor class color height http-equiv layout loading ping role style tabindex target theme width).member?(a.name)}
+
         if e['src']                                                  # src attribute
           src = (base.join e['src']).R                               # resolve src location
           if src.deny?
@@ -62,11 +67,14 @@ module Webize
             e['src'] = src.href                                      # update src to resolved location
           end
         end
+
         srcset e, base if e['srcset']                                # srcset attribute
+
         if e['href']                                                 # href attribute
           ref = (base.join e['href']).R                              # resolve href location
-          ref.query = '' if ref.query&.match?(/utm[^a-z]/)
-          ref.fragment = '' if ref.fragment&.match?(/utm[^a-z]/)
+          ref.query = '' if ref.query&.match?(/utm[^a-z]/)           # de-urchinize query
+          ref.fragment = '' if ref.fragment&.match?(/utm[^a-z]/)     # de-urchinize fragment
+
           if ref.deny?
             puts "🚩 \e[30;1m" + e.to_s.gsub((ref.deny_domain? ? /\/\/[^'"\/]+/ : Gunk), "\e[31m\\0\e[30m") + "\e[0m" if Verbose
             e.remove                                                 # strip blocked href
@@ -78,10 +86,12 @@ module Webize
             e['href'] = ref.href                                     # update href to resolved location
             e['class'] = css.join ' '                                # add CSS style
           end
+
         elsif e['id']                                                # id attribute
           e.set_attribute 'class', 'identified'                      # style as identified node
           e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id'] unless e.name == 'p'}</span> " # add href to node
         end}
+
       html.to_xhtml indent: 0
     end
 
