@@ -241,7 +241,7 @@ l.facebook.com l.instagram.com
           r.fetch
         end
       elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results user watch watch_videos yts).member?(path) || !path
-        if path == 'embed'
+        if %w(embed get_video_info).member? path
           r.fetchHTTP transformable: false
         else
           r.fetch
