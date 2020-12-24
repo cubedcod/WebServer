@@ -43,7 +43,7 @@ class WebResource
               env[:repository] ? (env[:repository].size.to_s + '⋮') : nil,
               env['HTTP_REFERER'] ? ["\e[#{color}m", env['HTTP_REFERER'], "\e[0m→"] : nil,
               "\e[#{color}#{env['HTTP_REFERER'] && !env['HTTP_REFERER'].index(env[:base].host) && ';7' || ''}m",
-              env[:deny] ? env[:base].to_s[8..-1] : env[:base], "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil,
+              env[:deny] ? env[:base].to_s.sub(/^https?:\/\//,'') : env[:base], "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil,
               [env['HTTP_ACCEPT'], head['Content-Type']].compact.join(' → ')
              ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
 
