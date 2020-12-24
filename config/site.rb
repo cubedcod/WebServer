@@ -234,7 +234,13 @@ l.facebook.com l.instagram.com
       qs = r.query_values || {}
       if %w{attribution_link redirect}.member? path
         [301, {'Location' => qs['q'] || qs['u']}, []]
-      elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results s user watch watch_videos yts).member?(path) || !path
+      elsif path == 's'
+        if r.path.match? /prepopulat|tamper/
+          r.deny
+        else
+          r.fetch
+        end
+      elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results user watch watch_videos yts).member?(path) || !path
         if path == 'embed'
           r.fetchHTTP transformable: false
         else
