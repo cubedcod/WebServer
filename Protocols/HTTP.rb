@@ -158,32 +158,32 @@ class WebResource
                    end
           body = HTTP.decompress h, response.read    # read body
 
-          # cache and scan
-          if formatExt = Suffixes[format] || Suffixes_Rack[format]    # lookup format-suffix
-            if extension == formatExt                                 # suffix agrees w/ format-suffix map
-              cache = self                                            # cache at canonical location
-            else                                                      # suffix incorrect or missing
-              cache = uri
-              cache += 'index' if uri[-1] == '/'                      # append directory-data slug
-              cache += formatExt                                      # append suffix
-              cache = cache.R
-            end
-            cache.writeFile body if cache.static_node?                # cache static entity
-          else
-            puts "extension undefined for #{format}"                  # warn on undefined suffix
-          end
+          # cache fetched data
           if format                                                   # format defined?
+            if formatExt = Suffixes[format] || Suffixes_Rack[format]  # look up format-suffix
+              if extension == formatExt                               # suffix agrees w/ reverse map
+                cache = self                                          # cache at canonical location
+              else                                                    # format-suffix mismatch
+                cache = uri
+                cache += 'index' if uri[-1] == '/'                    # append directory-data slug
+                cache += formatExt                                    # append suffix
+                cache = cache.R
+              end
+              cache.writeFile body if cache.static_node?              # cache static data
+            else
+              puts "extension undefined for #{format}"                # warning: undefined suffix
+            end
             if reader = RDF::Reader.for(content_type: format)         # reader defined for format?
               env[:repository] ||= RDF::Repository.new                # initialize RDF repository
               if timestamp = h['Last-Modified'] || h['last-modified'] # HTTP metadata to RDF-graph
                 env[:repository] << RDF::Statement.new(self, Date.R, Time.httpdate(timestamp.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,'')).iso8601) rescue nil
               end
-              reader.new(body,base_uri: self){|g|env[:repository] << g} # read RDF
+              reader.new(body,  base_uri: self){|g|env[:repository] << g} # read RDF
             else
-              puts "RDF::Reader undefined for #{format}" unless %w(css js).member? ext # undefined Reader
+              puts "RDF::Reader undefined for #{format}" unless %w(css js).member? ext # warning: undefined Reader
             end
           else
-            puts "ERROR format undefined on #{uri}"                   # undefined format
+            puts "ERROR format undefined on #{uri}"                   # warning: undefined format
           end
 
           return unless thru                                          # no HTTP response to caller

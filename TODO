@@ -16,3 +16,4 @@ gemini
 nntp
 gopher
 wayland browser w/ https/images
+get rid of Suffixes  and Suffixes_Rack constants, use RDF library mappings (handles multiple extensions, so .jpeg.jpg wont happen etc)
