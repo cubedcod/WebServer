@@ -5,6 +5,4 @@
   components.map{|component|
     require_relative "#{category}/#{component}"}}
 
-module Webize
-  Verbose = ENV.has_key? 'Verbose'
-end
+Verbose = ENV.has_key? 'Verbose'

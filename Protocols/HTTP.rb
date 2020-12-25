@@ -1,5 +1,6 @@
 # coding: utf-8
-%w(brotli cgi digest/sha2 open-uri rack).map{|_| require _}
+%w(brotli cgi digest/sha2 httparty open-uri rack).map{|_| require _}
+
 class WebResource
   module HTTP
     include URIs
@@ -336,11 +337,6 @@ class WebResource
       end
     end
 
-#    def href
-#      return self if local_node?
-#      ['http://localhost:8000/', host, path, (query ? ['?', query] : nil), (fragment ? ['#', fragment] : nil) ].join
-#    end
-
     def log_search
       env.update({searchable: true, sort: sizeAttr = '#size', view: 'table'})
       results = {}
@@ -372,16 +368,17 @@ class WebResource
     end
 
     def POST
-      require 'httparty'
       if allow_domain?
         head = headers
         body = env['rack.input'].read
         env.delete 'rack.input'
         head.map{|k,v| puts [k,v.to_s].join "\t" }
-        puts body
+        puts body if Verbose
+
         r = HTTParty.post uri, headers: head, body: body
         head = headers r.headers
         head.map{|k,v| puts [k,v.to_s].join "\t" }
+        puts HTTP.decompress(head, r.body) if Verbose
         [r.code, head, [r.body]]
       else
         env[:deny] = true
