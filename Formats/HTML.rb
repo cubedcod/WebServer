@@ -347,6 +347,29 @@ class WebResource
                              {_: :script, c: SiteJS}]}]}]
     end
 
+    # RDF -> Markup
+    def self.markup type, v, env
+      if [Abstract, Content, 'http://rdfs.org/sioc/ns#richContent'].member? type
+        v
+      elsif Markup[type] # markup lambda defined for type-argument
+        Markup[type][v,env]
+      elsif v.class == Hash # data
+        types = (v[Type] || []).map{|t|
+          MarkupMap[t.to_s] || t.to_s } # normalize types for renderer application
+        seen = false
+        [types.map{|type|
+          if f = Markup[type] # markup lambda defined for type
+            seen = true
+            f[v,env]
+          end},
+         (keyval v, env unless seen)] # default key-value renderer
+      elsif v.class == WebResource # resource-reference
+        v
+      else # renderer undefined
+        CGI.escapeHTML v.to_s
+      end
+    end
+
     # Markup -> HTML
     def self.render x
       case x

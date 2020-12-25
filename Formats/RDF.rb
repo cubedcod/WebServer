@@ -161,29 +161,6 @@ class WebResource
   end
   module HTML
 
-    # RDF -> Markup
-    def self.markup type, v, env
-      if [Abstract, Content, 'http://rdfs.org/sioc/ns#richContent'].member? type
-        v
-      elsif Markup[type] # markup lambda defined for type-argument
-        Markup[type][v,env]
-      elsif v.class == Hash # data
-        types = (v[Type] || []).map{|t|
-          MarkupMap[t.to_s] || t.to_s } # normalize types for renderer application
-        seen = false
-        [types.map{|type|
-          if f = Markup[type] # markup lambda defined for type
-            seen = true
-            f[v,env]
-          end},
-         (keyval v, env unless seen)] # default key-value renderer
-      elsif v.class == WebResource # resource-reference
-        v
-      else # renderer undefined
-        CGI.escapeHTML v.to_s
-      end
-    end
-
     Markup[DC+'language'] = -> lang, env {
       {'de' => '🇩🇪',
        'en' => '🇬🇧',
@@ -223,39 +200,4 @@ class WebResource
       end}
 
   end
-end
-module Webize
-
-  module URIlist
-    class Format < RDF::Format
-      content_type 'text/uri-list',
-                   extension: :u
-      content_encoding 'utf-8'
-      reader { Reader }
-    end
-    class Reader < RDF::Reader
-      include WebResource::URIs
-      format Format
-
-      def initialize(input = $stdin, options = {}, &block)
-        @base = options[:base_uri].R.path.sub(/.u$/,'').R
-        @doc = input.respond_to?(:read) ? input.read : input
-        if block_given?
-          case block.arity
-          when 0 then instance_eval(&block)
-          else block.call(self)
-          end
-        end
-        nil
-      end
-
-      def each_triple &block; each_statement{|s| block.call *s.to_triple} end
-
-      def each_statement &fn
-        @doc.lines.map(&:chomp).map{|line|
-          fn.call RDF::Statement.new line.R, Type.R, (W3 + '2000/01/rdf-schema#Resource').R unless line.empty? || line.match?(/^#/)}
-      end
-    end
-  end
-
 end
