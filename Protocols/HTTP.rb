@@ -312,7 +312,10 @@ class WebResource
       cookie.writeFile qs['cookie'] if qs['cookie'] && !qs['cookie'].empty? # cache cookie
       env['HTTP_COOKIE'] = cookie.readFile if cookie.node.exist? # fetch cookie from jar
       if last = parts[-1]
-        if last.match? /^new|message|rss/i
+        case last
+        when /^gen(erate)?_?204$/
+          return [204, {}, []]
+        when /^new|message|rss/i
           env[:sort] ||= 'date'
           env[:view] ||= 'table'
         end

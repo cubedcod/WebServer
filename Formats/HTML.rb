@@ -22,7 +22,7 @@ module Webize
             e.remove                                                 # strip blocked href
           end
         end}
-      doc.css('script').map{|s| s.remove if s.inner_text.match? /google.?[at]/i}
+      doc.css('script').map{|s| s.remove if s.inner_text.match? /doubleclick|google.?[at]|krxd|newrelic/i}
       doc.to_html
     end
 
