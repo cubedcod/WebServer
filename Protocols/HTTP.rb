@@ -225,10 +225,17 @@ class WebResource
         [304, {}, []]
       when /300|[45]\d\d/ # Not Found/Allowed or upstream error
         env[:origin_status] = status.to_i
-        if e.io.meta['content-type']&.match? /text\/html/
-          (env[:repository] ||= RDF::Repository.new) << RDF::Statement.new(self, Content.R, Webize::HTML.format(HTTP.decompress(e.io.meta, e.io.read), self)) # upstream message
+        if (query_values||{}).has_key? 'notransform'
+          head = headers e.io.meta
+          body = e.io.read
+          #head['Content-Length'] = body.bytesize
+          [200, head, [body]]
+        else
+          if e.io.meta['content-type']&.match? /text\/html/
+            (env[:repository] ||= RDF::Repository.new) << RDF::Statement.new(self, Content.R, Webize::HTML.format(HTTP.decompress(e.io.meta, e.io.read), self)) # upstream message
+          end
+          env[:base].cacheResponse
         end
-        env[:base].cacheResponse
       else
         raise
       end
