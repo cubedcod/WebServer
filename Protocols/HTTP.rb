@@ -223,15 +223,16 @@ class WebResource
         end
       when /304/ # Not Modified
         [304, {}, []]
-      when /300|[45]\d\d/ # Not Found/Allowed or upstream error
+      when /300|[45]\d\d/ # Not Found, Not Allowed or general upstream error
         env[:origin_status] = status.to_i
-        if (query_values||{}).has_key? 'notransform'
-          [200, (headers e.io.meta), [ e.io.read]]
-        else
+        if transformable
           if e.io.meta['content-type']&.match? /text\/html/
-            (env[:repository] ||= RDF::Repository.new) << RDF::Statement.new(self, Content.R, Webize::HTML.format(HTTP.decompress(e.io.meta, e.io.read), self)) # upstream message
+            (env[:repository] ||= RDF::Repository.new) << RDF::Statement.new(self, Content.R,
+                                                                             Webize::HTML.format(HTTP.decompress(e.io.meta, e.io.read), self)) # upstream message
           end
           env[:base].cacheResponse
+        else
+          [env[:origin_status], (headers e.io.meta), [e.io.read]]
         end
       else
         raise
