@@ -226,10 +226,7 @@ class WebResource
       when /300|[45]\d\d/ # Not Found/Allowed or upstream error
         env[:origin_status] = status.to_i
         if (query_values||{}).has_key? 'notransform'
-          head = headers e.io.meta
-          body = e.io.read
-          #head['Content-Length'] = body.bytesize
-          [200, head, [body]]
+          [200, (headers e.io.meta), [ e.io.read]]
         else
           if e.io.meta['content-type']&.match? /text\/html/
             (env[:repository] ||= RDF::Repository.new) << RDF::Statement.new(self, Content.R, Webize::HTML.format(HTTP.decompress(e.io.meta, e.io.read), self)) # upstream message
