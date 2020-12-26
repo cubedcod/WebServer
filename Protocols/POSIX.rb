@@ -116,6 +116,7 @@ class WebResource
         [self]
       else
         qs = query_values || {}
+        env[:summary] = !qs.has_key?('fullContent')
         (if node.directory?
          if qs['f'] && !qs['f'].empty? # FIND
            `find #{shellPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
@@ -124,7 +125,6 @@ class WebResource
          elsif qs.has_key?('Q') || qs.has_key?('q') # GREP directory
            nodeGrep
          else                          # LS
-           env[:summary] = !qs.has_key?('fullContent')
            (path=='/' && local_node?) ? [node] : [node, *node.children.select{|n|n.basename.to_s[0] != '.'}]
          end
         else
@@ -135,7 +135,8 @@ class WebResource
             else
               Pathname.glob globPath # parametric GLOB
             end
-          else # default document GLOB
+          else # default document-set GLOB
+            env[:summary] = false
             globPath += query_hash if static_node? && !local_node?
             globPath += '.*'
             Pathname.glob globPath
