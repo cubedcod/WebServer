@@ -56,9 +56,10 @@ body.error {background: #f00; font-weight: bold}
 div, a, svg, form, table, textarea { display: inline-block }
 h1,h2,h3,h4,h5,h6 {margin: 0}
 img, video {max-width: 100%}
-pre, code {white-space: pre-wrap; font-family: monospace}
+p {max-width: 100ex}
+pre, code {white-space: pre-wrap; font-family: monospace; max-width: 255ex}
 pre, p {margin: .125em}
-pre, p, li, article, blockquote, textarea, td[property="uri"] {max-width: 100ex; background-color: #000; color: #fff}
+pre, p, li, article, blockquote, textarea, td[property="uri"] {background-color: #000; color: #fff}
 span.name {font-size: .8em}
 svg, img[src*="svg"] {max-width:2em; max-height: 2em}
 table {border-spacing: 1px; border-radius: .2em}
