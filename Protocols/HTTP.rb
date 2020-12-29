@@ -328,7 +328,8 @@ class WebResource
       if path == '/favicon.ico' && node.exist?
         fileResponse
       elsif qs['download'] == 'audio'
-        storageURI = join(basename + (qs['list'] || qs['v'] || '')+ '.audio').R env
+        slug = qs['list'] || qs['v'] || 'audio'
+        storageURI = join([basename, slug].join '.').R
         storage = storageURI.fsPath
         unless File.directory? storage
           FileUtils.mkdir_p storage
