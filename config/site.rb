@@ -558,7 +558,7 @@ l.facebook.com l.instagram.com
   end
 
   def Mixcloud tree, &b
-    puts tree
+    puts tree.to_json
   end
 
   def NYT doc, &b

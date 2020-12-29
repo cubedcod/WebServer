@@ -178,7 +178,7 @@ class WebResource
               if timestamp = h['Last-Modified'] || h['last-modified'] # HTTP metadata to RDF-graph
                 env[:repository] << RDF::Statement.new(self, Date.R, Time.httpdate(timestamp.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,'')).iso8601) rescue nil
               end
-              reader.new(body,  base_uri: self){|g|env[:repository] << g} # read RDF
+              reader.new(body, base_uri: self){|g|env[:repository] << g} # read RDF
             else
               puts "RDF::Reader undefined for #{format}" unless %w(css js).member? ext # warning: undefined Reader
             end
@@ -390,6 +390,16 @@ class WebResource
         r = HTTParty.post uri, headers: head, body: body
 
         head = headers r.headers
+        if format  = head['Content-Type']
+          if reader = RDF::Reader.for(content_type: format) # reader defined for format?
+            env[:repository] ||= RDF::Repository.new        # initialize RDF repository
+            reader.new(HTTP.decompress(head, r.body), base_uri: self){|g|env[:repository] << g} # read RDF
+            saveRDF
+          else
+            puts "RDF::Reader undefined for #{format}"      # warning: undefined Reader
+          end
+        end
+
         if Verbose
           head.map{|k,v| puts [k,v.to_s].join "\t" }
           puts '<<<<<<<<', HTTP.decompress(head, r.body)
