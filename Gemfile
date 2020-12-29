@@ -1,6 +1,7 @@
 source "https://rubygems.org/"
 gem 'brotli'
 gem 'chronic'
+gem 'crass'
 gem 'exif'
 gem 'file-tail'
 gem 'httparty'
