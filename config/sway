@@ -16,7 +16,7 @@ exec ydotoold
 output eDP-1 scale 1
 output eDP-1 bg #000000 solid_color
 exec mkfifo $SWAYSOCK.wob && tail -f $SWAYSOCK.wob | wob
-#xwayland disable
+xwayland disable
 bar {
         status_command i3status
 	position top
