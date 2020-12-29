@@ -188,7 +188,7 @@ l.facebook.com l.instagram.com
       searchURL = -> q {
         ('https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_ext_alt_text=true&include_quote_count=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweet=true&q='+q+'&tweet_search_mode=live&count=20' + cursor + '&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2ChighlightedLabel').R(r.env)}
 
-      (if !r.path || r.path == '/'                                                                                   # feed
+      (if !r.path || r.path == '/'                                                                                  # feed
        Twits.shuffle.each_slice(18){|t|print '🐦'; searchURL[t.map{|u|'from%3A'+u}.join('%2BOR%2B')].fetchHTTP thru: false}
        r.saveRDF.graphResponse
       elsif parts.size == 1 && !%w(favicon.ico manifest.json push_service_worker.js search sw.js).member?(parts[0]) # user
@@ -519,8 +519,7 @@ l.facebook.com l.instagram.com
                                                     t
                                                   end}.join(' '), self)
         end rescue nil
-      end
-    }
+      end}
   end
 
   def Lobsters doc
@@ -558,7 +557,25 @@ l.facebook.com l.instagram.com
   end
 
   def Mixcloud tree, &b
-    puts tree.to_json
+    if data = tree['data']
+      if user = data['user']
+        if username = user['username']
+          if uploads = user['uploads']
+            if edges = uploads['edges']
+              edges.map{|edge|
+                mix = edge['node']
+                slug = mix['slug']
+                subject = graph = ('https://www.mixcloud.com/' + username + '/' + slug).R
+                yield subject, Title, mix['name'], graph
+                yield subject, Date, mix['publishDate'], graph
+                yield subject, Schema+'duration', mix['audioLength'], graph
+                yield subject, Audio, mix['previewUrl'].R, graph
+              }
+            end
+          end
+        end
+      end
+    end
   end
 
   def NYT doc, &b
