@@ -381,13 +381,19 @@ class WebResource
         head = headers
         body = env['rack.input'].read
         env.delete 'rack.input'
-        head.map{|k,v| puts [k,v.to_s].join "\t" } if Verbose
-        puts '>>>>>>>>', body
+
+        if Verbose
+          head.map{|k,v| puts [k,v.to_s].join "\t" }
+          puts '>>>>>>>>', body, '--------'
+        end
 
         r = HTTParty.post uri, headers: head, body: body
+
         head = headers r.headers
-        head.map{|k,v| puts [k,v.to_s].join "\t" } if Verbose
-        puts '<<<<<<<<', HTTP.decompress(head, r.body)
+        if Verbose
+          head.map{|k,v| puts [k,v.to_s].join "\t" }
+          puts '<<<<<<<<', HTTP.decompress(head, r.body)
+        end
 
         [r.code, head, [r.body]]
       else

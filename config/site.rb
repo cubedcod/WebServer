@@ -34,6 +34,7 @@ module Webize
       'api.twitter.com' => :TwitterJSON,
       'gitter.im' => :GitterJSON,
       'www.instagram.com' => :InstagramJSON,
+      'www.mixcloud.com' => :Mixcloud,
     }
   end
 end
@@ -554,6 +555,10 @@ l.facebook.com l.instagram.com
       yield subject, Content, (Webize::HTML.format comment.css('.comment_text')[0], self), graph
 
       comment.remove }
+  end
+
+  def Mixcloud tree, &b
+    puts tree
   end
 
   def NYT doc, &b
