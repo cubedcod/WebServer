@@ -150,16 +150,16 @@ class WebResource
           [206, h, [response.read]]                  # response with part
         else
           format = if path == '/feed' || (query_values||{})['mime'] == 'xml'
-                     'application/atom+xml'          # Atom/RSS content-type via URL
+                     'application/atom+xml'                           # content-type via feed URL
                    elsif h.has_key? 'content-type'
-                     h['content-type'].split(/;/)[0] # content-type in HTTP metadata
-                   elsif named_format                # content-type in name extension
+                     h['content-type'].split(/;/)[0]                  # content-type in HTTP metadata
+                   elsif named_format                                 # content-type via name extension
                      named_format
                    end
-          body = HTTP.decompress h, response.read    # read body
-
-          # cache fetched data
+          body = HTTP.decompress h, response.read                     # fetched body
           if format                                                   # format defined?
+            body = Webize::CSS.clean body if format == 'text/css'     # clean CSS
+            body = Webize::HTML.clean body,self if format=='text/html'# clean HTML
             if formatExt = Suffixes[format] || Suffixes_Rack[format]  # look up format-suffix
               if extension == formatExt                               # suffix agrees w/ reverse map
                 cache = self                                          # cache at canonical location
@@ -185,26 +185,22 @@ class WebResource
           else
             puts "ERROR format undefined on #{uri}"                   # warning: undefined format
           end
-
           return unless thru                                          # no HTTP response to caller
           saveRDF                                                     # commit graph-data
-
-          # response header
-          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
-            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # upstream metadata
+          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials
+             Content-Type ETag).map{|k|
+            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # response metadata
           env[:resp]['Access-Control-Allow-Origin'] ||= allowed_origin # CORS header
-          h['link'] && h['link'].split(',').map{|link|                # parse and merge upstream Link headers to request-environment
+          h['link'] && h['link'].split(',').map{|link|                # parse and merge upstream Link headers
             ref, type = link.split(';').map &:strip
             if ref && type
               ref = ref.sub(/^</,'').sub />$/, ''
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
             end}
-
           if transformable && !(format||'').match?(/audio|css|image|octet|script|video/)
             graphResponse                                     # response in local format
           else
-            body = Webize::HTML.clean body, self if format == 'text/html' # clean doc
             env[:resp]['Content-Length'] = body.bytesize.to_s # update Content-Length
             [200, env[:resp], [body]]                         # response in origin format
           end
@@ -269,6 +265,23 @@ class WebResource
       else
         hostHandler                            # host handler
       end
+    end
+
+    def graphResponse
+      return notfound if !env.has_key?(:repository) || env[:repository].empty?
+      format = selectFormat
+      env[:resp]['Access-Control-Allow-Origin'] ||= allowed_origin
+      env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
+      env[:resp].update({'Link' => env[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !env[:links] || env[:links].empty?
+      entity ->{
+        case format
+        when /^text\/html/
+          htmlDocument
+        when /^application\/atom+xml/
+          feedDocument
+        else
+          env[:repository].dump RDF::Writer.for(content_type: format).to_sym, base_uri: self
+        end}
     end
 
     def HEAD

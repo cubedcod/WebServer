@@ -138,27 +138,6 @@ class WebResource
   end
 
   include URIs
-
-  module HTTP
-
-    def graphResponse
-      return notfound if !env.has_key?(:repository) || env[:repository].empty?
-      format = selectFormat
-      env[:resp]['Access-Control-Allow-Origin'] ||= allowed_origin
-      env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
-      env[:resp].update({'Link' => env[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !env[:links] || env[:links].empty?
-      entity ->{
-        case format
-        when /^text\/html/
-          htmlDocument
-        when /^application\/atom+xml/
-          feedDocument
-        else
-          env[:repository].dump RDF::Writer.for(content_type: format).to_sym, base_uri: self
-        end}
-    end
-
-  end
   module HTML
 
     Markup[DC+'language'] = -> lang, env {
