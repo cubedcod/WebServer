@@ -2,7 +2,7 @@
 require 'taglib'
 class WebResource
 
-  # file -> Repository
+  # file -> Repository  
   def loadRDF graph: env[:repository] ||= RDF::Repository.new
     if node.file?
       unless ['🐢','ttl'].member? ext                     # file metadata
@@ -54,15 +54,15 @@ class WebResource
 
   # Repository -> file(s)
   def saveRDF repository = nil
-    return self unless repository || env[:repository]
-    (repository || env[:repository]).each_graph.map{|graph|
-      graphURI = (graph.name || self).R
-      fsBase = graphURI.fsPath                                                                  # storage location
+    return self unless repository || env[:repository]                                           # repository to store
+    (repository || env[:repository]).each_graph.map{|graph|                                     # graph
+      graphURI = (graph.name || self).R                                                         # graph URI
+      fsBase = graphURI.fsPath                                                                  # storage path
       fsBase += '/index' if fsBase[-1] == '/'
       f = fsBase + '.ttl'
       unless File.exist? f
         FileUtils.mkdir_p File.dirname f
-        RDF::Writer.for(:turtle).open(f){|f|f << graph}                                        # write 🐢
+        RDF::Writer.for(:turtle).open(f){|f|f << graph}                                         # write 🐢
         puts "\e[32m#{'%2d' % graph.size}⋮🐢 \e[1m#{'http://localhost:8000' if !graphURI.host}#{graphURI}\e[0m" if path != graphURI.path
       end
       if !graphURI.to_s.match?(/^\/\d\d\d\d\/\d\d\/\d\d/) && timestamp = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value # find timestamp if graph not on timeline
