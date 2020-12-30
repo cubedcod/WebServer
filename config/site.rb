@@ -448,12 +448,16 @@ l.facebook.com l.instagram.com
     doc.css('a.storylink').map{|story|
       story_row = story.parent.parent
       comments_row = story_row.next_sibling
-      subject = join comments_row.css('a')[-1]['href']
-      yield subject, Type, Post.R
-      yield subject, Title, story.inner_text
-      yield subject, Link, story['href']
-      if time = Chronic.parse(comments_row.css('.age > a')[0].inner_text.sub(/^on /,''))
-        yield subject, Date, time.iso8601
+      if a = comments_row.css('a')[-1]
+        if subject = a['href']
+          subject = join subject
+          yield subject, Type, Post.R
+          yield subject, Title, story.inner_text
+          yield subject, Link, story['href']
+          if time = Chronic.parse(comments_row.css('.age > a')[0].inner_text.sub(/^on /,''))
+            yield subject, Date, time.iso8601
+          end
+        end
       end
       story_row.remove
       comments_row.remove
