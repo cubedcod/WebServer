@@ -21,7 +21,7 @@ class WebResource
 1x1|
 affiliate(link)?s?|ad(obe|toniq|vert.*)?|ak(am|ismet)|apester|appnexus|atrk|audience|
 b(lueconic|ouncee?x.*|ugsnag)|.*bid(d(er|ing).*|s)|
-c(edexis|hartbeat.*|mp|ollector|omscore|ookie.?(c(hoice|onsent)|law|notice)|riteo|xense)|
+c(edexis|hartbeat.*|mp|ollector|omscore|ookie.?(c(hoice|onsent)|law|notice|.*\.js)|riteo|xense)|
 de(mandware|t(ect|roitchicago))|dfp|dis(countcode|ney(id)?|qus)|doubleclick|
 e(moji|nsighten|proof|scenic|vidon|zoic)|
 f(acebook|bcdn)|frosmo|
