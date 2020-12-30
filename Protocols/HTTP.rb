@@ -109,8 +109,12 @@ class WebResource
             else
               if h['Content-Type'] == 'application/javascript'
                 h['Content-Type'] = 'application/javascript; charset=utf-8' # add charset tag
-              elsif RDF::Format.file_extensions.has_key? body.ext.to_sym # format via path extension
-                h['Content-Type'] = RDF::Format.file_extensions[body.ext.to_sym][0].content_type[0]
+              elsif !h.has_key?('Content-Type')                            # format-hint missing?
+                if mime = Rack::Mime::MIME_TYPES[body.extension]           # format via Rack extension-map
+                  h['Content-Type'] = mime
+                elsif RDF::Format.file_extensions.has_key? body.ext.to_sym # format via RDF extension-map
+                  h['Content-Type'] = RDF::Format.file_extensions[body.ext.to_sym][0].content_type[0]
+                end
               end
               env[:resp]['Content-Length'] = body.node.size.to_s
               [s, h.update(env[:resp]), b]       # return file
@@ -233,6 +237,12 @@ class WebResource
       else
         raise
       end
+    end
+
+    def fileResponse
+      env[:resp]['Access-Control-Allow-Origin'] ||= allowed_origin
+      env[:resp]['ETag'] ||= Digest::SHA2.hexdigest [uri, node.stat.mtime, node.size].join
+      entity
     end
 
     def self.GET arg, lambda = NoGunk
