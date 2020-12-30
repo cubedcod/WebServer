@@ -2,7 +2,7 @@
 require 'taglib'
 class WebResource
 
-  # local node -> RDF::Repository
+  # file -> Repository
   def loadRDF graph: env[:repository] ||= RDF::Repository.new
     if node.file?
       unless ['🐢','ttl'].member? ext                     # file metadata
@@ -52,7 +52,7 @@ class WebResource
     self
   end
 
-  # RDF::Repository -> file(s)
+  # Repository -> file(s)
   def saveRDF repository = nil
     return self unless repository || env[:repository]
     (repository || env[:repository]).each_graph.map{|graph|
@@ -79,7 +79,7 @@ class WebResource
 
   SummaryFields = [Abstract, Creator, Date, Image, LDP+'contains', Link, Title, To, Type, Video]
 
-  # summary node
+  # file (big) -> file (small)
   def summary
     return self if basename.match(/^(index|README)/) || !node.exist? # don't summarize README or index files or dangling symlinks
 
@@ -103,7 +103,7 @@ class WebResource
     summary_node
   end
 
-  # turtle representation of node
+  # file (any MIME) -> file (turtle)
   def 🐢
     return self if ['🐢','ttl'].member? ext
     turtle_node = join(['', basename, '🐢'].join '.').R env
@@ -115,7 +115,7 @@ class WebResource
     turtle_node
   end
 
-  # graph -> tree (s -> p -> o) structure used by HTML + Feed serializers
+  # Repository -> JSON-compatible tree
   def treeFromGraph graph = nil
     graph ||= env[:repository]
     return {} unless graph
@@ -136,47 +136,5 @@ class WebResource
 
     tree
   end
-
   include URIs
-  module HTML
-
-    Markup[DC+'language'] = -> lang, env {
-      {'de' => '🇩🇪',
-       'en' => '🇬🇧',
-       'fr' => '🇫🇷',
-       'ja' => '🇯🇵',
-      }[lang] || lang}
-
-    MarkupGroup[Link] = -> links, env {
-      links.map(&:R).group_by{|l|links.size > 8 && l.host && l.host.split('.')[-1] || nil}.map{|tld, links|
-        [{class: :container,
-          c: [({class: :head, _: :span, c: tld} if tld),
-              {class: :body, c: links.group_by{|l|links.size > 25 ? ((l.host||'localhost').split('.')[-2]||' ')[0] : nil}.map{|alpha, links|
-                 ['<table><tr>',
-                  ({_: :td, class: :head, c: alpha} if alpha),
-                  {_: :td, class: :body,
-                   c: {_: :table, class: :links,
-                       c: links.group_by(&:host).map{|host, paths|
-                         {_: :tr,
-                          c: [{_: :td, class: :host,
-                               c: host ? (name = ('//' + host).R.display_name
-                                          color = env[:colors][name] ||= '#%06x' % (rand 16777216)
-                                          {_: :a, href: '/' + host, c: name, style: "background-color: #{color}; color: black"}) : []},
-                              {_: :td, c: paths.map{|path| Markup[Link][path,env]}}]}}}},
-                  '</tr></table>']}}]}, '&nbsp;']}}
-
-    Markup[Link] = -> ref, env {
-      u = ref.to_s
-      re = u.R env
-      [{_: :a, href: re.href, class: :path, c: (re.path||'/')[0..79], title: u, id: 'link' + Digest::SHA2.hexdigest(rand.to_s)},
-       " \n"]}
-
-    Markup[Type] = -> t, env {
-      if t.class == WebResource
-        {_: :a, href: t.uri, c: Icons[t.uri] || t.display_name}.update(Icons[t.uri] ? {class: :icon} : {})
-      else
-        CGI.escapeHTML t.to_s
-      end}
-
-  end
 end
