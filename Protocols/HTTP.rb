@@ -162,8 +162,8 @@ class WebResource
                    end
           body = HTTP.decompress h, response.read                     # fetched body
           if format                                                   # format defined?
-            body = Webize::CSS.clean body if format == 'text/css'     # clean CSS
-            body = Webize::HTML.clean body,self if format=='text/html'# clean HTML
+            body = Webize::CSS.clean body if format.index('text/css') == 0        # clean CSS
+            body = Webize::HTML.clean body,self if format.index('text/html') == 0 # clean HTML
             if formatExt = Suffixes[format] || Suffixes_Rack[format]  # look up format-suffix
               if extension == formatExt                               # suffix agrees w/ reverse map
                 cache = self                                          # cache at canonical location

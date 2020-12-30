@@ -23,7 +23,7 @@ module Webize
           end
         end}
 
-      doc.css('script').map{|s| s.remove if s.inner_text.match? /doubleclick|google.?[at]|krxd|newrelic/i}
+      doc.css('script').map{|s| s.remove if s.inner_text.match? /doubleclick|google.?[at]|krxd|ml314|newrelic/i}
       doc.css('style').map{|s| Webize::CSS.cleanNode s if s.inner_text.match? /font-face/}
 
       doc.to_html
