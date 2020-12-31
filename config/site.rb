@@ -447,21 +447,22 @@ l.facebook.com l.instagram.com
     # stories
     doc.css('a.storylink').map{|story|
       story_row = story.parent.parent
-      comments_row = story_row.next_sibling
+      comments_row = story_row.next_sibling.next_sibling
       if a = comments_row.css('a')[-1]
         if subject = a['href']
-          subject = join subject
-          yield subject, Type, Post.R
-          yield subject, Title, story.inner_text
-          yield subject, Link, story['href']
-          if time = Chronic.parse(comments_row.css('.age > a')[0].inner_text.sub(/^on /,''))
-            yield subject, Date, time.iso8601
+          if date = Chronic.parse(comments_row.css('.age > a')[0].inner_text.sub(/^on /,''))
+            subject = join subject
+            date = date.iso8601
+            graph = ['/' + date.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:+]/,'.'), (subject.to_s.split(/[:\/?&=]+/) - Webize::Plaintext::BasicSlugs)].join('.').R # graph URI
+            yield subject, Type, Post.R, graph
+            yield subject, Title, story.inner_text, graph
+            yield subject, Link, story['href'], graph
+            yield subject, Date, date, graph
+            story_row.remove
+            comments_row.remove
           end
         end
-      end
-      story_row.remove
-      comments_row.remove
-    }
+      end}
     # comments
     doc.css('div.comment').map{|comment|
       post = comment.parent

@@ -120,7 +120,7 @@ module Webize
  edu entry
  feed feedburner feeds feedproxy forum forums
  go google gov
- html in index irc is local medium
+ html http https id in index irc is item local medium
  net news org p php post
  r reddit rs rss rssfeed
  s sports source status story
