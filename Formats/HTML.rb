@@ -23,7 +23,7 @@ module Webize
           end
         end}
 
-      doc.css('script').map{|s| s.remove if s.inner_text.match? /doubleclick|ensighten|facebook\.(com|net)|google.?[at]|krxd|marketo|ml314|mpulse|newrelic|taboola/i}
+      doc.css('script').map{|s| s.remove if s.inner_text.match? /chartbeat|doubleclick|ensighten|facebook\.(com|net)|google.?[at]|krxd|marketo|ml314|mpulse|newrelic|scorecard|taboola/i}
       doc.css('style').map{|s| Webize::CSS.cleanNode s if s.inner_text.match? /font-face/}
 
       doc.to_html
