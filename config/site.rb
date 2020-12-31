@@ -444,7 +444,9 @@ l.facebook.com l.instagram.com
 
   def HackerNews doc
     base = 'https://news.ycombinator.com/'
+
     # stories
+    doc.css('form, img, .yclinks').map &:remove
     doc.css('a.storylink').map{|story|
       story_row = story.parent.parent
       comments_row = story_row.next_sibling.next_sibling
@@ -463,30 +465,34 @@ l.facebook.com l.instagram.com
           end
         end
       end}
+
     # comments
     doc.css('div.comment').map{|comment|
       post = comment.parent
       date = post.css('.age > a')[0]
       subject = base + date['href']
       comment.css('.reply').remove
-      yield subject, Type, Post.R
-      if user = post.css('.hnuser')[0]
-        yield subject, Creator, (base + user['href']).R
-        yield subject, Creator, user.inner_text
+      if time = Chronic.parse(date.inner_text.sub(/^on /,''))
+        time = time.iso8601
+        graph = ['/' + time.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:+]/,'.'), (subject.to_s.split(/[:\/?&=]+/) - Webize::Plaintext::BasicSlugs)].join('.').R # graph URI
+        yield subject, Date, time, graph
       end
-      yield subject, To, self
+      yield subject, Type, Post.R, graph
+      if user = post.css('.hnuser')[0]
+        yield subject, Creator, (base + user['href']).R, graph
+        yield subject, Creator, user.inner_text, graph
+      end
+      yield subject, To, self, graph
       if parent = post.css('.par > a')[0]
-        yield subject, To, (base + parent['href']).R
+        yield subject, To, (base + parent['href']).R, graph
       end
       if story = post.css('.storyon > a')[0]
-        yield subject, To, (base + story['href']).R
-        yield subject, Title, story.inner_text
+        yield subject, To, (base + story['href']).R, graph
+        yield subject, Title, story.inner_text, graph
       end
-      if time = Chronic.parse(date.inner_text.sub(/^on /,''))
-        yield subject, Date, time.iso8601
-      end
-      yield subject, Content, (Webize::HTML.format comment, self)
-      post.remove }
+      yield subject, Content, (Webize::HTML.format comment, self), graph
+      post.remove
+    }
   end
 
   def InstagramHTML doc, &b
