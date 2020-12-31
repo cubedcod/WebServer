@@ -2,7 +2,7 @@
 require 'taglib'
 class WebResource
 
-  # file -> Repository  
+  # file -> Repository
   def loadRDF graph: env[:repository] ||= RDF::Repository.new
     if node.file?
       unless ['🐢','ttl'].member? ext                     # file metadata
