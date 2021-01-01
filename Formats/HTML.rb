@@ -23,7 +23,7 @@ module Webize
           end
         end}
 
-      doc.css('script').map{|s| s.remove if s.inner_text.match? /chartbeat|doubleclick|ensighten|facebook\.(com|net)|google.?[at]|krxd|marketo|ml314|mpulse|newrelic|scorecard|taboola/i}
+      doc.css('script').map{|s| s.remove if s.inner_text.match? /aswpsdkus|bidder|BOOMR|chartbeat|\.cookie|detroitchicago|doubleclick|ensighten|Ezoic|facebook\.(com|net)|google.?[ast]|gtag|impression|krxd|marketo|ml314|mpulse|narrativ\.|newrelic|newsletter|outbrain|pixel|porpoiseant|prebid|pubmatic|scorecard|taboola|track(er|ing)|twitter.com|quant(cast|serv)/i}
       doc.css('style').map{|s| Webize::CSS.cleanNode s if s.inner_text.match? /font-face/}
 
       doc.to_html
