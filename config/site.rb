@@ -137,6 +137,13 @@ l.facebook.com l.instagram.com
 
     GET 'www.gstatic.com', -> r {r.path.match?(/204$/) ? [204,{},[]] : NoGunk[r]}
 
+    GET 'outline.com', -> r {
+      if r.parts.size == 1
+        (r.join ['/stat1k/', r.parts[0], '.html'].join).R(r.env).fetch
+      else
+        NoGunk[r]
+      end}
+
     GET 'old.reddit.com', -> r {
       r.fetch.yield_self{|status,head,body|
         if status.to_s.match? /^30/
