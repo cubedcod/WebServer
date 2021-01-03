@@ -3,6 +3,8 @@ class WebResource
   module URIs
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
 
+    AllowJS = %w(twitter.com)
+
     AllowFile = SiteDir.join 'allow_domains'
     AllowDomains = {}
     AllowFile.each_line{|l|
