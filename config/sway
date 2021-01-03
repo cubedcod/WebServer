@@ -41,6 +41,7 @@ exec swayidle timeout 120 'light -O && light -S 0.5' resume 'light -I' \
 	      idlehint 120
 
 # sound control
+bindsym F8  exec pactl set-sink-mute @DEFAULT_SINK@ toggle && pamixer --get-volume > $SWAYSOCK.wob
 bindsym F9  exec pactl set-sink-volume @DEFAULT_SINK@ -0.5% && pamixer --get-volume > $SWAYSOCK.wob
 bindsym F10 exec pactl set-sink-volume @DEFAULT_SINK@ +0.5% && pamixer --get-volume > $SWAYSOCK.wob
 bindsym F12 exec pactl set-sink-volume @DEFAULT_SINK@ +0.5% && pamixer --get-volume > $SWAYSOCK.wob
