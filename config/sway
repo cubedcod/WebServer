@@ -50,7 +50,7 @@ bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +0.5% && 
 
 # window control
 floating_modifier $mod
-bindsym $mod+Return exec termite
+bindsym $mod+Return exec foot
 bindsym $mod+Shift+q kill
 bindsym $mod+d exec dmenu-wl_run
 bindsym $mod+j focus left

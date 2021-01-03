@@ -3,7 +3,7 @@ class WebResource
   module URIs
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
 
-    AllowJS = %w(twitter.com)
+    AllowJS = %w(twitter.com  www.instagram.com)
 
     AllowFile = SiteDir.join 'allow_domains'
     AllowDomains = {}
