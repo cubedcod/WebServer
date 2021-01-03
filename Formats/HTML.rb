@@ -25,8 +25,9 @@ module Webize
 
       doc.css('script').map{|s|
         if s.inner_text.match? /aswpsdkus|bidder|BOOMR|chartbeat|\.cookie|detroitchicago|doubleclick|ensighten|Ezoic|facebook\.(com|net)|google.?[ast]|gtag|impression|krxd|marketo|ml314|mpulse|narrativ\.|newrelic|newsletter|outbrain|pixel|porpoiseant|prebid|pubmatic|scorecard|taboola|track(er|ing)|twitter.com|quant(cast|serv)/i
-          s.remove unless AllowJS.member? base.host
-        end}
+          s.remove
+        end} unless AllowJS.member? base.host
+
       doc.css('style').map{|s| Webize::CSS.cleanNode s if s.inner_text.match? /font-face/}
 
       doc.to_html
