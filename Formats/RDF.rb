@@ -1,5 +1,4 @@
 # coding: utf-8
-require 'taglib'
 class WebResource
 
   # file -> Repository
@@ -11,7 +10,8 @@ class WebResource
         graph << RDF::Statement.new(self, Date.R, stat.mtime.iso8601)
         graph << RDF::Statement.new(self, (Stat + 'size').R, stat.size)
       end
-      if %w(pack part svg ytdl).member? ext
+      if %w(info pack part svg ytdl).member? ext
+        puts "no RDF reader for file #{fsPath}"
       elsif %w(mp4 mkv webm).member? ext
         graph << RDF::Statement.new(self, Type.R, Video.R) # video-file metadata
       elsif %w(m4a mp3 ogg opus wav).member? ext           # audio-file metadata
@@ -24,7 +24,7 @@ class WebResource
                    :mail
                  elsif ext.match? /^html?$/
                    :html
-                 elsif %w(changelog license readme todo).member?(basename.downcase) || ext == 'txt'
+                 elsif %w(changelog license readme todo).member?(basename.downcase) || %w(ini txt).member?(ext)
                    :plaintext
                  elsif %w(gemfile makefile rakefile).member? basename.downcase
                    :sourcecode
@@ -43,10 +43,10 @@ class WebResource
           (format ? RDF::Reader.for(format) : RDF::Reader.for(**options)).new(File.open(file).read, **options){|_|graph << _} # load path
         else
           options[:format] = format if format
-          graph.load 'file:' + file, **options # load fileURI
+          graph.load 'file:' + file, **options # load file-URI
         end
       end
-    elsif node.directory?                     # directory
+    elsif node.directory?                      # directory
       dir_triples graph
     end
     self
@@ -103,7 +103,7 @@ class WebResource
     summary_node
   end
 
-  # file (any MIME) -> file (turtle)
+  # file (any type) -> file (turtle)
   def 🐢
     return self if ['🐢','ttl'].member? ext
     turtle_node = join(['', basename, '🐢'].join '.').R env
@@ -115,26 +115,5 @@ class WebResource
     turtle_node
   end
 
-  # Repository -> JSON-compatible tree
-  def treeFromGraph graph = nil
-    graph ||= env[:repository]
-    return {} unless graph
-
-    tree = {}
-
-    graph.each_triple{|s,p,o|
-      s = s.to_s               # subject
-      p = p.to_s               # predicate
-      o = [RDF::Node, RDF::URI, WebResource].member?(o.class) ? o.R : o.value # object
-      tree[s] ||= {'uri' => s} # insert subject
-      tree[s][p] ||= []        # insert predicate
-      if tree[s][p].class == Array
-        tree[s][p].push o unless tree[s][p].member? o # insert in object-list
-          else
-            tree[s][p] = [tree[s][p],o] unless tree[s][p] == o # new object-list
-      end}
-
-    tree
-  end
   include URIs
 end

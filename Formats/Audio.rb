@@ -1,3 +1,5 @@
+require 'taglib'
+
 module Webize
 
   module AAC
