@@ -30,6 +30,8 @@ module Webize
 
       doc.css('style').map{|s| Webize::CSS.cleanNode s if s.inner_text.match? /font-face/}
 
+      doc.css("[class*='newsletter']").remove
+
       doc.to_html
     end
 
