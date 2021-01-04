@@ -24,7 +24,7 @@ module Webize
         end}
 
       doc.css('script').map{|s|
-        if s.inner_text.match? /aswpsdkus|bidder|BOOMR|chartbeat|\.cookie|detroitchicago|doubleclick|ensighten|Ezoic|facebook\.(com|net)|google.?[ast]|gtag|impression|krxd|marketo|ml314|mpulse|narrativ\.|newrelic|newsletter|outbrain|pixel|porpoiseant|prebid|pubmatic|scorecard|taboola|track(er|ing)|twitter.com|quant(cast|serv)/i
+        if s.inner_text.match? ScriptGunk
           s.remove
         end} unless AllowJS.member? base.host
 

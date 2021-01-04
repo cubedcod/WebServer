@@ -48,5 +48,7 @@ zerg(net)?)
 
     InitialState = /(app|bio|boot(loader|strap)|broadcast(er)?|client|global|init(ial)?|meta|page|player|preload(ed)?|shared|site).?(con(fig|tent)|data|env|node|props|st(ate|ore))|app.bundle|environment|hydrat|SCRIPTS_LOADED|__typename/i
 
+    ScriptGunk = /aswpsdkus|bidder|BOOMR|chartbeat|\.cookie|detroitchicago|doubleclick|ensighten|Ezoic|facebook\.(com|net)|google.?[ast]|gtag|impression|krxd|marketo|ml314|mpulse|narrativ\.|newrelic|newsletter|outbrain|pixel|porpoiseant|prebid|pubmatic|scorecard|taboola|tiqcdn|track(er|ing)|twitter.com|quant(cast|serv)/i
+
   end
 end
