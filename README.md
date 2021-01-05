@@ -6,15 +6,13 @@
 
 ## USAGE
 
-server:
-./bin/web_console to bring up daemon, proxy-frontend and log viewer
+bring up "everything" (daemon/proxy/logviewer) in a tmux session:
 
-client:
-launch shortcuts in [bin/browse](bin/browse/)
+    ./bin/web_console
 
-browser configuration:
-google (search engine) http://localhost:8000/www.google.com/search?q=%s
-[local UI](javascript:location.href='http://localhost:8000/'+location.hostname+location.pathname+'?cookie='+encodeURIComponent(document.cookie)) bookmarklet
+client launch shortcuts in [bin/browse](bin/browse/)
+
+bookmarklet for [local UI](javascript:location.href='http://localhost:8000/'+location.hostname+location.pathname+'?cookie='+encodeURIComponent(document.cookie))
 
 ## WHAT
 
