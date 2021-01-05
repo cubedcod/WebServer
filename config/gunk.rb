@@ -48,7 +48,7 @@ zerg(net)?)
 
     InitialState = /(app|bio|boot(loader|strap)|broadcast(er)?|client|global|init(ial)?|meta|page|player|preload(ed)?|shared|site).?(con(fig|tent)|data|env|node|props|st(ate|ore))|app.bundle|environment|hydrat|SCRIPTS_LOADED|__typename/i
 
-    ScriptGunk = /algolia|aswpsdkus|bidder|BOOMR|chartbeat|\.cookie|detroitchicago|doubleclick|ensighten|Ezoic|facebook\.(com|net)|google.?[ast]|gtag|impression|krxd|marketo|ml314|mpulse|narrativ\.|newrelic|newsletter|outbrain|pixel|porpoiseant|prebid|pubmatic|salesloft|scorecard|taboola|tiqcdn|track(er|ing)|twitter.com|quant(cast|serv)/i
+    ScriptGunk = /algolia|aswpsdkus|auction|bidder|BOOMR|campaign|chartbeat|\.cookie|detroitchicago|doubleclick|ensighten|Ezoic|facebook\.(com|net)|google.?[ast]|gtag|impression|krxd|marketo|media\.net|ml314|mpulse|narrativ\.|newrelic|newsletter|outbrain|pixel|porpoiseant|prebid|pubmatic|quora|salesloft|scorecard|taboola|tiqcdn|track(er|ing)|twitter.com|quant(cast|serv)|yandex/i
 
   end
 end
