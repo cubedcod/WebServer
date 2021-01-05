@@ -48,7 +48,7 @@ zerg(net)?)
 
     InitialState = /(app|bio|boot(loader|strap)|broadcast(er)?|client|global|init(ial)?|meta|page|player|preload(ed)?|shared|site).?(con(fig|tent)|data|env|node|props|st(ate|ore))|app.bundle|environment|hydrat|SCRIPTS_LOADED|__typename/i
 
-    ScriptGunk = /algolia|aswpsdkus|auction|bidder|BOOMR|campaign|chartbeat|cloudfront|\.cookie|detroitchicago|doubleclick|effectivemeasure|ensighten|Ezoic|facebook\.(com|net)|google.?[ast]|gtag|impression|krxd|marketo|media\.net|ml314|mpulse|narrativ\.|newrelic|newsletter|omap[pi]|outbrain|pixel|porpoiseant|prebid|pubmatic|quora|salesloft|scorecard|ta(boola|rget[a-z])|tiqcdn|track(er|ing)|twitter.com|quant(cast|serv)|yandex/i
+    ScriptGunk = /algolia|aswpsdkus|auction|bidder|BOOMR|campaign|chartbeat|cloudfront|\.cookie|detroitchicago|doubleclick|effectivemeasure|ensighten|Ezoic|facebook\.(com|net)|google.?[ast]|gtag|impression|krxd|marketo|media\.net|ml314|mpulse|narrativ\.|newrelic|newsletter|omap[pi]|outbrain|pixel|porpoiseant|prebid|pubmatic|quora|salesloft|scorecard|ta(boola|rget[a-z])|tiqcdn|track(er|ing)|twitter.com|quant(cast|serv)|viglink|yandex/i
 
   end
 end

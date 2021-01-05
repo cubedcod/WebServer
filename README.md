@@ -6,7 +6,7 @@
 
 ## USAGE
 
-bring up "everything" (daemon/proxy/logviewer) in a tmux session:
+launch in a tmux session (daemon/proxy/logviewer):
 
     ./bin/web_console
 
