@@ -113,13 +113,10 @@ https://caughtinsouthie.com/feed/
 https://charlestownbridge.com/feed/
 https://cityofbostonarchives.tumblr.com/rss
 https://climate.mit.edu/rss.xml
-https://cmpwn.com/@sir
-https://cmpwn.com/@sir.rss
 https://codmansquare.wordpress.com/feed/
 https://codmansquarecouncil.org/feed/
 https://cogdesign.org/feed/
 https://colabradio.mit.edu/feed/
-https://columbiasavinhillcivic.org/feed/
 https://commonwealthmagazine.org/feed/
 https://corkscrew.audubon.org/rss.xml
 https://cpaboston.org/en/news-events/news/news.xml
@@ -192,7 +189,6 @@ https://gitter.im/api/v1/rooms/53e96c9c107e137846baa430/chatMessages?lookups%5B%
 https://gitter.im/api/v1/rooms/56994e9ce610378809bc8594/chatMessages?lookups%5B%5D=user&includeThreads=false&limit=31
 https://gitter.im/api/v1/rooms/5c65583dd73408ce4fb7ca38/chatMessages?lookups%5B%5D=user&includeThreads=false&limit=31
 https://gitter.im/api/v1/rooms/5d9518d1d73408ce4fccbc4e/chatMessages?lookups%5B%5D=user&includeThreads=false&limit=31
-https://goal.org/feed/
 https://graduationmusic.org/comments/feed/
 https://graduationmusic.org/feed/
 https://greaterashmont.org/feed/
@@ -367,8 +363,7 @@ https://www.apesnest.com/storytime/?format=rss
 https://www.archivespublichistory.org/?feed=rss2
 https://www.arrowstreet.com/feed/
 https://www.ashmonthill.org/ah/Home/rss.xml
-https://www.bankerandtradesman.com/feed/
-https://www.batesrealestatereport.com/feed/
+https://www.bankerandtradesman.com/comments/feed/
 https://www.baystatebanner.com/feed/
 https://www.betaboston.com/feed/
 https://www.boston.com/tag/business/feed
@@ -393,9 +388,10 @@ https://www.cctvcambridge.org/rss.xml
 https://www.chsne.org/feed/
 https://www.clintonlindsay.com/feed/
 https://www.codeotaku.com/journal/atom
+https://www.columbiasavinhillcivic.org/feed/
 https://www.cssboston.com/feed/
 https://www.dbedc.org/feed/
-https://www.dorchesterhistoricalsociety.org/blog/?feed=rss2
+https://www.dorchesterhistoricalsocietyblog.org/feed/
 https://www.dotnews.com/rss.xml
 https://www.dotpark.org/feed/
 https://www.ds4si.org/blog?format=RSS
@@ -440,7 +436,6 @@ https://www.landing-studio.com/news?format=RSS
 https://www.legalfoodhub.org/feed/
 https://www.livablestreets.info/blog.rss
 https://www.mapc.org/feed/
-https://www.massbike.org/news.rss
 https://www.massbroadcasters.org/feed
 https://www.masshist.org/beehiveblog/feed/
 https://www.masslibsystem.org/feed/
@@ -503,10 +498,6 @@ https://www.w1hh.org/feed/
 https://www.ward5online.com/feeds/posts/default
 https://www.wbna.org/news?format=RSS
 https://www.wollastonhill.com/blog?format=RSS
-https://www.worcestermag.com/culture?template=rss&mime=xml
-https://www.worcestermag.com/news?template=rss&mime=xml
-https://www.worcestermag.com/opinion?template=rss&mime=xml
-https://www.worcestermag.com/section/?template=rss_photos&mime=xml
 https://www.wrbbradio.org/feed/
 https://www.wreckshopmovement.com/13/feed
 https://www.writersroomofboston.org/feed/
