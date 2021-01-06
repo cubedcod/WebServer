@@ -401,26 +401,25 @@ class WebResource
     end
 
     def POST
-      if allow_domain?
-        head = headers
-        body = env['rack.input'].read
+      if allow_domain?                                  # POST allowed?
+        head = headers                                  # read headers
+        body = env['rack.input'].read                   # read body
         env.delete 'rack.input'
-
         if Verbose
           head.map{|k,v| puts [k,v.to_s].join "\t" }
           puts '>>>>>>>>', body, '--------'
         end
 
-        r = HTTParty.post uri, headers: head, body: body
+        r = HTTParty.post uri, headers: head, body: body # POST to origin
 
-        head = headers r.headers
-        if format  = head['Content-Type']
+        head = headers r.headers                            # response headers
+        if format  = head['Content-Type']                   # response format
           if reader = RDF::Reader.for(content_type: format) # reader defined for format?
             env[:repository] ||= RDF::Repository.new        # initialize RDF repository
             reader.new(HTTP.decompress(head, r.body), base_uri: self){|g|env[:repository] << g} # read RDF
-            saveRDF
+            saveRDF                                         # cache RDF
           else
-            puts "RDF::Reader undefined for #{format}"      # warning: undefined Reader
+            puts "RDF::Reader undefined for #{format}"      # Reader undefined
           end
         end
 
