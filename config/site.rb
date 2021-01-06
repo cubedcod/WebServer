@@ -135,8 +135,6 @@ l.facebook.com l.instagram.com
         r.deny
       end}
 
-    GET 'www.gstatic.com', -> r {r.path.match?(/204$/) ? [204,{},[]] : NoGunk[r]}
-
     GET 'outline.com', -> r {
       if r.parts.size == 1
         (r.join ['/stat1k/', r.parts[0], '.html'].join).R(r.env).fetch
