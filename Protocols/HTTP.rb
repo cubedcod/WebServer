@@ -370,7 +370,7 @@ class WebResource
     end
 
     def log_search
-      env.update({searchable: true, sort: sizeAttr = '#size', view: 'table'})
+      env.update({sort: sizeAttr = '#size', view: 'table'})
       results = {}
       if q = (query_values||{})['q']
         `grep --text -i #{Shellwords.escape 'http.*' + q} web.log | tr -s ' ' | cut -d ' ' -f 7 `.each_line{|uri|

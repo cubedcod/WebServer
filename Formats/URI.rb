@@ -106,10 +106,11 @@ class WebResource < RDF::URI
            {class: :path,
             c: env[:base].parts.map{|p| bc += '/' + p
               {_: :a, class: :breadcrumb, href: env[:base].join(bc).R.href, c: [{_: :span, c: '/'}, (CGI.escapeHTML Rack::Utils.unescape p)], id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}}},
-           (search_arg = %w(f find q search_query).find{|k|qs.has_key? k} || ([nil, '/'].member?(path) ? 'find' : 'q') # query arg
-            qs[search_arg] ||= ''                                                                                      # initialize query field
-            {_: :form, c: qs.map{|k,v|
-               ["\n", {_: :input, name: k, value: v}.update(k == search_arg ? ((env[:searchable] && v.empty?) ? {autofocus: true} : {}) : {type: :hidden})]}}.update(env[:search_base] ? {action: env[:base].join(env[:search_base]).R.href} : {})), "\n"]}
+           (if %w(localhost www.google.com).member? host
+            search_arg = %w(f find q search_query).find{|k|qs.has_key? k} || ([nil, '/'].member?(path) ? 'find' : 'q') # query arg
+            qs[search_arg] ||= ''                                                                                      # initialize query value
+            {_: :form, c: qs.map{|k,v| ["\n", {_: :input, name: k, value: v}.update(k == search_arg ? {} : {type: :hidden})]}}
+            end), "\n"]}
     end
     
     # URI -> markup-lambda index
