@@ -48,7 +48,7 @@ zerg(net)?)
 
     InitialState = /(app|bio|boot(loader|strap)|broadcast(er)?|client|global|init(ial)?|meta|page|player|preload(ed)?|shared|site).?(con(fig|tent)|data|env|node|props|st(ate|ore))|app.bundle|environment|hydrat|SCRIPTS_LOADED|__typename/i
 
-    ScriptGunk = /[-._\/'"\s:?&=~%+](ads?|cookie|track(er|ing)?)[-._\/'"\s:?&=~%]|algolia|analytic|aswpsdkus|auction|bidder|BOOMR|campaign|chartbeat|cloudfront|criteo|detroitchicago|doubleclick|effectivemeasure|ensighten|Ezoic|facebook\.(com|net)|google.?[ast]|gtag|impression|krxd|marketo|matomo|media\.net|ml314|mpulse|narrativ\.|newrelic|newsletter|omap[pi]|outbrain|pi(wik|xel)|porpoiseant|prebid|pubmatic|quora|salesloft|scorecard|snowplow|ta(boola|rget[a-z])|tiqcdn|twitter.com|quant(cast|serv)|viglink|yandex/i
+    ScriptGunk = /[-._\/'"\s:?&=~%+](ads?|cookie|createElement..script|track(er|ing)?)[-._\/'"\s:?&=~%]|algolia|analytic|aswpsdkus|auction|bidder|BOOMR|campaign|chartbeat|cloudfront|criteo|detroitchicago|doubleclick|effectivemeasure|ensighten|Ezoic|facebook\.(com|net)|google.?[ast]|gtag|impression|krxd|marketo|matomo|media\.net|ml314|mpulse|narrativ\.|newrelic|newsletter|omap[pi]|outbrain|pi(wik|xel)|porpoiseant|prebid|pubmatic|quora|salesloft|scorecard|snowplow|ta(boola|rget[a-z])|tiqcdn|twitter.com|quant(cast|serv)|viglink|yandex/i
 
   end
 end
