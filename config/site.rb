@@ -706,12 +706,10 @@ l.facebook.com l.instagram.com
     doc.css('.pager-previous > a[href]').map{|p| env[:links][:prev] ||= (join p['href'])}
   end
 
-  def YouTube doc, &b; dataVar = /window..ytInitial.*{/
+  def YouTube doc, &b
     doc.css('script').map{|script|
-      if script.inner_text.match? dataVar
-        script.inner_text.lines.grep(dataVar).map{|line|
-          Webize::JSON::Reader.new(line.sub(/^[^{]+/,'').chomp.sub(/;$/,''), base_uri: self).scanContent &b}
-      end}
+      script.inner_text.lines.grep(/ytInitialData/i).map{|line|
+        Webize::JSON::Reader.new(line.sub(/^[^{]+/,'').chomp.sub(/;$/,''), base_uri: self).scanContent &b}}
   end
 
 end
