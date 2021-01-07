@@ -13,6 +13,7 @@ module Webize
         'github.com' => :GitHub,
         'gitter.im' => :GitterHTML,
         'lobste.rs' => :Lobsters,
+        'mlpol.net' => :Chan,
         'news.ycombinator.com' => :HackerNews,
         'spinitron.com' => :Spinitron,
         'universalhub.com' => :UHub,
