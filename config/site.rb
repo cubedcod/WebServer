@@ -247,7 +247,7 @@ l.facebook.com l.instagram.com
       if %w{attribution_link redirect}.member? path
         [301, {'Location' => qs['q'] || qs['u']}, []]
       elsif path == 's'
-        if r.path.match? /annot|endscreen|prepopulat|tamper/
+        if r.path.match? /annot|endscreen|prepopulat|remote|tamper/
           r.deny
         else
           r.fetch
