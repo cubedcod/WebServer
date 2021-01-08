@@ -122,7 +122,7 @@ class WebResource < RDF::URI
   end
 end
 
-# cast-method to a WebResource
+# cast objects of varying classes to WebResource
 class Hash
   def R env=nil; env ? WebResource.new(self['uri']).env(env) : WebResource.new(self['uri']) end
 end
