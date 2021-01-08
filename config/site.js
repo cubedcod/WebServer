@@ -104,15 +104,15 @@ document.addEventListener("DOMContentLoaded", function(){
 		gotoLink('up');
 	    if(key==40) // [shift-down] show children
 		gotoLink('full');
-	    if(key==80) // [shift-P] previous node
-		selectPrevNode();
-	    if(key==78) // [shift-N] next node
-		selectNextNode();
-	} else {
-	    if(key==80) // [p]revious link
+	    if(key==80) // [shift-P] previous reference
 		selectPrevLink();
-	    if(key==78) // [n]ext link
+	    if(key==78) // [shift-N] next reference
 		selectNextLink();
+	} else {
+	    if(key==80) // [p]revious node
+		selectPrevNode();
+	    if(key==78) // [n]ext node
+		selectNextNode();
 	};
     },false);
 
