@@ -109,7 +109,7 @@ class WebResource
 
     def deny_domain?
       return false if !host || WebResource::HTTP::HostGET.has_key?(host) || allow_domain? # handler defined or domain in allow list
-      return false if env['REQUEST_METHOD'] = 'GET' && AllowGET.member?(host)
+      return false if env['REQUEST_METHOD'] == 'GET' && AllowGET.member?(host)
       c = DenyDomains                                               # start cursor at root
       host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # search for leaf in domain tree
     end

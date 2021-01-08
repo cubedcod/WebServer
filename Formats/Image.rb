@@ -40,6 +40,7 @@ data-ezsrc
 data-gl-src
 data-hi-res-src
 data-image
+data-img
 data-img-src
 data-lazy-img
 data-lazy-src
