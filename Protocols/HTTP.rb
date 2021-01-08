@@ -7,6 +7,11 @@ class WebResource
 
     HostGET = {}
 
+    def allow_domain?
+      c = AllowDomains                                              # start cursor at root
+      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # search for leaf in domain tree
+    end
+
     def allowed_origin
       if env['HTTP_ORIGIN']
         env['HTTP_ORIGIN']
@@ -94,6 +99,18 @@ class WebResource
         'Access-Control-Allow-Origin' => allowed_origin,
         'Content-Type' => type},
        [content]]
+    end
+
+    def deny?
+      return true if deny_domain?
+      return true if uri.match? Gunk
+      false
+    end
+
+    def deny_domain?
+      return false if !host || WebResource::HTTP::HostGET.has_key?(host) || allow_domain?
+      c = DenyDomains                                               # start cursor at root
+      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # search for leaf in domain tree
     end
 
     # if needed, generate and return entity. delegated to Rack handler if file reference
@@ -270,7 +287,7 @@ class WebResource
             referer = referer.R
             env['HTTP_REFERER'] = referer.remoteURL.to_s if referer.host == 'localhost' && referer.path != '/'
           end
-          (env[:base] = remoteURL).hostHandler # host handler (rebased on local host)
+          (env[:base] = remoteURL).hostHandler # host handler (rebased on localhost)
         end
       else
         hostHandler                            # host handler

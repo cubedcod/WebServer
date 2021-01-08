@@ -4,7 +4,9 @@ class WebResource
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
 
     AllowJS = %w(twitter.com www.instagram.com www.youtube.com)
+    AllowGET = %w(www.amazon.com)
 
+    # allow everything - POST, cookies etc
     AllowFile = SiteDir.join 'allow_domains'
     AllowDomains = {}
     AllowFile.each_line{|l|
