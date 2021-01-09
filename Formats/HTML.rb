@@ -30,7 +30,7 @@ module Webize
 
       doc.css('style').map{|s| Webize::CSS.cleanNode s if s.inner_text.match? /font-face|import/}
 
-      doc.css("[class*='modal'], [class*='newsletter']").remove
+      doc.css("[class*='cookie'], [class*='modal'], [class*='newsletter']").remove
 
       doc.to_html
     end

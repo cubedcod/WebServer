@@ -13,3 +13,4 @@ nntp
 gopher
 wayland browser w/ https/images
 reload deny_domains on changes and send reconfigure signal to squid
+?fullContent  for elided repeat content - https://solidproject.org/newsletter/2020-12-03#UI
