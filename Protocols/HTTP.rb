@@ -170,17 +170,19 @@ class WebResource
           h['Access-Control-Allow-Origin'] = allowed_origin unless h['Access-Control-Allow-Origin'] || h['access-control-allow-origin']
           [206, h, [response.read]]                  # response with part
         else
+          content_type = h['content-type']
           format = if path == '/feed' || (query_values||{})['mime'] == 'xml'
-                     'application/atom+xml'                           # content-type via feed URL
-                   elsif h.has_key? 'content-type'
-                     h['content-type'].split(/;/)[0]                  # content-type in HTTP metadata
-                   elsif named_format                                 # content-type via name extension
-                     named_format
+                     'application/atom+xml'                           # format via feed URL (ignore HTTP header)
+                   elsif content_type
+                     content_type.split(/;/)[0]                       # format defined in HTTP metadata
+                   elsif named_format
+                     named_format                                     # format from name extension mapping
                    end
 
           body = HTTP.decompress h, response.read                     # response body
 
           if format                                                   # format defined?
+puts content_type
             body = Webize::CSS.clean body if format.index('text/css') == 0        # clean CSS
             body = Webize::HTML.clean body,self if format.index('text/html') == 0 # clean HTML
             if formatExt = Suffixes[format] || Suffixes_Rack[format]  # look up format-suffix
