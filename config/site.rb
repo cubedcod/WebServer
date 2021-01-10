@@ -52,6 +52,8 @@ class WebResource
     SiteJS  = SiteDir.join('site.js').read
     KillFile = SiteDir.join('killfile').readlines.map &:chomp
 
+    SearchableHosts = %w(localhost twitter.com www.google.com)
+
   end
   module HTTP
 
