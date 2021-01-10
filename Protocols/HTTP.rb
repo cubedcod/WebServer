@@ -162,11 +162,10 @@ class WebResource
       ['http://', host, ![nil, 443].member?(port) ? [':', port] : nil, path, query ? ['?', query] : nil].join.R(env).fetchHTTP # fetch via HTTP
     end
 
-    # fetch from remote                            options:
-    def fetchHTTP thru: true,                        # pass HTTP response to caller
-                  transformable: !no_transform?      # allow transform (format conversion or same-format (HTML reformat, code pretty-print) rewrite)
+    # fetch from remote, fill local cache and possibly return upstream HTTP response to caller
+    def fetchHTTP thru: true, transformable: !no_transform? # allow format conversion and rewrite (HTML reformat, code pretty-print) of fetched data for caller
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
-        h = response.meta                            # upstream response header
+        h = response.meta                            # response header
         if response.status.to_s.match? /206/         # partial response
           h['Access-Control-Allow-Origin'] = allowed_origin unless h['Access-Control-Allow-Origin'] || h['access-control-allow-origin']
           [206, h, [response.read]]                  # response with part
@@ -178,7 +177,9 @@ class WebResource
                    elsif named_format                                 # content-type via name extension
                      named_format
                    end
-          body = HTTP.decompress h, response.read                     # fetched body
+
+          body = HTTP.decompress h, response.read                     # response body
+
           if format                                                   # format defined?
             body = Webize::CSS.clean body if format.index('text/css') == 0        # clean CSS
             body = Webize::HTML.clean body,self if format.index('text/html') == 0 # clean HTML
@@ -207,6 +208,7 @@ class WebResource
           else
             puts "ERROR format undefined on #{uri}"                   # warning: undefined format
           end
+
           return unless thru                                          # no HTTP response to caller
           saveRDF                                                     # commit graph-data
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials
