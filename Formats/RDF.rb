@@ -77,7 +77,7 @@ class WebResource
     self
   end
 
-  SummaryFields = [Abstract, Creator, Date, Image, LDP+'contains', Link, Title, To, Type, Video]
+  SummaryFields = [Abstract, Audio, Creator, Date, Image, LDP+'contains', Link, Title, To, Type, Video]
 
   # file (big) -> file (small)
   def summary

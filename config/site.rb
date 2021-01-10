@@ -583,12 +583,13 @@ l.facebook.com l.instagram.com
                 mix = edge['node']
                 slug = mix['slug']
                 subject = graph = ('https://www.mixcloud.com/' + username + '/' + slug).R
-                #yield subject, Type, Audio.R, graph
                 yield subject, Title, mix['name'], graph
                 yield subject, Date, mix['publishDate'], graph
                 yield subject, Schema+'duration', mix['audioLength'], graph
-                yield subject, Audio, mix['previewUrl'].R, graph
                 yield subject, Image, ('https://thumbnailer.mixcloud.com/unsafe/1280x1280/' + mix['picture']['urlRoot']).R, graph
+                if audio = mix['previewUrl']
+                  yield subject, Audio, audio.R, graph
+                end
               }
             end
           end
