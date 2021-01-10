@@ -170,19 +170,25 @@ class WebResource
           h['Access-Control-Allow-Origin'] = allowed_origin unless h['Access-Control-Allow-Origin'] || h['access-control-allow-origin']
           [206, h, [response.read]]                  # response with part
         else
-          content_type = h['content-type']
-          format = if path == '/feed' || (query_values||{})['mime'] == 'xml'
-                     'application/atom+xml'                           # format via feed URL (ignore HTTP header)
-                   elsif content_type
-                     content_type.split(/;/)[0]                       # format defined in HTTP metadata
-                   elsif named_format
-                     named_format                                     # format from name extension mapping
-                   end
-
           body = HTTP.decompress h, response.read                     # response body
 
+          format = if path=='/feed'||(query_values||{})['mime']=='xml'# feed URL (override HTTP-metadata content-type)
+                     'application/atom+xml'
+                   elsif content_type = h['content-type']             # format defined in HTTP metadata
+                     ct = content_type.split(/;/)
+                     if ct.size == 2
+                       charset = ct[1].sub(/.*charset=/,'')
+                       unless charset.match? /utf.*8/i
+                         puts "transcoding #{charset} doc to UTF-8"
+                         body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace
+                       end
+                     end
+                     ct[0]
+                   elsif named_format                                 # format from name extension mapping
+                     named_format
+                   end
+
           if format                                                   # format defined?
-puts content_type
             body = Webize::CSS.clean body if format.index('text/css') == 0        # clean CSS
             body = Webize::HTML.clean body,self if format.index('text/html') == 0 # clean HTML
             if formatExt = Suffixes[format] || Suffixes_Rack[format]  # look up format-suffix
