@@ -16,7 +16,7 @@ class WebResource
         graph << RDF::Statement.new(self, Type.R, Video.R) # video-file metadata
       elsif %w(m4a mp3 ogg opus wav).member? ext           # audio-file metadata
         tag_triples graph
-      else # read w/ RDF::Reader
+      else # file - read w/ RDF::Reader
         options = {}
         options[:base_uri] = self
         # format hints
@@ -44,7 +44,7 @@ class WebResource
           puts "no RDF reader for #{uri}"
         end
       end
-    elsif node.directory?                      # directory
+    elsif node.directory?
       dir_triples graph
     end
     self
