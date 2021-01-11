@@ -21,36 +21,20 @@ class WebResource
       l.chomp.sub(/^\./,'').split('.').reverse.map{|name|
         cursor = cursor[name] ||= {}}}
 
-    Gunk = %r((^|[-._\/'"\s:?&=~%+])(
-1x1|
-affiliate(link)?s?|ad(obe|toniq|vert.*|s)?|ak(am|ismet)|apester|appnexus|atrk|audience|
-b(lueconic|ouncee?x.*|ugsnag)|
-c(edexis|hartbeat.*|mp|ollector|omscore|ookie.?(c(hoice|onsent)|law|notice|.*\.js)|riteo|xense)|
-de(mandware|t(ect|roitchicago))|dfp|dis(countcode|ney(id)?|qus)|doubleclick|
-e(moji|nsighten|proof|scenic|vidon|zoic)|
-facebook|frosmo|
-g(dpr|eo(ip|locat(e|ion))|igya|pt|tag|tm)|.*(
-header|pre)[-_]?bid.*|hotjar|.*hubspot.*|[hp]b.?js|
-impression|indexww|
-keywee|kr(ux|xd).*|
-(app|s)?m(a(ilchimp|r(feel|keto)|tomo|utic)|etrics?|ms|pulse|tr)|
-newrelic|
-o(m(niture|tr)|nesignal|pt(anon|imera)|utbrain)|
-p(erimeter-?x|iwik|ixel.*\.js|op(down|over|up)|orpoiseant|owaboot|repopulator|ro(fitwell|mo(tion)?s?)|ub(exchange|matic))|/pv|
-quantcast|
-recaptcha|record(event|stats?)|re?t(ar)?ge?t(ing)?|(rich)?relevance|recirc.*|rpc|rubicon.*|
-s(a(fe[-_]?browsing|ilthru)|erv(edby|ice[-_]?worker)|(har|tag)e(aholic|count|daddy)|i(ftscience|gnalr|tenotice)|ourcepoint|u(bscribe|rveys?)|w.js)|
-t(aboola.*|ampering|ealium|inypass|rack(ers?|ing)|ricorder|rustx|ype(face|kit))|autotrack|
-u(rchin|s(abilla|er[-_]?(context|location))|tm)|
-web(font|trends)|wp-?(json|rum)|
-xiti|_0x.*|
-zerg(net)?)
-([-._\/'"\s:?&=~%]|$)|
-\.(eot|(bmp|gif)\?|otf|ttf|woff2?))xi
+    Gunk = Regexp.new SiteDir.join('gunk.regex').read.chomp
 
-    InitialState = /(app|bio|boot(loader|strap)|broadcast(er)?|client|global|init(ial)?|meta|page|player|preload(ed)?|shared|site).?(con(fig|tent)|data|env|node|props|st(ate|ore))|app.bundle|environment|hydrat|SCRIPTS_LOADED|__typename/i
-
-    ScriptGunk = /[-._\/'"\s:?&=~%+](ads?|cookie|createElement..script|track(er|ing)?)[-._\/'"\s:?&=~%]|addtoany|algolia|analytic|aswpsdkus|auction|bidder|BOOMR|campaign|chartbeat|cloudfront|criteo|detroitchicago|doubleclick|effectivemeasure|ensighten|Ezoic|facebook\.(com|net)|google.?[ast]|gtag|impression|krxd|marketo|matomo|media\.net|ml314|mpulse|narrativ\.|newrelic|newsletter|omap[pi]|outbrain|pi(wik|xel)|porpoiseant|prebid|pubmatic|quora|salesloft|scorecard|snowplow|ta(boola|rget[a-z])|tiqcdn|twitter.com|quant(cast|serv)|viglink|yandex/i
+    ScriptGunk = %r([-._\/'"\s:?&=~%+](ads?|cookie|createElement..script|track(er|ing)?)[-._\/'"\s:?&=~%]|
+addtoany|algolia|analytic|aswpsdkus|auction|
+bidder|BOOMR|
+campaign|chartbeat|cloudfront|criteo|
+detroitchicago|doubleclick|effectivemeasure|ensighten|Ezoic|
+facebook\.(com|net)|google.?[ast]|gtag|
+impression|krxd|marketo|matomo|media\.net|ml314|mpulse|
+narrativ\.|newrelic|newsletter|omap[pi]|outbrain|
+pi(wik|xel)|porpoiseant|prebid|pubmatic|quora|
+salesloft|scorecard|snowplow|
+ta(boola|rget[a-z])|tiqcdn|twitter.com|
+quant(cast|serv)|viglink|yandex)xi
 
   end
 end
