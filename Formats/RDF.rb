@@ -38,12 +38,10 @@ class WebResource
         elsif mime = named_format
           options[:content_type] = mime # format from extension
         end
-        file = fsPath
-        if file.index '#'
-          (format ? RDF::Reader.for(format) : RDF::Reader.for(**options)).new(File.open(file).read, **options){|_|graph << _} # load path
+        if reader = (format ? RDF::Reader.for(format) : RDF::Reader.for(**options))
+          reader.new(File.open(fsPath).read, **options){|_|graph << _} # read data
         else
-          options[:format] = format if format
-          graph.load 'file:' + file, **options # load file-URI
+          puts "no RDF reader for #{uri}"
         end
       end
     elsif node.directory?                      # directory
