@@ -116,18 +116,8 @@ module Webize
       format Format
 
       def initialize(input = $stdin, options = {}, &block)
-        doc = input.respond_to?(:read) ? input.read : input.to_s
-        if charset = doc[0..2048].encode('UTF-8', undef: :replace, invalid: :replace).match(/<meta[^>]+charset=['"]?([^'">]+)/i) # scan for charset tag
-          encoding = charset[1]
-          unless encoding.match? /utf.*8/i
-            encoding = 'Shift_JIS' if encoding.match? /sjis/
-            puts "transcoding #{encoding} to UTF-8"
-            doc.encode! 'UTF-8', encoding, invalid: :replace, undef: :replace
-          end
-        end
-
         @base = options[:base_uri]
-        @doc = Nokogiri::HTML.parse(doc)
+        @doc = Nokogiri::HTML.parse input.respond_to?(:read) ? input.read : input.to_s
 
         if block_given?
           case block.arity
