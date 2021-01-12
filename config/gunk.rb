@@ -25,8 +25,8 @@ class WebResource
 
     ScriptGunk = %r([-._\/'"\s:?&=~%+](ads?|cookie|createElement..script|track(er|ing)?)[-._\/'"\s:?&=~%]|
 addtoany|algolia|analytic|aswpsdkus|auction|
-bidder|BOOMR|
-campaign|chartbeat|cloudfront|criteo|
+bidder|bing|BOOMR|
+campaign|chartbeat|cloudfront|comscore|criteo|
 detroitchicago|doubleclick|effectivemeasure|ensighten|Ezoic|
 facebook\.(com|net)|google.?[ast]|gtag|
 impression|krxd|marketo|matomo|media\.net|ml314|mpulse|
