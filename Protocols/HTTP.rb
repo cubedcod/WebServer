@@ -162,7 +162,7 @@ class WebResource
       ['http://', host, ![nil, 443].member?(port) ? [':', port] : nil, path, query ? ['?', query] : nil].join.R(env).fetchHTTP # fetch via HTTP
     end
 
-    # fetch from remote, fill local cache and possibly return upstream HTTP response to caller
+    # fetch from remote, filling local cache and possibly returning HTTP response to caller
     def fetchHTTP thru: true, transformable: !no_transform? # allow format conversion and rewrite (HTML reformat, code pretty-print) of fetched data for caller
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                            # response header
@@ -171,7 +171,6 @@ class WebResource
           [206, h, [response.read]]                  # response with part
         else
           body = HTTP.decompress h, response.read                     # response body
-
           format = if path=='/feed'||(query_values||{})['mime']=='xml'# feed URL (override HTTP-metadata content-type)
                      'application/atom+xml'
                    elsif content_type = h['content-type']             # format defined in HTTP metadata
@@ -187,10 +186,10 @@ class WebResource
                    elsif named_format                                 # format from name extension mapping
                      named_format
                    end
-
           if format                                                   # format defined?
-            body = Webize::CSS.clean body if format.index('text/css') == 0        # clean CSS
+            body = Webize::CSS.clean body if format.index('text/css') == 0 # clean CSS
             body = Webize::HTML.clean body,self if format.index('text/html') == 0 # clean HTML
+            body = Webize::Code.clean body if format.index('script')  # clean JS
             if formatExt = Suffixes[format] || Suffixes_Rack[format]  # look up format-suffix
               if extension == formatExt                               # suffix agrees w/ reverse map
                 cache = self                                          # cache at canonical location
@@ -216,25 +215,23 @@ class WebResource
           else
             puts "ERROR format undefined on #{uri}"                   # warning: undefined format
           end
-
-          return unless thru                                          # no HTTP response to caller
-          saveRDF                                                     # commit graph-data
-          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials
-             Content-Type ETag).map{|k|
-            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # response metadata
-          env[:resp]['Access-Control-Allow-Origin'] ||= allowed_origin # CORS header
-          h['link'] && h['link'].split(',').map{|link|                # parse and merge upstream Link headers
+          return unless thru                                          # no HTTP response
+          saveRDF                                                     # cache graph-data
+          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
+            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # response headers from upstream
+          env[:resp]['Access-Control-Allow-Origin'] ||= allowed_origin# CORS header
+          h['link'] && h['link'].split(',').map{|link|                # parse and merge Link headers
             ref, type = link.split(';').map &:strip
             if ref && type
               ref = ref.sub(/^</,'').sub />$/, ''
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
             end}
-          if transformable && !(format||'').match?(/audio|css|image|octet|script|video/)
-            graphResponse                                     # response in local format
+          if transformable && !(format||'').match?(/audio|css|image|octet|script|video/) # can transcode or reformat
+            graphResponse                                     # doc in local format
           else
             env[:resp]['Content-Length'] = body.bytesize.to_s # update Content-Length
-            [200, env[:resp], [body]]                         # response in origin format
+            [200, env[:resp], [body]]                         # doc in origin format
           end
         end
       end

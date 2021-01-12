@@ -1,5 +1,15 @@
 module Webize
-  module Sourcecode
+  module Code
+    include WebResource::URIs
+
+    def self.clean str
+      if gunk = (str.match ScriptGunk)
+        "// #{gunk}"
+      else
+        str
+      end
+    end
+
     class Format < RDF::Format
       content_type 'application/ruby',
                    aliases: %w(
@@ -44,7 +54,9 @@ module Webize
       def source_tuples
         yield Type.R, (Schema + 'Code').R
         lang = "-l #{@lang}" if @lang
-        html = RDF::Literal [`pygmentize #{lang} -f html #{@base.shellPath}`,'<style>',CodeCSS,'</style>'].join.encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
+        html = RDF::Literal [`pygmentize #{lang} -f html #{@base.shellPath}`,
+                             '<style>', CodeCSS, '</style>'
+                            ].join.encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
         html.datatype = RDF.XMLLiteral
         yield Content.R, html
       end
