@@ -2,9 +2,11 @@ module Webize
   module Code
     include WebResource::URIs
 
-    def self.clean str
+    def self.clean str, base
       if gunk = (str.match ScriptGunk)
-        "// #{gunk}"
+        base.env[:deny] = true
+        ["// #{str.bytesize} bytes",
+         "// gunk: #{gunk}"].join "\n"
       else
         str
       end
