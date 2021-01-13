@@ -25,9 +25,9 @@ class WebResource
     ScriptGunk = %r(
 acsb|addtoany|algolia|analytic|aswpsdkus|auction|
 bidder|bing|BOOMR|
-campaign|chartbeat|chimp|cloudfront|co(mscore|nnatix|okielaw)|criteo|
+campaign|chartbeat|chimp|cloudfront|co(mscore|nnatix|okielaw)|criteo|cxense|
 detroitchicago|disqus|doubleclick|effectivemeasure|ensighten|Ezoic|
-facebook\.(com|net)|fullstory|google.?[acst]|gtag|hotjar|
+facebook\.(com|net)|fullstory|google.?[acst]|hotjar|
 impression|krxd|
 marketo|matomo|media\.net|ml314|mpulse|
 narrativ\.|newrelic|newsletter|omap[pi]|optanon|outbrain|
