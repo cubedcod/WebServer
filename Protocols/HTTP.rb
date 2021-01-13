@@ -176,7 +176,7 @@ class WebResource
                    elsif content_type = h['content-type']             # format defined in HTTP metadata
                      ct = content_type.split(/;/)
                      if ct.size == 2
-                       charset = ct[1].sub(/.*charset=/,'')
+                       charset = ct[1].sub(/.*charset=/i,'')
                        unless charset.match? /utf.*8/i
                          puts "transcoding #{charset} doc to UTF-8"
                          body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace

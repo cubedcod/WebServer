@@ -3,7 +3,7 @@ class WebResource
   module URIs
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
 
-    AllowJS = %w(twitter.com www.instagram.com www.youtube.com)
+    AllowJS = %w(twitter.com www.instagram.com www.mixcloud.com www.youtube.com)
     AllowGET = %w(www.amazon.com)
 
     # allow everything - POST, cookies etc

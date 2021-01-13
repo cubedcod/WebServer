@@ -3,7 +3,9 @@ module Webize
     include WebResource::URIs
 
     def self.clean str, base
-      if gunk = (str.match ScriptGunk)
+      if AllowJS.member? base.host
+        str
+      elsif gunk = (str.match ScriptGunk)
         base.env[:deny] = true
         ["// #{str.bytesize} bytes",
          "// gunk: #{gunk}"].join "\n"
