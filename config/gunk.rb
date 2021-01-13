@@ -26,16 +26,16 @@ class WebResource
     ScriptGunk = %r(
 acsb|addtoany|algolia|analytic|aswpsdkus|auction|
 bidder|bing|BOOMR|
-campaign|chartbeat|chimp|cloudfront|comscore|cookielaw|criteo|
-detroitchicago|doubleclick|effectivemeasure|ensighten|Ezoic|
+campaign|chartbeat|chimp|cloudfront|co(mscore|nnatix|okielaw)|criteo|
+detroitchicago|disqus|doubleclick|effectivemeasure|ensighten|Ezoic|
 facebook\.(com|net)|fullstory|google.?[acst]|gtag|hotjar|
 impression|krxd|
 marketo|matomo|media\.net|ml314|mpulse|
 narrativ\.|newrelic|newsletter|omap[pi]|optanon|outbrain|
-pi(ngdom|wik)|porpoiseant|prebid|pubmatic|quora|
+paypal|pi(ngdom|wik)|porpoiseant|prebid|pubmatic|quora|
 salesloft|scorecard|snowplow|
 ta(boola|rgeting)|tiqcdn|track(er|ing)|twitter.com|typekit|
-quant(cast|serv)|viglink|yandex|zoho)xi
+qua(ltrics|nt(cast|serv))|viglink|yandex|zergnet|zoho)xi
 
   end
 end
