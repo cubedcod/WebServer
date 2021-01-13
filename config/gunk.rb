@@ -6,8 +6,7 @@ class WebResource
     AllowJS = %w(twitter.com www.instagram.com www.mixcloud.com www.youtube.com)
     AllowGET = %w(www.amazon.com)
 
-    # allow everything - POST, cookies etc
-    AllowFile = SiteDir.join 'allow_domains'
+    AllowFile = SiteDir.join 'allow_domains' # allow everything - POST, cookies etc
     AllowDomains = {}
     AllowFile.each_line{|l|
       cursor = AllowDomains
