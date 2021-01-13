@@ -152,7 +152,7 @@ class WebResource
       end
     end
 
-    # fetch from cache or remote server
+    # fetch from cache or remote
     def fetch
       return cacheResponse if offline?
       return [304,{},[]] if (env.has_key?('HTTP_IF_NONE_MATCH') || env.has_key?('HTTP_IF_MODIFIED_SINCE')) && static_node? # client has static node cached
@@ -179,6 +179,7 @@ class WebResource
                        charset = ct[1].sub(/.*charset=/i,'')
                        unless charset.match? /utf.*8/i
                          puts "transcoding #{charset} doc to UTF-8"
+                         charset = nil if charset.empty? || charset=='empty'
                          body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace
                        end
                      end

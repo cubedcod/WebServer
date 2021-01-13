@@ -23,18 +23,19 @@ class WebResource
 
     Gunk = Regexp.new SiteDir.join('gunk.regex').read.chomp
 
-    ScriptGunk = %r([-._\/'"\s:?&=~%+](ads?|cookie|pixel)[-._\/'"\s:?&=~%]|
-addtoany|algolia|analytic|aswpsdkus|auction|
+    ScriptGunk = %r(
+acsb|addtoany|algolia|analytic|aswpsdkus|auction|
 bidder|bing|BOOMR|
-campaign|chartbeat|cloudfront|comscore|criteo|
+campaign|chartbeat|chimp|cloudfront|comscore|cookielaw|criteo|
 detroitchicago|doubleclick|effectivemeasure|ensighten|Ezoic|
-facebook\.(com|net)|google.?[ast]|gtag|
-impression|krxd|marketo|matomo|media\.net|ml314|mpulse|
-narrativ\.|newrelic|newsletter|omap[pi]|outbrain|
-piwik|porpoiseant|prebid|pubmatic|quora|
+facebook\.(com|net)|fullstory|google.?[acst]|gtag|hotjar|
+impression|krxd|
+marketo|matomo|media\.net|ml314|mpulse|
+narrativ\.|newrelic|newsletter|omap[pi]|optanon|outbrain|
+pi(ngdom|wik)|porpoiseant|prebid|pubmatic|quora|
 salesloft|scorecard|snowplow|
-ta(boola|rgeting)|tiqcdn|track(er|ing)|twitter.com|
-quant(cast|serv)|viglink|yandex)xi
+ta(boola|rgeting)|tiqcdn|track(er|ing)|twitter.com|typekit|
+quant(cast|serv)|viglink|yandex|zoho)xi
 
   end
 end

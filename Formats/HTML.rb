@@ -4,7 +4,8 @@ module Webize
     include WebResource::URIs
 
     def self.clean doc, base
-      doc = Nokogiri::HTML.parse doc
+      doc = Nokogiri::HTML.parse doc#.sub(/charset=["']utf8["']/i, "charset='utf-8'")
+
       doc.traverse{|e|
 
         if e['src']                                                  # src attribute
