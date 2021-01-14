@@ -29,14 +29,14 @@ detroitchicago|dfp|disqus|dotmetrics|doubleclick|
 effectivemeasure|ensighten|Ezoic|
 facebook\.(com|net)|fullstory|
 google.?[acst]|grapeshot|gumgum|gwallet|hotjar|
-impression|krxd|linkedin|
+impression|intercom|krxd|li(nkedin|strak)|
 marketo|matomo|media\.net|mequoda|ml314|mpulse|
 narrativ\.|newrelic|newsletter|npttech|nreum|
 omap[pi]|onesignal|optanon|outbrain|
-pa(rdot|ypal)|pi(ngdom|wik)|porpoiseant|prebid|pubmatic|
+pa(gespeed|rdot|ypal)|pi(ngdom|wik)|porpoiseant|prebid|pubmatic|
 quora|qua(ltrics|nt(cast|serv))|rightmessage|
 salesloft|scorecard|snowplow|
-ta(boola|rgeting)|tiqcdn|track(er|ing)|twitter.com|typekit|
+ta(boola|rgeting)|tiqcdn|track(er|ing)|turnto|twitter.com|typekit|
 venatus|viglink|vntsm|
 yandex|\.yimg|zergnet|zoho)xi
 
