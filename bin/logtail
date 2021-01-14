@@ -19,7 +19,7 @@ File::Tail::Logfile.tail('web.log') do |line|
           (WebResource::HTTP.status_icon status),
           format,
           "\e[#{denied ? '31;1' : WebResource::HTTP.format_color(format)}m",
-          denied ? url.to_s.sub(/^https?:\/\//,'') : url,
+          url,
           "\e[0m"].join ' '
   end
 end

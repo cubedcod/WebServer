@@ -3,7 +3,7 @@ class WebResource
   module URIs
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
 
-    AllowJS = %w(twitter.com www.instagram.com www.mixcloud.com www.youtube.com)
+    AllowJS = %w(cdn.jwplayer.com twitter.com www.instagram.com www.mixcloud.com www.youtube.com)
 
     AllowFile = SiteDir.join 'allow_domains'
     AllowDomains = {}
@@ -23,17 +23,22 @@ class WebResource
 
     ScriptGunk = %r(
 acsb|addtoany|algolia|analytic|aswpsdkus|auction|
-bidder|bing|BOOMR|
-campaign|chartbeat|chimp|cloudfront|co(mscore|nnatix|okielaw)|criteo|cxense|
-detroitchicago|disqus|doubleclick|effectivemeasure|ensighten|Ezoic|
-facebook\.(com|net)|fullstory|google.?[acst]|hotjar|
+bidder|bing|BOOMR|browser-update|
+campaign|chartbeat|chimp|cloudfront|co(mscore|nnatix|okielaw)|cpx\.|cr(iteo|sspxl)|cxense|
+detroitchicago|dfp|disqus|dotmetrics|doubleclick|
+effectivemeasure|ensighten|Ezoic|
+facebook\.(com|net)|fullstory|
+google.?[acst]|grapeshot|gumgum|gwallet|hotjar|
 impression|krxd|linkedin|
-marketo|matomo|media\.net|ml314|mpulse|
-narrativ\.|newrelic|newsletter|nreum|omap[pi]|onesignal|optanon|outbrain|
-paypal|pi(ngdom|wik)|porpoiseant|prebid|pubmatic|quora|
+marketo|matomo|media\.net|mequoda|ml314|mpulse|
+narrativ\.|newrelic|newsletter|npttech|nreum|
+omap[pi]|onesignal|optanon|outbrain|
+pa(rdot|ypal)|pi(ngdom|wik)|porpoiseant|prebid|pubmatic|
+quora|qua(ltrics|nt(cast|serv))|rightmessage|
 salesloft|scorecard|snowplow|
 ta(boola|rgeting)|tiqcdn|track(er|ing)|twitter.com|typekit|
-qua(ltrics|nt(cast|serv))|venatus|viglink|yandex|\.yimg|zergnet|zoho)xi
+venatus|viglink|vntsm|
+yandex|\.yimg|zergnet|zoho)xi
 
   end
 end

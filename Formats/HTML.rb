@@ -11,7 +11,7 @@ module Webize
         if e['src']                                                  # src attribute
           src = (base.join e['src']).R                               # resolve src location
           if src.deny?
-            puts "🚩 \e[30;1m" + e.to_s.gsub((src.deny_domain? ? /\/\/[^'"\/]+/ : Gunk), "\e[31m\\0\e[30m") + "\e[0m" if Verbose
+            puts "🚩 \e[30;1m" + e.to_s.gsub(Gunk, "\e[31m\\0\e[30m") + "\e[0m" if Verbose
             e.remove                                                 # strip blocked src
           end
         end
@@ -19,13 +19,14 @@ module Webize
         if e['href']                                                 # href attribute
           ref = (base.join e['href']).R                              # resolve href location
           if ref.deny?
-            puts "🚩 \e[30;1m" + e.to_s.gsub((ref.deny_domain? ? /\/\/[^'"\/]+/ : Gunk), "\e[31m\\0\e[30m") + "\e[0m" if Verbose
+            puts "🚩 \e[30;1m" + e.to_s.gsub(Gunk, "\e[31m\\0\e[30m") + "\e[0m" if Verbose
             e.remove                                                 # strip blocked href
           end
         end}
 
       doc.css('script').map{|s|
-        if s.inner_text.match? ScriptGunk
+        if gunk = (s.inner_text.match ScriptGunk)
+          puts gunk if Verbose
           s.remove
         end} unless AllowJS.member? base.host
 
@@ -71,7 +72,7 @@ module Webize
         if e['src']                                                  # src attribute
           src = (base.join e['src']).R                               # resolve src location
           if src.deny?
-            puts "🚩 \e[30;1m" + e.to_s.gsub((src.deny_domain? ? /\/\/[^'"\/]+/ : Gunk), "\e[31m\\0\e[30m") + "\e[0m" if Verbose
+            puts "🚩 \e[30;1m" + e.to_s.gsub(Gunk, "\e[31m\\0\e[30m") + "\e[0m" if Verbose
             e.remove                                                 # strip blocked src
           else
             e['src'] = src.href                                      # update src to resolved location
@@ -86,7 +87,7 @@ module Webize
           ref.fragment = '' if ref.fragment&.match?(/utm[^a-z]/)     # de-urchinize fragment
 
           if ref.deny?
-            puts "🚩 \e[30;1m" + e.to_s.gsub((ref.deny_domain? ? /\/\/[^'"\/]+/ : Gunk), "\e[31m\\0\e[30m") + "\e[0m" if Verbose
+            puts "🚩 \e[30;1m" + e.to_s.gsub(Gunk, "\e[31m\\0\e[30m") + "\e[0m" if Verbose
             e.remove                                                 # strip blocked href
           else
             offsite = ref.host != base.host
