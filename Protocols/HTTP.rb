@@ -102,14 +102,14 @@ class WebResource
     end
 
     def deny?
-      return true if deny_domain?
-      return true if uri.match? Gunk
-      false
+      return true  if uri.match? Gunk # URI filter
+      return false if !host
+      return false if allow_domain?   # DNS filters
+      return true  if deny_domain?
+             false
     end
 
     def deny_domain?
-      return false if !host || WebResource::HTTP::HostGET.has_key?(host) || allow_domain? # handler defined or domain in allow list
-      return false if env['REQUEST_METHOD'] == 'GET' && AllowGET.member?(host)
       c = DenyDomains                                               # start cursor at root
       host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # search for leaf in domain tree
     end

@@ -3,7 +3,7 @@ module Webize
   module CSS
 
     def self.clean str
-      str.gsub(/@font-face\s*{[^}]+}/, '').gsub(/@import url\([^\)]+\);/,'')
+      str.gsub(/@font-face\s*{[^}]+}/, '').gsub(/@import ('[^']+'|"[^"]+"|url\([^\)]+\));/,'')
     end
 
     def self.cleanNode node
