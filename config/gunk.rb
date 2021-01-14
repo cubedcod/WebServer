@@ -29,11 +29,11 @@ detroitchicago|disqus|doubleclick|effectivemeasure|ensighten|Ezoic|
 facebook\.(com|net)|fullstory|google.?[acst]|hotjar|
 impression|krxd|linkedin|
 marketo|matomo|media\.net|ml314|mpulse|
-narrativ\.|newrelic|newsletter|omap[pi]|optanon|outbrain|
+narrativ\.|newrelic|newsletter|nreum|omap[pi]|onesignal|optanon|outbrain|
 paypal|pi(ngdom|wik)|porpoiseant|prebid|pubmatic|quora|
 salesloft|scorecard|snowplow|
 ta(boola|rgeting)|tiqcdn|track(er|ing)|twitter.com|typekit|
-qua(ltrics|nt(cast|serv))|viglink|yandex|\.yimg|zergnet|zoho)xi
+qua(ltrics|nt(cast|serv))|venatus|viglink|yandex|\.yimg|zergnet|zoho)xi
 
   end
 end
