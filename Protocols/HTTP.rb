@@ -103,7 +103,7 @@ class WebResource
 
     def deny?
       return true  if uri.match? Gunk # URI filter
-      return false if !host
+      return false if !host || HostGET.has_key?(host)
       return false if allow_domain?   # DNS filters
       return true  if deny_domain?
              false
@@ -162,15 +162,16 @@ class WebResource
       ['http://', host, ![nil, 443].member?(port) ? [':', port] : nil, path, query ? ['?', query] : nil].join.R(env).fetchHTTP # fetch via HTTP
     end
 
-    # fetch from remote, filling local cache and possibly returning HTTP response to caller
-    def fetchHTTP thru: true, transformable: !no_transform? # allow format conversion and rewrite (HTML reformat, code pretty-print) of fetched data for caller
+    # fetch from remote, read graph-data, fill local graph+static caches, optionally return HTTP response
+    def fetchHTTP thru: true, transformable: !no_transform? # allow format conversion and rewrite (HTML reformat, code pretty-print)
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
-        h = response.meta                            # response header
-        if response.status.to_s.match? /206/         # partial response
+        h = response.meta                                             # response headerd
+        if response.status.to_s.match? /206/                          # partial response
           h['Access-Control-Allow-Origin'] = allowed_origin unless h['Access-Control-Allow-Origin'] || h['access-control-allow-origin']
-          [206, h, [response.read]]                  # response with part
+          [206, h, [response.read]]                                   # respond with part
         else
           body = HTTP.decompress h, response.read                     # response body
+
           format = if path=='/feed'||(query_values||{})['mime']=='xml'# feed URL (override HTTP-metadata content-type)
                      'application/atom+xml'
                    elsif content_type = h['content-type']             # format defined in HTTP metadata
@@ -187,10 +188,11 @@ class WebResource
                    elsif named_format                                 # format from name extension mapping
                      named_format
                    end
+
           if format                                                   # format defined?
-            body = Webize::CSS.clean body if format.index('text/css') == 0 # clean CSS
-            body = Webize::HTML.clean body, self if format.index('text/html') == 0 # clean HTML
-            body = Webize::Code.clean body, self if format.index('script') # clean JS
+            body = Webize::CSS.clean body if format.index('text/css') == 0 # clean upstream document
+            body = Webize::HTML.clean body, self if format.index('text/html') ==0
+            body = Webize::Code.clean body, self if format.index('script')
             if formatExt = Suffixes[format] || Suffixes_Rack[format]  # look up format-suffix
               if extension == formatExt                               # suffix agrees w/ reverse map
                 cache = self                                          # cache at canonical location
@@ -202,7 +204,7 @@ class WebResource
               end
               cache.writeFile body if cache.static_node?              # cache static data
             else
-              puts "extension undefined for #{format}"                # warning: undefined suffix
+              puts "extension undefined for #{format}"                # warn: undefined format-suffix
             end
             if reader = RDF::Reader.for(content_type: format)         # reader defined for format?
               env[:repository] ||= RDF::Repository.new                # initialize RDF repository
@@ -211,28 +213,32 @@ class WebResource
               end
               reader.new(body, base_uri: self){|g|env[:repository] << g} # read RDF
             else
-              puts "RDF::Reader undefined for #{format}" unless %w(css js).member? ext # warning: undefined Reader
+              puts "RDF::Reader undefined for #{format}" unless %w(css js).member? ext # warn: undefined Reader
             end
           else
-            puts "ERROR format undefined on #{uri}"                   # warning: undefined format
+            puts "ERROR format undefined on #{uri}"                   # warn: undefined format
           end
+
           return unless thru                                          # no HTTP response
+
           saveRDF                                                     # cache graph-data
-          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
-            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # response headers from upstream
+
           env[:resp]['Access-Control-Allow-Origin'] ||= allowed_origin# CORS header
-          h['link'] && h['link'].split(',').map{|link|                # parse and merge Link headers
+          h['link'] && h['link'].split(',').map{|link|                # Link headers
             ref, type = link.split(';').map &:strip
             if ref && type
               ref = ref.sub(/^</,'').sub />$/, ''
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
             end}
-          if transformable && !(format||'').match?(/audio|css|image|octet|script|video/) # can transcode or reformat
-            graphResponse                                     # doc in local format
+          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
+            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # misc upstream headers
+
+          if transformable && !(format||'').match?(/audio|css|image|octet|script|video/) # can transcode/reformat
+            graphResponse                                             # doc in local reformat
           else
-            env[:resp]['Content-Length'] = body.bytesize.to_s # update Content-Length
-            [200, env[:resp], [body]]                         # doc in origin format
+            env[:resp]['Content-Length'] = body.bytesize.to_s         # Content-Length header
+            [200, env[:resp], [body]]                                 # doc in original format
           end
         end
       end
