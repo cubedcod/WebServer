@@ -132,6 +132,8 @@ l.facebook.com l.instagram.com
         NoGunk[r]
       elsif r.path.index('/amp/s/') == 0
         [302, {'Location' => 'https://' + r.path[7..-1]}, []]
+      elsif p == 'complete'
+        r.fetch.yield_self{|s,h,b| puts s,h,b; [s,h,b]}
       elsif p == 'imgres' && q.has_key?('imgurl')
         [302, {'Location' => q['imgurl']}, []]
       else
