@@ -11,7 +11,7 @@ module Webize
         if e['src']                                                  # src attribute
           src = (base.join e['src']).R                               # resolve src location
           if src.deny?
-            puts "🚩 \e[30;1m" + e.to_s.gsub(Gunk, "\e[31m\\0\e[30m") + "\e[0m" if Verbose
+            puts "🚩 \e[31;1m#{src}\e[0m" if Verbose
             e.remove                                                 # strip blocked src
           end
         end
@@ -19,14 +19,14 @@ module Webize
         if e['href']                                                 # href attribute
           ref = (base.join e['href']).R                              # resolve href location
           if ref.deny?
-            puts "🚩 \e[30;1m" + e.to_s.gsub(Gunk, "\e[31m\\0\e[30m") + "\e[0m" if Verbose
+            puts "🚩 \e[31;1m#{ref}\e[0m" if Verbose
             e.remove                                                 # strip blocked href
           end
         end}
 
       doc.css('script').map{|s|
         if gunk = (s.inner_text.match ScriptGunk)
-          puts gunk if Verbose
+          print gunk, ' ' if Verbose
           s.remove
         end} unless AllowJS.member? base.host
 
