@@ -136,8 +136,8 @@ l.facebook.com l.instagram.com
       elsif p == 'complete'
         #puts r.fetch
         q = r.query_values['q']
-        output = ")]}'\n" + [q,["http://localhost:8000/h","http://localhost:8000/d","http://localhost:8000/m","https://twitter.com","https://www.reddit.com/r/androidx86+blissos+chrubuntu+chrultrabook+chromeos+crouton+galliumos/new","dong quai","donga","misc"],
-                             ["hour","day","month","twitter","reddit","","",""],[],
+        output = ")]}'\n" + [q,["http://localhost:8000/h","http://localhost:8000/d","http://localhost:8000/m","https://twitter.com","https://www.reddit.com/r/androidx86+blissos+chrultrabook+chromeos+stallmanwasright/new","http://localhost:8000/2021/01/15/?find=gitter&fullContent&view=table&sort=http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Fdate&order=asc","donga","misc"],
+                             ["hour","day","month","twitter","reddit","gitter","",""],[],
                              {"google:clientdata":{"bpc": :false,"phi": 0,"tlw": :false},
                               "google:suggestdetail":[{},{},{},{},{},{},{},{}],
                               "google:suggestrelevance":[1301,1100,750,603,602,601,600,550],
