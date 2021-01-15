@@ -372,7 +372,7 @@ class WebResource
           grouped = posts.size != 1
           color = env[:colors][to.R.display_name] ||= (grouped ? ('#%06x' % (rand 16777216)) : '#444')
           {style: "background: repeating-linear-gradient(-45deg, #000, #000 .875em, #{color} .875em, #{color} 1em); #{grouped ? 'padding: .42em' : ''}",
-           c: posts.sort_by!{|r|(r[Content] || r[Image] || [0])[0].size}.map{|post|
+           c: (env[:summary] && grouped) ? (HTML.tabular posts, env) : posts.sort_by!{|r|(r[Content] || r[Image] || [0])[0].size}.map{|post|
              Markup[Post][post,env]}}}
       end}
 

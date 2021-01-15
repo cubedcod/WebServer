@@ -3,7 +3,7 @@ class WebResource
   module URIs
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
 
-    AllowJS = %w(cdn.jwplayer.com twitter.com www.instagram.com www.mixcloud.com www.youtube.com)
+    AllowJS = %w(cdn.jwplayer.com twitter.com w3.cdn.anvato.net www.instagram.com www.mixcloud.com www.youtube.com)
 
     AllowFile = SiteDir.join 'allow_domains'
     AllowDomains = {}
@@ -25,7 +25,7 @@ class WebResource
 acsb|addtoany|algolia|analytic|aswpsdkus|auction|
 bidder|bing|BOOMR|browser-update|
 campaign|chartbeat|chimp|cloudfront|co(mscore|nnatix|okielaw)|cpx\.|cr(iteo|sspxl)|cxense|
-detroitchicago|dfp|disqus|dotmetrics|doubleclick|
+detroitchicago|[^a-z]dfp|disqus|dotmetrics|doubleclick|
 effectivemeasure|ensighten|Ezoic|
 facebook\.(com|net)|fullstory|
 google.?[acst]|grapeshot|gumgum|gwallet|hotjar|
