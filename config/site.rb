@@ -125,7 +125,6 @@ l.facebook.com l.instagram.com
     GET 'google.com', GotoGoogle
     GET 'maps.google.com', GotoGoogle
 
-    # r.fetch.yield_self{|s,h,b| puts s,h,b; [s,h,b]}
     GET 'www.google.com', -> r {
       p = r.parts[0]
       q = r.query_values || {}
@@ -134,17 +133,15 @@ l.facebook.com l.instagram.com
       elsif r.path.index('/amp/s/') == 0
         [302, {'Location' => 'https://' + r.path[7..-1]}, []]
       elsif p == 'complete'
-        #puts r.fetch
         q = r.query_values['q']
-        output = ")]}'\n" + [q,["http://localhost:8000/h","http://localhost:8000/d","http://localhost:8000/m","https://twitter.com","https://www.reddit.com/r/androidx86+blissos+chrultrabook+chromeos+stallmanwasright/new","http://localhost:8000/2021/01/15/?find=gitter&fullContent&view=table&sort=http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Fdate&order=asc","donga","misc"],
-                             ["hour","day","month","twitter","reddit","gitter","",""],[],
+        output = ")]}'\n" + [q,["http://localhost:8000/h","http://localhost:8000/d","http://localhost:8000/m","https://twitter.com","https://www.reddit.com/r/androidx86+blissos+chrultrabook+chromeos+stallmanwasright/new","http://localhost:8000/2021/01/15/?find=gitter&fullContent&view=table&sort=http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Fdate&order=asc","http://localhost:8000/h/*%7Bidm,digaphobia,logbook%7D*irc?fullContent&view=table&sort=date","misc"],
+                             ["hour","day","month","twitter","reddit","gitter","IRC",""],[],
                              {"google:clientdata":{"bpc": :false,"phi": 0,"tlw": :false},
                               "google:suggestdetail":[{},{},{},{},{},{},{},{}],
                               "google:suggestrelevance":[1301,1100,750,603,602,601,600,550],
                               "google:suggestsubtypes":[[3],[3],[3],[3],[3],[3],[3],[3]],
                               "google:suggesttype":["NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION"],
                               "google:verbatimrelevance": 1300}].to_json
-        puts output
         [200, {"Access-Control-Allow-Origin"=>"*", "Content-Type"=>"text/javascript; charset=UTF-8", "Content-Length" => output.bytesize}, [output]]
       elsif p == 'imgres' && q.has_key?('imgurl')
         [302, {'Location' => q['imgurl']}, []]
