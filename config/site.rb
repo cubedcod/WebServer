@@ -134,7 +134,7 @@ l.facebook.com l.instagram.com
         [302, {'Location' => 'https://' + r.path[7..-1]}, []]
       elsif p == 'complete'
         q = r.query_values['q']
-        output = ")]}'\n" + [q,["http://localhost:8000/h","http://localhost:8000/d","http://localhost:8000/m","https://twitter.com","https://www.reddit.com/r/androidx86+blissos+chrultrabook+chromeos+stallmanwasright/new","http://localhost:8000/2021/01/15/?find=gitter&fullContent&view=table&sort=http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Fdate&order=asc","http://localhost:8000/h/*%7Bidm,digaphobia,logbook%7D*irc?fullContent&view=table&sort=date","misc"],
+        output = ")]}'\n" + [q,["http://localhost:8000/h","http://localhost:8000/d","http://localhost:8000/m","https://twitter.com","https://www.reddit.com/r/androidx86+blissos+chrultrabook+chromeos+stallmanwasright/new","http://localhost:8000/2021/01/15/?find=gitter&fullContent&view=table&sort=http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Fdate&order=asc","http://localhost:8000/h/*%7Bidm,digaphobia,logbook%7D*irc?fullContent&view=table&sort=date&order=asc","misc"],
                              ["hour","day","month","twitter","reddit","gitter","IRC",""],[],
                              {"google:clientdata":{"bpc": :false,"phi": 0,"tlw": :false},
                               "google:suggestdetail":[{},{},{},{},{},{},{},{}],
