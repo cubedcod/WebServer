@@ -136,10 +136,10 @@ l.facebook.com l.instagram.com
       elsif p == 'complete'
         #puts r.fetch
         q = r.query_values['q']
-        output = ")]}'\n" + [q,["http://localhost:8000/h","http://localhost:8000/d","http://localhost:8000/m","dong quai","donga","dongle","dong to usd","dongguan"],
-                             ["","","","","","","",""],[],
+        output = ")]}'\n" + [q,["http://localhost:8000/h","http://localhost:8000/d","http://localhost:8000/m","https://twitter.com","https://www.reddit.com/r/androidx86+blissos+chrubuntu+chrultrabook+chromeos+crouton+galliumos/new","dong quai","donga","misc"],
+                             ["hour","day","month","twitter","reddit","","",""],[],
                              {"google:clientdata":{"bpc": :false,"phi": 0,"tlw": :false},
-                              "google:suggestdetail":[{a: "ploc ploc", q: "shred maus"},{},{},{},{},{},{},{}],
+                              "google:suggestdetail":[{},{},{},{},{},{},{},{}],
                               "google:suggestrelevance":[1301,1100,750,603,602,601,600,550],
                               "google:suggestsubtypes":[[3],[3],[3],[3],[3],[3],[3],[3]],
                               "google:suggesttype":["NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION"],
