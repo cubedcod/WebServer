@@ -4,7 +4,8 @@ module Webize
     include WebResource::URIs
 
     def self.clean doc, base
-      doc = Nokogiri::HTML.parse doc.gsub(/<\/?noscript[^>]*>/i, '')
+      doc.gsub!(/<\/?noscript[^>]*>/i, '') unless AllowJS.member? base.host
+      doc = Nokogiri::HTML.parse doc
 
       doc.traverse{|e|
 
