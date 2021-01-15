@@ -4,7 +4,7 @@ module Webize
     include WebResource::URIs
 
     def self.clean doc, base
-      doc = Nokogiri::HTML.parse doc#.sub(/charset=["']utf8["']/i, "charset='utf-8'")
+      doc = Nokogiri::HTML.parse doc.gsub(/<\/?noscript[^>]*>/i, '')
 
       doc.traverse{|e|
 
@@ -283,9 +283,9 @@ module Webize
             hashfile.writeFile hashs.keys.join "\n" # update hashfile
             linkfile.writeFile links.keys.join "\n" # update linkfile
           end
-          yield subject, Content, HTML.format(body, @base).gsub(/<\/?noscript[^>]*>/i, '')
+          yield subject, Content, HTML.format(body, @base)
         else # no <body> element
-          yield subject, Content, HTML.format(n, @base).gsub(/<\/?noscript[^>]*>/i, '')
+          yield subject, Content, HTML.format(n, @base)
         end
       end
     end
