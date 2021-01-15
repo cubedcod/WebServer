@@ -162,9 +162,10 @@ class WebResource
       ['http://', host, ![nil, 443].member?(port) ? [':', port] : nil, path, query ? ['?', query] : nil].join.R(env).fetchHTTP # fetch via HTTP
     end
 
-    # fetch from remote, read graph-data, fill local graph+static caches, optionally return HTTP response
+    # fetch from remote, read graph-data, fill graph+static caches, maybe return HTTP response
     def fetchHTTP thru: true, transformable: !no_transform? # allow format conversion and rewrite (HTML reformat, code pretty-print)
-      URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
+      url = transformable ? uri : (uri.sub /\?notransform$/, '') # strip local query-arg
+      URI.open(url, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                                             # response headerd
         if response.status.to_s.match? /206/                          # partial response
           h['Access-Control-Allow-Origin'] = allowed_origin unless h['Access-Control-Allow-Origin'] || h['access-control-allow-origin']
@@ -219,7 +220,7 @@ class WebResource
             puts "ERROR format undefined on #{uri}"                   # warn: undefined format
           end
 
-          return unless thru                                          # no HTTP response
+          return unless thru                                          # skip HTTP response
 
           saveRDF                                                     # cache graph-data
 

@@ -337,7 +337,7 @@ class WebResource
       end}
 
     Markup['http://purl.org/dc/terms/created'] = Markup['http://purl.org/dc/terms/modified'] = Markup[Date] = -> date, env {
-      {_: :a, class: :date, c: date, href: 'http://' + (ENV['HOSTNAME'] || 'localhost') + ':8000/' + date[0..13].gsub(/[-T:]/,'/')}}
+      {_: :a, class: :date, c: date, href: 'http://localhost:8000/' + date[0..13].gsub(/[-T:]/,'/')}}
 
     Markup[Creator] = Markup[To] = Markup['http://xmlns.com/foaf/0.1/maker'] = -> creator, env {
       if creator.class == String || !creator.respond_to?(:R)
@@ -403,7 +403,7 @@ class WebResource
                    href: resource.href, c: [(post.delete(Schema+'icon')||[]).map{|i|{_: :img, src: i.href}},CGI.escapeHTML(title)]}, " \n"]
                end},
              {class: :pointer,
-              c: [({_: :a, class: :date, href: '/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date} if date), ' ',
+              c: [({_: :a, class: :date, href: 'http://localhost:8000/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date} if date), ' ',
                   ({_: :a, type: :node, c: '☚', href: resource.href, id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} unless hasPointer)]},
              {_: :table, class: :fromto,
               c: {_: :tr,
