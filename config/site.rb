@@ -136,7 +136,14 @@ l.facebook.com l.instagram.com
       elsif p == 'complete'
         #puts r.fetch
         q = r.query_values['q']
-        output = ")]}'\n" + [q,["dong phuong","dong tao chicken","dong phuong king cakes","dong quai","donga","dongle","dong to usd","dongguan"],["","","","","","","",""],[],{"google:clientdata":{"bpc": :false,"phi": 0,"tlw": :false},"google:suggestdetail":[{},{},{},{},{},{},{},{}],"google:suggestrelevance":[1301,1100,750,603,602,601,600,550],"google:suggestsubtypes":[[3],[3],[3],[3],[3],[3],[3],[3]],"google:suggesttype":["ENTITY","ENTITY","ENTITY","ENTITY","QUERY","QUERY","QUERY","ENTITY"],"google:verbatimrelevance": 1300}].to_json
+        output = ")]}'\n" + [q,["http://localhost:8000/h","http://localhost:8000/d","http://localhost:8000/m","dong quai","donga","dongle","dong to usd","dongguan"],
+                             ["","","","","","","",""],[],
+                             {"google:clientdata":{"bpc": :false,"phi": 0,"tlw": :false},
+                              "google:suggestdetail":[{a: "ploc ploc", q: "shred maus"},{},{},{},{},{},{},{}],
+                              "google:suggestrelevance":[1301,1100,750,603,602,601,600,550],
+                              "google:suggestsubtypes":[[3],[3],[3],[3],[3],[3],[3],[3]],
+                              "google:suggesttype":["NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION"],
+                              "google:verbatimrelevance": 1300}].to_json
         puts output
         [200, {"Access-Control-Allow-Origin"=>"*", "Content-Type"=>"text/javascript; charset=UTF-8", "Content-Length" => output.bytesize}, [output]]
       elsif p == 'imgres' && q.has_key?('imgurl')
