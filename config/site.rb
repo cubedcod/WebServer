@@ -125,6 +125,7 @@ l.facebook.com l.instagram.com
     GET 'google.com', GotoGoogle
     GET 'maps.google.com', GotoGoogle
 
+    # r.fetch.yield_self{|s,h,b| puts s,h,b; [s,h,b]}
     GET 'www.google.com', -> r {
       p = r.parts[0]
       q = r.query_values || {}
@@ -133,7 +134,7 @@ l.facebook.com l.instagram.com
       elsif r.path.index('/amp/s/') == 0
         [302, {'Location' => 'https://' + r.path[7..-1]}, []]
       elsif p == 'complete'
-        #        r.fetch.yield_self{|s,h,b| puts s,h,b; [s,h,b]}
+        #puts r.fetch
         q = r.query_values['q']
         output = ")]}'\n" + [q,["dong phuong","dong tao chicken","dong phuong king cakes","dong quai","donga","dongle","dong to usd","dongguan"],["","","","","","","",""],[],{"google:clientdata":{"bpc": :false,"phi": 0,"tlw": :false},"google:suggestdetail":[{},{},{},{},{},{},{},{}],"google:suggestrelevance":[1301,1100,750,603,602,601,600,550],"google:suggestsubtypes":[[3],[3],[3],[3],[3],[3],[3],[3]],"google:suggesttype":["ENTITY","ENTITY","ENTITY","ENTITY","QUERY","QUERY","QUERY","ENTITY"],"google:verbatimrelevance": 1300}].to_json
         puts output
