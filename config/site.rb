@@ -133,7 +133,11 @@ l.facebook.com l.instagram.com
       elsif r.path.index('/amp/s/') == 0
         [302, {'Location' => 'https://' + r.path[7..-1]}, []]
       elsif p == 'complete'
-        r.fetch.yield_self{|s,h,b| puts s,h,b; [s,h,b]}
+        #        r.fetch.yield_self{|s,h,b| puts s,h,b; [s,h,b]}
+        q = r.query_values['q']
+        output = ")]}'\n" + [q,["dong phuong","dong tao chicken","dong phuong king cakes","dong quai","donga","dongle","dong to usd","dongguan"],["","","","","","","",""],[],{"google:clientdata":{"bpc": :false,"phi": 0,"tlw": :false},"google:suggestdetail":[{},{},{},{},{},{},{},{}],"google:suggestrelevance":[1301,1100,750,603,602,601,600,550],"google:suggestsubtypes":[[3],[3],[3],[3],[3],[3],[3],[3]],"google:suggesttype":["ENTITY","ENTITY","ENTITY","ENTITY","QUERY","QUERY","QUERY","ENTITY"],"google:verbatimrelevance": 1300}].to_json
+        puts output
+        [200, {"Access-Control-Allow-Origin"=>"*", "Content-Type"=>"text/javascript; charset=UTF-8", "Content-Length" => output.bytesize}, [output]]
       elsif p == 'imgres' && q.has_key?('imgurl')
         [302, {'Location' => q['imgurl']}, []]
       else
