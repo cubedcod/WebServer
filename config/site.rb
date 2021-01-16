@@ -126,12 +126,16 @@ l.facebook.com l.instagram.com
     GET 'maps.google.com', GotoGoogle
 
     GET 'www.google.com', -> r {
+      path - r.path
       p = r.parts[0]
       q = r.query_values || {}
       if %w(dl images maps search).member? p
         NoGunk[r]
-      elsif r.path.index('/amp/s/') == 0
+      elsif path.index('/amp/s/') == 0
         [302, {'Location' => 'https://' + r.path[7..-1]}, []]
+      elsif path == '/async/newtab_promos'
+        puts r.fetch
+        r.deny
       elsif p == 'complete'
         q = r.query_values['q']
         output = ")]}'\n" + [q,["http://localhost:8000/h","http://localhost:8000/d","http://localhost:8000/m","https://twitter.com","https://www.reddit.com/r/androidx86+blissos+chrultrabook+chromeos+stallmanwasright/new","http://localhost:8000/2021/01/15/?find=gitter&fullContent&view=table&sort=http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Fdate&order=asc","http://localhost:8000/h/*%7Bidm,digaphobia,logbook%7D*irc?fullContent&view=table&sort=date&order=asc","misc"],

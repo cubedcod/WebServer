@@ -22,7 +22,7 @@ class WebResource
     Gunk = Regexp.new SiteDir.join('gunk.regex').read.chomp, Regexp::IGNORECASE
 
     ScriptGunk = %r(
-acsb|addtoany|algolia|analytic|aswpsdkus|auction|
+[-._\/'"\s:?&=~%]ads?[-._\/'"\s:?&=~%]|acsb|addtoany|algolia|analytic|aswpsdkus|auction|
 bidder|bing|BOOMR|browser-update|
 campaign|chartbeat|chimp|cloudfront|co(mscore|nnatix|okielaw)|cpx\.|cr(iteo|sspxl)|cxense|
 detroitchicago|[^a-z]dfp|disqus|dotmetrics|doubleclick|
