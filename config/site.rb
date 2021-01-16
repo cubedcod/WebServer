@@ -134,7 +134,7 @@ l.facebook.com l.instagram.com
       elsif path.index('/amp/s/') == 0
         [302, {'Location' => 'https://' + r.path[7..-1]}, []]
       elsif path.index('/async/newtab') == 0
-        puts r.fetch
+        puts r.fetchHTTP transformable: false
         r.deny
       elsif p == 'complete'
         q = r.query_values['q']
