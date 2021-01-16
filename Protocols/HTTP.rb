@@ -299,10 +299,6 @@ class WebResource
           timeMeta                             # reference temporally-adjacent nodes
           cacheResponse                        # local node
         else
-          if referer = env['HTTP_REFERER']
-            referer = referer.R
-            env['HTTP_REFERER'] = referer.remoteURL.to_s if referer.host == 'localhost' && referer.path != '/'
-          end
           (env[:base] = remoteURL).hostHandler # host handler (rebased on localhost)
         end
       else
@@ -349,13 +345,8 @@ class WebResource
         head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base colors connection downloadable feeds fetched graph host images keep-alive links origin-status path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles remote-addr repository request-method request-path request-uri resp script-name searchable server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # external multi-hop headers
 
       head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # we accept Turtle even if requesting client doesnt
-      case host
-      when /wsj\.com$/
-        head['Referer'] = 'http://drudgereport.com/'
-      when /youtube.com$/
-        head['Referer'] = 'https://www.youtube.com/'
-      end
-      head['Referer'] = 'https://' + host + '/' if %w(gif jpeg jpg png svg webp).member? ext.downcase
+      head['Referer'] = 'http://drudgereport.com/' if host.match? /wsj\.com$/
+      head['Referer'] = 'https://' + host + '/' if %w(gif jpeg jpg png svg webp).member?(ext.downcase) || parts.member?('embed')
       head['User-Agent'] = if %w(po.st t.co).member? host # we want shortlink-expansion via HTTP-redirect, not Javascript, so advertise a basic user-agent
                              'curl/7.65.1'
                            else
