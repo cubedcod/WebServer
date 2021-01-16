@@ -28,7 +28,8 @@ campaign|chartbeat|chimp|cloudfront|co(mscore|nnatix|okielaw)|cpx\.|cr(iteo|sspx
 detroitchicago|[^a-z]dfp|disqus|dotmetrics|doubleclick|
 effectivemeasure|ensighten|evidon|Ezoic|
 facebook|foresee|fullstory|
-getpocket|google.?[acst]|grapeshot|gumgum|gwallet|hotjar|
+getpocket|google.?[acst]|grapeshot|gumgum|gwallet|
+hotjar|hubspot|
 impression|intercom|krxd|li(nkedin|strak)|
 ma(rketo|tomo)|me(dia\.net|quoda|trics)|ml314|mpulse|
 narrativ\.|newrelic|newsletter|npttech|nreum|

@@ -3,7 +3,6 @@ class WebResource
 
   # file -> Repository
   def loadRDF graph: env[:repository] ||= RDF::Repository.new
-puts uri
     if node.file?
       unless ['🐢','ttl'].member? ext                     # file metadata
         stat = node.stat
@@ -85,7 +84,7 @@ puts uri
     fullGraph = RDF::Repository.new                                            # graph
     miniGraph = RDF::Repository.new                                            # summary graph
     loadRDF graph: fullGraph                                                   # load graph
-    treeFromGraph(fullGraph).map{|subject, resource|                           # summarizable subjects
+    treeFromGraph(fullGraph).map{|subject, resource|                           # summarizable resources
       tiny = (resource[Type]||[]).member? (SIOC + 'MicroblogPost').R           # is micropost?
       predicates = [Abstract, Audio, Creator, Date, Image, LDP+'contains', Link, Title, To, Type, Video]
       predicates.push Content if tiny                                          # content included on microposts

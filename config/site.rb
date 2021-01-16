@@ -134,7 +134,9 @@ l.facebook.com l.instagram.com
       elsif path.index('/amp/s/') == 0
         [302, {'Location' => 'https://' + r.path[7..-1]}, []]
       elsif p == 'complete'
-        q = r.query_values['q']
+        qs = r.query_values || {}
+        q = qs['q']
+        r.fetch.yield_self{|s,h,b| puts s,h,b} if qs['client'] == 'firefox'
         output = ")]}'\n" + [q,["http://localhost:8000/h","http://localhost:8000/d","http://localhost:8000/m",
                                 "https://twitter.com",
                                 "https://www.reddit.com/r/androidx86+blissos+chrultrabook+chromeos+stallmanwasright/new",
