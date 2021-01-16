@@ -126,14 +126,14 @@ l.facebook.com l.instagram.com
     GET 'maps.google.com', GotoGoogle
 
     GET 'www.google.com', -> r {
-      path - r.path
+      path = r.path
       p = r.parts[0]
       q = r.query_values || {}
       if %w(dl images maps search).member? p
         NoGunk[r]
       elsif path.index('/amp/s/') == 0
         [302, {'Location' => 'https://' + r.path[7..-1]}, []]
-      elsif path == '/async/newtab_promos'
+      elsif path.index('/async/newtab') == 0
         puts r.fetch
         r.deny
       elsif p == 'complete'
@@ -176,8 +176,12 @@ l.facebook.com l.instagram.com
 
     GET 'www.reddit.com', -> r {
       r.env[:links][:prev] = ['//old.reddit.com', r.path.sub('.rss',''), '?',r.query].join.R.href # prev-page pointer
-      r.path += '.rss' if !r.path.index('.rss') && %w(r u user).member?(r.parts[0]) # request RSS representation
-      NoGunk[r]}
+      if %w(r u user).member? r.parts[0]
+        r.path += '.rss' unless r.path.index '.rss'
+        NoGunk[r]
+      else
+        r.deny
+      end}
 
     GET 's4.reutersmedia.net', -> r {
       args = r.query_values || {}
