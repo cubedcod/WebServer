@@ -3,6 +3,7 @@ class WebResource
 
   # file -> Repository
   def loadRDF graph: env[:repository] ||= RDF::Repository.new
+puts uri
     if node.file?
       unless ['🐢','ttl'].member? ext                     # file metadata
         stat = node.stat
@@ -75,30 +76,26 @@ class WebResource
     self
   end
 
-  SummaryFields = [Abstract, Audio, Creator, Date, Image, LDP+'contains', Link, Title, To, Type, Video]
-
   # file (big) -> file (small)
   def summary
-    return self if basename.match(/^(index|README)/) || !node.exist? # don't summarize README or index files or dangling symlinks
-
-    summary_node = join(['.preview', basename, ['🐢','ttl'].member?(ext) ? nil : '🐢'].compact.join '.').R env
+    return self if basename.match(/^(index|README)/) || !node.exist? # don't summarize index or README files
+    summary_node = join(['.preview', basename, ['🐢','ttl'].member?(ext) ? nil : '🐢'].compact.join '.').R env # summary URI
     file = summary_node.fsPath                                                 # summary file
     return summary_node if File.exist?(file) && File.mtime(file) >= node.mtime # summary up to date
-
-    fullGraph = RDF::Repository.new # full graph
-    miniGraph = RDF::Repository.new # summary graph
-    loadRDF graph: fullGraph        # load full graph
-
-    # summarize graph
-    treeFromGraph(fullGraph).map{|subject, resource| # all subjects
-      SummaryFields.map{|predicate|                  # summary predicates
+    fullGraph = RDF::Repository.new                                            # graph
+    miniGraph = RDF::Repository.new                                            # summary graph
+    loadRDF graph: fullGraph                                                   # load graph
+    treeFromGraph(fullGraph).map{|subject, resource|                           # summarizable subjects
+      tiny = (resource[Type]||[]).member? (SIOC + 'MicroblogPost').R           # is micropost?
+      predicates = [Abstract, Audio, Creator, Date, Image, LDP+'contains', Link, Title, To, Type, Video]
+      predicates.push Content if tiny                                          # content included on microposts
+      predicates.map{|predicate|                                               # summary predicate(s)
         if o = resource[predicate]
-          (o.class == Array ? o : [o]).map{|o|       # summary objects
-            miniGraph << RDF::Statement.new(subject.R,predicate.R,o)} # triple in summary-graph
-        end} if [Image, Abstract, Title, Link, Video].find{|p|resource.has_key? p}}
-
-    summary_node.writeFile miniGraph.dump(:turtle, base_uri: self, standard_prefixes: true) # store summary
-    summary_node
+          (o.class == Array ? o : [o]).map{|o|                                 # summary object(s)
+            miniGraph << RDF::Statement.new(subject.R,predicate.R,o)} # triple to summary-graph
+        end} if [Image, Abstract, Title, Link, Video].find{|p|resource.has_key? p} || tiny}
+    summary_node.writeFile miniGraph.dump(:turtle, base_uri: self, standard_prefixes: true) # cache summary
+    summary_node                                                                            # summary
   end
 
   # file (any type) -> file (turtle)
