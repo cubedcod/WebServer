@@ -30,7 +30,7 @@ effectivemeasure|ensighten|evidon|Ezoic|
 facebook|foresee|fullstory|
 getpocket|google.?[acst]|grapeshot|gumgum|gwallet|hotjar|
 impression|intercom|krxd|li(nkedin|strak)|
-marketo|matomo|media\.net|mequoda|ml314|mpulse|
+ma(rketo|tomo)|me(dia\.net|quoda|trics)|ml314|mpulse|
 narrativ\.|newrelic|newsletter|npttech|nreum|
 omap[pi]|onesignal|optanon|outbrain|
 pa(gespeed|rdot|ypal)|pi(n(gdom|terest)|wik)|porpoiseant|prebid|pubmatic|
@@ -38,7 +38,7 @@ quora|qua(ltrics|nt(cast|serv))|rightmessage|
 salesloft|scorecard|snowplow|
 ta(boola|rgeting)|tiqcdn|track(er|ing)|turnto|twitter.com|typekit|
 venatus|viglink|vntsm|
-yandex|\.yimg|zergnet|zoho)xi
+yandex|\.yimg|zergnet|zo(ho|pim))xi
 
   end
 end

@@ -97,8 +97,8 @@ class WebResource
     end
 
     def deny_domain?
-      c = DenyDomains                                               # start cursor at root
-      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # search for leaf in domain tree
+      c = DenyDomains                                               # init cursor
+      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # find leaf in domain tree
     end
 
     # if needed, generate and return entity. delegated to Rack handler if file reference
