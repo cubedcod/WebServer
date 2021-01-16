@@ -22,7 +22,7 @@ class WebResource
     Gunk = Regexp.new SiteDir.join('gunk.regex').read.chomp, Regexp::IGNORECASE
 
     ScriptGunk = %r(
-[-._\/'"\s:?&=~%]ads?[-._\/'"\s:?&=~%]|acsb|addtoany|algolia|analytic|aswpsdkus|auction|
+[-._\/\(\)'"\s:?&=~%](ads?|gtag)[-._\/\(\)'"\s:?&=~%]|acsb|addtoany|algolia|analytic|aswpsdkus|auction|
 baidu|bidder|bing|BOOMR|browser-update|
 campaign|chartbeat|chimp|cl(ickcease|oudfront)|co(mscore|nnatix|okielaw)|cpx\.|cr(iteo|sspxl)|cxense|
 detroitchicago|[^a-z]dfp|disqus|dotmetrics|doubleclick|
@@ -34,7 +34,7 @@ impression|intercom|krxd|li(nkedin|strak)|
 ma(rketo|tomo)|me(dia\.net|quoda|trics)|ml314|mpulse|
 narrativ\.|newrelic|newsletter|npttech|nreum|
 omap[pi]|onesignal|optanon|outbrain|
-pa(gespeed|rdot|ypal)|pi(n(gdom|terest)|wik)|porpoiseant|prebid|pubmatic|
+pa(gespeed|rdot|ypal)|pi(n(gdom|terest)|wik)|porpoiseant|prebid|pubm(atic|ine)|
 quora|qua(ltrics|nt(cast|serv))|rightmessage|
 salesloft|scorecard|snowplow|
 ta(boola|rgeting)|tiqcdn|track(er|ing)|toutapp|turnto|twitter.com|typekit|
