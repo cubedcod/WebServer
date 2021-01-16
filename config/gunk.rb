@@ -24,10 +24,10 @@ class WebResource
     ScriptGunk = %r(
 [-._\/'"\s:?&=~%]ads?[-._\/'"\s:?&=~%]|acsb|addtoany|algolia|analytic|aswpsdkus|auction|
 baidu|bidder|bing|BOOMR|browser-update|
-campaign|chartbeat|chimp|cloudfront|co(mscore|nnatix|okielaw)|cpx\.|cr(iteo|sspxl)|cxense|
+campaign|chartbeat|chimp|cl(ickcease|oudfront)|co(mscore|nnatix|okielaw)|cpx\.|cr(iteo|sspxl)|cxense|
 detroitchicago|[^a-z]dfp|disqus|dotmetrics|doubleclick|
 effectivemeasure|ensighten|evidon|Ezoic|
-facebook|foresee|fullstory|
+facebook|foresee|fullstory|funnel|
 getpocket|google.?[acst]|grapeshot|gumgum|gwallet|
 hotjar|hubspot|
 impression|intercom|krxd|li(nkedin|strak)|
@@ -37,8 +37,8 @@ omap[pi]|onesignal|optanon|outbrain|
 pa(gespeed|rdot|ypal)|pi(n(gdom|terest)|wik)|porpoiseant|prebid|pubmatic|
 quora|qua(ltrics|nt(cast|serv))|rightmessage|
 salesloft|scorecard|snowplow|
-ta(boola|rgeting)|tiqcdn|track(er|ing)|turnto|twitter.com|typekit|
-venatus|viglink|vntsm|
+ta(boola|rgeting)|tiqcdn|track(er|ing)|toutapp|turnto|twitter.com|typekit|
+venatus|viglink|vntsm|wp.?(admin|emoji|rum)|
 yandex|\.yimg|zergnet|zo(ho|pim))xi
 
   end
