@@ -44,9 +44,8 @@ module Webize
         html = Nokogiri::HTML.fragment html
       end
 
-      # strip externally-originated styles and scripts
-      html.css('iframe, script, style, a[href^="javascript"], link[rel="stylesheet"], link[type="text/javascript"], link[as="script"]').map{|e| puts "🚩 " + e.to_s} if ENV['VERBOSE']
-      html.css('iframe, script, style, a[href^="javascript"], link[rel="stylesheet"], link[type="text/javascript"], link[as="script"]').remove unless [nil,'localhost'].member? base.host # locally-originated scripts only
+      # strip externally-originated styles, scripts, and forms
+      html.css('iframe, input, script, style, a[href^="javascript"], link[rel="stylesheet"], link[type="text/javascript"], link[as="script"]').remove unless [nil,'localhost'].member? base.host
 
       # <img> mapping
       html.css('[style*="background-image"]').map{|node|
