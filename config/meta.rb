@@ -55,6 +55,7 @@ class WebResource
       'DC.contributor' => Creator,
       'DC.creator' => Creator,
       'DC.date' => Date,
+      'DC.date.created' => Date,
       'DC.date.issued' => Date,
       'DC.description' => Abstract,
       'DC.identifier' => DC+'identifier',

@@ -27,7 +27,7 @@ baidu|bidder|bing|BOOMR|browser-update|
 campaign|chartbeat|chimp|cloudfront|co(mscore|nnatix|okielaw)|cpx\.|cr(iteo|sspxl)|cxense|
 detroitchicago|[^a-z]dfp|disqus|dotmetrics|doubleclick|
 effectivemeasure|ensighten|evidon|Ezoic|
-facebook\.(com|net)|fullstory|
+facebook|foresee|fullstory|
 getpocket|google.?[acst]|grapeshot|gumgum|gwallet|hotjar|
 impression|intercom|krxd|li(nkedin|strak)|
 marketo|matomo|media\.net|mequoda|ml314|mpulse|
