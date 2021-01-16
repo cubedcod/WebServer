@@ -12,16 +12,6 @@ class WebResource
       host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # search for leaf in domain tree
     end
 
-    def allowed_origin
-      if env['HTTP_ORIGIN']
-        env['HTTP_ORIGIN']
-      elsif referer = env['HTTP_REFERER']
-        'http' + (host == 'localhost' ? '' : 's') + '://' + referer.R.host
-      else
-        '*'
-      end
-    end
-
     def cacheResponse
       nodes = nodeSet            # find nodes
       if nodes.size == 1 && (nodes[0].static_node? || # one node of preferred or fixed format
@@ -93,7 +83,7 @@ class WebResource
                       end
       [status,
        {'Access-Control-Allow-Credentials' => 'true',
-        'Access-Control-Allow-Origin' => allowed_origin,
+        'Access-Control-Allow-Origin' => origin,
         'Content-Type' => type},
        [content]]
     end
@@ -165,7 +155,7 @@ class WebResource
       URI.open(url, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                                             # response headerd
         if response.status.to_s.match? /206/                          # partial response
-          h['Access-Control-Allow-Origin'] = allowed_origin unless h['Access-Control-Allow-Origin'] || h['access-control-allow-origin']
+          h['Access-Control-Allow-Origin'] = origin unless h['Access-Control-Allow-Origin'] || h['access-control-allow-origin']
           [206, h, [response.read]]                                   # respond with part
         else
           body = HTTP.decompress h, response.read                     # response body
@@ -221,7 +211,7 @@ class WebResource
 
           saveRDF                                                     # cache graph-data
 
-          env[:resp]['Access-Control-Allow-Origin'] ||= allowed_origin# CORS header
+          env[:resp]['Access-Control-Allow-Origin'] ||= origin        # CORS header
           h['link'] && h['link'].split(',').map{|link|                # Link headers
             ref, type = link.split(';').map &:strip
             if ref && type
@@ -270,7 +260,7 @@ class WebResource
     end
 
     def fileResponse
-      env[:resp]['Access-Control-Allow-Origin'] ||= allowed_origin
+      env[:resp]['Access-Control-Allow-Origin'] ||= origin
       env[:resp]['ETag'] ||= Digest::SHA2.hexdigest [uri, node.stat.mtime, node.size].join
       entity
     end
@@ -306,7 +296,7 @@ class WebResource
     def graphResponse
       return notfound if !env.has_key?(:repository) || env[:repository].empty?
       format = selectFormat
-      env[:resp]['Access-Control-Allow-Origin'] ||= allowed_origin
+      env[:resp]['Access-Control-Allow-Origin'] ||= origin
       env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
       env[:resp].update({'Link' => env[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !env[:links] || env[:links].empty?
       entity ->{
@@ -410,6 +400,16 @@ class WebResource
       ENV.has_key?('OFFLINE') || (query_values||{}).has_key?('offline')
     end
 
+    def origin
+      if env['HTTP_ORIGIN']
+        env['HTTP_ORIGIN']
+      elsif referer = env['HTTP_REFERER']
+        'http' + (host == 'localhost' ? '' : 's') + '://' + referer.R.host
+      else
+        '*'
+      end
+    end
+
     # Hash -> querystring
     def HTTP.qs h
       return '' if !h || h.empty?
@@ -450,7 +450,7 @@ class WebResource
       else
         env[:deny] = true
         [202, {'Access-Control-Allow-Credentials' => 'true',
-               'Access-Control-Allow-Origin' => allowed_origin}, []]
+               'Access-Control-Allow-Origin' => origin}, []]
       end
     end
 
