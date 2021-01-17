@@ -54,6 +54,7 @@ module Webize
       html.css('amp-img').map{|amp| amp.add_child "<img src=\"#{amp['src']}\">"}                           # amp-img -> img
       html.css("div[class*='image'][data-src]").map{|div|div.add_child "<img src=\"#{div['data-src']}\">"} # div -> img
       html.css("figure[itemid]").map{|fig| fig.add_child "<img src=\"#{fig['itemid']}\">"}                 # figure -> img
+      html.css("slide").map{|s| s.add_child "<img src=\"#{s['original']}\" alt=\"#{s['caption']}\">"}      # slide -> img
 
 =begin
       # identify all <p> <pre> <ul> <ol> elements
