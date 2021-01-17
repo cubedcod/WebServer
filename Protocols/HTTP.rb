@@ -6,6 +6,7 @@ class WebResource
     include URIs
 
     HostGET = {}
+    Methods = %w(GET HEAD OPTIONS POST PUT)
 
     def allow_domain?
       c = AllowDomains                                              # start cursor at root
@@ -26,25 +27,22 @@ class WebResource
     end
 
     def self.call env
-      return [405,{},[]] unless %w(GET HEAD OPTIONS POST PUT).member? env['REQUEST_METHOD'] # allow methods
-      uri = RDF::URI('//' + env['HTTP_HOST']).join(env['REQUEST_PATH']).R env # request URI
-      uri.scheme = uri.local_node? ? 'http' : 'https'                         # URI scheme
+      return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']       # allow methods
+      uri = RDF::URI('//'+env['HTTP_HOST']).join(env['REQUEST_PATH']).R env # request URI
+      uri.scheme = uri.local_node? ? 'http' : 'https'                       # URI scheme
       uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading + consecutive & from qs so URI library doesn't freak out
-      env.update({base: uri, feeds: [], links: {}, resp: {}})                 # request environment
-      uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body| # dispatch request
-        format = uri.format_icon head['Content-Type']                 # logger
+      env.update({base: uri, feeds: [], links: {}, log: [], resp: {}})      # response environment
+      uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body|       # dispatch request
+        format = uri.format_icon head['Content-Type']                       # logger
         color = env[:deny] ? '31;1' : (format_color format)
-        puts [env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]), (status_icon status), format,
-              env[:repository] ? (env[:repository].size.to_s + '⋮') : nil,
-              env['HTTP_REFERER'] ? ["\e[#{color}m", env['HTTP_REFERER'], "\e[0m→"] : nil,
-              "\e[#{color}#{env['HTTP_REFERER'] && !env['HTTP_REFERER'].index(env[:base].host) && ';7' || ''}m",
-              env[:base], "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil,
-              [env['HTTP_ACCEPT'], head['Content-Type']].compact.join(' → ')
+        puts [env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]), (status_icon status), format, env[:repository] ? (env[:repository].size.to_s + '⋮') : nil,
+              env['HTTP_REFERER'] ? ["\e[#{color}m", env['HTTP_REFERER'], "\e[0m→"] : nil, "\e[#{color}#{env['HTTP_REFERER'] && !env['HTTP_REFERER'].index(env[:base].host) && ';7' || ''}m",
+              env[:base], "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil, Verbose ? [env['HTTP_ACCEPT'], head['Content-Type']].compact.join(' → ') : nil, env[:log]
              ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
-        [status, head, body]} # response
-    rescue Exception => e
+        [status, head, body]}                                               # response
+    rescue Exception => e                                                   # error handler
       msg = [[uri, e.class, e.message].join(' '), e.backtrace].join "\n"
-      puts "\e[7;31m500\e[0m " + msg
+      puts "\e[7;31m500\e[0m " + msg if Verbose
       [500, {'Content-Type' => 'text/html; charset=utf-8'}, env['REQUEST_METHOD'] == 'HEAD' ? [] : ["<!DOCTYPE html>\n<html><body class='error'>#{HTML.render [{_: :style, c: SiteCSS}, {_: :script, c: SiteJS}, uri.uri_toolbar]}<pre><a href='#{uri.remoteURL}' >500</a>\n#{CGI.escapeHTML msg}</pre></body></html>"]]
     end
 
@@ -329,7 +327,7 @@ class WebResource
           end
           t                                       # token
         }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
-        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base colors connection downloadable feeds fetched graph host images keep-alive links origin-status path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles remote-addr repository request-method request-path request-uri resp script-name searchable server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # external multi-hop headers
+        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base colors connection downloadable feeds fetched graph host images keep-alive links log origin-status path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles remote-addr repository request-method request-path request-uri resp script-name searchable server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # external multi-hop headers
 
       head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # we accept Turtle even if requesting client doesnt
       head['Referer'] = 'http://drudgereport.com/' if host.match? /wsj\.com$/

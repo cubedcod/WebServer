@@ -7,8 +7,7 @@ module Webize
         str
       elsif gunk = (str.match ScriptGunk)
         base.env[:deny] = true
-
-        puts "#{base} #{gunk}" if Verbose
+        base.env[:log].push gunk
 
         ["// #{str.bytesize} bytes",
          "// gunk: #{gunk}"].join "\n"
