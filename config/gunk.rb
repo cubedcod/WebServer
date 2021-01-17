@@ -36,8 +36,8 @@ narrativ\.|newrelic|newsletter|npttech|nreum|
 omap[pi]|onesignal|optanon|outbrain|
 pa(gespeed|r(dot|sely)|ypal)|pi(n(gdom|terest)|wik)|porpoiseant|prebid|pub(\.network|m(atic|ine))|
 quora|qua(ltrics|nt(cast|serv))|rightmessage|
-sa(il.?(horizon|thr)|lesloft)|scorecard|serviceWorker.register|snowplow|statcounter|
-ta(boola|rgeting)|tiqcdn|track(er|ing)|toutapp|turnto|twitter.com|typekit|
+sa(il.?(horizon|thr)|lesloft)|scorecard|se(archiq|rviceWorker)|snowplow|statcounter|
+ta(boola|rgeting)|tiqcdn|track(er|ing)|toutapp|turnto|twitter|typekit|
 venatus|viglink|vntsm|wp.?(admin|emoji|rum)|
 yandex|\.yimg|zergnet|zo(ho|pim))xi
 
