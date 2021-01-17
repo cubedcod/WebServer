@@ -3,7 +3,7 @@ class WebResource
   module URIs
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
 
-    AllowJS = %w(assets.squarespace.com cdn.jwplayer.com twitter.com w3.cdn.anvato.net www.google.com www.instagram.com www.mixcloud.com www.youtube.com)
+    AllowJS = %w(assets.squarespace.com cdn.jwplayer.com gitter.im twitter.com w3.cdn.anvato.net www.google.com www.instagram.com www.mixcloud.com www.youtube.com)
 
     AllowFile = SiteDir.join 'allow_domains'
     AllowDomains = {}
