@@ -19,6 +19,7 @@ module Webize
     class Format < RDF::Format
       content_type 'application/ruby',
                    aliases: %w(
+                   application/x-javascript;q=0.2
                    text/x-c;q=0.8
                    text/x-perl;q=0.8
                    text/x-ruby;q=0.8
