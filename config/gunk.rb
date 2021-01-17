@@ -34,9 +34,9 @@ impression|intercom|krxd|li(nkedin|strak)|
 ma(rketo|tomo)|me(dia\.net|quoda|trics)|ml314|mpulse|
 narrativ\.|newrelic|newsletter|npttech|nreum|
 omap[pi]|onesignal|optanon|outbrain|
-pa(gespeed|r(dot|sely)|ypal)|pi(n(gdom|terest)|wik)|porpoiseant|prebid|pubm(atic|ine)|
+pa(gespeed|r(dot|sely)|ypal)|pi(n(gdom|terest)|wik)|porpoiseant|prebid|pub(\.network|m(atic|ine))|
 quora|qua(ltrics|nt(cast|serv))|rightmessage|
-salesloft|scorecard|snowplow|statcounter|
+sa(il.?(horizon|thr)|lesloft)|scorecard|snowplow|statcounter|
 ta(boola|rgeting)|tiqcdn|track(er|ing)|toutapp|turnto|twitter.com|typekit|
 venatus|viglink|vntsm|wp.?(admin|emoji|rum)|
 yandex|\.yimg|zergnet|zo(ho|pim))xi

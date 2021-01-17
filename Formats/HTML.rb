@@ -27,7 +27,7 @@ module Webize
 
       doc.css('script').map{|s|
         if gunk = (s.inner_text.match ScriptGunk)
-          base.env[:log].push gunk
+          base.env[:log].push gunk if Verbose
           s.remove
         end} unless AllowJS.member? base.host
 
