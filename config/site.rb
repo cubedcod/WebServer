@@ -69,6 +69,7 @@ class WebResource
       else                                # request has query
         [302, {'Location' => r.path}, []] #  redirect to path
       end}
+
     Resizer = -> r {
       if r.parts[0] == 'resizer'
         parts = r.path.split /\/\d+x\d+\/((filter|smart)[^\/]*\/)?/

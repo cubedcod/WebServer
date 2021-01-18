@@ -32,7 +32,7 @@ module Webize
         end} unless AllowJS.member? base.host
 
       doc.css('style').map{|s| Webize::CSS.cleanNode s if s.inner_text.match? /font-face|import/}
-
+#      doc.css("[class*='cookie'], [class*='modal'], [class*='newsletter']").map{|r|  puts r}
       doc.css("[class*='cookie'], [class*='modal'], [class*='newsletter']").remove
 
       doc.to_html

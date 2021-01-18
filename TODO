@@ -14,3 +14,4 @@ gopher
 wayland browser w/ https/images
 reload deny_domains on changes and send reconfigure signal to squid
 ?fullContent  for elided repeat content - https://solidproject.org/newsletter/2020-12-03#UI
+JS without extension and w/ QS cache-collision - ~ grep --text /javascript web/web.log   | grep -v '\.js' | grep -v www.google.com | less - need to allow local query args w/o affecting origin-arg varied storage location.. see also  ?notransform stripping in  #fetch

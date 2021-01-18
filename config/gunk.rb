@@ -33,7 +33,7 @@ hotjar|hubspot|
 impression|intercom|krxd|li(nkedin|strak)|
 ma(rketo|tomo)|me(dia\.net|quoda|trics)|ml314|mpulse|
 narrativ\.|newrelic|newsletter|npttech|nreum|
-omap[pi]|onesignal|optanon|outbrain|
+olark|omap[pi]|onesignal|optanon|outbrain|
 pa(gespeed|r(dot|sely)|ypal)|pi(n(gdom|terest)|wik)|porpoiseant|prebid|pub(\.network|m(atic|ine))|
 quora|qua(ltrics|nt(cast|serv))|rightmessage|
 sa(il.?(horizon|thr)|lesloft)|scorecard|se(archiq|rviceWorker)|snowplow|statcounter|
