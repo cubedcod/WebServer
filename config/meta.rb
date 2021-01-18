@@ -267,6 +267,7 @@ class WebResource
       'expiration' => :drop,
       'external' => Link,
       'externalId' => :drop,
+      'facebook-domain-verification' => :drop,
       'favourited' => :drop,
       'favourites_count' => :drop,
       'fb:admins' => :drop,

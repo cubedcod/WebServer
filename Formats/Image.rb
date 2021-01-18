@@ -59,10 +59,10 @@ data-lazy-srcset
 data-srcset
 }
 
-    # resolve srcset references to local cache
+    # resolve srcset references
     def self.srcset node, base
       node['srcset'] = node['srcset'].scan(/\s*(\S+)\s+([^,]+),*/).map{|url, size|
-        [base.join(url).R.href, size].join ' '
+        [(base.join url), size].join ' '
       }.join(', ')
       nil
     end

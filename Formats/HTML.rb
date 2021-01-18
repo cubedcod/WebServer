@@ -40,11 +40,9 @@ module Webize
 
     # format HTML to local preferences
     def self.format html, base
-      if html.class == String
-        html = Nokogiri::HTML.fragment html
-      end
+      html = Nokogiri::HTML.fragment html if html.class == String
 
-      # strip externally-originated styles, scripts, and forms
+      # drop nonlocal formatting, embeds, code and input controls
       html.css('iframe, input, script, style, a[href^="javascript"], link[rel="stylesheet"], link[type="text/javascript"], link[as="script"]').remove unless [nil,'localhost'].member? base.host
 
       # <img> mapping
@@ -56,57 +54,29 @@ module Webize
       html.css("figure[itemid]").map{|fig| fig.add_child "<img src=\"#{fig['itemid']}\">"}                 # figure -> img
       html.css("slide").map{|s| s.add_child "<img src=\"#{s['original']}\" alt=\"#{s['caption']}\">"}      # slide -> img
 
-=begin
-      # identify all <p> <pre> <ul> <ol> elements
-      html.css('p').map{|e|   e.set_attribute 'id', 'p'   + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
-      html.css('pre').map{|e| e.set_attribute 'id', 'pre' + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
-      html.css('ul').map{|e|  e.set_attribute 'id', 'ul'  + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
-      html.css('ol').map{|e|  e.set_attribute 'id', 'ol'  + Digest::SHA2.hexdigest(rand.to_s)[0..3] unless e['id']}
-=end
-
-      # inspect nodes
-      html.traverse{|e|                                              # inspect node
+      html.traverse{|e|                                              # visit nodes
         e.respond_to?(:attribute_nodes) && e.attribute_nodes.map{|a| # inspect attributes
           e.set_attribute 'src', a.value if SRCnotSRC.member? a.name # map src-like attributes to src
           e.set_attribute 'srcset', a.value if SRCSET.member? a.name # map srcset-like attributes to srcset
-          a.unlink if a.name=='id' && a.value.match?(Gunk)           # strip attributes
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w(bgcolor class color height http-equiv layout loading ping role style tabindex target theme width).member?(a.name)}
-
-        if e['src']                                                  # src attribute
-          src = (base.join e['src']).R                               # resolve src location
-          if src.deny?
-            puts "🚩 \e[30;1m" + e.to_s.gsub(Gunk, "\e[31m\\0\e[30m") + "\e[0m" if Verbose
-            e.remove                                                 # strip blocked src
-          else
-            e['src'] = src.href                                      # update src to resolved location
-          end
-        end
-
-        srcset e, base if e['srcset']                                # srcset attribute
-
+        e['src'] = (base.join e['src']) if e['src']                  # resolve @src
+        srcset e, base if e['srcset']                                # resolve @srcset
         if e['href']                                                 # href attribute
           ref = (base.join e['href']).R                              # resolve href location
           ref.query = '' if ref.query&.match?(/utm[^a-z]/)           # de-urchinize query
           ref.fragment = '' if ref.fragment&.match?(/utm[^a-z]/)     # de-urchinize fragment
-
-          if ref.deny?
-            puts "🚩 \e[30;1m" + e.to_s.gsub(Gunk, "\e[31m\\0\e[30m") + "\e[0m" if Verbose
-            e.remove                                                 # strip blocked href
-          else
-            offsite = ref.host != base.host
-            e.add_child " <span class='uri'>#{CGI.escapeHTML (offsite ? ref.uri.sub(/^https?:..(www.)?/,'') : (ref.path || '/'))[0..127]}</span> " # show URI in HTML
-            e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # mint identifier
-            css = [:uri]; css.push :path unless offsite              # style as local or global reference
-            e['href'] = ref.href                                     # update href to resolved location
-            e['class'] = css.join ' '                                # add CSS style
-          end
-
-        elsif e['id']                                                # id attribute
+          offsite = ref.host != base.host
+          e.add_child " <span class='uri'>#{CGI.escapeHTML (offsite ? ref.uri.sub(/^https?:..(www.)?/,'') : (ref.path || '/'))[0..127]}</span> " # show URI in HTML
+          e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # mint identifier
+          css = [:uri]; css.push :path unless offsite                # style as local or global reference
+          e['href'] = ref.href                                       # update href to resolved location
+          e['class'] = css.join ' '                                  # add CSS style
+        elsif e['id']                                                # id attribute w/o href
           e.set_attribute 'class', 'identified'                      # style as identified node
           e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id'] unless e.name == 'p'}</span> " # add href to node
         end}
 
-      html.to_xhtml indent: 0
+      html.to_xhtml indent: 0                                        # serialize
     end
 
     class Format < RDF::Format
