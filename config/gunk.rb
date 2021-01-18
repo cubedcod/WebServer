@@ -23,7 +23,7 @@ class WebResource
 
     ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](ads?|gtag|pixel)[-._\/\(\)'"\s:?&=~%]|
 amazon|acsb|addtoany|algolia|analytic|aswpsdkus|auction|
-baidu|bidder|bing|BOOMR|browser-update|
+baidu|bidder|bing|BOOMR|browser-update|bugherd|
 campaign|chartbeat|chimp|cl(ickcease|oudfront)|co(mscore|n(fiant|natix)|okielaw)|cpx\.|cr(iteo|sspxl)|cxense|
 detroitchicago|[^a-z]dfp|disqus|dotmetrics|doubleclick|
 effectivemeasure|ensighten|evidon|Ezoic|
