@@ -22,23 +22,23 @@ class WebResource
     Gunk = Regexp.new SiteDir.join('gunk.regex').read.chomp, Regexp::IGNORECASE
 
     ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](ads?|gtag|pixel)[-._\/\(\)'"\s:?&=~%]|
-amazon|acsb|addtoany|algolia|analytic|aswpsdkus|auction|
-baidu|bidder|bing|BOOMR|browser-update|bugherd|
+ad(.?block|vert)|amazon|acsb|addtoany|algolia|analytic|aswpsdkus|auction|
+baidu|bazaarvoice|bidder|bing|BOOMR|browser-update|bugherd|
 campaign|chartbeat|chimp|cl(ickcease|oudfront)|co(mscore|n(fiant|natix)|okielaw)|cpx\.|cr(iteo|sspxl)|cxense|
 detroitchicago|[^a-z]dfp|disqus|dotmetrics|doubleclick|
 effectivemeasure|ensighten|evidon|Ezoic|
 facebook|foresee|fullstory|funnel|
-get(drip|pocket)|google|grapeshot|gumgum|gwallet|
+gdpr|get(drip|pocket)|google|grapeshot|gumgum|gwallet|
 hotjar|hubspot|
 impression|intercom|krxd|li(nkedin|strak)|
 ma(rketo|tomo)|me(dia\.net|quoda|trics)|ml314|mpulse|
 narrativ\.|newrelic|newsletter|npttech|nreum|
 olark|omap[pi]|onesignal|optanon|outbrain|
 pa(gespeed|r(dot|sely)|ypal)|pi(n(gdom|terest)|wik)|porpoiseant|prebid|pub(\.network|m(atic|ine))|
-quora|qua(ltrics|nt(cast|serv))|rightmessage|
+quora|qua(ltrics|nt(cast|serv|um))|rightmessage|
 sa(il.?(horizon|thr)|lesloft)|scorecard|se(archiq|rviceWorker)|snowplow|statcounter|
 ta(boola|rgeting)|tiqcdn|track(er|ing)|toutapp|turnto|twitter|typekit|
-venatus|viglink|vntsm|wp.?(admin|emoji|rum)|
+venatus|viglink|vntsm|woocommerce|wp.?(admin|emoji|rum)|
 yandex|\.yimg|zergnet|zo(ho|pim))xi
 
   end
