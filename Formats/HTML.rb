@@ -27,13 +27,15 @@ module Webize
 
       doc.css('script').map{|s|
         if gunk = (s.inner_text.match ScriptGunk)
-          base.env[:log].push gunk if Verbose
+          base.env[:log].push gunk
+          puts s.inner_text, '-'*42 if Verbose
           s.remove
         end} unless AllowJS.member?(base.host) #|| ENV.has_key?('GUNK')
 
       doc.css('style').map{|s| Webize::CSS.cleanNode s if s.inner_text.match? /font-face|import/}
-#      doc.css("[class*='cookie'], [class*='modal'], [class*='newsletter']").map{|r|  puts r}
-      doc.css("[class*='cookie'], [class*='modal'], [class*='newsletter']").remove
+
+      #doc.css("[class*='modal'], [class*='newsletter']").map{|r| puts r,'-'*42} if Verbose
+      doc.css("[class*='modal'], [class*='newsletter']").remove
 
       doc.to_html
     end
