@@ -27,6 +27,11 @@ module Webize
           end
         end}
 
+      doc.css('meta[content]').map{|meta|
+        if meta['content'].match? /^https?:/
+          meta.remove if meta['content'].R.deny?
+        end}
+
       doc.css('script').map{|s|
         if gunk = (s.inner_text.match ScriptGunk)
           base.env[:log].push gunk.to_s[0..31]
