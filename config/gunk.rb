@@ -23,14 +23,15 @@ class WebResource
 
     ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](ads|gtag|pixel)[-._\/\(\)'"\s:?&=~%]|
 ad(.?block|vert)|amazon|acsb|addtoany|algolia|analytic|aswpsdkus|auction|
-baidu|bazaarvoice|bidder|bing|BOOMR|browser.?update|bugherd|
+baidu|bazaarvoice|bidder|bing|BOOMR|browser.?update|btncdn|bugherd|
 campaign|chartbeat|chimp|cl(ickcease|oudfront)|co(mscore|n(fiant|natix)|okie.?(consent|law))|cpx\.|cr(iteo|sspxl)|cxense|
 detroitchicago|[^a-z]dfp|disqus|dmpxs|dotmetrics|doubleclick|
 effectivemeasure|ensighten|evidon|Ezoic|
 facebook|foresee|fullstory|funnel|
 gdpr|get(drip|pocket)|google|grapeshot|gumgum|gwallet|
 hotjar|hubspot|
-impression|inte(llitxt|rcom)|krxd|li(nkedin|strak)|
+impression|inte(llitxt|rcom)|krxd|kochava|
+li(nkedin|strak)|
 ma(rketo|tomo)|me(dia\.net|quoda|trics)|ml314|mpulse|
 narrativ\.|newrelic|newsletter|npttech|nreum|
 olark|omap[pi]|one(signal|trust)|optanon|outbrain|
