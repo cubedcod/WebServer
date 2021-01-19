@@ -22,7 +22,7 @@ class WebResource
     Gunk = Regexp.new SiteDir.join('gunk.regex').read.chomp, Regexp::IGNORECASE
 
     ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](ads|gtag|pixel)[-._\/\(\)'"\s:?&=~%]|
-ad(.?block|vert)|amazon|acsb|addtoany|algolia|analytic|aswpsdkus|auction|
+ad(.?block|recover|vert)|amazon|acsb|addtoany|algolia|analytic|aswpsdkus|auction|
 baidu|bazaarvoice|bidder|bing|BOOMR|browser.?update|btncdn|bugherd|
 campaign|chartbeat|chimp|cl(ickcease|oudfront)|co(mscore|n(fiant|natix)|okie.?(consent|law))|cpx\.|cr(iteo|sspxl)|cxense|
 detroitchicago|[^a-z]dfp|disqus|dmpxs|dotmetrics|doubleclick|
@@ -31,7 +31,7 @@ fa(cebook|stclick)|foresee|fullstory|funnel|
 gdpr|get(drip|pocket)|google|grapeshot|gumgum|gwallet|
 hotjar|hubspot|
 impression|inte(llitxt|rcom)|krxd|kochava|
-li(nkedin|strak)|
+lexity|li(nkedin|strak)|
 ma(rketo|tomo)|me(dia\.net|quoda|trics)|ml314|mpulse|
 narrativ\.|newrelic|newsletter|npttech|nreum|
 olark|omap[pi]|one(signal|trust)|optanon|outbrain|
@@ -40,7 +40,7 @@ quora|qua(ltrics|nt(cast|serv|um))|r-login|rightmessage|rlcdn|
 sa(il.?(horizon|thr)|lesloft)|sc(ene7|orecard)|se(archiq|edtag|ntry|rviceWorker)|snowplow|statcounter|
 ta(boola|rgeting)|tiqcdn|track(er|ing)|toutapp|turnto|twitter|typekit|
 venatus|viglink|vntsm|woocommerce|wp.?(admin|emoji|groho|rum)|
-yandex|\.yimg|zergnet|zo(ho|pim))xi
+yandex|\.yimg|ze(ndesk|rg)|zo(ho|pim))xi
 
   end
 end
