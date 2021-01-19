@@ -39,7 +39,8 @@ pa(ges(ense|peed)|r(dot|sely)|ypal)|pi(n(gdom|img|terest)|wik)|porpoiseant|prebi
 quora|qua(ltrics|nt(cast|serv|um))|r-login|rightmessage|rlcdn|
 sa(il.?(horizon|thr)|lesloft)|sc(ene7|orecard)|se(archiq|edtag|rviceWorker)|slickstream|snowplow|statcounter|
 ta(boola|rgeting)|tiqcdn|track(er|ing)|toutapp|turnto|twitter|typekit|
-venatus|viglink|vntsm|woocommerce|wp.?(emoji|groho|rum)|
+venatus|viglink|vuukle|vntsm|
+woocommerce|wp.?(emoji|groho|rum)|
 yandex|\.yimg|yotpo|
 ze(ndesk|rg)|zo(ho|pim))xi
 

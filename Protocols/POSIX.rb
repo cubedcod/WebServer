@@ -110,8 +110,9 @@ class WebResource
         [self]
       else
         qs = query_values || {}
-        env[:summary] = !%w(fullContent q).find{|arg| qs.has_key? arg }
+#        env[:summary] = !%w(fullContent q).find{|arg| qs.has_key? arg }
         (if node.directory?
+         env[:summary] = true
          if qs['f'] && !qs['f'].empty? # FIND
            `find #{shellPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
          elsif qs['find'] && !qs['find'].empty? && path != '/' # FIND case-insensitive substring
@@ -130,7 +131,7 @@ class WebResource
               Pathname.glob globPath # parametric GLOB
             end
           else # default document-set GLOB
-            env[:summary] = false
+#            env[:summary] = false
             globPath += query_hash if static_node? && !local_node?
             globPath += '.*'
             Pathname.glob globPath
