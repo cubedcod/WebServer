@@ -47,7 +47,7 @@ class WebResource
                     c: {_: :a, id: 'sort_by_' + slug, href: HTTP.qs(qs.merge({'sort' => p.uri, 'order' => ascending ? 'desc' : 'asc'})), c: icon}}, "\n"]}}}, "\n", # pointer to sorted representation
            {_: :tbody,
             c: graph.map{|resource|
-              re = (resource['uri'] || ('#' + Digest::SHA2.hexdigest(rand.to_s))).R env                      # resource identity
+              re = (resource['uri'] || ('#'+Digest::SHA2.hexdigest(rand.to_s))).to_s.R env                   # resource identity
               local_id = re.path == env[:base].path && re.fragment || ('r' + Digest::SHA2.hexdigest(re.uri)) # local-row identity
               [{_: :tr, id: local_id, c: keys.map{|k| # row
                  [{_: :td, property: k,

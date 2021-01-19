@@ -34,7 +34,7 @@ impression|inte(llitxt|rcom)|krxd|kochava|
 lexity|li(nkedin|strak)|
 ma(iler|rketo|tomo)|me(dia\.net|quoda|trics)|ml314|mpulse|
 narrativ\.|newrelic|newsletter|npttech|nreum|
-olark|omap[pi]|one(signal|trust)|opt(anon|imizer)|outbrain|
+olark|omappapi|one(signal|trust)|opt(anon|imizer)|outbrain|
 pa(ges(ense|peed)|r(dot|sely)|ypal)|pi(n(gdom|img|terest)|wik)|porpoiseant|prebid|pub(\.network|m(atic|ine))|
 quora|qua(ltrics|nt(cast|serv|um))|r-login|rightmessage|rlcdn|
 sa(il.?(horizon|thr)|lesloft)|sc(ene7|orecard)|se(archiq|edtag|rviceWorker)|slickstream|snowplow|statcounter|
