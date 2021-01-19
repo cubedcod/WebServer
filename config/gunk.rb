@@ -21,9 +21,9 @@ class WebResource
 
     Gunk = Regexp.new SiteDir.join('gunk.regex').read.chomp, Regexp::IGNORECASE
 
-    ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](ads|gtag|pixel)[-._\/\(\)'"\s:?&=~%]|
+    ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](ads|bing|gtag|pixel|sentry)[-._\/\(\)'"\s:?&=~%]|
 ad(.?block|recover|vert)|amazon|acsb|addtoany|algolia|analytic|aswpsdkus|auction|
-baidu|bazaarvoice|bidder|bing|BOOMR|browser.?update|btncdn|bugherd|
+baidu|bazaarvoice|bidder|BOOMR|browser.?update|btncdn|bugherd|
 campaign|chartbeat|chimp|cl(ickcease|oudfront)|co(mscore|n(fiant|natix)|okie.?(consent|law))|cpx\.|cr(iteo|sspxl)|cxense|
 detroitchicago|[^a-z]dfp|disqus|dmpxs|dotmetrics|doubleclick|
 effectivemeasure|ensighten|evidon|Ezoic|
@@ -37,9 +37,9 @@ narrativ\.|newrelic|newsletter|npttech|nreum|
 olark|omap[pi]|one(signal|trust)|opt(anon|imizer)|outbrain|
 pa(ges(ense|peed)|r(dot|sely)|ypal)|pi(n(gdom|terest)|wik)|porpoiseant|prebid|pub(\.network|m(atic|ine))|
 quora|qua(ltrics|nt(cast|serv|um))|r-login|rightmessage|rlcdn|
-sa(il.?(horizon|thr)|lesloft)|sc(ene7|orecard)|se(archiq|edtag|ntry|rviceWorker)|slickstream|snowplow|statcounter|
+sa(il.?(horizon|thr)|lesloft)|sc(ene7|orecard)|se(archiq|edtag|rviceWorker)|slickstream|snowplow|statcounter|
 ta(boola|rgeting)|tiqcdn|track(er|ing)|toutapp|turnto|twitter|typekit|
-venatus|viglink|vntsm|woocommerce|wp.?(admin|emoji|groho|rum)|
+venatus|viglink|vntsm|woocommerce|wp.?(emoji|groho|rum)|
 yandex|\.yimg|yotpo|
 ze(ndesk|rg)|zo(ho|pim))xi
 
