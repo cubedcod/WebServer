@@ -30,7 +30,7 @@ class WebResource
 
     LocalAddress = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).concat(ENV.has_key?('HOSTNAME') ? [ENV['HOSTNAME']] : []).uniq
 
-    # URI -> filesystem path (one-way map)
+    # URI -> fs path
     def fsPath
       [hostDir,                # host container
        if !path || path == '/' # null path
@@ -43,11 +43,11 @@ class WebResource
            '/cache' + Rack::Utils.unescape_path(path)
          else                  # direct map
            Rack::Utils.unescape_path path
-         end                                   # remote path:
+         end                   # remote path:
        elsif path.size > 512 || parts.find{|p|p.size > 127} # oversize names -> sharded-hash path
          hash = Digest::SHA2.hexdigest [path, query].join
          ['/', hash[0..1], hash[2..-1]]
-       else                                    # direct map
+       else                    # direct mapped path
          Rack::Utils.unescape_path path
        end].join
     end
@@ -110,33 +110,31 @@ class WebResource
         [self]
       else
         qs = query_values || {}
-#        env[:summary] = !%w(fullContent q).find{|arg| qs.has_key? arg }
-        (if node.directory?
-         env[:summary] = true
-         if qs['f'] && !qs['f'].empty? # FIND
+        (if node.directory?                                   # directory
+         if qs['f'] && !qs['f'].empty?                         # FIND
            `find #{shellPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
          elsif qs['find'] && !qs['find'].empty? && path != '/' # FIND case-insensitive substring
            `find #{shellPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
-         elsif qs.has_key?('Q') || qs.has_key?('q') # GREP directory
+         elsif qs.has_key?('Q') || qs.has_key?('q')            # GREP
            nodeGrep
-         else                          # LS
+         else                                                  # LS
+           env[:summary] = !qs.has_key?('fullContent')
            (path=='/' && local_node?) ? [node] : [node, *node.children.select{|n|n.basename.to_s[0] != '.'}]
          end
-        else
+        else                                                  # file(s)
           globPath = fsPath
           if globPath.match GlobChars
             if qs.has_key?('Q') || qs.has_key?('q')
-              nodeGrep Pathname.glob globPath # GREP within GLOB
+              nodeGrep Pathname.glob globPath                  # GREP
             else
-              Pathname.glob globPath # parametric GLOB
+              Pathname.glob globPath                           # GLOB
             end
-          else # default document-set GLOB
-#            env[:summary] = false
+          else                                                 # default document-set GLOB
             globPath += query_hash if static_node? && !local_node?
             globPath += '.*'
             Pathname.glob globPath
           end
-         end).map{|p| # join path to URI-space
+         end).map{|p|                                          # resolve URI
           join(p.to_s[hostDir.size..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env
         }
       end
