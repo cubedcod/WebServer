@@ -61,10 +61,10 @@ class WebResource < RDF::URI
 
   alias_method :uri, :to_s
 
-  # original href - use explicit or transparent/MITM proxy for adaptation
+  # original href - explicit or transparent/MITM proxy for adaptation
   alias_method :href, :to_s
 
-  # rebase href to point to localhost for adaption - "no proxy" mode
+  # "no proxy" href - rebase href to localhost for adaption
   # def href
   #   return self if local_node?
   #   ['http://localhost:8000/', host, path, (query ? ['?', query] : nil), (fragment ? ['#', fragment] : nil) ].join
@@ -95,7 +95,7 @@ class WebResource < RDF::URI
       {class: :toolbox,
        c: [({_: :span, c: env[:origin_status], style: 'font-weight: bold', class: :icon} if env[:origin_status]),
            ({_: :a, id: :tabular, class: :icon, c: '↨', href: env[:base].join(HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))).R.href} unless qs['view'] == 'table'),
-           ({_: :a, href: env[:base].uri, c: '☝', class: :icon, id: :upstream} unless local_node?),
+           #({_: :a, href: env[:base].uri, c: '☝', class: :icon, id: :upstream} unless local_node?),
            {_: :a, href: HTTP.qs(qs.merge({'notransform' => nil})), c: '⚗️', id: :UI, class: :icon},
            ({_: :a, href: HTTP.qs(qs.merge({'download' => 'audio'})), c: '&darr;', id: :download, class: :icon} if host.match?(/(^|\.)(bandcamp|(mix|sound)cloud|youtube).com/)),
            env[:feeds].map{|feed|
