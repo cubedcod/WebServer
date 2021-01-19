@@ -4,37 +4,38 @@ module Webize
     include WebResource::URIs
 
     def self.clean doc, base
-      doc.gsub!(/<\/?(form|noscript)[^>]*>/i, '') unless AllowJS.member? base.host
+      unless AllowJS.member? base.host               # show <noscript> content
+        doc.gsub!(/<\/?(form|noscript)[^>]*>/i, '') rescue nil
+      end
       doc = Nokogiri::HTML.parse doc
 
       doc.traverse{|e|
 
-        if e['src']                                                  # src attribute
-          src = (base.join e['src']).R                               # resolve src location
+        if e['src']                                  # src attribute
+          src = (base.join e['src']).R               # resolve src location
           if src.deny?
             puts "🚩 \e[31;1m#{src}\e[0m" if Verbose
-            e.remove                                                 # strip blocked src
+            e.remove                                 # strip blocked src
           end
         end
 
-        if e['href']                                                 # href attribute
-          ref = (base.join e['href']).R                              # resolve href location
+        if e['href']                                 # href attribute
+          ref = (base.join e['href']).R              # resolve href location
           if ref.deny?
             puts "🚩 \e[31;1m#{ref}\e[0m" if Verbose
-            e.remove                                                 # strip blocked href
+            e.remove                                 # strip blocked href
           end
         end}
 
       doc.css('script').map{|s|
         if gunk = (s.inner_text.match ScriptGunk)
-          base.env[:log].push gunk
+          base.env[:log].push gunk.to_s[0..31]
           puts s.inner_text, '-'*42 if Verbose
           s.remove
         end} unless AllowJS.member?(base.host) #|| ENV.has_key?('GUNK')
 
       doc.css('style').map{|s| Webize::CSS.cleanNode s if s.inner_text.match? /font-face|import/}
 
-      #doc.css("[class*='modal'], [class*='newsletter']").map{|r| puts r,'-'*42} if Verbose
       doc.css("[class*='modal'], [class*='newsletter']").remove
 
       doc.to_html

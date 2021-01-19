@@ -110,7 +110,7 @@ class WebResource
         [self]
       else
         qs = query_values || {}
-        env[:summary] = !qs.has_key?('fullContent')
+        env[:summary] = !%w(fullContent q).find{|arg| qs.has_key? arg }
         (if node.directory?
          if qs['f'] && !qs['f'].empty? # FIND
            `find #{shellPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
