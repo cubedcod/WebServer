@@ -5,7 +5,7 @@ module Webize
 
     def self.clean doc, base
       unless AllowJS.member? base.host               # show <noscript> content
-        doc.gsub!(/<\/?(form|noscript)[^>]*>/i, '') rescue nil
+        doc.gsub! /<\/?(form|noscript)[^>]*>/i, ''
       end
       doc = Nokogiri::HTML.parse doc
 

@@ -24,7 +24,7 @@ module Webize
       format Format
 
       def initialize(input = $stdin, options = {}, &block)
-        @doc = (input.respond_to?(:read) ? input.read : input).encode('UTF-8', undef: :replace, invalid: :replace, replace: ' ')
+        @doc = input.respond_to?(:read) ? input.read : input
         @base = options[:base_uri].R
         @host = @base.host
         if block_given?

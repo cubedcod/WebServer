@@ -1,5 +1,22 @@
 # coding: utf-8
 require 'rack'
+
+module Webize
+
+  def self.clean baseURI, body, format
+    if format.index('text/css') == 0     # clean CSS
+      Webize::CSS.clean body
+    elsif format.index('text/html') == 0 # clean HTML
+      Webize::HTML.clean body, baseURI
+    elsif format.index('script')         # clean JS
+      Webize::Code.clean body, baseURI
+    else
+      body
+    end
+  end
+
+end
+
 class WebResource
   module HTTP
 

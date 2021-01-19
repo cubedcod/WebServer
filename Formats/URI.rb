@@ -65,10 +65,10 @@ class WebResource < RDF::URI
   alias_method :href, :to_s
 
   # "no proxy" href - rebase href to localhost for adaption
-  # def href
-  #   return self if local_node?
-  #   ['http://localhost:8000/', host, path, (query ? ['?', query] : nil), (fragment ? ['#', fragment] : nil) ].join
-  # end
+  def proxy_href
+     return self if local_node?
+     ['http://localhost:8000/', host, path, (query ? ['?', query] : nil), (fragment ? ['#', fragment] : nil) ].join
+  end
 
   module HTML
     include URIs

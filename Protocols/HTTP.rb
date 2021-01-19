@@ -164,11 +164,7 @@ class WebResource
                      ct = content_type.split(/;/)
                      if ct.size == 2
                        charset = ct[1].sub(/.*charset=/i,'')
-                       unless charset.match? /utf.*8/i
-                         puts "transcoding #{charset} doc to UTF-8"
-                         charset = nil if charset.empty? || charset=='empty'
-                         body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace
-                       end
+                       charset = nil if charset.empty? || charset == 'empty'
                      end
                      ct[0]
                    elsif named_format                                 # format from name extension mapping
@@ -176,9 +172,8 @@ class WebResource
                    end
 
           if format                                                   # format defined?
-            body = Webize::CSS.clean body if format.index('text/css') == 0 # clean upstream document
-            body = Webize::HTML.clean body, self if format.index('text/html') ==0
-            body = Webize::Code.clean body, self if format.index('script')
+            body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace if format.index('text') == 0 # encode text in UTF-8
+            body = Webize.clean self, body, format                    # clean upstream document
             if formatExt = Suffixes[format] || Suffixes_Rack[format]  # look up format-suffix
               if extension == formatExt                               # suffix agrees w/ reverse map
                 cache = self                                          # cache at canonical location

@@ -61,13 +61,13 @@ class WebResource
     GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['u']||r.query_values['q']).R.href}, []]}
     NoGunk  = -> r {r.send r.uri.match?(Gunk) ? :deny : :fetch}
     NoQuery = -> r {
-      if !r.query                         # request
-        NoGunk[r].yield_self{|s,h,b|      #  inspect response
-          h.keys.map{|k|                  #  strip query from relocation
+      if !r.query                         # URL is qs-free, request and strip response qs
+        NoGunk[r].yield_self{|s,h,b|      # upstream response
+          h.keys.map{|k|                  # strip query in Location header
             h[k] = h[k].split('?')[0] if k.downcase == 'location' && h[k].match?(/\?/)}
-          [s,h,b]}                        #  response
-      else                                # request has query
-        [302, {'Location' => r.path}, []] #  redirect to path
+          [s,h,b]}                        # response
+      else                                # URL has qs, redirect to path
+        [302, {'Location' => ['//', r.host, r.path].join.R.proxy_href}, []]
       end}
 
     Resizer = -> r {
