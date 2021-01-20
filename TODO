@@ -14,4 +14,15 @@ gopher
 wayland browser w/ https/images
 reload deny_domains on changes and send reconfigure signal to squid
 ?fullContent  for elided repeat content - https://solidproject.org/newsletter/2020-12-03#UI
-JS without extension and w/ QS cache-collision - ~ grep --text /javascript web/web.log   | grep -v '\.js' | grep -v www.google.com | less - need to allow local query args w/o affecting origin-arg varied storage location.. see also  ?notransform stripping in  #fetch
+JS without extension and w/ QS cache-collision - ~ grep --text /javascript web/web.log   | grep -v '\.js' | grep -v www.google.com | less - need to allow local query args w/o affecting origin-arg varied storage location.. see also  ?notransform stripping in  #fetchError: cannot read infile: [Errno 21] Is a directory: 'bostonherald/_static/'
+🐕 📜 3⋮  https://www.bostonherald.com/2021/01/19/one-person-and-more-than-12-dogs-dead-in-holliston-fire/?notransform →  https://www.bostonherald.com/_static/??-eJyNy0EKgCAQAMAPlVtE2iV6S5TViq6ia5Gvj6AHdB0YuEK9eGJNDMHmHSlBODx72tBaODWtPkLAhXPULwmHJEyq4Fe0c7kTFp2+NrmxlY1Sg+x6aR7pUi6u 
+Error: cannot read infile: [Errno 21] Is a directory: 'bostonherald/_static/'
+🛑 📜 3⋮  https://www.bostonherald.com/2021/01/19/one-person-and-more-than-12-dogs-dead-in-holliston-fire/?notransform →  https://www.bostonherald.com/_static/??-eJydz9FOwzAMBdAfIjUFBOwB8SlTmnitu9iJagfUvycaIA1pmlberCudK1/4LC5kMRQDm5BRwauiKah5owCzQsjMWbowVTl2TNLNegc3uJLTeqCUdAviHHER9ItN6xXXEvaa5UyOKQ8+bTMpj47EDdWsLbxAS6ojiUI8sPPRte/0D2/Z94TtWB/kgyLmf8iSzRGfQ5KQamwj59NO5AHjpWKu7rd7Ris+HN2ue4R98zBUShF08gtGH+N6OknGn553fuuf+/uXp/51189f60TSTQ==  twitter
+Error: no lexer for filename 'androidcentral/d37ba2ae8bb02ce0132f226ed12da4444039470733edd3e741e01a8a0e8e1ff8' found
+Error: no lexer for filename 'androidcentral/85d4a4598d65baa944d11f1b8cf12a67eb401c0d926abb7de160d203e3625dd1' found
+🛑 📜 3⋮  https://www.androidcentral.com/oneplus-oxygenos-11-android-11?notransform →  https://www.androidcentral.com/sites/androidcentral.com/files/advagg_js/js__Cezk0AjNsmQ11u5QIgJ9fVUMYBVDLkr9NlSQmIT2xgw__tABSj2saC4helwYdmbSuuCI6nfBFOjjM8o7JYBDRvRw__8t_iHxFWpe2QVdHL3PL0GWIPBoCHR5-DrD6o-uUOv9k.js  google
+🛑 📜 3⋮  https://www.androidcentral.com/oneplus-oxygenos-11-android-11?notransform →  https://www.androidcentral.com/sites/androidcentral.com/files/advagg_js/js__H41_hTPvqu8kE1vP7oQ6CGHqkC_tndEj3BjJM0ZvaF4__7LxVz5C04TBW_1FqqwSwSg4lrR3wUZkLsZF3d8svpoE__8t_iHxFWpe2QVdHL3PL0GWIPBoCHR5-DrD6o-uUOv9k.js  Newsletter
+
+https://twitter.com/MariaAb1293 - user info JSON parse
+dig origlink
+https://forum.solidproject.org/ blank nodes
