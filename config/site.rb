@@ -57,9 +57,15 @@ class WebResource
   end
   module HTTP
 
-    # handler lambdas
+    # handler lambdas, available for binding to hostnames
     GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['u']||r.query_values['q']).R.href}, []]}
+
     NoGunk  = -> r {r.send r.uri.match?(Gunk) ? :deny : :fetch}
+
+    ImgRehost = -> r {
+      ps = r.path.split /https?:\/+/
+      ps.size > 1 ? [301, {'Location' => ('https://' + ps[-1]).R(r.env).href}, []] : r.deny}
+
     NoQuery = -> r {
       if !r.query                         # URL is qs-free, request and strip response qs
         NoGunk[r].yield_self{|s,h,b|      # upstream response
@@ -107,6 +113,8 @@ l.facebook.com l.instagram.com
 
     %w(bostonglobe-prod.cdn.arcpublishing.com).map{|host| GET host, Resizer }
 
+    GET 'res.cloudinary.com', ImgRehost
+
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
 
     GotoAdURL =  -> r {
@@ -139,7 +147,7 @@ l.facebook.com l.instagram.com
         output = ")]}'\n" + [q,["http://localhost:8000/h","http://localhost:8000/d","http://localhost:8000/m",
                                 "https://twitter.com",
                                 "https://www.reddit.com/r/androidx86+blissos+chrultrabook+chromeos+stallmanwasright/new",
-                                "http://localhost:8000/2021/01/15/?find=gitter&fullContent&view=table&sort=http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Fdate&order=asc",
+                                "http://localhost:8000/d?find=gitter&fullContent&view=table&sort=http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Fdate&order=asc",
                                 "http://localhost:8000/h/*%7Bdrum,idm,phobia,logbook%7D*irc?fullContent&view=table&sort=date&order=asc","misc"],
                              ["hour","day","month","twitter","reddit","gitter","IRC",""],[],
                              {"google:clientdata":{"bpc": :false,"phi": 0,"tlw": :false},
@@ -193,6 +201,8 @@ l.facebook.com l.instagram.com
       else
         NoGunk[r]
       end}
+
+    GET 'cdn.shortpixel.ai', ImgRehost
 
     GET 'go.theregister.com', -> r {
       if r.parts[0] == 'feed'
@@ -258,13 +268,8 @@ l.facebook.com l.instagram.com
           [s,h,b]
         end}}
 
-    ImgRehost = -> r {
-      ps = r.path.split /https?:\/+/
-      ps.size > 1 ? [301, {'Location' => ('https://' + ps[-1]).R(r.env).href}, []] : r.deny}
-
-    GET 'cdn.shortpixel.ai', ImgRehost
+    GET 'news.yahoo.com', NoGunk
     GET 's.yimg.com', ImgRehost
-    GET 'res.cloudinary.com', ImgRehost
 
     GotoYT = -> r {[301, {'Location' => ['//www.youtube.com', r.path, '?', r.query].join.R.href}, []]}
     GET 'm.youtube.com', GotoYT
