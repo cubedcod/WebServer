@@ -34,7 +34,7 @@ module Webize
 
       doc.css('script').map{|s|
         if gunk = (s.inner_text.match ScriptGunk)
-          base.env[:log].push gunk.to_s[0..31]
+          base.env[:log].push gunk.to_s[0..31] if Verbose
           puts s.inner_text, '-'*42 if Verbose
           s.remove
         end} unless AllowJS.member?(base.host) #|| ENV.has_key?('GUNK')

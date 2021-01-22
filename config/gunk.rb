@@ -30,19 +30,19 @@ effectivemeasure|ensighten|evidon|Ezoic|
 fa(cebook|stclick)|foresee|fullstory|funnel|
 gdpr|get(drip|pocket)|google|grapeshot|gumgum|gwallet|
 hotjar|hubspot|
-impression|inte(llitxt|rcom)|krxd|kochava|
+impression|inte(llitxt|rcom)|kr(ux|xd)|kochava|
 lexity|li(nkedin|strak)|
 ma(iler|rketo|tomo)|me(dia\.net|quoda|tri(cs|x))|ml314|mpulse|
 narrativ\.|newrelic|newsletter|npttech|nreum|
-olark|omappapi|one(signal|trust)|opt(anon|imizer)|outbrain|
-pa(ges(ense|peed)|r(dot|sely)|ypal)|pi(n(gdom|img|terest)|wik)|porpoiseant|prebid|pub(\.network|m(atic|ine))|
+olark|omappapi|one(signal|trust)|opt(anon|imize)|outbrain|
+pa(ges(ense|peed)|r(dot|sely)|ypal)|pi(n(gdom|img|terest)|wik)|porpoiseant|prebid|pub(\.network|m(atic|ine))|pushly|
 quora|qua(ltrics|nt(cast|serv|um))|r-login|rightmessage|rlcdn|
 sa(il.?(horizon|thr)|lesloft)|sc(ene7|orecard)|se(archiq|edtag|rviceWorker)|slickstream|snowplow|st(atcounter|umbleupon)|
 ta(boola|rgeting)|tiqcdn|track(er|ing)|toutapp|turnto|twitter|typekit|
-venatus|viglink|vuukle|vntsm|
+unruly|venatus|viglink|vuukle|vntsm|
 woocommerce|wp.?(emoji|groho|rum)|
 yandex|\.yimg|yotpo|
-ze(ndesk|rg)|zo(ho|pim))xi
+ze(ndesk|rg)|zo(ho|pim)|zqtk)xi
 
   end
 end
