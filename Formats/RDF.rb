@@ -1,7 +1,8 @@
 # coding: utf-8
 class WebResource
 
-  # file -> Repository
+  # file -> Repository: wrap RDF#load and skip reading entire large media-files and add MIME type hints
+  # TODO maybe move the media stuff to #summary?
   def loadRDF graph: env[:repository] ||= RDF::Repository.new
     if node.file?
       unless ['🐢','ttl'].member? ext                     # file metadata
@@ -50,7 +51,7 @@ class WebResource
     self
   end
 
-  # Repository -> file(s)
+  # Repository -> 🐢 file(s)
   def saveRDF repository = nil
     return self unless repository || env[:repository]                                           # repository to store
     (repository || env[:repository]).each_graph.map{|graph|                                     # graph
@@ -75,7 +76,7 @@ class WebResource
     self
   end
 
-  # file (big) -> file (small)
+  # file -> 🐢 file (overview metadata)
   def summary
     return self if basename.match(/^(index|README)/) || !node.exist? # don't summarize index or README files
     summary_node = join(['.preview', basename, ['🐢','ttl'].member?(ext) ? nil : '🐢'].compact.join '.').R env # summary URI
@@ -97,7 +98,7 @@ class WebResource
     summary_node                                                                            # summary
   end
 
-  # file (any type) -> file (turtle)
+  # file -> 🐢 file
   def 🐢
     return self if ['🐢','ttl'].member? ext
     turtle_node = join(['', basename, '🐢'].join '.').R env
