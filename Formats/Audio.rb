@@ -91,6 +91,7 @@ module Webize
       content_type 'audio/m4a', extensions: [:m4a, :m4s],
                    aliases: %w(
                     audio/x-m4a;q=0.8
+                    audio/x-wav;q=0.8
                     audio/m4s;q=0.8)
       reader { Reader }
     end
