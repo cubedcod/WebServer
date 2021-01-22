@@ -102,6 +102,8 @@ c212.net gate.sc googleweblight.com
 l.facebook.com l.instagram.com
 ).map{|s| GET s, GotoURL}
 
+    GET 'www.dropbox.com', NoGunk
+
     GET 'gitter.im', -> r {
       if r.parts[0] == 'api'
         token = r.join('/token').R
