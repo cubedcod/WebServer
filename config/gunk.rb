@@ -37,7 +37,7 @@ narrativ\.|newrelic|newsletter|npttech|nreum|
 olark|omappapi|one(signal|trust)|opt(anon|imize)|outbrain|
 pa(ges(ense|peed)|r(dot|sely)|ypal)|pi(n(gdom|img|terest)|wik)|porpoiseant|prebid|pub(\.network|m(atic|ine))|pushly|
 quora|qua(ltrics|nt(cast|serv|um))|r-login|rightmessage|rlcdn|
-sa(il.?(horizon|thr)|lesloft)|sc(ene7|orecard)|se(archiq|edtag|rviceWorker)|slickstream|snowplow|sponsor|st(atcounter|umbleupon)|
+sa(il.?(horizon|thr)|lesloft)|sc(ene7|orecard)|se(archiq|edtag|rviceWorker)|slickstream|smartlook|snowplow|sponsor|st(atcounter|umbleupon)|
 ta(boola|rgeting)|ti(qcdn|nypass)|track(er|ing)|toutapp|turnto|twitter|typekit|
 unruly|venatus|viglink|vuukle|vntsm|
 woocommerce|wp.?(emoji|groho|rum)|
