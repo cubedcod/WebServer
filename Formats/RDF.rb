@@ -1,8 +1,8 @@
 # coding: utf-8
 class WebResource
 
-  # file -> Repository: wrap RDF#load and skip reading entire large media-files and add MIME type hints
-  # TODO maybe move the media stuff to #summary?
+  # file -> Repository: wrap RDF#load, adding MIME type hints and skipping full load of media-files
+  # TODO move media stuff to #summary and make their load noop/undefined here?
   def loadRDF graph: env[:repository] ||= RDF::Repository.new
     if node.file?
       unless ['🐢','ttl'].member? ext                     # file metadata
@@ -21,7 +21,7 @@ class WebResource
         options = {}
         options[:base_uri] = self
         # format hints
-        if format = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # email procmail PREFIX or maildir containment
+        if format = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # procmail message PREFIX and maildir containment
                    :mail
                  elsif ext.match? /^html?$/
                    :html
