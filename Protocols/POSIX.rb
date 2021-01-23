@@ -50,7 +50,7 @@ class WebResource
     end
 
     def host_parts
-      local_node? ? '.' : host.split('.').-(%w(com net org www)).reverse
+      local_node? ? ['.'] : host.split('.').-(%w(com net org www)).reverse
     end
 
     def local_node?
