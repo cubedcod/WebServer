@@ -38,7 +38,6 @@ module Webize
 
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri].R
-
         extension = @base.ext
         @lang = 'html' if extension == 'erb'
         @lang = 'ruby' if options[:content_type] == 'text/x-ruby'

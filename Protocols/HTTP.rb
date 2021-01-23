@@ -147,22 +147,20 @@ class WebResource
       ['http://', host, ![nil, 443].member?(port) ? [':', port] : nil, path, query ? ['?', query] : nil].join.R(env).fetchHTTP # fetch via HTTP
     end
 
-    # fetch from remote, read graph-data, fill graph+static caches, maybe return HTTP response
-    def fetchHTTP thru: true, transformable: !no_transform? # allow format conversion and rewrite (HTML reformat, code pretty-print)
-      url = transformable ? uri : (uri.sub /\?notransform$/, '') # strip local query-arg
-      URI.open(url, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
-        h = response.meta                                             # response headerd
-        if response.status.to_s.match? /206/                          # partial response
+    # fetch from remote, read graph-data, fill graph+static caches
+    def fetchHTTP thru: true, transformable: !no_transform? # options: omit HTTP response to caller, enable format transforms
+      URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
+        h = response.meta                                             # response headers
+        if response.status.to_s.match? /206/                          # partial data
           h['Access-Control-Allow-Origin'] = origin unless h['Access-Control-Allow-Origin'] || h['access-control-allow-origin']
-          [206, h, [response.read]]                                   # respond with part
+          [206, h, [response.read]]                                   # return part
         else
-          body = HTTP.decompress h, response.read                     # response body
-
-          format = if path=='/feed'||(query_values||{})['mime']=='xml'# feed URL (override HTTP-metadata content-type)
+          body = HTTP.decompress h, response.read                     # decompress body
+          format = if path=='/feed'||(query_values||{})['mime']=='xml'# feed-URL (override broken text/html content-types)
                      'application/atom+xml'
-                   elsif content_type = h['content-type']             # format defined in HTTP metadata
+                   elsif content_type = h['content-type']             # format specified in header
                      ct = content_type.split(/;/)
-                     if ct.size == 2
+                     if ct.size == 2                                  # charset specified in header
                        charset = ct[1].sub(/.*charset=/i,'')
                        charset = nil if charset.empty? || charset == 'empty'
                      end
@@ -170,40 +168,32 @@ class WebResource
                    elsif named_format                                 # format from name extension mapping
                      named_format
                    end
-
-          if format                                                   # format defined?
-            body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace if format.index('text') == 0 # encode text in UTF-8
-            body = Webize.clean self, body, format                    # clean upstream document
+          if format                                                   # format defined
+            body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace if format.index('text') == 0 # reencode text in UTF-8
+            body = Webize.clean self, body, format                    # clean upstream data
             if formatExt = Suffixes[format] || Suffixes_Rack[format]  # look up format-suffix
-              if extension == formatExt                               # suffix agrees w/ reverse map
-                cache = self                                          # cache at canonical location
-              else                                                    # format-suffix mismatch
-                cache = uri
-                cache += 'index' if uri[-1] == '/'                    # append directory-data slug
-                cache += formatExt                                    # append suffix
-                cache = cache.R
-              end
-              cache.writeFile body if cache.static_node?              # cache static data
+              file = fsPath                                           # cache base path
+              file += '/index' if file[-1] == '/'                     # append directory-data slug
+              file += formatExt unless File.extname(file)==formatExt  # append format-suffix
+              FileUtils.mkdir_p File.dirname file                     # create parent directories
+              File.open(file, 'w'){|f| f << body }                    # cache fetched data
             else
-              puts "extension undefined for #{format}"                # warn: undefined format-suffix
+              puts "extension undefined for #{format}"                # warning: undefined format-suffix
             end
             if reader = RDF::Reader.for(content_type: format)         # reader defined for format?
               env[:repository] ||= RDF::Repository.new                # initialize RDF repository
-              if timestamp = h['Last-Modified'] || h['last-modified'] # HTTP metadata to RDF-graph
+              if format.index('html') && timestamp = h['Last-Modified'] || h['last-modified'] # HTTP metadata to RDF-graph
                 env[:repository] << RDF::Statement.new(self, Date.R, Time.httpdate(timestamp.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,'')).iso8601) rescue nil
               end
               reader.new(body, base_uri: self){|g|env[:repository] << g} # read RDF
             else
-              puts "RDF::Reader undefined for #{format}" unless %w(css js).member? ext # warn: undefined Reader
-            end
+              puts "RDF::Reader undefined for #{format}"              # warning: undefined Reader
+            end unless format.index 'script'
           else
-            puts "ERROR format undefined on #{uri}"                   # warn: undefined format
+            puts "ERROR format undefined on #{uri}"                   # warning: undefined format
           end
-
           return unless thru                                          # skip HTTP response
-
-          saveRDF                                                     # cache graph-data
-
+          saveRDF                                                     # cache graph
           env[:resp]['Access-Control-Allow-Origin'] ||= origin        # CORS header
           h['link'] && h['link'].split(',').map{|link|                # Link headers
             ref, type = link.split(';').map &:strip

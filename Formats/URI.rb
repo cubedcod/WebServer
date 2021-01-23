@@ -52,11 +52,6 @@ class WebResource < RDF::URI
 
     def parts; path ? (path.split('/') - ['']) : [] end
 
-    def query_hash
-      return '' unless query && !query.empty?
-      '.' + Digest::SHA2.hexdigest(query)[0..15]
-    end
-
   end
 
   alias_method :uri, :to_s
@@ -88,7 +83,7 @@ class WebResource < RDF::URI
                  end
                  env[:links][:icon].href                 # page icon
                end
-             elsif favicon.node.exist?                   # host icon exists at well-known location?
+             elsif favicon.node.exist?                   # icon exists at well-known location?
                favicon.href                              # host icon
              end
 
@@ -120,13 +115,7 @@ class WebResource < RDF::URI
   end
 end
 
-# cast objects of varying classes to WebResource
-class Hash
-  def R env=nil; env ? WebResource.new(self['uri']).env(env) : WebResource.new(self['uri']) end
-end
-class Pathname
-  def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
-end
+# cast URI-identified classes to WebResource
 class RDF::URI
   def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
 end

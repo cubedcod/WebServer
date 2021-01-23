@@ -27,7 +27,7 @@ baidu|bazaarvoice|bidder|BO(OMR|uncee?x)|browser.?update|btncdn|bugherd|
 campaign|chartbeat|chimp|cl(ickcease|oudfront)|co(mscore|n(fiant|natix|sent)|okie.?(consent|law))|cpx\.|cr(iteo|sspxl)|cxense|
 detroitchicago|[^a-z]dfp|disqus|dmpxs|dotmetrics|doubleclick|
 effectivemeasure|ensighten|evidon|Ezoic|
-fa(cebook|stclick)|foresee|fullstory|funnel|
+fa(cebook|stclick)|fingerprint|foresee|fullstory|funnel|
 gdpr|get(drip|pocket)|google|grapeshot|gumgum|gwallet|
 hotjar|hubspot|
 impression|inte(llitxt|rcom)|kr(ux|xd)|kochava|

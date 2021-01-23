@@ -1,5 +1,4 @@
 # coding: utf-8
-
 %w(fileutils pathname shellwords).map{|d| require d }
 class WebResource
 
@@ -30,41 +29,35 @@ class WebResource
 
     LocalAddress = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).concat(ENV.has_key?('HOSTNAME') ? [ENV['HOSTNAME']] : []).uniq
 
-    # URI -> fs path
+    # URI -> filesystem path
     def fsPath
-      [hostDir,                # host container
-       if !path || path == '/' # null path
-         nil
-       elsif local_node?       # local path:
-         if parts[0] == 'msg'  # Message-ID -> path
+      [host_parts,            # host directory
+       if local_node?         # local path?
+         if parts[0] == 'msg' # Message-ID -> sharded message storage
            id = Digest::SHA2.hexdigest Rack::Utils.unescape_path parts[1]
-           ['/mail/', id[0..1], '/', id[2..-1]]
-         elsif path[-1] == '🐢'
-           '/cache' + Rack::Utils.unescape_path(path)
-         else                  # direct map
-           Rack::Utils.unescape_path path
-         end                   # remote path:
-       elsif path.size > 512 || parts.find{|p|p.size > 127} # oversize names -> sharded-hash path
-         hash = Digest::SHA2.hexdigest [path, query].join
-         ['/', hash[0..1], hash[2..-1]]
-       else                    # direct mapped path
-         Rack::Utils.unescape_path path
-       end].join
+           ['mail', id[0..1], id[2..-1]]
+         else                 # direct mapping
+           parts.map{|part| Rack::Utils.unescape_path part}
+         end
+       else                   # remote path
+         (if path.size > 512 || parts.find{|p|p.size > 127} # oversize, hash and shard
+          hash = Digest::SHA2.hexdigest path
+          [hash[0..1], hash[2..-1]]
+         else                 # direct mapping
+           parts.map{|part| Rack::Utils.unescape_path part} # path
+          end).concat(query ? [Digest::SHA2.hexdigest(query)[0..15]] : []) # hashed qs
+       end].join '/'
     end
 
-    def hostDir
-      if local_node?
-        '.'
-      else
-        host.split('.').-(%w(com net org www)).reverse.join '/'
-      end
+    def host_parts
+      local_node? ? '.' : host.split('.').-(%w(com net org www)).reverse
     end
 
     def local_node?
       !host || LocalAddress.member?(host)
     end
 
-    # local Pathname instance for resource
+    # URI -> Pathname
     def node; Pathname.new fsPath end
 
     # escaped path for shell invocation
@@ -110,7 +103,8 @@ class WebResource
         [self]
       else
         qs = query_values || {}
-        (if node.directory?                                   # directory
+        pathbase = host_parts.join('/').size
+        (if node.directory?                                    # directory
          if qs['f'] && !qs['f'].empty?                         # FIND
            `find #{shellPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
          elsif qs['find'] && !qs['find'].empty? && path != '/' # FIND case-insensitive substring
@@ -121,7 +115,7 @@ class WebResource
            env[:summary] = !qs.has_key?('fullContent')
            (path=='/' && local_node?) ? [node] : [node, *node.children.select{|n|n.basename.to_s[0] != '.'}]
          end
-        else                                                  # file(s)
+        else                                                   # file(s)
           globPath = fsPath
           if globPath.match GlobChars
             if qs.has_key?('Q') || qs.has_key?('q')
@@ -129,14 +123,12 @@ class WebResource
             else
               Pathname.glob globPath                           # GLOB
             end
-          else                                                 # default document-set GLOB
-            globPath += query_hash if static_node? && !local_node?
+          else                                                 # default-set GLOB
             globPath += '.*'
             Pathname.glob globPath
           end
-         end).map{|p|                                          # resolve URI
-          join(p.to_s[hostDir.size..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env
-        }
+         end).map{|p|                                          # resolve node URIs
+          join(p.to_s[pathbase..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env}
       end
     end
 
