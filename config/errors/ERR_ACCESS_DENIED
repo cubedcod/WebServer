@@ -8,6 +8,11 @@
       document.addEventListener("DOMContentLoaded", function(){
 	  var url = new URL(document.location);
 	  url.searchParams.set('cookie', document.cookie);
+	  url.searchParams.delete('utm_source');
+	  url.searchParams.delete('utm_term');
+	  url.searchParams.delete('utm_medium');
+	  url.searchParams.delete('utm_content');
+	  url.searchParams.delete('utm_campaign');
 	  document.querySelector('a').setAttribute('href', 'http://localhost:8000/' + url);
       });
     </script>
