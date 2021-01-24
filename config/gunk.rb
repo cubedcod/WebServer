@@ -21,7 +21,7 @@ class WebResource
 
     Gunk = Regexp.new SiteDir.join('gunk.regex').read.chomp, Regexp::IGNORECASE
 
-    ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](ads|bing|gt(ag|m)|pi(ng|xel)|s(entry|umo)|utm)[-._\/\(\)'"\s:?&=~%]|
+    ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](ads|b0e8|bing|gt(ag|m)|pi(ng|xel)|s(entry|umo)|utm)[-._\/\(\)'"\s:?&=~%]|
 ad(.?bl(ade|ock)|push|r(ecover|oll)|vert)|am(azon|plitude)|acsb|addtoany|algolia|analytic|aswpsdkus|auction|
 baidu|bazaarvoice|bidder|BO(OMR|uncee?x)|browser.?update|btncdn|bu(gherd|zzfeed)|
 campaign|chartbeat|chimp|cl(ickcease|oudfront)|co(mscore|n(fiant|natix|sent)|okie.?(consent|law))|cpx\.|cr(iteo|sspxl)|cxense|
@@ -39,7 +39,7 @@ olark|omappapi|one(signal|trust)|opt(anon|imize)|outbrain|owneriq|
 pa(ges(ense|peed)|r(dot|sely)|ypal)|pi(n(gdom|img|terest)|wik)|porpoiseant|prebid|pub(\.network|m(atic|ine))|pushly|
 quora|qua(ltrics|nt(cast|serv|um))|
 r-login|rightmessage|rlcdn|
-sa(il.?(horizon|thr)|les(force|loft))|sc(ene7|orecard)|se(archiq|edtag|rviceWorker)|slickstream|smartlook|snowplow|sponsor|st(atcounter|umbleupon)|
+sa(il.?(horizon|thr)|les(force|loft))|sc(ene7|orecard)|se(archiq|edtag|rviceWorker)|shopify|slickstream|smartlook|snowplow|sponsor|st(atcounter|umbleupon)|
 ta(boola|rgeting)|ti(qcdn|nypass)|track(er|ing)|toutapp|turnto|twitter|typekit|
 unruly|
 venatus|viglink|vuukle|vntsm|
