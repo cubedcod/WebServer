@@ -7,6 +7,7 @@ class WebResource
 
     HostGET = {}
     Methods = %w(GET HEAD OPTIONS POST PUT)
+    Args = %w(notransform offline order sort view)
 
     def allow_domain?
       c = AllowDomains                                              # start cursor at root
@@ -33,9 +34,8 @@ class WebResource
       if env['QUERY_STRING'] && !env['QUERY_STRING'].empty?                 # query string
         uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&')        # strip leading + consecutive &s from query so URI library doesn't freak out
         qs = uri.query_values                                               # parse query to arg->val map
-        %w(notransform sort view).map{|k|                                   # local (client <> proxy) args
-          env[k.to_sym] = qs.delete(k) || true if qs.has_key? k }           # consume local args
-        qs.empty? ? (uri.query = nil) : (uri.query_values = qs)             # set query to (proxy <> origin) args
+        Args.map{|k|env[k.to_sym] = qs.delete(k) || true if qs.has_key? k}  # read local (client <> proxy) args
+        qs.empty? ? (uri.query = nil) : (uri.query_values = qs)             # set remote (proxy <> origin) args
       end
       env.update({base: uri, feeds: [], links: {}, log: [], resp: {}})      # response environment
       uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body|       # dispatch request
@@ -318,7 +318,7 @@ class WebResource
           end
           t                                       # token
         }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
-        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base colors connection downloadable feeds fetched graph host images keep-alive links log notransform origin-status path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles remote-addr repository request-method request-path request-uri resp script-name searchable server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via view x-forwarded-for).member?(key.downcase)} # external multi-hop headers
+        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base colors connection downloadable feeds fetched graph host images keep-alive links log notransform offline order origin-status path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles remote-addr repository request-method request-path request-uri resp script-name searchable server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via view x-forwarded-for).member?(key.downcase)} # external multi-hop headers
 
       head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # we accept Turtle even if requesting client doesnt
       head['Referer'] = 'http://drudgereport.com/' if host.match? /wsj\.com$/
@@ -384,7 +384,7 @@ class WebResource
                    {'Content-Type' => 'text/html'}, [htmlDocument]] end
 
     def offline?
-      ENV.has_key?('OFFLINE') || (query_values||{}).has_key?('offline')
+      ENV.has_key?('OFFLINE') || env.has_key?(:offline)
     end
 
     def origin
