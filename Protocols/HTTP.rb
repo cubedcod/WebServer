@@ -28,12 +28,12 @@ class WebResource
     end
 
     def self.call env
-      return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']       # allow methods
-      uri = RDF::URI('//'+env['HTTP_HOST']).join(env['REQUEST_PATH']).R env # request URI
-      uri.scheme = uri.local_node? ? 'http' : 'https'                       # URI scheme
-      if env['QUERY_STRING'] && !env['QUERY_STRING'].empty?                 # query string
-        uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&')        # strip leading + consecutive &s from query so URI library doesn't freak out
-        qs = uri.query_values                                               # parse query to arg->val map
+      return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']       # method
+      uri = RDF::URI('//'+env['HTTP_HOST']).join(env['REQUEST_PATH']).R env # URI
+      uri.scheme = uri.local_node? ? 'http' : 'https'                       # scheme
+      if env['QUERY_STRING'] && !env['QUERY_STRING'].empty?                 # query
+        uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&')        # strip leading + consecutive &s so URI library doesn't freak out
+        qs = uri.query_values                                               # parse query args
         Args.map{|k|env[k.to_sym] = qs.delete(k) || true if qs.has_key? k}  # read local (client <> proxy) args
         qs.empty? ? (uri.query = nil) : (uri.query_values = qs)             # set remote (proxy <> origin) args
       end
