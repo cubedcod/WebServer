@@ -269,13 +269,16 @@ class WebResource
         post.css('.file-image, .fileThumb, .imgLink').map{|a|
           yield subject, Image, (join a['href']), graph if a['href'] }
 
-        post.css('.post_image, .post-image').map{|img|
+        post.css('.post_image, .post-image, img.thumb').map{|img|
           yield subject, Image, (join img.parent['href']), graph }
+
+        post.css('img.multithumb, img.multithumbfirst').map{|img|
+          yield subject, Image, (join img.parent.parent['href']), graph }
 
         post.css('[href$="m4v"], [href$="mp4"], [href$="webm"]').map{|a|
           yield subject, Video, (join a['href']), graph }
 
-        post.css('.body, .divMessage, .post-body, .postMessage, .text').map{|msg|
+        post.css('.body, .divMessage, .message, .post-body, .postMessage, .text').map{|msg|
           msg.css('a[onclick*="Reply"], .post-link, .quotelink, .quoteLink').map{|reply_of|
             yield subject, To, (join reply_of['href']), graph
             reply_of.remove}

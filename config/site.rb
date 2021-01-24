@@ -3,6 +3,7 @@ module Webize
   module HTML
     class Reader
       Triplr = {
+        '7chan.org' => :Chan,
         '8kun.top' => :Chan,
         'apnews.com' => :AP,
         'bunkerchan.xyz' => :Chan,
