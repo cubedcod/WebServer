@@ -443,7 +443,7 @@ class WebResource
     end
 
     def remoteURL
-      ['https:/' , path.sub(/^\/https?:\//,''),
+      ['https:/' , path.sub(/^\/https?:\/+/, '/'),
        (query ? ['?', query] : nil),
        (fragment ? ['#', fragment] : nil) ].join.R env
     end
