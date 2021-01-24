@@ -24,7 +24,7 @@ class WebResource
     ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](ads|b0e8|bing|gt(ag|m)|pi(ng|xel)|s(entry|umo)|utm)[-._\/\(\)'"\s:?&=~%]|
 ad(.?bl(ade|ock)|push|r(ecover|oll)|vert)|am(azon|plitude)|acsb|addtoany|algolia|analytic|aswpsdkus|auction|
 baidu|bazaarvoice|bidder|BO(OMR|uncee?x)|browser.?update|btncdn|bu(gherd|zzfeed)|
-campaign|chartbeat|chimp|cl(ickcease|oudfront)|co(mscore|n(fiant|natix|sent)|okie.?(consent|law))|cpx\.|cr(iteo|sspxl)|cxense|
+campaign|chartbeat|chimp|cl(ick(cea|fu)se|oudfront)|co(mscore|n(fiant|natix|sent)|okie.?(consent|law))|cpx\.|cr(iteo|sspxl)|cxense|
 detroitchicago|[^a-z]dfp|disqus|dmpxs|dotmetrics|doubleclick|
 effectivemeasure|ensighten|evidon|Ezoic|
 fa(cebook|stclick)|feedbackify|fingerprint|foresee|fullstory|funnel|
