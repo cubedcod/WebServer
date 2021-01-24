@@ -16,7 +16,7 @@ class WebResource
     def cacheResponse
       nodes = nodeSet            # find nodes
       if nodes.size == 1 && (nodes[0].static_node? || # one node of preferred or fixed format
-                            (nodes[0].named_format == selectFormat && (no_transform? || nodes[0].named_format != 'text/html')))
+                            (nodes[0].named_format == selectFormat && (env[:notransform] || nodes[0].named_format != 'text/html')))
         nodes[0].fileResponse    # static response
       else
         nodes.map{|n|            # load graph-data
@@ -30,7 +30,13 @@ class WebResource
       return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']       # allow methods
       uri = RDF::URI('//'+env['HTTP_HOST']).join(env['REQUEST_PATH']).R env # request URI
       uri.scheme = uri.local_node? ? 'http' : 'https'                       # URI scheme
-      uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&') if env['QUERY_STRING'] && !env['QUERY_STRING'].empty? # strip leading + consecutive & from qs so URI library doesn't freak out
+      if env['QUERY_STRING'] && !env['QUERY_STRING'].empty?                 # query string
+        uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&')        # strip leading + consecutive &s from query so URI library doesn't freak out
+        qs = uri.query_values                                               # parse query to arg->val map
+        %w(notransform sort view).map{|k|                                   # local (client <> proxy) args
+          env[k.to_sym] = qs.delete(k) || true if qs.has_key? k }           # consume local args
+        qs.empty? ? (uri.query = nil) : (uri.query_values = qs)             # set query to (proxy <> origin) args
+      end
       env.update({base: uri, feeds: [], links: {}, log: [], resp: {}})      # response environment
       uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body|       # dispatch request
         format = uri.format_icon head['Content-Type']                       # logger
@@ -148,7 +154,7 @@ class WebResource
     end
 
     # fetch from remote, read graph-data, fill graph+static caches
-    def fetchHTTP thru: true, transformable: !no_transform? # options: omit HTTP response to caller, enable format transforms
+    def fetchHTTP thru: true, transformable: !env[:notransform]       # opts: omit HTTP response to caller, enable format transforms
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                                             # response headers
         if response.status.to_s.match? /206/                          # partial data
@@ -312,7 +318,7 @@ class WebResource
           end
           t                                       # token
         }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
-        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base colors connection downloadable feeds fetched graph host images keep-alive links log origin-status path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles remote-addr repository request-method request-path request-uri resp script-name searchable server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for).member?(key.downcase)} # external multi-hop headers
+        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base colors connection downloadable feeds fetched graph host images keep-alive links log notransform origin-status path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles remote-addr repository request-method request-path request-uri resp script-name searchable server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via view x-forwarded-for).member?(key.downcase)} # external multi-hop headers
 
       head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # we accept Turtle even if requesting client doesnt
       head['Referer'] = 'http://drudgereport.com/' if host.match? /wsj\.com$/
@@ -373,8 +379,6 @@ class WebResource
       end
       [200, {'Content-Type' => 'text/html'}, [(htmlDocument results)]]
     end
-
-    def no_transform?; (query_values||{}).has_key? 'notransform' end
 
     def notfound; [env[:origin_status] || 404,
                    {'Content-Type' => 'text/html'}, [htmlDocument]] end

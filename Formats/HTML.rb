@@ -303,8 +303,6 @@ class WebResource
     def htmlDocument graph=nil
       graph ||= env[:graph] = treeFromGraph
       qs = query_values || {}
-      env[:view] ||= qs['view']
-      env[:sort] ||= qs['sort']
       env[:colors] ||= {}
       env[:links][:up] = [File.dirname(env['REQUEST_PATH']), '/', (query ? ['?', query] : nil)].join unless path == '/' # pointer to container
       if env[:summary]                                                                                                  # pointer to unabridged content

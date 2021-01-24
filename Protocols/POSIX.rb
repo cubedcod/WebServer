@@ -52,7 +52,7 @@ class WebResource
              name = ps.pop                   # get basename
              x = File.extname name           # find extension
              base = File.basename name, x    # strip extension
-             ps.push [name, '.', qh, x].join # basename w/ queryhash before extension
+             ps.push [base, '.', qh, x].join # basename w/ queryhash before extension
            else
              ps.push qh                      # queryhash as basename
            end
