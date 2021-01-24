@@ -38,6 +38,7 @@ module Webize
 
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri].R
+        @path = options[:path] || @base.fsPath
         extension = @base.ext
         @lang = 'html' if extension == 'erb'
         @lang = 'ruby' if options[:content_type] == 'text/x-ruby'
@@ -62,7 +63,7 @@ module Webize
       def source_tuples
         yield Type.R, (Schema + 'Code').R
         lang = "-l #{@lang}" if @lang
-        html = RDF::Literal [`pygmentize #{lang} -f html #{@base.shellPath}`,
+        html = RDF::Literal [`pygmentize #{lang} -f html #{Shellwords.escape @path}`,
                              '<style>', CodeCSS, '</style>'
                             ].join.encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
         html.datatype = RDF.XMLLiteral

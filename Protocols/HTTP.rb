@@ -154,7 +154,7 @@ class WebResource
       ['http://', host, ![nil, 443].member?(port) ? [':', port] : nil, path, query ? ['?', query] : nil].join.R(env).fetchHTTP # fetch via HTTP
     end
 
-    # fetch from remote, read graph-data, fill graph+static caches
+    # fetch from remote, read graph-data, fill graph+static caches, maybe return original or transformed data in HTTP response
     def fetchHTTP thru: true, transformable: !env[:notransform]       # opts: omit HTTP response to caller, enable format transforms
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                                             # response headers
@@ -192,7 +192,7 @@ class WebResource
               if format.index('html') && timestamp = h['Last-Modified'] || h['last-modified'] # HTTP metadata to RDF-graph
                 env[:repository] << RDF::Statement.new(self, Date.R, Time.httpdate(timestamp.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,'')).iso8601) rescue nil
               end
-              reader.new(body, base_uri: self){|g|env[:repository] << g} # read RDF
+              reader.new(body, base_uri: self, path: file){|g|env[:repository] << g} # read RDF
             else
               puts "RDF::Reader undefined for #{format}"              # warning: undefined Reader
             end unless format.index 'script'
