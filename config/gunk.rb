@@ -31,7 +31,7 @@ fa(cebook|stclick)|feedbackify|fingerprint|foresee|fullstory|funnel|
 gdpr|get(drip|pocket)|google|grapeshot|gumgum|gwallet|
 hotjar|hubspot|
 impression|inte(llitxt|rcom)|kr(ux|xd)|kochava|
-lexity|li(nkedin|strak)|
+lexity|li(nkedin|strak|veperson)|
 ma(iler|rketo|tomo)|me(dia\.net|quoda|tri(cs|x))|ml314|mpulse|
 narrativ\.|newrelic|newsletter|npttech|nreum|
 olark|omappapi|one(signal|trust)|opt(anon|imize)|outbrain|

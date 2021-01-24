@@ -32,20 +32,32 @@ class WebResource
     # URI -> filesystem path
     def fsPath
       [host_parts,            # host directory
-       if local_node?         # local path?
+       if local_node?         # local path
          if parts[0] == 'msg' # Message-ID -> sharded message storage
            id = Digest::SHA2.hexdigest Rack::Utils.unescape_path parts[1]
            ['mail', id[0..1], id[2..-1]]
          else                 # direct mapping
            parts.map{|part| Rack::Utils.unescape_path part}
          end
-       else                   # remote path
-         (if path.size > 512 || parts.find{|p|p.size > 127} # oversize, hash and shard
-          hash = Digest::SHA2.hexdigest path
-          [hash[0..1], hash[2..-1]]
-         else                 # direct mapping
-           parts.map{|part| Rack::Utils.unescape_path part} # path
-          end).concat(query ? [Digest::SHA2.hexdigest(query)[0..15]] : []) # hashed qs
+       else                   # remote path - qs differentiates local storage path
+         ps = if (path && path.size > 496) || parts.find{|p|p.size > 127} # oversized, hash and shard
+                hash = Digest::SHA2.hexdigest path
+                [hash[0..1], hash[2..-1]]
+              else            # direct mapping
+                parts.map{|part| Rack::Utils.unescape_path part}
+              end
+         if query                            # querystring exists
+           qh = Digest::SHA2.hexdigest(query)[0..15] # hash query
+           if ps.size > 0
+             name = ps.pop                   # get basename
+             x = File.extname name           # find extension
+             base = File.basename name, x    # strip extension
+             ps.push [name, '.', qh, x].join # basename w/ queryhash before extension
+           else
+             ps.push qh                      # queryhash as basename
+           end
+         end
+         ps
        end].join '/'
     end
 
