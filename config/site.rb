@@ -151,8 +151,8 @@ l.facebook.com l.instagram.com
         output = ")]}'\n" + [q,["http://localhost:8000/h","http://localhost:8000/d","http://localhost:8000/m",
                                 "https://twitter.com",
                                 "https://www.reddit.com/r/androidx86+blissos+chrultrabook+chromeos+stallmanwasright/new",
-                                "http://localhost:8000/d?find=gitter&fullContent&view=table&sort=http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Fdate&order=asc",
-                                "http://localhost:8000/h/*%7Bdrum,idm,phobia,logbook%7D*irc?fullContent&view=table&sort=date&order=asc","misc"],
+                                "http://localhost:8000/d?find=gitter&view=table&sort=http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Fdate&order=asc",
+                                "http://localhost:8000/h/*%7Bdrum,idm,phobia,logbook%7D*irc?view=table&sort=date&order=asc","misc"],
                              ["hour","day","month","twitter","reddit","gitter","IRC",""],[],
                              {"google:clientdata":{"bpc": :false,"phi": 0,"tlw": :false},
                               "google:suggestdetail":[{},{},{},{},{},{},{},{}],
@@ -194,7 +194,7 @@ l.facebook.com l.instagram.com
       if %w(r u user).member? route
         r.path += '.rss' unless r.path.index '.rss'
         NoGunk[r]
-      elsif %w(gallery).member? route
+      elsif %w(favicon.ico gallery).member? route
         NoGunk[r]
       else
         r.deny
