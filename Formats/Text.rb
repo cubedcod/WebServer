@@ -45,6 +45,7 @@ module Webize
 
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri]
+        @path = options[:path] || @base.fsPath
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -65,7 +66,7 @@ module Webize
         yield Type.R, (Schema + 'Document').R
         yield Title.R, @base.basename
         converter = @base.ext == 'doc' ? :antiword : :docx2txt
-        html = RDF::Literal '<pre>' + `#{converter} #{@base.shellPath}` + '</pre>'
+        html = RDF::Literal '<pre>' + `#{converter} #{Shellwords.escape @path}` + '</pre>'
         html.datatype = RDF.XMLLiteral
         yield Content.R, html
       end

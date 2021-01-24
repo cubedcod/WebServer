@@ -33,7 +33,7 @@ class WebResource
                    :turtle
                     end
         elsif ext.empty? # no extension. ask FILE(1)
-          mime = `file -b --mime-type #{shellPath}`.chomp
+          mime = `file -b --mime-type #{Shellwords.escape fsPath}`.chomp
           format = :plaintext if mime == 'text/plain'
           options[:content_type] = mime # format from FILE(1)
         elsif mime = named_format

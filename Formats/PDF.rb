@@ -10,12 +10,13 @@ module Webize
 
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri].R
-#        require 'pdf/reader'
-#        @doc = begin
-#                 ::PDF::Reader.new input
-#               rescue Exception => e
-#                 puts e.class, e.message
-#               end
+        @path = options[:path] || @base.fsPath
+        #        require 'pdf/reader'
+        #        @doc = begin
+        #                 ::PDF::Reader.new input
+        #               rescue Exception => e
+        #                 puts e.class, e.message
+        #               end
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -49,10 +50,7 @@ module Webize
         end
 =end
         ## use poppler-utils
-        location = @base.shellPath
-        location += '.pdf' unless @base.ext == 'pdf'
-        html = RDF::Literal `pdftohtml -s -stdout #{location}`
-        #html = RDF::Literal '<pre>' + `pdftotext #{location} -` + '</pre>'
+        html = RDF::Literal `pdftohtml -s -stdout #{Shellwords.escape @path}`
         html.datatype = RDF.XMLLiteral
         yield Content.R, html
       end

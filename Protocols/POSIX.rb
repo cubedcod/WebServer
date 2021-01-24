@@ -29,7 +29,7 @@ class WebResource
 
     LocalAddress = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).concat(ENV.has_key?('HOSTNAME') ? [ENV['HOSTNAME']] : []).uniq
 
-    # URI -> filesystem path
+    # URI -> fs-path
     def fsPath
       [host_parts,            # host directory
        if local_node?         # local path
@@ -71,9 +71,6 @@ class WebResource
 
     # URI -> Pathname
     def node; Pathname.new fsPath end
-
-    # escaped path for shell invocation
-    def shellPath; Shellwords.escape fsPath.force_encoding 'UTF-8' end
 
   end
 
@@ -118,9 +115,9 @@ class WebResource
         pathbase = host_parts.join('/').size
         (if node.directory?                                    # directory
          if qs['f'] && !qs['f'].empty?                         # FIND
-           `find #{shellPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
+           `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
          elsif qs['find'] && !qs['find'].empty? && path != '/' # FIND case-insensitive substring
-           `find #{shellPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
+           `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
          elsif qs.has_key?('Q') || qs.has_key?('q')            # GREP
            nodeGrep
          else                                                  # LS
