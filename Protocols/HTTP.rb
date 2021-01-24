@@ -28,25 +28,26 @@ class WebResource
     end
 
     def self.call env
-      return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']       # method
-      uri = RDF::URI('//'+env['HTTP_HOST']).join(env['REQUEST_PATH']).R env # URI
-      uri.scheme = uri.local_node? ? 'http' : 'https'                       # scheme
-      if env['QUERY_STRING'] && !env['QUERY_STRING'].empty?                 # query
-        uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&')        # strip leading + consecutive &s so URI library doesn't freak out
-        qs = uri.query_values                                               # parse query args
-        Args.map{|k|env[k.to_sym] = qs.delete(k) || true if qs.has_key? k}  # read local (client <> proxy) args
-        qs.empty? ? (uri.query = nil) : (uri.query_values = qs)             # set remote (proxy <> origin) args
+      return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']      # method
+      uri = RDF::URI('//' + env['HTTP_HOST']).                             # host
+              join(env['REQUEST_PATH'].gsub /\/\/+/, '/').R env            # path
+      uri.scheme = uri.local_node? ? 'http' : 'https'                      # scheme
+      if env['QUERY_STRING'] && !env['QUERY_STRING'].empty?                # query
+        uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&')       # strip leading + consecutive &s so URI library doesn't freak out
+        qs = uri.query_values                                              # parse query args
+        Args.map{|k|env[k.to_sym] = qs.delete(k) || true if qs.has_key? k} # read local (client <> proxy) args
+        qs.empty? ? (uri.query = nil) : (uri.query_values = qs)            # set remote (proxy <> origin) args
       end
-      env.update({base: uri, feeds: [], links: {}, log: [], resp: {}})      # response environment
-      uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body|       # dispatch request
-        format = uri.format_icon head['Content-Type']                       # logger
+      env.update({base: uri, feeds: [], links: {}, log: [], resp: {}})     # response environment
+      uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body|      # dispatch request
+        format = uri.format_icon head['Content-Type']                      # logger
         color = env[:deny] ? '31;1' : (format_color format)
         puts [env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]), (status_icon status), format, env[:repository] ? (env[:repository].size.to_s + '⋮') : nil,
               env['HTTP_REFERER'] ? ["\e[#{color}m", env['HTTP_REFERER'], "\e[0m→"] : nil, "\e[#{color}#{env['HTTP_REFERER'] && !env['HTTP_REFERER'].index(env[:base].host) && ';7' || ''}m",
               env[:base], "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil, Verbose ? [env['HTTP_ACCEPT'], head['Content-Type']].compact.join(' → ') : nil, env[:log]
              ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
-        [status, head, body]}                                               # response
-    rescue Exception => e                                                   # error handler
+        [status, head, body]}                                              # response
+    rescue Exception => e                                                  # error handler
       msg = [[uri, e.class, e.message].join(' '), e.backtrace].join "\n"
       puts "\e[7;31m500\e[0m " + msg if Verbose
       [500, {'Content-Type' => 'text/html; charset=utf-8'}, env['REQUEST_METHOD'] == 'HEAD' ? [] : ["<!DOCTYPE html>\n<html><body class='error'>#{HTML.render [{_: :style, c: SiteCSS}, {_: :script, c: SiteJS}, uri.uri_toolbar]}<pre><a href='#{uri.remoteURL}' >500</a>\n#{CGI.escapeHTML msg}</pre></body></html>"]]

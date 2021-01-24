@@ -260,7 +260,7 @@ class WebResource
         post.css('.labelCreated').map{|created|
           yield subject, Date, Chronic.parse(created.inner_text).iso8601, graph }
 
-        post.css('.name, .post_author, .poster-name').map{|name|
+        post.css('.name, .post_author, .poster-name, .postername').map{|name|
           yield subject, Creator, name.inner_text, graph }
 
         post.css('.post-subject, .post_title, .subject, .title').map{|subj|
@@ -279,7 +279,7 @@ class WebResource
           yield subject, Video, (join a['href']), graph }
 
         post.css('.body, .divMessage, .message, .post-body, .postMessage, .text').map{|msg|
-          msg.css('a[onclick*="Reply"], .post-link, .quotelink, .quoteLink').map{|reply_of|
+          msg.css('a[class^="ref"], a[onclick*="Reply"], .post-link, .quotelink, .quoteLink').map{|reply_of|
             yield subject, To, (join reply_of['href']), graph
             reply_of.remove}
           yield subject, Content, msg, graph }
