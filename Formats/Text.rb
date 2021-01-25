@@ -141,7 +141,6 @@ module Webize
       def initialize(input = $stdin, options = {}, &block)
         @doc = (input.respond_to?(:read) ? input.read : input).encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
         @base = options[:base_uri].R
-        @body = @base.join '#this'
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -217,12 +216,11 @@ module Webize
                                        yield subject, p, o},
                                      '</pre>'].join if msg
           }
-        else # basic text content
-          yield @body, Content, Webize::HTML.format(WebResource::HTML.render({_: :pre,
+        else # generic
+          yield @base, Content, Webize::HTML.format(WebResource::HTML.render({_: :pre,
                                                                               c: @doc.lines.map{|line|
-                                                                                line.hrefs{|p,o| # emit references as RDF
-                                                                                  yield @body, p, o  unless o.deny?
-                                                                                  # yield o, Type, (W3+'2000/01/rdf-schema#Resource').R
+                                                                                line.hrefs{|p,o| # inline references to RDF
+                                                                                  yield @base, p, o  unless o.deny?
                                                                                 }}}), @base)
         end
       end

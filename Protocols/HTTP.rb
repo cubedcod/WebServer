@@ -189,7 +189,7 @@ class WebResource
             end
             if reader = RDF::Reader.for(content_type: format)         # reader defined for format?
               env[:repository] ||= RDF::Repository.new                # initialize RDF repository
-              if format.index('html') && timestamp = h['Last-Modified'] || h['last-modified'] # HTTP metadata to RDF-graph
+              if format.index('text')==0 && timestamp = h['Last-Modified']||h['last-modified'] # HTTP metadata to RDF-graph
                 env[:repository] << RDF::Statement.new(self, Date.R, Time.httpdate(timestamp.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,'')).iso8601) rescue nil
               end
               reader.new(body, base_uri: self, path: file){|g|env[:repository] << g} # read RDF
