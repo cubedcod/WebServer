@@ -9,9 +9,11 @@ class String
       (link.empty? && '' ||
        '<a href="' + link.gsub('&','&amp;').gsub('<','&lt;').gsub('>','&gt;') + '">' +
        (resource = link.R
+        img = nil
         if blk
           type = case link
                  when /(gif|jpg|jpeg|(jpg|png):(large|small|thumb)|png|webp)(\?|$)/i
+                   img = '<img src="' + resource.uri + '">'
                    WebResource::Image
                  when /(youtu.?be|(mkv|mp4|webm)(\?|$))/i
                    WebResource::Video
@@ -20,7 +22,8 @@ class String
                  end
           yield type, resource
         end
-        CGI.escapeHTML(resource.uri.sub(/^http:../,'')[0..79])) +
+        [img,
+         CGI.escapeHTML(resource.uri.sub(/^http:../,'')[0..79])].join) +
        '</a>') +
       (post.empty? && '' || post.hrefs(&blk)) # prob not tail-recursive, getting overflow on logfiles, may need to rework
   rescue
