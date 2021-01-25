@@ -33,10 +33,10 @@ hotjar|hubspot|
 im(pression|rworldwide)|inte(llitxt|rcom)|
 kr(ux|xd)|kochava|
 lexity|li(nkedin|strak|veperson)|
-ma(iler|rketo|tomo)|me(dia\.net|quoda|tri(cs|x))|ml314|mouseflow|mpulse|
+ma(iler|rket|tomo)|me(dia\.net|quoda|tri(cs|x))|ml314|mo(dal|useflow)|mpulse|
 narrativ\.|newrelic|newsletter|npttech|nreum|
-olark|omappapi|one(signal|trust)|op(mnstr|t(anon|imize))|outbrain|owneriq|
-pa(ges(ense|peed)|r(dot|sely)|ypal)|pi(n(gdom|img|terest)|wik)|porpoiseant|pr(ebid|omo)|pub(\.network|m(atic|ine))|pushly|
+olark|omappapi|one(signal|trust)|op(t?n?mn?str|t(anon|imize))|outbrain|owneriq|
+pa(ges(ense|peed)|r(dot|sely)|y(pa|wal)l)|pi(n(gdom|img|terest)|wik)|porpoiseant|pr(ebid|omo)|pub(\.network|m(atic|ine))|pushly|
 quora|qua(ltrics|nt(cast|serv|um))|
 r-login|rightmessage|rlcdn|
 sa(il.?(horizon|thr)|les(force|loft))|sc(ene7|orecard)|se(archiq|edtag|rv(edby|iceWorker))|shopify|slickstream|smartlook|snowplow|spo(nsor|t\.im)|st(atcounter|umbleupon)|

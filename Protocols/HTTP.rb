@@ -195,7 +195,7 @@ class WebResource
               reader.new(body, base_uri: self, path: file){|g|env[:repository] << g} # read RDF
             else
               puts "RDF::Reader undefined for #{format}"              # warning: undefined Reader
-            end unless format.index 'script'
+            end unless format.match? /octet-stream|script/
           else
             puts "ERROR format undefined on #{uri}"                   # warning: undefined format
           end

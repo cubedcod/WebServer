@@ -57,6 +57,7 @@ class WebResource
       'audio/mpeg' => '.mp3',
       'audio/opus' => '.opus',
       'binary/octet-stream' => '.bin',
+      'image/avif' => '.avif',
       'image/jpg' => '.jpg',
       'image/svg+xml' => '.svg',
       'image/webp' => '.webp',
