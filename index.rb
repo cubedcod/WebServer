@@ -1,5 +1,5 @@
 {Formats: %w(URI Archive Audio Calendar Chat Code CSS CSV Feed Form HTML Image JSON Mail Markdown MIME Org PDF RDF Subtitle Text Video),
- Protocols: %w(Gemini POSIX HTTP NNTP),
+ Protocols: %w(POSIX HTTP),
  config: %w(gunk meta site)}.
   map{|category, components|
   components.map{|component|
