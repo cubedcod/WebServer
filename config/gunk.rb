@@ -21,7 +21,7 @@ class WebResource
 
     Gunk = Regexp.new SiteDir.join('gunk.regex').read.chomp, Regexp::IGNORECASE
 
-    ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](ads|b0e8|bing|gt(ag|m)|pi(ng|xel)|s(entry|umo)|utm)[-._\/\(\)'"\s:?&=~%]|
+    ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](ads|b0e8|bing|gt(ag|m)|pi(ng|xel)|s(entry|umo)|t(aw|rac)k|utm)[-._\/\(\)'"\s:?&=~%]|
 ad(.?bl(ade|ock)|push|r(ecover|oll)|sense|vert)|am(azon|plitude)|acsb|addtoany|algolia|analytic|aswpsdkus|auction|
 baidu|bazaarvoice|bidder|BO(OMR|uncee?x)|browser.?update|btncdn|bu(gherd|zzfeed)|
 campaign|chartbeat|chimp|cl(ick(cea|fu)se|oudfront)|co(mscore|n(fiant|natix|sent)|okie.?(consent|law))|cpx\.|cr(iteo|sspxl)|cxense|
@@ -33,13 +33,13 @@ hotjar|hubspot|
 im(pression|rworldwide)|inte(llitxt|rcom)|
 kr(ux|xd)|kochava|
 lexity|li(nkedin|strak|veperson)|
-ma(iler|rketo|tomo)|me(dia\.net|quoda|tri(cs|x))|ml314|mpulse|
+ma(iler|rketo|tomo)|me(dia\.net|quoda|tri(cs|x))|ml314|mouseflow|mpulse|
 narrativ\.|newrelic|newsletter|npttech|nreum|
-olark|omappapi|one(signal|trust)|opt(anon|imize)|outbrain|owneriq|
+olark|omappapi|one(signal|trust)|op(mnstr|t(anon|imize))|outbrain|owneriq|
 pa(ges(ense|peed)|r(dot|sely)|ypal)|pi(n(gdom|img|terest)|wik)|porpoiseant|prebid|pub(\.network|m(atic|ine))|pushly|
 quora|qua(ltrics|nt(cast|serv|um))|
 r-login|rightmessage|rlcdn|
-sa(il.?(horizon|thr)|les(force|loft))|sc(ene7|orecard)|se(archiq|edtag|rviceWorker)|shopify|slickstream|smartlook|snowplow|spo(nsor|t\.im)|st(atcounter|umbleupon)|
+sa(il.?(horizon|thr)|les(force|loft))|sc(ene7|orecard)|se(archiq|edtag|rv(edby|iceWorker))|shopify|slickstream|smartlook|snowplow|spo(nsor|t\.im)|st(atcounter|umbleupon)|
 ta(boola|rgeting)|ti(qcdn|nypass)|track(er|ing)|toutapp|turnto|twitter|typekit|
 unruly|
 venatus|viglink|vuukle|vntsm|
