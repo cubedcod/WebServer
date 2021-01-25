@@ -5,10 +5,7 @@ openrc/systemd unit for daemon - log to syslog / systemd journal
 tools for feedlist maintenance - query recent log for errors/redirects / no new data, list discovered feeds for possible subscription
 path visualization
 offline icon , e.g. to stop redirect and use local cache on  http://localhost:8000/lobste.rs/threads/?view=table&sort=date&offline  http://localhost:8000/www.universalhub.com/comment
-gemini
-nntp
-gopher
-wayland browser w/ https/images
+wayland browser w/ https/images and simulation of the JS behaviors
 ?fullContent  for elided repeat content - https://solidproject.org/newsletter/2020-12-03#UI
 https://twitter.com/MariaAb1293 - user info JSON parse
 feedburner origlink
