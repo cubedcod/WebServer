@@ -24,11 +24,11 @@ class WebResource
     ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](ads|b0e8|bing|gt(ag|m)|pi(ng|xel)|s(entry|umo)|t(aw|rac)k|utm)[-._\/\(\)'"\s:?&=~%]|
 ad(.?bl(ade|ock)|push|r(ecover|oll)|sense|vert)|am(azon|plitude)|acsb|addtoany|algolia|analytic|aswpsdkus|auction|
 baidu|bazaarvoice|bidder|BO(OMR|uncee?x)|browser.?update|btncdn|bu(gherd|zzfeed)|
-campaign|chartbeat|chimp|cl(ick(cea|fu)se|oudfront)|co(mscore|n(fiant|natix|sent)|okie.?(consent|law))|cpx\.|cr(iteo|sspxl)|cxense|
+campaign|chartbeat|chimp|cl(ick(cea|fu)se|oudfront)|co(mscore|n(fiant|natix|sent)|okie.?(consent|law))|cpx\.|cr(iteo|sspxl|wdcntrl)|cxense|
 detroitchicago|[^a-z]dfp|disqus|dmpxs|dotmetrics|doubleclick|
 effectivemeasure|ensighten|evidon|Ezoic|
 fa(cebook|stclick)|feedbackify|fingerprint|foresee|fullstory|funnel|
-gdpr|get(drip|pocket)|google|grapeshot|gumgum|gwallet|
+gdpr|ge(oloc|t(drip|pocket))|google|grapeshot|gumgum|gwallet|
 hotjar|hubspot|
 im(pression|rworldwide)|inte(llitxt|rcom)|
 kr(ux|xd)|kochava|

@@ -570,6 +570,7 @@ class WebResource
       'shenma-site-verification' => :drop,
       'shortcode' => :drop,
       'shortcut' => :drop,
+      'shorter' => Link,
       'shortlink' => Link,
       'shorturl' => Link,
       'showAds' => :drop,
