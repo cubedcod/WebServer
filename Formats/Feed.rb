@@ -126,6 +126,7 @@ module Webize
         reLinkCData = /<link><\!\[CDATA\[([^\]]+)/    # <link> CDATA block
         reLinkHref = /<link[^>]+rel=["']?alternate["']?[^>]+href=["']?([^'">\s]+)/ # <link> @href @rel=alternate
         reLinkRel = /<link[^>]+href=["']?([^'">\s]+)/ # <link> @href
+        reOrigLink = /<feedburner:origLink>([^<]+)/   # <feedburner:origLink> element
         reId = /<(?:gu)?id[^>]*>([^<]+)/              # <id> element
         isURL = /\A(\/|http)[\S]+\Z/                  # HTTP URI
 
@@ -156,6 +157,7 @@ module Webize
           inner = m[3]
           # identifier search
           if id = (attrs && attrs.match(reRDFabout) ||
+                   inner.match(reOrigLink) ||
                    inner.match(reLink) ||
                    inner.match(reLinkCData) ||
                    inner.match(reLinkHref) ||
