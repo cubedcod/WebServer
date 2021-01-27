@@ -169,6 +169,7 @@ class WebResource
                      ct = content_type.split(/;/)
                      if ct.size == 2                                  # charset specified in header
                        charset = ct[1].sub(/.*charset=/i,'')
+                       charset = 'UTF-8' if charset.match? /utf.?8/i
                        charset = nil if charset.empty? || charset == 'empty'
                      end
                      ct[0]
@@ -176,8 +177,8 @@ class WebResource
                      named_format
                    end
           if format                                                   # format defined
-            body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace if format.index('text') == 0 # reencode text in UTF-8
-            body = Webize.clean self, body, format                    # clean upstream data
+            body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace if format.index('text') == 0 # encode text in UTF-8
+            body = Webize.clean self,body,format unless AllowGunk.member? host # clean data
             if formatExt = Suffixes[format] || Suffixes_Rack[format]  # look up format-suffix
               file = fsPath                                           # cache base path
               file += '/index' if file[-1] == '/'                     # append directory-data slug

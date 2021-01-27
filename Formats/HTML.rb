@@ -4,10 +4,7 @@ module Webize
     include WebResource::URIs
 
     def self.clean doc, base
-      unless AllowJS.member? base.host               # show <noscript> content
-        doc.gsub! /<\/?(form|noscript)[^>]*>/i, ''
-      end
-      doc = Nokogiri::HTML.parse doc
+      doc = Nokogiri::HTML.parse doc.gsub /<\/?(form|noscript)[^>]*>/i, '' # strip <noscript>,<form> and parse
 
       doc.traverse{|e|
 
@@ -37,7 +34,7 @@ module Webize
           base.env[:log].push gunk.to_s[0..31] if Verbose
           puts s.inner_text, '-'*42 if Verbose
           s.remove
-        end} unless AllowJS.member?(base.host) #|| ENV.has_key?('GUNK')
+        end}
 
       doc.css('style').map{|s| Webize::CSS.cleanNode s if s.inner_text.match? /font-face|import/}
 
