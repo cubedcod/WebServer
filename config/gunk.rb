@@ -3,8 +3,6 @@ class WebResource
   module URIs
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
 
-    AllowGunk = %w(w3.cdn.anvato.net code.jquery.com cdn.jwplayer.com gitter.im www.google.com twitter.com www.instagram.com www.mixcloud.com assets.squarespace.com www.youtube.com)
-
     AllowFile = SiteDir.join 'allow_domains'
     AllowDomains = {}
     AllowFile.each_line{|l|

@@ -42,9 +42,12 @@ module Webize
 end
 class WebResource
   module URIs
-    AllowedHeaders = 'authorization, client-id, content-type, device-fp, device-id, x-access-token, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-csrf-token, x-device-id, x-goog-authuser, x-guest-token, x-hostname, x-lib-version, x-locale, x-twitter-active-user, x-twitter-client-language, x-twitter-utcoffset, x-requested-with' # TODO populate from preflight
 
-    # site-config resources
+    AllowedHeaders = 'authorization, client-id, content-type, device-fp, device-id, x-access-token, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-csrf-token, x-device-id, x-goog-authuser, x-guest-token, x-hostname, x-lib-version, x-locale, x-twitter-active-user, x-twitter-client-language, x-twitter-utcoffset, x-requested-with' # TODO populate from preflight
+    AllowGunk = %w(w3.cdn.anvato.net code.jquery.com cdn.jwplayer.com gitter.im www.google.com twitter.com www.instagram.com www.mixcloud.com assets.squarespace.com www.youtube.com)
+    DarkLogo = %w(www.nytimes.com)
+
+    # site resources
     FeedIcon = SiteDir.join('feed.svg').read
     SiteFont = SiteDir.join('fonts/hack-regular-subset.woff2').read
     SiteIcon = SiteDir.join('favicon.ico').read

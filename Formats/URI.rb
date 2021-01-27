@@ -95,7 +95,7 @@ class WebResource < RDF::URI
            ({_: :a, href: HTTP.qs(qs.merge({'download' => 'audio'})), c: '&darr;', id: :download, class: :icon} if host.match?(/(^|\.)(bandcamp|(mix|sound)cloud|youtube).com/)),
            env[:feeds].map{|feed|
              {_: :a, href: feed.R.href, title: feed.path, class: :icon, c: FeedIcon, id: 'feed' + Digest::SHA2.hexdigest(feed.to_s)}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange'} : {})}, "\n",
-           {_: :a, href: env[:base].join('/').R.href, id: :host, c: icon ? {_: :img, src: icon} : '🏠'},
+           {_: :a, href: env[:base].join('/').R.href, id: :host, c: icon ? {_: :img, src: icon, style: DarkLogo.member?(host) ? 'background-color: #fff' : ''} : '🏠'},
            {class: :path,
             c: env[:base].parts.map{|p| bc += '/' + p
               {_: :a, class: :breadcrumb, href: env[:base].join(bc).R.href, c: [{_: :span, c: '/'}, (CGI.escapeHTML Rack::Utils.unescape p)], id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}}},
