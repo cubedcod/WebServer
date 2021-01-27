@@ -1,0 +1,14 @@
+untyped feeds w/ bad default:
+500 http://localhost:8000/https:/static.fsf.org/fsforg/rss/news.xml Encoding::UndefinedConversionError "\xC3" from ASCII-8BIT to UTF-8
+500 http://localhost:8000/https:/cambridgehappenings.org/~api/papers/b2aba772-7680-4d6b-8282-76aa8c9b8762/rss Encoding::UndefinedConversionError "\xE2" from ASCII-8BIT to UTF-8
+500 http://localhost:8000/https:/ar.al/index.xml Encoding::UndefinedConversionError "\xE2" from ASCII-8BIT to UTF-8
+500 http://localhost:8000/https:/librelounge.org/atom-feed.atom Encoding::UndefinedConversionError "\xC3" from ASCII-8BIT to UTF-8
+500 http://localhost:8000/https:/cambridgehappenings.org/~api/papers/b2aba772-7680-4d6b-8282-76aa8c9b8762/rss?type=link&section=Science Encoding::UndefinedConversionError "\xE2" from ASCII-8BIT to UTF-8
+500 http://localhost:8000/https:/lisawilliams.github.io/lisa/feed.xml Encoding::UndefinedConversionError "\xE2" from ASCII-8BIT to UTF-8
+500 http://localhost:8000/https:/www.ashmonthill.org/ah/Home/rss.xml Encoding::UndefinedConversionError "\xE2" from ASCII-8BIT to UTF-8
+500 http://localhost:8000/https:/www.codeotaku.com/journal/atom Encoding::UndefinedConversionError "\xE5" from ASCII-8BIT to UTF-8
+500 http://localhost:8000/https:/www.theregister.com/headlines.atom Encoding::UndefinedConversionError "\xE2" from ASCII-8BIT to UTF-8
+500 http://localhost:8000/https:/www.eastboston.com/eastboston.rss Encoding::UndefinedConversionError "\xE2" from ASCII-8BIT to UTF-8
+
+googlechrome fakehostname gunkL
+500 https://czhcsbi/ SocketError Failed to open TCP connection to czhcsbi:80 (getaddrinfo: Temporary failure in name resolution)
