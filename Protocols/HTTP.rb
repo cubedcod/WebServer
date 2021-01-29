@@ -163,20 +163,26 @@ class WebResource
           [206, h, [response.read]]                                   # return part
         else
           body = HTTP.decompress h, response.read                     # decompress body
-          format = if path=='/feed'||(query_values||{})['mime']=='xml'# feed-URL (override broken text/html content-types)
+          format = if path=='/feed'||(query_values||{})['mime']=='xml'# format fixed at feed-URL (override erroneous upstream text/html)
                      'application/atom+xml'
-                   elsif content_type = h['content-type']             # format specified in header
+                   elsif content_type = h['content-type']             # format defined in HTTP header
                      ct = content_type.split(/;/)
-                     if ct.size == 2                                  # charset specified in header
+                     if ct.size == 2                                  # charset defined in HTTP header
                        charset = ct[1].sub(/.*charset=/i,'')
-                       charset = 'UTF-8' if charset.match? /utf.?8/i
                        charset = nil if charset.empty? || charset == 'empty'
                      end
                      ct[0]
-                   elsif named_format                                 # format from name extension mapping
+                   elsif named_format                                 # format via name-extension map
                      named_format
                    end
           if format                                                   # format defined
+            if !charset && format.index('html') && metatag = body[0..4096].encode('UTF-8', undef: :replace, invalid: :replace).match(/<meta[^>]+charset=['"]?([^'">]+)/i)
+              charset = metatag[1]                                    # charset defined in <head> of document
+            end
+            if charset
+              charset = 'UTF-8' if charset.match? /utf.?8/i           # normalize UTF-8 charset-id
+              charset = 'Shift_JIS' if charset.match? /s(hift)?.?jis/i# normalize Shift-JIS charset-id
+            end
             body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace if format.match? /(ht|x)ml|script|text/ # encode text in UTF-8
             body = Webize.clean self,body,format unless AllowGunk.member? host # clean data
             if formatExt = Suffixes[format] || Suffixes_Rack[format]  # look up format-suffix
