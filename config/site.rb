@@ -7,7 +7,6 @@ module Webize
         '8kun.top' => :Chan,
         'apnews.com' => :AP,
         'bunkerchan.xyz' => :Chan,
-        'drudgereport.com' => :Drudge,
         'archive.4plebs.org' => :Chan,
         'boards.4chan.org' => :Chan,
         'boards.4channel.org' => :Chan,
@@ -360,9 +359,6 @@ l.facebook.com l.instagram.com
         yield subject, Content, Webize::HTML.format(content, self)}
       post.remove }
     ['#fixed_sidebar'].map{|s|doc.css(s).map &:remove}
-  end
-
-  def Drudge doc
   end
 
   def GitHub doc
