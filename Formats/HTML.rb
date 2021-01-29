@@ -230,7 +230,8 @@ module Webize
 
         # <body>
         if body = n.css('body')[0]
-          unless @base.local_node? || (@base.query_values||{}).has_key?('fullContent') # hide upstream site-gunk
+          unless @base.local_node? || (@base.query_values||{}).has_key?('fullContent') # summarize to new content
+            @base.env[:summary] = true
             hashed_nodes = 'div, footer, h1, h2, h3, nav, p, section, span'
             hashs = {}
             links = {}
@@ -261,6 +262,7 @@ module Webize
             hashfile.writeFile hashs.keys.join "\n" # update hashfile
             linkfile.writeFile links.keys.join "\n" # update linkfile
           end
+
           yield subject, Content, HTML.format(body, @base)
         else # no <body> element
           yield subject, Content, HTML.format(n, @base)
