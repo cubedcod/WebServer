@@ -177,7 +177,7 @@ class WebResource
                      named_format
                    end
           if format                                                   # format defined
-            body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace if format.index('text') == 0 # encode text in UTF-8
+            body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace if format.match? /(ht|x)ml|script|text/ # encode text in UTF-8
             body = Webize.clean self,body,format unless AllowGunk.member? host # clean data
             if formatExt = Suffixes[format] || Suffixes_Rack[format]  # look up format-suffix
               file = fsPath                                           # cache base path
