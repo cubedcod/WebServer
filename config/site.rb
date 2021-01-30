@@ -277,6 +277,7 @@ l.facebook.com l.instagram.com
           [s,h,b]
         end}}
 
+    GET 'www.walmart.com', NoGunk
     GET 'news.yahoo.com', NoGunk
     GET 's.yimg.com', ImgRehost
 
