@@ -28,7 +28,7 @@ effectivemeasure|ensighten|evidon|Ezoic|
 fa(cebook|stclick)|feedback|fingerprint|foresee|fullstory|funnel|
 gdpr|ge(oloc|t(drip|pocket))|google|grapeshot|gumgum|gwallet|
 hotjar|hubspot|
-im(pression|rworldwide)|inte(llitxt|rcom)|
+im(pression|rworldwide)|inte(llitxt|rcom)|iubenda|
 kr(ux|xd)|kochava|
 lexity|li(nkedin|strak|veperson)|
 ma(iler|rket|tomo)|me(dia\.net|quoda|tri(cs|x))|ml314|mo(dal|useflow)|mpulse|
