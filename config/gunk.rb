@@ -19,8 +19,8 @@ class WebResource
 
     Gunk = Regexp.new SiteDir.join('gunk.regex').read.chomp, Regexp::IGNORECASE
 
-    ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](ads|b0e8|bing|gt(ag|m)|pi(ng|xel)|s(entry|umo)|t(aw|rac)k|utm)[-._\/\(\)'"\s:?&=~%]|
-ad(.?bl(ade|ock)|push|r(ecover|oll)|sense|vert)|am(azon|plitude)|acsb|addtoany|algolia|analytic|aswpsdk|au(ction|dioeye)|
+    ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](ads|b0e8|bing|g(aq|t(ag|m))|pi(ng|xel)|s(entry|umo)|t(aw|rac)k|utm)[-._\/\(\)'"\s:?&=~%]|
+ad(.?bl(ade|ock)|push|r(ecover|oll)|sense|dthis|vert)|am(azon|plitude)|acsb|addtoany|algolia|analytic|aswpsdk|au(ction|dioeye)|
 baidu|bazaarvoice|bidder|BO(OMR|uncee?x)|browser.?update|btncdn|bu(gherd|zzfeed)|
 campaign|chartbeat|chimp|cl(ick(cea|fu)se|oudfront)|co(mscore|n(fiant|natix|sent)|okie.?(consent|law))|cpx\.|cr(iteo|sspxl|wdcntrl)|cxense|
 datadog|detroitchicago|[^a-z]dfp|disqus|dmpxs|dotmetrics|doubleclick|
