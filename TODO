@@ -17,3 +17,6 @@ all users same color since #displayname doesnt use querystring-based user id
 https://boards.4channel.org/g/thread/79924795?view=table&sort=date - hyperlinks not in <a>
 tree view for replies
 search-result abstract rollup at top of page
+record some of the dropped telemetry URLs - which youtube vids were watched, guesstimated locations etc
+yt/disqus comments
+dynamic NAVIGATION suggestions in autocomplete
