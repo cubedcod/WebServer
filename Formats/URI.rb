@@ -41,9 +41,10 @@ class WebResource < RDF::URI
     def basename; File.basename path end
 
     def display_name
-      return fragment if fragment && !fragment.empty?
-      return basename if path && basename && !['','/'].member?(basename)
-      return host.sub(/^www\./,'').sub(/\.com$/,'') if host
+      return fragment if fragment && !fragment.empty?                    # fragment
+      return query_values['id'] if (query_values || {}).has_key? 'id'    # query
+      return basename if path && basename && !['','/'].member?(basename) # basename
+      return host.sub(/^www\./,'').sub(/\.com$/,'') if host              # hostname
       'user'
     end
 
@@ -94,7 +95,7 @@ class WebResource < RDF::URI
            {_: :a, href: HTTP.qs(qs.merge({'notransform' => nil})), c: '⚗️', id: :UI, class: :icon},
            ({_: :a, href: HTTP.qs(qs.merge({'download' => 'audio'})), c: '&darr;', id: :download, class: :icon} if host.match?(/(^|\.)(bandcamp|(mix|sound)cloud|youtube).com/)),
            env[:feeds].map{|feed|
-             {_: :a, href: feed.R.href, title: feed.path, class: :icon, c: FeedIcon, id: 'feed' + Digest::SHA2.hexdigest(feed.to_s)}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .1em solid orange; background-color: orange'} : {})}, "\n",
+             {_: :a, href: feed.R.href, title: feed.path, class: :icon, c: FeedIcon, id: 'feed' + Digest::SHA2.hexdigest(feed.to_s)}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .08em solid orange; background-color: orange'} : {})}, "\n",
            {_: :a, href: env[:base].join('/').R.href, id: :host, c: icon ? {_: :img, src: icon, style: DarkLogo.member?(host) ? 'background-color: #fff' : ''} : '🏠'},
            {class: :path,
             c: env[:base].parts.map{|p| bc += '/' + p
