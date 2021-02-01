@@ -22,7 +22,7 @@ class WebResource
     ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](ads|b0e8|bing|g(aq|tag)|pixel|s(entry|umo)|tawk|utm)[-._\/\(\)'"\s:?&=~%]|
 ad(.?bl(ade|ock)|push|r(ecover|oll)|sense|dthis)|amplitude\.com|acsb|addtoany|algolia|analytic|aswpsdk|au(ction|dioeye)|
 baidu|bazaarvoice|bidder|BO(OMR|uncee?x)|browser.?update|btncdn|bu(gherd|zzfeed)|
-campaign|chartbeat|chimp|cl(ick(cea|fu)se|oudfront)|co(mscore|n(fiant|natix)|okie.?(consent|law))|cpx\.|cr(iteo|sspxl|wdcntrl)|cxense|
+campaign|chartbeat|chimp|cl(ick(cea|fu)se)|co(mscore|n(fiant|natix)|okie.?(consent|law))|cpx\.|cr(iteo|sspxl|wdcntrl)|cxense|
 datadog|detroitchicago|[^a-z]dfp|disqus|dmpxs|dotmetrics|doubleclick\.net|
 effectivemeasure|ensighten|evidon|Ezoic|
 fa(cebook\.(com|net)|stclick)|fingerprint|foresee|fullstory|funnel|
@@ -37,7 +37,7 @@ olark|omappapi|one(signal|trust)|online-metrix|op(t?n?mn?str|t(anon|imizely))|ou
 pa(ges(ense|peed)|r(dot|sely)|y(pa|wal)l)|pi(n(gdom|img|terest)|wik)|porpoiseant|pr(ebid|omo(s|tion))|pub(\.network|m(atic|ine))|pushly|
 quora|qua(l(aroo|trics)|nt(cast|serv|um))|
 r-login|rightmessage|rlcdn|
-sa(il.?(horizon|thr)|les(force|loft))|sc(ene7|orecard)|se(archiq|edtag|rv(edby|iceWorker))|shopify|slickstream|smart(asset|look)|snowplow|spo(nsor|t\.im)|st(atcounter|umbleupon)|
+sa(il.?(horizon|thr)|les(force|loft))|sc(ene7|orecard)|se(archiq|edtag|rv(edby|iceWorker))|shopify|slickstream|smart(asset|look)|snowplow|spot\.im|st(atcounter|umbleupon)|
 ta(boola|rgeting)|ti(qcdn|nypass)|toutapp|turnto|twitter|typekit|
 unruly|
 venatus|viglink|vuukle|vntsm|
