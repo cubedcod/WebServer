@@ -50,7 +50,7 @@ class WebResource
               re = (resource['uri'] || ('#'+Digest::SHA2.hexdigest(rand.to_s))).to_s.R env                   # resource identity
               local_id = re.path == env[:base].path && re.fragment || ('r' + Digest::SHA2.hexdigest(re.uri)) # local-row identity
               [{_: :tr, id: local_id, c: keys.map{|k| # row
-                 [{_: :td, property: k,
+                 [{_: :td, class: re.deny? ? 'blocked' :  '', property: k,
                   c: if k == 'uri'
                    tCount = 0
                    [(resource[Title]||[]).map{|title|
