@@ -43,7 +43,6 @@ class WebResource
   module URIs
 
     AllowedHeaders = 'authorization, client-id, content-type, device-fp, device-id, x-access-token, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-csrf-token, x-device-id, x-goog-authuser, x-guest-token, x-hostname, x-lib-version, x-locale, x-twitter-active-user, x-twitter-client-language, x-twitter-utcoffset, x-requested-with' # TODO populate from preflight
-    AllowGunk = %w(abs.twimg.com w3.cdn.anvato.net code.jquery.com cdn.jwplayer.com gitter.im www.google.com twitter.com www.instagram.com www.mixcloud.com assets.squarespace.com www.youtube.com)
     DarkLogo = %w(www.nytimes.com)
 
     # site resources
@@ -107,7 +106,6 @@ l.facebook.com l.instagram.com
 
     GET 'www.amazon.com', NoGunk
     GET 'www.dropbox.com', NoGunk
-    GET 'www.facebook.com', NoGunk
 
     GET 'gitter.im', -> r {
       if r.parts[0] == 'api'

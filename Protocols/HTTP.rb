@@ -185,7 +185,7 @@ class WebResource
               charset = 'Shift_JIS' if charset.match? /s(hift)?.?jis/i# normalize Shift-JIS charset-id
             end
             body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace if format.match? /(ht|x)ml|script|text/ # encode text in UTF-8
-            body = Webize.clean self,body,format unless AllowGunk.member? host # clean data
+            body = Webize.clean self, body, format                    # clean data
             if formatExt = Suffixes[format] || Suffixes_Rack[format]  # look up format-suffix
               file = fsPath                                           # cache base path
               file += '/index' if file[-1] == '/'                     # append directory-data slug
