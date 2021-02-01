@@ -107,6 +107,7 @@ l.facebook.com l.instagram.com
 
     GET 'www.amazon.com', NoGunk
     GET 'www.dropbox.com', NoGunk
+    GET 'www.facebook.com', NoGunk
 
     GET 'gitter.im', -> r {
       if r.parts[0] == 'api'
