@@ -26,14 +26,14 @@ campaign|chartbeat|chimp|cl(ick(cea|fu)se|oudfront)|co(mscore|n(fiant|natix)|oki
 datadog|detroitchicago|[^a-z]dfp|disqus|dmpxs|dotmetrics|doubleclick\.net|
 effectivemeasure|ensighten|evidon|Ezoic|
 fa(cebook\.(com|net)|stclick)|fingerprint|foresee|fullstory|funnel|
-gdpr|ge(oloc|t(drip|pocket))|google.?(a[dn]|tag|syn)|grapeshot|gumgum|gwallet|
+gdpr|ge(oloc|t(drip|pocket))|google[-._]?(a[dn]|tag|syn)|grapeshot|gumgum|gwallet|
 hotjar|hubspot|
 im(pression|rworldwide)|in(folink|te(llitxt|rcom))|iubenda|
 kr(ux|xd)|kochava|
 lexity|li(nkedin|strak|veperson)|
-ma(rket|tomo)|me(dia\.net|quoda|tri(cs|x))|ml314|mo(dal|useflow)|mpulse|
+matomo|me(dia\.net|quoda|trics)|ml314|mouseflow|mpulse|
 narrativ\.|newrelic|newsletter|npttech|nreum|
-olark|omappapi|one(signal|trust)|op(t?n?mn?str|t(anon|imizely))|outbrain|owneriq|
+olark|omappapi|one(signal|trust)|online-metrix|op(t?n?mn?str|t(anon|imizely))|outbrain|owneriq|
 pa(ges(ense|peed)|r(dot|sely)|y(pa|wal)l)|pi(n(gdom|img|terest)|wik)|porpoiseant|pr(ebid|omo(s|tion))|pub(\.network|m(atic|ine))|pushly|
 quora|qua(l(aroo|trics)|nt(cast|serv|um))|
 r-login|rightmessage|rlcdn|
@@ -43,7 +43,7 @@ unruly|
 venatus|viglink|vuukle|vntsm|
 woocommerce|wp.?(emoji|groho|rum)|
 yandex|\.yimg|yotpo|
-ze(ndesk|rg)|zo(ho|pim)|zqtk)xi
+ze(ndesk|rgnet)|zopim|zqtk)xi
 
   end
 end
