@@ -31,6 +31,7 @@ class WebResource
       Schema + 'NewsArticle' => Post,
       Schema + 'Person' => Person,
       Schema + 'Review' => Post,
+      Schema + 'SearchResult' => Post,
       Schema + 'UserComments' => Post,
       Schema + 'VideoObject' => Video,
       Schema + 'WebPage' => Post,

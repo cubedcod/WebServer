@@ -121,7 +121,7 @@ class WebResource
          elsif qs.has_key?('Q') || qs.has_key?('q')            # GREP
            nodeGrep
          else                                                  # LS
-           env[:summary] = !qs.has_key?('fullContent')
+#           env[:summary] = !qs.has_key?('fullContent')
            (path=='/' && local_node?) ? [node] : [node, *node.children.select{|n|n.basename.to_s[0] != '.'}]
          end
         else                                                   # file(s)

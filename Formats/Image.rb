@@ -223,6 +223,7 @@ class WebResource
       Schema + 'width' => '↔',
       Schema + 'DiscussionForumPosting' => '📝',
       Schema + 'sameAs' => '=',
+      Schema + 'SearchResult' => '🔎',
       Stat + 'File' => '📄',
       To => '☇',
       Type => '📕',

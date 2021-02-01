@@ -475,7 +475,7 @@ l.facebook.com l.instagram.com
         subject = r['href'].R
         if subject.host
           if title = r.css('h3')[0]
-            yield subject, Type, Post.R
+            yield subject, Type, (Schema+'SearchResult').R
             yield subject, Title, title.inner_text
             yield subject, Content, Webize::HTML.format(g.inner_html, self)
             if (icon = ('//' + subject.host + '/favicon.ico').R).node.exist?
