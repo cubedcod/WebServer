@@ -1,10 +1,4 @@
 require 'json'
-class WebResourc
-  module URIs
-    InitialState = /(app|bio|boot(loader|strap)|broadcast(er)?|client|global|init(ial)?|meta|page|player|preload(ed)?|shared|site).?(con(fig|tent)|data|env|node|props|st(ate|ore))|app.bundle|environment|hydrat|SCRIPTS_LOADED|__typename/i
-  end
-end
-
 module Webize
   module JSON
 
