@@ -37,7 +37,7 @@ olark|omappapi|one(signal|trust)|op(t?n?mn?str|t(anon|imize))|outbrain|owneriq|
 pa(ges(ense|peed)|r(dot|sely)|y(pa|wal)l)|pi(n(gdom|img|terest)|wik)|porpoiseant|pr(ebid|omo)|pub(\.network|m(atic|ine))|pushly|
 quora|qua(l(aroo|trics)|nt(cast|serv|um))|
 r-login|rightmessage|rlcdn|
-sa(il.?(horizon|thr)|les(force|loft))|sc(ene7|orecard)|se(archiq|edtag|rv(edby|iceWorker))|shopify|slickstream|smartlook|snowplow|spo(nsor|t\.im)|st(atcounter|umbleupon)|
+sa(il.?(horizon|thr)|les(force|loft))|sc(ene7|orecard)|se(archiq|edtag|rv(edby|iceWorker))|shopify|slickstream|smart(asset|look)|snowplow|spo(nsor|t\.im)|st(atcounter|umbleupon)|
 ta(boola|rgeting)|ti(qcdn|nypass)|track(er|ing)|toutapp|turnto|twitter|typekit|
 unruly|
 venatus|viglink|vuukle|vntsm|
