@@ -35,7 +35,7 @@ matomo|me(dia\.net|quoda)|ml314|mouseflow|mpulse|
 narrativ\.|newrelic|npttech|nreum|
 olark|omappapi|one(signal|trust)|online-metrix|op(t?n?mn?str|t(anon|imizely))|outbrain|owneriq|
 pa(ges(ense|peed)|r(dot|sely)|y(pa|wal)l)|pi(n(gdom|img)|wik)|porpoiseant|prebid|pub(\.network|m(atic|ine))|pushly|
-quora|qua(l(aroo|trics)|nt(cast|serv|um))|
+quora|qua(l(aroo|trics)|nt(cast|serv))|
 r-login|rightmessage|rlcdn|
 sa(il.?(horizon|thr)|les(force|loft))|sc(ene7|orecard)|se(archiq|edtag|rvedby)|shopify|slickstream|smart(asset|look)|snowplow|spot\.im|statcounter|
 taboola|ti(qcdn|nypass)|toutapp|typekit|

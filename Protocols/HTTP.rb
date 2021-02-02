@@ -416,6 +416,7 @@ class WebResource
         env.delete 'rack.input'
 
         if Verbose                                          # log request
+          puts 'POST ' + uri
           head.map{|k,v| puts [k,v.to_s].join "\t" }
           puts '>>>>>>>>', body
         end
