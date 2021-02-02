@@ -26,7 +26,7 @@ chartbeat|chimp|cl(ick(cea|fu)se)|co(mscore|n(fiant|n(atix|ect\.facebook))|okie.
 datadog|detroitchicago|disqus|dmpxs|dotmetrics|
 effectivemeasure|ensighten|evidon|Ezoic|
 fastclick|fingerprint|foresee|fullstory|funnel|
-gaug\.es|get(drip|pocket)|google.?(analytic|tag)|grapeshot|gumgum|
+gaug\.es|g[eo]t(chosen|drip|pocket)|google.?(analytic|tag)|grapeshot|gumgum|
 hotjar|hubspot|
 in(folink|te(llitxt|rcom))|iubenda|
 kochava|
