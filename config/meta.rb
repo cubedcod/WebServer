@@ -50,6 +50,7 @@ class WebResource
       'DC.Description' => Abstract,
       'DC.Publisher' => Creator,
       'DC.Publisher.Address' => Creator,
+      'DC.Subject' => Abstract,
       'DC.Title' => Title,
       'DC.Type' => Type,
       'DC.author' => Creator,

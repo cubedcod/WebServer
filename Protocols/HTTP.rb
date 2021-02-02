@@ -188,7 +188,7 @@ class WebResource
               reader.new(body, base_uri: self, path: file){|g|env[:repository] << g} # read RDF
             else
               puts "RDF::Reader undefined for #{format}"              # warning: undefined Reader
-            end unless format.match? /octet-stream|script/
+            end unless format.match? /octet-stream|script|vnd/
           else
             puts "ERROR format undefined on #{uri}"                   # warning: undefined format
           end
@@ -252,14 +252,14 @@ class WebResource
           if h['Content-Type'] == 'application/javascript'
             h['Content-Type'] = 'application/javascript; charset=utf-8' # add charset 
           elsif !h.has_key?('Content-Type')                             # format missing?
-            if mime = Rack::Mime::MIME_TYPES[body.extension]            # format via Rack extension-map
+            if mime = Rack::Mime::MIME_TYPES[extension]                 # format via Rack extension-map
               h['Content-Type'] = mime
-            elsif RDF::Format.file_extensions.has_key? body.ext.to_sym  # format via RDF extension-map
-              h['Content-Type'] = RDF::Format.file_extensions[body.ext.to_sym][0].content_type[0]
+            elsif RDF::Format.file_extensions.has_key? ext.to_sym       # format via RDF extension-map
+              h['Content-Type'] = RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
             end
           end
           env[:resp]['Access-Control-Allow-Origin'] ||= origin
-          env[:resp]['Content-Length'] = body.node.size.to_s
+          env[:resp]['Content-Length'] = node.size.to_s
           [s, h.update(env[:resp]), b]                                  # file response
         end}
     end
@@ -317,9 +317,9 @@ class WebResource
     end
 
     # Rack/server-internal and connection-specific headers dropped in proxy scenarios
-    SingleHop = %w(base colors connection downloadable feeds fetched graph host images keep-alive links log notransform offline order origin-status path-info query-string
+    SingleHop = %w(base colors connection downloadable feeds fetched graph host images keep-alive links log notransform offline order path-info query-string
  rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles
- remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software sort
+ remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software sort status
  te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via view x-forwarded-for)
 
     # headers case-normalized
