@@ -19,14 +19,14 @@ class WebResource
 
     Gunk = Regexp.new SiteDir.join('gunk.regex').read.chomp, Regexp::IGNORECASE
 
-    ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](acsbapp?|b0e8|bing|dfp|g(aq|dpr)|kr(ux|xd)|sumo|tawk|turnto|zqtk)[-._\/\(\)'"\s:?&=~%]|
+    ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](6sc|acsbapp?|b0e8|bing|dfp|g(aq|dpr)|kr(ux|xd)|sumo|tawk|turnto|zqtk)[-._\/\(\)'"\s:?&=~%]|
 ad(blade|push|r(ecover|oll)|dthis)|amplitude\.com|addtoany|algolia|aswpsdk|audioeye|
 baidu|bazaarvoice|bidder|BO(OMR|uncee?x)|browser.?update|btncdn|bu(gherd|zzfeed)|
-chartbeat|chimp|cl(ick(cea|fu)se)|co(mscore|n(fiant|natix)|okie.?(consent|law))|cpx\.|cr(iteo|sspxl|wdcntrl)|cxense|
+chartbeat|chimp|cl(ick(cea|fu)se)|co(mscore|n(fiant|natix)|okie.?(consent|law))|cpx\.|cr(i(sp\.chat|teo)|sspxl|wdcntrl)|cxense|
 datadog|detroitchicago|disqus|dmpxs|dotmetrics|
 effectivemeasure|ensighten|evidon|Ezoic|
 fastclick|fingerprint|foresee|fullstory|funnel|
-get(drip|pocket)|grapeshot|gumgum|
+get(drip|pocket)|google.?(analytics|tagmanager)|grapeshot|gumgum|
 hotjar|hubspot|
 in(folink|te(llitxt|rcom))|iubenda|
 kochava|
