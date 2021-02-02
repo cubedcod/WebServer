@@ -312,7 +312,7 @@ l.facebook.com l.instagram.com
               [s,h,b]}
           end
         else
-          r.fetch
+          NoGunk[r]
         end
       else
         r.deny
