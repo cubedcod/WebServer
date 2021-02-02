@@ -159,7 +159,10 @@ class WebResource
     def fetchHTTP thru: true, transformable: !env[:notransform]       # opts: omit HTTP response to caller, enable format transforms
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
         h = response.meta                                             # response headers
-        if response.status.to_s.match? /206/                          # partial data
+        case response.status[0].to_i
+        when 204                                                      # no content
+          [204, {}, []]
+        when 206                                                      # partial content
           h['Access-Control-Allow-Origin'] = origin unless h['Access-Control-Allow-Origin'] || h['access-control-allow-origin']
           [206, h, [response.read]]                                   # return part
         else
@@ -345,15 +348,6 @@ class WebResource
       cookie = join('/cookie').R
       cookie.writeFile qs['cookie'] if qs['cookie'] && !qs['cookie'].empty? # cache cookie
       env['HTTP_COOKIE'] = cookie.readFile if cookie.node.exist? # fetch cookie from jar
-      if last = parts[-1]
-        case last
-        when /^gen(erate)?_?204$/
-          return [204, {}, []]
-        when /^new|message|rss/i
-          env[:sort] ||= 'date'
-          env[:view] ||= 'table'
-        end
-      end
       if path == '/favicon.ico' && node.exist?
         fileResponse
       elsif qs['download'] == 'audio'
@@ -370,6 +364,8 @@ class WebResource
         handler[self]
       elsif deny?
         deny
+      elsif parts[-1]&.match? /^gen(erate)?_?204$/
+        [204, {}, []]
       else                       # remote graph-node
         fetch
       end

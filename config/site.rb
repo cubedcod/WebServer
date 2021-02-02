@@ -296,7 +296,7 @@ l.facebook.com l.instagram.com
         else
           r.fetch
         end
-      elsif %w(browse_ajax c channel embed feed get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results user watch watch_videos yts).member?(path) || !path
+      elsif %w(browse_ajax c channel embed feed generate_204 get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results user watch watch_videos yts).member?(path) || !path
         if %w(embed get_video_info).member? path
           r.fetchHTTP transformable: false
         else
