@@ -411,16 +411,17 @@ class WebResource
     end
 
     def POST
-      if allow_domain?                                  # POST allowed?
-        head = headers                                  # read headers
-        body = env['rack.input'].read                   # read body
-        env.delete 'rack.input'
-        if Verbose
-          head.map{|k,v| puts [k,v.to_s].join "\t" }
-          puts '>>>>>>>>', body, '--------'
-        end
+      head = headers                                        # read head
+      body = env['rack.input'].read                         # read body
+      env.delete 'rack.input'
 
-        r = HTTParty.post uri, headers: head, body: body # POST to origin
+      if Verbose                                            # log request
+        head.map{|k,v| puts [k,v.to_s].join "\t" }
+        puts '>>>>>>>>', body, '--------'
+      end
+
+      if allow_domain?                                      # POST allowed?
+        r = HTTParty.post uri, headers: head, body: body    # POST to origin
 
         head = headers r.headers                            # response headers
         if format  = head['Content-Type']                   # response format
@@ -433,7 +434,7 @@ class WebResource
           end
         end
 
-        if Verbose
+        if Verbose                                          # log response
           head.map{|k,v| puts [k,v.to_s].join "\t" }
           puts '<<<<<<<<', HTTP.decompress(head, r.body)
         end
