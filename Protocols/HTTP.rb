@@ -53,6 +53,14 @@ class WebResource
       [500, {'Content-Type' => 'text/html; charset=utf-8'}, env['REQUEST_METHOD'] == 'HEAD' ? [] : ["<!DOCTYPE html>\n<html><body class='error'>#{HTML.render [{_: :style, c: SiteCSS}, {_: :script, c: SiteJS}, uri.uri_toolbar]}<pre><a href='#{uri.remoteURL}' >500</a>\n#{CGI.escapeHTML msg}</pre></body></html>"]]
     end
 
+    def client_etags
+      if tags = env['HTTP_IF_NONE_MATCH']
+        tags.strip.split /\s*,\s*/
+      else
+        []
+      end
+    end
+
     def HTTP.decompress head, body
       encoding = head.delete 'Content-Encoding'
       return body unless encoding
@@ -108,36 +116,6 @@ class WebResource
     def deny_domain?
       c = DenyDomains                                               # init cursor
       host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # find leaf in domain tree
-    end
-
-    # if needed, generate and return entity. delegated to Rack handler if file reference
-    def entity generator = nil
-      if env['HTTP_IF_NONE_MATCH']&.strip&.split(/\s*,\s*/)&.include? env[:resp]['ETag']
-        [304, {}, []]                            # unmodified entity
-      else
-        body = generator ? generator.call : self # generate entity
-        if body.class == WebResource             # entity is a resource-reference
-          Rack::Files.new('.').serving(Rack::Request.new(env), body.fsPath).yield_self{|s,h,b|
-            if 304 == s
-              [304, {}, []]                      # unmodified file
-            else
-              if h['Content-Type'] == 'application/javascript'
-                h['Content-Type'] = 'application/javascript; charset=utf-8' # add charset tag
-              elsif !h.has_key?('Content-Type')                            # format-hint missing?
-                if mime = Rack::Mime::MIME_TYPES[body.extension]           # format via Rack extension-map
-                  h['Content-Type'] = mime
-                elsif RDF::Format.file_extensions.has_key? body.ext.to_sym # format via RDF extension-map
-                  h['Content-Type'] = RDF::Format.file_extensions[body.ext.to_sym][0].content_type[0]
-                end
-              end
-              env[:resp]['Content-Length'] = body.node.size.to_s
-              [s, h.update(env[:resp]), b]       # return file
-            end}
-        else
-          env[:resp]['Content-Length'] = body.bytesize.to_s
-          [200, env[:resp], [body]]              # return data
-        end
-      end
     end
 
     def env e = nil
@@ -223,9 +201,9 @@ class WebResource
               ref = ref.sub(/^</,'').sub />$/, ''
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
-            end}
-          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
-            env[:resp][k] ||= h[k] if h[k]}                           # upstream headers
+            end}                                                      # upstream headers
+          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type).map{|k|env[:resp][k] ||= h[k] if h[k]}
+          env[:resp]['ETag'] ||= h['Etag']
 
           if transformable && !(format||'').match?(/audio|css|image|octet|script|video/) # can transcode/reformat
             graphResponse                                             # doc in local reformat
@@ -265,9 +243,25 @@ class WebResource
     end
 
     def fileResponse
-      env[:resp]['Access-Control-Allow-Origin'] ||= origin
       env[:resp]['ETag'] ||= Digest::SHA2.hexdigest [uri, node.stat.mtime, node.size].join
-      entity
+      return [304,{},[]] if client_etags.include? env[:resp]['ETag']    # client has file
+      Rack::Files.new('.').serving(Rack::Request.new(env), fsPath).yield_self{|s,h,b|
+        if 304 == s
+          [304, {}, []]                                                 # unmodified file
+        else
+          if h['Content-Type'] == 'application/javascript'
+            h['Content-Type'] = 'application/javascript; charset=utf-8' # add charset 
+          elsif !h.has_key?('Content-Type')                             # format missing?
+            if mime = Rack::Mime::MIME_TYPES[body.extension]            # format via Rack extension-map
+              h['Content-Type'] = mime
+            elsif RDF::Format.file_extensions.has_key? body.ext.to_sym  # format via RDF extension-map
+              h['Content-Type'] = RDF::Format.file_extensions[body.ext.to_sym][0].content_type[0]
+            end
+          end
+          env[:resp]['Access-Control-Allow-Origin'] ||= origin
+          env[:resp]['Content-Length'] = body.node.size.to_s
+          [s, h.update(env[:resp]), b]                                  # file response
+        end}
     end
 
     def self.GET arg, lambda = NoGunk
@@ -299,20 +293,22 @@ class WebResource
     end
 
     def graphResponse
-      return notfound if !env.has_key?(:repository) || env[:repository].empty?
-      format = selectFormat
-      env[:resp]['Access-Control-Allow-Origin'] ||= origin
+      return notfound if !env.has_key?(:repository) || env[:repository].empty? # empty graph
+      return [304,{},[]] if client_etags.include? env[:resp]['ETag']           # client has file
+      format = selectFormat                                                    # response format
+      env[:resp]['Access-Control-Allow-Origin'] ||= origin                     # response headers
       env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
       env[:resp].update({'Link' => env[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !env[:links] || env[:links].empty?
-      entity ->{
-        case format
-        when /^text\/html/
-          htmlDocument
-        when /^application\/atom+xml/
-          feedDocument
-        else
-          env[:repository].dump RDF::Writer.for(content_type: format).to_sym, base_uri: self
-        end}
+      body = case format                                                       # response body
+             when /^text\/html/
+               htmlDocument
+             when /^application\/atom+xml/
+               feedDocument
+             else
+               env[:repository].dump RDF::Writer.for(content_type: format).to_sym, base_uri: self
+             end
+      env[:resp]['Content-Length'] = body.bytesize.to_s                        # response size
+      [env[:status] || 200, env[:resp], [body]]                                # graph response
     end
 
     def HEAD
