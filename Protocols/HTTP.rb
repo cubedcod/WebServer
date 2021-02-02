@@ -54,7 +54,9 @@ class WebResource
     end
 
     def HTTP.decompress head, body
-      case (head['content-encoding']||head['Content-Encoding']).to_s
+      encoding = head.delete 'Content-Encoding'
+      return body unless encoding
+      case encoding.to_s
       when /^br(otli)?$/i
         Brotli.inflate body
       when /gzip/i
@@ -62,11 +64,14 @@ class WebResource
       when /flate|zip/i
         Zlib::Inflate.inflate body
       else
+        puts "undefined Content-Encoding: #{encoding}"
+        head['Content-Encoding'] = encoding
         body
       end
     rescue Exception => e
       puts [e.class, e.message].join " "
-      ''
+      head['Content-Encoding'] = encoding
+      body
     end
  
     def deny status = 200, type = nil
@@ -157,18 +162,18 @@ class WebResource
     # fetch from remote, read graph-data, fill graph+static caches, maybe return original or transformed data in HTTP response
     def fetchHTTP thru: true, transformable: !env[:notransform]       # opts: omit HTTP response to caller, enable format transforms
       URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
-        h = response.meta                                             # response headers
+        h = headers response.meta                                     # response headers
         case response.status[0].to_i
         when 204                                                      # no content
           [204, {}, []]
         when 206                                                      # partial content
-          h['Access-Control-Allow-Origin'] = origin unless h['Access-Control-Allow-Origin'] || h['access-control-allow-origin']
+          h['Access-Control-Allow-Origin'] ||= origin
           [206, h, [response.read]]                                   # return part
         else                                                          # full content
           body = HTTP.decompress h, response.read                     # decompress content
           format = if path=='/feed'||(query_values||{})['mime']=='xml'# format fixed at feed-URL (override erroneous upstream text/html)
                      'application/atom+xml'
-                   elsif content_type = h['content-type']             # format defined in HTTP header
+                   elsif content_type = h['Content-Type']             # format defined in HTTP header
                      ct = content_type.split(/;/)
                      if ct.size == 2                                  # charset defined in HTTP header
                        charset = ct[1].sub(/.*charset=/i,'')
@@ -199,7 +204,7 @@ class WebResource
             end
             if reader = RDF::Reader.for(content_type: format)         # reader defined for format?
               env[:repository] ||= RDF::Repository.new                # initialize RDF repository
-              if format.index('text')==0 && timestamp = h['Last-Modified']||h['last-modified'] # HTTP metadata to RDF-graph
+              if format.index('text') && timestamp=h['Last-Modified'] # HTTP metadata to RDF-graph
                 env[:repository] << RDF::Statement.new(self, Date.R, Time.httpdate(timestamp.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,'')).iso8601) rescue nil
               end
               reader.new(body, base_uri: self, path: file){|g|env[:repository] << g} # read RDF
@@ -212,7 +217,7 @@ class WebResource
           return unless thru                                          # skip HTTP response
           saveRDF                                                     # cache graph
           env[:resp]['Access-Control-Allow-Origin'] ||= origin        # CORS header
-          h['link'] && h['link'].split(',').map{|link|                # Link headers
+          h['Link'] && h['Link'].split(',').map{|link|                # Link headers
             ref, type = link.split(';').map &:strip
             if ref && type
               ref = ref.sub(/^</,'').sub />$/, ''
@@ -220,7 +225,7 @@ class WebResource
               env[:links][type.to_sym] = ref
             end}
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type ETag).map{|k|
-            env[:resp][k] ||= h[k.downcase] if h[k.downcase]}         # misc upstream headers
+            env[:resp][k] ||= h[k] if h[k]}                           # upstream headers
 
           if transformable && !(format||'').match?(/audio|css|image|octet|script|video/) # can transcode/reformat
             graphResponse                                             # doc in local reformat
@@ -245,16 +250,15 @@ class WebResource
         [304, {}, []]
       when /300|[45]\d\d/ # Not Found, Not Allowed or general upstream error
         env[:status] = status.to_i
-        body = e.io.read
-        if transformable
-          if e.io.meta['content-type']&.match? /text\/html/
-            (env[:repository] ||= RDF::Repository.new) << RDF::Statement.new(self, Content.R,
-                                                                             Webize::HTML.format(HTTP.decompress(e.io.meta, body), self)) # upstream message
-          end
-          env[:base].cacheResponse
-        else
-          [env[:status], (headers e.io.meta), [body]]
+        head = headers e.io.meta
+        body = HTTP.decompress head, e.io.read
+        if head['Content-Type']&.index 'html'
+          body = Webize::HTML.clean body, self
+          env[:repository] ||= RDF::Repository.new
+          RDF::Reader.for(content_type: 'text/html').new(body, base_uri: self){|g|env[:repository] << g} # read RDF
         end
+        head['Content-Length'] = body.bytesize.to_s
+        transformable ? env[:base].cacheResponse : [env[:status], head, [body]]
       else
         raise
       end
@@ -316,21 +320,26 @@ class WebResource
                           [s, h, []]} # status and header
     end
 
-    # headers cleaned/filtered for export
+    # Rack/server-internal and connection-specific headers dropped in proxy scenarios
+    SingleHop = %w(base colors connection downloadable feeds fetched graph host images keep-alive links log notransform offline order origin-status path-info query-string
+ rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles
+ remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software sort
+ te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via view x-forwarded-for)
+
+    # headers case-normalized
     def headers raw = nil
-      raw ||= env || {} # raw headers
-      head = {}         # clean headers
-      raw.map{|k,v|     # inspect headers
-        k = k.to_s
-        key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|t| # strip prefix, tokenize
-          if %w{cl dfe dnt id spf utc xsrf}.member? t # acronyms
-            t = t.upcase                          # upcase
+      raw ||= env || {}        # raw headers
+      head = {}                # clean headers
+      raw.map{|k,v|            # inspect (k,v) pairs
+        k = k.to_s                                              # stringify key
+        key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|t| # strip Rack prefix, tokenize
+          if %w{cf cl ct dfe dnt id spf utc xsrf}.member? t     # acronyms
+            t = t.upcase       # upcase acronym
           else
-            t[0] = t[0].upcase                    # capitalize
+            t[0] = t[0].upcase # capitalize token
           end
-          t                                       # token
-        }.join(k.match?(/(_AP_|PASS_SFP)/i) ? '_' : '-') # join tokens
-        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless %w(base colors connection downloadable feeds fetched graph host images keep-alive links log notransform offline order origin-status path-info query-string rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles remote-addr repository request-method request-path request-uri resp script-name searchable server-name server-port server-protocol server-software summary sort te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via view x-forwarded-for).member?(key.downcase)} # external multi-hop headers
+          t}.join '-'          # join tokens
+        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless SingleHop.member?(key.downcase)} # set header at normalized key
 
       #head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # accept Turtle even if requesting client doesnt
       head['Referer'] = 'http://drudgereport.com/' if host.match? /wsj\.com$/
