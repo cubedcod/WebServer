@@ -299,8 +299,13 @@ l.facebook.com l.instagram.com
           r.fetch
         end
       elsif %w(browse_ajax c channel embed feed generate_204 get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results user watch watch_videos yts).member?(path) || !path
-        if %w(embed get_video_info).member? path
+        case path
+        when 'embed'
           r.fetchHTTP transformable: false
+        when 'get_video_info'
+          r.fetchHTTP(transformable: false).yield_self{|s,h,b|
+            puts b
+            [s,h,b]}
         else
           r.fetch
         end

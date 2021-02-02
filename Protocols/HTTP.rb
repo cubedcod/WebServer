@@ -70,7 +70,6 @@ class WebResource
     end
  
     def deny status = 200, type = nil
-      return [302, {'Location' => ['//', host, path].join.R(env).href}, []] if query&.match? Gunk # strip query
       env[:deny] = true
       type, content = if type == :stylesheet || ext == 'css'
                         ['text/css', '']
