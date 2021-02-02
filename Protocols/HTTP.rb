@@ -165,8 +165,8 @@ class WebResource
         when 206                                                      # partial content
           h['Access-Control-Allow-Origin'] = origin unless h['Access-Control-Allow-Origin'] || h['access-control-allow-origin']
           [206, h, [response.read]]                                   # return part
-        else
-          body = HTTP.decompress h, response.read                     # decompress body
+        else                                                          # full content
+          body = HTTP.decompress h, response.read                     # decompress content
           format = if path=='/feed'||(query_values||{})['mime']=='xml'# format fixed at feed-URL (override erroneous upstream text/html)
                      'application/atom+xml'
                    elsif content_type = h['content-type']             # format defined in HTTP header
@@ -417,10 +417,10 @@ class WebResource
 
       if Verbose                                            # log request
         head.map{|k,v| puts [k,v.to_s].join "\t" }
-        puts '>>>>>>>>', body, '--------'
+        puts '>>>>>>>>', body
       end
 
-      if allow_domain?                                      # POST allowed?
+      if allow_domain? && !uri.match?(Gunk)                 # POST allowed?
         r = HTTParty.post uri, headers: head, body: body    # POST to origin
 
         head = headers r.headers                            # response headers
@@ -435,6 +435,7 @@ class WebResource
         end
 
         if Verbose                                          # log response
+          puts '-' * 40
           head.map{|k,v| puts [k,v.to_s].join "\t" }
           puts '<<<<<<<<', HTTP.decompress(head, r.body)
         end

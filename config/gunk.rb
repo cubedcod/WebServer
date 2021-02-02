@@ -32,7 +32,7 @@ in(folink|te(llitxt|rcom))|iubenda|
 kochava|
 lexity|li(strak|veperson)|
 matomo|me(dia\.net|quoda)|ml314|mouseflow|mpulse|
-narrativ\.|newrelic|newsletter|npttech|nreum|
+narrativ\.|newrelic|npttech|nreum|
 olark|omappapi|one(signal|trust)|online-metrix|op(t?n?mn?str|t(anon|imizely))|outbrain|owneriq|
 pa(ges(ense|peed)|r(dot|sely)|y(pa|wal)l)|pi(n(gdom|img)|wik)|porpoiseant|prebid|pub(\.network|m(atic|ine))|pushly|
 quora|qua(l(aroo|trics)|nt(cast|serv|um))|
