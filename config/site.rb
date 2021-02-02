@@ -191,6 +191,8 @@ l.facebook.com l.instagram.com
 
     GET 'www.reddit.com', -> r {
       r.env[:links][:prev] = ['//old.reddit.com', r.path.sub('.rss',''), '?',r.query].join.R.href # prev-page pointer
+      r.env[:sort] ||= 'date'
+      r.env[:view] ||= 'table'
       route = r.parts[0]
       if %w(r u user).member? route
         r.path += '.rss' unless r.path.index '.rss'
