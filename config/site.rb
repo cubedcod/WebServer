@@ -303,9 +303,14 @@ l.facebook.com l.instagram.com
         when 'embed'
           r.fetchHTTP transformable: false
         when 'get_video_info'
-          r.fetchHTTP(transformable: false).yield_self{|s,h,b|
-            puts b
-            [s,h,b]}
+          if r.query_values['el'] == 'adunit'
+            # TODO Ad substitution
+            [200, {"Access-Control-Allow-Origin"=>"https://www.youtube.com", "Content-Type"=>"application/x-www-form-urlencoded", "Content-Length"=>"0"}, ['']]
+          else
+            r.fetchHTTP(transformable: false).yield_self{|s,h,b|
+              puts h, Rack::Utils.parse_query(b[0])
+              [s,h,b]}
+          end
         else
           r.fetch
         end
