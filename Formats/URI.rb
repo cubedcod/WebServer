@@ -89,7 +89,7 @@ class WebResource < RDF::URI
              end
 
       {class: :toolbox,
-       c: [({_: :span, c: env[:origin_status], style: 'font-weight: bold', class: :icon} if env[:origin_status]),
+       c: [({_: :span, c: env[:status], style: 'font-weight: bold', class: :icon} if env[:status]),
            ({_: :a, id: :tabular, class: :icon, c: '↨', href: env[:base].join(HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))).R.href} unless env[:view] == 'table'),
            #({_: :a, href: env[:base].uri, c: '☝', class: :icon, id: :upstream} unless local_node?),
            {_: :a, href: HTTP.qs(qs.merge({'notransform' => nil})), c: '⚗️', id: :UI, class: :icon},

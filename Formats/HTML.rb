@@ -314,7 +314,7 @@ class WebResource
           [{_: :a, href: url.R(env).href, id: key, class: :icon, c: content},
            "\n"]
         end}
-      bgcolor = {401 => :orange, 403 => :yellow, 404 => :gray}[env[:origin_status]] || '#444'
+      bgcolor = {401 => :orange, 403 => :yellow, 404 => :gray}[env[:status]] || '#444'
       htmlGrep if local_node?
       groups = {}
       graph.map{|uri, resource| # group resources by type
