@@ -410,16 +410,16 @@ class WebResource
     end
 
     def POST
-      head = headers                                        # read head
-      body = env['rack.input'].read                         # read body
-      env.delete 'rack.input'
-
-      if Verbose                                            # log request
-        head.map{|k,v| puts [k,v.to_s].join "\t" }
-        puts '>>>>>>>>', body
-      end
-
       if allow_domain? && !uri.match?(Gunk)                 # POST allowed?
+        head = headers                                      # read head
+        body = env['rack.input'].read                       # read body
+        env.delete 'rack.input'
+
+        if Verbose                                          # log request
+          head.map{|k,v| puts [k,v.to_s].join "\t" }
+          puts '>>>>>>>>', body
+        end
+
         r = HTTParty.post uri, headers: head, body: body    # POST to origin
 
         head = headers r.headers                            # response headers
@@ -439,7 +439,7 @@ class WebResource
           puts '<<<<<<<<', HTTP.decompress(head, r.body)
         end
 
-        [r.code, head, [r.body]]
+        [r.code, head, [r.body]]                            # response
       else
         env[:deny] = true
         [202, {'Access-Control-Allow-Credentials' => 'true',
