@@ -19,7 +19,7 @@ class WebResource
 
     Gunk = Regexp.new SiteDir.join('gunk.regex').read.chomp, Regexp::IGNORECASE
 
-    ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](acsbapp?|b0e8|bing|dfp|g(aq|dpr|tag)|kr(ux|xd)|s(entry|umo)|tawk|zqtk)[-._\/\(\)'"\s:?&=~%]|
+    ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](acsbapp?|b0e8|bing|dfp|g(aq|dpr|tag)|kr(ux|xd)|sumo|tawk|zqtk)[-._\/\(\)'"\s:?&=~%]|
 ad(blade|push|r(ecover|oll)|dthis)|amplitude\.com|addtoany|algolia|aswpsdk|au(ction|dioeye)|
 baidu|bazaarvoice|bidder|BO(OMR|uncee?x)|browser.?update|btncdn|bu(gherd|zzfeed)|
 chartbeat|chimp|cl(ick(cea|fu)se)|co(mscore|n(fiant|natix)|okie.?(consent|law))|cpx\.|cr(iteo|sspxl|wdcntrl)|cxense|

@@ -143,7 +143,7 @@ l.facebook.com l.instagram.com
       path = r.path
       p = r.parts[0]
       q = r.query_values || {}
-      if %w(images maps search).member? p
+      if %w(images js maps search).member? p
         NoGunk[r]
       elsif path.index('/amp/s/') == 0
         [302, {'Location' => 'https://' + r.path[7..-1]}, []]
