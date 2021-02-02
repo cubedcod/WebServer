@@ -140,16 +140,9 @@ l.facebook.com l.instagram.com
     GET 'maps.google.com', GotoGoogle
 
     GET 'www.google.com', -> r {
-      path = r.path
-      p = r.parts[0]
-      q = r.query_values || {}
-      if %w(images js maps search).member? p
-        NoGunk[r]
-      elsif path.index('/amp/s/') == 0
-        [302, {'Location' => 'https://' + r.path[7..-1]}, []]
-      elsif p == 'complete'
-        q = (r.query_values || {})['q']
-        output = ")]}'\n" + [q,["http://localhost:8000/h","http://localhost:8000/d","http://localhost:8000/m",
+      case r.parts[0]
+      when 'complete'
+        output = ")]}'\n" + [(r.query_values||{})['q'],["http://localhost:8000/h","http://localhost:8000/d","http://localhost:8000/m",
                                 "https://twitter.com",
                                 "https://www.reddit.com/r/androidx86+blissos+chrultrabook+chromeos+stallmanwasright/new",
                                 "http://localhost:8000/d?find=gitter&view=table&sort=http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Fdate&order=asc",
@@ -162,8 +155,8 @@ l.facebook.com l.instagram.com
                               "google:suggesttype":["NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION"],
                               "google:verbatimrelevance": 1300}].to_json
         [200, {"Access-Control-Allow-Origin"=>"*", "Content-Type"=>"text/javascript; charset=UTF-8", "Content-Length" => output.bytesize}, [output]]
-      elsif p == 'imgres' && q.has_key?('imgurl')
-        [302, {'Location' => q['imgurl']}, []]
+      when 'search'
+        NoGunk[r]
       else
         r.deny
       end}
