@@ -428,12 +428,13 @@ class WebResource
         end
 
         r = HTTParty.post uri, headers: head, body: body    # POST to origin
-
         head = headers r.headers                            # response headers
+        body = HTTP.decompress head, r.body
+
         if format  = head['Content-Type']                   # response format
           if reader = RDF::Reader.for(content_type: format) # reader defined for format?
             env[:repository] ||= RDF::Repository.new        # initialize RDF repository
-            reader.new(HTTP.decompress(head, r.body), base_uri: self){|g|env[:repository] << g} # read RDF
+            reader.new(body, base_uri: self){|g|env[:repository] << g} # read RDF
             saveRDF                                         # cache RDF
           else
             puts "RDF::Reader undefined for #{format}"      # Reader undefined
@@ -443,10 +444,10 @@ class WebResource
         if Verbose                                          # log response
           puts '-' * 40
           head.map{|k,v| puts [k,v.to_s].join "\t" }
-          puts '<<<<<<<<', HTTP.decompress(head, r.body)
+          puts '<<<<<<<<', body
         end
 
-        [r.code, head, [r.body]]                            # response
+        [r.code, head, [body]]                              # response
       else
         env[:deny] = true
         [202, {'Access-Control-Allow-Credentials' => 'true',
