@@ -68,7 +68,7 @@ module Webize
         if e['src']
           src = (base.join e['src']).R                               # resolve @src
           if src.deny?
-            puts "🚩 \e[31;1m#{src}\e[0m" #if Verbose
+            puts "🚩 \e[31;1m#{src}\e[0m" if Verbose
             e.remove
           else
             e['src'] = src.uri
