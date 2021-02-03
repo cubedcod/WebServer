@@ -330,7 +330,7 @@ class WebResource
       raw.map{|k,v|            # inspect (k,v) pairs
         k = k.to_s                                              # stringify key
         key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|t| # strip Rack prefix, tokenize
-          if %w{cf cl ct dfe dnt id spf utc xsrf}.member? t     # acronyms
+          if %w{cf cl ct dfe dnt id spf utc xss xsrf}.member? t # acronyms
             t = t.upcase       # upcase acronym
           else
             t[0] = t[0].upcase # capitalize token

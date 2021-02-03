@@ -157,6 +157,8 @@ l.facebook.com l.instagram.com
         [200, {"Access-Control-Allow-Origin"=>"*", "Content-Type"=>"text/javascript; charset=UTF-8", "Content-Length" => output.bytesize}, [output]]
       when 'search'
         NoGunk[r]
+      when /^(js)$/
+        NoGunk[r]
       else
         r.deny
       end}
