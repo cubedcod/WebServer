@@ -26,7 +26,7 @@ chartbeat|chimp|cl(ick(cea|fu)se)|co(mscore|n(fiant|n(atix|ect\.facebook))|okie.
 datadog|de(mdex|troitchicago)|disqus|dmpxs|dotmetrics|
 effectivemeasure|ensighten|evidon|Ezoic|
 fastclick|firebase|foresee|fullstory|funnel|
-gaug\.es|g[eo]t(chosen|drip|pocket)|googletag(manager|services)\.com|grapeshot|gumgum|
+gaug\.es|g[eo]t(chosen|drip|pocket)|google.?(analytics|tag(manager|services))\.com|grapeshot|gumgum|
 hotjar|hubspot|
 in(folink|te(llitxt|rcom))|iubenda|
 kochava|
@@ -34,7 +34,7 @@ lexity|li(strak|veperson)|
 ma(rfeel|tomo)|me(dia\.net|quoda)|ml314|mouseflow|mpulse|
 narrativ\.|newrelic|npttech|nreum|
 olark|omappapi|one(signal|trust)|online-metrix|op(t?n?mn?str|t(anon|imizely))|outbrain|owneriq|
-pa(ges(ense|peed)|r(dot|sely)|y(pa|wal)l)|petametrics|pi(co\.tools|n(gdom|img)|wik)|porpoiseant|prebid|pub(\.network|m(atic|ine))|push(ly|nami)|
+pa(ges(ense|peed)|r(dot|sely)|y(pa|wal)l)|petametrics|pi(co\.tools|n(gdom|img)|wik)|platform\.twitter|porpoiseant|prebid|pub(\.network|m(atic|ine))|push(ly|nami)|
 quora|qua(l(aroo|trics)|nt(cast|serv))|
 radiateb2b|r-login|rightmessage|rlcdn|
 sa(il.?(horizon|thr)|les(force|loft))|sc(ene7|orecardresearch)|se(archiq|edtag|gment\.(com|io)|ntry-cdn|rvedby|ssioncam)|shopify|slickstream|smart(asset|look)|snowplow|spot\.im|statcounter|

@@ -65,7 +65,15 @@ module Webize
           e.set_attribute 'src', a.value if SRCnotSRC.member? a.name # map src-like attributes to src
           e.set_attribute 'srcset', a.value if SRCSET.member? a.name # map srcset-like attributes to srcset
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w(bgcolor class color height http-equiv layout loading ping role style tabindex target theme width).member?(a.name)}
-        e['src'] = (base.join e['src']) if e['src']                  # resolve @src
+        if e['src']
+          src = (base.join e['src']).R                               # resolve @src
+          if src.deny?
+            puts "🚩 \e[31;1m#{src}\e[0m" #if Verbose
+            e.remove
+          else
+            e['src'] = src.uri
+          end
+        end
         srcset e, base if e['srcset']                                # resolve @srcset
         if e['href']                                                 # href attribute
           ref = (base.join e['href']).R                              # resolve href location
