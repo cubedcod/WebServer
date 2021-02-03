@@ -38,8 +38,8 @@ module Webize
 
       doc.css('style').map{|s| Webize::CSS.cleanNode s if s.inner_text.match? /font-face|import/}
 
- puts doc.css "amp-ad, amp-consent, [class*='modal'], [class*='newsletter'], [class*='overlay'], .player-unavailable" if Verbose
-      doc.css("amp-ad, amp-consent, [class*='modal'], [class*='newsletter'], [class*='overlay'], .player-unavailable").remove
+ puts doc.css "amp-ad, amp-consent, [class*='modal'], [class*='newsletter'], [class*='overlay']" if Verbose
+      doc.css("amp-ad, amp-consent, [class*='modal'], [class*='newsletter'], [class*='overlay']").remove
 
       doc.to_html
     end
