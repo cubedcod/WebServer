@@ -67,8 +67,8 @@ module Webize
         srcset e, base if e['srcset']                                # resolve @srcset
         if e['href']                                                 # href attribute
           ref = (base.join e['href']).R                              # resolve href location
-          ref.query = '' if ref.query&.match?(/utm[^a-z]/)           # de-urchinize query
-          ref.fragment = '' if ref.fragment&.match?(/utm[^a-z]/)     # de-urchinize fragment
+          ref.query = nil if ref.query&.match?(/utm[^a-z]/)          # de-urchinize query
+          ref.fragment = nil if ref.fragment&.match?(/utm[^a-z]/)    # de-urchinize fragment
           offsite = ref.host != base.host
           e.add_child " <span class='uri'>#{CGI.escapeHTML (offsite ? ref.uri.sub(/^https?:..(www.)?/,'') : (ref.path || '/'))[0..127]}</span> " # show URI in HTML
           e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # mint identifier

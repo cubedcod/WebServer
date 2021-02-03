@@ -34,16 +34,16 @@ lexity|li(strak|veperson)|
 ma(rfeel|tomo)|me(dia\.net|quoda)|ml314|mouseflow|mpulse|
 narrativ\.|newrelic|npttech|nreum|
 olark|omappapi|one(signal|trust)|online-metrix|op(t?n?mn?str|t(anon|imizely))|outbrain|owneriq|
-pa(ges(ense|peed)|r(dot|sely)|y(pa|wal)l)|petametrics|pi(n(gdom|img)|wik)|porpoiseant|prebid|pub(\.network|m(atic|ine))|pushly|
+pa(ges(ense|peed)|r(dot|sely)|y(pa|wal)l)|petametrics|pi(co\.tools|n(gdom|img)|wik)|porpoiseant|prebid|pub(\.network|m(atic|ine))|push(ly|nami)|
 quora|qua(l(aroo|trics)|nt(cast|serv))|
 r-login|rightmessage|rlcdn|
-sa(il.?(horizon|thr)|les(force|loft))|sc(ene7|orecardresearch)|se(archiq|edtag|gment\.io|rvedby|ssioncam)|shopify|slickstream|smart(asset|look)|snowplow|spot\.im|statcounter|
+sa(il.?(horizon|thr)|les(force|loft))|sc(ene7|orecardresearch)|se(archiq|edtag|gment\.(com|io)|rvedby|ssioncam)|shopify|slickstream|smart(asset|look)|snowplow|spot\.im|statcounter|
 taboola|ti(qcdn|nypass)|toutapp|trustpilot|typekit|
 unruly|
 venatus|viglink|vuukle|vntsm|
 woocommerce|wp.?(emoji|groho|rum)|
 yandex|\.yimg|yotpo|
-ze(ndesk|rgnet)|zopim)xi
+ze(ndesk|rgnet)|zo(ominfo|pim))xi
 
   end
 end

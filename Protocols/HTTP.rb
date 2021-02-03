@@ -95,8 +95,9 @@ class WebResource
                       elsif type == :JSON || ext == 'json'
                         ['application/json','{}']
                       else
+                        url = (query&.match? /utm[^a-z]/) ? path : uri
                         ['text/html; charset=utf-8',
-                         "<html><body class='blocked'>#{HTML.render [{_: :style, c: SiteCSS}, {_: :script, c: SiteJS}, uri_toolbar]}<a class='unblock' href='#{uri}'>⌘</a></body></html>"]
+                         "<html><body class='blocked'>#{HTML.render [{_: :style, c: SiteCSS}, {_: :script, c: SiteJS}, uri_toolbar]}<a class='unblock' href='#{url}'>⌘</a></body></html>"]
                       end
       [status,
        {'Access-Control-Allow-Credentials' => 'true',
