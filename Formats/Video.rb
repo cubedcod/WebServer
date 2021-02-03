@@ -101,9 +101,9 @@ class WebResource
         end
         v = v.R env
         if v.uri.match? /youtu/
-#          id = (v.query_values||{})['v'] || v.parts[-1]
+          id = (v.query_values||{})['v'] || v.parts[-1]
 #          {_: :iframe, width: 560, height: 315, src: "https://www.youtube.com/embed/#{id}", frameborder: 0, allow: 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture', allowfullscreen: :true}
-          v
+          {_: :a, href: v.uri, c: {_: :img, src: "https://i.ytimg.com/vi_webp/#{id}/sddefault.webp"}}
         else
           [dash ? '<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>' : nil,
            {class: :video,
