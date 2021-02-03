@@ -19,14 +19,14 @@ class WebResource
 
     Gunk = Regexp.new SiteDir.join('gunk.regex').read.chomp, Regexp::IGNORECASE
 
-    ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](6sc|acsbapp?|b0e8|dfp|fyre|g(aq|dpr)|kr(ux|xd)|sumo|tawk|turnto|zqtk)[-._\/\(\)'"\s:?&=~%]|
+    ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](6sc|acsbapp?|b0e8|dfp|fyre|g(aq|dpr)|kr(ux|xd)|licdn|marketo|sumo|tawk|turnto|zqtk)[-._\/\(\)'"\s:?&=~%]|
 ad(blade|r(ecover|oll)|dthis)|alexametrics|amplitude\.com|addtoany|algolia|aswpsdk|audioeye|
 baidu|bazaarvoice|bidder|BO(OMe?R(ang)?|uncee?x)|browser.?update|btncdn|bu(gherd|zzfeed)|
 chartbeat|chimp|cl(ick(cea|fu)se)|co(mscore|n(fiant|n(atix|ect\.facebook))|okie.?(consent|law))|cpx\.|cr(i(sp\.chat|teo)|sspxl|wdcntrl)|cxense|
-datadog|detroitchicago|disqus|dmpxs|dotmetrics|
+datadog|de(mdex|troitchicago)|disqus|dmpxs|dotmetrics|
 effectivemeasure|ensighten|evidon|Ezoic|
 fastclick|firebase|foresee|fullstory|funnel|
-gaug\.es|g[eo]t(chosen|drip|pocket)|google.?(analytics|tagmanager)\.com|grapeshot|gumgum|
+gaug\.es|g[eo]t(chosen|drip|pocket)|google.?(analytics|tag(manager|services))\.com|grapeshot|gumgum|
 hotjar|hubspot|
 in(folink|te(llitxt|rcom))|iubenda|
 kochava|
@@ -36,8 +36,8 @@ narrativ\.|newrelic|npttech|nreum|
 olark|omappapi|one(signal|trust)|online-metrix|op(t?n?mn?str|t(anon|imizely))|outbrain|owneriq|
 pa(ges(ense|peed)|r(dot|sely)|y(pa|wal)l)|petametrics|pi(co\.tools|n(gdom|img)|wik)|porpoiseant|prebid|pub(\.network|m(atic|ine))|push(ly|nami)|
 quora|qua(l(aroo|trics)|nt(cast|serv))|
-r-login|rightmessage|rlcdn|
-sa(il.?(horizon|thr)|les(force|loft))|sc(ene7|orecardresearch)|se(archiq|edtag|gment\.(com|io)|rvedby|ssioncam)|shopify|slickstream|smart(asset|look)|snowplow|spot\.im|statcounter|
+radiateb2b|r-login|rightmessage|rlcdn|
+sa(il.?(horizon|thr)|les(force|loft))|sc(ene7|orecardresearch)|se(archiq|edtag|gment\.(com|io)|ntry-cdn|rvedby|ssioncam)|shopify|slickstream|smart(asset|look)|snowplow|spot\.im|statcounter|
 taboola|ti(qcdn|nypass)|toutapp|trustpilot|typekit|
 unruly|
 venatus|viglink|vuukle|vntsm|
