@@ -1,8 +1,6 @@
 #!/bin/sh
-#source /etc/profile
 conf=~/src/WebServer/config
-srv=~/web
-cd $srv
+cd $HOME/web
 tmux new-session -s HTTP -d
 tmux send-keys -t HTTP:0 'sudo socat TCP-LISTEN:80,fork TCP:127.0.0.1:8000 &' C-m
 tmux send-keys -t HTTP:0 'sudo socat TCP-LISTEN:443,fork TCP:127.0.0.1:8081 &' C-m
