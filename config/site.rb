@@ -157,8 +157,8 @@ l.facebook.com l.instagram.com
         [200, {"Access-Control-Allow-Origin"=>"*", "Content-Type"=>"text/javascript; charset=UTF-8", "Content-Length" => output.bytesize}, [output]]
       when 'search'
         NoGunk[r]
-      when /^(js)$/
-        NoGunk[r]
+#      when /^(js)$/
+#        NoGunk[r]
       else
         r.deny
       end}
@@ -296,7 +296,7 @@ l.facebook.com l.instagram.com
         end
       elsif %w(browse_ajax c channel embed feed generate_204 get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results user watch watch_videos yts).member?(path) || !path
         case path
-        when /ajax|embed/
+        when /ajax|embed|watch/
           r.fetchHTTP transformable: false
         when 'get_video_info'
           if r.query_values['el'] == 'adunit'

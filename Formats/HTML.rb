@@ -37,6 +37,8 @@ module Webize
         end}
 
       doc.css('style').map{|s| Webize::CSS.cleanNode s if s.inner_text.match? /font-face|import/}
+
+ puts doc.css "amp-ad, amp-consent, [class*='modal'], [class*='newsletter'], [class*='overlay'], .player-unavailable" if Verbose
       doc.css("amp-ad, amp-consent, [class*='modal'], [class*='newsletter'], [class*='overlay'], .player-unavailable").remove
 
       doc.to_html
@@ -67,8 +69,8 @@ module Webize
         srcset e, base if e['srcset']                                # resolve @srcset
         if e['href']                                                 # href attribute
           ref = (base.join e['href']).R                              # resolve href location
-          ref.query = nil if ref.query&.match?(/utm[^a-z]/)          # de-urchinize query
-          ref.fragment = nil if ref.fragment&.match?(/utm[^a-z]/)    # de-urchinize fragment
+          ref.query = nil if ref.query&.match?(/utm[^a-z]/)          # unutmize query
+          ref.fragment = nil if ref.fragment&.match?(/utm[^a-z]/)    # unutmize fragment
           offsite = ref.host != base.host
           e.add_child " <span class='uri'>#{CGI.escapeHTML (offsite ? ref.uri.sub(/^https?:..(www.)?/,'') : (ref.path || '/'))[0..127]}</span> " # show URI in HTML
           e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # mint identifier
