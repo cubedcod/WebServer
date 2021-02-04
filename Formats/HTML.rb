@@ -32,7 +32,7 @@ module Webize
       doc.css('script').map{|s|
         if gunk = (s.inner_text.match ScriptGunk)
           base.env[:log].push gunk.to_s[0..31] if Verbose
-          puts s.inner_text, '-'*42 if Verbose
+          puts "🚩 \e[30;1m" + s.inner_text.sub(/^\n/,'').gsub(ScriptGunk, "\e[31m\\0\e[30m") + "\e[0m" if Verbose
           s.remove
         end}
 
