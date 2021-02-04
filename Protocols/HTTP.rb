@@ -206,11 +206,11 @@ class WebResource
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type).map{|k|env[:resp][k] ||= h[k] if h[k]}
           env[:resp]['ETag'] ||= h['Etag']
 
-          if transformable && !(format||'').match?(/audio|css|image|octet|script|video/) # can transcode/reformat
-            graphResponse                                             # doc in local reformat
+          if transformable && format&.match?(/text|xml/)              # enable content-negotiation
+            graphResponse                                             # data in local-pref format
           else
             env[:resp]['Content-Length'] = body.bytesize.to_s         # Content-Length header
-            [200, env[:resp], [body]]                                 # doc in original format
+            [200, env[:resp], [body]]                                 # data in original format
           end
         end
       end
@@ -317,9 +317,8 @@ class WebResource
                           [s, h, []]} # status and header
     end
 
-    # Rack/server-internal and connection-specific headers dropped in proxy scenarios
-    SingleHop = %w(base colors connection downloadable feeds fetched graph host images keep-alive links log notransform offline order path-info query-string
- rack.errors rack.hijack rack.hijack? rack.input rack.logger rack.multiprocess rack.multithread rack.run-once rack.url-scheme rack.version rack.tempfiles
+    # client<>proxy headers not repeated on proxy<>origin connections
+    SingleHopHeaders = %w(base colors connection downloadable feeds fetched graph host images keep-alive links log notransform offline order path-info query-string
  remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software sort status
  te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via view x-forwarded-for)
 
@@ -328,15 +327,17 @@ class WebResource
       raw ||= env || {}        # raw headers
       head = {}                # clean headers
       raw.map{|k,v|            # inspect (k,v) pairs
-        k = k.to_s                                              # stringify key
-        key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|t| # strip Rack prefix, tokenize
-          if %w{cf cl ct dfe dnt id spf utc xss xsrf}.member? t # acronyms
-            t = t.upcase       # upcase acronym
-          else
-            t[0] = t[0].upcase # capitalize token
-          end
-          t}.join '-'          # join tokens
-        head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless SingleHop.member?(key.downcase)} # set header at normalized key
+        k = k.to_s                                                # stringify key
+        unless k.index('rack.') == 0                              # strip Rack-internal headers
+          key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|t| # strip Rack HTTP_ prefix and tokenize
+            if %w{cf cl ct dfe dnt id spf utc xss xsrf}.member? t # acronyms
+              t = t.upcase       # upcase acronym
+            else
+              t[0] = t[0].upcase # capitalize token
+            end
+            t}.join '-'          # join tokens
+          head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless SingleHopHeaders.member? key.downcase
+        end} # set header at normalized key
 
       #head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # accept Turtle even if requesting client doesnt
       head['Referer'] = 'http://drudgereport.com/' if host.match? /wsj\.com$/
