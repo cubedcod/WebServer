@@ -20,9 +20,8 @@ class WebResource
                             (nodes[0].named_format == selectFormat && (env[:notransform] || nodes[0].named_format != 'text/html')))
         nodes[0].fileResponse    # static response
       else
-        nodes.map{|n|            # load graph-data
-          env[:summary] ? n.summary : n.🐢}.map &:loadRDF
-        saveRDF if env[:updates] # cache resources discovered in RDFization
+        nodes.map{|_|_.🐢.loadRDF}# load graph
+        saveRDF if env[:updates] # cache resources emitted by RDF-ize process
         graphResponse            # graph response
       end
     end

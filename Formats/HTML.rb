@@ -144,6 +144,7 @@ module Webize
       def scanContent &f
         subject = @base         # subject URI
         n = @doc
+        qs = @base.query_values || {}
 
         # base URI declaration
         if base = n.css('head base')[0]
@@ -239,8 +240,8 @@ module Webize
 
         # <body>
         if body = n.css('body')[0]
-          unless @base.local_node? || (@base.query_values||{}).has_key?('fullContent') # summarize to new content
-            @base.env[:summary] = true
+          unless @base.local_node? || qs.has_key?('fullContent') # summarize to new content
+            @base.env[:links][:down] ||= HTTP.qs qs.merge({'fullContent' => nil})
             hashed_nodes = 'div, footer, h1, h2, h3, nav, p, section, span'
             hashs = {}
             links = {}
@@ -312,12 +313,7 @@ class WebResource
       graph ||= env[:graph] = treeFromGraph
       qs = query_values || {}
       env[:colors] ||= {}
-      env[:links][:up] = [File.dirname(env['REQUEST_PATH']), '/', (query ? ['?', query] : nil)].join unless path == '/' # pointer to container
-      if env[:summary]                                                                                                  # pointer to unabridged content
-        expanded = HTTP.qs qs.merge({'fullContent' => nil})
-        env[:links][:full] = expanded
-        expander = {_: :a, id: :expand, c: '&#11206;', href: expanded}
-      end
+      env[:links][:up] ||= [File.dirname(env['REQUEST_PATH']), '/', (query ? ['?', query] : nil)].join unless path == '/'
       link = -> key, content { # render Link reference
         if url = env[:links] && env[:links][key]
           [{_: :a, href: url.R(env).href, id: key, class: :icon, c: content},
@@ -355,7 +351,7 @@ class WebResource
                                      HTML.markup nil, resource, env} # singleton markup
                                  end
                                end},
-                             expander,
+                             env[:links][:down] ? {_: :a, id: :expand, c: '&#11206;', href: env[:links][:down]} : nil,
                              {_: :script, c: SiteJS}]}]}]
     end
 

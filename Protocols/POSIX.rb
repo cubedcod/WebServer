@@ -113,31 +113,31 @@ class WebResource
       else
         qs = query_values || {}
         pathbase = host_parts.join('/').size
-        (if node.directory?                                    # directory
-         if qs['f'] && !qs['f'].empty?                         # FIND
-           `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
-         elsif qs['find'] && !qs['find'].empty? && path != '/' # FIND case-insensitive substring
-           `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
-         elsif qs.has_key?('Q') || qs.has_key?('q')            # GREP
-           nodeGrep
-         else                                                  # LS
-#           env[:summary] = !qs.has_key?('fullContent')
-           (path=='/' && local_node?) ? [node] : [node, *node.children.select{|n|n.basename.to_s[0] != '.'}]
-         end
-        else                                                   # file(s)
-          globPath = fsPath
-          if globPath.match GlobChars
-            if qs.has_key?('Q') || qs.has_key?('q')
-              nodeGrep Pathname.glob globPath                  # GREP
-            else
-              Pathname.glob globPath                           # GLOB
-            end
-          else                                                 # default-set GLOB
-            globPath += '.*'
-            Pathname.glob globPath
-          end
-         end).map{|p|                                          # resolve node URIs
-          join(p.to_s[pathbase..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env}
+        nodes = (if node.directory?                                    # directory
+                 if qs['f'] && !qs['f'].empty?                         # FIND
+                   `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
+                 elsif qs['find'] && !qs['find'].empty? && path != '/' # FIND case-insensitive substring
+                   `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
+                 elsif qs.has_key?('Q') || qs.has_key?('q')            # GREP
+                   nodeGrep
+                 else                                                  # LS
+                   summarize = true
+                   (path=='/' && local_node?) ? [node] : [node, *node.children.select{|n|n.basename.to_s[0] != '.'}]
+                 end
+                else                                                   # file(s)
+                  globPath = fsPath
+                  if globPath.match GlobChars
+                    if qs.has_key?('Q') || qs.has_key?('q')
+                      nodeGrep Pathname.glob globPath                  # GREP
+                    else
+                      Pathname.glob globPath                           # GLOB
+                    end
+                  else                                                 # default-set GLOB
+                    globPath += '.*'
+                    Pathname.glob globPath
+                  end
+                 end).map{|p|join(p.to_s[pathbase..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env} # escape reserved chars in path & resolve node-URI
+        summarize ? nodes.map(&:summary) : nodes
       end
     end
 

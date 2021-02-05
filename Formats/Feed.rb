@@ -358,21 +358,6 @@ class WebResource
       if env[:view] == 'table'
         HTML.tabular posts, env
       else
-        if env[:summary]
-          im,nonim = posts.partition{|p|(p[Type]||[:untyped]).find{|t| t.to_s == SIOC+'InstantMessage'}} # select IMs
-          mgroup = {}
-          im.map{|m| # rollup IMs on from/to
-            from = m[Creator]
-            to = m[To]
-            key = Digest::SHA2.hexdigest([from,to].join)
-            mgroup[key] ||= {'uri' => m['uri'], Creator => from, To => to}
-            [Link,Image,Video].map{|p|
-              if m[p]
-                mgroup[key][p] ||= []
-                mgroup[key][p].concat m[p]
-              end}}
-          posts = [*(mgroup.values), *nonim]
-        end
         posts.group_by{|p|(p[To] || [''.R])[0]}.map{|to, posts|
           grouped = posts.size != 1
           color = env[:colors][to.R.display_name] ||= (grouped ? ('#%06x' % (rand 16777216)) : '#444')
