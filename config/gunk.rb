@@ -21,8 +21,8 @@ class WebResource
 
     ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](6sc|acsbapp?|b0e8|dmpxs|fyre|gaq|kr(ux|xd)|licdn|marketo|sumo|tawk|turnto|zqtk)[-._\/\(\)'"\s:?&=~%]|
 ad(blade|r(ecover|oll)|dthis)\.com|alexametrics|am(azon-adsystem|plitude)\.com|addtoany|algolia|aswpsdk|audioeye|
-baidu|bazaarvoice|bing\.com|BO(OMe?R(ang)?|uncee?x)|browser.?update|btncdn|bu(gherd|zzfeed)|
-chartbeat|chimp|cl(ick(cea|fu)se)|co(mscore\.com|n(fiant|natix)|okie.?(consent|law))|cpx\.|cr(i(sp\.chat|teo)|sspxl|wdcntrl)|cxense|
+bazaarvoice|bing\.com|BO(OMe?R(ang)?|uncee?x)|browser.?update|btncdn|bu(gherd|zzfeed)|
+chartbeat|cl(ick(cea|fu)se)|co(mscore\.com|n(fiant|natix)|okie.?(consent|law))|cpx\.|cr(i(sp\.chat|teo)|sspxl|wdcntrl)|cxense|
 datadog\.com|de(mdex|troitchicago)|disqus(cdn)?\.com|dotmetrics|
 effectivemeasure|ensighten|evidon|Ezoic|
 fastclick|firebase|foresee|fullstory|
@@ -42,7 +42,7 @@ taboola|ti(qcdn|nypass)|toutapp|trustpilot|
 unruly|
 venatus|viglink|vuukle|vntsm|
 woocommerce|wp.?(emoji|groho|rum)|
-yandex|\.yimg|yotpo|
+\.yimg|yotpo|
 zergnet|zo(ominfo|pim))xi
 
   end

@@ -342,7 +342,7 @@ class WebResource
         k = k.to_s                                                # stringify key
         unless k.index('rack.') == 0                              # strip Rack-internal headers
           key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|t| # strip Rack HTTP_ prefix and tokenize
-            if %w{cf cl ct dfe dnt id spf utc xss xsrf}.member? t # acronyms
+            if %w{cf cl csrf ct dfe dnt id spf utc xss xsrf}.member? t # acronyms
               t = t.upcase       # upcase acronym
             else
               t[0] = t[0].upcase # capitalize token
