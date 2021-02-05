@@ -18,29 +18,6 @@ module Webize
 end
 
 class WebResource
-  module HTTP
-
-    def selectFormat default = 'text/html'
-      return default unless env.has_key? 'HTTP_ACCEPT' # no preference specified
-
-      index = {} # q-value -> format
-
-      env['HTTP_ACCEPT'].split(/,/).map{|e| # split to (MIME,q) pairs
-        format, q = e.split /;/             # split (MIME,q) pair
-        i = q && q.split(/=/)[1].to_f || 1  # q-value with default
-        index[i] ||= []                     # init index
-        index[i].push format.strip}         # index on q-value
-
-      index.sort.reverse.map{|q,formats| # formats sorted on descending q-value
-        formats.sort_by{|f|{'text/turtle'=>0}[f]||1}.map{|f|  # tiebreak with 🐢-winner
-          return default if f == '*/*'                        # default via wildcard
-          return f if RDF::Writer.for(:content_type => f) ||  # RDF via writer definition
-            ['application/atom+xml','text/html'].member?(f)}} # non-RDF via writer definition
-
-      default                                                 # default
-    end
-
-  end
   module URIs
 
     # MIME to extension mapping, adjunct to Rack's list
