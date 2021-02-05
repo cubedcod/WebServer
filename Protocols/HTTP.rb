@@ -443,9 +443,11 @@ class WebResource
 
         r = HTTParty.post uri, headers: head, body: body    # POST to origin
         head = headers r.headers                            # response headers
-        body = HTTP.decompress head, r.body
 
-        if format  = head['Content-Type']                   # response format
+        body = r.body
+=begin
+        body = HTTP.decompress head, r.body
+        if format = head['Content-Type']                    # response format
           if reader = RDF::Reader.for(content_type: format) # reader defined for format?
             env[:repository] ||= RDF::Repository.new        # initialize RDF repository
             reader.new(body, base_uri: self){|g|env[:repository] << g} # read RDF
@@ -454,7 +456,7 @@ class WebResource
             puts "RDF::Reader undefined for #{format}"      # Reader undefined
           end
         end
-
+=end
         if Verbose                                          # log response
           puts '-' * 40
           head.map{|k,v| puts [k,v.to_s].join "\t" }
