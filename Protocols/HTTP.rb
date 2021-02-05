@@ -207,7 +207,7 @@ class WebResource
           env[:resp]['Content-Length'] = body.bytesize.to_s           # Content-Length header
           env[:resp]['ETag'] ||= h['Etag']                            # ETag header
           if env[:notransform] || !format || !format.match?(/json|text|xml/) # fixed format
-            [200, env[:resp], [body]]                                 # fetched data in original format
+            [200, env[:resp], [body]]                                 # data in original format
           else                                                        # content-negotiated transform allowed
             if format.index 'json'                                    # upstream data is JSON?
               if (selectFormat format) == format                      # JSON preferred?
