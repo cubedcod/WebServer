@@ -244,7 +244,7 @@ class WebResource
           RDF::Reader.for(content_type: 'text/html').new(body, base_uri: self){|g|env[:repository] << g} # read RDF
         end
         head['Content-Length'] = body.bytesize.to_s
-        transformable ? env[:base].cacheResponse : [env[:status], head, [body]]
+        env[:notransform] ? [env[:status], head, [body]] : env[:base].cacheResponse
       else
         raise
       end

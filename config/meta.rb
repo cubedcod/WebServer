@@ -574,6 +574,7 @@ class WebResource
       'shortcut' => :drop,
       'shorter' => Link,
       'shortlink' => Link,
+      'shortlinkUrl' => Link,
       'shorturl' => Link,
       'showAds' => :drop,
       'site_name' => Abstract,

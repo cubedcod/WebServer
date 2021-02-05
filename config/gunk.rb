@@ -19,14 +19,14 @@ class WebResource
 
     Gunk = Regexp.new SiteDir.join('gunk.regex').read.chomp, Regexp::IGNORECASE
 
-    ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](6sc|acsbapp?|b0e8|fyre|gaq|kr(ux|xd)|licdn|marketo|sumo|tawk|turnto|zqtk)[-._\/\(\)'"\s:?&=~%]|
+    ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](6sc|acsbapp?|b0e8|dmpxs|fyre|gaq|kr(ux|xd)|licdn|marketo|sumo|tawk|turnto|zqtk)[-._\/\(\)'"\s:?&=~%]|
 ad(blade|r(ecover|oll)|dthis)|alexametrics|am(azon-adsystem|plitude)\.com|addtoany|algolia|aswpsdk|audioeye|
 baidu|bazaarvoice|bing\.com|BO(OMe?R(ang)?|uncee?x)|browser.?update|btncdn|bu(gherd|zzfeed)|
 chartbeat|chimp|cl(ick(cea|fu)se)|co(mscore\.com|n(fiant|n(atix|ect\.facebook))|okie.?(consent|law))|cpx\.|cr(i(sp\.chat|teo)|sspxl|wdcntrl)|cxense|
-datadog|de(mdex|troitchicago)|disqus(cdn)?\.com|dmpxs|dotmetrics|
+datadog|de(mdex|troitchicago)|disqus(cdn)?\.com|dotmetrics|
 effectivemeasure|ensighten|evidon|Ezoic|
-fa(cebook\.com|stclick)|firebase|foresee|fullstory|funnel|
-gaug\.es|g[eo]t(chosen|drip|pocket)|google.?(analytics|syndication|tag(manager|services))\.com|grapeshot|gumgum\.com|
+fastclick|firebase|foresee|fullstory|funnel|
+gaug\.es|g[eo]t(chosen|drip|pocket)|google.?(analytics|tag(manager|services))\.com|grapeshot|gumgum\.com|
 hotjar|hs-analytics|hubspot|
 in(folink|te(llitxt|rcom))|iubenda|
 kochava|
