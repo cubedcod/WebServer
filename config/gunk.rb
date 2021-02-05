@@ -30,7 +30,7 @@ gaug\.es|g[eo]t(chosen|drip|pocket)|grapeshot|gumgum\.com|
 hotjar|hs-analytics|hubspot|
 in(folink|te(llitxt|rcom\.(com|io)))|iubenda|
 kochava|
-lexity|li(strak|veperson)|
+lexity\.com|li(strak|veperson)|
 ma(rfeel|tomo)|me(dia\.net|quoda)|ml314|mouseflow|mpulse|
 narrativ\.|newrelic|npttech|nreum|
 olark|omappapi|one(signal|trust)|online-metrix|op(t?n?mn?str|t(anon|imizely\.com))|outbrain|owneriq|
