@@ -206,7 +206,6 @@ class WebResource
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type).map{|k|env[:resp][k] ||= h[k] if h[k]}
           env[:resp]['Content-Length'] = body.bytesize.to_s           # Content-Length header
           env[:resp]['ETag'] ||= h['Etag']                            # ETag header
-
           if env[:notransform] || !format || format.match?(/css|script/) || !format.match?(/json|text|xml/) # fixed format?
             [200, env[:resp], [body]]                                 # data in original format
           else                                                        # content-negotiated transform allowed
