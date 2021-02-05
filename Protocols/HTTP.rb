@@ -428,6 +428,36 @@ class WebResource
       }.join("&")
     end
 
+    def OPTIONS
+      if allow_domain? && !uri.match?(Gunk)                 # POST allowed?
+        head = headers                                      # read head
+        body = env['rack.input'].read                       # read body
+        env.delete 'rack.input'
+
+        if Verbose                                          # log request
+          puts 'OPTIONS ' + uri
+          head.map{|k,v| puts [k,v.to_s].join "\t" }
+          puts '>>>>>>>>', body
+        end
+
+        r = HTTParty.options uri, headers: head, body: body    # OPTIONS request to origin
+        head = headers r.headers                            # response headers
+        body = r.body
+
+        if Verbose                                          # log response
+          puts '-' * 40
+          head.map{|k,v| puts [k,v.to_s].join "\t" }
+          puts '<<<<<<<<', body unless head['Content-Encoding']
+        end
+
+        [r.code, head, [body]]                              # response
+      else
+        env[:deny] = true
+        [202, {'Access-Control-Allow-Credentials' => 'true',
+               'Access-Control-Allow-Origin' => origin}, []]
+      end
+    end
+
     def POST
       if allow_domain? && !uri.match?(Gunk)                 # POST allowed?
         head = headers                                      # read head
@@ -468,6 +498,7 @@ class WebResource
                'Access-Control-Allow-Origin' => origin}, []]
       end
     end
+
 
     def remoteURL
       ['https:/' , path.sub(/^\/https?:\/+/, '/'),
