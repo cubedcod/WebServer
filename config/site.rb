@@ -269,7 +269,8 @@ l.facebook.com l.instagram.com
         NoGunk[r]
        end).yield_self{|s,h,b|
         if [401,403,429].member? s
-          r.fetchHTTP transformable: false
+          r.env[:notransform] = true
+          r.fetch
         else
           [s,h,b]
         end}}
@@ -296,14 +297,15 @@ l.facebook.com l.instagram.com
         end
       elsif %w(browse_ajax c channel embed feed generate_204 get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results user watch watch_videos yts).member?(path) || !path
         case path
-        when /ajax|embed|watch/
-          r.fetchHTTP transformable: false
+        when /ajax|embed/
+          r.env[:notransform] = true
+          r.fetch
         when 'get_video_info'
-          if r.query_values['el'] == 'adunit'
-            # TODO Ad substitution
+          if r.query_values['el'] == 'adunit' # TODO ad substitution, just drop for now
             [200, {"Access-Control-Allow-Origin"=>"https://www.youtube.com", "Content-Type"=>"application/x-www-form-urlencoded", "Content-Length"=>"0"}, ['']]
           else
-            r.fetchHTTP(transformable: false).yield_self{|s,h,b|
+            r.env[:notransform] = true
+            r.fetch.yield_self{|s,h,b|
               puts h, Rack::Utils.parse_query(b[0])
               [s,h,b]}
           end

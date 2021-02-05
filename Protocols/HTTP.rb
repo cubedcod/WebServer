@@ -15,14 +15,14 @@ class WebResource
     end
 
     def cacheResponse
-      nodes = nodeSet            # find nodes
-      if nodes.size == 1 && (nodes[0].static_node? || # one node of preferred or fixed format
+      nodes = nodeSet             # find local nodes
+      if nodes.size == 1 && (nodes[0].static_node? || # single node found in client-preferred or fixed format
                             (nodes[0].named_format == selectFormat && (env[:notransform] || nodes[0].named_format != 'text/html')))
-        nodes[0].fileResponse    # static response
+        nodes[0].fileResponse     # static response on file, return
       else
-        nodes.map{|_|_.🐢.loadRDF}# load graph
-        saveRDF if env[:updates] # cache resources emitted by RDF-ize process
-        graphResponse            # graph response
+        nodes.map{|_|_.🐢.loadRDF}# transcode to RDF if needed, load RDF
+        saveRDF if env[:updates]  # cache resources emitted in RDF transcode
+        graphResponse             # graph response
       end
     end
 
@@ -137,9 +137,10 @@ class WebResource
       ['http://', host, ![nil, 443].member?(port) ? [':', port] : nil, path, query ? ['?', query] : nil].join.R(env).fetchHTTP # fetch via HTTP
     end
 
-    # fetch from remote, read graph-data, fill graph+static caches, maybe return original or transformed data in HTTP response
-    def fetchHTTP thru: true, transformable: !env[:notransform]       # opts: omit HTTP response to caller, enable format transforms
-      URI.open(uri, headers.merge({redirect: false})) do |response| ; env[:fetched] = true
+    # fetch remote data to local graph
+    def fetchHTTP thru: true                                          # return HTTP response to caller?
+      URI.open(uri, headers.merge({redirect: false})) do |response|
+        env[:fetched] = true                                          # mark as a network-fetch for logger
         h = headers response.meta                                     # response headers
         case response.status[0].to_i
         when 204                                                      # no content
@@ -193,7 +194,7 @@ class WebResource
             puts "ERROR format undefined on #{uri}"                   # warning: undefined format
           end
           return unless thru                                          # skip HTTP response
-          saveRDF                                                     # cache graph
+          saveRDF                                                     # cache graph-data
           env[:resp]['Access-Control-Allow-Origin'] ||= origin        # CORS header
           h['Link'] && h['Link'].split(',').map{|link|                # Link headers
             ref, type = link.split(';').map &:strip
@@ -203,13 +204,20 @@ class WebResource
               env[:links][type.to_sym] = ref
             end}                                                      # upstream headers
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type).map{|k|env[:resp][k] ||= h[k] if h[k]}
-          env[:resp]['ETag'] ||= h['Etag']
-
-          if transformable && format&.match?(/text|xml/)              # enable content-negotiation
-            graphResponse                                             # data in local-pref format
-          else
-            env[:resp]['Content-Length'] = body.bytesize.to_s         # Content-Length header
-            [200, env[:resp], [body]]                                 # data in original format
+          env[:resp]['Content-Length'] = body.bytesize.to_s           # Content-Length header
+          env[:resp]['ETag'] ||= h['Etag']                            # ETag header
+          if env[:notransform] || !format || !format.match?(/json|text|xml/) # fixed format
+            [200, env[:resp], [body]]                                 # fetched data in original format
+          else                                                        # content-negotiated transform allowed
+            if format.index 'json'                                    # upstream data is JSON?
+              if (selectFormat format) == format                      # JSON preferred?
+                [200, env[:resp], [body]]                             # unmodified JSON
+              else
+                graphResponse format                                  # transform JSON to requested format
+              end
+            else                                                      # upstream Atom/HTML/RSS/XML/TXT
+              graphResponse format                                    # transform to requested format, or within-MIME reformat
+            end
           end
         end
       end
@@ -273,38 +281,38 @@ class WebResource
         p = parts[0]
         if !p
           [302, {'Location' => '/h'}, []]
-        elsif %w{m d h}.member? p              # goto current day/hour/min dir
+        elsif %w{m d h}.member? p              # goto current day/hour/min-dir
           dateDir
         elsif path == '/favicon.ico'
           [200, {'Content-Type' => 'image/png'}, [SiteIcon]]
         elsif path == '/log' || path == '/log/'
           log_search                           # search log
-        elsif path == '/mail'                  # goto inbox
-          [302, {'Location' => '/d?f=msg*'}, []]
-        elsif !p.match? /[.:]/                 # no hostname/scheme characters
-          timeMeta                             # reference temporally-adjacent nodes
-          cacheResponse                        # local node
-        else
-          (env[:base] = remoteURL).hostHandler # host handler (rebased on localhost)
+        elsif path == '/mail'
+          [302,{'Location' => '/d?f=msg*'},[]] # goto "inbox" of today's messages
+        elsif !p.match? /[.:]/                 # no hostname/scheme characters in first path-segment
+          timeMeta                             # reference temporally-adjacent nodes in metadata
+          cacheResponse                        # local path
+        else                                   # hostname in first path-segment
+          (env[:base] = remoteURL).hostHandler # host handler (mapped to local URI-space)
         end
       else
         hostHandler                            # host handler
       end
     end
 
-    def graphResponse
+    def graphResponse defaultFormat='text/html'
       return notfound if !env.has_key?(:repository) || env[:repository].empty? # empty graph
       return [304,{},[]] if client_etags.include? env[:resp]['ETag']           # client has file
-      format = selectFormat                                                    # response format
+      format = selectFormat defaultFormat                                      # response format
       env[:resp]['Access-Control-Allow-Origin'] ||= origin                     # response headers
       env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
       env[:resp].update({'Link' => env[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !env[:links] || env[:links].empty?
       body = case format                                                       # response body
              when /^text\/html/
-               htmlDocument
+               htmlDocument                                                    # serialize HTML
              when /^application\/atom+xml/
-               feedDocument
-             else
+               feedDocument                                                    # serialize Atom/RSS
+             else                                                              # serialize RDF
                env[:repository].dump RDF::Writer.for(content_type: format).to_sym, base_uri: self
              end
       env[:resp]['Content-Length'] = body.bytesize.to_s                        # response size
@@ -313,7 +321,7 @@ class WebResource
 
     def HEAD
       self.GET.yield_self{|s, h, _|
-                          [s, h, []]} # status and header
+                          [s, h, []]} # return status and header
     end
 
     # client<>proxy headers not repeated on proxy<>origin connections
@@ -461,10 +469,9 @@ class WebResource
        (fragment ? ['#', fragment] : nil) ].join.R env
     end
 
-    def selectFormat default = 'text/html'
+    def selectFormat default='text/html'
       return default unless env.has_key? 'HTTP_ACCEPT' # no preference specified
-
-      index = {} # q-value -> format
+      index = {} # (q-value -> format) table
 
       env['HTTP_ACCEPT'].split(/,/).map{|e| # split to (MIME,q) pairs
         format, q = e.split /;/             # split (MIME,q) pair
@@ -472,11 +479,11 @@ class WebResource
         index[i] ||= []                     # init index
         index[i].push format.strip}         # index on q-value
 
-      index.sort.reverse.map{|q,formats| # formats sorted on descending q-value
+      index.sort.reverse.map{|q,formats| # formats grouped on descending q-value
         formats.sort_by{|f|{'text/turtle'=>0}[f]||1}.map{|f|  # tiebreak with 🐢-winner
-          return default if f == '*/*'                        # default via wildcard
-          return f if RDF::Writer.for(:content_type => f) ||  # RDF via writer definition
-            ['application/atom+xml','text/html'].member?(f)}} # non-RDF via writer definition
+          return default if f == '*/*'                        # wildcard, select default
+          return f if RDF::Writer.for(:content_type => f) ||  # highest q w/ RDF writer defined
+            ['application/atom+xml','text/html'].member?(f)}} # highest q w/ nonRDF writer defined
 
       default                                                 # default
     end
