@@ -207,7 +207,7 @@ class WebResource
           env[:resp]['Content-Length'] = body.bytesize.to_s           # Content-Length header
           env[:resp]['ETag'] ||= h['Etag']                            # ETag header
 
-          if env[:notransform] || !format || format.match?(/script/) || !format.match?(/json|text|xml/) # fixed format?
+          if env[:notransform] || !format || format.match?(/css|script/) || !format.match?(/json|text|xml/) # fixed format?
             [200, env[:resp], [body]]                                 # data in original format
           else                                                        # content-negotiated transform allowed
             if format.index 'json'                                    # upstream data is JSON
@@ -314,7 +314,12 @@ class WebResource
              when /^application\/atom+xml/
                feedDocument                                                    # serialize Atom/RSS
              else                                                              # serialize RDF
-               env[:repository].dump RDF::Writer.for(content_type: format).to_sym, base_uri: self
+               if writer = RDF::Writer.for(content_type: format)
+                 env[:repository].dump writer.to_sym, base_uri: self
+               else
+                 puts "no Writer for #{format}!"
+                 ''
+               end
              end
       env[:resp]['Content-Length'] = body.bytesize.to_s                        # response size
       [env[:status] || 200, env[:resp], [body]]                                # graph response
