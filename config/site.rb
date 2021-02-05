@@ -157,8 +157,6 @@ l.facebook.com l.instagram.com
         [200, {"Access-Control-Allow-Origin"=>"*", "Content-Type"=>"text/javascript; charset=UTF-8", "Content-Length" => output.bytesize}, [output]]
       when 'search'
         NoGunk[r]
-#      when /^(js)$/
-#        NoGunk[r]
       else
         r.deny
       end}
@@ -183,6 +181,8 @@ l.facebook.com l.instagram.com
 
     GET 'instagram.com', -> r {[301, {'Location' => ['//www.instagram.com', r.path].join.R.href}, []]}
     GET 'www.instagram.com', -> r {(!r.path || r.path=='/') ? r.cacheResponse : NoGunk[r]}
+
+#    GET 'www.linkedin.com', NoGunk
 
     GET 'www.reddit.com', -> r {
       r.env[:links][:prev] = ['//old.reddit.com', r.path.sub('.rss',''), '?',r.query].join.R.href # prev-page pointer
