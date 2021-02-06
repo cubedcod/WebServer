@@ -138,6 +138,7 @@ l.facebook.com l.instagram.com
 
     GET 'google.com', GotoGoogle
     GET 'maps.google.com', GotoGoogle
+    GET 'maps.googleapis.com', NoGunk
 
     GET 'www.google.com', -> r {
       case r.parts[0]
@@ -155,7 +156,7 @@ l.facebook.com l.instagram.com
                               "google:suggesttype":["NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION"],
                               "google:verbatimrelevance": 1300}].to_json
         [200, {"Access-Control-Allow-Origin"=>"*", "Content-Type"=>"text/javascript; charset=UTF-8", "Content-Length" => output.bytesize}, [output]]
-      when /js|search/
+      when /maps|js|search/
         NoGunk[r]
       else
         r.deny
@@ -249,10 +250,14 @@ l.facebook.com l.instagram.com
           uid = nil
           uidQuery = "https://twitter.com/i/api/graphql/ku_TJZNyXL2T4-D9Oypg7w/UserByScreenName?variables=%7B%22screen_name%22%3A%22#{parts[0]}%22%2C%22withHighlightedLabel%22%3Atrue%7D"
           URI.open(uidQuery, r.headers){|response|
-            body = HTTP.decompress({'Content-Encoding' => response.meta['content-encoding']}, response.read)
-            json = ::JSON.parse body
-            uid = json['data']['user']['rest_id']
-            ('https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20' + cursor + '&ext=mediaStats%2CcameraMoment').R(r.env).fetch}
+            body = response.read
+            if response.meta['content-type'].index 'json'
+              json = ::JSON.parse HTTP.decompress({'Content-Encoding' => response.meta['content-encoding']}, body)
+              uid = json['data']['user']['rest_id']
+              ('https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20' + cursor + '&ext=mediaStats%2CcameraMoment').R(r.env).fetch
+            else
+              [200, response.meta, [body]]
+            end} rescue [401,{},[]]
         end
       elsif parts.member?('status') || parts.member?('statuses')                                                    # tweet / conversation
         if parts.size == 2
@@ -271,6 +276,7 @@ l.facebook.com l.instagram.com
         if [401,403,429].member? s
           puts "Upstream status #{s}, fetching stock UI for token refresh"
           r.env[:notransform] = true
+          %w(HTTP_COOKIE authorization x-csrf-token x-guest-token).map{|a| r.env.delete a }
           r.fetch
         else
           [s,h,b]

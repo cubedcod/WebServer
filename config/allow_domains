@@ -1,12 +1,14 @@
 .lbry.tv
 .pscp.tv
 .storage.googleapis.com
+.abs.hls.ttvnw.net
 ajax.cloudflare.com
 ajax.googleapis.com
 api.lbry.com
 cdnjs.cloudflare.com
 edge.api.brightcove.com
 entitlement.auth.adobe.com
+gql.twitch.tv
 graphql.api.dailymotion.com
 players.brightcove.net
 secure.brightcove.com

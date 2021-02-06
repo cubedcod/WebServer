@@ -90,7 +90,7 @@ class WebResource
                       elsif type == :image || %w(bmp gif png).member?(ext)
                         ['image/png', SiteIcon]
                       elsif type == :script || ext == 'js'
-                        ['application/javascript', '//']
+                        ['application/javascript', "// URI: #{uri.match(Gunk) || host}"]
                       elsif type == :JSON || ext == 'json'
                         ['application/json','{}']
                       else
@@ -454,6 +454,7 @@ class WebResource
       else
         env[:deny] = true
         [202, {'Access-Control-Allow-Credentials' => 'true',
+               'Access-Control-Allow-Headers' => AllowedHeaders,
                'Access-Control-Allow-Origin' => origin}, []]
       end
     end
