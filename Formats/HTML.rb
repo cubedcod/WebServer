@@ -144,6 +144,7 @@ module Webize
       end
 
       def scanContent &f
+        embeds = RDF::Graph.new
         subject = @base         # subject URI
         n = @doc
         qs = @base.query_values || {}
@@ -223,22 +224,26 @@ module Webize
         # HFeed
         @base.HFeed n, &f 
 
-        # RDFa + JSON-LD + Microdata
-        unless @base.to_s.match? /\/feed|polymer.*html/ # don't look for RDF in unpopulated templates
-          embeds = RDF::Graph.new
-          n.css('script[type="application/ld+json"]').map{|dataElement|
-            embeds << (::JSON::LD::API.toRdf ::JSON.parse dataElement.inner_text)} rescue "JSON-LD read failure in #{@base}"   # JSON-LD triples
-          RDF::Reader.for(:rdfa).new(@doc, base_uri: @base){|_| embeds << _ } rescue "RDFa read failure in #{@base}"           # RDFa triples
-          RDF::Reader.for(:microdata).new(@doc, base_uri: @base){|_| embeds << _ } rescue "Microdata read failure in #{@base}" # Microdata triples
-          embeds.each_triple{|s,p,o| # inspect  raw triple
-            p = MetaMap[p.to_s] || p # map predicates
-            puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/ # show unresolved property-names
-            yield s, p, o unless p == :drop} # emit triple
-        end
-
-        # JSON
+        # JSON (generic)
         n.css('script[type="application/json"], script[type="text/json"]').map{|json|
           Webize::JSON::Reader.new(json.inner_text.strip.sub(/^<!--/,'').sub(/-->$/,''), base_uri: @base).scanContent &f}
+
+        # JSON (LD)
+        n.css('script[type="application/ld+json"]').map{|dataElement|
+          embeds << (::JSON::LD::API.toRdf ::JSON.parse dataElement.inner_text)} rescue "JSON-LD read failure in #{@base}"   # JSON-LD triples
+
+        # RDFa
+        n.css('script').remove # we're done extractign RDF from scripts, RDFa parser otherwise recursively instantiates yet another reader..
+        RDF::Reader.for(:rdfa).new(@doc, base_uri: @base){|_| embeds << _ } rescue "RDFa read failure in #{@base}"           # RDFa triples
+
+        # Microdata
+        RDF::Reader.for(:microdata).new(@doc, base_uri: @base){|_| embeds << _ } rescue "Microdata read failure in #{@base}" # Microdata triples
+
+        # emit triples from embeded graphs
+        embeds.each_triple{|s,p,o| # inspect  raw triple
+          p = MetaMap[p.to_s] || p # map predicates
+          puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/ # show unresolved property-names
+          yield s, p, o unless p == :drop} # emit triple
 
         # <body>
         if body = n.css('body')[0]
