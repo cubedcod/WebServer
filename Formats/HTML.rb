@@ -92,7 +92,7 @@ module Webize
           e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id'] unless e.name == 'p'}</span> " # add href to node
         end}
 
-      html.to_xhtml indent: 0                                        # serialize
+      html.to_html                                                   # serialize
     end
 
     class Format < RDF::Format

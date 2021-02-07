@@ -8,8 +8,6 @@ offline icon , e.g. to stop redirect and use local cache on  http://localhost:80
 wayland browser w/ https/images and simulation of the JS behaviors
 https://twitter.com/MariaAb1293 - user info JSON parse
 https://forum.solidproject.org/ blank nodes
-ERROR <https://www.nytimes.com/2021/01/27/technology/personaltech/apple-privacy-labels.html>: 118:97: ERROR: Tag header invalid-> shutt up errors maybe coming from mrdf/nokogumbo/etc  somewhere
-exclude localstate and  jsonld from scriptgunk scan - it's data not (AnnoyingWare) code🐕 📃 103⋮  https://lfod.life/jeff-2timez-lfodmix-1-26-21/  🐕 📃 11⋮  https://www.thecrimson.com/article/2021/1/28/title-ix-achilles-heel-feature/ -
 look for apollo_state on every site ? maybe via meta/link-tag fingerprinting or smth so no string-scan in every script
 p2p notification net to replace rsync/syncthing - just use hub/spoke irc3? libp2p-gossipsub private nets? full-mesh Turtle-on-the-wire?
 https://boards.4channel.org/g/thread/79924795?view=table&sort=date - hyperlinks not in <a>
