@@ -19,7 +19,7 @@ class WebResource
 
     Gunk = Regexp.new SiteDir.join('gunk.regex').read.chomp, Regexp::IGNORECASE
 
-    ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](6sc|acsbapp?|aksb|b0e8|dmpxs|fyre|gaq|kr(ux|xd)|licdn|marketo|omtrdc|sumo|tawk|turnto|zqtk)[-._\/\(\)'"\s:?&=~%]|
+    ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](6sc|acsbapp?|aksb|b0e8|dmpxs|fyre|gaq|kr(ux|xd)|licdn|m(arketo|pulse)|omtrdc|sumo|tawk|turnto|zqtk)[-._\/\(\)'"\s:?&=~%]|
 ad(blade|r(ecover|oll)|dthis|safeprotected)\.com|alexametrics|am(azon-adsystem|plitude)\.com|addtoany|algolia|aswpsdk|audioeye|
 bazaarvoice|bing\.com|BO(OMe?R(ang)?|uncee?x)|browser.?update|btncdn|bu(gherd|zzfeed)|
 ch(artbeat|impstatic)|cl(ick(cea|fu)se)|co(mscore\.com|n(fiant|natix)|okie.?(consent|law))|cpx\.|cr(i(sp\.chat|teo)|sspxl|wdcntrl)|cxense|
@@ -31,7 +31,7 @@ hotjar|hs-analytics|hubspot|
 in(folink|te(llitxt|rcom\.(com|io)))|iperceptions|iubenda|
 kochava|
 lexity\.com|li(strak|veperson)|
-ma(rfeel|tomo)|me(dia\.net|quoda)|ml314|mouseflow|mpulse|
+ma(rfeel|tomo)|me(dia\.net|quoda)|ml314|mouseflow|
 narrativ\.|newrelic|npttech|nreum|
 olark|omappapi|one(signal|trust)|online-metrix|op(t?n?mn?str|t(anon|imizely\.com))|outbrain|owneriq|
 pa(ges(ense|peed)|r(dot|sely)|ypal\.com)|petametrics|pi(co\.tools|n(gdom|img)|wik)|porpoiseant|prebid|pub(\.network|m(atic\.com|ine))|push(ly|nami)|
