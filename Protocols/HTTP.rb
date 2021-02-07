@@ -40,7 +40,7 @@ class WebResource
       env.update({base: uri, feeds: [], links: {}, log: [], resp: {}})     # response environment
       uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body|      # dispatch request
         format = uri.format_icon head['Content-Type']                      # logger
-        color = env[:deny] ? '31;1' : (format_color format)
+        color = env[:deny] ? '38;5;196' : (format_color format)
         puts [env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]), (status_icon status), format, env[:repository] ? (env[:repository].size.to_s + '⋮') : nil,
               env['HTTP_REFERER'] ? ["\e[#{color}m", env['HTTP_REFERER'], "\e[0m→"] : nil, "\e[#{color}#{env['HTTP_REFERER'] && !env['HTTP_REFERER'].index(env[:base].host) && ';7' || ''}m",
               env[:base], "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil, Verbose ? [env['HTTP_ACCEPT'], head['Content-Type']].compact.join(' → ') : nil, env[:log]

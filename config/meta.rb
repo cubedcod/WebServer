@@ -516,6 +516,7 @@ class WebResource
       'preview_url' => Link,
       'profile' => :drop,
       'profile:username' => Creator,
+      'profile_image_url' => Image,
       'profilePicture' => Image,
       'promotionalHeadline' => Title,
       'promotionalSummary' => Abstract,

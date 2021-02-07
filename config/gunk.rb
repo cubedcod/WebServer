@@ -37,7 +37,7 @@ olark|omappapi|one(signal|trust)|online-metrix|op(t?n?mn?str|t(anon|imizely\.com
 pa(ges(ense|peed)|r(dot|sely)|ypal\.com)|petametrics|pi(co\.tools|n(gdom|img)|wik)|porpoiseant|prebid|pub(\.network|m(atic\.com|ine))|push(ly|nami)|
 quora|qua(l(aroo|trics)|nt(cast|serve?)\.com)|
 radiateb2b|r-login|rightmessage|rlcdn|
-sa(il.?(horizon|thr)|lesloft\.com)|sc(ene7|(arab|orecard)research)|se(archiq|edtag|gment\.(com|io)|ntry-cdn|rvedby|ssioncam)|shopify|slickstream|smart(asset|look)|snowplow|spot\.im|statcounter|
+sa(il.?(horizon|thr[a-z]+)|lesloft\.com)|sc(ene7|(arab|orecard)research)|se(archiq|edtag|gment\.(com|io)|ntry-cdn|rvedby|ssioncam)|shopify|slickstream|smart(asset|look)|snowplow|spot\.im|statcounter|
 taboola|ti(qcdn|nypass)|toutapp|trustpilot|
 unruly|
 venatus|viglink|vuukle|vntsm|

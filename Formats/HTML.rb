@@ -4,7 +4,7 @@ module Webize
     include WebResource::URIs
 
     def self.clean doc, base
-      log = -> content, filter {puts "🧽 \e[30;1m" + content.to_s.sub(/^\n/,'').gsub(filter, "\e[32m\\0\e[30m") + "\e[0m"}
+      log = -> content, filter {puts "🧽 \e[38;5;8m" + content.to_s.gsub(/[\n\r\s\t]+/,' ').gsub(filter, "\e[38;5;48m\\0\e[38;5;8m") + "\e[0m"}
 
       doc = Nokogiri::HTML.parse doc.gsub /<\/?(form|noscript)[^>]*>/i, '' # strip <noscript>,<form> and parse
       doc.traverse{|e|
