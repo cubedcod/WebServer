@@ -144,7 +144,7 @@ module Webize
       end
 
       def scanContent &f
-        embeds = RDF::Graph.new
+        embeds = RDF::Graph.new # storage for embedded graphs
         subject = @base         # subject URI
         n = @doc
         qs = @base.query_values || {}
@@ -233,13 +233,13 @@ module Webize
           embeds << (::JSON::LD::API.toRdf ::JSON.parse dataElement.inner_text)} rescue "JSON-LD read failure in #{@base}"   # JSON-LD triples
 
         # RDFa
-        n.css('script').remove # we're done extractign RDF from scripts, RDFa parser otherwise recursively instantiates yet another reader..
+        n.css('script').remove # we're done extractign RDF from scripts, RDFa reader instantiates readers for these elements
         RDF::Reader.for(:rdfa).new(@doc, base_uri: @base){|_| embeds << _ } rescue "RDFa read failure in #{@base}"           # RDFa triples
 
         # Microdata
         RDF::Reader.for(:microdata).new(@doc, base_uri: @base){|_| embeds << _ } rescue "Microdata read failure in #{@base}" # Microdata triples
 
-        # emit triples from embeded graphs
+        # clean and emit triples from embed graphs
         embeds.each_triple{|s,p,o| # inspect  raw triple
           p = MetaMap[p.to_s] || p # map predicates
           puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/ # show unresolved property-names

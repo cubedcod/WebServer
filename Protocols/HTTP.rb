@@ -164,13 +164,13 @@ class WebResource
                    end
           if format                                                   # format defined
             if !charset && format.index('html') && metatag = body[0..4096].encode('UTF-8', undef: :replace, invalid: :replace).match(/<meta[^>]+charset=['"]?([^'">]+)/i)
-              charset = metatag[1]                                    # charset defined in <head> of document
+              charset = metatag[1]                                    # charset defined in <head>
             end
             if charset
               charset = 'UTF-8' if charset.match? /utf.?8/i           # normalize UTF-8 charset-id
               charset = 'Shift_JIS' if charset.match? /s(hift)?.?jis/i# normalize Shift-JIS charset-id
-            end
-            body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace if format.match? /(ht|x)ml|script|text/ # encode text in UTF-8
+            end                                                       # encode text in UTF-8
+            body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace if format.match? /(ht|x)ml|script|text/
             body = Webize.clean self, body, format                    # clean data
             if formatExt = Suffixes[format] || Suffixes_Rack[format]  # look up format-suffix
               file = fsPath                                           # cache base path
