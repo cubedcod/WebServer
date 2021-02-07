@@ -308,9 +308,9 @@ class WebResource
       env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
       env[:resp].update({'Link' => env[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !env[:links] || env[:links].empty?
       body = case format                                                       # response body
-             when /^text\/html/
+             when /html/
                htmlDocument                                                    # serialize HTML
-             when /^application\/atom+xml/
+             when /atom|rss|xml/
                feedDocument                                                    # serialize Atom/RSS
              else                                                              # serialize RDF
                if writer = RDF::Writer.for(content_type: format)
