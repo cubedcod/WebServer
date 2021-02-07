@@ -20,12 +20,12 @@ class WebResource
     Gunk = Regexp.new SiteDir.join('gunk.regex').read.chomp, Regexp::IGNORECASE
 
     ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](6sc|acsbapp?|aksb|b0e8|dmpxs|fyre|gaq|kr(ux|xd)|licdn|marketo|omtrdc|sumo|tawk|turnto|zqtk)[-._\/\(\)'"\s:?&=~%]|
-ad(blade|r(ecover|oll)|dthis)\.com|alexametrics|am(azon-adsystem|plitude)\.com|addtoany|algolia|aswpsdk|audioeye|
+ad(blade|r(ecover|oll)|dthis|safeprotected)\.com|alexametrics|am(azon-adsystem|plitude)\.com|addtoany|algolia|aswpsdk|audioeye|
 bazaarvoice|bing\.com|BO(OMe?R(ang)?|uncee?x)|browser.?update|btncdn|bu(gherd|zzfeed)|
-chartbeat|cl(ick(cea|fu)se)|co(mscore\.com|n(fiant|natix)|okie.?(consent|law))|cpx\.|cr(i(sp\.chat|teo)|sspxl|wdcntrl)|cxense|
-datadog\.com|de(mdex|troitchicago)|disqus(cdn)?\.com|dotmetrics|
+ch(artbeat|impstatic)|cl(ick(cea|fu)se)|co(mscore\.com|n(fiant|natix)|okie.?(consent|law))|cpx\.|cr(i(sp\.chat|teo)|sspxl|wdcntrl)|cxense|
+datadog\.com|de(m(andbase|dex)|troitchicago)|disqus(cdn)?\.com|dotmetrics|
 effectivemeasure|ensighten|evidon|Ezoic|
-fastclick|firebase|foresee|fullstory|
+fastclick|firebase|foresee\.com|fullstory|
 gaug\.es|g[eo]t(chosen|drip|pocket)|grapeshot|gumgum\.com|
 hotjar|hs-analytics|hubspot|
 in(folink|te(llitxt|rcom\.(com|io)))|iperceptions|iubenda|

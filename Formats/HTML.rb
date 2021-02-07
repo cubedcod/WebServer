@@ -4,8 +4,9 @@ module Webize
     include WebResource::URIs
 
     def self.clean doc, base
-      doc = Nokogiri::HTML.parse doc.gsub /<\/?(form|noscript)[^>]*>/i, '' # strip <noscript>,<form> and parse
+      log = -> content, filter {puts "🧽 \e[30;1m" + content.to_s.sub(/^\n/,'').gsub(filter, "\e[32m\\0\e[30m") + "\e[0m"}
 
+      doc = Nokogiri::HTML.parse doc.gsub /<\/?(form|noscript)[^>]*>/i, '' # strip <noscript>,<form> and parse
       doc.traverse{|e|
 
         if e['src']                                  # src attribute
@@ -32,14 +33,14 @@ module Webize
       doc.css('script').map{|s|
         if gunk = (s.inner_text.match ScriptGunk)
           base.env[:log].push gunk.to_s[0..31] if Verbose
-          puts "🧽 \e[30;1m" + s.inner_text.sub(/^\n/,'').gsub(ScriptGunk, "\e[38;5;51m\\0\e[30m") + "\e[0m" if Verbose
+          log[s.inner_text,ScriptGunk] if Verbose
           s.remove
         end}
 
       doc.css('style').map{|s| Webize::CSS.cleanNode s if s.inner_text.match? /font-face|import/}
 
       dropnodes = "amp-ad, amp-consent, [class*='modal'], [class*='newsletter'], [class*='overlay'], [class*='popup'], .player-unavailable"
-      doc.css(dropnodes).map{|n|puts "🧽 \e[30;1m" + n.to_s.sub(/^\n/,'').gsub(/amp-(ad|consent)|modal|newsletter|overlay|popup/, "\e[38;5;51m\\0\e[30m") + "\e[0m"} if Verbose
+      doc.css(dropnodes).map{|n| log[n,/amp-(ad|consent)|modal|newsletter|overlay|popup/]} if Verbose
       doc.css(dropnodes).remove
 
       doc.to_html
