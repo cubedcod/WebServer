@@ -36,7 +36,9 @@ module Webize
 
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri].R
-        @path = options[:path] || @base.fsPath
+        unless @path = options[:path]
+          puts "Code triplr requires path reference: #{@base}" # TODO look into that ruby pygments clone
+        end
         extension = @base.ext
         @lang = 'html' if extension == 'erb'
         @lang = 'ruby' if options[:content_type] == 'text/x-ruby'

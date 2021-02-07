@@ -272,6 +272,8 @@ class WebResource
         '🐢'
       elsif %w(htm html).member?(x) || mime.match?(/html/)
         '📃'
+      elsif mime.match? /atom|rss|xml/
+        '📰'
       elsif mime.match? /^(application\/)?font/
         '🇦'
       elsif mime.match? /octet.stream/
