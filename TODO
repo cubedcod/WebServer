@@ -12,11 +12,9 @@ ERROR <https://www.nytimes.com/2021/01/27/technology/personaltech/apple-privacy-
 exclude localstate and  jsonld from scriptgunk scan - it's data not (AnnoyingWare) code🐕 📃 103⋮  https://lfod.life/jeff-2timez-lfodmix-1-26-21/  🐕 📃 11⋮  https://www.thecrimson.com/article/2021/1/28/title-ix-achilles-heel-feature/ -
 look for apollo_state on every site ? maybe via meta/link-tag fingerprinting or smth so no string-scan in every script
 p2p notification net to replace rsync/syncthing - just use hub/spoke irc3? libp2p-gossipsub private nets? full-mesh Turtle-on-the-wire?
-all users same color since #displayname doesnt use querystring-based user id
 https://boards.4channel.org/g/thread/79924795?view=table&sort=date - hyperlinks not in <a>
 tree view for replies
 search-result abstract rollup at top of page
 record some of the dropped telemetry URLs - which youtube vids were watched, guesstimated locations etc
 yt/disqus comments
 dynamic NAVIGATION suggestions in autocomplete
-500 https://czhcsbi/ SocketError Failed to open TCP connection to czhcsbi:80 (getaddrinfo: Temporary failure in name resolution)
