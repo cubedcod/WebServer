@@ -62,7 +62,7 @@ class WebResource
       unless File.exist? f
         FileUtils.mkdir_p File.dirname f
         RDF::Writer.for(:turtle).open(f){|f|f << graph}                                         # write 🐢
-        puts "\e[32m#{'%2d' % graph.size}⋮🐢 \e[1m#{'http://localhost:8000' if !graphURI.host}#{graphURI}\e[0m" if path != graphURI.path
+        puts "\e[38;5;48m#{'%2d' % graph.size}⋮🐢 \e[1m#{'http://localhost:8000' if !graphURI.host}#{graphURI}\e[0m" if path != graphURI.path
       end
       if !graphURI.to_s.match?(/^\/\d\d\d\d\/\d\d\/\d\d/) && timestamp = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value # find timestamp if graph not on timeline
         🕒 = [timestamp.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'),   # hour-dir
