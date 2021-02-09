@@ -206,18 +206,10 @@ class WebResource
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type).map{|k|env[:resp][k] ||= h[k] if h[k]}
           env[:resp]['Content-Length'] = body.bytesize.to_s           # Content-Length header
           env[:resp]['ETag'] ||= h['Etag']                            # ETag header
-          if env[:notransform] || !format || format.match?(/css|script/) || !format.match?(/json|text|xml/) # fixed format?
+          if env[:notransform] || !format || format.match?(NoTransform) || !format.match?(Transformable) || (format.match?(NoReformat) && format==(selectFormat format)) # fixed formats
             [200, env[:resp], [body]]                                 # data in original format
-          else                                                        # content-negotiated transform allowed
-            if format.index 'json'                                    # upstream data is JSON
-              if (selectFormat format) == format                      # JSON preferred?
-                [200, env[:resp], [body]]                             # JSON in original format
-              else
-                graphResponse format                                  # transform JSON to requested format
-              end
-            else                                                      # upstream Atom/HTML/RSS/XML/TXT
-              graphResponse format                                    # transform to requested format, or within-MIME reformat
-            end
+          else                                                        # content-negotiated transform
+            graphResponse format                                      # transform to requested MIME, or same-MIME reformat
           end
         end
       end

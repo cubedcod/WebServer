@@ -79,3 +79,12 @@ https://cdn-shop.adafruit.com/datasheets/Si5351.pdf encoding with unprimed cache
 /sbin/unicorn:23:in `load'
 /sbin/unicorn:23:in `<main>'
   🚫 📃  https://cdn-shop.adafruit.com/datasheets/Si5351.pdf →  https://cdn-shop.adafruit.com/favicon.ico  image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8 → text/html
+
+box.com borked
+
+
+🐕 📜  https://bpda.app.box.com/s/uzz33jpqs1izh3or061ne7wf2n6kzc2m?notransform →  https://cdn01.boxcdn.net/enduser/lang-en-US.72f3210ac7.js  */* → application/javascript; charset=utf-8
+🛑 📜  https://bpda.app.box.com/s/uzz33jpqs1izh3or061ne7wf2n6kzc2m?notransform →  https://cdn01.boxcdn.net/enduser/vendors~app.15f4043a47.js  */* → application/javascript; charset=utf-8 HubSpot
+🛑 📜  https://bpda.app.box.com/s/uzz33jpqs1izh3or061ne7wf2n6kzc2m?notransform →  https://cdn01.boxcdn.net/enduser/app.bea3f66dfe.js  */* → application/javascript; charset=utf-8 boomerang
+
+https://bpda.app.box.com/s/uzz33jpqs1izh3or061ne7wf2n6kzc2m?notransform

@@ -18,6 +18,11 @@ module Webize
 end
 
 class WebResource
+  module HTTP
+    NoReformat = /json/
+    NoTransform = /css|script/ # conneg disabled for these formats
+    Transformable = /json|text|xml/ # conneg enabled for these formats
+  end
   module URIs
 
     # MIME to extension mapping, adjunct to Rack's list
