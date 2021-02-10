@@ -25,7 +25,7 @@ bazaarvoice|bing\.com|BO(OMe?R(ang)?|uncee?x)|browser.?update|btncdn|bu(gherd|zz
 ch(artbeat|impstatic)|cl(ick(cea|fu)se)|co(mscore\.com|n(fiant|n(atix|ect\.facebook\.net))|okie.?(consent|law))|cpx\.|cr(i(sp\.chat|teo)|sspxl|wdcntrl)|cxense|
 datadog\.com|de(m(andbase|dex)|troitchicago)|disqus(cdn)?\.com|dotmetrics|
 effectivemeasure|ensighten|evidon|\.ex\.co|Ezoic|
-fastclick|feedbackify|firebase|foresee\.com|fullstory|
+fastclick|feedbackify|firebase|foresee\.com|fullstory|(function|var)[\s\(]+_0x|
 gaug\.es|g[eo]t(chosen|drip|pocket)|google.?(analytics|tag|syndication)|grapeshot|gumgum\.com|
 hotjar|hs-analytics|hubspot|
 ibclick\.stream|in(folink|te(llitxt|rcom\.(com|io)))|iperceptions|iubenda|
