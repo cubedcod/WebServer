@@ -23,7 +23,7 @@ class WebResource
     def self.tabular graph, env
       graph = graph.values if graph.class == Hash
       qs = env[:base].query_values || {}
-      keys = graph.select{|r|r.respond_to? :keys}.map{|r|r.keys}.flatten.uniq - [Abstract, Content, DC+'hasFormat', DC+'identifier', Image, Link, Video, SIOC+'reply_of', SIOC+'richContent', SIOC+'user_agent', Title]
+      keys = graph.select{|r|r.respond_to? :keys}.map{|r|r.keys}.flatten.uniq - [Abstract, Content, DC+'identifier', Image, Link, Video, SIOC+'richContent', Title] # fields in main column
       keys = [Creator, *(keys - [Creator])] if keys.member? Creator
 
       if env[:sort]
@@ -39,45 +39,36 @@ class WebResource
 
       {_: :table, class: :tabular,                    # table
        c: [{_: :thead,
-            c: {_: :tr, c: keys.map{|p|               # header
-                  p = p.R
-                  slug = p.display_name
+            c: {_: :tr, c: keys.map{|p|               # table header
+                  p = p.R; slug = p.display_name
                   icon = Icons[p.uri] || slug
                   [{_: :th,
-                    c: {_: :a, id: 'sort_by_' + slug, href: HTTP.qs(qs.merge({'sort' => p.uri, 'order' => ascending ? 'desc' : 'asc'})), c: icon}}, "\n"]}}}, "\n", # pointer to sorted representation
+                    c: {_: :a, id: 'sort_by_' + slug, href: HTTP.qs(qs.merge({'sort' => p.uri, 'order' => ascending ? 'desc' : 'asc'})), c: icon}}, "\n"]}}}, "\n", # pointer to sorted column
            {_: :tbody,
             c: graph.map{|resource|
-              re = (resource['uri'] || ('#'+Digest::SHA2.hexdigest(rand.to_s))).to_s.R env                   # resource identity
-              local_id = re.path == env[:base].path && re.fragment || ('r' + Digest::SHA2.hexdigest(re.uri)) # local-row identity
+              re = (resource['uri'] || ('#'+Digest::SHA2.hexdigest(rand.to_s))).to_s.R env                   # resource identifier
+              local_id = re.path == env[:base].path && re.fragment || ('r' + Digest::SHA2.hexdigest(re.uri)) # table-row identifier
               [{_: :tr, id: local_id, c: keys.map{|k| # row
                  [{_: :td, class: re.deny? ? 'blocked' :  '', property: k,
-                  c: if k == 'uri'
+                  c: if k == 'uri'                                                                           # main column
                    tCount = 0
                    [(resource[Title]||[]).map{|title|
-                      title = title.to_s.sub(/\/u\/\S+ on /, '').sub /^Re: /, ''
-                      unless env[:title] == title
+                      title = title.to_s.sub(/\/u\/\S+ on /, '').sub /^Re: /, ''                             # clean title
+                      unless env[:title] == title                                                            # show title at most once if repeats on subsequent resources
                         env[:title] = title; tCount += 1
-                        [{_: :a, href: re.href,       # link to resource with title
-                          class: :title,
-                          type: :node,
-                          c: CGI.escapeHTML(title), id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}, ' ']
+                        [{_: :a,href: re.href,class: :title,type: :node,c: CGI.escapeHTML(title),id: 'r'+Digest::SHA2.hexdigest(rand.to_s)}, ' '] # title
                       end},
-                    ({_: :a, href: re.href,           # basic pointer to resource
-                      class: :id, type: :node, c: '☛',
-                      id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} if tCount == 0), "\n",
-                    (resource[SIOC+'reply_of']||[]).map{|r|
-                      {_: :a, href: r.to_s,
-                       c: Icons[SIOC+'reply_of']} if r.class == RDF::URI || r.class == WebResource},
-                    ({class: :abstract, c: resource[Abstract]} if resource.has_key? Abstract),
-                    [Image, Video].map{|t|(resource[t]||[]).map{|i|Markup[t][i,env]}},
-                    resource[Content], resource[SIOC+'richContent'],
-                    MarkupGroup[Link][(resource[Link]||[]),env]]
+                    ({_: :a,href: re.href,class: :id,type: :node,c: '☛',id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} if tCount == 0),# resource pointer
+                    ({class: :abstract, c: resource[Abstract]} if resource.has_key? Abstract),                                       # abstract
+                    [Image, Video].map{|t|(resource[t]||[]).map{|i|Markup[t][i,env]}},                                               # image & video links
+                    ([resource[Content], resource[SIOC+'richContent'],                                                               # inlined HTML content
+                      MarkupGroup[Link][(resource[Link]||[]),env]] unless (resource[Creator]||[]).find{|a|KillFile.member? a.to_s})] # untyped links
                   else
-                    if Type == k && resource.has_key?(Type) && [Audio.R, Video.R].member?(resource[Type][0])
+                    if Type == k && resource.has_key?(Type) && [Audio.R, Video.R].member?(resource[Type][0])                         # play-button on A/V types
                       playerType = resource[Type][0] == Audio.R ?  'audio' : 'video'
                       {_: :a, href: '#', c: '▶️', onclick: 'var player = document.getElementById("' + playerType + '"); player.src="' + re.href + '"; player.play()'}
                     else
-                      (resource[k]||[]).yield_self{|r|r.class == Array ? r : [r]}.map{|v| markup k, v, env }
+                      (resource[k]||[]).yield_self{|r|r.class == Array ? r : [r]}.map{|v| markup k, v, env }                         # resource type represented as icon or shortname
                     end
                    end}, "\n" ]}}, "\n" ]}}]}
     end
