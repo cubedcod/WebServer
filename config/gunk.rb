@@ -31,14 +31,14 @@ hotjar|hs-analytics|hubspot|
 ibclick\.stream|in(folink|te(llitxt|rcom\.(com|io)))|iperceptions|iubenda|
 kochava|
 lexity\.com|li(strak|veperson)|
-ma(rfeel|tomo)|me(dia\.net|quoda)|ml314|mouseflow|
-narrativ\.|newrelic|npttech|nreum|
+ma(rfeel|tomo|ven\.io)|me(dia\.net|quoda)|ml314|mouseflow|
+narrativ\.|new(relic|sletter)|npttech|nreum|
 olark|omappapi|one(signal|trust)|online-metrix|op(t?n?mn?str|t(anon|imizely\.com))|outbrain|owneriq|
 pa(ges(ense|peed)|r(dot|sely)|ypal\.com)|petametrics|pi(ano\.io|co\.tools|n(gdom|img)|wik)|porpoiseant|prebid|pub(\.network|m(atic\.com|ine))|push(ly|nami)|
 quora|qua(l(aroo|trics)|nt(cast|serve?)\.)|
 radiateb2b|r-login|rightmessage|rlcdn|
 sa(il.?(horizon|thr[a-z]+)|lesloft\.com)|sc(ene7|(arab|orecard)research)|se(archiq|edtag|gment\.(com|io)|ntry-cdn|rvedby|ssioncam)|shopify|slickstream|smart(asset|look)|snowplow|spot\.im|statcounter|swoop\.com|
-taboola|ti(qcdn|nypass)|toutapp|trustpilot|
+taboola|ti(qcdn|nypass)|toutapp|trustpilot|typekit|
 unruly|usabilla|
 venatus|viglink|vuukle|vntsm|
 woocommerce|wp.?(emoji|groho|rum)|

@@ -4,7 +4,7 @@ module Webize
     include WebResource::URIs
 
     def self.clean doc, base
-      log = -> content, filter {puts "🧽 \e[38;5;8m" + content.to_s.gsub(/[\n\r\s\t]+/,' ').gsub(filter, "\e[38;5;48m\\0\e[38;5;8m") + "\e[0m"}
+      log = -> type, content, filter {puts type + " \e[38;5;8m" + content.to_s.gsub(/[\n\r\s\t]+/,' ').gsub(filter, "\e[38;5;48m\\0\e[38;5;8m") + "\e[0m"}
 
       doc = Nokogiri::HTML.parse doc.gsub /<\/?(form|noscript)[^>]*>/i, '' # strip <noscript>,<form> and parse
       doc.traverse{|e|
@@ -33,14 +33,14 @@ module Webize
       doc.css('script').map{|s|
         if gunk = (s.inner_text.match ScriptGunk)
           base.env[:log].push gunk.to_s[0..31] if Verbose
-          log[s.inner_text,ScriptGunk] if Verbose
+          log['✂️', s.inner_text,ScriptGunk] if Verbose
           s.remove
         end}
 
       doc.css('style').map{|s| Webize::CSS.cleanNode s if s.inner_text.match? /font-face|import/}
 
-      dropnodes = "amp-ad, amp-consent, [class*='modal'], [class*='newsletter'], [class*='popup'], .player-unavailable"
-      doc.css(dropnodes).map{|n| log[n,/amp-(ad|consent)|modal|newsletter|popup/]} if Verbose
+      dropnodes = "amp-ad, amp-consent, [class*='email'], [class*='modal'], [class*='newsletter'], [class*='popup'], .player-unavailable"
+      doc.css(dropnodes).map{|n| log['🧽', n,/amp-(ad|consent)|email|modal|newsletter|popup/]} if Verbose
       doc.css(dropnodes).remove
 
       doc.to_html
