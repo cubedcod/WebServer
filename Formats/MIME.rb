@@ -4,7 +4,9 @@ require 'rack'
 module Webize
 
   def self.clean baseURI, body, format
-    if format.index('text/css') == 0     # clean CSS
+    if WebResource::HTTP::HostGET.has_key? baseURI.host
+      body # custom handler, you're on your own for cleaning
+    elsif format.index('text/css') == 0  # clean CSS
       Webize::CSS.clean body
     elsif format.index('text/html') == 0 # clean HTML
       Webize::HTML.clean body, baseURI
