@@ -34,11 +34,11 @@ lexity\.com|li(strak|veperson)|
 ma(rfeel|tomo|ven\.io)|me(dia\.net|quoda)|ml314|mouseflow|
 narrativ\.|new(relic|sletter)|npttech|nreum|
 olark|omappapi|one(signal|trust)|online-metrix|op(t?n?mn?str|t(anon|imizely\.com))|outbrain|owneriq|
-pa(ges(ense|peed)|r(dot|sely)|ypal\.com)|pbjs|petametrics|pi(ano\.io|co\.tools|n(gdom|img|terest)|wik)|porpoiseant|prebid|pub(\.network|m(atic|ine))|push(ly|nami)|
+pa(ges(ense|peed)|r(dot|sely)|ypal\.com)|pbjs|pe(rimeter.?x|tametrics)|pi(ano\.io|co\.tools|n(gdom|img|terest)|wik)|porpoiseant|prebid|pub(\.network|m(atic|ine))|push(ly|nami)|px-cloud|
 quora|qua(l(aroo|trics)|nt(cast|serve?)\.)|
 radiateb2b|r-login|rightmessage|rlcdn|rubicon|
 sa(il.?(horizon|thr[a-z]+)|lesloft\.com)|sc(ene7|(arab|orecard)research)|se(archiq|edtag|gment\.(com|io)|ntry-cdn|rvedby|ssioncam)|shopify|slickstream|smart(asset|look)|snowplow|so(nobi|vrn)|spot.?im|statcounter|swoop\.com|
-ta(boola|rgeting)|tempest|ti(qcdn|nypass)|toutapp|tr(ack(er|ing)|iplelift|ustpilot)|twitter|typekit|
+ta(boola|rgeting)|tempest|ti(qcdn|nypass)|thinglink|toutapp|tr(ack(er|ing)|iplelift|ustpilot)|platform.twitter|typekit|
 unruly|usabilla|
 ve(natus|rizon)|viglink|vuukle|vntsm|
 woocommerce|wp.?(emoji|groho|rum)|
