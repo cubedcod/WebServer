@@ -50,7 +50,7 @@ module Webize
         end
 =end
         ## use poppler-utils
-        html = RDF::Literal `pdftohtml -s -stdout #{Shellwords.escape @path}`
+        html = RDF::Literal `pdftohtml -s -stdout #{Shellwords.escape @path}`.encode('UTF-8', invalid: :replace, undef: :replace)
         html.datatype = RDF.XMLLiteral
         yield Content.R, html
       end

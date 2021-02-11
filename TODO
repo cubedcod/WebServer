@@ -17,74 +17,9 @@ record some of the dropped telemetry URLs - which youtube vids were watched, gue
 yt/disqus comments
 dynamic NAVIGATION suggestions in autocomplete
 https://cdn-shop.adafruit.com/datasheets/Si5351.pdf encoding with unprimed cache
+HTML view for schema.org events https://jewishchronicle.timesofisrael.com/
 
-
-500 https://cdn-shop.adafruit.com/datasheets/Si5351.pdf ArgumentError invalid byte sequence in UTF-8
-/usr/lib/ruby/gems/2.7.0/gems/rdf-turtle-3.1.3/lib/rdf/turtle/writer.rb:460:in `match'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-turtle-3.1.3/lib/rdf/turtle/writer.rb:460:in `match'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-turtle-3.1.3/lib/rdf/turtle/writer.rb:460:in `quoted'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-turtle-3.1.3/lib/rdf/turtle/writer.rb:284:in `format_literal'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-3.1.10/lib/rdf/writer.rb:516:in `format_term'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-turtle-3.1.3/lib/rdf/turtle/writer.rb:558:in `p_term'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-turtle-3.1.3/lib/rdf/turtle/writer.rb:576:in `path'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-turtle-3.1.3/lib/rdf/turtle/writer.rb:599:in `block in objectList'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-turtle-3.1.3/lib/rdf/turtle/writer.rb:593:in `each'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-turtle-3.1.3/lib/rdf/turtle/writer.rb:593:in `each_with_index'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-turtle-3.1.3/lib/rdf/turtle/writer.rb:593:in `objectList'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-turtle-3.1.3/lib/rdf/turtle/writer.rb:632:in `block in predicateObjectList'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-turtle-3.1.3/lib/rdf/turtle/writer.rb:626:in `each'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-turtle-3.1.3/lib/rdf/turtle/writer.rb:626:in `each_with_index'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-turtle-3.1.3/lib/rdf/turtle/writer.rb:626:in `predicateObjectList'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-turtle-3.1.3/lib/rdf/turtle/writer.rb:643:in `triples'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-turtle-3.1.3/lib/rdf/turtle/writer.rb:651:in `statement'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-turtle-3.1.3/lib/rdf/turtle/writer.rb:197:in `block in write_epilogue'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-turtle-3.1.3/lib/rdf/turtle/writer.rb:195:in `each'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-turtle-3.1.3/lib/rdf/turtle/writer.rb:195:in `write_epilogue'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-3.1.10/lib/rdf/writer.rb:297:in `initialize'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-turtle-3.1.3/lib/rdf/turtle/writer.rb:131:in `initialize'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-3.1.10/lib/rdf/writer.rb:240:in `new'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-3.1.10/lib/rdf/writer.rb:240:in `block in open'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-3.1.10/lib/rdf/writer.rb:237:in `open'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-3.1.10/lib/rdf/writer.rb:237:in `open'
-/home/user/src/WebServer/Formats/RDF.rb:64:in `block in saveRDF'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-3.1.10/lib/rdf/mixin/queryable.rb:299:in `<<'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-3.1.10/lib/rdf/mixin/queryable.rb:299:in `block (2 levels) in enum_for'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-3.1.10/lib/rdf/repository.rb:310:in `block in each_graph'
-/usr/lib/ruby/gems/2.7.0/gems/hamster-3.0.0/lib/hamster/hash.rb:370:in `block in each_key'
-/usr/lib/ruby/gems/2.7.0/gems/hamster-3.0.0/lib/hamster/trie.rb:40:in `block in each'
-/usr/lib/ruby/gems/2.7.0/gems/hamster-3.0.0/lib/hamster/trie.rb:40:in `each'
-/usr/lib/ruby/gems/2.7.0/gems/hamster-3.0.0/lib/hamster/trie.rb:40:in `each'
-/usr/lib/ruby/gems/2.7.0/gems/hamster-3.0.0/lib/hamster/hash.rb:370:in `each_key'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-3.1.10/lib/rdf/repository.rb:309:in `each_graph'
-/usr/lib/ruby/gems/2.7.0/gems/rdf-3.1.10/lib/rdf/mixin/queryable.rb:299:in `block in enum_for'
-/home/user/src/WebServer/Formats/RDF.rb:57:in `each'
-/home/user/src/WebServer/Formats/RDF.rb:57:in `each'
-/home/user/src/WebServer/Formats/RDF.rb:57:in `map'
-/home/user/src/WebServer/Formats/RDF.rb:57:in `saveRDF'
-/home/user/src/WebServer/Protocols/HTTP.rb:197:in `block in fetchHTTP'
-/usr/lib/ruby/2.7.0/open-uri.rb:178:in `open_uri'
-/usr/lib/ruby/2.7.0/open-uri.rb:744:in `open'
-/usr/lib/ruby/2.7.0/open-uri.rb:50:in `open'
-/home/user/src/WebServer/Protocols/HTTP.rb:142:in `fetchHTTP'
-/home/user/src/WebServer/Protocols/HTTP.rb:135:in `fetch'
-/home/user/src/WebServer/Protocols/HTTP.rb:389:in `hostHandler'
-/home/user/src/WebServer/Protocols/HTTP.rb:299:in `GET'
-/home/user/src/WebServer/Protocols/HTTP.rb:41:in `call'
-/usr/lib/ruby/gems/2.7.0/gems/unicorn-5.8.0/lib/unicorn/http_server.rb:634:in `process_client'
-/usr/lib/ruby/gems/2.7.0/gems/unicorn-5.8.0/lib/unicorn/http_server.rb:732:in `worker_loop'
-/usr/lib/ruby/gems/2.7.0/gems/unicorn-5.8.0/lib/unicorn/http_server.rb:548:in `spawn_missing_workers'
-/usr/lib/ruby/gems/2.7.0/gems/unicorn-5.8.0/lib/unicorn/http_server.rb:562:in `maintain_worker_count'
-/usr/lib/ruby/gems/2.7.0/gems/unicorn-5.8.0/lib/unicorn/http_server.rb:295:in `join'
-/usr/lib/ruby/gems/2.7.0/gems/unicorn-5.8.0/bin/unicorn:128:in `<top (required)>'
-/sbin/unicorn:23:in `load'
-/sbin/unicorn:23:in `<main>'
-  🚫 📃  https://cdn-shop.adafruit.com/datasheets/Si5351.pdf →  https://cdn-shop.adafruit.com/favicon.ico  image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8 → text/html
-
-box.com borked
-
-
-🐕 📜  https://bpda.app.box.com/s/uzz33jpqs1izh3or061ne7wf2n6kzc2m?notransform →  https://cdn01.boxcdn.net/enduser/lang-en-US.72f3210ac7.js  */* → application/javascript; charset=utf-8
+box.com borked:
 🛑 📜  https://bpda.app.box.com/s/uzz33jpqs1izh3or061ne7wf2n6kzc2m?notransform →  https://cdn01.boxcdn.net/enduser/vendors~app.15f4043a47.js  */* → application/javascript; charset=utf-8 HubSpot
 🛑 📜  https://bpda.app.box.com/s/uzz33jpqs1izh3or061ne7wf2n6kzc2m?notransform →  https://cdn01.boxcdn.net/enduser/app.bea3f66dfe.js  */* → application/javascript; charset=utf-8 boomerang
-
 https://bpda.app.box.com/s/uzz33jpqs1izh3or061ne7wf2n6kzc2m?notransform
