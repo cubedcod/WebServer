@@ -32,6 +32,7 @@ module Webize
   end
   module JSON
     Triplr = {
+      'api.imgur.com' => :Imgur,
       'api.twitter.com' => :TwitterJSON,
       'gitter.im' => :GitterJSON,
       'www.instagram.com' => :InstagramJSON,
@@ -565,6 +566,10 @@ l.facebook.com l.instagram.com
       yield subject, Content, (Webize::HTML.format comment, self), graph
       post.remove
     }
+  end
+
+  def Imgur tree, &b
+    puts tree['media']
   end
 
   def InstagramHTML doc, &b
