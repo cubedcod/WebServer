@@ -162,6 +162,14 @@ l.facebook.com l.instagram.com
         r.deny
       end}
 
+    GET 'imgur.com', -> r { p = r.parts
+      case p[0]
+      when 'a'
+        [301, {'Location' => "https://api.imgur.com/post/v1/albums/#{p[1]}?client_id=546c25a59c58ad7&include=media%2Cadconfig%2Caccount"}, []]
+      else
+        NoGunk[r]
+      end}
+
     GET 'outline.com', -> r {
       if r.parts.size == 1
         (r.join ['/stat1k/', r.parts[0], '.html'].join).R(r.env).fetch
