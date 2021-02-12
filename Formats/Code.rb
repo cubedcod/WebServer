@@ -5,8 +5,6 @@ module Webize
     def self.clean str, base
       if !ScriptHosts.member?(base.host) && gunk = (str.match ScriptGunk)
         base.env[:deny] = true
-        base.env[:log].push gunk
-
         ["// #{str.bytesize} bytes",
          "// gunk: #{gunk}"].join "\n"
       else

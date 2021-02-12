@@ -33,15 +33,14 @@ module Webize
       doc.css('script').map{|s|
         text = s.inner_text
         if !ScriptHosts.member?(base.host) && s['type'] != 'application/ld+json' && !text.match?(/^[\n\r\s\t]*window._*(Apollo|initial|preloaded)_*(data|state)/i) && gunk = (text.match ScriptGunk)
-          base.env[:log].push gunk.to_s[0..31] if Verbose
           log['✂️', text, ScriptGunk] if Verbose
           s.remove
         end}
 
       doc.css('style').map{|s| Webize::CSS.cleanNode s if s.inner_text.match? /font-face|import/}
 
-      dropnodes = "amp-ad, amp-consent, [class*='email'], [class*='modal'], [class*='newsletter'], [class*='popup'], .player-unavailable"
-      doc.css(dropnodes).map{|n| log['🧽', n, /amp-(ad|consent)|email|modal|newsletter|popup/i]} if Verbose
+      dropnodes = "amp-ad, amp-consent, [class*='modal'], [class*='newsletter'], [class*='popup'], .player-unavailable"
+      doc.css(dropnodes).map{|n| log['🧽', n, /amp-(ad|consent)|modal|newsletter|popup/i]} if Verbose
       doc.css(dropnodes).remove
 
       doc.to_html

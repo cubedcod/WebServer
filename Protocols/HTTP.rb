@@ -43,7 +43,7 @@ class WebResource
         color = env[:deny] ? '38;5;196' : (format_color format)
         puts [env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]), (status_icon status), format, env[:repository] ? (env[:repository].size.to_s + '⋮') : nil,
               env['HTTP_REFERER'] ? ["\e[#{color}m", env['HTTP_REFERER'], "\e[0m→"] : nil, "\e[#{color}#{env['HTTP_REFERER'] && !env['HTTP_REFERER'].index(env[:base].host) && ';7' || ''}m",
-              env[:base], "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil, Verbose ? [env['HTTP_ACCEPT'], head['Content-Type']].compact.join(' → ') : nil, env[:log]
+              env[:base], "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil, Verbose ? [env['HTTP_ACCEPT'], head['Content-Type']].compact.join(' → ') : nil,
              ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
         [status, head, body]}                                              # response
     rescue Exception => e                                                  # error handler
@@ -326,7 +326,7 @@ class WebResource
     end
 
     # client<>proxy headers not repeated on proxy<>origin connections
-    SingleHopHeaders = %w(base colors connection downloadable feeds fetched graph host images keep-alive links log notransform offline order path-info query-string
+    SingleHopHeaders = %w(base colors connection downloadable feeds fetched graph host images keep-alive links notransform offline order path-info query-string
  remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software sort status
  te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via view x-forwarded-for)
 
