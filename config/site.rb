@@ -195,8 +195,6 @@ l.facebook.com l.instagram.com
     GET 'instagram.com', -> r {[301, {'Location' => ['//www.instagram.com', r.path].join.R.href}, []]}
     GET 'www.instagram.com', -> r {(!r.path || r.path=='/') ? r.cacheResponse : NoGunk[r]}
 
-#    GET 'www.linkedin.com', NoGunk
-
     GET 'www.reddit.com', -> r {
       r.env[:links][:prev] = ['//old.reddit.com', r.path.sub('.rss',''), '?',r.query].join.R.href # prev-page pointer
       r.env[:sort] ||= 'date'
@@ -572,7 +570,8 @@ l.facebook.com l.instagram.com
   end
 
   def Imgur tree, &b
-    puts :IMGUR, tree
+    tree['media'].map{|img|
+      yield self, Image, img['url'].R}
   end
 
   def InstagramHTML doc, &b
