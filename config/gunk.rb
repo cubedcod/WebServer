@@ -21,17 +21,17 @@ class WebResource
 
     ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](6sc|acsbapp?|ad(miral|s)|aksb|b0e8|dmpxs|fyre|gaq|kr(ux|xd)|licdn|m(ar(insm|keto)|pulse)|o(mtrdc|penx)|sumo|tawk|turnto|zqtk)[-._\/\(\)'"\s:?&=~%]|
 ad.?(bl(ade|ock[a-z]*)|r(ecover|oll)|dthis|s(afeprotected|ense|lot|-twitter)|unit|zone)|alexametrics|am(azon[a-z]*|plitude)\.com|analytics|addtoany|algolia|app(dynamics|nexus)|apstag|aswpsdk|au(ction|dioeye)|
-ba(nner|zaarvoice)|beacon|bi(d(d(er[a-z]*|ing)|s)|ng\.com)|BO(mbora|OMe?R(ang)?|uncee?x)|browser.?update|btncdn|bu(gherd|zzfeed)|
-ch(artbeat|impstatic)|cl(arity\.ms|ick(cea|fu )se)|co(mscore\.com|n(fiant|natix|versant)|okie.?(bot|consent|law|notice))|cpx\.|cr(i(sp\.chat|teo)|sspxl|wdcntrl)|cxense|
+bazaarvoice|beacon|bi(d(d(er[a-z]*|ing)|s)|ng\.com)|BO(mbora|OMe?R(ang)?|uncee?x)|browser.?update|btncdn|bu(gherd|zzfeed)|
+campaign|ch(artbeat|impstatic)|cl(arity\.ms|ick(cea|fu )se)|co(mscore\.com|n(fiant|natix|versant)|okie.?[a-z]*)|cpx\.|cr(i(sp\.chat|teo)|sspxl|wdcntrl)|cxense|
 datadog\.com|de(m(andbase|dex)|troitchicago)|dis(qus(cdn)?\.com|trictm)|do(ubleclick|tmetrics)|
-effectivemeasure|ensighten|evidon|\.ex\.co|Ezoic|
+effectivemeasure|email|ensighten|evidon|\.ex\.co|Ezoic|
 fa(cebook|stclick)|feedbackify|firebase|foresee\.com|freshchat|fullstory|(function|var)[\s\(]+_0x|
 gaug\.es|g[eo]t(chosen|drip|pocket)|google.?[a-z]+|grapeshot|gumgum|
-heatmap\.it|hotjar|hs-analytics|hu?bspo?t|
+heatmap\.it|hotjar|hs-analytics|htlbid|hu?bspo?t|
 ibclick\.stream|in(folink|te(llitxt|r(com\.(com|io)|stitial)))|iperceptions|iubenda|
 kochava|
-lexity\.com|li(strak|veperson)|
-ma(r(feel|keting)|tomo|ven\.io)|me(dia\.net|quoda)|ml314|mouseflow|mxpnl|
+lexity\.com|li(nkedin|strak|veperson)|
+ma(iler[a-z]*|r(feel|keting)|tomo|ven\.io)|me(dia\.net|quoda)|ml314|mouseflow|mxpnl|
 narrativ\.|new(relic|sletter)|npttech|nreum|
 olark|omappapi|one(signal|trust)|online-metrix|op(t?n?mn?str|t(anon|imizely\.com))|outbrain|owneriq|
 pa(ges(ense|peed)|r(dot|sely)|ypal\.com)|pbjs|pe(r(formance|imeter.?x|mutive)|tametrics)|pi(ano\.io|co\.tools|n(gdom|img|terest)|wik)|porpoiseant|prebid|pub(\.network|m(atic|ine))|push(ly|nami)|px-cloud|
