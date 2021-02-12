@@ -293,18 +293,21 @@ class WebResource
     end
 
     def graphResponse defaultFormat='text/html'
-      return notfound if !env.has_key?(:repository) || env[:repository].empty? # empty graph
-      return [304,{},[]] if client_etags.include? env[:resp]['ETag']           # client has file
-      format = selectFormat defaultFormat                                      # response format
-      env[:resp]['Access-Control-Allow-Origin'] ||= origin                     # response headers
+      return notfound if !env.has_key?(:repository)||env[:repository].empty? # empty graph
+      return [304,{},[]] if client_etags.include? env[:resp]['ETag']         # client has file
+      status = env[:status] || 200                                           # response status
+      format = selectFormat defaultFormat                                    # response format
+      env[:resp]['Access-Control-Allow-Origin'] ||= origin                   # response headers
       env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
       env[:resp].update({'Link' => env[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !env[:links] || env[:links].empty?
-      body = case format                                                       # response body
+      return [status, env[:resp], nil] if env['REQUEST_METHOD'] == 'HEAD'    # header-only response
+
+      body = case format                                                     # response body
              when /html/
-               htmlDocument                                                    # serialize HTML
+               htmlDocument                                                  # serialize HTML
              when /atom|rss|xml/
-               feedDocument                                                    # serialize Atom/RSS
-             else                                                              # serialize RDF
+               feedDocument                                                  # serialize Atom/RSS
+             else                                                            # serialize RDF
                if writer = RDF::Writer.for(content_type: format)
                  env[:repository].dump writer.to_sym, base_uri: self
                else
@@ -312,8 +315,9 @@ class WebResource
                  ''
                end
              end
-      env[:resp]['Content-Length'] = body.bytesize.to_s                        # response size
-      [env[:status] || 200, env[:resp], [body]]                                # graph response
+      env[:resp]['Content-Length'] = body.bytesize.to_s                      # response size
+
+      [status, env[:resp], [body]]                                           # graph response
     end
 
     def HEAD

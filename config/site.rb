@@ -163,6 +163,8 @@ l.facebook.com l.instagram.com
         r.deny
       end}
 
+    (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com", NoGunk}
+
     GET 'imgur.com', -> r { p = r.parts
       case p[0]
       when 'a'
