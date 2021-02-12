@@ -20,7 +20,7 @@ class WebResource
     Gunk = Regexp.new SiteDir.join('gunk.regex').read.chomp, Regexp::IGNORECASE
 
     ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](6sc|acsbapp?|ad(miral|s)|aksb|b0e8|dmpxs|fyre|gaq|kr(ux|xd)|licdn|m(ar(insm|keto)|pulse)|omtrdc|sumo|tawk|turnto|zqtk)[-._\/\(\)'"\s:?&=~%]|
-ad(blade|r(ecover|oll)|dthis|s(afeprotected|ense|lot|-twitter)|unit|zone)|alexametrics|am(azon-adsystem|plitude)\.com|analytics|addtoany|algolia|app(dynamics|nexus)|apstag|aswpsdk|audioeye|
+ad.?(bl(ade|ock[a-z]*)|r(ecover|oll)|dthis|s(afeprotected|ense|lot|-twitter)|unit|zone)|alexametrics|am(azon-adsystem|plitude)\.com|analytics|addtoany|algolia|app(dynamics|nexus)|apstag|aswpsdk|audioeye|
 bazaarvoice|beacon|bi(d(d(er|ing)|s)|ng\.com)|BO(mbora|OMe?R(ang)?|uncee?x)|browser.?update|btncdn|bu(gherd|zzfeed)|
 ch(artbeat|impstatic)|cl(arity\.ms|ick(cea|fu )se)|co(mscore\.com|n(fiant|n(atix|ect\.facebook\.net)|versant)|okie.?(bot|consent|law|notice))|cpx\.|cr(i(sp\.chat|teo)|sspxl|wdcntrl)|cxense|
 datadog\.com|de(m(andbase|dex)|troitchicago)|dis(qus(cdn)?\.com|trictm)|do(ubleclick|tmetrics)|

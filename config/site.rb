@@ -572,7 +572,7 @@ l.facebook.com l.instagram.com
   end
 
   def Imgur tree, &b
-    puts tree['media']
+    puts :IMGUR, tree
   end
 
   def InstagramHTML doc, &b

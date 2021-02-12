@@ -41,7 +41,7 @@ module Webize
       doc.css('style').map{|s| Webize::CSS.cleanNode s if s.inner_text.match? /font-face|import/}
 
       dropnodes = "amp-ad, amp-consent, [class*='email'], [class*='modal'], [class*='newsletter'], [class*='popup'], .player-unavailable"
-      doc.css(dropnodes).map{|n| log['🧽', n,/amp-(ad|consent)|email|modal|newsletter|popup/]} if Verbose
+      doc.css(dropnodes).map{|n| log['🧽', n, /amp-(ad|consent)|email|modal|newsletter|popup/i]} if Verbose
       doc.css(dropnodes).remove
 
       doc.to_html
