@@ -140,7 +140,6 @@ l.facebook.com l.instagram.com
 
     GET 'google.com', GotoGoogle
     GET 'maps.google.com', GotoGoogle
-    GET 'maps.googleapis.com', NoGunk
 
     GET 'www.google.com', -> r {
       case r.parts[0]
