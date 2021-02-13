@@ -43,6 +43,8 @@ module Webize
       doc.css(dropnodes).map{|n| log['🧽', n, /amp-(ad|consent)|modal|newsletter|popup/i]} if Verbose
       doc.css(dropnodes).remove
 
+      doc.css('[integrity]').map{|n|n.delete 'integrity'} # anything making it past our filters tends to be heavily modified or rewritten
+
       doc.to_html
     end
 
