@@ -56,7 +56,7 @@ class WebResource
     KillFile = SiteDir.join('killfile').readlines.map &:chomp
 
     SearchableHosts = %w(localhost twitter.com www.google.com)
-    ScriptHosts = %w(static.twitchcdn.net www.twitch.tv)
+    ScriptHosts = %w(app.element.io matrix.to static.twitchcdn.net www.twitch.tv)
 
   end
   module HTTP

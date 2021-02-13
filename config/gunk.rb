@@ -34,7 +34,7 @@ lexity\.com|li(nkedin|strak|veperson)|
 ma(iler[a-z]*|r(feel|keting)|t(htag|omo)|ven\.io)|me(dia\.net|quoda)|ml314|mouseflow|munchkin|mxpnl|
 narrativ\.|new(relic|sletter)|noti[cf][a-z]+|npttech|nreum|
 olark|omappapi|one(signal|trust)|online-metrix|op(t?n?mn?str|t(anon|imizely\.com))|outbrain|owneriq|
-pa(ge(s(ense|peed)|.?view)|r(dot|sely)|y[pw]all?)|pbjs|pe(r(formance|imeter.?x|mutive|sonaliz[a-z]*)|tametrics)|pi(ano\.io|co\.tools|n(gdom|img|terest)|wik)|po(rpoiseant|strelease)|prebid[a-z]+|pub(\.network|m(atic|ine))|push(ly|nami)|px-cloud|
+pa(ge(s(ense|peed)|.?view)|r(dot|sely)|y[pw]all?)|pbjs|pe(r(formance|imeter.?x|mutive|sonaliz[a-z]*)|tametrics)|pi(ano\.io|co\.tools|n(gdom|img|terest)|wik)|po(rpoiseant|strelease)|prebid[a-z]+|pub(\.network|m(atic|ine))|push(bullet|ly|nami)|px-cloud|
 quora|qua(l(aroo|trics)|nt(cast|serve?)\.)|
 radiateb2b|r-login|revcontent|rightmessage|rlcdn|rubicon|
 sa(il.?(horizon|thr[a-z]+)|lesloft\.com)|sc(ene7|(arab|orecard)research)|se(archiq|edtag|gment\.(com|io)|ntry-cdn|rv(edby|ice.?worker)|ssioncam)|shopify|signup|slickstream|smart(asset|look)|snowplow|so(cial|nobi|vrn)|spo(nsor[a-z]*|t.?im)|statcounter|swoop\.com|
