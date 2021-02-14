@@ -132,7 +132,7 @@ class WebResource
       end
     end
 
-    # fetch from cache or remote
+    # fetch data from cache or remote
     def fetch
       return cacheResponse if offline?
       return [304,{},[]] if (env.has_key?('HTTP_IF_NONE_MATCH') || env.has_key?('HTTP_IF_MODIFIED_SINCE')) && static_node? # client has static node cached
@@ -143,7 +143,7 @@ class WebResource
       ['http://', host, ![nil, 443].member?(port) ? [':', port] : nil, path, query ? ['?', query] : nil].join.R(env).fetchHTTP rescue (env[:status]=408; notfound) # fetch via HTTP
     end
 
-    # fetch remote data to local graph
+    # fetch remote data to local graph (in RAM w/ disk cache)
     def fetchHTTP thru: true                                          # return HTTP response to caller?
       URI.open(uri, headers.merge({redirect: false})) do |response|
         env[:fetched] = true                                          # mark as a network-fetch for logger
@@ -153,7 +153,7 @@ class WebResource
           [204, {}, []]
         when 206                                                      # partial content
           h['Access-Control-Allow-Origin'] ||= origin
-          [206, h, [response.read]]                                   # return part
+          [206, h, [response.read]]
         else                                                          # full content
           body = HTTP.decompress h, response.read                     # decompress content
           format = if path=='/feed'||(query_values||{})['mime']=='xml'# format fixed at feed-URL (override erroneous upstream text/html)
@@ -331,7 +331,7 @@ class WebResource
                           [s, h, []]} # return status and header
     end
 
-    # client<>proxy headers not repeated on proxy<>origin connections
+    # client<>proxy headers not reused on proxy<>origin connections
     SingleHopHeaders = %w(base colors connection downloadable feeds fetched filtered graph host images keep-alive links notransform offline order path-info query-string
  remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software sort status
  te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via view x-forwarded-for)
@@ -368,10 +368,10 @@ class WebResource
       qs = query_values || {}
       cookie = join('/cookie').R
       cookie.writeFile qs['cookie'] if qs['cookie'] && !qs['cookie'].empty? # cache cookie
-      env['HTTP_COOKIE'] = cookie.readFile if cookie.node.exist? # fetch cookie from jar
-      if path == '/favicon.ico' && node.exist?
-        fileResponse
-      elsif qs['download'] == 'audio'
+      env['HTTP_COOKIE'] ||= cookie.readFile if cookie.node.exist? # fetch cookie from jar
+      if path == '/favicon.ico'                                    # icon handler
+        node.exist? ? fileResponse : fetch
+      elsif qs['download'] == 'audio'                              # download from remote 
         slug = qs['list'] || qs['v'] || 'audio'
         storageURI = join([basename, slug].join '.').R
         storage = storageURI.fsPath
@@ -381,13 +381,13 @@ class WebResource
           Process.detach pid
         end
         [302, {'Location' => storageURI.href + '?offline'}, []]
-      elsif handler = HostGET[host] # host lambda
-        handler[self]
-      elsif deny?
-        deny
-      elsif parts[-1]&.match? /^gen(erate)?_?204$/
+      elsif parts[-1]&.match? /^(gen(erate)?|log)_?204$/           # 204 response, skip roundtrip to origin
         [204, {}, []]
-      else                       # remote graph-node
+      elsif handler = HostGET[host]                                # custom handler: lambda
+        handler[self]
+      elsif deny?                                                  # blocked request
+        deny
+      else                                                         # generic handler: remote node cache
         fetch
       end
     end

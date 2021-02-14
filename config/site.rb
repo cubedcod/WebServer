@@ -140,6 +140,8 @@ l.facebook.com l.instagram.com
 
     GET 'google.com', GotoGoogle
     GET 'maps.google.com', GotoGoogle
+    GET 'maps.gstatic.com', NoGunk
+    GET 'www.gstatic.com', NoGunk
 
     GET 'www.google.com', -> r {
       case r.parts[0]
@@ -157,7 +159,7 @@ l.facebook.com l.instagram.com
                               "google:suggesttype":["NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION"],
                               "google:verbatimrelevance": 1300}].to_json
         [200, {"Access-Control-Allow-Origin"=>"*", "Content-Type"=>"text/javascript; charset=UTF-8", "Content-Length" => output.bytesize}, [output]]
-      when /maps|js|search/
+      when /images|maps|search/
         NoGunk[r]
       else
         r.deny
