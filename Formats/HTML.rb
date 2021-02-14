@@ -4,7 +4,7 @@ module Webize
     include WebResource::URIs
 
     def self.clean doc, base
-      log = -> type, content, filter {puts type + " \e[38;5;8m" + content.to_s.gsub(/[\n\r\s\t]+/,' ').gsub(filter, "\e[38;5;48m\\0\e[38;5;8m") + "\e[0m"}
+      log = -> type, content, filter {print type + " \e[38;5;8m" + content.to_s.gsub(/[\n\r\s\t]+/,' ').gsub(filter, "\e[38;5;48m\\0\e[38;5;8m") + "\e[0m "}
 
       doc = Nokogiri::HTML.parse doc.gsub /<\/?(form|noscript)[^>]*>/i, '' # strip <noscript>,<form> and parse
       doc.traverse{|e|
@@ -32,9 +32,10 @@ module Webize
 
       doc.css('script').map{|s|
         text = s.inner_text
-        if !ScriptHosts.member?(base.host) && s['type'] != 'application/ld+json' && !text.match?(/^[\n\r\s\t]*window._*(Apollo|initial|preloaded)_*(data|state)/i) && gunk = (text.match ScriptGunk)
-          log['✂️', text, ScriptGunk] if Verbose
-          s.remove
+        if !ScriptHosts.member?(base.host) && s['type'] != 'application/ld+json' && !text.match?(/^[\n\r\s\t]*window._*(Apollo|initial|preloaded)_*(data|state)/i) && text.match?(ScriptGunk)
+          lines = text.split /[\n;]+/
+          s.content = lines.grep_v(ScriptGunk).join ";\n"
+          lines.grep(ScriptGunk).map{|l| log['✂️', l, ScriptGunk]} if Verbose
         end}
 
       doc.css('style').map{|s| Webize::CSS.cleanNode s if s.inner_text.match? /font-face|import/}

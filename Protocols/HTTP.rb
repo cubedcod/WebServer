@@ -43,7 +43,7 @@ class WebResource
         color = if env[:deny]
                   '38;5;196'
                 elsif env[:filtered]
-                  '38;5;214'
+                  '38;5;208'
                 else
                   format_color format
                 end

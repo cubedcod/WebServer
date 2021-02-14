@@ -1,3 +1,4 @@
+# coding: utf-8
 module Webize
   module Code
     include WebResource::URIs
@@ -5,7 +6,12 @@ module Webize
     def self.clean str, base
       if !ScriptHosts.member?(base.host) && str.match?(ScriptGunk)
         base.env[:filtered] = true
-        str.split(/[\n;]+/).grep_v(ScriptGunk).join ";\n"
+        lines = str.split /[\n;]+/
+        if Verbose
+          lines.grep(ScriptGunk).map{|l| print "✂️ \e[38;5;8m" + l.gsub(/[\n\r\s\t]+/,' ').gsub(ScriptGunk, "\e[38;5;48m\\0\e[38;5;8m") + "\e[0m "}
+          print "\n"
+        end
+        lines.grep_v(ScriptGunk).join ";\n"
       else
         str
       end

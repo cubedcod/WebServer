@@ -19,7 +19,7 @@ class WebResource
 
     Gunk = Regexp.new SiteDir.join('gunk.regex').read.chomp, Regexp::IGNORECASE
 
-    ScriptGunk = %r([-._\/\(\)'"\s:?&=~%](6sc|acsbapp?|ad(miral|s)?|aksb|b0e8|d([fm]p(xs)?)|en25|fyre|g(aq|t(ag|m))|kr(ux|xd)|licdn|m(ar(insm|keto)|pulse)|nr-data|o(mtrdc|penx)|paq|(app|grow|king)?sumo|t(aw|rac)k[a-z]*|turnto|zqtk)[-._\/\(\)'"\s:?&=~%]|
+    ScriptGunk = %r([-._\/\(\)\\{}'"\s:?&=~%](6sc|acsbapp?|ad(miral|s)?|affirm|aksb|b0e8|d([fm]p(xs)?)|en25|fyre|g(aq|igya|t(ag|m))|kr(ux|xd)|licdn|m(ar(insm|keto)|pulse)|nr-data|o(mtrdc|penx)|paq|(app|grow|king)?sumo|t(aw|rac)k[a-z]*|turnto|utm|xtlo|zqtk)[-._\/\(\)\\{}'"\s:?&=~%]|
 ad.?(bl(ade|ock[a-z]*)|r(ecover|oll)|dthis|layer|s(afeprotected|ense|lot)|unit|zone)|alexametrics|am(azon[a-z]*|plitude)\.com|analytics|addtoany|algolia|app(dynamics|nexus)|apstag|aswpsdk|au(ction|dioeye)|
 bazaarvoice|beacon|bi(d(d(er|ing)|s)[a-z]*|ng\.com)|BO(mbora|OMe?R(ang)?|uncee?x)|browser.?update|btncdn|bu(gherd|zzfeed)|
 campaign|ch(artbeat|impstatic)|cl(arity\.ms|ick(cea|fu )se)|co(mscore\.com|n(fiant|natix|sent|versant)|okie.?[a-z]*)|cpx\.|cr(i(sp\.chat|teo)|sspxl|wdcntrl)|cxense|
@@ -30,7 +30,7 @@ gaug\.es|g[eo]t(chosen|drip|pocket)|geo(ip|loc)|google.?[a-z]+|grapeshot|gumgum|
 heatmap\.it|hotjar|hs-analytics|htlbid|hu?bspo?t|
 ibclick\.stream|impression[a-z]*|in(folink|stagram|te(llitxt|r(com\.(com|io)|stitial)))|iperceptions|iubenda|
 kochava|
-lexity\.com|li(nkedin|strak|veperson)|
+le(aderboard|xity\.com)|li(nkedin|strak|veperson)|
 ma(iler[a-z]*|r(feel|keting)|t(htag|omo)|ven\.io)|me(dia\.net|quoda)|ml314|mouseflow|munchkin|mxpnl|
 narrativ\.|new(relic|sletter)|npttech|nreum|
 olark|omappapi|one(signal|trust)|online-metrix|op(t?n?mn?str|t(anon|imizely\.com))|outbrain|owneriq|
