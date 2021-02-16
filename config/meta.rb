@@ -208,6 +208,7 @@ class WebResource
       'createdAt' => Date,
       'csrf-param' => :drop,
       'csrf-token' => :drop,
+      'cx_shield' => :drop,
       'data' => :drop,
       'dataLayer' => :drop,
       'date' => Date,
