@@ -15,13 +15,14 @@ class WebResource
     end
 
     def cacheResponse
+      timeMeta                    # reference temporally-adjacent nodes
       nodes = nodeSet             # find local nodes
       if nodes.size == 1 && (nodes[0].static_node? || # single node found in client-preferred or fixed format
                             (nodes[0].named_format == selectFormat && (env[:notransform] || nodes[0].named_format != 'text/html')))
         nodes[0].fileResponse     # static response on file, return
       else
         nodes.map{|_|_.🐢.loadRDF}# transcode to RDF if needed, load RDF
-        saveRDF if env[:updates]  # cache resources emitted in RDF transcode
+        saveRDF if env[:updates]  # cache resources found in RDF transcode
         graphResponse             # graph response
       end
     end
@@ -43,7 +44,7 @@ class WebResource
         color = if env[:deny]
                   '38;5;196'
                 elsif env[:filtered]
-                  '38;5;208'
+                  '38;5;122'
                 else
                   format_color format
                 end
@@ -126,7 +127,8 @@ class WebResource
 
     def env e = nil
       if e
-        @env = e;  self
+        @env = e
+        self
       else
         @env ||= {}
       end
@@ -134,17 +136,17 @@ class WebResource
 
     # fetch data from cache or remote
     def fetch
-      return cacheResponse if offline?
-      return [304,{},[]] if (env.has_key?('HTTP_IF_NONE_MATCH') || env.has_key?('HTTP_IF_MODIFIED_SINCE')) && static_node? # client has static node cached
-      nodes = nodeSet
-      return nodes[0].fileResponse if nodes.size == 1 && nodes[0].static_node?                            # server has static node cached
-      fetchHTTP                                                                 # fetch via HTTPS
+      return cacheResponse if offline?                                # offline, return cache contents
+      return [304,{},[]] if (env.has_key?('HTTP_IF_NONE_MATCH') || env.has_key?('HTTP_IF_MODIFIED_SINCE')) && static_node?
+      ns = nodeSet                                                    # client has static-node in cache, return 304 response
+      return ns[0].fileResponse if ns.size == 1 && ns[0].static_node? # server has static-node in cache, return data
+      fetchHTTP                                                       # fetch via HTTPS w/ HTTP fallback on error
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
-      ['http://', host, ![nil, 443].member?(port) ? [':', port] : nil, path, query ? ['?', query] : nil].join.R(env).fetchHTTP rescue (env[:status]=408; notfound) # fetch via HTTP
+      ['http://', host, ![nil, 443].member?(port) ? [':', port] : nil, path, query ? ['?', query] : nil].join.R(env).fetchHTTP rescue (env[:status] = 408; notfound)
     end
 
-    # fetch remote data to local graph (in RAM w/ disk cache)
-    def fetchHTTP thru: true                                          # return HTTP response to caller?
+    # fetch remote data (to RAM w/ fs-cache update)
+    def fetchHTTP thru: true                                          # do we return a HTTP response?
       URI.open(uri, headers.merge({redirect: false})) do |response|
         env[:fetched] = true                                          # mark as a network-fetch for logger
         h = headers response.meta                                     # response headers
@@ -199,7 +201,7 @@ class WebResource
           else
             puts "ERROR format undefined on #{uri}"                   # warning: undefined format
           end
-          return unless thru                                          # skip HTTP response
+          return unless thru                                          # no HTTP response, return w/ loaded data
           saveRDF                                                     # cache graph-data
           env[:resp]['Access-Control-Allow-Origin'] ||= origin        # CORS header
           h['Link'] && h['Link'].split(',').map{|link|                # Link headers
@@ -279,19 +281,18 @@ class WebResource
         p = parts[0]
         if !p
           [302, {'Location' => '/h'}, []]
-        elsif %w{m d h}.member? p              # goto current day/hour/min-dir
+        elsif %w{m d h}.member? p              # current month/day/hour redirect
           dateDir
-        elsif path == '/favicon.ico'
+        elsif path == '/favicon.ico'           # icon handler
           [200, {'Content-Type' => 'image/png'}, [SiteIcon]]
-        elsif path == '/log' || path == '/log/'
-          log_search                           # search log
-        elsif path == '/mail'
-          [302,{'Location' => '/d?f=msg*'},[]] # goto "inbox" of today's messages
-        elsif !p.match? /[.:]/                 # no hostname/scheme characters in first path-segment
-          timeMeta                             # reference temporally-adjacent nodes in metadata
+        elsif path == '/log' || path=='/log/'  # log-search handler
+          log_search
+        elsif path == '/mail'                  # mail-inbox redirect
+          [302,{'Location' => '/d?f=msg*'},[]]
+        elsif !p.match? /[.:]/                 # no domain-separator chars in path-segment
           cacheResponse                        # local path
         else                                   # hostname in first path-segment
-          (env[:base] = remoteURL).hostHandler # host handler (mapped to local URI-space)
+          (env[:base] = remoteURL).hostHandler # host handler (rebased on local URIspace)
         end
       else
         hostHandler                            # host handler
@@ -353,7 +354,7 @@ class WebResource
           head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless SingleHopHeaders.member? key.downcase
         end} # set header at normalized key
 
-      #head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # accept Turtle even if requesting client doesnt
+      #head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # accept Turtle at proxy even if client doesnt
       head['Referer'] = 'http://drudgereport.com/' if host.match? /wsj\.com$/
       head['Referer'] = 'https://' + host + '/' if %w(gif jpeg jpg png svg webp).member?(ext.downcase) || parts.member?('embed')
       head['User-Agent'] = if %w(po.st t.co).member? host # we want shortlink-expansion via HTTP-redirect, not Javascript, so advertise a basic user-agent
@@ -365,10 +366,11 @@ class WebResource
     end
 
     def hostHandler
-      qs = query_values || {}
-      cookie = join('/cookie').R
-      cookie.writeFile qs['cookie'] if qs['cookie'] && !qs['cookie'].empty? # cache cookie
-      env['HTTP_COOKIE'] ||= cookie.readFile if cookie.node.exist? # fetch cookie from jar
+      URIs.denylist                                                # refresh denylist
+      qs = query_values || {}                                      # parse query
+      cookie = join('/cookie').R                                   # cookie-jar URI
+      cookie.writeFile qs['cookie'] if qs['cookie'] && !qs['cookie'].empty? # store cookie to jar
+      env['HTTP_COOKIE'] ||= cookie.readFile if cookie.node.exist? # read cookie from jar if none supplied
       if path == '/favicon.ico'                                    # icon handler
         node.exist? ? fileResponse : fetch
       elsif qs['download'] == 'audio'                              # download from remote 

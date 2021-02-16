@@ -3,19 +3,38 @@ class WebResource
   module URIs
     SiteDir  = Pathname.new(__dir__).relative_path_from Pathname.new Dir.pwd
 
+    FileModified = {allow: 0,
+                    deny: 0}
+
     AllowFile = SiteDir.join 'allow_domains'
     AllowDomains = {}
-    AllowFile.each_line{|l|
-      cursor = AllowDomains
-      l.chomp.sub(/^\./,'').split('.').reverse.map{|name|
-        cursor = cursor[name] ||= {}}}
 
     DenyFile = SiteDir.join 'deny_domains'
     DenyDomains = {}
-    DenyFile.each_line{|l|
-      cursor = DenyDomains
-      l.chomp.sub(/^\./,'').split('.').reverse.map{|name|
-        cursor = cursor[name] ||= {}}}
+
+    def self.allowlist
+      ts = AllowFile.mtime.to_i
+      return unless ts > FileModified[:allow]
+      puts 'allowfile updated at ' + AllowFile.mtime.iso8601
+      FileModified[:allow] = ts
+      AllowFile.each_line{|l|
+        cursor = AllowDomains
+        l.chomp.sub(/^\./,'').split('.').reverse.map{|name|
+          cursor = cursor[name] ||= {}}}
+    end
+    self.allowlist
+
+    def self.denylist
+      ts = DenyFile.mtime.to_i
+      return unless ts > FileModified[:deny]
+      puts 'denyfile updated at ' + DenyFile.mtime.iso8601
+      FileModified[:deny] = ts
+      DenyFile.each_line{|l|
+        cursor = DenyDomains
+        l.chomp.sub(/^\./,'').split('.').reverse.map{|name|
+          cursor = cursor[name] ||= {}}}
+    end
+    self.denylist
 
     Gunk = Regexp.new SiteDir.join('gunk.regex').read.chomp, Regexp::IGNORECASE
 

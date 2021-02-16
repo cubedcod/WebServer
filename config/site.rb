@@ -514,7 +514,7 @@ l.facebook.com l.instagram.com
     if pagenext = doc.css('#pnnext')[0]
       env[:links][:next] ||= join pagenext['href']
     end
-    doc.css('#botstuff, #bottomads, #footcnt, #searchform, svg').map &:remove
+    doc.css('#botstuff, #bottomads, #footcnt, #searchform, svg, #tads').map &:remove
   end
 
   def HackerNews doc

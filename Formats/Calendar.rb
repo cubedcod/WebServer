@@ -28,11 +28,13 @@ class WebResource
     end
 
     def timeMeta
-      n = nil # next page
-      p = nil # prev page
-      # date parts
+      n = nil # next-page locator
+      p = nil # prev-page locator
+
+      # read date components from path
       dp = []; ps = parts
       dp.push ps.shift.to_i while ps[0] && ps[0].match(/^[0-9]+$/)
+
       case dp.length
       when 1 # Y
         year = dp[0]
@@ -57,9 +59,13 @@ class WebResource
           n = hour >= 23 ? (day + 1).strftime('/%Y/%m/%d/00') : (day.strftime('/%Y/%m/%d/')+('%02d' % (hour+1)))
         end
       end
+
+      # append non-date components of path, and trailing slash
       remainder = ps.empty? ? '' : ['', *ps].join('/')
       remainder += '/' if env['REQUEST_PATH'] && env['REQUEST_PATH'][-1] == '/'
       q = query ? ('?'+query) : ''
+
+      # set metadata
       env[:links][:prev] = p + remainder + q + '#prev' if p
       env[:links][:next] = n + remainder + q + '#next' if n
     end
