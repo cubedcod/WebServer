@@ -18,7 +18,7 @@ yt/disqus comments
 dynamic NAVIGATION suggestions in autocomplete
 https://cdn-shop.adafruit.com/datasheets/Si5351.pdf encoding with unprimed cache
 HTML view for schema.org events https://jewishchronicle.timesofisrael.com/
-
+handle crap like <script data-rocketlazyloadscript="https://www.googletagmanager.com/gtag/js?id=UA-43586498-8" async></script> in the cleaner
 box.com borked:
 🛑 📜  https://bpda.app.box.com/s/uzz33jpqs1izh3or061ne7wf2n6kzc2m?notransform →  https://cdn01.boxcdn.net/enduser/vendors~app.15f4043a47.js  */* → application/javascript; charset=utf-8 HubSpot
 🛑 📜  https://bpda.app.box.com/s/uzz33jpqs1izh3or061ne7wf2n6kzc2m?notransform →  https://cdn01.boxcdn.net/enduser/app.bea3f66dfe.js  */* → application/javascript; charset=utf-8 boomerang

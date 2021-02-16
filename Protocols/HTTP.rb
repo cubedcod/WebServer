@@ -34,8 +34,8 @@ class WebResource
       uri.scheme = uri.local_node? ? 'http' : 'https'                    # scheme
       if env['QUERY_STRING'] && !env['QUERY_STRING'].empty?              # query
         uri.query = env['QUERY_STRING'].sub(/^&/,'').gsub(/&&+/,'&')     # strip leading + consecutive &s so URI library doesn't freak out
-        qs = uri.query_values                                            # parse query args
-        Args.map{|k|env[k.to_sym] = qs.delete(k)||true if qs.has_key? k} # read local (client <> proxy) args
+        qs = uri.query_values || {}                                      # parse query args
+        Args.map{|k|env[k.to_sym] = qs.delete(k)||true if qs.has_key? k} # set local (client <> proxy) args
         qs.empty? ? (uri.query = nil) : (uri.query_values = qs)          # set remote (proxy <> origin) args
       end
       env.update({base: uri, feeds: [], links: {}, resp: {}})            # response environment
@@ -50,13 +50,12 @@ class WebResource
                 end
         puts [env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]), (status_icon status), format, env[:repository] ? (env[:repository].size.to_s + '⋮') : nil,
               env['HTTP_REFERER'] ? ["\e[#{color}m", env['HTTP_REFERER'], "\e[0m→"] : nil, "\e[#{color}#{env['HTTP_REFERER'] && !env['HTTP_REFERER'].index(env[:base].host) && ';7' || ''}m",
-              env[:base], "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil, Verbose ? [env['HTTP_ACCEPT'], head['Content-Type']].compact.join(' → ') : nil,
+              env[:base], "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil, true ? [env['HTTP_ACCEPT'], head['Content-Type']].compact.join(' → ') : nil,
              ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
         [status, head, body]}                                            # response
     rescue Exception => e                                                # error handler
-      msg = [[uri, e.class, e.message].join(' '), e.backtrace].join "\n"
-      puts "\e[7;31m500\e[0m " + msg if Verbose
-      [500, {'Content-Type' => 'text/html; charset=utf-8'}, env['REQUEST_METHOD'] == 'HEAD' ? [] : ["<!DOCTYPE html>\n<html><body class='error'>#{HTML.render [{_: :style, c: SiteCSS}, {_: :script, c: SiteJS}, uri.uri_toolbar]}<pre><a href='#{uri.remoteURL}' >500</a>\n#{CGI.escapeHTML msg}</pre></body></html>"]]
+      puts uri, e.class, e.message, e.backtrace
+      [500, {'Content-Type' => 'text/html; charset=utf-8'}, env['REQUEST_METHOD'] == 'HEAD' ? [] : ["<html><body class='error'>#{HTML.render [{_: :style, c: SiteCSS}, {_: :script, c: SiteJS}, uri.uri_toolbar]}500</body></html>"]]
     end
 
     def client_etags
@@ -138,8 +137,8 @@ class WebResource
     def fetch
       return cacheResponse if offline?                                # offline, return cache contents
       return [304,{},[]] if (env.has_key?('HTTP_IF_NONE_MATCH') || env.has_key?('HTTP_IF_MODIFIED_SINCE')) && static_node?
-      ns = nodeSet                                                    # client has static-node in cache, return 304 response
-      return ns[0].fileResponse if ns.size == 1 && ns[0].static_node? # server has static-node in cache, return data
+      ns = nodeSet                                                    # client has static-node in cache, 304 response
+      return ns[0].fileResponse if ns.size == 1 && ns[0].static_node? # server has static-node in cache, return it
       fetchHTTP                                                       # fetch via HTTPS w/ HTTP fallback on error
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
       ['http://', host, ![nil, 443].member?(port) ? [':', port] : nil, path, query ? ['?', query] : nil].join.R(env).fetchHTTP rescue (env[:status] = 408; notfound)
@@ -214,10 +213,11 @@ class WebResource
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type).map{|k|env[:resp][k] ||= h[k] if h[k]}
           env[:resp]['Content-Length'] = body.bytesize.to_s           # Content-Length header
           env[:resp]['ETag'] ||= h['Etag']                            # ETag header
-          if env[:notransform] || !format || format.match?(NoTransform) || !format.match?(Transformable) || (format.match?(NoReformat) && format==(selectFormat format)) # fixed formats
+          response_format = selectFormat format                       # content-type negotiation
+          if env[:notransform] || !format || (format == response_format && format.match?(FixedFormat))
             [200, env[:resp], [body]]                                 # data in original format
           else                                                        # content-negotiated transform
-            graphResponse format                                      # transform to requested MIME, or same-MIME reformat
+            graphResponse format                                      # transform to requested MIME or within-MIME reformat
           end
         end
       end
@@ -332,7 +332,7 @@ class WebResource
                           [s, h, []]} # return status and header
     end
 
-    # client<>proxy headers not reused on proxy<>origin connections
+    # client<>proxy headers not exported to proxy<>origin connections
     SingleHopHeaders = %w(base colors connection downloadable feeds fetched filtered graph host images keep-alive links notransform offline order path-info query-string
  remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software sort status
  te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via view x-forwarded-for)
@@ -354,7 +354,7 @@ class WebResource
           head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless SingleHopHeaders.member? key.downcase
         end} # set header at normalized key
 
-      #head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # accept Turtle at proxy even if client doesnt
+      #head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # accept Turtle at proxy even if client doesn't
       head['Referer'] = 'http://drudgereport.com/' if host.match? /wsj\.com$/
       head['Referer'] = 'https://' + host + '/' if %w(gif jpeg jpg png svg webp).member?(ext.downcase) || parts.member?('embed')
       head['User-Agent'] = if %w(po.st t.co).member? host # we want shortlink-expansion via HTTP-redirect, not Javascript, so advertise a basic user-agent
@@ -373,7 +373,7 @@ class WebResource
       env['HTTP_COOKIE'] ||= cookie.readFile if cookie.node.exist? # read cookie from jar if none supplied
       if path == '/favicon.ico'                                    # icon handler
         node.exist? ? fileResponse : fetch
-      elsif qs['download'] == 'audio'                              # download from remote 
+      elsif qs['download'] == 'audio'                              # download from remote
         slug = qs['list'] || qs['v'] || 'audio'
         storageURI = join([basename, slug].join '.').R
         storage = storageURI.fsPath
@@ -511,23 +511,24 @@ class WebResource
        (fragment ? ['#', fragment] : nil) ].join.R env
     end
 
-    def selectFormat default='text/html'
-      return default unless env.has_key? 'HTTP_ACCEPT' # no preference specified
-      index = {} # (q-value -> format) table
+    def selectFormat format = 'text/html'   # default preference
+      return format unless env.has_key? 'HTTP_ACCEPT' # unspecified preference -> default
+      category = format.split('/')[0]+'/*'  # format-category wildcard
+      index = {}                            # (q-val -> format) table
+                                            # build sortable index:
+      env['HTTP_ACCEPT'].split(/,/).map{|e| # foreach (MIME,q) pair
+        fmt, q = e.split /;/                # pair variables
+        i = q && q.split(/=/)[1].to_f || 1  # q-val
+        index[i] ||= []                     # initialize entry
+        index[i].push fmt.strip}            # add format at q-val
 
-      env['HTTP_ACCEPT'].split(/,/).map{|e| # split to (MIME,q) pairs
-        format, q = e.split /;/             # split (MIME,q) pair
-        i = q && q.split(/=/)[1].to_f || 1  # q-value with default
-        index[i] ||= []                     # init index
-        index[i].push format.strip}         # index on q-value
+      index.sort.reverse.map{|_, formats|   # begin search at highest q-val
+        return format if formats.member?(category) || formats.include?('*/*') # wildcard on format-category or anything
+        formats.map{|fmt|
+          return fmt if RDF::Writer.for(:content_type => fmt) || # RDF writer available
+             ['application/atom+xml','text/html'].member?(fmt)}} # native writer available
 
-      index.sort.reverse.map{|q,formats| # formats grouped on descending q-value
-        formats.sort_by{|f|{'text/turtle'=>0}[f]||1}.map{|f|  # tiebreak with 🐢-winner
-          return default if f == '*/*'                        # wildcard, select default
-          return f if RDF::Writer.for(:content_type => f) ||  # highest q w/ RDF writer defined
-            ['application/atom+xml','text/html'].member?(f)}} # highest q w/ nonRDF writer defined
-
-      default                                                 # default
+      format                                                     # default format
     end
 
   end

@@ -21,9 +21,7 @@ end
 
 class WebResource
   module HTTP
-    NoReformat = /json/
-    NoTransform = /css|script/ # conneg disabled for these formats
-    Transformable = /json|text|xml/ # conneg enabled for these formats
+    FixedFormat = /audio|css|image|json|script|video/
   end
   module URIs
 
@@ -62,7 +60,7 @@ class WebResource
     end
 
     def static_node? # no transcodes or invalidation (mint new URI for new version)
-      %w(bin c cc css geojson gif h ico jpeg jpg js m3u8 m4a mp3 mp4 opus pem pdf png rb svg tar ts wav webm webp).member? ext.downcase
+      %w(bin c cc css geojson gif h ico jpeg jpg js m3u8 m4a mp3 mp4 opus pem png rb svg tar ts wav webm webp).member? ext.downcase
     end
 
   end
