@@ -406,7 +406,7 @@ class WebResource
                            post.delete(SIOC+'reply_of')],
                        class: :to}, "\n"]}},
              {class: :body,
-              c: [{class: :abstract, c: post.delete(Abstract)},
+              c: [({class: :abstract, c: post.delete(Abstract)} if post.has_key? Abstract),
                   {class: :content,
                    c: [(post.delete(Image) || []).map{|i| Markup[Image][i,env]},
                        post.delete(Content),
