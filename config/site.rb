@@ -3,6 +3,7 @@ module Webize
   module HTML
     class Reader
       Triplr = {
+        '4archive.org' => :Chan,
         '7chan.org' => :Chan,
         '8kun.top' => :Chan,
         'apnews.com' => :AP,
@@ -222,7 +223,7 @@ l.facebook.com l.instagram.com
       end}
 
     GET 'cdn.shortpixel.ai', ImgRehost
-
+    GET 'teddit.net', -> r {[301, {'Location' => '//www.reddit.com' + r.path}, []]}
     GET 'go.theregister.com', -> r {
       if r.parts[0] == 'feed'
         [301, {'Location' => 'https://' + r.path[6..-1]}, []]

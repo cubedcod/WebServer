@@ -4,7 +4,7 @@ module Webize
     include WebResource::URIs
 
     def self.clean str, base
-      if !ScriptHosts.member?(base.host) && str.match?(ScriptGunk)
+      if !ScriptHosts.member?(base.host) && str.match?(ScriptGunk) && !ENV.has_key?('JS')
         base.env[:filtered] = true
         lines = str.split /[\n;]+/
         if Verbose
