@@ -574,8 +574,9 @@ l.facebook.com l.instagram.com
   end
 
   def Imgur tree, &b
-    tree['media'].map{|img|
-      yield self, Image, img['url'].R}
+    tree['media'].map{|i|
+      url = i['url'].R
+      yield self, url.ext == 'mp4' ? Video : Image, url}
   end
 
   def InstagramHTML doc, &b
