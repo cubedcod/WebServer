@@ -32,7 +32,7 @@ module Webize
 
       doc.css('script').map{|s|
         text = s.inner_text
-        if !ScriptHosts.member?(base.host) && s['type'] != 'application/ld+json' && !text.match?(/^[\n\r\s\t]*window._*(Apollo|initial|preloaded)_*(data|state)/i) && text.match?(ScriptGunk)
+        if !ScriptHosts.member?(base.host) && s['type'] != 'application/ld+json' && !text.match?(/^[\n\r\s\t]*window._*(Apollo|initial|preloaded)_*(data|state)/i) && text.match?(ScriptGunk) && !ENV.has_key?('JS')
           lines = text.split /[\n;]+/
           s.content = lines.grep_v(ScriptGunk).join ";\n"
           lines.grep(ScriptGunk).map{|l| log['✂️', l, ScriptGunk]} if Verbose
