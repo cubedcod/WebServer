@@ -1,4 +1,5 @@
 # coding: utf-8
+require 'rouge'
 module Webize
   module Code
     include WebResource::URIs

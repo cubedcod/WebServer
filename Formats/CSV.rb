@@ -23,7 +23,7 @@ class WebResource
     def self.tabular graph, env
       graph = graph.values if graph.class == Hash
       qs = env[:base].query_values || {}
-      keys = graph.select{|r|r.respond_to? :keys}.map{|r|r.keys}.flatten.uniq - [Abstract, Content, DC+'identifier', Image, Link, Video, SIOC+'richContent', Title] # fields in main column
+      keys = graph.select{|r|r.respond_to? :keys}.map{|r|r.keys}.flatten.uniq - [Abstract, Content, DC+'identifier', Image, Video, SIOC+'richContent', Title] # fields in main column
       keys = [Creator, *(keys - [Creator])] if keys.member? Creator
 
       if env[:sort]
@@ -58,17 +58,16 @@ class WebResource
                         env[:title] = title; tCount += 1
                         [{_: :a,href: re.href,class: :title,type: :node,c: CGI.escapeHTML(title),id: 'r'+Digest::SHA2.hexdigest(rand.to_s)}, ' '] # title
                       end},
-                    ({_: :a,href: re.href,class: :id,type: :node,c: '☛',id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} if tCount == 0),# resource pointer
-                    ({class: :abstract, c: resource[Abstract]} if resource.has_key? Abstract),                                       # abstract
-                    [Image, Video].map{|t|(resource[t]||[]).map{|i|Markup[t][i,env]}},                                               # image & video links
-                    ([resource[Content], resource[SIOC+'richContent'],                                                               # inlined HTML content
-                      MarkupGroup[Link][(resource[Link]||[]),env]] unless (resource[Creator]||[]).find{|a|KillFile.member? a.to_s})] # untyped links
+                    ({_: :a,href: re.href,class: :id,type: :node,c: '☛',id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} if tCount == 0),    # resource pointer
+                    ({class: :abstract, c: resource[Abstract]} if resource.has_key? Abstract),                                           # abstract
+                    [Image, Video].map{|t|(resource[t]||[]).map{|i|Markup[t][i,env]}},                                                   # image & video links
+                    ([resource[Content], resource[SIOC+'richContent']] unless (resource[Creator]||[]).find{|a|KillFile.member? a.to_s})] # HTML content
                   else
-                    if Type == k && resource.has_key?(Type) && [Audio.R, Video.R].member?(resource[Type][0])                         # play-button on A/V types
+                    if Type == k && resource.has_key?(Type) && [Audio.R, Video.R].member?(resource[Type][0])                             # play-button on A/V types
                       playerType = resource[Type][0] == Audio.R ?  'audio' : 'video'
                       {_: :a, href: '#', c: '▶️', onclick: 'var player = document.getElementById("' + playerType + '"); player.src="' + re.href + '"; player.play()'}
                     else
-                      (resource[k]||[]).yield_self{|r|r.class == Array ? r : [r]}.map{|v| markup k, v, env }                         # resource type represented as icon or shortname
+                      (resource[k]||[]).yield_self{|r|r.class == Array ? r : [r]}.map{|v| markup k, v, env }                             # type represented as icon or shortname
                     end
                    end}, "\n" ]}}, "\n" ]}}]}
     end
