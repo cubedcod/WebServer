@@ -40,10 +40,10 @@ class WebResource
 ad.?(bl(ade|ock[a-z]*)|r(ecover|oll)|dthis|layer|s(afeprotected|ense|lot)|unit|zone)|alexametrics|am(azon[a-z]*|plitude)\.com|analytics|addtoany|algolia|app(dynamics|nexus)|apstag|aswpsdk|au(ction|di(ence[a-z]*|oeye))|
 ba(idu|zaarvoice)|bdstatic|beacon|bi(d(d(er|ing)|s)[a-z]*|ng\.com)|BO(mbora|OMe?R(ang)?|uncee?x)|browser.?update|btncdn|bu(gherd|zzfeed)|
 campaign|ch(artbeat|impstatic)|cl(arity\.ms|ick(cea|fu )se)|co(mscore\.com|n(fiant|natix|sent|versant)|okie.?[a-z]*)|cpx\.|cr(azyegg|i(sp\.chat|teo)|sspxl|wdcntrl)|cxense|
-datadog\.com|de(m(andbase|dex)|troitchicago)|dis(qus(cdn)?\.com|trictm)|do(ubleclick|t(metrics|omi))|
+datadog\.com|de(m(andbase|dex)|troitchicago)|districtm|do(ubleclick|t(metrics|omi))|
 effectivemeasure|email|ensighten|evidon|\.ex\.co|Ezoic|
 fa(cebook|stclick)|feedbackify|firebase|foresee\.com|freshchat|fullstory|(function|var)[\s\(]+_0x|
-gaug\.es|g[eo]t(chosen|drip|pocket)|geo(ip|loc)|google.?[a-z]+|grapeshot|gumgum|
+gaug\.es|gdpr|g[eo]t(chosen|drip|pocket)|geo(ip|loc)|google.?[a-z]+|grapeshot|gumgum|
 heatmap\.it|hotjar|hs-analytics|htlbid|hu?bspo?t|
 ibclick\.stream|imp(actradius|ression[a-z]*)|in(folink|stagram|te(llitxt|r(com\.(com|io)|stitial)))|iperceptions|iubenda|
 kochava|
@@ -51,9 +51,9 @@ le(aderboard|xity\.com)|li(nkedin|strak|veperson)|
 ma(iler[a-z]*|r(feel|keting)|t(htag|omo)|ven\.io)|me(dia\.net|quoda|trics)|ml314|mouseflow|munchkin|mxpnl|
 narrativ\.|new(relic|sletter)|npttech|nreum|
 olark|omappapi|one(signal|trust)|online-metrix|op(t?n?mn?str|t(anon|imizely\.com))|outbrain|owneriq|
-pa(ge(s(ense|peed)|.?view)|r(dot|sely)|y[pw]all?)|pbjs|pe(r(imeter.?x|mutive|sonaliz[a-z]*)|tametrics)|pi(ano\.io|co\.tools|n(gdom|img|terest)|wik)|po(rpoiseant|strelease)|pr(ebid[a-z]+|ivacy-center)|pub(\.network|m(atic|ine))|push(bullet|ly|nami)|px-cloud|
+pa(ge(s(ense|peed)|.?view)|r(dot|sely)|y[pw]all?)|pbjs|pe(r(imeter.?x|mutive|sonaliz[a-z]*)|tametrics)|pi(ano\.io|co\.tools|n(gdom|img|terest)|wik)|po(rpoiseant|strelease)|pr(ebid[a-z]+|ivacy-center)|pub(ads|\.network|m(atic|ine))|push(bullet|ly|nami)|px-cloud|
 quora|qua(l(aroo|trics)|nt(cast|serve?)\.)|
-radiateb2b|r-login|revcontent|rightmessage|rlcdn|rubicon|
+radiateb2b|r-login|revcontent|rightmessage|rlcdn|rollbar|rubicon|
 sa(il.?(horizon|thr[a-z]+)|lesloft\.com)|sc(ene7|(arab|orecard)research)|se(archiq|edtag|gment\.(com|io)|ntry-cdn|rv(edby|ice.?worker)|ssioncam)|shopify|signup|slickstream|smart(asset|look)|snowplow|so(cial|nobi|vrn)|spo(nsor[a-z]*|t.?im)|statcounter|swoop\.com|synacor[a-z]*|
 ta(boola|rgeting)|tempest|ti(qcdn|nypass)|thinglink|toutapp|[a-z]*tr(ack(cmp|er|ing)[a-z]*|iplelift|ust(pilot|x))|twitter|typekit|
 unruly|urbanairship|usabilla|
