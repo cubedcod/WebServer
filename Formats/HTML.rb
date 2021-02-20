@@ -31,6 +31,7 @@ module Webize
         end}
 
       doc.css('script').map{|s|
+        s.attribute_nodes.map{|a| (puts "🚩 \e[38;5;196m#{a.value}\e[0m" if Verbose; s.remove) if a.value.R.deny?} # src lurks in other attributes, awaiting JS rewrite
         text = s.inner_text
         if !ScriptHosts.member?(base.host) && s['type'] != 'application/ld+json' && !text.match?(/^[\n\r\s\t]*window._*(Apollo|initial|preloaded)_*(data|state)/i) && text.match?(ScriptGunk) && !ENV.has_key?('JS')
           lines = text.split /[\n;]+/
