@@ -17,7 +17,7 @@ class WebResource
     def cacheResponse
       timeMeta                    # reference temporally-adjacent nodes
       nodes = nodeSet             # find local nodes
-      if nodes.size == 1 && (nodes[0].static_node? || # single node found in client-preferred or fixed format
+      if nodes.size == 1 && (nodes[0].static_node? || # one node found in client-preferred or fixed format (no transcode/merge)
                             (nodes[0].named_format == selectFormat && (env[:notransform] || nodes[0].named_format != 'text/html')))
         nodes[0].fileResponse     # static response on file, return
       else
