@@ -47,7 +47,7 @@ gaug\.es|gdpr|g[eo]t(chosen|drip|pocket)|geo(ip|loc)|google.?[a-z]+|grapeshot|gu
 heatmap\.it|hotjar|hs-analytics|htlbid|hu?bspo?t|
 ibclick\.stream|imp(actradius|ression[a-z]*)|in(folink|stagram|te(llitxt|r(com\.(com|io)|stitial)))|iperceptions|iubenda|
 kochava|
-le(aderboard|xity\.com)|li(nkedin|strak|veperson)|
+le(aderboard|xity\.com)|li(nkedin|strak|veperson)|lockerdome|
 ma(iler[a-z]*|r(feel|keting)|t(htag|omo)|ven\.io)|me(dia\.net|quoda|trics)|ml314|mouseflow|munchkin|mxpnl|
 narrativ\.|new(relic|sletter)|npttech|nreum|
 olark|omappapi|one(signal|trust)|online-metrix|op(t?n?mn?str|t(anon|imizely\.com))|outbrain|owneriq|
