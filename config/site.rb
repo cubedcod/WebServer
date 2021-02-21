@@ -66,6 +66,7 @@ class WebResource
     GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['u']||r.query_values['q']).R.href}, []]}
 
     NoGunk  = -> r {r.send r.uri.match?(Gunk) ? :deny : :fetch}
+    NoTransform = -> r {r.env[:notransform] = true; NoGunk[r]}
 
     ImgRehost = -> r {
       ps = r.path.split /https?:\/+/
@@ -140,6 +141,7 @@ l.facebook.com l.instagram.com
     GotoGoogle = -> r {[301, {'Location' => ['//www.google.com', r.path, '?', r.query].join.R.href}, []]}
 
     GET 'google.com', GotoGoogle
+    GET 'groups.google.com', NoTransform
     GET 'maps.google.com', GotoGoogle
     GET 'maps.gstatic.com', NoGunk
     GET 'www.gstatic.com', NoGunk

@@ -45,7 +45,7 @@ effectivemeasure|email|ensighten|evidon|\.ex\.co|Ezoic|
 fa(cebook|stclick)|feedbackify|firebase|foresee\.com|freshchat|fullstory|(function|var)[\s\(]+_0x|
 gaug\.es|gdpr|g[eo]t(chosen|drip|pocket)|geo(ip|loc)|google.?[a-z]+|grapeshot|gumgum|
 heatmap\.it|hotjar|hs-analytics|htlbid|hu?bspo?t|
-ibclick\.stream|imp(actradius|ression[a-z]*)|in(folink|stagram|te(llitxt|r(com\.(com|io)|stitial)))|iperceptions|iubenda|
+ibclick\.stream|imp(actradius|ression[a-z]*)|in(dex(exchange|ww)|folink|stagram|te(llitxt|r(com\.(com|io)|stitial)))|iperceptions|iubenda|
 kochava|
 le(aderboard|xity\.com)|li(nkedin|strak|veperson)|lockerdome|
 ma(iler[a-z]*|r(feel|keting)|t(htag|omo)|ven\.io)|me(dia\.net|quoda|trics)|ml314|mouseflow|munchkin|mxpnl|
