@@ -40,6 +40,7 @@ class WebResource
       'audio/opus' => '.opus',
       'binary/octet-stream' => '.bin',
       'image/avif' => '.avif',
+      'image/GIF' => '.gif',
       'image/jpg' => '.jpg',
       'image/svg+xml' => '.svg',
       'image/webp' => '.webp',
