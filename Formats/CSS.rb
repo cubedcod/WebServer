@@ -3,7 +3,7 @@ module Webize
   module CSS
 
     def self.clean str
-      str.gsub(/@font-face\s*{[^}]+}/, '').gsub(/@import ('[^']+'|"[^"]+"|url\([^\)]+\));/,'')
+      str.gsub(/@font-face\s*{[^}]+}/, '').gsub(/url\([^\)]+\)/,'url()') # drop fonts and recursive includes (tracker links in background: URL field)
     end
 
     def self.cleanNode node

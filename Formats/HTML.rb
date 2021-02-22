@@ -4,7 +4,7 @@ module Webize
     include WebResource::URIs
 
     CSSURL = /url\(['"]*([^\)'"]+)['"]*\)/
-    CSSgunk = /background-image|font-face|import/
+    CSSgunk = /background|font-face|import/
 
     def self.clean doc, base
       log = -> type, content, filter {               # logger
@@ -46,7 +46,7 @@ module Webize
 
       doc.css('style').map{|style|                   # strip CSS gunk
         Webize::CSS.cleanNode style if style.inner_text.match? CSSgunk}
-      doc.css('[style*="background-image"]').map{|node| node['style'].match(CSSURL).yield_self{|url| (puts "🚩 \e[38;5;196m#{url[1]}\e[0m" if Verbose; node.remove) if url && url[1].R.deny?}}
+      doc.css('[style*="background"]').map{|node| node['style'].match(CSSURL).yield_self{|url| (puts "🚩 \e[38;5;196m#{url[1]}\e[0m" if Verbose; node.remove) if url && url[1].R.deny?}}
 
       dropnodes = "amp-ad, amp-consent, [class*='modal'], [class*='newsletter'], [class*='popup'], .player-unavailable"
       doc.css(dropnodes).map{|n| log['🧽', n, /amp-(ad|consent)|modal|newsletter|popup/i]} if Verbose
