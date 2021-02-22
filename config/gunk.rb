@@ -36,12 +36,12 @@ class WebResource
 
     Gunk = Regexp.new SiteDir.join('gunk.regex').read.chomp, Regexp::IGNORECASE
 
-    ScriptGunk = %r([-._\/\(\)\\{}'"\s:?&=~%](6sc|acsbapp?|ad(miral|s)?|affirm|aksb|atrk|b0e8|d([fm]p(xs)?)|en25|fyre|g(aq|igya|t(ag|m))|kr(ux|xd)|licdn|m(ar(insm|keto)|pulse)|nr-data|o(mtrdc|penx)|paq|(app|grow|king)?sumo|t(aw|rac)k[a-z]*|turnto|utm|xtlo|zqtk)[-._\/\(\)\\{}'"\s:?&=~%]|
+    ScriptGunk = %r([-._\/\(\)\\{}'"\s:?&=~%](6sc|acsbapp?|ad(miral|s)?|affirm|aksb|atrk|b0e8|d([fm]p(xs)?)|en25|fyre|g(aq|igya|t(ag|m))|kr(ux|xd)|licdn|m(ar(insm|keto)|pulse)|nr-data|o(mtrdc|penx)|p(aq|ixel)|(app|grow|king)?sumo|t(aw|rac)k[a-z]*|turnto|utm|xtlo|zqtk)[-._\/\(\)\\{}'"\s:?&=~%]|
 ad.?(bl(ade|ock[a-z]*)|r(ecover|oll)|dthis|layer|s(afeprotected|ense|lot)|unit|zone)|alexametrics|am(azon[a-z]*|plitude)\.com|analytics|addtoany|algolia|app(dynamics|nexus)|apstag|aswpsdk|au(ction|di(ence[a-z]*|oeye))|
 ba(idu|zaarvoice)|bdstatic|beacon|bi(d(d(er|ing)|s)[a-z]*|ng\.com)|BO(mbora|OMe?R(ang)?|uncee?x)|browser.?update|btncdn|bu(gherd|zzfeed)|
 campaign|ch(artbeat|impstatic)|cl(arity\.ms|ick(cea|fu )se)|co(mscore\.com|n(fiant|natix|sent|versant)|okie.?[a-z]*)|cpx\.|cr(azyegg|i(sp\.chat|teo)|sspxl|wdcntrl)|cxense|
 datadog\.com|de(m(andbase|dex)|troitchicago)|districtm|do(ubleclick|t(metrics|omi))|
-effectivemeasure|email|ensighten|evidon|\.ex\.co|Ezoic|
+effectivemeasure|email|ensighten|evidon|\.ex\.co|extreme-dm|Ezoic|
 fa(cebook|stclick)|feedbackify|firebase|foresee\.com|freshchat|fullstory|(function|var)[\s\(]+_0x|
 gaug\.es|gdpr|g[eo]t(chosen|drip|pocket)|geo(ip|loc)|google.?[a-z]+|grapeshot|gumgum|
 heatmap\.it|hotjar|hs-analytics|htlbid|hu?bspo?t|

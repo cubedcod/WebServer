@@ -3,51 +3,58 @@ module Webize
   module HTML
     include WebResource::URIs
 
-    def self.clean doc, base
-      log = -> type, content, filter {print type + " \e[38;5;8m" + content.to_s.gsub(/[\n\r\s\t]+/,' ').gsub(filter, "\e[38;5;48m\\0\e[38;5;8m") + "\e[0m "}
+    CSSURL = /url\(['"]*([^\)'"]+)['"]*\)/
+    CSSgunk = /background-image|font-face|import/
 
-      doc = Nokogiri::HTML.parse doc.gsub /<\/?(form|noscript)[^>]*>/i, '' # strip <noscript>,<form> and parse
-      doc.traverse{|e|
+    def self.clean doc, base
+      log = -> type, content, filter {               # logger
+        print type + " \e[38;5;8m" + content.to_s.gsub(/[\n\r\s\t]+/,' ').gsub(filter, "\e[38;5;48m\\0\e[38;5;8m") + "\e[0m "}
+
+      doc = Nokogiri::HTML.parse doc.gsub /<\/?noscript[^>]*>/i,'' # strip <noscript>, preserving child nodes
+      doc.traverse{|e|                               # visit nodes
 
         if e['src']                                  # src attribute
-          src = (base.join e['src']).R               # resolve src location
+          src = (base.join e['src']).R               # resolve locator
           if src.deny?
             puts "🚩 \e[38;5;196m#{src}\e[0m" if Verbose
-            e.remove                                 # strip blocked src
+            e.remove                                 # strip gunk reference in src attribute
           end
         end
 
         if e['href']                                 # href attribute
-          ref = (base.join e['href']).R              # resolve href location
+          ref = (base.join e['href']).R              # resolve locator
           if ref.deny?
             puts "🚩 \e[38;5;196m#{ref}\e[0m" if Verbose
-            e.remove                                 # strip blocked href
+            e.remove                                 # strip gunk reference in href attribute
           end
         end}
 
-      doc.css('meta[content]').map{|meta|
+      doc.css('meta[content]').map{|meta|            # strip gunk reference in meta tag
         if meta['content'].match? /^https?:/
           meta.remove if meta['content'].R.deny?
         end}
 
-      doc.css('script').map{|s|
-        s.attribute_nodes.map{|a| (puts "🚩 \e[38;5;196m#{a.value}\e[0m" if Verbose; s.remove) if a.value.R.deny?} # src lurks in other attributes, awaiting JS rewrite
-        text = s.inner_text
+      doc.css('script').map{|s|                      # visit scripts
+        s.attribute_nodes.map{|a| (puts "🚩 \e[38;5;196m#{a.value}\e[0m" if Verbose; s.remove) if a.value.R.deny?}
+                                                     # strip gunk reference in nonstandard src attribute
+        text = s.inner_text                          # strip script gunk
         if !ScriptHosts.member?(base.host) && s['type'] != 'application/ld+json' && !text.match?(/^[\n\r\s\t]*window._*(Apollo|initial|preloaded)_*(data|state)/i) && text.match?(ScriptGunk) && !ENV.has_key?('JS')
-          lines = text.split /[\n;]+/
-          s.content = lines.grep_v(ScriptGunk).join ";\n"
+          lines = text.split /[\n;]+/                # visit lines
+          s.content = lines.grep_v(ScriptGunk).join ";\n" # strip gunked lines
           lines.grep(ScriptGunk).map{|l| log['✂️', l, ScriptGunk]} if Verbose
         end}
 
-      doc.css('style').map{|s| Webize::CSS.cleanNode s if s.inner_text.match? /font-face|import/}
+      doc.css('style').map{|style|                   # strip CSS gunk
+        Webize::CSS.cleanNode style if style.inner_text.match? CSSgunk}
+      doc.css('[style*="background-image"]').map{|node| node['style'].match(CSSURL).yield_self{|url| (puts "🚩 \e[38;5;196m#{url[1]}\e[0m" if Verbose; node.remove) if url && url[1].R.deny?}}
 
       dropnodes = "amp-ad, amp-consent, [class*='modal'], [class*='newsletter'], [class*='popup'], .player-unavailable"
       doc.css(dropnodes).map{|n| log['🧽', n, /amp-(ad|consent)|modal|newsletter|popup/i]} if Verbose
-      doc.css(dropnodes).remove
+      doc.css(dropnodes).remove                      # strip amp, newsletter, modal, popup gunk
 
-      doc.css('[integrity]').map{|n|n.delete 'integrity'} # anything making it past our filters tends to be heavily modified or rewritten
+      doc.css('[integrity]').map{|n|n.delete 'integrity'} # content is heavily modified, strip integrity signature
 
-      doc.to_html
+      doc.to_html                                    # serialize clean(er) doc
     end
 
     # format HTML to local preferences
@@ -59,7 +66,7 @@ module Webize
 
       # <img> mapping
       html.css('[style*="background-image"]').map{|node|
-        node['style'].match(/url\(['"]*([^\)'"]+)['"]*\)/).yield_self{|url|                                # CSS background-image -> img
+        node['style'].match(CSSURL).yield_self{|url|                                # CSS background-image -> img
           node.add_child "<img src=\"#{url[1]}\">" if url}}
       html.css('amp-img').map{|amp| amp.add_child "<img src=\"#{amp['src']}\">"}                           # amp-img -> img
       html.css("div[class*='image'][data-src]").map{|div|div.add_child "<img src=\"#{div['data-src']}\">"} # div -> img
