@@ -1,6 +1,4 @@
 # coding: utf-8
-
-# coding: utf-8
 class WebResource
 
   # file -> Repository: wrap RDF#load, adding MIME type hints and skipping full load of media-files
