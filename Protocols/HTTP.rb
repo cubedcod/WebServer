@@ -332,29 +332,27 @@ class WebResource
                           [s, h, []]} # return status and header
     end
 
-    # client<>proxy headers not exported to proxy<>origin connections
-    SingleHopHeaders = %w(base colors connection downloadable feeds fetched filtered graph host images keep-alive links notransform offline order path-info query-string
- remote-addr repository request-method request-path request-uri resp script-name server-name server-port server-protocol server-software sort status
- te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via view x-forwarded-for)
+    # client<>proxy headers not repeated on proxy<>origin connection
+    SingleHopHeaders = %w(connection host keep-alive path-info query-string
+ remote-addr request-method request-path request-uri script-name server-name server-port server-protocol server-software
+ te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for)
 
     # headers case-normalized
     def headers raw = nil
       raw ||= env || {}        # raw headers
-      head = {}                # clean headers
+      head = {}                # cleaned headers
       raw.map{|k,v|            # inspect (k,v) pairs
-        k = k.to_s                                                # stringify key
-        unless k.index('rack.') == 0                              # strip Rack-internal headers
-          key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|t| # strip Rack HTTP_ prefix and tokenize
+        unless k.class != String || k.index('rack.') == 0 # strip Rack-internal headers
+          key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|t| # strip Rack prefix and tokenize
             if %w{cf cl csrf ct dfe dnt id spf utc xss xsrf}.member? t # acronyms
-              t = t.upcase       # upcase acronym
+              t = t.upcase     # upcase acronym
             else
-              t[0] = t[0].upcase # capitalize token
+              t[0] = t[0].upcase # capitalize
             end
-            t}.join '-'          # join tokens
-          head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless SingleHopHeaders.member? key.downcase
-        end} # set header at normalized key
+            t}.join '-'        # join tokens
+          head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless SingleHopHeaders.member? key.downcase # set header
+        end}
 
-      #head['Accept'] = ['text/turtle', head['Accept']].join ',' unless (head['Accept']||'').match?(/text\/turtle/) # accept Turtle at proxy even if client doesn't
       head['Referer'] = 'http://drudgereport.com/' if host.match? /wsj\.com$/
       head['Referer'] = 'https://' + host + '/' if %w(gif jpeg jpg png svg webp).member?(ext.downcase) || parts.member?('embed')
       head['User-Agent'] = if %w(po.st t.co).member? host # we want shortlink-expansion via HTTP-redirect, not Javascript, so advertise a basic user-agent
