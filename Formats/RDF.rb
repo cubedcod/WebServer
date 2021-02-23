@@ -1,4 +1,6 @@
 # coding: utf-8
+
+# coding: utf-8
 class WebResource
 
   # file -> Repository: wrap RDF#load, adding MIME type hints and skipping full load of media-files
@@ -64,10 +66,11 @@ class WebResource
         RDF::Writer.for(:turtle).open(f){|f|f << graph}                                         # write 🐢
         puts "\e[38;5;48m#{'%2d' % graph.size}⋮🐢 \e[1m#{'http://localhost:8000' if !graphURI.host}#{graphURI}\e[0m" if path != graphURI.path
       end
-      if !graphURI.to_s.match?(/^\/\d\d\d\d\/\d\d\/\d\d/) && timestamp = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value # find timestamp if graph not on timeline
-        🕒 = [timestamp.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'),   # hour-dir
-              %w{host path query}.map{|a|graphURI.send(a).yield_self{|p|p&&p.split(/[\W_]/)}}]. # graph name-slugs for timeline link
-               flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.')[0..123] + '.ttl'
+      if !graphURI.to_s.match?(/^\/\d\d\d\d\/\d\d\/\d\d/) && (ts = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value) && ts.match?(/^\d\d\d\d-/) # find timestamp if graph URI not located on timeline
+        🕒 = [ts.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'),          # hour-dir slug
+              %w{host path query}.map{|a|graphURI.send(a).yield_self{|p|p&&p.split(/[\W_]/)}}]. # name slugs
+               flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.')[0..123] + '.ttl'  # timeline URI
+        puts ['🕒', ts, 🕒].join ' ' if Verbose
         unless File.exist? 🕒                                                                   # link 🐢 to timeline
           FileUtils.mkdir_p File.dirname 🕒
           FileUtils.ln f, 🕒 rescue nil
