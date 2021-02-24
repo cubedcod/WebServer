@@ -145,6 +145,7 @@ l.facebook.com l.instagram.com
     GET 'maps.google.com', GotoGoogle
     GET 'maps.gstatic.com', NoGunk
     GET 'www.gstatic.com', NoGunk
+    GET 'streetviewpixels-pa.googleapis.com', NoGunk
 
     GET 'www.google.com', -> r {
       case r.parts[0]

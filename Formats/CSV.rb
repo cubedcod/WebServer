@@ -54,7 +54,7 @@ class WebResource
                    tCount = 0
                    [(resource[Title]||[]).map{|title|
                       title = title.to_s.sub(/\/u\/\S+ on /, '').sub /^Re: /, ''                             # clean title
-                      unless env[:title] == title                                                            # show title at most once if repeats on subsequent resources
+                      unless env[:title] == title                                                            # omit title if repeated on subsequent resource
                         env[:title] = title; tCount += 1
                         [{_: :a,href: re.href,class: :title,type: :node,c: CGI.escapeHTML(title),id: 'r'+Digest::SHA2.hexdigest(rand.to_s)}, ' '] # title
                       end},
