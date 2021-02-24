@@ -60,7 +60,7 @@ unruly|urbanairship|usabilla|
 ve(natus|rizon)|vi(glink|sitorid)|vuukle|vntsm|
 wo(ocommerce|rdfence)|wp.?(emoji|groho|rum)|
 \.yimg|y(adro|otpo)|
-zergnet|zo(ominfo|pim))xi
+ze(ndesk|rgnet)|zo(ominfo|pim))xi
 
   end
 end
