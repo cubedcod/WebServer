@@ -6,6 +6,7 @@ module Webize
     CSSURL = /url\(['"]*([^\)'"]+)['"]*\)/
     CSSgunk = /background|font-face|import/
 
+    # clean HTML document
     def self.clean doc, base
       log = -> type, content, filter {               # logger
         print type + " \e[38;5;8m" + content.to_s.gsub(/[\n\r\s\t]+/,' ').gsub(filter, "\e[38;5;48m\\0\e[38;5;8m") + "\e[0m "}
