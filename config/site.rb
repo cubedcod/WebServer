@@ -441,20 +441,20 @@ l.facebook.com l.instagram.com
   def GitterHTML doc
     doc.css('script').map{|script|
       text = script.inner_text
-      if text.match? /^window.gitterClientEnv/
+      if text.match? /^window.gitterClientEnv/     # environment JSON
         if token = text.match(/accessToken":"([^"]+)/)
           token = token[1]
           tFile = join('/token').R
           unless tFile.node.exist? && tFile.readFile == token
-            tFile.writeFile token
+            tFile.writeFile token                  # save updated client-token
             puts ['🎫 ', host, token].join ' '
           end
         end
         if room = text.match(/"id":"([^"]+)/)
-          room_id = room[1]                              # room identifier
+          room_id = room[1]                         # room id
           room = ('http://gitter.im/api/v1/rooms/' + room_id).R # room URI
           env[:links][:prev] = room.uri + '/chatMessages?lookups%5B%5D=user&includeThreads=false&limit=31'
-          yield room, Schema + 'sameAs', self, room # point room integer-id to URI
+          yield room, Schema + 'sameAs', self, room # link room (integer) id to URI
           yield room, Type, (SIOC + 'ChatChannel').R
         end
       end}
