@@ -245,17 +245,17 @@ module Webize
           embeds << (::JSON::LD::API.toRdf ::JSON.parse dataElement.inner_text)} rescue "JSON-LD read failure in #{@base}"   # JSON-LD triples
 
         # RDFa
-        n.css('script').remove # we're done extractign RDF from scripts, RDFa reader instantiates readers for these elements
+        n.css('script').remove # we're done extracting RDF from scripts, RDFa::Reader recursively instantiates readers for scripts if they exist
         RDF::Reader.for(:rdfa).new(@doc, base_uri: @base){|_| embeds << _ } rescue "RDFa read failure in #{@base}"           # RDFa triples
 
         # Microdata
         RDF::Reader.for(:microdata).new(@doc, base_uri: @base){|_| embeds << _ } rescue "Microdata read failure in #{@base}" # Microdata triples
 
-        # clean and emit triples from embed graphs
+        # emit triples from embed graphs
         embeds.each_triple{|s,p,o| # inspect  raw triple
           p = MetaMap[p.to_s] || p # map predicates
-          puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/ # show unresolved property-names
-          yield s, p, o unless p == :drop} # emit triple
+          puts [p, o].join "\t" unless p.to_s.match? /^(drop|http)/ # log unresolved property-names
+          yield s, p, o, (['//', s.host, s.path].join.R if s.class == RDF::URI && s.host) unless p == :drop} # emit triple
 
         # <body>
         if body = n.css('body')[0]
