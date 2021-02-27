@@ -113,9 +113,8 @@ class WebResource
 
     def deny?
       return true  if uri.match? Gunk # URI filter
-      return false if !host || HostGET.has_key?(host)
-      return false if allow_domain?   # DNS filters
-      return true  if deny_domain?
+      return false if !host || allow_domain? || HostGET.has_key?(host) || ScriptHosts.member?(host) # explicit allow
+      return true  if deny_domain?    # DNS filter
              false
     end
 

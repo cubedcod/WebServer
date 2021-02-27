@@ -2,11 +2,8 @@
 .pscp.tv
 .storage.googleapis.com
 .abs.hls.ttvnw.net
-ajax.cloudflare.com
-ajax.googleapis.com
 api.frame.io
 api.lbry.com
-cdnjs.cloudflare.com
 discord.com
 edge.api.brightcove.com
 entitlement.auth.adobe.com
@@ -19,6 +16,5 @@ secure.brightcove.com
 sp.auth.adobe.com
 tkx.apis.anvato.net
 v.redd.it
-www.google.com
 www.mixcloud.com
 www.youtube.com
