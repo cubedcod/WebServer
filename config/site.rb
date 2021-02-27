@@ -177,7 +177,7 @@ l.facebook.com l.instagram.com
 
     GET 'imgur.com', -> r { p = r.parts
       case p[0]
-      when 'a'
+      when /^(a|gallery)$/
         [301, {'Location' => "https://api.imgur.com/post/v1/albums/#{p[1]}?client_id=546c25a59c58ad7&include=media%2Cadconfig%2Caccount"}, []]
       else
         NoGunk[r]
