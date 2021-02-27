@@ -102,8 +102,8 @@ document.addEventListener("DOMContentLoaded", function(){
 		gotoLink('next');
 	    if(key==38) // [shift-up] up to parent
 		gotoLink('up');
-	    if(key==40) // [shift-down] show children
-		gotoLink('full');
+	    if(key==40) // [shift-down] down to children
+		gotoLink('down');
 	    if(key==80) // [shift-P] previous reference
 		selectPrevLink();
 	    if(key==78) // [shift-N] next reference
