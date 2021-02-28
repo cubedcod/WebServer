@@ -165,7 +165,7 @@ l.facebook.com l.instagram.com
                               "google:suggesttype":["NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION"],
                               "google:verbatimrelevance": 1300}].to_json
         [200, {"Access-Control-Allow-Origin"=>"*", "Content-Type"=>"text/javascript; charset=UTF-8", "Content-Length" => output.bytesize}, [output]]
-      when /images|maps|search/
+      when /^(images|maps|search)$/
         NoGunk[r]
       when /url/
         GotoURL[r]

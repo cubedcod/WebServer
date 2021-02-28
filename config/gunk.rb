@@ -54,7 +54,7 @@ oktopost|olark|omappapi|one(signal|trust)|online-metrix|op(t?n?mn?str|t(anon|imi
 pa(ge(s(ense|peed)|.?view)|r(dot|sely)|y[pw]all?)|pbjs|pe(r(imeter.?x|mutive|sonaliz[a-z]*)|tametrics)|pi(ano\.io|co\.tools|n(gdom|img|terest)|wik)|po(rpoiseant|strelease)|pr(ebid[a-z]+|ivacy-center)|pub(ads|\.network|m(atic|ine))|push(bullet|ly|nami)|px-cloud|
 quora|qua(l(aroo|trics)|nt(cast|serve?)\.)|
 radiateb2b|r-login|revcontent|rightmessage|rlcdn|rollbar|rubicon|
-sa(il.?(horizon|thr[a-z]+)|lesloft\.com)|sc(ene7|(arab|orecard)research)|se(archiq|edtag|gment\.(com|io)|ntry-cdn|rv(edby|ice.?worker)|ssioncam)|sh(arethis|opify)|signup|slickstream|smart(asset|look)|snowplow|so(cial|nobi|vrn)|spo(nsor[a-z]*|t.?im)|st(atcounter|umbleupon)|swoop\.com|synacor[a-z]*|
+sa(il.?(horizon|thr[a-z]+)|lesloft\.com)|sc(ene7|(arab|orecard)research)|se(archiq|edtag|gment\.(com|io)|ntry-cdn|rv(edby|ice.?worker)|ssioncam)|sh(arethis|opify)|si(ftscience|gnup)|slickstream|smart(asset|look)|snowplow|so(cial|nobi|vrn)|spo(nsor[a-z]*|t.?im)|st(atcounter|umbleupon)|swoop\.com|synacor[a-z]*|
 ta(boola|rgeting)|tempest|ti(qcdn|nypass)|thinglink|toutapp|[a-z]*tr(ack(cmp|er|ing)[a-z]*|iplelift|ust(pilot|x))|twitter|typekit|
 unruly|urbanairship|usabilla|
 ve(natus|rizon)|vi(glink|sitorid)|vuukle|vntsm|
