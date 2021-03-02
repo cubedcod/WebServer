@@ -14,7 +14,7 @@ module Webize
 
     class Format < RDF::Format
       content_type 'application/json',
-                   extension: :json,
+                   extensions: [:json, :webmanifest],
                    aliases: %w(
                     application/manifest+json;q=0.8
                     application/vnd.imgur.v1+json;q=0.1

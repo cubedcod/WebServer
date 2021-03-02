@@ -142,6 +142,7 @@ l.facebook.com l.instagram.com
 
     GET 'google.com', GotoGoogle
     GET 'groups.google.com', NoTransform
+    GET 'lh3.googleusercontent.com', NoGunk
     GET 'maps.google.com', GotoGoogle
     GET 'maps.gstatic.com', NoGunk
     GET 'www.gstatic.com', NoGunk
