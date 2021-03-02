@@ -168,7 +168,10 @@ l.facebook.com l.instagram.com
         [200, {"Access-Control-Allow-Origin"=>"*", "Content-Type"=>"text/javascript; charset=UTF-8", "Content-Length" => output.bytesize}, [output]]
       when /^(images|maps|search)$/
         NoGunk[r]
-      when /url/
+      when 'sorry' # won't let us search - switch to DuckduckGo
+        q = r.query_values['continue'].R.query_values['q']
+        [301, {'Location' => 'https://html.duckduckgo.com/html/' + HTTP.qs({q: q})}, []]
+      when 'url'
         GotoURL[r]
       else
         r.deny
