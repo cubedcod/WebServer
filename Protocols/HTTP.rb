@@ -160,7 +160,7 @@ class WebResource
                      'application/atom+xml'
                    elsif content_type = h['Content-Type']             # format defined in HTTP header
                      ct = content_type.split(/;/)
-                     if ct.size == 2                                  # charset defined in HTTP header
+                     if ct.size == 2 && ct[1].index('charset')        # charset defined in HTTP header
                        charset = ct[1].sub(/.*charset=/i,'')
                        charset = nil if charset.empty? || charset == 'empty'
                      end
