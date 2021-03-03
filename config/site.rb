@@ -329,9 +329,16 @@ l.facebook.com l.instagram.com
         case path
         when /ajax|embed/
           r.env[:notransform] = true
-          r.fetch
+          r.fetch.yield_self{|s,h,b|
+            if h['Content-Type']&.index('html')
+              doc = Nokogiri::HTML.parse b[0]
+              doc.css('script').map{|s|
+                puts s
+              }
+            end
+            [s,h,b]}
         when 'get_video_info'
-          if r.query_values['el'] == 'adunit' # TODO ad substitution, just drop for now
+          if r.query_values['el'] == 'adunit' # TODO ad insertion
             [200, {"Access-Control-Allow-Origin"=>"https://www.youtube.com", "Content-Type"=>"application/x-www-form-urlencoded", "Content-Length"=>"0"}, ['']]
           else
             r.env[:notransform] = true

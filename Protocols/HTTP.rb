@@ -134,19 +134,19 @@ class WebResource
 
     # fetch data from cache or remote
     def fetch
-      return cacheResponse if offline?                                # offline, return cache contents
+      return cacheResponse if offline?                                # offline, return cached content
       return [304,{},[]] if (env.has_key?('HTTP_IF_NONE_MATCH') || env.has_key?('HTTP_IF_MODIFIED_SINCE')) && static_node?
-      ns = nodeSet                                                    # client has static-node in cache, 304 response
-      return ns[0].fileResponse if ns.size == 1 && ns[0].static_node? # server has static-node in cache, return it
+      ns = nodeSet                                                    # client has static-node cached, 304 response
+      return ns[0].fileResponse if ns.size == 1 && ns[0].static_node? # server has static-node cached, return it
       fetchHTTP                                                       # fetch via HTTPS w/ HTTP fallback on error
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
       ['http://', host, ![nil, 443].member?(port) ? [':', port] : nil, path, query ? ['?', query] : nil].join.R(env).fetchHTTP rescue (env[:status] = 408; notfound)
     end
 
-    # fetch remote data (to RAM w/ fs-cache update)
-    def fetchHTTP thru: true                                          # do we return a HTTP response?
+    # fetch remote data (to RAM w/ local-cache fill)
+    def fetchHTTP thru: true                                          # opt: return HTTP response
       URI.open(uri, headers.merge({redirect: false})) do |response|
-        env[:fetched] = true                                          # mark as a network-fetch for logger
+        env[:fetched] = true                                          # mark as fetched for logger
         h = headers response.meta                                     # response headers
         case response.status[0].to_i
         when 204                                                      # no content
@@ -156,7 +156,8 @@ class WebResource
           [206, h, [response.read]]
         else                                                          # full content
           body = HTTP.decompress h, response.read                     # decompress content
-          format = if path=='/feed'||(query_values||{})['mime']=='xml'# format fixed at feed-URL (override erroneous upstream text/html)
+
+          format = if path=='/feed'||(query_values||{})['mime']=='xml'# format fixed on feed URL (ignore erroneous upstream text/html headers)
                      'application/atom+xml'
                    elsif content_type = h['Content-Type']             # format defined in HTTP header
                      ct = content_type.split(/;/)
@@ -168,6 +169,7 @@ class WebResource
                    elsif named_format                                 # format via name-extension map
                      named_format
                    end
+
           if format                                                   # format defined
             if !charset && format.index('html') && metatag = body[0..4096].encode('UTF-8', undef: :replace, invalid: :replace).match(/<meta[^>]+charset=['"]?([^'">]+)/i)
               charset = metatag[1]                                    # charset defined in <head>
@@ -175,9 +177,11 @@ class WebResource
             if charset
               charset = 'UTF-8' if charset.match? /utf.?8/i           # normalize UTF-8 charset-id
               charset = 'Shift_JIS' if charset.match? /s(hift)?.?jis/i# normalize Shift-JIS charset-id
-            end                                                       # encode text in UTF-8
+            end
+                                                                      # encode text in UTF-8
             body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace if format.match? /(ht|x)ml|script|text/
             body = Webize.clean self, body, format                    # clean data
+
             if formatExt = Suffixes[format] || Suffixes_Rack[format]  # look up format-suffix
               file = fsPath                                           # cache base path
               file += '/index' if file[-1] == '/'                     # append directory-data slug
@@ -185,8 +189,9 @@ class WebResource
               FileUtils.mkdir_p File.dirname file                     # create parent directories
               File.open(file, 'w'){|f| f << body }                    # cache fetched data
             else
-              puts "extension undefined for #{format}"                # warning: undefined format-suffix
+              puts "⚠️ extension undefined for #{format}"                # warning: undefined format-suffix
             end
+
             if reader = RDF::Reader.for(content_type: format)         # reader defined for format?
               env[:repository] ||= RDF::Repository.new                # initialize RDF repository
               if format.index('text') && timestamp=h['Last-Modified'] # HTTP metadata to RDF-graph
@@ -194,13 +199,16 @@ class WebResource
               end
               reader.new(body, base_uri: self, path: file){|g|env[:repository] << g} # read RDF
             else
-              puts "RDF::Reader undefined for #{format}"              # warning: undefined Reader
+              puts "⚠️ Reader undefined for #{format}"              # warning: undefined Reader
             end unless format.match? /octet-stream|script/
           else
-            puts "ERROR format undefined on #{uri}"                   # warning: undefined format
+            puts "⚠️ format undefined on #{uri}"                   # warning: undefined format
           end
-          return unless thru                                          # no HTTP response, return w/ loaded data
+
+          return unless thru                                          # no HTTP-response, return w/ fetched graph-data
+
           saveRDF                                                     # cache graph-data
+
           env[:resp]['Access-Control-Allow-Origin'] ||= origin        # CORS header
           h['Link'] && h['Link'].split(',').map{|link|                # Link headers
             ref, type = link.split(';').map &:strip
@@ -213,20 +221,21 @@ class WebResource
           env[:resp]['Content-Length'] = body.bytesize.to_s           # Content-Length header
           env[:resp]['ETag'] ||= h['Etag']                            # ETag header
           response_format = selectFormat format                       # content-type negotiation
+
           if env[:notransform] || !format || (format == response_format && format.match?(FixedFormat))
             [200, env[:resp], [body]]                                 # data in original format
           else                                                        # content-negotiated transform
-            graphResponse format                                      # transform to requested MIME or within-MIME reformat
+            graphResponse format                                      # transform to requested MIME or same-MIME reformat
           end
         end
       end
     rescue Exception => e
       status = e.respond_to?(:io) ? e.io.status[0] : ''
       case status
-      when /30[12378]/ # redirect
+      when /30[12378]/ # redirected
         dest = (join e.io.meta['location']).R env
         if scheme == 'https' && dest.scheme == 'http'
-          puts "WARNING HTTPS downgraded to HTTP: #{uri} -> #{dest}"
+          puts "⚠️ HTTPS downgraded to HTTP: #{uri} -> #{dest}"
           dest.fetchHTTP
         else
           [302, {'Location' => dest.href}, []]
