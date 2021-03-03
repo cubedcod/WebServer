@@ -38,7 +38,6 @@ module Webize
       'gitter.im' => :GitterJSON,
       'www.instagram.com' => :InstagramJSON,
       'www.mixcloud.com' => :Mixcloud,
-      'www.youtube.com' => :YouTubeJSON,
     }
   end
 end
@@ -816,9 +815,6 @@ l.facebook.com l.instagram.com
     doc.css('script').map{|script|
       script.inner_text.lines.grep(/ytInitialData/i).map{|line|
         Webize::JSON::Reader.new(line.sub(/^[^{]+/,'').chomp.sub(/;$/,''), base_uri: self).scanContent &b}}
-  end
-
-  def YouTubeJSON tree, &b
   end
 
 end

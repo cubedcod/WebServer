@@ -30,7 +30,6 @@ module Webize
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri].R
         @json = ::JSON.parse(input.respond_to?(:read) ? input.read : input) rescue {}
-#        puts ::JSON.pretty_generate @json if Verbose
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)
@@ -95,6 +94,7 @@ module Webize
         else
           Webize::JSON.scan(@json){|h|
             if s = h['uri'] || h['url'] || h['link'] || h['canonical_url'] || ((h['id']||h['ID']||h['_id']) && ('#' + (h['id']||h['ID']||h['_id']).to_s))
+              puts ::JSON.pretty_generate h if Verbose
               s = @base.join(s).R
               yield s, Type, Post.R if h.has_key? 'content'
               if s.parts[0] == 'users'
