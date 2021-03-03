@@ -64,8 +64,8 @@ module Webize
     def self.format html, base
       html = Nokogiri::HTML.fragment html if html.class == String
 
-      # drop nonlocal formatting, embeds, code and input controls
-      html.css('iframe, input, script, style, a[href^="javascript"], link[rel="stylesheet"], link[type="text/javascript"], link[as="script"]').remove unless [nil,'localhost'].member? base.host
+      # drop upstream formatting and embeds
+      html.css('iframe, script, style, a[href^="javascript"], link[rel="stylesheet"], link[type="text/javascript"], link[as="script"]').remove unless [nil,'localhost'].member? base.host
 
       # <img> mapping
       html.css('[style*="background-image"]').map{|node|
