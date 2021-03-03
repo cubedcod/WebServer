@@ -325,16 +325,25 @@ l.facebook.com l.instagram.com
         else
           r.fetch
         end
-      elsif %w(browse_ajax c channel embed feed generate_204 get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results user watch watch_videos yts).member?(path) || !path
+      elsif %w(browse_ajax c channel embed feed feeds generate_204 get_video_info guide_ajax heartbeat iframe_api live_chat manifest.json opensearch playlist results user watch watch_videos yts).member?(path) || !path
         case path
         when /ajax|embed/
           r.env[:notransform] = true
           r.fetch.yield_self{|s,h,b|
             if h['Content-Type']&.index('html')
               doc = Nokogiri::HTML.parse b[0]
+              edited = false
               doc.css('script').map{|s|
-                puts s
-              }
+                js = /\/\/www.google.com\/js\//
+                if s.inner_text.match? js
+                  edited = true
+                  s.content = s.inner_text.gsub(js,'#')
+                end
+                puts s.inner_text}
+              if edited
+                b = [doc.to_html]
+                h.delete 'Content-Length'
+              end
             end
             [s,h,b]}
         when 'get_video_info'

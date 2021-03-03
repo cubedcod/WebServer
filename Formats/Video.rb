@@ -103,7 +103,9 @@ class WebResource
         if v.uri.match? /youtu/
           q = v.query_values || {}
           id = q['v'] || v.parts[-1]
-          if id == (env[:base].query_values||{})['v']
+          env[:tubes] ||= {}
+          if id == (env[:base].query_values||{})['v'] && !env[:tubes].has_key?(id)
+            env[:tubes][id] = id
             t = q['start'] || q['t']
             {_: :iframe, width: 560, height: 315, src: "https://www.youtube.com/embed/#{id}#{t ? '?start='+t : nil}", frameborder: 0, allow: 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture', allowfullscreen: :true}
           else
