@@ -43,7 +43,7 @@ ca(mpaign|rambo)|ch(artbeat|impstatic)|cl(arity\.ms|ick(cea|fu )se)|co(mscore\.c
 datadog\.com|de(m(andbase|dex)|troitchicago)|districtm|do(ubleclick|t(metrics|omi))|
 effectivemeasure|email|ensighten|evidon|\.ex\.co|extreme-dm|Ezoic|
 fa(cebook|stclick)|feedbackify|firebase|foresee\.com|freshchat|fullstory|(function|var)[\s\(]+_0x|
-gaug\.es|gdpr|g[eo]t(chosen|drip|pocket)|geo(ip|loc)|google|grapeshot|gumgum|
+gaug\.es|gdpr|g[eo]t(chosen|drip|pocket)|geo(ip|loc)|\.gif\?|google|grapeshot|gumgum|
 heatmap\.it|hotjar|hs-analytics|htlbid|hu?bspo?t|
 ibclick\.stream|imp(actradius|ression[a-z]*)|in(dex(exchange|ww)|folink|stagram|te(llitxt|r(com\.(com|io)|stitial)))|iperceptions|iubenda|
 kochava|
