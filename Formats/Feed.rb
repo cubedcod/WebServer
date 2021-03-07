@@ -382,7 +382,7 @@ class WebResource
       if authors.find{|a| KillFile.member? a.to_s}
         authors.map{|a| CGI.escapeHTML a.R.display_name if a.respond_to? :R}
       else
-        {class: :post, id: local_id,
+        {class: resource.deny? ? 'blocked post' : :post, id: local_id,
          c: ["\n",
              (post.delete(Title)||[]).map(&:to_s).map(&:strip).compact.-([""]).uniq.map{|title|
                title = title.to_s.sub(/\/u\/\S+ on /,'')
