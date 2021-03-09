@@ -26,7 +26,8 @@ module Webize
           ref = (base.join e['href']).R              # resolve locator
           if ref.deny?
             puts "🚩 \e[38;5;196m#{ref}\e[0m" if Verbose
-            e.remove                                 # strip gunk reference in href attribute
+            e['class'] = 'blocked'
+#            e.remove                                 # strip gunk reference in href attribute
           end
         end}
 
@@ -122,6 +123,7 @@ module Webize
 
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri]
+        @base.env[:links] ||= {}
         @doc = Nokogiri::HTML.parse input.respond_to?(:read) ? input.read : input.to_s
 
         if block_given?

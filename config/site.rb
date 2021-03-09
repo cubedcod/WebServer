@@ -142,6 +142,7 @@ l.facebook.com l.instagram.com
     GET 'google.com', GotoGoogle
     GET 'groups.google.com', NoTransform
     GET 'lh3.googleusercontent.com', NoGunk
+    GET 'lh5.googleusercontent.com', NoGunk
     GET 'maps.google.com', GotoGoogle
     GET 'maps.gstatic.com', NoGunk
     GET 'www.gstatic.com', NoGunk
@@ -165,7 +166,7 @@ l.facebook.com l.instagram.com
                               "google:suggesttype":["NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION"],
                               "google:verbatimrelevance": 1300}].to_json
         [200, {"Access-Control-Allow-Origin"=>"*", "Content-Type"=>"text/javascript; charset=UTF-8", "Content-Length" => output.bytesize}, [output]]
-      when /^(images|maps|search)$/
+      when /^(images|x?js|maps|search)$/
         NoGunk[r]
       when 'sorry' # won't let us search - switch to DuckduckGo
         q = r.query_values['continue'].R.query_values['q']
