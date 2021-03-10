@@ -26,8 +26,11 @@ module Webize
           ref = (base.join e['href']).R              # resolve locator
           if ref.deny?
             puts "🚩 \e[38;5;196m#{ref}\e[0m" if Verbose
-            e['class'] = 'blocked'
-#            e.remove                                 # strip gunk reference in href attribute
+            if e.name == 'link'  #%w(link).member? e.name
+              e.remove                                 # strip gunk reference in href attribute
+            else
+              e['class'] = 'blocked'
+            end
           end
         end}
 
