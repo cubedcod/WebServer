@@ -107,7 +107,7 @@ c212.net gate.sc googleweblight.com
 l.facebook.com l.instagram.com
 ).map{|s| GET s, GotoURL}
 
-    GET 'www.amazon.com', NoGunk
+    #GET 'www.amazon.com', NoGunk
     GET 'www.dropbox.com', NoGunk
 
     GET 'gitter.im', -> r {

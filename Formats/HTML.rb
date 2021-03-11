@@ -22,15 +22,11 @@ module Webize
           end
         end
 
-        if e['href']                                 # href attribute
+        if e.name == 'link' && e['href']             # href attribute
           ref = (base.join e['href']).R              # resolve locator
           if ref.deny?
             puts "🚩 \e[38;5;196m#{ref}\e[0m" if Verbose
-            if e.name == 'link'  #%w(link).member? e.name
-              e.remove                                 # strip gunk reference in href attribute
-            else
-              e['class'] = 'blocked'
-            end
+            e.remove                                 # strip gunk reference in href attribute
           end
         end}
 
@@ -102,7 +98,9 @@ module Webize
           offsite = ref.host != base.host
           e.add_child " <span class='uri'>#{CGI.escapeHTML (offsite ? ref.uri.sub(/^https?:..(www.)?/,'') : (ref.path || '/'))[0..127]}</span> " # show URI in HTML
           e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # mint identifier
-          css = [:uri]; css.push :path unless offsite                # style as local or global reference
+          css = [:uri]
+          css.push :path unless offsite                              # style as local or global reference
+          css.push :blocked if ref.deny?                             # style as blocked resource
           e['href'] = ref.href                                       # update href to resolved location
           e['class'] = css.join ' '                                  # add CSS style
         elsif e['id']                                                # id attribute w/o href
