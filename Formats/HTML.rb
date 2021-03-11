@@ -22,8 +22,8 @@ module Webize
           end
         end
 
-        if e.name == 'link' && e['href']             # href attribute
-          ref = (base.join e['href']).R              # resolve locator
+        if (e.name=='link' && e['href']) || e['xlink:href'] # href attribute
+          ref = (base.join (e['href'] || e['xlink:href'])).R # resolve location
           if ref.deny?
             puts "🚩 \e[38;5;196m#{ref}\e[0m" if Verbose
             e.remove                                 # strip gunk reference in href attribute
