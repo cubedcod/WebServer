@@ -187,6 +187,8 @@ l.facebook.com l.instagram.com
         NoGunk[r]
       end}
 
+    GET 'www.msn.com', NoGunk
+
     GET 'outline.com', -> r {
       if r.parts.size == 1
         (r.join ['/stat1k/', r.parts[0], '.html'].join).R(r.env).fetch
@@ -306,6 +308,8 @@ l.facebook.com l.instagram.com
         end}}
 
     GET 'www.walmart.com', NoGunk
+
+    GET 'finance.yahoo.com', NoGunk
     GET 'news.yahoo.com', NoGunk
     GET 's.yimg.com', ImgRehost
 
