@@ -69,7 +69,7 @@ class WebResource
 
     ImgRehost = -> r {
       ps = r.path.split /https?:\/+/
-      ps.size > 1 ? [301, {'Location' => ('https://' + ps[-1]).R(r.env).href}, []] : r.deny}
+      ps.size > 1 ? [301, {'Location' => ('https://' + ps[-1]).R(r.env).href}, []] : NoGunk[r]}
 
     NoQuery = -> r {
       if !r.query                         # URL is qs-free, request and strip response qs
