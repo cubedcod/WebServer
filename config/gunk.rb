@@ -58,7 +58,7 @@ sa(il.?(horizon|thr[a-z]+)|lesloft\.com)|sc(ene7|(arab|orecard)research)|se(arch
 ta(boola|rgeting)|te(mpest|rmly)|ti(dio|qcdn|nypass)|thinglink|toutapp|[a-z]*tr(ack(cmp|er|ing)[a-z]*|iplelift|ust(pilot|x))|twitter|typekit|
 unruly|urbanairship|usabilla|
 ve(natus|rizon)|vi(glink|sitorid)|vuukle|vntsm|
-widget|wo(ocommerce|rdfence)|wp.?(emoji|groho|rum)|
+widget|wknd|wo(ocommerce|rdfence)|wp.?(emoji|groho|rum)|
 \.yimg|y(adro|otpo)|
 ze(ndesk|rgnet)|zo(ominfo|pim))xi
 
