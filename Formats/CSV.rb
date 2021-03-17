@@ -63,11 +63,13 @@ class WebResource
                     [Image, Video].map{|t|(resource[t]||[]).map{|i|Markup[t][i,env]}},                                                   # image & video links
                     ([resource[Content], resource[SIOC+'richContent']] unless (resource[Creator]||[]).find{|a|KillFile.member? a.to_s})] # HTML content
                   else
-                    if Type == k && resource.has_key?(Type) && [Audio.R, Video.R].member?(resource[Type][0])                             # play-button on A/V types
-                      playerType = resource[Type][0] == Audio.R ?  'audio' : 'video'
+                    if Type == k && resource.has_key?(Type) && [Audio.R, Video.R].member?(resource[Type][0])                             # type represented as icon or shortname
+                      playerType = resource[Type][0] == Audio.R ?  'audio' : 'video'                                                     # play-button on A/V resources
                       {_: :a, href: '#', c: '▶️', onclick: 'var player = document.getElementById("' + playerType + '"); player.src="' + re.href + '"; player.play()'}
+                    elsif Link == k
+                      MarkupGroup[Link][resource[Link]||[], env]                                                                         # untyped links
                     else
-                      (resource[k]||[]).yield_self{|r|r.class == Array ? r : [r]}.map{|v| markup k, v, env }                             # type represented as icon or shortname
+                      (resource[k]||[]).yield_self{|r|r.class == Array ? r : [r]}.map{|v| markup k, v, env }                             # dispatch to type-specific renderer
                     end
                    end}, "\n" ]}}, "\n" ]}}]}
     end
