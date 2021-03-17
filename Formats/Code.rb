@@ -23,6 +23,7 @@ module Webize
                    aliases: %w(
                    application/javascript;q=0.2
                    application/x-javascript;q=0.2
+                   application/x-sh;q=0.2
                    text/css;q=0.2
                    text/x-c;q=0.8
                    text/x-perl;q=0.8
