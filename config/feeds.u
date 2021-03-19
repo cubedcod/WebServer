@@ -128,6 +128,7 @@ https://district7boston.com/feed/
 https://districthallboston.org/feed/
 https://dorchester.comunicas.org/feed/
 https://dorchesterfoodcoop.com/feed/
+https://dotat.at/:/feed.atom
 https://dotmass.blogspot.com/feeds/posts/default
 https://dotrat.com/feed/
 https://dppnewsletter.blogspot.com/feeds/posts/default
@@ -221,15 +222,15 @@ https://lemmy.ml/feeds/c/libre_culture.xml
 https://len.falken.ink/
 https://lfod.life/feed/
 https://librelounge.org/atom-feed.atom
-https://liliputing.com/feed
 https://liliputing.com/comments/feed
+https://liliputing.com/feed
 https://lisamikulski.com/index.php/feed/
 https://lisawilliams.github.io/lisa/feed.xml
 https://liveboston617.org/feed/
 https://lobste.rs/comments.rss
 https://lobste.rs/rss
-https://lobste.rs/threads/ddevault
 https://lobste.rs/threads/LenFalken
+https://lobste.rs/threads/ddevault
 https://lynnjournal.com/comments/feed/
 https://lynnpolice.org/feed/
 https://mapublichealth.org/feed/
@@ -246,11 +247,12 @@ https://medium.com/feed/@skyqrose
 https://medium.com/feed/@sunrise.boston.podcast
 https://medium.com/feed/mit-media-lab
 https://miixtapechiick.com/feed/
+https://mjg59.dreamwidth.org/data/atom
+https://mjg59.dreamwidth.org/data/rss
 https://motifri.com/feed/
 https://mountauburn.org/feed/
 https://mspnews.org/feed/
 https://n-gate.com/index.atom
-https://www.naiopma.org/feed/
 https://ncaaa.org/feed/
 https://neighborhoodview.org/feed/
 https://nenc.news/feed/
@@ -269,8 +271,8 @@ https://node2.feed43.com/ccj.xml
 https://northendwaterfront.com/feed/
 https://nshsdenebola.com/feed/
 https://octodon.social/@cwebber/
-https://oddballmagazine.com/feed/
 https://oddballmagazine.com/comments/feed/
+https://oddballmagazine.com/feed/
 https://oldwayspt.org/blog/feed
 https://our4corners.wordpress.com/feed/
 https://pbn.com/comments/feed/
@@ -284,7 +286,6 @@ https://qrpblog.com/feed/
 https://quincyquarry.com/comments/feed/
 https://quincyquarry.com/feed/
 https://radioaficion.com/news/feed/
-https://www.radiodiscussions.com/forums/boston.672/index.rss
 https://radioinsight.com/community/board/northeast/boston/feed/
 https://randolphpd.com/feed/
 https://rationalurbanism.com/comments/feed/
@@ -452,6 +453,7 @@ https://www.middlesexda.com/node/108/news/feed
 https://www.miltonscene.com/feed/
 https://www.miltontimes.com/search/?f=rss&amp;t=article&amp;l=50&amp;s=start_time&amp;sd=desc&amp;k%5B%5D=%23topstory
 https://www.mvtimes.com/feed/
+https://www.naiopma.org/feed/
 https://www.nbcboston.com/news/local/?rss=y
 https://www.necir.org/feed/
 https://www.neighbormedia.org/rss.xml
@@ -461,6 +463,7 @@ https://www.newhavenindependent.org/index.php/feeds/atom/
 https://www.olmsted.org/index.php?format=feed&type=rss
 https://www.ourladyofczestochowa.com/feed/
 https://www.pine64.org/feed/
+https://www.radiodiscussions.com/forums/boston.672/index.rss
 https://www.raydunetz.com/feed/
 https://www.realhartford.org/feed/
 https://www.reddit.com/r/Dorchester+SOLID+StallmanWasRight+roxbury/new/
