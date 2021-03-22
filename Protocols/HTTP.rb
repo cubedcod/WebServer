@@ -1,5 +1,5 @@
 # coding: utf-8
-%w(brotli cgi digest/sha2 httparty open-uri rack).map{|_| require _}
+%w(brotli cgi digest/sha2 httparty open-uri pry rack).map{|_| require _}
 
 class WebResource
   module HTTP
@@ -38,7 +38,10 @@ class WebResource
         Args.map{|k|env[k.to_sym] = qs.delete(k)||true if qs.has_key? k} # set local (client <> proxy) args
         qs.empty? ? (uri.query = nil) : (uri.query_values = qs)          # set remote (proxy <> origin) args
       end
-      env.update({base: uri, feeds: [], links: {}, resp: {}})            # response environment
+      env.update({base: uri, feeds: [], links: {}, resp: {}})            # response-environment storage
+
+      #Pry::ColorPrinter.pp env
+
       uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body|    # dispatch request
         format = uri.format_icon head['Content-Type']                    # logger
         color = if env[:deny]
@@ -300,6 +303,7 @@ class WebResource
         elsif !p.match? /[.:]/                 # no domain-separator chars in path-segment
           cacheResponse                        # local path
         else                                   # hostname in first path-segment
+          env[:proxy_href] = true
           (env[:base] = remoteURL).hostHandler # host handler (rebased on local URIspace)
         end
       else

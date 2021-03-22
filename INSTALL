@@ -1,10 +1,11 @@
 #!/bin/sh
+uid=$(id -u)
 
 ## install Distro packages
 
 # Alpine https://www.alpinelinux.org/
 which apk && sudo apk add alpine-sdk ruby ruby-dev ruby-json ruby-bigdecimal ruby-bundler openssl-dev parallel py3-pip findutils grep socat syncthing libexif-dev libxslt-dev squid taglib-dev tmux py3-pygments p11-kit-trust
-which apk && sudo /usr/lib/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB
+which apk && sudo /usr/lib/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB && sudo chown -R $uid:$uid /var/cache/squid
 
 # Arch https://www.archlinux.org/
 which pacman && sudo pacman -S --needed base-devel git libexif parallel pygmentize ruby ruby-bundler socat squid syncthing taglib tmux
