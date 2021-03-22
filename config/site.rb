@@ -212,7 +212,7 @@ l.facebook.com l.instagram.com
     GET 'www.instagram.com', -> r {(!r.path || r.path=='/') ? r.cacheResponse : NoGunk[r]}
 
     GET 'www.reddit.com', -> r {
-      r.env[:links][:prev] = ['//old.reddit.com', r.path.sub('.rss',''), '?',r.query].join.R.href # prev-page pointer
+      r.env[:links][:prev] = ['//old.reddit.com', (r.path || '/').sub('.rss',''), '?',r.query].join.R.href # previous-page pointer
       r.env[:sort] ||= 'date'
       r.env[:view] ||= 'table'
       route = r.parts[0]
