@@ -146,8 +146,8 @@ class WebResource
       ['http://', host, ![nil, 443].member?(port) ? [':', port] : nil, path, query ? ['?', query] : nil].join.R(env).fetchHTTP rescue (env[:status] = 408; notfound)
     end
 
-    # fetch remote data (to RAM w/ local-cache fill)
-    def fetchHTTP thru: true                                          # opt: return HTTP response
+    # fetch remote data to RAM and fs-cache
+    def fetchHTTP thru: true                                          # optional: HTTP response to caller
       URI.open(uri, headers.merge({redirect: false})) do |response|
         env[:fetched] = true                                          # mark as fetched for logger
         h = headers response.meta                                     # response headers
@@ -176,12 +176,12 @@ class WebResource
               charset = metatag[1]                                    # charset defined in <head>
             end
             if charset
-              charset = 'UTF-8' if charset.match? /utf.?8/i           # normalize UTF-8 charset-id
-              charset = 'Shift_JIS' if charset.match? /s(hift)?.?jis/i# normalize Shift-JIS charset-id
+              charset = 'UTF-8' if charset.match? /utf.?8/i           # normalize UTF-8 charset symbol
+              charset = 'Shift_JIS' if charset.match? /s(hift)?.?jis/i# normalize Shift-JIS charset symbol
             end                                                       # encode in UTF-8
             body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace if format.match? /(ht|x)ml|script|text/
-            body = Webize.clean self, body, format                    # clean data
-            if formatExt = Suffixes[format] || Suffixes_Rack[format]  # look up format-suffix
+            body = Webize.clean self, body, format                    # clean upstream data
+            if formatExt = Suffixes[format] || Suffixes_Rack[format]  # find format-suffix
               file = fsPath                                           # cache path
               file += '/index' if file[-1] == '/'                     # append dir-index slug
               file += formatExt unless File.extname(file)==formatExt  # append format-suffix
@@ -202,8 +202,8 @@ class WebResource
           else
             puts "⚠️ format undefined on #{uri}"                       # ⚠️ undefined format
           end
-          return unless thru                                          # no HTTP-response, return w/ fetched graph-data
-          saveRDF                                                     # update graph-cache
+          return unless thru                                          # no HTTP response, done fetching to RAM
+          saveRDF                                                     # commit graph-cache
           env[:resp]['Access-Control-Allow-Origin'] ||= origin        # CORS header
           h['Link'] && h['Link'].split(',').map{|link|                # Link headers
             ref, type = link.split(';').map &:strip
@@ -211,7 +211,7 @@ class WebResource
               ref = ref.sub(/^</,'').sub />$/, ''
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
-            end}                                                      # upstream headers
+            end}                                                      # upstream headers for downstream
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type).map{|k|env[:resp][k] ||= h[k] if h[k]}
           env[:resp]['Content-Length'] = body.bytesize.to_s           # Content-Length header
           env[:resp]['ETag'] ||= h['Etag']                            # ETag header
@@ -219,7 +219,7 @@ class WebResource
           if env[:notransform] || !format || (format == response_format && format.match?(FixedFormat))
             [200, env[:resp], [body]]                                 # response in upstream format
           else                                                        # content-negotiated transform
-            graphResponse format                                      # transform to requested MIME or same-MIME reformat
+            graphResponse format                                      # response in requested format
           end
         end
       end
