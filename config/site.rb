@@ -191,10 +191,7 @@ l.facebook.com l.instagram.com
         NoGunk[r]
       end}
 
-    GET 'api.mixcloud.com', -> r {
-r.cacheResponse
-      #  r.fetchHTTP format: 'application/json'
-    }
+    GET 'api.mixcloud.com', -> r {r.fetchHTTP format: 'application/json'}
 
     GET 'www.msn.com', NoGunk
 
