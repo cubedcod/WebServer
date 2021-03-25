@@ -159,7 +159,6 @@ class WebResource
           [206, h, [response.read]]
         else                                                          # full content
           body = HTTP.decompress h, response.read                     # decompress content
-
           format = if path=='/feed'||(query_values||{})['mime']=='xml'# format fixed on feed URL (ignore erroneous upstream text/html headers)
                      'application/atom+xml'
                    elsif content_type = h['Content-Type']             # format defined in HTTP header
@@ -172,7 +171,6 @@ class WebResource
                    elsif named_format                                 # format via name-extension map
                      named_format
                    end
-
           if format                                                   # format defined
             if !charset && format.index('html') && metatag = body[0..4096].encode('UTF-8', undef: :replace, invalid: :replace).match(/<meta[^>]+charset=['"]?([^'">]+)/i)
               charset = metatag[1]                                    # charset defined in <head>
@@ -180,21 +178,18 @@ class WebResource
             if charset
               charset = 'UTF-8' if charset.match? /utf.?8/i           # normalize UTF-8 charset-id
               charset = 'Shift_JIS' if charset.match? /s(hift)?.?jis/i# normalize Shift-JIS charset-id
-            end
-                                                                      # encode text in UTF-8
+            end                                                       # encode in UTF-8
             body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace if format.match? /(ht|x)ml|script|text/
             body = Webize.clean self, body, format                    # clean data
-
             if formatExt = Suffixes[format] || Suffixes_Rack[format]  # look up format-suffix
-              file = fsPath                                           # cache base path
-              file += '/index' if file[-1] == '/'                     # append directory-data slug
+              file = fsPath                                           # cache path
+              file += '/index' if file[-1] == '/'                     # append dir-index slug
               file += formatExt unless File.extname(file)==formatExt  # append format-suffix
-              FileUtils.mkdir_p File.dirname file                     # create parent directories
-              File.open(file, 'w'){|f| f << body }                    # cache fetched data
+              FileUtils.mkdir_p File.dirname file                     # create container
+              File.open(file, 'w'){|f| f << body }                    # update data-cache
             else
-              puts "⚠️ extension undefined for #{format}"                # warning: undefined format-suffix
+              puts "⚠️ extension undefined for #{format}"              # ⚠️ undefined format-suffix
             end
-
             if reader = RDF::Reader.for(content_type: format)         # reader defined for format?
               env[:repository] ||= RDF::Repository.new                # initialize RDF repository
               if format.index('text') && timestamp=h['Last-Modified'] # HTTP metadata to RDF-graph
@@ -202,16 +197,13 @@ class WebResource
               end
               reader.new(body, base_uri: self, path: file){|g|env[:repository] << g} # read RDF
             else
-              puts "⚠️ Reader undefined for #{format}"              # warning: undefined Reader
+              puts "⚠️ Reader undefined for #{format}"                 # ⚠️ undefined Reader
             end unless format.match? /octet-stream|script/
           else
-            puts "⚠️ format undefined on #{uri}"                   # warning: undefined format
+            puts "⚠️ format undefined on #{uri}"                       # ⚠️ undefined format
           end
-
           return unless thru                                          # no HTTP-response, return w/ fetched graph-data
-
-          saveRDF                                                     # cache graph-data
-
+          saveRDF                                                     # update graph-cache
           env[:resp]['Access-Control-Allow-Origin'] ||= origin        # CORS header
           h['Link'] && h['Link'].split(',').map{|link|                # Link headers
             ref, type = link.split(';').map &:strip
@@ -223,10 +215,9 @@ class WebResource
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type).map{|k|env[:resp][k] ||= h[k] if h[k]}
           env[:resp]['Content-Length'] = body.bytesize.to_s           # Content-Length header
           env[:resp]['ETag'] ||= h['Etag']                            # ETag header
-          response_format = selectFormat format                       # content-type negotiation
-
+          response_format = selectFormat format                       # select response content-type
           if env[:notransform] || !format || (format == response_format && format.match?(FixedFormat))
-            [200, env[:resp], [body]]                                 # data in original format
+            [200, env[:resp], [body]]                                 # response in upstream format
           else                                                        # content-negotiated transform
             graphResponse format                                      # transform to requested MIME or same-MIME reformat
           end
