@@ -34,6 +34,7 @@ module Webize
   module JSON
     Triplr = {
       'api.imgur.com' => :Imgur,
+      'api.mixcloud.com' => :MixcloudAPI,
       'api.twitter.com' => :TwitterJSON,
       'gitter.im' => :GitterJSON,
       'www.instagram.com' => :InstagramJSON,
@@ -189,6 +190,8 @@ l.facebook.com l.instagram.com
       else
         NoGunk[r]
       end}
+
+    GET 'api.mixcloud.com', -> r {r.fetchHTTP format: 'application/json'}
 
     GET 'www.msn.com', NoGunk
 
@@ -707,6 +710,10 @@ l.facebook.com l.instagram.com
         end
       end
     end
+  end
+
+  def MixcloudAPI tree, &b
+    puts :MIXCLOUD
   end
 
   def NYT doc, &b

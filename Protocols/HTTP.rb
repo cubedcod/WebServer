@@ -147,11 +147,11 @@ class WebResource
     end
 
     # fetch remote data to RAM and fs-cache
-    def fetchHTTP thru: true                                          # optional: HTTP response to caller
-      URI.open(uri, headers.merge({redirect: false})) do |response|
+    def fetchHTTP format: nil, thru: true                             # options: format (to override broken remotes), HTTP response for caller
+      URI.open(uri, headers.merge({redirect: false})) do |response|   # fetch over HTTP from remote
         env[:fetched] = true                                          # mark as fetched for logger
         h = headers response.meta                                     # response headers
-        case response.status[0].to_i
+        case response.status[0].to_i                                  # response status
         when 204                                                      # no content
           [204, {}, []]
         when 206                                                      # partial content
@@ -159,18 +159,18 @@ class WebResource
           [206, h, [response.read]]
         else                                                          # full content
           body = HTTP.decompress h, response.read                     # decompress content
-          format = if path=='/feed'||(query_values||{})['mime']=='xml'# format fixed on feed URL (ignore erroneous upstream text/html headers)
-                     'application/atom+xml'
-                   elsif content_type = h['Content-Type']             # format defined in HTTP header
-                     ct = content_type.split(/;/)
-                     if ct.size == 2 && ct[1].index('charset')        # charset defined in HTTP header
-                       charset = ct[1].sub(/.*charset=/i,'')
-                       charset = nil if charset.empty? || charset == 'empty'
+          format ||= if path == '/feed'                               # format fixed on remote feed to ignore erroneous text/html headers
+                       'application/atom+xml'
+                     elsif content_type = h['Content-Type']           # format defined in HTTP header
+                       ct = content_type.split(/;/)
+                       if ct.size == 2 && ct[1].index('charset')      # charset defined in HTTP header
+                         charset = ct[1].sub(/.*charset=/i,'')
+                         charset = nil if charset.empty? || charset == 'empty'
+                       end
+                       ct[0]
+                     elsif named_format                               # format via name-extension map
+                       named_format
                      end
-                     ct[0]
-                   elsif named_format                                 # format via name-extension map
-                     named_format
-                   end
           if format                                                   # format defined
             if !charset && format.index('html') && metatag = body[0..4096].encode('UTF-8', undef: :replace, invalid: :replace).match(/<meta[^>]+charset=['"]?([^'">]+)/i)
               charset = metatag[1]                                    # charset defined in <head>
