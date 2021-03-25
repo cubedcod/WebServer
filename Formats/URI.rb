@@ -51,6 +51,8 @@ class WebResource < RDF::URI
     def ext; path ? (File.extname(path)[1..-1] || '') : '' end
     def extension; '.' + ext end
 
+    def insecure; ['http://', host, path, query].join.R env end
+
     def parts; path ? (path.split('/') - ['']) : [] end
 
     def queryvals
