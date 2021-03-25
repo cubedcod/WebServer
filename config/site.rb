@@ -191,7 +191,10 @@ l.facebook.com l.instagram.com
         NoGunk[r]
       end}
 
-    GET 'api.mixcloud.com', -> r {r.fetchHTTP format: 'application/json'}
+    GET 'api.mixcloud.com', -> r {
+r.cacheResponse
+      #  r.fetchHTTP format: 'application/json'
+    }
 
     GET 'www.msn.com', NoGunk
 
@@ -713,7 +716,19 @@ l.facebook.com l.instagram.com
   end
 
   def MixcloudAPI tree, &b
-    puts :MIXCLOUD
+    yield self, Title, tree['name']
+    tree['data'].map{|mix|
+      graph = subject = mix['url'].R
+      yield subject, Title, mix['name'], graph
+      yield subject, Date, mix['created_time'], graph
+      yield subject, Creator, mix['user']['name'].R,graph
+      yield subject, To, mix['user']['url'].R,graph
+      mix['pictures'].map{|_,i|
+        yield subject, Image, i.R, graph}
+      yield subject, Schema+'duration', mix['audio_length'], graph
+      mix['tags'].map{|tag|
+        yield subject, Abstract, tag['name'], graph}
+    }
   end
 
   def NYT doc, &b

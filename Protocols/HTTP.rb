@@ -137,11 +137,11 @@ class WebResource
 
     # fetch data from cache or remote
     def fetch
-      return cacheResponse if offline?                                # offline, return cached content
+      return cacheResponse if offline?                                # offline, respond from cache
       return [304,{},[]] if (env.has_key?('HTTP_IF_NONE_MATCH') || env.has_key?('HTTP_IF_MODIFIED_SINCE')) && static_node?
-      ns = nodeSet                                                    # client has static-node cached, 304 response
-      return ns[0].fileResponse if ns.size == 1 && ns[0].static_node? # server has static-node cached, return it
-      fetchHTTP                                                       # fetch via HTTPS w/ HTTP fallback on error
+      ns = nodeSet                                                    # client has node cached, 304 response
+      return ns[0].fileResponse if ns.size == 1 && ns[0].static_node? # server has node cached, return it
+      fetchHTTP                                                       # fetch over HTTPS, with HTTP fallback
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
       ['http://', host, ![nil, 443].member?(port) ? [':', port] : nil, path, query ? ['?', query] : nil].join.R(env).fetchHTTP rescue (env[:status] = 408; notfound)
     end
