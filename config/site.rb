@@ -305,7 +305,6 @@ l.facebook.com l.instagram.com
         NoGunk[r]
        end).yield_self{|s,h,b|
         if [401,403,429].member? s
-          puts "Upstream status #{s}, fetching stock UI for token refresh"
           r.env[:notransform] = true
           %w(HTTP_COOKIE authorization x-csrf-token x-guest-token).map{|a| r.env.delete a }
           r.fetch
