@@ -194,7 +194,7 @@ module Webize
                 @base.env[:feeds].push v if k == 'alternate' && ((m['type']&.match?(/atom|rss/)) || (v.path&.match?(/^\/feed\/?$/))) && !@base.env[:feeds].member?(v)
                 k = MetaMap[k] || k
                 puts [k, v].join "\t" unless k.to_s.match? /^(drop|http)/
-                yield subject, k, v unless k == :drop}
+                yield subject, k, v unless k == :drop || v.R.deny?}
             end
           end}
 
@@ -449,7 +449,8 @@ class WebResource
                                c: host ? (name = ('//' + host).R.display_name
                                           color = env[:colors][name] ||= '#%06x' % (rand 16777216)
                                           {_: :a, href: '/' + host, c: name, style: "background-color: #{color}; color: black"}) : []},
-                              {_: :td, c: paths.map{|path| Markup[Link][path,env]}}]}}}},
+                              {_: :td, c: paths.map{|path|
+                                 Markup[Link][path,env]}}]}}}},
                   '</tr></table>']}}]}, '&nbsp;']}}
 
     Markup[Link] = -> ref, env {
