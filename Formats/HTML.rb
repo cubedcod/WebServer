@@ -164,7 +164,6 @@ module Webize
         embeds = RDF::Graph.new # storage for embedded graphs
         subject = @base         # subject URI
         n = @doc
-        qs = @base.query_values || {}
 
         # base URI declaration
         if base = n.css('head base')[0]
@@ -264,8 +263,8 @@ module Webize
 
         # <body>
         if body = n.css('body')[0]
-          unless @base.local_node? || qs.has_key?('fullContent') # summarize to new content
-            @base.env[:links][:down] ||= WebResource::HTTP.qs qs.merge({'fullContent' => nil})
+          unless @base.local_node? || @base.env[:fullContent] # summarize to new content
+            @base.env[:links][:down] ||= WebResource::HTTP.qs @base.queryvals.merge({'fullContent' => nil})
             hashed_nodes = 'div, footer, h1, h2, h3, nav, p, section, span'
             hashs = {}
             links = {}

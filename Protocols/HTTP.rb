@@ -7,7 +7,7 @@ class WebResource
 
     HostGET = {}
     Methods = %w(GET HEAD OPTIONS POST PUT)
-    Args = %w(notransform offline order sort view)
+    Args = %w(fullContent notransform offline order sort view)
 
     def allow_domain?
       c = AllowDomains                                              # start cursor at root
@@ -17,6 +17,7 @@ class WebResource
     def cacheResponse
       timeMeta                    # reference temporally-adjacent nodes
       nodes = nodeSet             # find local nodes
+puts nodes
       if nodes.size == 1 && (nodes[0].static_node? || # one node found in client-preferred or fixed format (no transcode/merge)
                             (nodes[0].named_format == selectFormat && (env[:notransform] || nodes[0].named_format != 'text/html')))
         nodes[0].fileResponse     # static response on file, return

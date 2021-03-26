@@ -48,7 +48,7 @@ heatmap\.it|hotjar|hs-analytics|htlbid|hu?bspo?t|
 ibclick\.stream|imp(actradius|ression[a-z]*)|in(dex(exchange|ww)|folink|stagram|te(llitxt|r(com\.(com|io)|stitial)))|iperceptions|iubenda|
 kochava|
 le(aderboard|xity\.com)|li(nkedin|strak|veperson)|lockerdome|lytics|
-ma(iler[a-z]*|r(feel|keting)|t(htag|omo)|ven\.io)|me(dia\.net|quoda|tric)|ml314|mouseflow|munchkin|mxpnl|
+ma(iler[a-z]*|r(feel|keting)|t(htag|omo)|ven\.io)|me(dia\.net|quoda|tric)|ml314|mo(atads|useflow)|munchkin|mxpnl|
 narrativ\.|new(relic|sletter)|npttech|nreum|
 oktopost|olark|omappapi|one(signal|trust)|online-metrix|op(t?n?mn?str|t(anon|imize))|outbrain|owneriq|
 pa(ge(s(ense|peed)|.?view)|r(dot|sely|tner)|y[pw]all?)|pbjs|pe(r(imeter.?x|mutive|sonaliz[a-z]*)|tametrics)|pi(ano\.io|co\.tools|n(gdom|img|terest)|wik)|po(rpoiseant|strelease)|pr(e(bid[a-z]+|ssboard)|ivacy-center|ofitwell)|pub(ads|exchange|\.network|m(atic|ine))|pu(rechat|sh(bullet|ly|nami))|px-cloud|

@@ -723,8 +723,11 @@ l.facebook.com l.instagram.com
         yield subject, Image, i.R, graph}
       yield subject, Schema+'duration', mix['audio_length'], graph
       mix['tags'].map{|tag|
-        yield subject, Abstract, tag['name'], graph}
-    }
+        yield subject, Abstract, tag['name'], graph}}
+    if pages = tree['paging']
+      env[:links][:next] = pages['next']
+      env[:links][:prev] = pages['previous']
+    end
   end
 
   def NYT doc, &b
