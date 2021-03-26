@@ -277,6 +277,8 @@ l.facebook.com l.instagram.com
       elsif parts.size == 1 && !%w(favicon.ico manifest.json push_service_worker.js search sw.js).member?(parts[0]) # user
         if qs.has_key? 'q' # query tweets in local cache
           r.cacheResponse
+        elsif qs.has_key? 'ref_src'
+          [301, {'Location' => r.path}, []]
         else # find uid
           uid = nil
           uidQuery = "https://twitter.com/i/api/graphql/ku_TJZNyXL2T4-D9Oypg7w/UserByScreenName?variables=%7B%22screen_name%22%3A%22#{parts[0]}%22%2C%22withHighlightedLabel%22%3Atrue%7D"
