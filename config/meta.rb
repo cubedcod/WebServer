@@ -19,7 +19,6 @@ class WebResource
       SIOC + 'InstantMessage' => Post,
       SIOC + 'MicroblogPost' => Post,
       SIOC + 'BlogPost' => Post,
-      SIOC + 'MailMessage' => Post,
       SIOC + 'UserAccount' => Person,
       Schema + 'Answer' => Post,
       Schema + 'Article' => Post,

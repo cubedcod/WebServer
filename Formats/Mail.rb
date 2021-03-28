@@ -159,3 +159,10 @@ module Webize
     end
   end
 end
+class WebResource
+  module HTML
+    MarkupGroup[SIOC + 'MailMessage'] = -> msgs, env {
+      MarkupGroup[Post][msgs,env]
+    }
+  end
+end
