@@ -110,6 +110,7 @@ class DNSServer
   def run
     Socket.udp_server_loop(@port) do |data, src|
       r = DNSRequest.new(self, data)
+      puts [Time.now.iso8601, r.domain, @records[r.domain]]
       src.reply r.response(@records[r.domain])
     end
   end

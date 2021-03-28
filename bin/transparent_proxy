@@ -43,25 +43,35 @@ ip6tables -A OUTPUT -o lo   -j ACCEPT
 open_TCP     22 SSH
 open_port    67 DHCP
 open_port    68 DHCP
+
 iptables  -t nat -A OUTPUT -p tcp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1 # redirect DNS traffic not originating from proxy
 ip6tables -t nat -A OUTPUT -p tcp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
+iptables  -t nat -A OUTPUT -p udp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
+ip6tables -t nat -A OUTPUT -p udp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
 iptables  -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8000 -m owner ! --uid-owner $1 # redirect HTTP traffic not originating from proxy
 ip6tables -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8000 -m owner ! --uid-owner $1
 iptables  -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1 # redirect HTTPS traffic not originating from proxy
 ip6tables -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1
-iptables  -A OUTPUT -p tcp --sport 53 -j ACCEPT -m owner --uid-owner $1 # allow DNS traffic outgoing from proxy
+
+iptables  -A OUTPUT -p tcp --sport 53 -j ACCEPT -m owner --uid-owner $1 # allow DNS traffic for proxy uid
 ip6tables -A OUTPUT -p tcp --sport 53 -j ACCEPT -m owner --uid-owner $1
 iptables  -A OUTPUT -p tcp --dport 53 -j ACCEPT -m owner --uid-owner $1
 ip6tables -A OUTPUT -p tcp --dport 53 -j ACCEPT -m owner --uid-owner $1
-iptables  -A OUTPUT -p tcp --sport 80 -j ACCEPT -m owner --uid-owner $1 # allow HTTP traffic outgoing from proxy
+iptables  -A OUTPUT -p udp --sport 53 -j ACCEPT -m owner --uid-owner $1
+ip6tables -A OUTPUT -p udp --sport 53 -j ACCEPT -m owner --uid-owner $1
+iptables  -A OUTPUT -p udp --dport 53 -j ACCEPT -m owner --uid-owner $1
+ip6tables -A OUTPUT -p udp --dport 53 -j ACCEPT -m owner --uid-owner $1
+iptables  -A OUTPUT -p tcp --sport 80 -j ACCEPT -m owner --uid-owner $1 # allow HTTP traffic for proxy uid
 ip6tables -A OUTPUT -p tcp --sport 80 -j ACCEPT -m owner --uid-owner $1
 iptables  -A OUTPUT -p tcp --dport 80 -j ACCEPT -m owner --uid-owner $1
 ip6tables -A OUTPUT -p tcp --dport 80 -j ACCEPT -m owner --uid-owner $1
-iptables  -A OUTPUT -p tcp --sport 443 -j ACCEPT -m owner --uid-owner $1 # allow HTTPS traffic outgoing from proxy
+iptables  -A OUTPUT -p tcp --sport 443 -j ACCEPT -m owner --uid-owner $1 # allow HTTPS traffic for proxy uid
 ip6tables -A OUTPUT -p tcp --sport 443 -j ACCEPT -m owner --uid-owner $1
 iptables  -A OUTPUT -p tcp --dport 443 -j ACCEPT -m owner --uid-owner $1
 ip6tables -A OUTPUT -p tcp --dport 443 -j ACCEPT -m owner --uid-owner $1
+
 open_TCP    587 SMTP
+open_port  1053 DNS
 open_TCP   8000 HTTP
 open_TCP   8080 HTTP
 open_TCP   8081 HTTP
