@@ -1,21 +1,16 @@
 #!/usr/bin/env ruby
-# Simple, scrappy UDP DNS server in Ruby (with protocol annotations)
-# By Peter Cooper
-#
+# Simple, scrappy UDP DNS server  By Peter Cooper
 # MIT license
 #
-# * Not advised to use in your production environment! ;-)
-# * Requires Ruby 1.9
-# * Supports A and CNAME records
-# * See http://www.ietf.org/rfc/rfc1035.txt for protocol guidance
-# * All records get the same TTL
+# * See http://www.ietf.org/rfc/rfc1035.txt
 
+require 'resolv'
 require 'socket'
+require_relative '../index'
 
 records = {
+  'www.mixcloud.com.' => '127.0.0.1',
   'www.reddit.com.' => '127.0.0.1',
-  'test.host.' => '127.0.0.2',
-  'test.cnames.com.' => 'example.com'
 }
 
 class DNSRequest
@@ -110,8 +105,9 @@ class DNSServer
   def run
     Socket.udp_server_loop(@port) do |data, src|
       r = DNSRequest.new(self, data)
-      puts [Time.now.iso8601, r.domain, @records[r.domain]]
-      src.reply r.response(@records[r.domain])
+      result = @records[r.domain] || Resolv.getaddress(r.domain)
+      puts [Time.now.iso8601, r.domain, result].join ' '
+      src.reply r.response(result)
     end
   end
 end
