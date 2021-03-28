@@ -28,6 +28,7 @@ class WebResource < RDF::URI
     Creator  = SIOC + 'has_creator'
     To       = SIOC + 'addressed_to'
     Post     = SIOC + 'Post'
+    From     = Creator
 
     FOAF     = 'http://xmlns.com/foaf/0.1/'
     Person   = FOAF + 'Person'

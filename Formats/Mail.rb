@@ -162,7 +162,9 @@ end
 class WebResource
   module HTML
     MarkupGroup[SIOC + 'MailMessage'] = -> msgs, env {
-      MarkupGroup[Post][msgs,env]
+      [HTML.tabular(msgs.map{|m|
+                      Hash[m.select{|k,v|[To, From, Image, Title].member? k}].update({'uri' => '#tr'+Digest::SHA2.hexdigest(m['uri'])})}, env),
+       MarkupGroup[Post][msgs,env]]
     }
   end
 end
