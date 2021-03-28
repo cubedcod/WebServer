@@ -388,7 +388,7 @@ class WebResource
                unless env[:title] == title
                  env[:title] = title
                  hasPointer = true
-                 [{_: :a,  id: 't' + local_id, class: :title, type: :node,
+                 [{_: :a,  id: 'r'+Digest::SHA2.hexdigest(rand.to_s), class: :title, type: :node,
                    href: resource.href, c: [(post.delete(Schema+'icon')||[]).map{|i|{_: :img, src: i.href}},CGI.escapeHTML(title)]}, " \n"]
                end},
              {class: :pointer,
