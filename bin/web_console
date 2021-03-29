@@ -1,7 +1,5 @@
 #!/bin/sh
 conf=~/src/WebServer/config
 sudo iptables -t nat -A OUTPUT -p tcp -d 127.0.0.1 --dport 80 -j REDIRECT --to-ports 8000
-cd $conf
-squid -f squid.conf
-cd $HOME/web
-unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c $conf/unicorn.rb $conf/rack.ru
+cd $conf && squid -f squid.conf
+cd $HOME/web && unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c $conf/unicorn.rb $conf/rack.ru

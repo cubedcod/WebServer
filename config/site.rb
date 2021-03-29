@@ -539,7 +539,7 @@ l.facebook.com l.instagram.com
             yield subject, Type, (Schema+'SearchResult').R
             yield subject, Title, title.inner_text
             yield subject, Content, Webize::HTML.format(g.inner_html, self)
-            if (icon = ('//' + subject.host + '/favicon.ico').R).node.exist?
+            if (icon = ('//' + subject.host + '/favicon.ico').R env).node.exist?
               yield subject, Schema+'icon', icon
             end
           end
