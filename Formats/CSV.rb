@@ -58,7 +58,7 @@ class WebResource
                         env[:title] = title; tCount += 1
                         [{_: :a,href: re.href,class: :title,type: :node,c: CGI.escapeHTML(title),id: 'r'+Digest::SHA2.hexdigest(rand.to_s)}, ' '] # title
                       end},
-                    ({_: :a,href: re.href,class: :id,type: :node,c: '☛',id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} if tCount == 0),    # resource pointer
+                    ({_: :a,href: re.href, class: :id, type: :node, c: '☛', id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} if tCount == 0),    # resource pointer
                     ({class: :abstract, c: resource[Abstract]} if resource.has_key? Abstract),                                           # abstract
                     [Image, Video].map{|t|(resource[t]||[]).map{|i|Markup[t][i,env]}},                                                   # image & video links
                     ([resource[Content], resource[SIOC+'richContent']] unless (resource[Creator]||[]).find{|a|KillFile.member? a.to_s})] # HTML content

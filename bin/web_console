@@ -1,9 +1,7 @@
 #!/bin/sh
 conf=~/src/WebServer/config
+sudo iptables -t nat -A OUTPUT -p tcp -d 127.0.0.1 --dport 80 -j REDIRECT --to-ports 8000
+cd $conf
+squid -f squid.conf
 cd $HOME/web
-tmux new-session -s HTTP -d
-tmux send-keys -t HTTP:0 'sudo socat TCP-LISTEN:80,fork TCP:127.0.0.1:8000 &' C-m
-tmux send-keys -t HTTP:0 'sudo socat TCP-LISTEN:443,fork TCP:127.0.0.1:8081 &' C-m
-tmux send-keys -t HTTP:0 "cd $conf; squid -f squid.conf" C-m
-tmux new-window -t HTTP:1 -d unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c $conf/unicorn.rb $conf/rack.ru
-tmux attach-session -t HTTP
+unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c $conf/unicorn.rb $conf/rack.ru

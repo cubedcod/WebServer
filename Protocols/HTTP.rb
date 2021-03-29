@@ -280,11 +280,15 @@ class WebResource
 
     def GET
       if local_node?
+        env[:proxy_href] = true
         p = parts[0]
         if !p
-          [302, {'Location' => '/h'}, []]
+          [302, {'Location' => '/bookmarks'}, []]
         elsif %w{m d h}.member? p              # current month/day/hour redirect
           dateDir
+        elsif path == '/bookmarks'
+          env[:view] = 'table'
+          [200, {'Content-Type' => 'text/html'}, [htmlDocument(Hash[Bookmarks.map{|b|[b,{'uri'=>b, Title => [b]}]}])]]
         elsif path == '/favicon.ico'           # icon handler
           [200, {'Content-Type' => 'image/png'}, [SiteIcon]]
         elsif path == '/log' || path=='/log/'  # log-search handler
@@ -294,7 +298,6 @@ class WebResource
         elsif !p.match? /[.:]/                 # no domain-separator chars in path-segment
           cacheResponse                        # local path
         else                                   # hostname in first path-segment
-          env[:proxy_href] = true
           (env[:base] = remoteURL).hostHandler # host handler (rebased on local URIspace)
         end
       else
