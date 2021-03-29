@@ -48,10 +48,10 @@ iptables  -t nat -A OUTPUT -p tcp --dport  53 -j REDIRECT --to-ports 1053 -m own
 ip6tables -t nat -A OUTPUT -p tcp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
 iptables  -t nat -A OUTPUT -p udp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
 ip6tables -t nat -A OUTPUT -p udp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
-#iptables  -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8000 -m owner ! --uid-owner $1 # redirect HTTP traffic not originating from proxy
-#ip6tables -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8000 -m owner ! --uid-owner $1
-#iptables  -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1 # redirect HTTPS traffic not originating from proxy
-#ip6tables -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1
+iptables  -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8000 -m owner ! --uid-owner $1 # redirect HTTP traffic not originating from proxy
+ip6tables -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8000 -m owner ! --uid-owner $1
+iptables  -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1 # redirect HTTPS traffic not originating from proxy
+ip6tables -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8081 -m owner ! --uid-owner $1
 
 iptables  -A OUTPUT -p tcp --sport 53 -j ACCEPT -m owner --uid-owner $1 # allow DNS traffic for proxy uid
 ip6tables -A OUTPUT -p tcp --sport 53 -j ACCEPT -m owner --uid-owner $1
