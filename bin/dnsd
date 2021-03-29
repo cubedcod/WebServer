@@ -87,10 +87,12 @@ end
 class DNSServer
   attr_reader :port, :ttl
   LocalHost = '127.0.0.1'
+  Hosts = {}
+
   def initialize(options = {})
     options = {
       port: 1053,
-      ttl: 60
+      ttl: 600
     }.merge(options)
     
     @port, @ttl = options[:port], options[:ttl]
@@ -100,11 +102,15 @@ class DNSServer
     Socket.udp_server_loop(@port) do |data, src|
       r = DNSRequest.new(self, data)
       host = r.domain.sub /\.$/,''
+      unless Hosts.has_key? host
+        newHost = true
+        Hosts[host] = true
+      end
       result = (['//',host].join.R.deny? || WebResource::HTTP::HostGET.has_key?(host)) ? LocalHost : Resolv.getaddress(r.domain) rescue LocalHost
-      puts [Time.now.iso8601, r.domain, result].join ' '
+      puts [Time.now.iso8601, newHost ? "\e[38;5;51m" : nil, r.domain, newHost ? "\e[0m" : nil, result].join ' '
       src.reply r.response(result)
     end
   end
 end
 
-DNSServer.new(ttl: 600).run
+DNSServer.new(ttl: 3600).run
