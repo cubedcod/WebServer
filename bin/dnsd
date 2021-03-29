@@ -106,7 +106,7 @@ class DNSServer
   def run
     Socket.udp_server_loop(@port) do |data, src|
       r = DNSRequest.new(self, data)
-      result = @records[r.domain] || Resolv.getaddress(r.domain)
+      result = @records[r.domain] || Resolv.getaddress(r.domain) rescue '127.0.0.1'
       puts [Time.now.iso8601, r.domain, result].join ' '
       src.reply r.response(result)
     end
