@@ -348,7 +348,7 @@ class WebResource
       if creator.class == String || !creator.respond_to?(:R)
         CGI.escapeHTML creator.to_s
       else
-        uri = creator.R
+        uri = creator.R env
         name = uri.display_name
         color = env[:colors][name] ||= '#%06x' % (rand 16777216)
         {_: :a, href: uri.href, id: 'a' + Digest::SHA2.hexdigest(rand.to_s), class: :fromto, style: "background-color: #{color}; color: black", c: name}
