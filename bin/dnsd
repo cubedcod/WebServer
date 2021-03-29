@@ -7,11 +7,6 @@ require 'resolv'
 require 'socket'
 require_relative '../index'
 
-records = {
-  'www.mixcloud.com.' => '127.0.0.1',
-  'www.reddit.com.' => '127.0.0.1',
-}
-
 class DNSRequest
   attr_reader :server, :data, :domain
   
@@ -91,26 +86,25 @@ end
 
 class DNSServer
   attr_reader :port, :ttl
-  attr_accessor :records
-  
+  LocalHost = '127.0.0.1'
   def initialize(options = {})
     options = {
       port: 1053,
-      ttl: 60,
-      records: {}
+      ttl: 60
     }.merge(options)
     
-    @port, @records, @ttl = options[:port], options[:records], options[:ttl]
+    @port, @ttl = options[:port], options[:ttl]
   end
     
   def run
     Socket.udp_server_loop(@port) do |data, src|
       r = DNSRequest.new(self, data)
-      result = @records[r.domain] || Resolv.getaddress(r.domain) rescue '127.0.0.1'
+      host = r.domain.sub /\.$/,''
+      result = (['//',host].join.R.deny? || WebResource::HTTP::HostGET.has_key?(host)) ? LocalHost : Resolv.getaddress(r.domain) rescue LocalHost
       puts [Time.now.iso8601, r.domain, result].join ' '
       src.reply r.response(result)
     end
   end
 end
 
-DNSServer.new(records: records, ttl: 120).run
+DNSServer.new(ttl: 600).run
