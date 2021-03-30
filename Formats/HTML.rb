@@ -112,10 +112,10 @@ module Webize
     end
 
     def self.proxy_hrefs html, env
-      html = (Nokogiri::HTML.fragment [html].join)                   # parse
-
-      html.css('img').map{|i|i['src'] = i['src'].R(env).proxy_href}
-
+      return nil if !html || html.empty?
+      html = Nokogiri::HTML.fragment(html.class == Array ? html.join : html) # parse
+      html.css('img[src]').map{|i|i['src'] = i['src'].R(env).proxy_href}  # image refs
+      html.css('a[href]').map{|a|a['href'] = a['href'].R(env).proxy_href} # hrefs
       html.to_html                                                   # serialize
     end
 
