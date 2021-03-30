@@ -111,6 +111,14 @@ module Webize
       html.to_html                                                   # serialize
     end
 
+    def self.proxy_hrefs html, env
+      html = (Nokogiri::HTML.fragment [html].join)                   # parse
+
+      html.css('img').map{|i|i['src'] = i['src'].R(env).proxy_href}
+
+      html.to_html                                                   # serialize
+    end
+
     class Format < RDF::Format
       content_type 'text/html', extensions: [:htm, :html], aliases: %w(text/fragment+html;q=0.8)
       content_encoding 'utf-8'
@@ -381,7 +389,7 @@ class WebResource
     # RDF -> Markup
     def self.markup type, v, env
       if [Abstract, Content, 'http://rdfs.org/sioc/ns#richContent'].member? type
-        v
+        env.has_key?(:proxy_href) ? Webize::HTML.proxy_hrefs(v, env) : v
       elsif Markup[type] # markup lambda defined for type-argument
         Markup[type][v,env]
       elsif v.class == Hash # data
