@@ -13,7 +13,9 @@
 	  url.searchParams.delete('utm_medium');
 	  url.searchParams.delete('utm_content');
 	  url.searchParams.delete('utm_campaign');
-	  document.querySelector('a').setAttribute('href', 'http://localhost:8000/' + url);
+	  var loc = 'http://localhost:8000/' + url;
+	  document.querySelector('a').setAttribute('href', loc);
+	  window.location.href = loc;
       });
     </script>
   </body>
