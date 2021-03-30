@@ -126,16 +126,23 @@ class WebResource < RDF::URI
   end
 end
 
-# cast URI-identified classes to WebResource
+# #R method casts to WebResource
 class RDF::URI
   def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
 end
+
 class RDF::Node
   def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
 end
+
 class String
   def R env=nil; env ? WebResource.new(self).env(env) : WebResource.new(self) end
 end
+
+class Symbol
+  def R env=nil; env ? WebResource.new(to_s).env(env) : WebResource.new(to_s) end
+end
+
 class WebResource
   def R env_=nil; env_ ? env(env_) : self end
 end
