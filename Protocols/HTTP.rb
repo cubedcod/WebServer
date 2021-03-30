@@ -103,7 +103,7 @@ class WebResource
                       elsif type == :JSON || ext == 'json'
                         ['application/json','{}']
                       else
-                        url = (query&.match? /utm[^a-z]/) ? path : uri
+                        url = (query&.match? /utm[^a-z]/) ? ['//',host,path].join : uri
                         ['text/html; charset=utf-8',
                          "<html><body class='blocked'>#{HTML.render [{_: :style, c: SiteCSS}, {_: :script, c: SiteJS}, uri_toolbar]}<a class='unblock' href='#{url}'>⌘</a></body></html>"]
                       end
