@@ -82,9 +82,9 @@ class WebResource < RDF::URI
     def uri_toolbar
       qs = query_values || {}
       bc = '' # breadcrumb trail
-      favicon = ('//' + host + '/favicon.ico').R
-      icon = if env[:links][:icon]                       # icon reference in resource metadata
-               env[:links][:icon] = env[:links][:icon].R # icon resource
+      favicon = ('//' + host + '/favicon.ico').R env # icon at well-known location
+      icon = if env[:links][:icon]                       # icon reference in metadata
+               env[:links][:icon] = env[:links][:icon].R env # use icon reference
                if env[:links][:icon].uri.index('data:') == 0 # data URI?
                  env[:links][:icon].uri                      # data URI
                else
@@ -92,17 +92,17 @@ class WebResource < RDF::URI
                    FileUtils.mkdir_p File.dirname favicon.fsPath
                    FileUtils.ln_s (env[:links][:icon].node.relative_path_from favicon.node.dirname), favicon.node # link to well-known location
                  end
-                 env[:links][:icon].href                 # page icon
+                 env[:links][:icon].href                 # referenced icon
                end
-             elsif favicon.node.exist?                   # icon exists at well-known location?
-               favicon.href                              # host icon
+             elsif favicon.node.exist?                   # icon at well-known location
+               favicon.href
              end
 
       {class: :toolbox,
        c: [({_: :span, c: env[:status], style: 'font-weight: bold', class: :icon} if env[:status]),
            ({_: :a, id: :tabular, class: :icon, c: '↨', href: env[:base].join(HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))).R.href} unless env[:view] == 'table'),
            #({_: :a, href: env[:base].uri, c: '☝', class: :icon, id: :upstream} unless local_node?),
-           {_: :a, href: HTTP.qs(qs.merge({'notransform' => nil})), c: '⚗️', id: :UI, class: :icon},
+           {_: :a, href: env[:proxy_href] ? uri : HTTP.qs(qs.merge({'notransform' => nil})), c: '⚗️', id: :UI, class: :icon},
            ({_: :a, href: HTTP.qs(qs.merge({'download' => 'audio'})), c: '&darr;', id: :download, class: :icon} if host.match?(/(^|\.)(bandcamp|(mix|sound)cloud|youtube).com/)),
            env[:feeds].map{|feed|
              {_: :a, href: feed.R.href, title: feed.path, class: :icon, c: FeedIcon, id: 'feed' + Digest::SHA2.hexdigest(feed.to_s)}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .08em solid orange; background-color: orange'} : {})}, "\n",
