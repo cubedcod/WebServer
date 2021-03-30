@@ -27,9 +27,7 @@ class WebResource
 
   module URIs
 
-    LocalAddress = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).concat(ENV.has_key?('HOSTNAME') ? [ENV['HOSTNAME']] : []).uniq
-
-    # URI -> fs-path
+    # URI -> path (String)
     def fsPath
       [host_parts,            # host directory
        if local_node?         # local path
@@ -59,14 +57,6 @@ class WebResource
          end
          ps
        end].join '/'
-    end
-
-    def host_parts
-      local_node? ? ['.'] : host.split('.').-(%w(com net org www)).reverse
-    end
-
-    def local_node?
-      !host || LocalAddress.member?(host)
     end
 
     # URI -> Pathname
