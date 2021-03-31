@@ -396,14 +396,14 @@ class WebResource
     def self.markup type, v, env
       if [Abstract, Content, 'http://rdfs.org/sioc/ns#richContent'].member? type
         (env.has_key?(:proxy_href) && v.class==String) ? Webize::HTML.proxy_hrefs(v, env) : v
-      elsif Markup[type] # markup lambda defined for type-argument
+      elsif Markup[type] # lambda defined for type-argument
         Markup[type][v,env]
       elsif v.class == Hash # data
         types = (v[Type] || []).map{|t|
           MarkupMap[t.to_s] || t.to_s } # normalize types for renderer application
         seen = false
         [types.map{|type|
-          if f = Markup[type] # markup lambda defined for type
+          if f = Markup[type] # lambda defined for type
             seen = true
             f[v,env]
           end},

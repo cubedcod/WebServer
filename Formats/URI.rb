@@ -124,9 +124,9 @@ class WebResource < RDF::URI
             end), "\n"]}
     end
     
-    # URI -> lambda
-    Markup = {}      # markup single resource of type
-    MarkupGroup = {} # markup group of resources of type
+    # URI -> renderer lambda
+    Markup = {}      # single resource of type
+    MarkupGroup = {} # group of resources of type
 
     Markup['uri'] = -> uri, env {uri.R}
 
