@@ -114,9 +114,9 @@ class WebResource < RDF::URI
            ({_: :a, href: HTTP.qs(qs.merge({'download' => 'audio'})), c: '&darr;', id: :download, class: :icon} if host.match?(/(^|\.)(bandcamp|(mix|sound)cloud|youtube).com/)), # download link
            env[:feeds].map{|feed|                                                                                                                                                 # feed links
              {_: :a, href: feed.R.href, title: feed.path, class: :icon, c: FeedIcon, id: 'feed' + Digest::SHA2.hexdigest(feed.to_s)}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .08em solid orange; background-color: orange'} : {})}, "\n",
-           {_: :a, href: env[:base].join('/').R.href, id: :host, c: icon ? {_: :img, src: icon, style: DarkLogo.member?(host) ? 'background-color: #fff' : ''} : '🏠'},        # link to path root
+           {_: :a, href: env[:base].join('/').R(env).href, id: :host, c: icon ? {_: :img, src: icon, style: DarkLogo.member?(host) ? 'background-color: #fff' : ''} : '🏠'},   # link to path root
            {class: :path, c: env[:base].parts.map{|p| bc += '/' + p                                                                                                            # path breadcrumbs
-              {_: :a, class: :breadcrumb, href: env[:base].join(bc).R.href, c: [{_: :span, c: '/'}, (CGI.escapeHTML Rack::Utils.unescape p)], id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}}},
+              {_: :a, class: :breadcrumb, href: env[:base].join(bc).R(env).href, c: [{_: :span, c: '/'}, (CGI.escapeHTML Rack::Utils.unescape p)], id: 'r' + Digest::SHA2.hexdigest(rand.to_s)}}},
            (if SearchableHosts.member? host
             search_arg = %w(f find q search_query).find{|k|qs.has_key? k} || ([nil, '/'].member?(path) ? 'find' : 'q') # query argument
             qs[search_arg] ||= ''                                                                                      # initial query value

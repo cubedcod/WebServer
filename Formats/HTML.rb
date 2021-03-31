@@ -282,7 +282,7 @@ module Webize
         if body = n.css('body')[0]
           unless @base.local_node? || @base.env[:fullContent] # summarize to new content
             @base.env[:links][:down] ||= WebResource::HTTP.qs @base.queryvals.merge({'fullContent' => nil})
-            hashed_nodes = 'div, footer, h1, h2, h3, nav, p, section, span'
+            hashed_nodes = 'div, footer, h1,h2,h3, nav, p, section, span, ul, li'
             hashs = {}
             links = {}
             hashfile = ('//' + @base.host + '/.hashes').R
