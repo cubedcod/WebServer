@@ -149,6 +149,7 @@ l.facebook.com l.instagram.com
     GET 'lh5.googleusercontent.com', NoGunk
     GET 'maps.google.com', GotoGoogle
     GET 'maps.gstatic.com', NoGunk
+    GET 'news.google.com', NoGunk
     GET 'www.gstatic.com', NoGunk
     GET 'streetviewpixels-pa.googleapis.com', NoGunk
 

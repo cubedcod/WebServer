@@ -41,6 +41,7 @@ data-gl-src
 data-hi-res-src
 data-image
 data-img
+data-img-url
 data-img-src
 data-lazy-img
 data-lazy-src
