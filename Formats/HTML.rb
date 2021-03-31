@@ -78,8 +78,8 @@ module Webize
 
       html.traverse{|e|                                              # visit nodes
         e.respond_to?(:attribute_nodes) && e.attribute_nodes.map{|a| # inspect attributes
-          e.set_attribute 'src', a.value if SRCnotSRC.member? a.name # map src-like attributes to src
-          e.set_attribute 'srcset', a.value if SRCSET.member? a.name # map srcset-like attributes to srcset
+          e.set_attribute 'src', a.value if SRCnotSRC.member? a.name # map alternative src attributes to @src
+          e.set_attribute 'srcset', a.value if SRCSET.member? a.name # map alternative srcset attributes to @srcset
           a.unlink if a.name.match?(/^(aria|data|js|[Oo][Nn])|react/) || %w(bgcolor class color height http-equiv layout loading ping role style tabindex target theme width).member?(a.name)}
         if e['src']
           src = (base.join e['src']).R                               # resolve @src
@@ -92,9 +92,9 @@ module Webize
         end
         srcset e, base if e['srcset']                                # resolve @srcset
         if e['href']                                                 # href attribute
-          ref = (base.join e['href']).R                              # resolve href location
-          ref.query = nil if ref.query&.match?(/utm[^a-z]/)          # unutmize query
-          ref.fragment = nil if ref.fragment&.match?(/utm[^a-z]/)    # unutmize fragment
+          ref = (base.join e['href']).R                              # resolve @href
+          ref.query = nil if ref.query&.match?(/utm[^a-z]/)          # deutmize query (tracking gunk)
+          ref.fragment = nil if ref.fragment&.match?(/utm[^a-z]/)    # deutmize fragment
           offsite = ref.host != base.host
           e.add_child " <span class='uri'>#{CGI.escapeHTML (offsite ? ref.uri.sub(/^https?:..(www.)?/,'') : (ref.path || '/'))[0..127]}</span> " # show URI in HTML
           e.set_attribute 'id', 'id' + Digest::SHA2.hexdigest(rand.to_s) unless e['id'] # mint identifier
@@ -111,12 +111,21 @@ module Webize
       html.to_html                                                   # serialize
     end
 
+    # resolve proxy hrefs in HTML content
     def self.proxy_hrefs html, env
-      return nil if !html || html.empty?
-      html = Nokogiri::HTML.fragment(html.class == Array ? html.join : html) # parse
-      html.css('img[src]').map{|i|i['src'] = i['src'].R(env).proxy_href}  # image refs
-      html.css('a[href]').map{|a|a['href'] = a['href'].R(env).proxy_href} # hrefs
-      html.to_html                                                   # serialize
+      return '' if !html || html.empty?
+      html = Nokogiri::HTML.fragment(html.class==Array ? html.join : html) # parse
+
+      html.css('img[src]').map{|i|                                         # img @src
+        i['src'] = i['src'].R(env).proxy_href}
+
+      html.css('img[srcset]').map{|i|                                      # img @srcset
+        i['srcset'] = i['srcset'].scan(SrcSetRegex).map{|ref, size|
+          [ref.R(env).proxy_href, size].join ' '}.join(', ')}
+
+      html.css('a[href]').map{|a|a['href'] = a['href'].R(env).proxy_href}  # @href
+
+      html.to_html                                                         # serialize
     end
 
     class Format < RDF::Format

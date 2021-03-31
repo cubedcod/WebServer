@@ -59,11 +59,12 @@ data-lazy-srcset
 data-srcset
 }
 
-    # resolve srcset references
+    SrcSetRegex = /\s*(\S+)\s+([^,]+),*/
+
+    # resolve @srcset refs
     def self.srcset node, base
-      node['srcset'] = node['srcset'].scan(/\s*(\S+)\s+([^,]+),*/).map{|url, size|
-        [(base.join url), size].join ' '
-      }.join(', ')
+      node['srcset'] = node['srcset'].scan(SrcSetRegex).map{|url, size|
+        [(base.join url), size].join ' '}.join(', ')
       nil
     end
 
