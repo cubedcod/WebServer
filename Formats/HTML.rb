@@ -382,14 +382,11 @@ class WebResource
                              link[:prev, '&#9664;'], "\n", link[:next, '&#9654;'], "\n",
                              groups.map{|type, resources|
                                if MarkupGroup.has_key? type
-                                 MarkupGroup[type][resources, env]   # collection markup
+                                 MarkupGroup[type][resources, env]
+                               elsif env[:view] == 'table'
+                                 HTML.tabular resources, env
                                else
-                                 if env[:view] == 'table'
-                                   HTML.tabular resources, env       # tabular view
-                                 else
-                                   resources.map{|resource|
-                                     HTML.markup nil, resource, env} # singleton markup
-                                 end
+                                 resources.map{|r|HTML.markup nil, r, env}
                                end},
                              env[:links][:down] ? {_: :a, id: :expand, c: '&#11206;', href: env[:links][:down]} : nil,
                              {_: :script, c: SiteJS}]}]}]
@@ -398,7 +395,7 @@ class WebResource
     # RDF -> Markup
     def self.markup type, v, env
       if [Abstract, Content, 'http://rdfs.org/sioc/ns#richContent'].member? type
-        env.has_key?(:proxy_href) ? Webize::HTML.proxy_hrefs(v, env) : v
+        (env.has_key?(:proxy_href) && v.class==String) ? Webize::HTML.proxy_hrefs(v, env) : v
       elsif Markup[type] # markup lambda defined for type-argument
         Markup[type][v,env]
       elsif v.class == Hash # data
