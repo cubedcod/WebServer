@@ -341,9 +341,6 @@ class WebResource
         [{_: :span, class: :title, c: CGI.escapeHTML(title)}, ' ']
       end}
 
-    Markup['http://purl.org/dc/terms/created'] = Markup['http://purl.org/dc/terms/modified'] = Markup[Date] = -> date, env {
-      {_: :a, class: :date, c: date, href: 'http://localhost:8000/' + date[0..13].gsub(/[-T:]/,'/')}}
-
     Markup[Creator] = Markup[To] = Markup['http://xmlns.com/foaf/0.1/maker'] = -> creator, env {
       if creator.class == String || !creator.respond_to?(:R)
         CGI.escapeHTML creator.to_s

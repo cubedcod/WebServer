@@ -9,6 +9,11 @@ class WebResource
 
   end
 
+  module HTML
+    Markup['http://purl.org/dc/terms/created'] = Markup['http://purl.org/dc/terms/modified'] = Markup[Date] = -> date, env {
+      {_: :a, class: :date, c: date, href: 'http://localhost:8000/' + date[0..13].gsub(/[-T:]/,'/')}}
+  end
+
   module HTTP
 
     def dateDir
