@@ -116,10 +116,10 @@ module Webize
       return '' if !html || html.empty?
       html = Nokogiri::HTML.fragment(html.class==Array ? html.join : html) # parse
 
-      html.css('img[src]').map{|i|                                         # img @src
+      html.css('[src]').map{|i|                                            # @src
         i['src'] = i['src'].R(env).proxy_href}
 
-      html.css('img[srcset]').map{|i|                                      # img @srcset
+      html.css('[srcset]').map{|i|                                         # @srcset
         i['srcset'] = i['srcset'].scan(SrcSetRegex).map{|ref, size|
           [ref.R(env).proxy_href, size].join ' '}.join(', ')}
 
