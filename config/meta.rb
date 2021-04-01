@@ -711,6 +711,7 @@ class WebResource
       Atom + 'displaycategories' => Abstract,
       Atom + 'enclosure' => SIOC+'attachment',
       Atom + 'link' => DC+'link',
+      Atom + 'pubDate' => Date,
       Atom + 'self' => Link,
       Atom + 'summary' => Abstract,
       Atom + 'title' => Title,
