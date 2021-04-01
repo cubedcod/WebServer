@@ -111,7 +111,6 @@ l.facebook.com l.instagram.com
 
     GET 'bos.gl', -> r {r.insecure.fetch}
 
-    GET 'www.amazon.com', NoGunk
     GET 'www.dropbox.com', NoGunk
 
     GET 'gitter.im', -> r {

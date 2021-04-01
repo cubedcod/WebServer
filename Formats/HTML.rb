@@ -392,13 +392,13 @@ class WebResource
                              {_: :script, c: SiteJS}]}]}]
     end
 
-    # JSON fields or full object -> Markup
+    # arbitrary JSON -> Markup
     def self.markup type, v, env
       if [Abstract, Content, 'http://rdfs.org/sioc/ns#richContent'].member? type
         (env.has_key?(:proxy_href) && v.class==String) ? Webize::HTML.proxy_hrefs(v, env) : v
-      elsif Markup[type] # renderer defined for type given as argument
+      elsif Markup[type] # renderer defined for type argument
         Markup[type][v,env]
-      elsif v.class == Hash # arbitrary RDF/JSON object
+      elsif v.class == Hash # RDF-in-JSON object
         types = (v[Type] || []).map{|t| # type defined in RDF
           MarkupMap[t.to_s] || t.to_s } # map to render type
         seen = false
