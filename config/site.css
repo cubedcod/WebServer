@@ -45,7 +45,7 @@ a.idlink {color: #aaa; font-size: .72em; vertical-align: bottom}
 a.title:visited, a.uri:visited, a.uri.path:visited, a.path:visited {background-color: #0f5; color: #000}
 a.unblock {color: #fff; font-size: 22em; font-weight: normal; text-decoration: none}
 a.uri > span.uri {font-size: 0.8em; font-weight: normal; color: #777}
-a.uri {border-radius: .28em; border: 1px solid #000; background-color: #d8d8d8; color: #000; max-width: 42ex; overflow: hidden; margin: .1em; font-weight: bold; padding-left: .1em; padding-right: .1em}
+a.uri {border-radius: 0 .4em .4em 0; border: 1px solid #000; background-color: #d8d8d8; color: #000; max-width: 42ex; overflow: hidden; margin: .1em; font-weight: bold; padding-left: .1em; padding-right: .1em}
 a.uri.path > span.uri {color: #aaa}
 a.uri.path {background-color: #222; color: #fff; border-color: #333}
 a:hover, a.uri:hover {border-color: #0ff; background-color: #0ff}
