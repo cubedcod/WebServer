@@ -10,8 +10,8 @@
 a.blocked {display: none}
 .breadcrumb > span {font-size: 1.4em; color: #888}
 .breadcrumb {color: #eee}
-.container .body {border-radius: 0 .4em .4em .4em; width: 100%; border-width: .1em}
-.container .head {border-radius: .4em .4em 0 0; border-width: .1em .1em 0 .1em; font-weight: bold; font-size: 1.1em; padding-left: .16em; padding-right: .16em}
+.container .body {border-radius: 0 .4em .4em .4em; width: 100%; border-width: .1em; margin: 0}
+.container .head {border-radius: .4em .4em 0 0; border-width: .1em .1em 0 .1em; font-weight: bold; font-size: 1.1em; padding-left: .16em; padding-right: .16em; margin: 0}
 .container > .head, .container > .body {background-color: #000; color: #fff; border-style: solid; border-color: #555}
 .container td.head {border-radius: .4em 0 0 .4em}
 .container {margin: .2em}
