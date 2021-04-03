@@ -178,9 +178,11 @@ class WebResource
             if charset
               charset = 'UTF-8' if charset.match? /utf.?8/i           # normalize UTF-8 charset symbol
               charset = 'Shift_JIS' if charset.match? /s(hift)?.?jis/i# normalize Shift-JIS charset symbol
-            end                                                       # encode in UTF-8
+            end                                                       # transcode to UTF-8
             body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace if format.match? /(ht|x)ml|script|text/
+
             body = Webize.clean self, body, format                    # clean upstream data
+
             if formatExt = Suffixes[format] || Suffixes_Rack[format]  # find format-suffix
               file = fsPath                                           # cache path
               file += '/index' if file[-1] == '/'                     # append dir-index slug
@@ -190,12 +192,16 @@ class WebResource
             else
               puts "⚠️ extension undefined for #{format}"              # ⚠️ undefined format-suffix
             end
+
             if reader = RDF::Reader.for(content_type: format)         # reader defined for format?
               env[:repository] ||= RDF::Repository.new                # initialize RDF repository
+
               if format.index('text') && timestamp=h['Last-Modified'] # HTTP metadata to RDF-graph
                 env[:repository] << RDF::Statement.new(self, Date.R, Time.httpdate(timestamp.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,'')).iso8601) rescue nil
               end
+
               reader.new(body, base_uri: self, path: file){|g|env[:repository] << g} # read RDF
+
             else
               puts "⚠️ Reader undefined for #{format}"                 # ⚠️ undefined Reader
             end unless format.match? /octet-stream|script/
@@ -204,6 +210,7 @@ class WebResource
           end
           return unless thru                                          # no HTTP response, done fetching to RAM
           saveRDF                                                     # commit graph-cache
+
           env[:resp]['Access-Control-Allow-Origin'] ||= origin        # CORS header
           h['Link'] && h['Link'].split(',').map{|link|                # Link headers
             ref, type = link.split(';').map &:strip
@@ -211,12 +218,15 @@ class WebResource
               ref = ref.sub(/^</,'').sub />$/, ''
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
-            end}                                                      # upstream headers for downstream
+            end}                                                      # upstream headers
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type).map{|k|env[:resp][k] ||= h[k] if h[k]}
-          env[:resp]['Content-Length'] = body.bytesize.to_s           # Content-Length header
           env[:resp]['ETag'] ||= h['Etag']                            # ETag header
+
           response_format = selectFormat format                       # select response content-type
           if env[:notransform] || !format || (format == response_format && format.match?(FixedFormat))
+            puts format, env.has_key?(:proxy_href)
+            body = Webize::HTML.proxy_hrefs body, env, true if format == 'text/html' && env.has_key?(:proxy_href) # rebase hrefs
+            env[:resp]['Content-Length'] = body.bytesize.to_s         # Content-Length header
             [200, env[:resp], [body]]                                 # response in upstream format
           else                                                        # content-negotiated transform
             graphResponse format                                      # response in requested format

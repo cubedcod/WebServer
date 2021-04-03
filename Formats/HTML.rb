@@ -112,9 +112,9 @@ module Webize
     end
 
     # resolve proxy hrefs in HTML content
-    def self.proxy_hrefs html, env
+    def self.proxy_hrefs html, env, full=false
       return '' if !html || html.empty?
-      html = Nokogiri::HTML.fragment(html.class==Array ? html.join : html) # parse
+      html = Nokogiri::HTML.send (full ? :parse : :fragment), (html.class==Array ? html.join : html) # parse
 
       html.css('[src]').map{|i|                                            # @src
         i['src'] = i['src'].R(env).proxy_href}
@@ -123,7 +123,7 @@ module Webize
         i['srcset'] = i['srcset'].scan(SrcSetRegex).map{|ref, size|
           [ref.R(env).proxy_href, size].join ' '}.join(', ')}
 
-      html.css('a[href]').map{|a|a['href'] = a['href'].R(env).proxy_href}  # @href
+      html.css('[href]').map{|a|a['href'] = a['href'].R(env).proxy_href}  # @href
 
       html.to_html                                                         # serialize
     end
