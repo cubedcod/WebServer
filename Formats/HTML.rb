@@ -24,7 +24,7 @@ module Webize
 
         if (e.name=='link' && e['href']) || e['xlink:href'] # href attribute
           ref = (base.join (e['href'] || e['xlink:href'])).R # resolve location
-          if ref.deny?
+          if ref.deny? || %w(dns-prefetch preconnect).member?(e['rel'])
             puts "🚩 \e[38;5;196m#{ref}\e[0m" if Verbose
             e.remove                                 # strip gunk reference in href attribute
           end
