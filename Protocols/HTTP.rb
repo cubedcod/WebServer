@@ -224,8 +224,7 @@ class WebResource
 
           response_format = selectFormat format                       # select response content-type
           if env[:notransform] || !format || (format == response_format && format.match?(FixedFormat))
-            puts format, env.has_key?(:proxy_href)
-            body = Webize::HTML.proxy_hrefs body, env, true if format == 'text/html' && env.has_key?(:proxy_href) # rebase hrefs
+            body = Webize::HTML.proxy_hrefs body, env, true if format == 'text/html' && env.has_key?(:proxy_href) # rebase hrefs in proxy scenario
             env[:resp]['Content-Length'] = body.bytesize.to_s         # Content-Length header
             [200, env[:resp], [body]]                                 # response in upstream format
           else                                                        # content-negotiated transform
