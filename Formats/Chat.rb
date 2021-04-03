@@ -4,11 +4,14 @@ module Webize
     class Reader
 
       def chat_triples
+
         # irssi:
         #  /set autolog on
         #  /set autolog_path ~/web/%Y/%m/%d/%H/$tag.$0.irc
         # weechat:
         #  /set logger.mask.irc "%Y/%m/%d/%H/$server.$channel.irc"
+
+        type = (SIOC + 'InstantMessage').R
         dirname = File.dirname @base.path
         network, channame = @base.basename.split '.'
         channame = Rack::Utils.unescape_path(channame).gsub('#','')
@@ -34,15 +37,20 @@ module Webize
           nick = CGI.escape(nick || 'anonymous')
           timestamp = day + time
           subject = '#' + channame + hourslug + (lines += 1).to_s
-          yield subject, Type, (SIOC + 'InstantMessage').R
+          yield subject, Type, type
           ts[timestamp] ||= 0
           yield subject, Date, [timestamp, '%02d' % ts[timestamp]].join('.')
           ts[timestamp] += 1
           yield subject, To, chan
-          yield subject, Creator, (dirname + '/*irc?q=' + nick + '&sort=date&view=table#' + nick).R
+          creator = (dirname + '/*irc?q=' + nick + '&sort=date&view=table#' + nick).R
+          yield subject, Creator, creator
           yield subject, Content, ['<pre>',
                                    msg.hrefs{|p,o|
-                                     yield subject, p, o},
+                                     links = '#links_' + nick
+                                     yield links, Creator, creator
+                                     yield links, Type, Post.R
+                                     yield links, To, chan
+                                     yield links, p, o},
                                    '</pre>'].join if msg
         }
       end

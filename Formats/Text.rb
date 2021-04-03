@@ -164,12 +164,12 @@ module Webize
                                      graph_name: graph || @base)}
       end
 
-      def text_triples
+      def text_triples &f
         basename = File.basename @base.path, '.txt'
         if basename == 'twtxt'
-          twtxt_triples
+          twtxt_triples &f
         elsif @base.ext == 'irc'
-          chat_triples
+          chat_triples &f
         else
           yield @base, Content, Webize::HTML.format(WebResource::HTML.render({_: :pre,
                                                                               c: @doc.lines.map{|line|
