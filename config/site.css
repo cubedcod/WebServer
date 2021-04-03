@@ -7,7 +7,6 @@
 #prev:hover, #next:hover {background-color: #333}
 .abstract {background-color: #2c2c2c; color: #eee; border-width: 0 0 0 .5em; border-style: solid; border-color: #555; padding: .2em}
 .blocked, .blocked.post .body {background: repeating-linear-gradient(80deg, #000, #000 1.1em, #f00 1.1em, #f00 7.8em)}
-a.blocked {display: none}
 .breadcrumb > span {font-size: 1.4em; color: #888}
 .breadcrumb {color: #eee}
 .container .body {border-radius: 0 .4em .4em .4em; width: 100%; border-width: .1em; margin: 0}
@@ -38,6 +37,7 @@ a.blocked {display: none}
 .toolbox { position: fixed; top: 0; z-index: 2}
 :target {background-color: #2ef !important; color : #000 !important}
 a {text-decoration: none; border-radius: .14em; color: #eee; font-weight: bold}
+a.blocked {display: none}
 a.date {white-space: nowrap; background-color: #000; vertical-align: bottom; color: #bbb; border-radius: .2em .2em 0 0; font-size: .8em}
 a.fromto:only-child {padding: .1em 64ex 256ex 64ex; margin: 0 -64ex -256ex -64ex}
 a.id {float: right}
@@ -66,7 +66,6 @@ span.name {font-size: .8em}
 svg, img[src*="svg"] {max-width:2em; max-height: 2em}
 table {border-spacing: 1px; border-radius: .2em}
 table.fromto {background-color: #000; color: #fff}
-table.links {max-width: 72ex}
 td {overflow: hidden; vertical-align: top; border-radius: .2em}
 td.k a {color: #ccc; max-width: 28ex}
 td.k {text-align: right; font-weight: bold}

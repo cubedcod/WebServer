@@ -130,6 +130,31 @@ class WebResource < RDF::URI
 
     Markup['uri'] = -> uri, env {uri.R}
 
+    MarkupGroup[Link] = -> links, env {
+      links.map(&:R).group_by{|l|links.size > 8 && l.host && l.host.split('.')[-1] || nil}.map{|tld, links|
+        [{class: :container,
+          c: [({class: :head, _: :span, c: tld} if tld),
+              {class: :body, c: links.group_by{|l|links.size > 25 ? ((l.host||'localhost').split('.')[-2]||' ')[0] : nil}.map{|alpha, links|
+                 ['<table><tr>',
+                  ({_: :td, class: :head, c: alpha} if alpha),
+                  {_: :td, class: :body,
+                   c: {_: :table, class: :links,
+                       c: links.group_by(&:host).map{|host, paths|
+                         {_: :tr,
+                          c: [{_: :td, class: :host,
+                               c: host ? (name = ('//' + host).R.display_name
+                                          color = env[:colors][name] ||= '#%06x' % (rand 16777216)
+                                          {_: :a, href: '/' + host, c: name, style: "background-color: #{color}; color: black"}) : []},
+                              {_: :td, c: paths.map{|path|
+                                 Markup[Link][path,env]}}]}}}},
+                  '</tr></table>']}}]}, '&nbsp;']}}
+
+    Markup[Link] = -> ref, env {
+      u = ref.to_s
+      re = u.R env
+      [{_: :a, href: re.href, class: :path, c: (re.path||'/')[0..255], title: u, id: 'link' + Digest::SHA2.hexdigest(rand.to_s)},
+       " \n"]}
+
   end
 end
 

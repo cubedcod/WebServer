@@ -48,7 +48,7 @@ module Webize
                                    msg.hrefs{|p,o|
                                      links = '#links_' + nick
                                      yield links, Creator, creator
-                                     yield links, Type, Post.R
+                                     #yield links, Type, Post.R
                                      yield links, To, chan
                                      yield links, p, o},
                                    '</pre>'].join if msg
