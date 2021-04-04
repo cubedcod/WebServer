@@ -30,6 +30,7 @@ which xbps-install && sudo /usr/libexec/squid/security_file_certgen -c -s /var/c
 which pygmentize || pip install pygments
 
 # Ruby
+gem install nokogiri -- --use-system-libraries
 which bundle || gem install bundler
 bundle install
 
