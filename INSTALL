@@ -31,6 +31,7 @@ which pygmentize || pip install pygments
 
 # Ruby
 gem install nokogiri -- --use-system-libraries
+gem install unicorn
 which bundle || gem install bundler
 bundle install
 
