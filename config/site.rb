@@ -59,7 +59,7 @@ class WebResource
     KillFile = SiteDir.join('killfile').readlines.map &:chomp
     ScriptHosts = SiteDir.join('script_hosts').readlines.map &:chomp
     SearchableHosts = %w(localhost twitter.com www.google.com)
-    Bookmarks = ["http://localhost:8000/h","http://localhost:8000/d","http://localhost:8000/m", "https://twitter.com", "https://boards.4chan.org/pol/?sort=date&view=table", "https://boards.4channel.org/g/?view=table&sort=date", "http://localhost:8000/d?find=gitter&view=table&sort=http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Fdate&order=asc", "http://localhost:8000/h/*%7Bdrum,idm,phobia,logbook%7D*irc?view=table&sort=date&order=asc", "https://www.reddit.com/r/chrultrabook+dorchester+roxbury+solid+stallmanwasright/new"]
+    Bookmarks = ["/h","/d","/m", "https://twitter.com", "https://boards.4chan.org/pol/?sort=date&view=table", "https://boards.4channel.org/g/?view=table&sort=date", "/d?find=gitter&view=table&sort=http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Fdate&order=asc", "/h/*%7Bdrum,idm,phobia,logbook%7D*irc?view=table&sort=date&order=asc", "https://www.reddit.com/r/chrultrabook+dorchester+roxbury+solid+stallmanwasright/new"]
 
   end
   module HTTP
