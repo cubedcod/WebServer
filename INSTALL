@@ -18,7 +18,7 @@ which crew && crew install buildessential libexif parallel socat taglib tmux
 which apt-add-repository && sudo apt-get install build-essential git parallel ruby ruby-dev bundler grep file libexif-dev libssl-dev libtag1-dev libxslt-dev libzip-dev socat squid make tmux libffi-dev
 
 # Termux https://termux.com/
-which pkg && pkg install git ruby grep file findutils pkg-config libiconv libexif libprotobuf libxslt parallel clang taglib squid make libffi libcap libcrypt openssl-tool tmux tsu zlib
+which pkg && pkg install git ruby grep file findutils pkg-config libiconv libexif libprotobuf libxslt parallel poppler clang taglib squid make libffi libcap libcrypt openssl-tool tmux tsu zlib
 
 # Void https://voidlinux.org
 which xbps-install && sudo xbps-install -S base-devel curl git libexif-devel libltdl-devel libressl-devel parallel poppler-utils python3-Pygments ruby ruby-devel socat squid taglib-devel tmux
