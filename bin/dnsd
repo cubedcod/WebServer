@@ -88,10 +88,9 @@ class DNSServer
   attr_reader :port, :ttl
   LocalHost = '127.0.0.1'
   Hosts = {}
-
   def initialize(options = {})
     options = {
-      port: 1053,
+      port: ARGV[0] || 1053,
       ttl: 600
     }.merge(options)
     
