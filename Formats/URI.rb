@@ -110,7 +110,7 @@ class WebResource < RDF::URI
       {class: :toolbox,
        c: [({_: :span, c: env[:status], style: 'font-weight: bold', class: :icon} if env[:status]),                                                      # status code
            ({_: :a, id: :tabular, class: :icon, c: '↨', href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless env[:view] == 'table'),   # link to tabular view
-           {_: :a, href: (env[:proxy_href] && !local_node?) ? env[:base].uri : HTTP.qs(qs.merge({'notransform' => nil})), c: '⚗️', id: :UI, class: :icon},# link to origin UI and format
+           {_: :a, href: (env[:proxy_href] && !local_node?) ? [env[:base].uri,'#UI'].join : HTTP.qs(qs.merge({'notransform' => nil})), c: '⚗️', id: :UI, class: :icon},# link to origin UX
            ({_: :a, href: HTTP.qs(qs.merge({'download' => 'audio'})), c: '&darr;', id: :download, class: :icon} if host.match?(/(^|\.)(bandcamp|(mix|sound)cloud|youtube).com/)), # download link
            env[:feeds].map{|feed|                                                                                                                                                 # feed links
              {_: :a, href: feed.R.href, title: feed.path, class: :icon, c: FeedIcon, id: 'feed' + Digest::SHA2.hexdigest(feed.to_s)}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .08em solid orange; background-color: orange'} : {})}, "\n",
