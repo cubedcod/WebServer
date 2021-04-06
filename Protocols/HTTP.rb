@@ -289,8 +289,9 @@ class WebResource
 
     def GET
       if local_node?
-        p = parts[0]
-        if !p
+        env[:proxy_href] = true                # proxy remote URLs
+        p = parts[0]                           # path selector
+        if !p                                  # root path
           [302, {'Location' => '/bookmarks'}, []]
         elsif %w{m d h}.member? p              # current month/day/hour redirect
           dateDir
@@ -306,7 +307,6 @@ class WebResource
         elsif !p.match? /[.:]/                 # no domain-separator chars in path-segment
           cacheResponse                        # local path
         else                                   # hostname in first path-segment
-          env[:proxy_href] = true
           (env[:base] = remoteURL).hostHandler # host handler (rebased on local URI-space)
         end
       else
