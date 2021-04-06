@@ -289,7 +289,6 @@ class WebResource
 
     def GET
       if local_node?
-        env[:proxy_href] = true
         p = parts[0]
         if !p
           [302, {'Location' => '/bookmarks'}, []]
@@ -307,7 +306,8 @@ class WebResource
         elsif !p.match? /[.:]/                 # no domain-separator chars in path-segment
           cacheResponse                        # local path
         else                                   # hostname in first path-segment
-          (env[:base] = remoteURL).hostHandler # host handler (rebased on local URIspace)
+          env[:proxy_href] = true
+          (env[:base] = remoteURL).hostHandler # host handler (rebased on local URI-space)
         end
       else
         hostHandler                            # host handler
