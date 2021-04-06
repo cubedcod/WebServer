@@ -27,7 +27,7 @@ class WebResource
       keys = [Creator, *(keys - [Creator])] if keys.member? Creator
 
       if env[:sort]
-        ascending = qs['order'] == 'asc'
+        ascending = env[:order] == 'asc'
         attr = env[:sort]
         attr = Date if %w(date new).member? attr
         attr = Content if attr == 'content'
