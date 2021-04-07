@@ -421,7 +421,10 @@ class WebResource
       [200, {'Content-Type' => 'text/html'}, [(htmlDocument results)]]
     end
 
-    def notfound; [env[:status] || 404, {'Content-Type' => 'text/html'}, [htmlDocument({'#req'=>env})]] end
+    def notfound
+      env[Image] = self if %w(gif jpg png webp).member? ext
+      [env[:status] || 404, {'Content-Type' => 'text/html'}, [htmlDocument({'#req'=>env})]]
+    end
 
     def offline?
       ENV.has_key?('OFFLINE') || env.has_key?(:offline)
