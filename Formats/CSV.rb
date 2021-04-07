@@ -43,12 +43,11 @@ class WebResource
                   p = p.R; slug = p.display_name
                   icon = Icons[p.uri] || slug
                   [{_: :th,
-                    c: {_: :a, id: 'sort_by_' + slug, href: HTTP.qs(qs.merge({'sort' => p.uri, 'order' => ascending ? 'desc' : 'asc'})), c: icon}}, "\n"]}}}, "\n", # pointer to sorted column
+                    c: {_: :a, href: HTTP.qs(qs.merge({'sort' => p.uri, 'order' => ascending ? 'desc' : 'asc'})), c: icon}}, "\n"]}}}, "\n", # pointer to sorted column
            {_: :tbody,
             c: graph.map{|resource|
-              re = (resource['uri'] || ('#'+Digest::SHA2.hexdigest(rand.to_s))).to_s.R env                   # resource identifier
-              local_id = re.path == env[:base].path && re.fragment || ('r' + Digest::SHA2.hexdigest(re.uri)) # table-row identifier
-              [{_: :tr, id: local_id, c: keys.map{|k| # row
+              re = (resource['uri'] || ('#'+Digest::SHA2.hexdigest(rand.to_s))).to_s.R env                   # URI
+              [{_: :tr, c: keys.map{|k|                                                                      # resource row
                  [{_: :td, class: re.deny? ? 'blocked' :  '', property: k,
                   c: if k == 'uri'                                                                           # main column
                    tCount = 0

@@ -152,8 +152,7 @@ class WebResource < RDF::URI
     Markup[Link] = -> ref, env {
       u = ref.to_s
       re = u.R env
-      [{_: :a, href: re.href, class: :path, c: (re.path||'/')[0..255], title: u, id: 'link' + Digest::SHA2.hexdigest(rand.to_s)},
-       " \n"]}
+      [{_: :a, href: re.href, class: :path, c: (re.path||'/')[0..255], title: u}, " \n"]}
 
   end
 end
