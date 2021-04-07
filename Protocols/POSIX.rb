@@ -102,6 +102,7 @@ class WebResource
         [self]
       else
         qs = query_values || {}
+        summarize = qs.has_key? 'abbr'
         pathbase = host_parts.join('/').size
         nodes = (if node.directory?                                    # directory
                  if qs['f'] && !qs['f'].empty?                         # FIND

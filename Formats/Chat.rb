@@ -12,12 +12,14 @@ module Webize
         #  /set logger.mask.irc "%Y/%m/%d/%H/$server.$channel.irc"
 
         type = (SIOC + 'InstantMessage').R
+        parts = @base.parts
         dirname = File.dirname @base.path
         network, channame = @base.basename.split '.'
         channame = Rack::Utils.unescape_path(channame).gsub('#','')
         chan = ('#' + channame).R
-        day = @base.parts[0..2].join('-') + 'T'
-        hourslug = @base.parts[0..3].join
+        day = parts[0..2].join('-') + 'T'
+        hourslug = parts[0..3].join
+        linksubject = [nil, parts[0..2]].join('/') + '/#IRClinks'
         lines = 0
         ts = {}
         @doc.lines.grep(/^[^-]/).map{|msg|
@@ -45,7 +47,7 @@ module Webize
           creator = (dirname + '/*irc?q=' + nick + '&sort=date&view=table#' + nick).R
           yield subject, Creator, creator
           yield subject, Content, ['<pre>',
-                                   msg.hrefs{|p,o| yield '#IRClinks', p, o},
+                                   msg.hrefs{|p,o| yield linksubject, p, o},
                                    '</pre>'].join if msg}
       end
 
