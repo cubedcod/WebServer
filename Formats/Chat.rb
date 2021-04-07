@@ -45,14 +45,8 @@ module Webize
           creator = (dirname + '/*irc?q=' + nick + '&sort=date&view=table#' + nick).R
           yield subject, Creator, creator
           yield subject, Content, ['<pre>',
-                                   msg.hrefs{|p,o|
-                                     links = '#links_' + nick
-                                     yield links, Creator, creator
-                                     #yield links, Type, Post.R
-                                     yield links, To, chan
-                                     yield links, p, o},
-                                   '</pre>'].join if msg
-        }
+                                   msg.hrefs{|p,o| yield '#IRClinks', p, o},
+                                   '</pre>'].join if msg}
       end
 
       def twtxt_triples

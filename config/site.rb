@@ -713,6 +713,7 @@ l.facebook.com l.instagram.com
     yield self, Title, tree['name']
     tree['data'].map{|mix|
       graph = subject = mix['url'].R
+      yield subject, Type, Post.R, graph
       yield subject, Title, mix['name'], graph
       yield subject, Date, mix['created_time'], graph
       yield subject, Creator, mix['user']['name'].R,graph
