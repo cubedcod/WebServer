@@ -3,36 +3,23 @@ NodeList.prototype.map = function(f,a){
 	f.apply(this[i],a);
     return this;
 };
-
-Element.prototype.attr = function(a,v){
-    if(v){
-	this.setAttribute(a,String(v));
-	return this;
-    } else {
-	return this.getAttribute(a);
-    };
-};
-
 document.addEventListener("DOMContentLoaded", function(){
-
+    // construct node-ring
     var first = null;
     var last = null;
-
-    // construct selection-ring
-    document.querySelectorAll('[id]').map(function(e){
+    document.querySelectorAll('a[id]').map(function(e){
 	if(!first)
 	    first = this;	
-	if(last){ // link to prior
-	    this.attr('prev',last.attr('id'));
-	    last.attr('next',this.attr('id'));
+	if(last){ // link to prior node
+	    this.setAttribute('prev', last.getAttribute('id'));
+	    last.setAttribute('next', this.getAttribute('id'));
 	};
 	last = this;
     });
     if(first && last){ // close ring
-	last.attr('next',first.attr('id'));
-	first.attr('prev',last.attr('id'));
+	last.setAttribute('next',first.getAttribute('id'));
+	first.setAttribute('prev',last.getAttribute('id'));
     };
-
     // keyboard control
     document.addEventListener("keydown",function(e){
 	var key = e.keyCode;
@@ -42,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function(){
 		cur = document.getElementById(location.hash.slice(1));
 	    if(!cur)
 		cur = last;
-	    window.location.hash = cur.attr('next');
+	    window.location.hash = cur.getAttribute('next');
 	    e.preventDefault();
 	};
 	var selectPrevLink = function(){
@@ -51,49 +38,13 @@ document.addEventListener("DOMContentLoaded", function(){
 		cur = document.getElementById(location.hash.slice(1));
 	    if(!cur)
 		cur = first;
-	    window.location.hash = cur.attr('prev');;
-	    e.preventDefault();
-	};
-	var selectNextNode = function(){
-	    var cur = null;
-	    if(window.location.hash)
-		cur = document.getElementById(location.hash.slice(1));
-	    if(!cur)
-		cur = last;
-	    var start = cur;
-	    do {
-		cur = document.getElementById(cur.attr('next'));
-	    } while ((cur != start) && (cur.attr('type') != 'node'));
-	    window.location.hash = cur.attr('id');
-	    e.preventDefault();
-	};
-	var selectPrevNode = function(){
-	    var cur = null;
-	    if(window.location.hash)
-		cur = document.getElementById(location.hash.slice(1));
-	    if(!cur)
-		cur = first;
-	    var start = cur;
-	    do {
-		cur = document.getElementById(cur.attr('prev'));
-	    } while ((cur != start) && (cur.attr('type') != 'node'));
-	    window.location.hash = cur.attr('id');
+	    window.location.hash = cur.getAttribute('prev');;
 	    e.preventDefault();
 	};
 	var gotoLink = function(arc) {
 	    var doc = document.querySelector("link[rel='" + arc + "']");
 	    if(doc)
 		window.location = doc.getAttribute('href');
-	};
-	var gotoHref = function(){
-	    if(window.location.hash){
-		cur = document.getElementById(location.hash.slice(1));
-		if(cur){
-		    href = cur.attr('href');
-		    if(href)
-			window.location = href;
-		};
-	    };
 	};
 	if(e.getModifierState("Shift")) {
 	    if(key==37) // [shift-left] previous page
@@ -104,22 +55,16 @@ document.addEventListener("DOMContentLoaded", function(){
 		gotoLink('up');
 	    if(key==40) // [shift-down] down to children
 		gotoLink('down');
-	    if(key==80) // [shift-P] previous reference
-		selectPrevLink();
-	    if(key==78) // [shift-N] next reference
-		selectNextLink();
 	} else {
-	    if(key==80) // [p]revious node
-		selectPrevNode();
-	    if(key==78) // [n]ext node
-		selectNextNode();
+	    if(key==80) // [p]revious anchor
+		selectPrevLink();
+	    if(key==78) // [n]ext anchor
+		selectNextLink();
 	};
     },false);
-
     document.querySelectorAll('input').map(function(i){
 	this.addEventListener("keydown",function(e){
 	    e.stopPropagation();
 	},false);
     });
-
 }, false);

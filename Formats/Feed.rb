@@ -385,12 +385,12 @@ class WebResource
                unless env[:title] == title
                  env[:title] = title
                  hasPointer = true
-                 [{_: :a,  id: 'r'+Digest::SHA2.hexdigest(rand.to_s), class: :title, type: :node,
+                 [{_: :a,  id: 'r'+Digest::SHA2.hexdigest(rand.to_s), class: :title,
                    href: resource.href, c: [(post.delete(Schema+'icon')||[]).map{|i|{_: :img, src: i.href}},CGI.escapeHTML(title)]}, " \n"]
                end},
              {class: :pointer,
               c: [({_: :a, class: :date, href: 'http://localhost:8000/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date} if date), ' ',
-                  ({_: :a, type: :node, c: '☚', href: resource.href, id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} unless hasPointer)]},
+                  ({_: :a, c: '☚', href: resource.href, id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} unless hasPointer)]},
              {_: :table, class: :fromto,
               c: {_: :tr,
                   c: [{_: :td,

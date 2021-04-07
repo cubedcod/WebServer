@@ -148,7 +148,7 @@ class WebResource
        W3 + 'ns/posix/stat#mtime',
        W3 + 'ns/posix/stat#size'].map{|p|dir.delete p}
       {class: :container,
-       c: [{_: :a, id: 'container' + Digest::SHA2.hexdigest(rand.to_s), class: :head, href: uri.href, type: :node, c: uri.basename},
+       c: [{_: :a, id: 'container' + Digest::SHA2.hexdigest(rand.to_s), class: :head, href: uri.href, c: uri.basename},
            {class: :body, c: HTML.keyval(dir, env)}]}}
 
     Markup[Stat+'File'] = -> file, env {
