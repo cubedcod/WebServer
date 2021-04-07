@@ -43,6 +43,7 @@ data-image
 data-img
 data-img-url
 data-img-src
+data-lazy
 data-lazy-img
 data-lazy-src
 data-menuimg

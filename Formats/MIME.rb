@@ -19,7 +19,7 @@ end
 
 class WebResource
   module HTTP
-    FixedFormat = /audio|css|image|json|script|video/
+    FixedFormat = /audio|css|image|script|video/
   end
   module URIs
 
