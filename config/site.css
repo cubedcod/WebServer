@@ -20,7 +20,8 @@
 .greentext, .greenText {background-color: #af0; color: #000; padding-left: .3em}
 .identified, .post {border: 1px solid #282828}
 .links .host {text-align: right}
-.links .path {font-weight: normal; display: inline-block; border-width: 0 0 0 .1em; border-style: solid; border-color: #fff}
+.links .path {font-weight: normal}
+.links .path::first-letter {font-weight: bold; background-color:#aaa; color:#000}
 .post .body {background: repeating-linear-gradient(-45deg, #000, #000 .875em, #222 .875em, #222 1em); color: #fff}
 .post .pointer {float: right}
 .post { max-width: 100ex; margin: .166em}
