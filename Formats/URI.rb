@@ -114,7 +114,7 @@ class WebResource < RDF::URI
            ({_: :a, href: HTTP.qs(qs.merge({'download' => 'audio'})),c: '&darr;',class: :icon} if host.match?(/(^|\.)(bandcamp|(mix|sound)cloud|youtube).com/)), # download link
            env[:feeds].map{|feed|                                                                                                                                # feed links
              {_: :a, href: feed.R.href, title: feed.path, class: :icon, c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .08em solid orange; background-color: orange'} : {})}, "\n",
-           {_: :a, href: env[:base].join('/').R(env).href, c: icon ? {_: :img, src: icon, style: DarkLogo.member?(host) ? 'background-color: #fff' : ''} : '🏠'},# link to path root
+           {_: :a, class: :host, href: env[:base].join('/').R(env).href, c: icon ? {_: :img, src: icon, style: DarkLogo.member?(host) ? 'background-color: #fff' : ''} : '🏠'},# link to path root
            {class: :path, c: env[:base].parts.map{|p| bc += '/' + p                                                                                              # path breadcrumbs
               {_: :a, class: :breadcrumb, href: env[:base].join(bc).R(env).href, c: [{_: :span, c: '/'}, (CGI.escapeHTML Rack::Utils.unescape p)]}}},
            (if SearchableHosts.member? host
