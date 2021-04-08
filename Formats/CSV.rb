@@ -25,17 +25,14 @@ class WebResource
       qs = env[:base].query_values || {}
       keys = graph.select{|r|r.respond_to? :keys}.map{|r|r.keys}.flatten.uniq - [Abstract, Content, DC+'identifier', Image, Video, SIOC+'richContent', Title] # fields in main column
       keys = [Creator, *(keys - [Creator])] if keys.member? Creator
-
-      if env[:sort]
-        ascending = env[:order] == 'asc'
-        attr = env[:sort]
-        attr = Date if %w(date new).member? attr
-        attr = Content if attr == 'content'
-        sortable, unsorted = graph.partition{|r|r.has_key? attr}
-        sorted = sortable.sort_by{|r|r[attr]}
-        sorted.reverse! unless ascending
-        graph = [*sorted, *unsorted]
-      end
+      ascending = env[:order] == 'asc'
+      attr = env[:sort] || Date
+      attr = Date if %w(date new).member? attr
+      attr = Content if attr == 'content'
+      sortable, unsorted = graph.partition{|r|r.has_key? attr}
+      sorted = sortable.sort_by{|r|r[attr]}
+      sorted.reverse! unless ascending
+      graph = [*sorted, *unsorted]
 
       {_: :table, class: :tabular,                    # table
        c: [{_: :thead,
