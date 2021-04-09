@@ -112,4 +112,15 @@ class WebResource
   end
 
   include URIs
+
+  module HTML
+
+    Markup[Type] = -> t, env {
+      if t.class == WebResource
+        {_: :a, href: t.uri, c: Icons[t.uri] || t.display_name}.update(Icons[t.uri] ? {class: :icon} : {})
+      else
+        CGI.escapeHTML t.to_s
+      end}
+
+  end
 end

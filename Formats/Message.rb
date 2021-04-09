@@ -1,6 +1,14 @@
 # coding: utf-8
 class WebResource
   module HTML
+
+    Markup[DC+'language'] = -> lang, env {
+      {'de' => '🇩🇪',
+       'en' => '🇬🇧',
+       'fr' => '🇫🇷',
+       'ja' => '🇯🇵',
+      }[lang] || lang}
+
     Markup[Title] = -> title, env {
       if title.class == String
         [{_: :span, class: :title, c: CGI.escapeHTML(title)}, ' ']
