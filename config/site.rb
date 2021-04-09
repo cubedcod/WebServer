@@ -216,7 +216,7 @@ l.facebook.com l.instagram.com
       r.env[:sort] ||= 'date'
       r.env[:view] ||= 'table'
       route = r.parts[0]
-      if %w(r u user).member? route
+      if %w(comments r u user).member? route
         r.path += '.rss' unless r.path.index '.rss'
         NoGunk[r]
       elsif %w(favicon.ico gallery).member? route
