@@ -65,9 +65,12 @@ data-srcset
 
     # resolve @srcset refs
     def self.srcset node, base
-      node['srcset'] = node['srcset'].scan(SrcSetRegex).map{|url, size|
-        [(base.join url), size].join ' '}.join(', ')
-      nil
+      srcset = node['srcset'].scan(SrcSetRegex).map{|url, size|[(base.join url), size].join ' '}.join(', ')
+      if srcset.empty?
+        puts "srcset failed to parse: " + node['srcset']
+      else
+        node['srcset'] = srcset
+      end
     end
 
   end
