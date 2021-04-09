@@ -1,3 +1,4 @@
+# coding: utf-8
 require 'org-ruby'
 module Webize
   module Org
@@ -40,5 +41,18 @@ module Webize
         yield Content.R, html
       end
     end
+  end
+end
+class WebResource
+  module HTML
+    MarkupGroup['http://xmlns.com/foaf/0.1/Person'] = -> people, env {
+      {_: :table, style: 'max-width: 40em; border: 1px dotted blue' ,
+       c: {_: :tr,
+           c: [{_: :td, c: :👥, style: 'font-size: 3em'},
+               {_: :td, c: people.map{|person|
+                  person.delete Type
+                  HTML.keyval person, env
+                }}]}}
+    }
   end
 end
