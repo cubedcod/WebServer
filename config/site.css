@@ -20,7 +20,7 @@
 .identified, .post {border: 1px solid #282828}
 .links .host {text-align: right}
 .links .path {font-weight: normal}
-.links .path::first-letter {font-weight: bold; background-color:#aaa; color:#000; border-radius: .18em}
+.links .path::first-letter {font-weight: bold; background-color:#888; color:#000; border-radius: .18em}
 .post .body {background: repeating-linear-gradient(-45deg, #000, #000 .875em, #222 .875em, #222 1em); color: #fff}
 .post .pointer {float: right}
 .post { max-width: 100ex; margin: .166em}
@@ -29,12 +29,13 @@
 .thumb, .thumb * {float: left; max-width: 22em}
 .title {background-color: #000; color: #fff; font-size: 1.08em; font-weight: bold; vertical-align: top; border-radius: 0; border-style: dotted; border-width: 0 0 1px 0 }
 .toolbox .icon {font-size: 1.6em; color: #fff; text-shadow: 1px 1px #000000; float: right}
-.toolbox .host {position: absolute; top: 0; left: 0; z-index: -1}
+.toolbox .host {position: fixed; top: 0; left: 1em; z-index: -1}
 .toolbox .path {background-color: #000; border-radius: 0 0 .5em .5em;padding: 0 .2em 0 .2em}
-.toolbox > a, .toolbox form {vertical-align: top}
+.toolbox > a, .toolbox form {}
 .toolbox a.icon:target {text-shadow: 0px 0px #000000}
 .toolbox form input {background-color: #000; color: #fff; border-radius: .5em; border: 1px solid #444}
 .toolbox svg {height: 1em; width: 1em}
+.toolbox {vertical-align: top}
 :target {background-color: #2ef !important; color : #000 !important}
 a {text-decoration: none; border-radius: .14em; color: #eee; font-weight: bold}
 a.blocked {display: none}
@@ -50,7 +51,7 @@ a.uri.path > span.uri {color: #aaa}
 a.uri.path {background-color: #222; color: #fff; border-color: #333}
 a:hover, a.uri:hover {border-color: #0ff; background-color: #0ff}
 blockquote {border-radius: .2em; border-width: 0 0 0 .5em; border-style: solid; border-color: #444; margin: 0 0 0 .1em; background-color: #2c2c2c; color: #fff}
-body {font-family: sans-serif; vertical-align: top; margin-top: 2.6em; margin-left: 2em; margin-right: 2em; background-color: #000; color: #fff}
+body {font-family: sans-serif; vertical-align: top; margin-left: 2em; margin-right: 2em; background-color: #000; color: #fff}
 body.error > pre > a {color: #fff; font-size: 12ex; text-decoration: none}
 body.error > pre {margin: auto; max-width: 120ex; white-space: pre-wrap}
 body.error {background: #f00; font-weight: bold}
