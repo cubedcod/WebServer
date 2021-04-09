@@ -119,8 +119,8 @@ module Webize
         i['src'] = i['src'].R(env).proxy_href}
 
       html.css('[srcset]').map{|i|                                         # @srcset
-        i['srcset'] = i['srcset'].scan(SrcSetRegex).map{|ref, size|
-          [ref.R(env).proxy_href, size].join ' '}.join(', ')}
+        srcset = i['srcset'].scan(SrcSetRegex).map{|ref, size| [ref.R(env).proxy_href, size].join ' '}.join(', ')
+        i['srcset'] = srcset unless srcset.empty?}
 
       html.css('[href]').map{|a|a['href'] = a['href'].R(env).proxy_href}  # @href
 
