@@ -51,8 +51,8 @@ module Webize
       doc.css('[style]').map{|node|
         Webize::CSS.cleanAttr node if node['style'].match? CSSgunk}
 
-      dropnodes = "amp-ad, amp-consent, [class*='modal'], [class*='newsletter'], [class*='popup'], .player-unavailable"
-      doc.css(dropnodes).map{|n| log['🧽', n, /amp-(ad|consent)|modal|newsletter|popup/i]} if Verbose
+      dropnodes = "amp-ad, amp-consent, [class*='newsletter'], [class*='popup'], .player-unavailable"
+      doc.css(dropnodes).map{|n| log['🧽', n, /amp-(ad|consent)|newsletter|popup/i]} if Verbose
       doc.css(dropnodes).remove                      # strip amp, newsletter, modal, popup gunk
 
       doc.css('[integrity]').map{|n|n.delete 'integrity'} # content is heavily modified, strip integrity signature
