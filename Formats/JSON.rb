@@ -93,7 +93,7 @@ module Webize
           @base.send hostTriples, @json, &f
         else
           Webize::JSON.scan(@json){|h|
-            if s = h['uri'] || h['url'] || h['link'] || h['canonical_url'] || ((h['id']||h['ID']||h['_id']) && ('#' + (h['id']||h['ID']||h['_id']).to_s))
+            if s = h['uri'] || h['url'] || h['link'] || h['canonical_url'] || h['src'] || ((h['id']||h['ID']||h['_id']) && ('#' + (h['id']||h['ID']||h['_id']).to_s))
               puts ::JSON.pretty_generate h if Verbose
               s = @base.join(s).R
               yield s, Type, Post.R if h.has_key? 'content'
@@ -122,5 +122,14 @@ module Webize
 
       end
     end
+  end
+end
+class WebResource
+
+  # read RDF from JSON embedded in HTML
+  def JSONembed doc, pattern, &b
+    doc.css('script').map{|script|
+      script.inner_text.lines.grep(pattern).map{|line|
+        Webize::JSON::Reader.new(line.sub(/^[^{]+/,'').chomp.sub(/;$/,''), base_uri: self).scanContent &b}}
   end
 end

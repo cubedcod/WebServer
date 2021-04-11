@@ -22,6 +22,7 @@ module Webize
         'www.city-data.com' => :CityData,
         'www.google.com' => :GoogleHTML,
         'www.instagram.com' => :InstagramHTML,
+        'www.nationalgeographic.com' => :NatGeo,
         'www.nytimes.com' => :NYT,
         'www.qrz.com' => :QRZ,
         'www.scmp.com' => :Apollo,
@@ -370,9 +371,7 @@ l.facebook.com l.instagram.com
   end
 
   def Apollo doc, &b
-    doc.css('script').map{|script|
-      script.inner_text.lines.grep(/window[^{]+Apollo[^{]+{/i).map{|line|
-        Webize::JSON::Reader.new(line.sub(/^[^{]+/,'').chomp.sub(/;$/,''), base_uri: self).scanContent &b}}
+    JSONembed doc, /window[^{]+Apollo[^{]+{/i, &b
   end
 
   def AP doc
@@ -728,9 +727,12 @@ l.facebook.com l.instagram.com
     end
   end
 
+  def NatGeo doc, &b
+    JSONembed doc, /window[^{]+NatGeo[^{]+{/i, &b
+  end
+
   def NYT doc, &b
-    doc.css('script').select{|s|s.inner_text.match? /^window.__preload/}.map{|script|
-      Webize::JSON::Reader.new(script.inner_text[25...-1].chomp.sub(/;$/,''), base_uri: self).scanContent &b}
+    JSONembed doc, /^window.__preload/, &b
   end
 
   def QRZ doc, &b
@@ -839,9 +841,7 @@ l.facebook.com l.instagram.com
   end
 
   def YouTube doc, &b
-    doc.css('script').map{|script|
-      script.inner_text.lines.grep(/ytInitialData/i).map{|line|
-        Webize::JSON::Reader.new(line.sub(/^[^{]+/,'').chomp.sub(/;$/,''), base_uri: self).scanContent &b}}
+    JSONembed doc, /ytInitialData/i, &b
   end
 
 end
