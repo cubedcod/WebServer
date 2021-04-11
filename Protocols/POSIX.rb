@@ -98,13 +98,13 @@ class WebResource
 
     # URI -> nodes
     def nodeSet
-      if node.file?
-        [self]
-      else
-        qs = query_values || {}
-        summarize = qs.has_key? 'abbr'
-        pathbase = host_parts.join('/').size
-        nodes = (if node.directory?                                    # directory
+      qs = queryvals
+      summarize = qs.has_key? 'abbr'
+      nodes = if node.file? # direct map (one node)
+                [self]
+              else          # indirect map (multiple nodes)
+                pathbase = host_parts.join('/').size
+                (if node.directory?                                    # directory
                  if qs['f'] && !qs['f'].empty?                         # FIND
                    `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
                  elsif qs['find'] && !qs['find'].empty? && path != '/' # FIND case-insensitive substring
@@ -127,9 +127,9 @@ class WebResource
                     globPath += '.*'
                     Pathname.glob globPath
                   end
-                 end).map{|p|join(p.to_s[pathbase..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env} # escape reserved chars in path & resolve node-URI
-        summarize ? nodes.map(&:summary) : nodes
-      end
+                 end).map{|p|join(p.to_s[pathbase..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env} # escape reserved-chars and resolve path to URI
+              end
+      summarize ? nodes.map(&:summary) : nodes
     end
 
   end
