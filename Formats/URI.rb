@@ -79,10 +79,17 @@ class WebResource < RDF::URI
     env.has_key?(:proxy_href) ? proxy_href : uri
   end
 
-  # rebase href on local host
+  # origin href -> proxy href
   def proxy_href
-    return self if local_node? # local node, no proxying
+    return self if local_node? # we are the origin, nothing to do
     ['http://', env['HTTP_HOST'], '/', host, path, (query ? ['?', query] : nil), (fragment ? ['#', fragment] : nil) ].join
+  end
+
+  # proxy href -> origin href
+  def remoteURL
+      ['https:/' , path.sub(/^\/https?:\/+/, '/'),
+       (query ? ['?', query] : nil),
+       (fragment ? ['#', fragment] : nil) ].join.R env
   end
 
   module HTML

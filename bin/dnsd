@@ -113,7 +113,11 @@ class DNSServer
         Hosts[host] = true
       end
       result = (['//',host].join.R.deny? || WebResource::HTTP::HostGET.has_key?(host)) ? LocalHost : Resolv.getaddress(r.domain) rescue LocalHost
-      puts [Time.now.iso8601, newHost ? "\e[38;5;51m" : nil, r.domain, newHost ? "\e[0m" : nil, result == LocalHost ? '⚙️' : result].join ' '
+      local = result == LocalHost
+      highlight = newHost && !local
+      puts [Time.now.iso8601,
+            [highlight ? "\e[38;5;51mhttps://" : nil, r.domain.sub(/\.$/,''), highlight ? "\e[0m" : nil].join,
+            local ? '⚙️' : result].join ' '
       src.reply r.response(result)
     end
   end

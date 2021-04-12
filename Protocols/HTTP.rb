@@ -519,13 +519,6 @@ class WebResource
       end
     end
 
-
-    def remoteURL
-      ['https:/' , path.sub(/^\/https?:\/+/, '/'),
-       (query ? ['?', query] : nil),
-       (fragment ? ['#', fragment] : nil) ].join.R env
-    end
-
     def selectFormat format=nil
       format ||= 'text/html'                # default format
       return format unless env.has_key? 'HTTP_ACCEPT' # unspecified preference
