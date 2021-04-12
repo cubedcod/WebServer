@@ -77,8 +77,9 @@ class WebResource
     # URI -> pathnames
     def nodeGrep files = nil
       files = [fsPath] if !files || files.empty?
-      qs = query_values || {}
-      q = qs['Q'] || qs['q']
+      qs = queryvals
+      q = (qs['Q'] || qs['q']).to_s
+      return [] if q.empty?
       args = q.shellsplit rescue q.split(/\W/)
       file_arg = files.map{|file| Shellwords.escape file.to_s }.join ' '
       case args.size
