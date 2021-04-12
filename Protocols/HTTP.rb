@@ -382,7 +382,7 @@ class WebResource
       qs = query_values || {}                                      # parse query
       cookie = join('/cookie').R                                   # cookie-jar URI
       cookie.writeFile qs['cookie'] if qs['cookie'] && !qs['cookie'].empty? # store cookie to jar
-      env['HTTP_COOKIE'] ||= cookie.readFile if cookie.node.exist? # read cookie from jar if none supplied
+      env['HTTP_COOKIE'] = cookie.readFile if cookie.node.exist? # read cookie from jar
       if path == '/favicon.ico'                                    # icon handler
         node.exist? ? fileResponse : fetch
       elsif qs['download'] == 'audio'                              # download from remote
