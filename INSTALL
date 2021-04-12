@@ -24,6 +24,8 @@ which pkg && pkg install git ruby grep file findutils pkg-config libiconv libexi
 which xbps-install && sudo xbps-install -S base-devel curl git libexif-devel libltdl-devel libressl-devel parallel poppler-utils python3-Pygments ruby ruby-devel socat squid taglib-devel tmux
 which xbps-install && sudo /usr/libexec/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB
 
+sudo setcap cap_net_bind_service=+ep /usr/sbin/squid
+
 ## install Language packages
 
 # Python
