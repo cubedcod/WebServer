@@ -112,7 +112,7 @@ class DNSServer
         newHost = true
         Hosts[host] = true
       end
-      result = (['//',host].join.R.deny? || WebResource::HTTP::HostGET.has_key?(host)) ? LocalHost : Resolv.getaddress(r.domain) rescue LocalHost
+      result = ['//',host].join.R.block_domain? ? LocalHost : Resolv.getaddress(r.domain) rescue LocalHost
       local = result == LocalHost
       highlight = newHost && !local
       puts [Time.now.iso8601,
@@ -120,6 +120,14 @@ class DNSServer
             local ? '⚙️' : result].join ' '
       src.reply r.response(result)
     end
+  end
+end
+
+class WebResource
+  def block_domain?
+    return false if allow_domain? || ScriptHosts.member?(host)
+    return true  if deny_domain?
+    false
   end
 end
 
