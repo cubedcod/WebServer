@@ -105,6 +105,7 @@ module Webize
               h.map{|p, v|
                 unless %w(_id id uri).member? p
                   p = MetaMap[p] || p
+                  puts [p, v].join "\t" unless p.to_s.match? /^(drop|http)/
                   (v.class == Array ? v : [v]).map{|o|
                     unless [Hash, NilClass].member?(o.class) || (o.class == String && o.empty?) # each non-nil terminal value
                       o = @base.join o if o.class == String && o.match?(/^(http|\/)\S+$/)       # resolve URI

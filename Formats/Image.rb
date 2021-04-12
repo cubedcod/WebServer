@@ -51,6 +51,7 @@ data-native-src
 data-original
 data-raw-src
 data-src
+data-url
 image-src
 )
 
