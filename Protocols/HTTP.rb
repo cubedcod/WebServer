@@ -346,7 +346,7 @@ class WebResource
                           [s, h, []]} # return status and header
     end
 
-    # client<>proxy headers not repeated on proxy<>origin connection
+    # client<>proxy connection-specific and Rack-internal headers not repeated on proxy<>origin connection
     SingleHopHeaders = %w(connection host keep-alive path-info query-string
  remote-addr request-method request-path request-uri script-name server-name server-port server-protocol server-software
  te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for)
