@@ -117,7 +117,7 @@ class DNSServer
       highlight = newHost && !local
       puts [Time.now.iso8601,
             [highlight ? "\e[38;5;51mhttps://" : nil, r.domain.sub(/\.$/,''), highlight ? "\e[0m" : nil].join,
-            local ? '⚙️' : result].join ' '
+            local ? '⚙️' : result].join ' ' if highlight
       src.reply r.response(result)
     end
   end
