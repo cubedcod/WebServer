@@ -1,0 +1,2 @@
+#!/bin/sh
+chromium-browser --enable-features=UseOzonePlatform --ozone-platform=wayland "http://localhost:8000/$1"
