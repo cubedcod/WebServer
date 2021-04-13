@@ -165,7 +165,7 @@ module Webize
       end
 
       def text_triples &f
-        basename = File.basename @base.path, '.txt'
+        basename = File.basename (@base.path || '/'), '.txt'
         if basename == 'twtxt'
           twtxt_triples &f
         elsif @base.ext == 'irc'
