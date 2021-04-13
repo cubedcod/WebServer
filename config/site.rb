@@ -167,6 +167,7 @@ l.facebook.com l.instagram.com
                               "google:verbatimrelevance": 1300}].to_json
         [200, {"Access-Control-Allow-Origin"=>"*", "Content-Type"=>"text/javascript; charset=UTF-8", "Content-Length" => output.bytesize}, [output]]
       when /^(images|x?js|maps|search)$/
+        r.env[:scripts] = true
         NoGunk[r]
       when 'sorry' # won't let us search - switch to DuckduckGo
         q = r.query_values['continue'].R.query_values['q']

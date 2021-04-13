@@ -39,7 +39,7 @@ module Webize
         s.attribute_nodes.map{|a| (puts "🚩 \e[38;5;196m#{a.value}\e[0m" if Verbose; s.remove) if a.value.R.deny?}
                                                      # strip gunk reference in nonstandard src attribute
         text = s.inner_text                          # strip script gunk
-        if !ScriptHosts.member?(base.host) && s['type'] != 'application/ld+json' && !text.match?(/(Apollo|initial|preloaded)_*(data|state)/i) && text.match?(ScriptGunk) && !ENV.has_key?('JS')
+        if !ScriptHosts.member?(base.host) && !base.env.has_key?(:scripts) && s['type'] != 'application/ld+json' && !text.match?(/(Apollo|initial|preloaded)_*(data|state)/i) && text.match?(ScriptGunk) && !ENV.has_key?('JS')
           lines = text.split /[\n;]+/                # visit lines
           s.content = lines.grep_v(ScriptGunk).join ";\n" # strip gunked lines
           lines.grep(ScriptGunk).map{|l| log['✂️', l, ScriptGunk]} if Verbose
