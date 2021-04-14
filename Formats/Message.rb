@@ -36,33 +36,27 @@ class WebResource
 
     Markup[Post] = -> post, env {
       post.delete Type
-      uri = post.delete('uri') || ('#' + Digest::SHA2.hexdigest(rand.to_s))
-      resource = uri.R env
+      resource = (post.delete('uri') || ('#' + Digest::SHA2.hexdigest(rand.to_s))).R env
       authors = post.delete(Creator) || []
       date = (post.delete(Date) || [])[0]
-      uri_hash = 'r' + Digest::SHA2.hexdigest(uri)
+      id = 'r' + Digest::SHA2.hexdigest(resource.uri) # local identifier for nonlocal-resource representation
       hasPointer = false
-      local_id = if !resource.path || (resource.host == env[:base].host && resource.path == env[:base].path)
-                   resource.fragment
-                 else
-                   uri_hash
-                 end
       if authors.find{|a| KillFile.member? a.to_s}
         authors.map{|a| CGI.escapeHTML a.R.display_name if a.respond_to? :R}
       else
-        {class: resource.deny? ? 'blocked post' : :post,
+        {class: resource.deny? ? 'blocked post' : :post, id: env[:base].uri == resource.uri.split('#')[0] ? resource.fragment : id,
          c: ["\n",
              (post.delete(Title)||[]).map(&:to_s).map(&:strip).compact.-([""]).uniq.map{|title|
                title = title.to_s.sub(/\/u\/\S+ on /,'')
                unless env[:title] == title
                  env[:title] = title
                  hasPointer = true
-                 [{_: :a,  id: local_id, class: :title,
+                 [{_: :a, id: '#msg'+Digest::SHA2.hexdigest(rand.to_s), class: :title,
                    href: resource.href, c: [(post.delete(Schema+'icon')||[]).map{|i|{_: :img, src: i.href}},CGI.escapeHTML(title)]}, " \n"]
                end},
              {class: :pointer,
-              c: [({_: :a, class: :date, href: 'http://localhost:8000/' + date[0..13].gsub(/[-T:]/,'/') + '#' + uri_hash, c: date} if date), ' ',
-                  ({_: :a, c: '☚', href: resource.href, id: local_id} unless hasPointer)]},
+              c: [({_: :a, class: :date, href: 'http://localhost:8000/' + date[0..13].gsub(/[-T:]/,'/') + '#' + id, c: date} if date), ' ',
+                  ({_: :a, c: '☚', href: resource.href, id: '#msg'+Digest::SHA2.hexdigest(rand.to_s)} unless hasPointer)]},
              {_: :table, class: :fromto,
               c: {_: :tr,
                   c: [{_: :td,
