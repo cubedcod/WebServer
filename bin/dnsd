@@ -115,7 +115,7 @@ class DNSServer
         result = Cache[domain]
       else
         newHost = true
-        result = Cache[domain] = ['//', hostname].join.R.block_domain? ? LocalHost : Resolv.getaddress(domain) rescue LocalHost
+        result = Cache[domain] = ['//', hostname].join.R.deny? ? LocalHost : Resolv.getaddress(domain) rescue LocalHost
       end
 
       local = result == LocalHost
@@ -126,14 +126,6 @@ class DNSServer
 
       src.reply r.response(result)
     end
-  end
-end
-
-class WebResource
-  def block_domain?
-    return false if allow_domain? || ScriptHosts.member?(host)
-    return true  if deny_domain?
-    false
   end
 end
 
