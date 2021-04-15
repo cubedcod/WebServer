@@ -34,7 +34,6 @@ class WebResource
       Schema + 'UserComments' => Post,
       Schema + 'VideoObject' => Video,
       Schema + 'WebPage' => Post,
-      W3 + '2000/01/rdf-schema#Resource' => Link,
     }
 
   end

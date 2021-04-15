@@ -292,16 +292,12 @@ class WebResource
         env[:proxy_href] = true                # proxy remote URLs
         p = parts[0]                           # path selector
         if !p                                  # root path
-          [302, {'Location' => '/bookmarks'}, []]
+          env[:view] = 'table'
+          '/bookmarks'.R(env).cacheResponse
         elsif %w{m d h}.member? p              # current month/day/hour redirect
           dateDir
-        elsif path == '/bookmarks'
-          env[:view] = 'table'
-          [200, {'Content-Type' => 'text/html'}, [htmlDocument(Hash[Bookmarks.map{|b|[b,{'uri'=>b, Title => [b]}]}])]]
         elsif path == '/favicon.ico'           # icon handler
           [200, {'Content-Type' => 'image/png'}, [SiteIcon]]
-        elsif path == '/mail'                  # mail-inbox redirect
-          [302,{'Location' => '/d?f=msg*'},[]]
         elsif !p.match? /[.:]/                 # no domain-separator chars in path-segment
           cacheResponse                        # local path
         else                                   # hostname in first path-segment

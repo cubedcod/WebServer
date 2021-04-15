@@ -60,7 +60,6 @@ class WebResource
     KillFile = SiteDir.join('killfile').readlines.map &:chomp
     ScriptHosts = SiteDir.join('script_hosts').readlines.map &:chomp
     SearchableHosts = %w(localhost twitter.com www.google.com)
-    Bookmarks = SiteDir.join('bookmarks.u').readlines.map &:chomp
 
   end
   module HTTP
@@ -157,15 +156,6 @@ l.facebook.com l.instagram.com
       case r.parts[0]
       when 'amp'
         r.path.index('/amp/s/') == 0 ? [302, {'Location' => 'https://' + r.path[7..-1]}, []] : r.deny
-      when 'complete'
-        output = ")]}'\n" + [(r.query_values||{})['q'], Bookmarks[0..7], Bookmarks[0..7].map{|b|b.R.display_name}, [],
-                             {"google:clientdata":{"bpc": :false,"phi": 0,"tlw": :false},
-                              "google:suggestdetail":[{},{},{},{},{},{},{},{}],
-                              "google:suggestrelevance":[1301,1100,750,603,602,601,600,550],
-                              "google:suggestsubtypes":[[3],[3],[3],[3],[3],[3],[3],[3]],
-                              "google:suggesttype":["NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION","NAVIGATION"],
-                              "google:verbatimrelevance": 1300}].to_json
-        [200, {"Access-Control-Allow-Origin"=>"*", "Content-Type"=>"text/javascript; charset=UTF-8", "Content-Length" => output.bytesize}, [output]]
       when /^(images|x?js|maps|search)$/
         r.env[:scripts] = true
         NoGunk[r]

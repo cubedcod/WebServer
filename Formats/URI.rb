@@ -98,7 +98,7 @@ class WebResource < RDF::URI
     def uri_toolbar
       qs = queryvals
       bc = '' # breadcrumb trail
-      favicon = ('//' + host + '/favicon.ico').R env # icon at well-known location
+      favicon = ('//' + (host || 'localhost') + '/favicon.ico').R env # icon at well-known location
       icon = if env[:links][:icon]                       # icon reference in metadata
                env[:links][:icon] = env[:links][:icon].R env # use icon reference
                if env[:links][:icon].uri.index('data:') == 0 # data URI?
@@ -118,7 +118,7 @@ class WebResource < RDF::URI
        c: [({_: :span, c: env[:status], style: 'font-weight: bold', class: :icon} if env[:status]),                                                              # status code
            ({_: :a, class: :icon, c: '↨', href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless env[:view] == 'table'),                         # link to tabular view
            {_: :a, href: (env[:proxy_href] && !local_node?) ? env[:base].uri : HTTP.qs(qs.merge({'notransform' => nil})), c: '⚗️', id: :UI, class: :icon},        # link to upstream UX
-           ({_: :a, href: HTTP.qs(qs.merge({'download' => 'audio'})),c: '&darr;',class: :icon} if host.match?(/(^|\.)(bandcamp|(mix|sound)cloud|youtube).com/)), # download link
+           ({_: :a, href: HTTP.qs(qs.merge({'download' => 'audio'})),c: '&darr;', class: :icon} if host&.match?(/(^|\.)(bandcamp|(mix|sound)cloud|youtube).com/)), # download link
            env[:feeds].map{|feed|                                                                                                                                # feed links
              {_: :a, href: feed.R(env).href,title: feed.path,class: :icon,c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {style: 'border: .08em solid orange; background-color: orange'} : {})}, "\n",
            {_: :a, class: :host, href: env[:base].join('/').R(env).href, c: icon ? {_: :img, src: icon, style: DarkLogo.member?(host) ? 'background-color: #fff' : ''} : '🏠'},# link to path root
@@ -138,7 +138,7 @@ class WebResource < RDF::URI
     Markup['uri'] = -> uri, env {uri.R}
 
     MarkupGroup[Link] = -> links, env {
-      links.map(&:R).group_by{|l|links.size > 8 && l.host && l.host.split('.')[-1] || nil}.map{|tld, links|
+      links.map{|l|l.respond_to?(:R) ? l.R : l['uri'].R}.group_by{|l|links.size > 8 && l.host && l.host.split('.')[-1] || nil}.map{|tld, links|
         [{class: :container,
           c: [({class: :head, _: :span, c: tld} if tld),
               {class: :body, c: links.group_by{|l|links.size > 25 ? ((l.host||'localhost').split('.')[-2]||' ')[0] : nil}.map{|alpha, links|
@@ -212,8 +212,12 @@ module Webize
       def each_triple &block; each_statement{|s| block.call *s.to_triple} end
 
       def each_statement &fn
-        @doc.lines.map(&:chomp).map(&:strip).map{|line|
-          fn.call RDF::Statement.new line.R, Type.R, (W3 + '2000/01/rdf-schema#Resource').R unless line.empty? || line.match?(/^#/)}
+        @doc.lines.map(&:chomp).map{|line|
+          unless line.empty? || line.match?(/^#/) # skip empty or commented lines
+            uri, title = line.split ' ', 2        # URI and optional comment
+            fn.call RDF::Statement.new uri.R, Type.R, (W3 + '2000/01/rdf-schema#Resource').R
+            fn.call RDF::Statement.new uri.R, Title.R, title || uri
+          end}
       end
     end
   end
