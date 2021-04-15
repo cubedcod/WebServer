@@ -26,8 +26,8 @@
 .post { max-width: 100ex; margin: .166em}
 .post:target .body {background: repeating-linear-gradient(-45deg, #000, #000 .875em, #178 .875em, #178 1em)}
 .posts {border-style: solid; border-width: 0.1em}
-.preembed {display: inline-block; position: relative}
-.preembed .icon {position: absolute;  left: 46%; top: 42%; font-size: 5em}
+.preembed .icon {position: absolute; left: 45%; top: 35%; font-size: 8em; color: #f00}
+.preembed {position: relative}
 .quote {background-color: #ccc; color: #000; padding-left: .3em}
 .thumb, .thumb * {float: left; max-width: 22em}
 .title {background-color: #000; color: #fff; font-size: 1.08em; font-weight: bold; vertical-align: top; border-radius: 0; border-style: dotted; border-width: 0 0 1px 0 }
@@ -58,9 +58,10 @@ body.error > pre {margin: auto; max-width: 120ex; white-space: pre-wrap}
 body.error {background: #f00; font-weight: bold}
 div, a, svg, form, table, textarea { display: inline-block }
 h1,h2,h3,h4,h5,h6 {margin: 0}
+iframe, .preembed {border: .3em solid #fff}
+iframe.main_player {border: .42em solid red}
 img, video {max-width: 100%}
 p {max-width: 100ex}
-iframe.main_player {border: .42em solid red}
 p[style] {background-color: #fff; color: #000}
 pre, code {white-space: pre-wrap; font-family: monospace; max-width: 255ex}
 pre, p {margin: .125em}
