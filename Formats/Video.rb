@@ -90,28 +90,35 @@ class WebResource
 
     Markup[Video] = Markup['WEB_PAGE_TYPE_WATCH'] = -> video, env {
       if v = if video.class == WebResource || (video.class == String && video.match?(/^http/))
-               video
+               video                                                                                                               # video URL
              else
-               video['https://schema.org/url'] || video[Schema+'contentURL'] || video[Schema+'url'] || video[Link] || video['uri']
+               video['https://schema.org/url'] || video[Schema+'contentURL'] || video[Schema+'url'] || video[Link] || video['uri'] # video in RDF reference
              end
-        v = v[0] if v.class == Array
-        if v.to_s.match? /v.redd.it/
-          v += '/DASHPlaylist.mpd'
+
+        if v.class == Array
+          puts "multiple videos, using first:" + v.join(', ') if v.size > 1
+          v = v[0]
+        end
+
+        if v.to_s.match? /v.redd.it/ # reddit
+          v += '/DASHPlaylist.mpd'   # append playlist suffix for dash.js
           dash = true
         end
+
         v = v.R env
-        if v.uri.match? /youtu/
-          q = v.query_values || {}
-          id = q['v'] || v.parts[-1]
+        if v.uri.match? /youtu/      # youtube
           env[:tubes] ||= {}
-          if id == (env[:base].query_values||{})['v'] && !env[:tubes].has_key?(id)
+          q = v.queryvals
+          id = q['v'] || v.parts[-1]
+          t = q['start'] || q['t']
+          if id == (env[:base].query_values||{})['v'] && !env[:tubes].has_key?(id) # navigated to video URL
             env[:tubes][id] = id
-            t = q['start'] || q['t']
-            {_: :iframe, width: 560, height: 315, src: "https://www.youtube.com/embed/#{id}#{t ? '?start='+t : nil}", frameborder: 0, allow: 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture', allowfullscreen: :true}
+            {_: :iframe, class: :main_player, width: 640, height: 480, src: "https://www.youtube.com/embed/#{id}#{t ? '?start='+t : nil}", frameborder: 0, allow: 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture', allowfullscreen: :true}
           else
-            {_: :a, href: v.uri, c: {_: :img, src: "https://i.ytimg.com/vi_webp/#{id}/sddefault.webp"}}
+            player = 'embed' + Digest::SHA2.hexdigest(rand.to_s)
+            [{class: :preembed, onclick: "inlineplayer(\"##{player}\",\"#{id}\"); this.remove()", c: [{_: :img, src: "https://i.ytimg.com/vi_webp/#{id}/sddefault.webp"},{class: :icon, c: '&#9654;'}]}, {id: player}]
           end
-        else
+        else                         # generic video reference
           [dash ? '<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>' : nil,
            {class: :video,
             c: [{_: :video, src: v.uri, controls: :true}.update(dash ? {'data-dashjs-player' => 1} : {}), '<br>',
