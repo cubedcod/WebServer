@@ -42,10 +42,8 @@ module Webize
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri].R
         @path = options[:path]
-        extension = @base.ext
-        @lang = 'html' if extension == 'erb'
-        @lang = 'ruby' if options[:content_type] == 'text/x-ruby'
-        @lang = 'shell' if options[:content_type] == 'text/x-shellscript'
+        @mime = options[:content_type]
+        @doc = (input.respond_to?(:read) ? input.read : input).encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
 
         if block_given?
           case block.arity
@@ -65,16 +63,27 @@ module Webize
 
       def source_tuples
         yield Type.R, (Schema + 'Code').R
-        lang = "-l #{@lang}" if @lang
-        if @path # file path given, use pygmentize util
-          html = RDF::Literal [`pygmentize #{lang} -f html #{Shellwords.escape @path}`,
-                               '<style>', CodeCSS, '</style>'
-                              ].join.encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
-          html.datatype = RDF.XMLLiteral
-          yield Content.R, html
-        else
-puts :ROUGE          
+
+        if @path # fs-path argument given, use pygmentize
+          lang = 'html' if @base.ext == 'erb'
+          lang = 'ruby' if @mime == 'text/x-ruby'
+          lang = 'shell' if @mime == 'text/x-shellscript'
+          langtag = "-l #{lang}" if lang
+          html = `pygmentize #{langtag} -f html #{Shellwords.escape @path}`
+
+        else # Rouge
+          #lexer = Rouge::Lexer.guess_by_mimetype(@mime)
+          lexer = Rouge::Lexer.guess_by_filename(@base.basename)
+          #puts "Rouge: #{@base.basename} #{lexer}"
+
+          html = Rouge::Formatters::HTMLPygments.new(Rouge::Formatters::HTML.new).format(lexer.lex(@doc))
         end
+
+        html = RDF::Literal [html,
+                             '<style>', CodeCSS, '</style>'
+                            ].join.encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
+        html.datatype = RDF.XMLLiteral
+        yield Content.R, html
       end
     end
   end
