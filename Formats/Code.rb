@@ -30,7 +30,7 @@ module Webize
                    text/x-ruby;q=0.8
                    text/x-shellscript;q=0.8
                    ),
-                   extensions: [:bash, :c, :css, :cpp, :erb, :gemspec, :go, :h, :hs, :js, :mk, :nix, :patch, :pl, :pm, :proto, :py, :rb, :sh, :zsh]
+                   extensions: [:bash, :c, :css, :cpp, :erb, :gemspec, :go, :h, :hs, :js, :mk, :nim, :nix, :patch, :pl, :pm, :proto, :py, :rb, :sh, :zsh]
       content_encoding 'utf-8'
       reader { Reader }
     end
@@ -41,9 +41,7 @@ module Webize
 
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri].R
-        unless @path = options[:path]
-          puts "Code triplr requires path reference: #{@base}" # TODO look into that ruby pygments clone
-        end
+        @path = options[:path]
         extension = @base.ext
         @lang = 'html' if extension == 'erb'
         @lang = 'ruby' if options[:content_type] == 'text/x-ruby'
@@ -68,11 +66,15 @@ module Webize
       def source_tuples
         yield Type.R, (Schema + 'Code').R
         lang = "-l #{@lang}" if @lang
-        html = RDF::Literal [`pygmentize #{lang} -f html #{Shellwords.escape @path}`,
-                             '<style>', CodeCSS, '</style>'
-                            ].join.encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
-        html.datatype = RDF.XMLLiteral
-        yield Content.R, html
+        if @path # file path given, use pygmentize util
+          html = RDF::Literal [`pygmentize #{lang} -f html #{Shellwords.escape @path}`,
+                               '<style>', CodeCSS, '</style>'
+                              ].join.encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
+          html.datatype = RDF.XMLLiteral
+          yield Content.R, html
+        else
+puts :ROUGE          
+        end
       end
     end
   end

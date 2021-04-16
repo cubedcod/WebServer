@@ -5,7 +5,7 @@ class WebResource
   # TODO move media stuff to #summary and make their load noop/undefined here?
   def loadRDF graph: env[:repository] ||= RDF::Repository.new
     if node.file?
-      unless %w(🐢 irc ttl).member? ext                    # file metadata
+      unless %w(🐢 irc ttl u).member? ext                  # file metadata
         stat = node.stat
         graph << RDF::Statement.new(self, Title.R, Rack::Utils.unescape_path(basename))
         graph << RDF::Statement.new(self, Date.R, stat.mtime.iso8601)
