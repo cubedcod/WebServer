@@ -170,10 +170,11 @@ l.facebook.com l.instagram.com
 
     (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com", NoGunk}
 
-    GET 'imgur.com', -> r { p = r.parts
+    GET 'imgur.com', -> r {
+      p = r.parts
       case p[0]
       when /^(a|gallery)$/
-        [301, {'Location' => "https://api.imgur.com/post/v1/albums/#{p[1]}?client_id=546c25a59c58ad7&include=media%2Cadconfig%2Caccount"}, []]
+        [301, {'Location' => "https://api.imgur.com/post/v1/albums/#{p[1]}?client_id=546c25a59c58ad7&include=media%2Cadconfig%2Caccount".R(r.env).href}, []]
       else
         NoGunk[r]
       end}
