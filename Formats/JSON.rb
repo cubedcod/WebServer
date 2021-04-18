@@ -17,8 +17,7 @@ module Webize
                    extensions: [:json, :webmanifest],
                    aliases: %w(
                     application/manifest+json;q=0.8
-                    application/vnd.imgur.v1+json;q=0.1
-                    text/javascript;q=0.8)
+                    application/vnd.imgur.v1+json;q=0.1)
       content_encoding 'utf-8'
       reader { Reader }
     end
@@ -131,6 +130,6 @@ class WebResource
   def JSONembed doc, pattern, &b
     doc.css('script').map{|script|
       script.inner_text.lines.grep(pattern).map{|line|
-        Webize::JSON::Reader.new(line.sub(/^[^{]+/,'').chomp.sub(/;$/,''), base_uri: self).scanContent &b}}
+        Webize::JSON::Reader.new(line.sub(/^[^{]+/,'').chomp.sub(/};.*/,'}'), base_uri: self).scanContent &b}}
   end
 end

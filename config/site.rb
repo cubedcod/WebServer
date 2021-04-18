@@ -209,7 +209,7 @@ l.facebook.com l.instagram.com
         r.env[:sort] = 'date'
         r.env[:view] = 'table'
         %w(balamii NTSRadio Reprezent worldwidefm whynowworld).map{|chan|
-          "https://api.mixcloud.com/#{chan}/cloudcasts/".R(r.env).fetchHTTP thru: false}
+          "https://api.mixcloud.com/#{chan}/cloudcasts/".R(r.env).fetchHTTP format: 'application/json', thru: false}
         r.saveRDF.graphResponse
       else
        NoGunk[r]
@@ -844,7 +844,7 @@ l.facebook.com l.instagram.com
   end
 
   def YouTube doc, &b
-    JSONembed doc, /ytInitialData/i, &b
+    JSONembed doc, /var ytInitial(Data|PlayerResponse) = /i, &b
   end
 
 end
