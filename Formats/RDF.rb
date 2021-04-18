@@ -5,22 +5,21 @@ class WebResource
   # TODO move media stuff to #summary and make their load noop/undefined here?
   def loadRDF graph: env[:repository] ||= RDF::Repository.new
     if node.file?
-      unless %w(🐢 irc ttl u).member? ext                  # file metadata
-        stat = node.stat
-        graph << RDF::Statement.new(self, Title.R, Rack::Utils.unescape_path(basename))
-        graph << RDF::Statement.new(self, Date.R, stat.mtime.iso8601)
-        graph << RDF::Statement.new(self, (Stat + 'size').R, stat.size)
-      end
-      if %w(info pack part svg ytdl).member? ext
+
+     #stat = node.stat                                     # file metadata
+     #graph << RDF::Statement.new(self, Title.R, Rack::Utils.unescape_path(basename))
+     #graph << RDF::Statement.new(self, Date.R, stat.mtime.iso8601)
+     #graph << RDF::Statement.new(self, (Stat + 'size').R, stat.size)
+
+      if %w(info pack part svg ytdl).member? ext           # incomplete/tmpfiles, ignore
         puts "no RDF reader for file #{fsPath}"
-      elsif %w(mp4 mkv webm).member? ext
-        graph << RDF::Statement.new(self, Type.R, Video.R) # video-file metadata
+      elsif %w(mp4 mkv webm).member? ext                   # video-file metadata
+        graph << RDF::Statement.new(self, Type.R, Video.R)
       elsif %w(m4a mp3 ogg opus wav).member? ext           # audio-file metadata
         tag_triples graph
-      else # file - read w/ RDF::Reader
+      else                                                 # load w/ RDF::Reader
         options = {}
         options[:base_uri] = self
-        # format hints
         if format = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # procmail message PREFIX and maildir containment
                    :mail
                  elsif ext.match? /^html?$/
@@ -31,22 +30,22 @@ class WebResource
                    :sourcecode
                  elsif %w(ttl 🐢).member? ext
                    :turtle
-                    end
-        elsif ext.empty? # no extension. ask FILE(1)
+                    end                                    # pathname based format hints
+        elsif ext.empty?                                   # no name-extension, ask FILE(1) for format
           mime = `file -b --mime-type #{Shellwords.escape fsPath}`.chomp
           format = :plaintext if mime == 'text/plain'
-          options[:content_type] = mime # format from FILE(1)
-        elsif mime = named_format
-          options[:content_type] = mime # format from extension
+          options[:content_type] = mime
+        elsif mime = named_format                          # format in local ext->MIME map
+          options[:content_type] = mime
         end
         if reader = (format ? RDF::Reader.for(format) : RDF::Reader.for(**options))
-          reader.new(File.open(fsPath).read, **options){|_|graph << _} # read data
+          reader.new(File.open(fsPath).read, **options){|_|graph << _} # load RDF
         else
-          puts "no RDF reader for #{uri}"
+          puts "no RDF reader for #{uri}"                  # no reader found
         end
       end
     elsif node.directory?
-      dir_triples graph
+      dir_triples graph                                    # directory metadata
     end
     self
   end
