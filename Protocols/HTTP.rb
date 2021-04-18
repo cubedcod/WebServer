@@ -181,7 +181,6 @@ class WebResource
               charset = 'Shift_JIS' if charset.match? /s(hift)?.?jis/i# normalize Shift-JIS charset symbol
             end                                                       # transcode to UTF-8
             body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace if format.match? /(ht|x)ml|script|text/
-
             body = Webize.clean self, body, format                    # clean upstream data
 
             if formatExt = Suffixes[format] || Suffixes_Rack[format]  # find format-suffix
@@ -193,19 +192,15 @@ class WebResource
             else
               puts "⚠️ extension undefined for #{format}"              # ⚠️ undefined format-suffix
             end
-
             if reader = RDF::Reader.for(content_type: format)         # reader defined for format?
               env[:repository] ||= RDF::Repository.new                # initialize RDF repository
-
               if format.index('text') && timestamp=h['Last-Modified'] # HTTP metadata to RDF-graph
                 env[:repository] << RDF::Statement.new(self, Date.R, Time.httpdate(timestamp.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,'')).iso8601) rescue nil
               end
-
               reader.new(body, base_uri: self, path: file){|g|env[:repository] << g} # read RDF
-
             else
               puts "⚠️ Reader undefined for #{format}"                 # ⚠️ undefined Reader
-            end unless format.match? /octet-stream|script/
+            end unless format.match? /octet-stream/                   # can't parse binary blobs
           else
             puts "⚠️ format undefined on #{uri}"                       # ⚠️ undefined format
           end

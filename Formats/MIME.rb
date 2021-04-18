@@ -8,7 +8,7 @@ module Webize
       Webize::CSS.clean body
     elsif format.index('text/html') == 0 # clean HTML
       Webize::HTML.clean body, baseURI
-    elsif format.index('script')         # clean JS
+    elsif format.index('application/javascript') # clean JS
       Webize::Code.clean body, baseURI
     else
       body

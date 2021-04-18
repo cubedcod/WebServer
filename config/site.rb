@@ -204,6 +204,17 @@ l.facebook.com l.instagram.com
     GET 'instagram.com', -> r {[301, {'Location' => ['//www.instagram.com', r.path].join.R.href}, []]}
     GET 'www.instagram.com', -> r {(!r.path || r.path=='/') ? r.cacheResponse : NoGunk[r]}
 
+    GET 'www.mixcloud.com', -> r {
+      if r.path == '/'
+        r.env[:sort] = 'date'
+        r.env[:view] = 'table'
+        %w(balamii NTSRadio Reprezent worldwidefm whynowworld).map{|chan|
+          "https://api.mixcloud.com/#{chan}/cloudcasts/".R(r.env).fetchHTTP thru: false}
+        r.saveRDF.graphResponse
+      else
+       NoGunk[r]
+      end}
+
     GET 'www.reddit.com', -> r {
       r.env[:links][:prev] = ['//old.reddit.com', (r.path || '/').sub('.rss',''), '?',r.query].join.R.href # previous-page pointer
       r.env[:sort] ||= 'date'

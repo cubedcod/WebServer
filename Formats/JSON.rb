@@ -29,7 +29,7 @@ module Webize
 
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri].R
-        @json = ::JSON.parse(input.respond_to?(:read) ? input.read : input) rescue {}
+        @json = ::JSON.parse(input.respond_to?(:read) ? input.read : input)
         if block_given?
           case block.arity
           when 0 then instance_eval(&block)

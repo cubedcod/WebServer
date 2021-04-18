@@ -59,7 +59,7 @@ body.error {background: #f00; font-weight: bold}
 div, a, svg, form, table, textarea { display: inline-block }
 h1,h2,h3,h4,h5,h6 {margin: 0}
 iframe, .preembed {border: .2em solid #fff}
-iframe.main_player {border: .2em solid red}
+iframe.main_player {border: .25em solid red}
 img, video {max-width: 100%}
 p {max-width: 100ex}
 p[style] {background-color: #fff; color: #000}
