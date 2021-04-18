@@ -208,7 +208,14 @@ l.facebook.com l.instagram.com
       if r.path == '/'
         r.env[:sort] = 'date'
         r.env[:view] = 'table'
-        %w(balamii NTSRadio Reprezent worldwidefm whynowworld).map{|chan|
+        %w(
+balamii
+MikeyGlamourAudio
+NTSRadio
+Reprezent
+worldwidefm
+whynowworld
+).map{|chan|
           "https://api.mixcloud.com/#{chan}/cloudcasts/".R(r.env).fetchHTTP format: 'application/json', thru: false}
         r.saveRDF.graphResponse
       else
