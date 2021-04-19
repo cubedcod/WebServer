@@ -205,7 +205,7 @@ l.facebook.com l.instagram.com
     GET 'www.instagram.com', -> r {(!r.path || r.path=='/') ? r.cacheResponse : NoGunk[r]}
 
     GET 'www.mixcloud.com', -> r {
-      if r.path == '/'
+      if !r.path || r.path == '/'
         r.env[:sort] = 'date'
         r.env[:view] = 'table'
         %w(
@@ -214,8 +214,8 @@ MikeyGlamourAudio
 NTSRadio
 Reprezent
 worldwidefm
-whynowworld
-).map{|chan|
+whynowworld).map{|chan|
+          print "🔊"
           "https://api.mixcloud.com/#{chan}/cloudcasts/".R(r.env).fetchHTTP format: 'application/json', thru: false}
         r.saveRDF.graphResponse
       else
