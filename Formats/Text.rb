@@ -12,7 +12,7 @@ class String
         img = nil
         if blk
           type = case link
-                 when /(gif|jpg|jpeg|(jpg|png):(large|small|thumb)|png|webp)(\?|$)/i
+                 when /[\.=](gif|jpg|jpeg|(jpg|png):(large|small|thumb)|png|webp)([\?&]|$)/i
                    img = '<img src="' + resource.uri + '">'
                    WebResource::Image
                  when /(youtu.?be|(mkv|mp4|webm)(\?|$))/i
