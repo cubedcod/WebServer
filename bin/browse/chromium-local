@@ -1,2 +1,2 @@
 #!/bin/sh
-chromium-browser --enable-features=UseOzonePlatform --ozone-platform=wayland "http://localhost:8000/$1"
+flatpak run com.github.Eloston.UngoogledChromium "http://localhost:8000/$1"
