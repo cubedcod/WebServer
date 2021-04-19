@@ -103,9 +103,8 @@ class WebResource
                       elsif type == :JSON || ext == 'json'
                         ['application/json','{}']
                       else
-                        url = (query&.match? /utm[^a-z]/) ? ['//',host,path].join : uri
                         ['text/html; charset=utf-8',
-                         "<html><body class='blocked'>#{HTML.render [{_: :style, c: SiteCSS}, {_: :script, c: SiteJS}, uri_toolbar]}<a class='unblock' href='#{url}'>⌘</a></body></html>"]
+                         "<html><body class='blocked'>#{HTML.render [{_: :style, c: SiteCSS}, {_: :script, c: SiteJS}, uri_toolbar]}<a class='unblock' href='#{href}'>⌘</a></body></html>"]
                       end
       [status,
        {'Access-Control-Allow-Credentials' => 'true',
@@ -389,6 +388,8 @@ class WebResource
         [204, {}, []]
       elsif handler = HostGET[host]                                # custom handler: lambda
         handler[self]
+      elsif query&.match? /utm[^a-z]/
+        [301, {'Location' => ['//',host,path].join.R(env).href}, []]
       elsif deny?                                                  # blocked request
         deny
       else                                                         # generic handler: remote node cache
