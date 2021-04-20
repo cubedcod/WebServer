@@ -150,7 +150,6 @@ module Webize
           base = m[1]
           base = base + '#' unless %w{/ #}.member? base [-1]
           x[prefix] = base}
-
         # scan document
         @doc.scan(reItem){|m|
           attrs = m[2]

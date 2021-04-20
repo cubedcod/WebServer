@@ -180,6 +180,9 @@ class WebResource
               charset = 'Shift_JIS' if charset.match? /s(hift)?.?jis/i# normalize Shift-JIS charset symbol
             end                                                       # transcode to UTF-8
             body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace if format.match? /(ht|x)ml|script|text/
+            if format == 'application/xml' && body[0..2048].match?(/(<|DOCTYPE )html/i)
+              format = 'text/html';puts 'HTML with XML type declared' # XML format is HTML
+            end
             body = Webize.clean self, body, format                    # clean upstream data
 
             if formatExt = Suffixes[format] || Suffixes_Rack[format]  # find format-suffix

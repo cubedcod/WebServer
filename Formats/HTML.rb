@@ -130,7 +130,7 @@ module Webize
     end
 
     class Format < RDF::Format
-      content_type 'text/html', extensions: [:htm, :html], aliases: %w(text/fragment+html;q=0.8)
+      content_type 'text/html', extensions: [:htm, :html]
       content_encoding 'utf-8'
       reader { Reader }
     end
