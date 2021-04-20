@@ -1,6 +1,6 @@
 #!/bin/sh
-# configure transparent proxy
-# call with uid of proxy as first arg
+# force traffic through transparent proxy
+# call with uid of proxy-daemon as first arg. find with 'id'
 
 open_UDP () {
     iptables  -A INPUT  -p udp --sport $1 -j ACCEPT
