@@ -7,8 +7,8 @@ sudo iptables -t nat -A OUTPUT -p udp -d 127.0.0.1 --dport 53 -j REDIRECT --to-p
 sudo iptables -t nat -A OUTPUT -p tcp -d 127.0.0.1 --dport 80 -j REDIRECT --to-ports 8000
 sudo iptables -t nat -A OUTPUT -p tcp -d 127.0.0.1 --dport 443 -j REDIRECT --to-ports 8443
 
-# launch forward (explicit) proxy, and transparent HTTPS-terminating reverse proxy
+# launch forward and transparent HTTPS-terminating reverse proxy
 cd $conf && squid -f squid.conf
 
-# run HTTP server (Ctrl-C to stop)
+# launch web server
 cd $HOME/web && unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c $conf/unicorn.rb $conf/rack.ru

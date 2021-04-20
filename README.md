@@ -6,14 +6,14 @@
 
 ## USAGE
 
-launch the ruby daemon, HTTPS-terminating proxy and optionally DNS server
+launch the web server and proxy
 
     ./bin/daemons
-    ./bin/dnsd
 
-client launch shortcuts for proxy-mode in [bin/browse](bin/browse/). for DNS-mode, configure via your network manager, or as a quick hack:
+browser shortcuts for forward-proxy mode in [bin/browse](bin/browse/). for DNS-mode, launch and configure local DNS server
 
     echo nameserver 127.0.0.1 | sudo tee /etc/resolv.conf
+    ./bin/dnsd
 
 bookmarklet for [local UI](javascript:location.href='http://localhost:8000/'+location.hostname+location.pathname+'?cookie='+encodeURIComponent(document.cookie))
 

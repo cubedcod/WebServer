@@ -1,6 +1,7 @@
 #!/bin/sh
-# force traffic through transparent proxy
-# call with uid of proxy-daemon as first arg. find with 'id'
+# on systems with 'rogue' apps ignoring system proxy or DNS settings,
+# we can enforce traffic via transparent proxy for egress
+# call with your uid as first argument. (find it with 'id')
 
 open_UDP () {
     iptables  -A INPUT  -p udp --sport $1 -j ACCEPT
