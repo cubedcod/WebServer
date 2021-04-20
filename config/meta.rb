@@ -193,6 +193,7 @@ class WebResource
       'category' => Abstract,
       'category_mapping' => :drop,
       'checksum' => :drop,
+      'ci:canonical' => Link,
       'comments_disabled' => :drop,
       'completeUrl' => Link,
       'componentType' => Type,
