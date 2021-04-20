@@ -6,11 +6,14 @@
 
 ## USAGE
 
-launch in a tmux session (daemon/proxy/logviewer):
+launch the ruby daemon, HTTPS-terminating proxy and optionally DNS server
 
-    ./bin/web_console
+    ./bin/daemons
+    ./bin/dnsd
 
-client launch shortcuts in [bin/browse](bin/browse/)
+client launch shortcuts for proxy-mode in [bin/browse](bin/browse/). for DNS-mode, configure via your network manager, or as a quick hack:
+
+    echo nameserver 127.0.0.1 | sudo tee /etc/resolv.conf
 
 bookmarklet for [local UI](javascript:location.href='http://localhost:8000/'+location.hostname+location.pathname+'?cookie='+encodeURIComponent(document.cookie))
 
