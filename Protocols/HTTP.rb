@@ -391,9 +391,9 @@ class WebResource
         [204, {}, []]
       elsif handler = HostGET[host]                                # custom handler: lambda
         handler[self]
-      elsif query&.match? /utm[^a-z]/
-        [301, {'Location' => ['//',host,path].join.R(env).href}, []]
-      elsif deny?                                                  # blocked request
+      elsif query&.match? Gunk
+        [301,{'Location' => ['//',host,path].join.R(env).href},[]] # strip query-gunk
+      elsif deny?                                                  # block request
         deny
       else                                                         # generic handler: remote node cache
         fetch
