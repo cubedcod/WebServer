@@ -289,8 +289,7 @@ class WebResource
         env[:proxy_href] = true                # proxy remote URLs
         p = parts[0]                           # path selector
         if !p                                  # root path
-          env[:view] = 'table'
-          '/bookmarks'.R(env).cacheResponse
+          '/index'.R(env).cacheResponse
         elsif %w{m d h}.member? p              # current month/day/hour redirect
           dateDir
         elsif path == '/favicon.ico'           # icon handler
