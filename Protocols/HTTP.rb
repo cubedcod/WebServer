@@ -142,8 +142,12 @@ class WebResource
       ns = nodeSet                                                    # client has node cached, 304 response
       return ns[0].fileResponse if ns.size == 1 && ns[0].static_node? # server has node cached, return it
       fetchHTTP                                                       # fetch over HTTPS, with HTTP fallback
-    rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError
-      ['http://', host, ![nil, 443].member?(port) ? [':', port] : nil, path, query ? ['?', query] : nil].join.R(env).fetchHTTP rescue (env[:status] = 408; notfound)
+    rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError => e
+      if e.class == SocketError && e.message.index('name not')
+        [302,{'Location' => 'http://localhost/www.google.com/search' + HTTP.qs({'q' => host})},[]]
+      else
+        ['http://', host, ![nil, 443].member?(port) ? [':', port] : nil, path, query ? ['?', query] : nil].join.R(env).fetchHTTP rescue (env[:status] = 408; notfound)
+      end
     end
 
     # fetch remote data to RAM and fs-cache
