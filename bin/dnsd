@@ -1,8 +1,7 @@
 #!/usr/bin/env ruby
 # coding: utf-8
-# Simple DNS server  By Peter Cooper
+# previously: Simple DNS server  By Peter Cooper
 # MIT license
-# * See http://www.ietf.org/rfc/rfc1035.txt
 
 require 'resolv'
 require 'socket'
@@ -115,11 +114,13 @@ class DNSServer
         result = Cache[domain]
       else
         newHost = true
-        result = Cache[domain] = ['//', hostname].join.R.deny? ? LocalHost : Resolv.getaddress(domain) rescue LocalHost
+        reverse = domain.index 'in-addr.arpa'
+        domain = domain[0..reverse-2].split('.').reverse.join('.') if reverse
+        result = Cache[domain] = ['//', hostname].join.R.deny? ? LocalHost : Resolv.send((reverse ? :getname : :getaddress), domain) rescue LocalHost
       end
 
       local = result == LocalHost
-      highlight = newHost && !local
+      highlight = newHost && !local && !reverse
       puts [Time.now.iso8601,
             [highlight ? "\e[38;5;51mhttps://" : nil, hostname, highlight ? "\e[0m" : nil].join,
             local ? '⚙️' : result].join ' ' if newHost
