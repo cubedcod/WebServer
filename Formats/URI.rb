@@ -67,7 +67,7 @@ class WebResource < RDF::URI
 
     def queryvals
       return {} unless query
-      (puts 'bad query: '+query; return {}) if query.match? /^&|&$/ # TODO fix upstream URI library
+      (puts 'bad query: '+query; return {}) if query.match? /^&|&&|&$/ # TODO fix upstream URI library
       query_values
     end
 
