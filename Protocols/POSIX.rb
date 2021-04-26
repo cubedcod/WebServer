@@ -114,6 +114,7 @@ class WebResource
                    nodeGrep
                  else                                                  # LS
                    summarize = true
+                   env[:links][:down] ||= '*'
                    (path=='/' && local_node?) ? [node] : [node, *node.children.select{|n|n.basename.to_s[0] != '.'}]
                  end
                 else                                                   # file(s)
