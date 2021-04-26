@@ -1,6 +1,5 @@
 .lbry.tv
 .pscp.tv
-.storage.googleapis.com
 .abs.hls.ttvnw.net
 .alpinelinux.org
 api.frame.io
@@ -9,10 +8,8 @@ edge.api.brightcove.com
 entitlement.auth.adobe.com
 gql.twitch.tv
 graphql.api.dailymotion.com
-groups.google.com
 players.brightcove.net
 matrix.org
-s3.amazonaws.com
 secure.brightcove.com
 sp.auth.adobe.com
 tkx.apis.anvato.net
