@@ -179,7 +179,22 @@ l.facebook.com l.instagram.com
         NoGunk[r]
       end}
 
+    GET 'instagram.com', -> r {[301, {'Location' => ['//www.instagram.com', r.path].join.R.href}, []]}
+    GET 'www.instagram.com', -> r {(!r.path || r.path=='/') ? r.cacheResponse : NoGunk[r]}
+
     GET 'api.mixcloud.com', -> r {r.fetchHTTP format: 'application/json'}
+    GET 'mixcloud.com', -> r {[301, {'Location' => ['//www.miscloud.com', r.path].join.R.href}, []]}
+    GET 'www.mixcloud.com', -> r {
+      if !r.path || r.path == '/'
+        r.env[:sort] = 'date'
+        r.env[:view] = 'table'
+        SiteDir.join('mixcloud').readlines.map(&:chomp).map{|chan|
+          print "🔊"
+          "https://api.mixcloud.com/#{chan}/cloudcasts/".R(r.env).fetchHTTP format: 'application/json', thru: false}
+        r.saveRDF.graphResponse
+      else
+       NoGunk[r]
+      end}
 
     GET 'www.msn.com', NoGunk
 
@@ -195,26 +210,11 @@ l.facebook.com l.instagram.com
         if status.to_s.match? /^30/
           puts "upstream redirect", head
           [status, head, body]
-        else # find page pointer missing in HEAD (old+new UI) and HTML+RSS body (new UI)
+        else # find page pointer missing in HEAD/<head> (old+new UI) and HTML/RSS body (new UI)
           links = []
           body[0].scan(/href="([^"]+after=[^"]+)/){|link|links << CGI.unescapeHTML(link[0]).R} # find links
           [302, {'Location' => (links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]).to_s.sub('old','www')}, []] # goto link with highest count
         end}}
-
-    GET 'instagram.com', -> r {[301, {'Location' => ['//www.instagram.com', r.path].join.R.href}, []]}
-    GET 'www.instagram.com', -> r {(!r.path || r.path=='/') ? r.cacheResponse : NoGunk[r]}
-
-    GET 'www.mixcloud.com', -> r {
-      if !r.path || r.path == '/'
-        r.env[:sort] = 'date'
-        r.env[:view] = 'table'
-        SiteDir.join('mixcloud').readlines.map(&:chomp).map{|chan|
-          print "🔊"
-          "https://api.mixcloud.com/#{chan}/cloudcasts/".R(r.env).fetchHTTP format: 'application/json', thru: false}
-        r.saveRDF.graphResponse
-      else
-       NoGunk[r]
-      end}
 
     GET 'www.reddit.com', -> r {
       r.env[:links][:prev] = ['//old.reddit.com', (r.path || '/').sub('.rss',''), '?',r.query].join.R.href # previous-page pointer
@@ -230,6 +230,8 @@ l.facebook.com l.instagram.com
         r.deny
       end}
 
+    GET 'teddit.net', -> r {[301, {'Location' => '//www.reddit.com' + r.path}, []]}
+
     GET 's4.reutersmedia.net', -> r {
       args = r.query_values || {}
       if args.has_key? 'w'
@@ -240,7 +242,7 @@ l.facebook.com l.instagram.com
       end}
 
     GET 'cdn.shortpixel.ai', ImgRehost
-    GET 'teddit.net', -> r {[301, {'Location' => '//www.reddit.com' + r.path}, []]}
+
     GET 'go.theregister.com', -> r {
       if r.parts[0] == 'feed'
         [301, {'Location' => 'https://' + r.path[6..-1]}, []]
