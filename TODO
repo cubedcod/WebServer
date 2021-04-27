@@ -1,24 +1,11 @@
 if-modified-since on getfeeds
 ml mbox extract curl -I https://www.redhat.com/archives/dm-devel/2020-November.txt.gz
-use distro-squid (install conf file)
-openrc/systemd unit for daemon - log to syslog / systemd journal
-tools for feedlist maintenance - query recent log for errors/redirects / no new data, list discovered feeds for possible subscription
-path visualization
-offline icon , e.g. to stop redirect and use local cache on  https://lobste.rs/threads/?view=table&sort=date&offline  https://www.universalhub.com/comment
-wayland browser w/ https/images and simulation of the JS behaviors
+tools for feedlist maintenance -  errors/redirects / no new data, list discovered feeds for possible subscription
+path visualization (how did i get here? referer history)
 https://twitter.com/MariaAb1293 - user info JSON parse
 https://forum.solidproject.org/ blank nodes
-look for apollo_state on every site ? maybe via meta/link-tag fingerprinting or smth so no string-scan in every script
-p2p notification net to replace rsync/syncthing - just use hub/spoke irc3? libp2p-gossipsub private nets? full-mesh Turtle-on-the-wire?
 https://boards.4channel.org/g/thread/79924795?view=table&sort=date - hyperlinks not in <a>
-tree view for replies
 git
-search-result abstract rollup at top of page
-record some of the dropped telemetry URLs - which youtube vids were watched, guesstimated locations etc
-yt/disqus comments
-dynamic NAVIGATION suggestions in autocomplete
-HTML view for schema.org events https://jewishchronicle.timesofisrael.com/
-datetime visualization
-image typing when URI isnt  image-like but we have it cached https://media.zenfs.com/en/ap.org/86fd3464492afd86d85368ce684c1a29
+HTML view for schema.org events https://jewishchronicle.timesofisrael.com/ - datetimeline vis
 fill in other known data  from store.. inbound linkers, title etc
 RDFa - investigate HAML template-solution in RDF library

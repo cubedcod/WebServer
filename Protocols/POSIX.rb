@@ -100,7 +100,11 @@ class WebResource
     # URI -> nodes
     def nodeSet
       qs = queryvals
-      grep = (qs.has_key?('Q')||qs.has_key?('q')) && (local_node? || offline?)
+
+      # glob-chars and grep-arg only magic on offline local cache
+      do_local_searches = local_node? || offline?
+      do_grep = (qs.has_key?('Q')||qs.has_key?('q')) && do_local_searches
+
       summarize = qs.has_key? 'abbr'
       nodes = if node.file? # direct map - single node
                 [self]
@@ -111,7 +115,7 @@ class WebResource
                    `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
                  elsif qs['find'] && !qs['find'].empty? && path != '/' # FIND - substring match
                    `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
-                 elsif grep                                            # GREP
+                 elsif do_grep                                         # GREP
                    nodeGrep
                  else                                                  # LS
                    summarize = true
@@ -120,8 +124,8 @@ class WebResource
                  end
                 else                                                   # file(s)
                   globPath = fsPath
-                  if globPath.match GlobChars
-                    if grep
+                  if globPath.match?(GlobChars) && do_local_searches
+                    if do_grep
                       nodeGrep Pathname.glob globPath                  # GREP
                     else
                       Pathname.glob globPath                           # GLOB
