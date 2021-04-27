@@ -100,17 +100,18 @@ class WebResource
     # URI -> nodes
     def nodeSet
       qs = queryvals
+      grep = (qs.has_key?('Q')||qs.has_key?('q')) && (local_node? || offline?)
       summarize = qs.has_key? 'abbr'
-      nodes = if node.file? # direct map (one node)
+      nodes = if node.file? # direct map - single node
                 [self]
-              else          # indirect map (multiple nodes)
+              else          # indirect map - one or more nodes
                 pathbase = host_parts.join('/').size
                 (if node.directory?                                    # directory
-                 if qs['f'] && !qs['f'].empty?                         # FIND
+                 if qs['f'] && !qs['f'].empty?                         # FIND - full match
                    `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
-                 elsif qs['find'] && !qs['find'].empty? && path != '/' # FIND case-insensitive substring
+                 elsif qs['find'] && !qs['find'].empty? && path != '/' # FIND - substring match
                    `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
-                 elsif qs.has_key?('Q') || qs.has_key?('q')            # GREP
+                 elsif grep                                            # GREP
                    nodeGrep
                  else                                                  # LS
                    summarize = true
@@ -120,7 +121,7 @@ class WebResource
                 else                                                   # file(s)
                   globPath = fsPath
                   if globPath.match GlobChars
-                    if qs.has_key?('Q') || qs.has_key?('q')
+                    if grep
                       nodeGrep Pathname.glob globPath                  # GREP
                     else
                       Pathname.glob globPath                           # GLOB
