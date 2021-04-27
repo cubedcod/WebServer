@@ -327,7 +327,7 @@ class WebResource
                if writer = RDF::Writer.for(content_type: format)
                  env[:repository].dump writer.to_sym, base_uri: self
                else
-                 puts "no Writer for #{format}!"
+                 puts "no Writer for #{format}"
                  ''
                end
              end
