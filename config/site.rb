@@ -66,7 +66,7 @@ class WebResource
 
     # handler lambdas, available for binding to hostnames
 
-    GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['u']||r.query_values['q']).R.href}, []]}
+    GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['u']||r.query_values['q']).R(r.env).href}, []]}
 
     NoGunk  = -> r {r.send r.uri.match?(Gunk) ? :deny : :fetch}
     NoTransform = -> r {r.env[:notransform] = true; NoGunk[r]}
@@ -140,7 +140,7 @@ l.facebook.com l.instagram.com
     GET 'googleads.g.doubleclick.net', GotoAdURL
     GET 'www.googleadservices.com', GotoAdURL
 
-    GotoGoogle = -> r {[301, {'Location' => ['//www.google.com', r.path, '?', r.query].join.R.href}, []]}
+    GotoGoogle = -> r {[301, {'Location' => ['//www.google.com', r.path, '?', r.query].join.R(r.env).href}, []]}
 
     GET 'google.com', GotoGoogle
     GET 'groups.google.com', NoTransform
@@ -179,11 +179,11 @@ l.facebook.com l.instagram.com
         NoGunk[r]
       end}
 
-    GET 'instagram.com', -> r {[301, {'Location' => ['//www.instagram.com', r.path].join.R.href}, []]}
+    GET 'instagram.com', -> r {[301, {'Location' => ['//www.instagram.com', r.path].join.R(r.env).href}, []]}
     GET 'www.instagram.com', -> r {(!r.path || r.path=='/') ? r.cacheResponse : NoGunk[r]}
 
     GET 'api.mixcloud.com', -> r {r.fetchHTTP format: 'application/json'}
-    GET 'mixcloud.com', -> r {[301, {'Location' => ['//www.miscloud.com', r.path].join.R.href}, []]}
+    GET 'mixcloud.com', -> r {[301, {'Location' => ['//www.mixcloud.com', r.path].join.R(r.env).href}, []]}
     GET 'www.mixcloud.com', -> r {
       if !r.path || r.path == '/'
         r.env[:sort] = 'date'
@@ -250,7 +250,7 @@ l.facebook.com l.instagram.com
         r.deny
       end}
 
-    GET 'mobile.twitter.com', -> r {[301, {'Location' => ('//twitter.com' + r.path).R.href}, []]}
+    GET 'mobile.twitter.com', -> r {[301, {'Location' => ('//twitter.com' + r.path).R(r.env).href}, []]}
     GET 'twitter.com', -> r {
       r.env[:sort] = 'date'
       r.env[:view] = 'table'
@@ -320,7 +320,7 @@ l.facebook.com l.instagram.com
     GET 'news.yahoo.com', NoGunk
     GET 's.yimg.com', ImgRehost
 
-    GotoYT = -> r {[301, {'Location' => ['//www.youtube.com', r.path, '?', r.query].join.R.href}, []]}
+    GotoYT = -> r {[301, {'Location' => ['//www.youtube.com', r.path, '?', r.query].join.R(r.env).href}, []]}
     GET 'm.youtube.com', GotoYT
     GET 'yewtu.be', GotoYT
     GET 'youtube.com', GotoYT
