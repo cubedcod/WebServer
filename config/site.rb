@@ -156,9 +156,11 @@ l.facebook.com l.instagram.com
       case r.parts[0]
       when 'amp'
         r.path.index('/amp/s/') == 0 ? [302, {'Location' => 'https://' + r.path[7..-1]}, []] : r.deny
-      when /^(images|x?js|maps|search)$/
+      when /^(images|x?js|maps)$/
         r.env[:scripts] = true
         NoGunk[r]
+      when 'search'
+        r.fetch
       when 'sorry' # won't let us search - switch to DuckduckGo
         q = r.query_values['continue'].R.query_values['q']
         [301, {'Location' => 'https://html.duckduckgo.com/html/' + HTTP.qs({q: q})}, []]
