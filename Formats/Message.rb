@@ -2,6 +2,50 @@
 class WebResource
   module HTML
 
+    # RDF from message-board post
+    def Chan doc
+      doc.css('.post, .postCell, .post-container').map{|post|
+        num = post.css('a.linkSelf, a.post_no, .postNum a')[0]
+        subject = join(num ? num['href'] : ('#' + (post['data-post-no'] || post['id'] || (Digest::SHA2.hexdigest post.to_s))))
+        graph = ['https://', subject.host, subject.path.sub(/\.html$/, ''), '/', subject.fragment].join.R
+
+        yield subject, Type, Post.R, graph
+
+        post.css('time, .dateTime').map{|date|
+          yield subject, Date, (date['datetime'] || Time.at((date['data-utc'] || date['unixtime']).to_i).iso8601), graph }
+
+        post.css('.labelCreated').map{|created|
+          yield subject, Date, Chronic.parse(created.inner_text).iso8601, graph }
+
+        post.css('.name, .post_author, .poster-name, .postername').map{|name|
+          yield subject, Creator, name.inner_text, graph }
+
+        post.css('.post-subject, .post_title, .subject, .title').map{|subj|
+          yield subject, Title, subj.inner_text, graph }
+
+        post.css('.file-image, .fileThumb, .imgLink').map{|a|
+          yield subject, Image, (join a['href']), graph if a['href'] }
+
+        post.css('.post_image, .post-image, img.thumb').map{|img|
+          yield subject, Image, (join img.parent['href']), graph }
+
+        post.css('img.multithumb, img.multithumbfirst').map{|img|
+          yield subject, Image, (join img.parent.parent['href']), graph }
+
+        post.css('[href$="m4v"], [href$="mp4"], [href$="webm"]').map{|a|
+          yield subject, Video, (join a['href']), graph }
+
+        post.css('.body, .divMessage, .message, .post-body, .postMessage, .text').map{|msg|
+          msg.css('a[class^="ref"], a[onclick*="Reply"], .post-link, .quotelink, .quoteLink').map{|reply_of|
+            yield subject, To, (join reply_of['href']), graph
+            reply_of.remove}
+          yield subject, Content, msg, graph }
+
+        post.remove }
+
+      doc.css('#boardNavMobile, #delform, #absbot, #navtopright, #postForm, #postingForm, #actionsForm, #thread-interactions').map &:remove
+    end
+
     Markup[DC+'language'] = -> lang, env {
       {'de' => '🇩🇪',
        'en' => '🇬🇧',
