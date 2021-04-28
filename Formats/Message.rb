@@ -42,7 +42,7 @@ class WebResource
 
           msg.traverse{|n|                                                    # references in text content
             if n.text? && n.to_s.match?(/https?:\/\//)
-              n.add_next_sibling n.to_s.hrefs
+              n.add_next_sibling (Webize::HTML.format (CGI.unescapeHTML n.to_s).hrefs, self)
               n.remove
             end}
 
