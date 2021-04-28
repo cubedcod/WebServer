@@ -1,4 +1,4 @@
-{Formats: %w(URI Archive Audio Calendar Code CSS CSV Feed Form HTML Image JSON Mail Markdown Message MIME Org PDF RDF Subtitle Text Chat Video),
+{Formats: %w(URI Archive Audio Calendar Code CSS CSV Feed Form HTML Image JSON Mail Markdown Message MIME Org PDF RDF Subtitle Text Video),
  Protocols: %w(POSIX HTTP),
  config: %w(gunk meta site)}.
   map{|category, components|

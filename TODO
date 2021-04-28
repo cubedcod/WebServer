@@ -4,7 +4,6 @@ tools for feedlist maintenance -  errors/redirects / no new data, list discovere
 path visualization (how did i get here? referer history)
 https://twitter.com/MariaAb1293 - user info JSON parse
 https://forum.solidproject.org/ blank nodes
-https://boards.4channel.org/g/thread/79924795?view=table&sort=date - hyperlinks not in <a>
 git
 fix reverse-dns output binarycrap and/or switch to rubydns
 HTML view for schema.org events https://jewishchronicle.timesofisrael.com/ - datetimeline vis
