@@ -6,6 +6,7 @@ https://twitter.com/MariaAb1293 - user info JSON parse
 https://forum.solidproject.org/ blank nodes
 https://boards.4channel.org/g/thread/79924795?view=table&sort=date - hyperlinks not in <a>
 git
+fix reverse-dns output binarycrap and/or switch to rubydns
 HTML view for schema.org events https://jewishchronicle.timesofisrael.com/ - datetimeline vis
 fill in other known data  from store.. inbound linkers, title etc
 RDFa - investigate HAML template-solution in RDF library
