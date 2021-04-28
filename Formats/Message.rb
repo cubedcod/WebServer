@@ -2,7 +2,7 @@
 module Webize
   module Plaintext
 
-    class Reader
+    class Reader < RDF::Reader
 
       # IRC log -> RDF
       def chat_triples
@@ -21,7 +21,7 @@ module Webize
         chan = ('#' + channame).R
         day = parts[0..2].join('-') + 'T'
         hourslug = parts[0..3].join
-        linksubject = [nil, parts[0..2]].join('/') + '/#IRClinks'
+        linkgroup = [nil, parts[0..2]].join('/') + '/#IRClinks'
         lines = 0
         ts = {}
         @doc.lines.grep(/^[^-]/).map{|msg|
@@ -49,10 +49,11 @@ module Webize
           creator = (dirname + '/*irc?q=' + nick + '&sort=date&view=table#' + nick).R
           yield subject, Creator, creator
           yield subject, Content, ['<pre>',
-                                   msg.hrefs{|p,o| yield linksubject, p, o},
+                                   msg.hrefs{|p,o| yield p==Video ? subject : linkgroup, p, o},
                                    '</pre>'].join if msg}
       end
 
+      # twtxt -> RDF
       def twtxt_triples
         dirname = File.dirname @base.path
         @doc.lines.grep(/^[^#]/).map{|line|

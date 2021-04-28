@@ -137,7 +137,7 @@ module Webize
       reader { Reader }
     end
 
-    class Reader < RDF::Reader
+    class Reader
       include WebResource::URIs
       format Format
 
