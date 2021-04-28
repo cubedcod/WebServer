@@ -5,41 +5,48 @@ class WebResource
     # RDF from message-board post
     def Chan doc
       doc.css('.post, .postCell, .post-container').map{|post|
-        num = post.css('a.linkSelf, a.post_no, .postNum a')[0]
+        num = post.css('a.linkSelf, a.post_no, .postNum a')[0]                # post identifier
         subject = join(num ? num['href'] : ('#' + (post['data-post-no'] || post['id'] || (Digest::SHA2.hexdigest post.to_s))))
         graph = ['https://', subject.host, subject.path.sub(/\.html$/, ''), '/', subject.fragment].join.R
 
-        yield subject, Type, Post.R, graph
+        yield subject, Type, Post.R, graph                                    # post typetag
 
-        post.css('time, .dateTime').map{|date|
+        post.css('time, .dateTime').map{|date|                                # timestamp from unixtime
           yield subject, Date, (date['datetime'] || Time.at((date['data-utc'] || date['unixtime']).to_i).iso8601), graph }
 
-        post.css('.labelCreated').map{|created|
-          yield subject, Date, Chronic.parse(created.inner_text).iso8601, graph }
+        post.css('.labelCreated').map{|created|                               # freeform timestamp
+          yield subject, Date, Chronic.parse(created.inner_text).iso8601, graph}
 
-        post.css('.name, .post_author, .poster-name, .postername').map{|name|
+        post.css('.name, .post_author, .poster-name, .postername').map{|name| # author
           yield subject, Creator, name.inner_text, graph }
 
-        post.css('.post-subject, .post_title, .subject, .title').map{|subj|
+        post.css('.post-subject, .post_title, .subject, .title').map{|subj|   # title
           yield subject, Title, subj.inner_text, graph }
 
-        post.css('.file-image, .fileThumb, .imgLink').map{|a|
+        post.css('.file-image, .fileThumb, .imgLink').map{|a|                 # image references
           yield subject, Image, (join a['href']), graph if a['href'] }
 
-        post.css('.post_image, .post-image, img.thumb').map{|img|
+        post.css('.post_image, .post-image, img.thumb').map{|img|             # images
           yield subject, Image, (join img.parent['href']), graph }
 
-        post.css('img.multithumb, img.multithumbfirst').map{|img|
+        post.css('img.multithumb, img.multithumbfirst').map{|img|             # image thumbnails
           yield subject, Image, (join img.parent.parent['href']), graph }
 
-        post.css('[href$="m4v"], [href$="mp4"], [href$="webm"]').map{|a|
+        post.css('[href$="m4v"], [href$="mp4"], [href$="webm"]').map{|a|      # videos
           yield subject, Video, (join a['href']), graph }
 
         post.css('.body, .divMessage, .message, .post-body, .postMessage, .text').map{|msg|
           msg.css('a[class^="ref"], a[onclick*="Reply"], .post-link, .quotelink, .quoteLink').map{|reply_of|
-            yield subject, To, (join reply_of['href']), graph
+            yield subject, To, (join reply_of['href']), graph                 # reply-of references
             reply_of.remove}
-          yield subject, Content, msg, graph }
+
+          msg.traverse{|n|                                                    # references in text content
+            if n.text? && n.to_s.match?(/https?:\/\//)
+              n.add_next_sibling n.to_s.hrefs
+              n.remove
+            end}
+
+          yield subject, Content, msg, graph }                                # message body
 
         post.remove }
 

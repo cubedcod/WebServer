@@ -11,7 +11,7 @@ module Webize
       log = -> type, content, filter {               # logger
         print type + " \e[38;5;8m" + content.to_s.gsub(/[\n\r\s\t]+/,' ').gsub(filter, "\e[38;5;48m\\0\e[38;5;8m") + "\e[0m "}
 
-      doc = Nokogiri::HTML.parse doc.gsub /<\/?noscript[^>]*>/i,'' # strip <noscript>, preserving child nodes
+      doc = Nokogiri::HTML.parse doc.gsub /<\/?(noscript|wbr)[^>]*>/i,'' # strip <noscript> <wbr>
       doc.traverse{|e|                               # visit nodes
 
         if e['src']                                  # src attribute
