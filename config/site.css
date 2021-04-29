@@ -28,7 +28,7 @@
 .posts {border-style: solid; border-width: 0.1em}
 .preembed .icon {position: absolute; left: 45%; top: 35%; font-size: 8em; color: #f00}
 .preembed {position: relative; vertical-align: top}
-.quote {background-color: #ccc; color: #000; padding-left: .3em}
+.quote {background-color: #ddd; color: #000; padding-left: .2em}
 .thumb, .thumb * {float: left; max-width: 22em}
 .title {background-color: #000; color: #fff; font-size: 1.08em; font-weight: bold; vertical-align: top; border-radius: 0; border-style: dotted; border-width: 0 0 1px 0 }
 .toolbox .host {position: fixed; top: 0; left: 1em; z-index: -1}
@@ -46,9 +46,9 @@ a.id {float: right}
 a.idlink {color: #aaa; font-size: .72em; vertical-align: bottom}
 a.title:visited, a.uri:visited, a.uri.path:visited, a.path:visited {background-color: #0f5; color: #000}
 a.unblock {color: #fff; font-size: 22em; font-weight: normal; text-decoration: none}
-a.uri > span.uri {font-size: 0.8em; font-weight: normal; color: #888}
-a.uri {border-radius: .3em; background-color: #fff; color: #000; max-width: 42ex; overflow: hidden; margin: .1em; font-weight: bold; padding-left: .1em; padding-right: .1em}
-a.uri.path {background-color: #222; color: #fff; border: .1em solid #444}
+a.uri > span.uri {font-size: 0.8em; font-weight: normal; color: #999}
+a.uri {border-radius: .38em; background-color: #fff; color: #000; max-width: 42ex; overflow: hidden; margin: .1em; font-weight: bold; padding-left: .1em; padding-right: .1em}
+a.uri.path {background-color: #222; color: #fff; border: .1em solid #333}
 a:hover, a.uri:hover {border-color: #0ff; background-color: #0ff}
 blockquote {border-radius: .2em; border-width: 0 0 0 .5em; border-style: solid; border-color: #444; margin: 0 0 0 .1em; background-color: #2c2c2c; color: #fff}
 body {font-family: sans-serif; vertical-align: top; margin-left: 2em; margin-right: 2em; background-color: #000; color: #fff}

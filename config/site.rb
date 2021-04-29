@@ -48,6 +48,9 @@ class WebResource
 
     AllowedHeaders = 'authorization, client-id, content-type, device-fp, device-id, x-access-token, x-braze-api-key, x-braze-datarequest, x-braze-triggersrequest, x-csrf-token, x-device-id, x-goog-authuser, x-guest-token, x-hostname, x-lib-version, x-locale, x-twitter-active-user, x-twitter-client-language, x-twitter-utcoffset, x-requested-with' # TODO populate from preflight
     DarkLogo = %w(www.bostonglobe.com www.nytimes.com)
+    HostColors = {'i.redd.it' => '#f40',
+                  'www.reddit.com' => '#f40',
+                  'twitter.com' => :cyan}
 
     # site resources
 

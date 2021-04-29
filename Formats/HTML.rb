@@ -107,6 +107,7 @@ module Webize
           css.push :blocked if ref.deny?                          # style as blocked resource
           e['href'] = ref.href                                    # update href to resolved location
           e['class'] = css.join ' '                               # add CSS style
+          e['style'] = "#{offsite ? :background : :border}-color: #{HostColors[ref.host]}" if HostColors.has_key?(ref.host)
         elsif e['id']                                             # id attribute w/o href
           e.set_attribute 'class', 'identified'                   # style as identified node
           e.add_child " <a class='idlink' href='##{e['id']}'>##{CGI.escapeHTML e['id'] unless e.name == 'p'}</span> " # add href to node
