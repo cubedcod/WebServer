@@ -150,8 +150,11 @@ class WebResource < RDF::URI
                          h = ('//' + (host || 'localhost')).R env
                          {_: :tr,
                           c: [{_: :td, class: :host,
-                               c: host ? {_: :a, href: h.href, c: [{_: :img, src: h.join('/favicon.ico').R(env).href}, h.display_name],
-                                          style: "background-color: #{HostColors[host] || '#bbb'}; color: black"} : []},
+                               c: host ? {_: :a, href: h.href,
+                                          c: [{_: :img, src: h.join('/favicon.ico').R(env).href},
+                                              #h.display_name,
+                                             ],
+                                          style: "background-color: #{HostColors[host] || '#ccc'}; color: black"} : []},
                               {_: :td, c: paths.map{|path|
                                  Markup[Link][path,env]}}]}}}},
                   '</tr></table>']}}]}, '&nbsp;']}}

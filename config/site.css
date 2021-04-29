@@ -19,9 +19,9 @@
 .greentext, .greenText {background-color: #af0; color: #000; padding-left: .3em}
 .identified, .post {border: 1px solid #282828}
 .links .host {text-align: right}
-.links .host img {max-height: 3em}
+.links .host img {max-width: 4em}
 .links .path {font-weight: normal}
-.links .path::first-letter {font-weight: bold; background-color:#888; color:#000; border-radius: .18em}
+.links .path::first-letter {font-weight: bold; background-color:#aaa; color:#000; border-radius: .18em}
 .post .body {background: repeating-linear-gradient(-45deg, #000, #000 .875em, #222 .875em, #222 1em); color: #fff}
 .post .pointer {float: right}
 .post { max-width: 100ex; margin: .166em}
