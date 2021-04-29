@@ -51,7 +51,7 @@ class WebResource
     HostColors = {
       'forum.solidproject.org' => '#7c4dff',
       'i.redd.it' => '#f40',
-      'twitter.com' => '#289',
+      'twitter.com' => '#29a',
       'www.reddit.com' => '#f40',
       'www.youtube.com' => '#f00',
     }
