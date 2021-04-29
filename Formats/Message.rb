@@ -49,7 +49,7 @@ module Webize
           creator = (dirname + '/*irc?q=' + nick + '&sort=date&view=table#' + nick).R
           yield subject, Creator, creator
           yield subject, Content, ['<pre>',
-                                   msg.hrefs{|p,o| yield p==Video ? subject : linkgroup, p, o},
+                                   msg.hrefs{|p,o| yield [Image,Video].member?(p) ? subject : linkgroup, p, o}, # cluster non-media links per channel for space-efficient layout
                                    '</pre>'].join if msg}
       end
 
