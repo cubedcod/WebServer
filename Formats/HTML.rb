@@ -97,7 +97,11 @@ module Webize
           ref.query = nil if ref.query&.match?(/utm[^a-z]/)       # deutmize query (tracker gunk)
           ref.fragment = nil if ref.fragment&.match?(/utm[^a-z]/) # deutmize fragment
           offsite = ref.host != base.host
-          e.add_child " <span class='uri'>#{CGI.escapeHTML (offsite ? ref.uri.sub(/^https?:..(www.)?/,'') : (ref.path || '/'))[0..127]}</span> " # show URI in HTML
+          e.inner_html = [offsite ? ['<img src="//', ref.host, '/favicon.ico">'] : nil,
+                          e.inner_html,
+                          ' <span class="uri">',
+                          CGI.escapeHTML((offsite ? ref.uri.sub(/^https?:..(www.)?/,'') : (ref.path || '/'))[0..127]),
+                          '</span> '].join # URI and icon
           css = [:uri]
           css.push :path unless offsite                           # style as local or global reference
           css.push :blocked if ref.deny?                          # style as blocked resource
