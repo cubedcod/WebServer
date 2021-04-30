@@ -1,2 +1,2 @@
 #!/bin/sh
-http_proxy=http://localhost:8080 https_proxy=http://localhost:8080 chromium --enable-features=UseOzonePlatform --ozone-platform=wayland "$@"
+http_proxy=http://localhost:8080 https_proxy=http://localhost:8080 chromium-browser --enable-features=UseOzonePlatform --ozone-platform=wayland "$@"
