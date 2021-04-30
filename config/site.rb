@@ -55,6 +55,7 @@ class WebResource
       'twitter.com' => 'rgba(29,161,242,1.00)',
       'www.reddit.com' => '#f40',
       'www.youtube.com' => '#f00',
+      'youtube.com' => '#f00',
     }
 
     # site resources
