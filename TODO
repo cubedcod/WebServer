@@ -7,8 +7,6 @@ https://forum.solidproject.org/ blank nodes
 git
 fix reverse-dns output binarycrap and/or switch to rubydns
 HTML view for schema.org events https://jewishchronicle.timesofisrael.com/ - datetimeline vis
-fill in other known data  from store.. inbound linkers, title etc
 RDFa - investigate HAML template-solution in RDF library
 notification mesh
-nixos spec
 browser
