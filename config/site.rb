@@ -136,6 +136,7 @@ l.facebook.com l.instagram.com
     GET 'res.cloudinary.com', ImgRehost
     GET 'detectportal.firefox.com', -> r {[200, {'Content-Type' => 'text/plain'}, ["success\n"]]}
     GET 'abcnews.go.com', NoGunk
+    GET 'www.foxnews.com', NoGunk
 
     GotoAdURL =  -> r {
       if url = (r.query_values || {})['adurl']
