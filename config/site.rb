@@ -293,7 +293,7 @@ l.facebook.com l.instagram.com
           [301, {'Location' => r.path}, []]
         else # find uid
           uid = nil
-          uidQuery = "https://twitter.com/i/api/graphql/ku_TJZNyXL2T4-D9Oypg7w/UserByScreenName?variables=%7B%22screen_name%22%3A%22#{parts[0]}%22%2C%22withHighlightedLabel%22%3Atrue%7D"
+          uidQuery = "https://twitter.com/i/api/graphql/Vf8si2dfZ1zmah8ePYPjDQ/UserByScreenNameWithoutResults?variables=%7B%22screen_name%22:%22#{parts[0]}%22%2C%22withHighlightedLabel%22:true%7D"
           URI.open(uidQuery, r.headers){|response|
             body = response.read
             if response.meta['content-type'].index 'json'
