@@ -2,7 +2,6 @@ if-modified-since on getfeeds
 ml mbox extract curl -I https://www.redhat.com/archives/dm-devel/2020-November.txt.gz
 tools for feedlist maintenance -  errors/redirects / no new data, list discovered feeds for possible subscription
 path visualization (how did i get here? referer history)
-https://twitter.com/MariaAb1293 - user info JSON parse
 https://forum.solidproject.org/ blank nodes
 git
 fix reverse-dns output binarycrap and/or switch to rubydns
