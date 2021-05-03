@@ -78,7 +78,6 @@ class WebResource
     GotoURL = -> r {[301, {'Location' => (r.query_values['url']||r.query_values['u']||r.query_values['q']).R(r.env).href}, []]}
 
     NoGunk  = -> r {r.send r.uri.match?(Gunk) ? :deny : :fetch}
-    NoTransform = -> r {r.env[:notransform] = true; NoGunk[r]}
 
     ImgRehost = -> r {
       ps = r.path.split /https?:\/+/
@@ -150,17 +149,7 @@ l.facebook.com l.instagram.com
     GET 'googleads.g.doubleclick.net', GotoAdURL
     GET 'www.googleadservices.com', GotoAdURL
 
-    GotoGoogle = -> r {[301, {'Location' => ['//www.google.com', r.path, '?', r.query].join.R(r.env).href}, []]}
-
-    GET 'google.com', GotoGoogle
-    GET 'groups.google.com', NoTransform
-    GET 'lh3.googleusercontent.com', NoGunk
-    GET 'lh5.googleusercontent.com', NoGunk
-    GET 'maps.google.com', GotoGoogle
-    GET 'maps.gstatic.com', NoGunk
-    GET 'news.google.com', NoGunk
-    GET 'www.gstatic.com', NoGunk
-    GET 'streetviewpixels-pa.googleapis.com', NoGunk
+    GET 'google.com', -> r {[301, {'Location' => ['//www.google.com', r.path, '?', r.query].join.R(r.env).href}, []]}
 
     GET 'www.google.com', -> r {
       case r.parts[0]
@@ -179,8 +168,6 @@ l.facebook.com l.instagram.com
       else
         r.deny
       end}
-
-    (0..3).map{|i| GET "encrypted-tbn#{i}.gstatic.com", NoGunk}
 
     GET 'imgur.com', -> r {
       p = r.parts

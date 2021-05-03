@@ -3,7 +3,7 @@ module Webize
   module Feed
     class Format < RDF::Format
       content_type 'application/rss+xml',
-                   extensions: [:atom, :rss, :rss2],
+                   extensions: [:atom, :rss, :rss2, :xml],
                    aliases: %w(
                    application/atom+xml;q=0.8
                    application/x-rss+xml;q=0.2

@@ -53,7 +53,7 @@ class WebResource < RDF::URI
     end
 
     def ext; path ? (File.extname(path)[1..-1] || '') : '' end
-    def extension; '.' + ext end
+    def suffix; '.' + ext end
 
     def host_parts
       local_node? ? ['.'] : host.split('.').-(%w(com net org www)).reverse

@@ -1,16 +1,9 @@
 # coding: utf-8
 class WebResource
 
-  # file -> Repository: wrap RDF#load, adding MIME type hints and skipping full load of media-files
-  # TODO move media stuff to #summary and make their load noop/undefined here?
+  # file -> Repository: wrap RDF#load, adding type-hints and skipping full read of media-files
   def loadRDF graph: env[:repository] ||= RDF::Repository.new
     if node.file?
-
-     #stat = node.stat                                     # file metadata
-     #graph << RDF::Statement.new(self, Title.R, Rack::Utils.unescape_path(basename))
-     #graph << RDF::Statement.new(self, Date.R, stat.mtime.iso8601)
-     #graph << RDF::Statement.new(self, (Stat + 'size').R, stat.size)
-
       if %w(info pack part svg ytdl).member? ext           # incomplete/tmpfiles, ignore
         puts "no RDF reader for file #{fsPath}"
       elsif %w(mp4 mkv webm).member? ext                   # video-file metadata
@@ -18,28 +11,29 @@ class WebResource
       elsif %w(m4a mp3 ogg opus wav).member? ext           # audio-file metadata
         tag_triples graph
       else                                                 # load w/ RDF::Reader
-        options = {}
-        options[:base_uri] = self
-        if format = if ext != 'ttl' && (basename.index('msg.') == 0 || path.index('/sent/cur') == 0) # procmail message PREFIX and maildir containment
-                   :mail
-                 elsif ext.match? /^html?$/
-                   :html
-                 elsif %w(changelog license readme todo).member?(basename.downcase) || %w(ini txt).member?(ext)
-                   :plaintext
-                 elsif %w(gemfile makefile rakefile).member? basename.downcase
-                   :sourcecode
-                 elsif %w(ttl 🐢).member? ext
-                   :turtle
-                    end                                    # pathname based format hints
-        elsif ext.empty?                                   # no name-extension, ask FILE(1) for format
+        options = {base_uri: self}
+        name = basename.downcase
+        if format = if basename.index('msg.') == 0 || path.index('/sent/cur') == 0 # maildir name-prefix or dir containment
+                      :mail
+                    elsif ext.match? /^html?$/
+                      :html
+                    elsif %w(changelog license readme todo).member? name
+                      :plaintext
+                    elsif %w(gemfile makefile rakefile).member? name
+                      :sourcecode
+                    end
+        elsif ext.empty?                                   # no suffix, ask FILE(1) for MIME
           mime = `file -b --mime-type #{Shellwords.escape fsPath}`.chomp
           format = :plaintext if mime == 'text/plain'
           options[:content_type] = mime
-        elsif mime = named_format                          # format in local ext->MIME map
+        elsif mime = Rack::Mime::MIME_TYPES[suffix]        # suffix -> MIME map
+          options[:content_type] = mime
+        elsif mime = Suffixes.invert[suffix]
           options[:content_type] = mime
         end
         if reader = (format ? RDF::Reader.for(format) : RDF::Reader.for(**options))
-          reader.new(File.open(fsPath).read, **options){|_|graph << _} # load RDF
+puts options
+          reader.new(File.open(fsPath).read, **options){|_|graph << _} # read RDF
         else
           puts "no RDF reader for #{uri}"                  # no reader found
         end
@@ -57,7 +51,7 @@ class WebResource
       graphURI = (graph.name || self).R                                                         # graph URI
       fsBase = graphURI.fsPath                                                                  # storage path
       fsBase += '/index' if fsBase[-1] == '/'
-      f = fsBase + '.ttl'
+      f = fsBase + '.🐢'
       unless File.exist? f
         FileUtils.mkdir_p File.dirname f
         RDF::Writer.for(:turtle).open(f){|f|f << graph}                                         # write 🐢
@@ -66,7 +60,7 @@ class WebResource
       if !graphURI.to_s.match?(/^\/\d\d\d\d\/\d\d\/\d\d/) && (ts = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value) && ts.match?(/^\d\d\d\d-/) # find timestamp if graph URI not located on timeline
         🕒 = [ts.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'),          # hour-dir slug
               %w{host path query}.map{|a|graphURI.send(a).yield_self{|p|p&&p.split(/[\W_]/)}}]. # name slugs
-               flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.')[0..123] + '.ttl'  # timeline URI
+               flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.')[0..123] + '.🐢'   # timeline URI
         puts ['🕒', ts, 🕒].join ' ' if Verbose
         unless File.exist? 🕒                                                                   # link 🐢 to timeline
           FileUtils.mkdir_p File.dirname 🕒

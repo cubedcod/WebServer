@@ -17,13 +17,12 @@ class WebResource
     def cacheResponse
       timeMeta                    # reference temporally-adjacent nodes
       nodes = nodeSet             # find local nodes
-      if nodes.size == 1 && (nodes[0].static_node? || # one node found in client-preferred or fixed format (no transcode/merge)
-                            (nodes[0].named_format == selectFormat && (env[:notransform] || nodes[0].named_format != 'text/html')))
-        nodes[0].fileResponse     # static response on file, return
+      if nodes.size == 1 && (env[:notransform] || nodes[0].static_node? || nodes[0].suffix == Suffixes[selectFormat])
+        nodes[0].fileResponse     # no transform required
       else
-        nodes.map{|_|_.🐢.loadRDF}# transcode to RDF if needed, load RDF
-        saveRDF if env[:updates]  # cache resources found in RDF transcode
-        graphResponse             # graph response
+        nodes.map{|_|_.🐢.loadRDF}# load RDF to graph
+        saveRDF if env[:updates]  # cache RDF found in non-RDF reads
+        graphResponse             # response
       end
     end
 
@@ -174,8 +173,6 @@ class WebResource
                          charset = nil if charset.empty? || charset == 'empty'
                        end
                        ct[0]
-                     elsif named_format                               # format via name-extension map
-                       named_format
                      end
           if format                                                   # format defined
             if !charset && format.index('html') && metatag = body[0..4096].encode('UTF-8', undef: :replace, invalid: :replace).match(/<meta[^>]+charset=['"]?([^'">]+)/i)
@@ -280,7 +277,7 @@ class WebResource
           if h['Content-Type'] == 'application/javascript'
             h['Content-Type'] = 'application/javascript; charset=utf-8' # add charset 
           elsif !h.has_key?('Content-Type')                             # format missing?
-            if mime = Rack::Mime::MIME_TYPES[extension]                 # format via Rack extension-map
+            if mime = Rack::Mime::MIME_TYPES[suffix]                    # format via Rack extension-map
               h['Content-Type'] = mime
             elsif RDF::Format.file_extensions.has_key? ext.to_sym       # format via RDF extension-map
               h['Content-Type'] = RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
@@ -515,14 +512,12 @@ class WebResource
       return format unless env.has_key? 'HTTP_ACCEPT' # unspecified preference
       category = format.split('/')[0]+'/*'  # format-category wildcard
       index = {}                            # (q-val -> format) table
-                                            # build sortable index:
-      env['HTTP_ACCEPT'].split(/,/).map{|e| # foreach (MIME,q) pair
-        fmt, q = e.split /;/                # pair variables
-        i = q && q.split(/=/)[1].to_f || 1  # q-val
+      env['HTTP_ACCEPT'].split(/,/).map{|e| # build sorted index:
+        fmt, q = e.split /;/                # (MIME, qval) pair
+        i = q && q.split(/=/)[1].to_f || 1  # qval default
         index[i] ||= []                     # initialize entry
         index[i].push fmt.strip}            # add format at q-val
-
-      index.sort.reverse.map{|_, formats|   # begin search at highest q-val
+      index.sort.reverse.map{|_, formats|   # search:
         return format if formats.member?(category) || formats.include?('*/*') # wildcard on format-category or anything
         formats.map{|fmt|
           return fmt if RDF::Writer.for(:content_type => fmt) || # RDF writer available
