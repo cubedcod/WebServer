@@ -38,6 +38,7 @@ class WebResource
         Args.map{|k|env[k.to_sym] = qs.delete(k)||true if qs.has_key? k} # set local (client <> proxy) args
         qs.empty? ? (uri.query = nil) : (uri.query_values = qs)          # set remote (proxy <> origin) args
       end
+      env[:client_cache] = env.has_key?('HTTP_IF_NONE_MATCH') || env.has_key?('HTTP_IF_MODIFIED_SINCE')
       env.update({base: uri, feeds: [], links: {}, resp: {}})            # init environment storage
       Pry::ColorPrinter.pp env  if Verbose                               # log request
       uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body|    # dispatch request
@@ -136,12 +137,11 @@ class WebResource
     # fetch data from cache or remote
     def fetch
       return cacheResponse if offline?                                # offline, respond from cache
-      modstamp = 'HTTP_IF_MODIFIED_SINCE'
-      return [304,{},[]] if (env.has_key?('HTTP_IF_NONE_MATCH') || env.has_key?(modstamp)) && static_node?
-      ns = nodeSet                                                    # client has node cached, 304 response
+      return [304,{},[]] if env[:client_cache] && static_node?        # client has node cached
+      ns = nodeSet
       return ns[0].fileResponse if ns.size == 1 && ns[0].static_node? # server has node cached, return it
       if timestamp = ns.map{|n|n.node.mtime}.sort[0]                  # cache timestamp
-        env[modstamp] = timestamp.httpdate
+        env['HTTP_IF_MODIFIED_SINCE'] = timestamp.httpdate
       end
       fetchHTTP                                                       # fetch over HTTPS, with HTTP fallback
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError => e
@@ -154,7 +154,7 @@ class WebResource
 
     # fetch remote data to RAM and fs-cache
     def fetchHTTP format: nil, thru: true                             # options: format (to override broken remotes), HTTP response for caller
-puts headers
+puts headers['If-Modified-Since']
       URI.open(uri, headers.merge({redirect: false})) do |response|   # fetch over HTTP from remote
         env[:fetched] = true                                          # mark as fetched for logger
         h = headers response.meta                                     # response headers
@@ -203,7 +203,7 @@ puts headers
             end
             if reader = RDF::Reader.for(content_type: format)         # reader defined for format?
               env[:repository] ||= RDF::Repository.new                # initialize RDF repository
-              if format.index('text') && ts = h['Last-Modified']      # HTTP timestamp to RDF-metadata and cache mtime
+              if ts = h['Last-Modified']                              # HTTP timestamp to RDF and cache mtime
                 ts = Time.httpdate(ts.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,''))
                 puts ts
                 FileUtils.touch file, mtime: ts
@@ -227,7 +227,8 @@ puts headers
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
             end}                                                      # upstream headers
-          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type).map{|k|env[:resp][k] ||= h[k] if h[k]}
+          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type Last-Modified).map{|k|
+            env[:resp][k] ||= h[k] if h[k]}
           env[:resp]['ETag'] ||= h['Etag']                            # ETag header
 
           if env[:notransform]|| !format ||format.match?(FixedFormat) # no transform
@@ -250,8 +251,8 @@ puts headers
         else
           [302, {'Location' => dest.href}, []]
         end
-      when /304/ # Not Modified
-        [304, {}, []]
+      when /304/ # upstream Not Modified
+        env[:client_cache] ? [304, {}, []] : cacheResponse
       when /300|[45]\d\d/ # Not Found, Not Allowed or general upstream error
         env[:status] = status.to_i
         head = headers e.io.meta
