@@ -34,6 +34,7 @@ class WebResource
       'application/x-mpegURL' => '.m3u8',
       'application/x-rss+xml' => '.rss',
       'application/x-turtle' => '.ttl',
+      'application/xml' => '.xml',
       'audio/mpeg' => '.mp3',
       'audio/opus' => '.opus',
       'binary/octet-stream' => '.bin',

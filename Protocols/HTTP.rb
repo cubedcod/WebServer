@@ -154,7 +154,6 @@ class WebResource
 
     # fetch remote data to RAM and fs-cache
     def fetchHTTP format: nil, thru: true                             # options: format (to override broken remotes), HTTP response for caller
-puts headers['If-Modified-Since']
       URI.open(uri, headers.merge({redirect: false})) do |response|   # fetch over HTTP from remote
         env[:fetched] = true                                          # mark as fetched for logger
         h = headers response.meta                                     # response headers
