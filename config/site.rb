@@ -284,34 +284,46 @@ l.facebook.com l.instagram.com
         ('https://api.twitter.com/2/search/adaptive.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_ext_alt_text=true&include_quote_count=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweet=true&q='+q+'&tweet_search_mode=live&count=20' + cursor + '&query_source=&pc=1&spelling_corrections=1&ext=mediaStats%2ChighlightedLabel').R(r.env)}
 
       (if !r.path || r.path == '/'                                                                                  # feed
-       SiteDir.join('twitter').readlines.map(&:chomp).shuffle.each_slice(18){|t|print '🐦'; searchURL[t.map{|u|'from%3A'+u}.join('%2BOR%2B')].fetchHTTP thru: false}
+       SiteDir.join('twitter').readlines.map(&:chomp).shuffle.each_slice(18){|t|
+         print '🐦'
+         searchURL[t.map{|u|'from%3A'+u}.join('%2BOR%2B')].fetchHTTP thru: false}
        r.saveRDF.graphResponse
-      elsif parts.size == 1 && !%w(favicon.ico manifest.json push_service_worker.js search sw.js).member?(parts[0]) # user
-        if qs.has_key? 'q' # query tweets in local cache
+      elsif parts.size == 1 && !%w(favicon.ico manifest.json push_service_worker.js search sw.js).member?(parts[0]) # user page
+        if qs.has_key? 'q' # [q]uery local tweet-cache
           r.cacheResponse
         elsif qs.has_key? 'ref_src'
           [301, {'Location' => r.path}, []]
-        else # find uid
+        else # find uid, show tweets and profile data
           uid = nil
           uidQuery = "https://twitter.com/i/api/graphql/Vf8si2dfZ1zmah8ePYPjDQ/UserByScreenNameWithoutResults?variables=%7B%22screen_name%22:%22#{parts[0]}%22%2C%22withHighlightedLabel%22:true%7D"
           URI.open(uidQuery, r.headers){|response|
             body = response.read
             if response.meta['content-type'].index 'json'
               json = ::JSON.parse HTTP.decompress({'Content-Encoding' => response.meta['content-encoding']}, body)
+              user = json['data']['user']['legacy']
               uid = json['data']['user']['rest_id']
+
+              r.env[:repository] ||= RDF::Repository.new # RDF storage for profile triples
+              r.env[:repository] << RDF::Statement.new(r, Abstract.R, user['description'].hrefs)
+              r.env[:repository] << RDF::Statement.new(r, Date.R, user['created_at'])
+              r.env[:repository] << RDF::Statement.new(r, Title.R, user['name'])
+              r.env[:repository] << RDF::Statement.new(r, (Schema+'location').R, user['location'])
+              %w(profile_banner_url profile_image_url_https).map{|image|
+                r.env[:repository] << RDF::Statement.new(r, Image.R, user[image].R)}
+
               ('https://api.twitter.com/2/timeline/profile/' + uid + '.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&include_tweet_replies=false&userId=' + uid + '&count=20' + cursor + '&ext=mediaStats%2CcameraMoment').R(r.env).fetch
             else
               [200, response.meta, [body]]
-            end} rescue [401,{},[]]
+            end}
         end
-      elsif parts.member?('status') || parts.member?('statuses')                                                    # tweet / conversation
+      elsif parts.member?('status') || parts.member?('statuses')                                                    # tweet / conversation page
         if parts.size == 2
           r.cacheResponse # search local archive
         else
           convo = parts.find{|p| p.match? /^\d{8}\d+$/ }
           "https://api.twitter.com/2/timeline/conversation/#{convo}.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&skip_status=1&cards_platform=Web-12&include_cards=1&include_composer_source=true&include_ext_alt_text=true&include_reply_count=1&tweet_mode=extended&include_entities=true&include_user_entities=true&include_ext_media_color=true&include_ext_media_availability=true&send_error_codes=true&simple_quoted_tweets=true&count=20#{cursor}&ext=mediaStats%2CcameraMoment".R(r.env).fetch
         end
-      elsif parts[0] == 'hashtag'                                                                                   # hashtag
+      elsif parts[0] == 'hashtag'                                                                                   # hashtag search
         searchURL['%23'+parts[1]].fetch
       elsif parts[0] == 'search'                                                                                    # search
         qs.has_key?('q') ?  searchURL[qs['q']].fetch : r.notfound
