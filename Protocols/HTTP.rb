@@ -33,17 +33,15 @@ class WebResource
               join(env['REQUEST_PATH'].gsub /\/\/+/, '/').R env          # path
       uri.scheme = uri.local_node? ? 'http' : 'https'                    # scheme
       if env['QUERY_STRING'] && !env['QUERY_STRING'].empty?              # query
-        uri.query = env['QUERY_STRING'].sub(/^&+/,'').sub(/&+$/,'').gsub(/&&+/,'&') # query stripped of leading/consecutive/trailing & chars
+        uri.query = env['QUERY_STRING'].sub(/^&+/,'').sub(/&+$/,'').gsub(/&&+/,'&') # strip query of excess & chars
         qs = uri.query_values || {}                                      # parse query args
         Args.map{|k|env[k.to_sym] = qs.delete(k)||true if qs.has_key? k} # set local (client <> proxy) args
         qs.empty? ? (uri.query = nil) : (uri.query_values = qs)          # set remote (proxy <> origin) args
       end
-      env.update({base: uri, feeds: [], links: {}, resp: {}})            # response-environment storage
-
-      #Pry::ColorPrinter.pp env
-
+      env.update({base: uri, feeds: [], links: {}, resp: {}})            # init environment storage
+      Pry::ColorPrinter.pp env  if Verbose                               # log request
       uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body|    # dispatch request
-        format = uri.format_icon head['Content-Type']                    # logger
+        format = uri.format_icon head['Content-Type']                    # log response
         color = if env[:deny]
                   '38;5;196'
                 elsif env[:filtered]
