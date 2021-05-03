@@ -202,11 +202,13 @@ class WebResource
             end
             if reader = RDF::Reader.for(content_type: format)         # reader defined for format?
               env[:repository] ||= RDF::Repository.new                # initialize RDF repository
-              if ts = h['Last-Modified']                              # HTTP timestamp to RDF and cache mtime
-                ts = Time.httpdate(ts.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,''))
-                puts ts
-                FileUtils.touch file, mtime: ts
-                env[:repository] << RDF::Statement.new(self, Date.R, ts.iso8601) rescue nil
+              if timestamp = h['Last-Modified']                       # HTTP timestamp to RDF and cache mtime
+                if ts = Time.httpdate(timestamp.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,'')) rescue nil
+                  FileUtils.touch file, mtime: ts
+                  env[:repository] << RDF::Statement.new(self, Date.R, ts.iso8601) rescue nil
+                else
+                  puts "bad timestamp #{timestamp}"
+                end
               end
               reader.new(body, base_uri: self, path: file){|g|env[:repository] << g} # read RDF
             else
