@@ -3,7 +3,7 @@ require 'mail'
 module Webize
   module Mail
     class Format < RDF::Format
-      content_type 'message/rfc822', :extension => :eml
+      content_type 'message/rfc822', aliases: %w(message/rfc2822;q=0.8), :extension => :eml
       content_encoding 'utf-8'
       reader { Reader }
       def self.symbols

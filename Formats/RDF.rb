@@ -10,30 +10,26 @@ class WebResource
         graph << RDF::Statement.new(self, Type.R, Video.R)
       elsif %w(m4a mp3 ogg opus wav).member? ext           # audio-file metadata
         tag_triples graph
-      else                                                 # load w/ RDF::Reader
-        options = {base_uri: self}
-        name = basename.downcase
-        if format = if basename.index('msg.') == 0 || path.index('/sent/cur') == 0 # maildir name-prefix or dir containment
-                      :mail
-                    elsif ext.match? /^html?$/
-                      :html
-                    elsif %w(changelog license readme todo).member? name
-                      :plaintext
-                    elsif %w(gemfile makefile rakefile).member? name
-                      :sourcecode
-                    end
-        elsif ext.empty?                                   # no suffix, ask FILE(1) for MIME
-          mime = `file -b --mime-type #{Shellwords.escape fsPath}`.chomp
-          format = :plaintext if mime == 'text/plain'
-          options[:content_type] = mime
-        elsif mime = Rack::Mime::MIME_TYPES[suffix]        # suffix -> MIME map
-          options[:content_type] = mime
-        elsif mime = Suffixes.invert[suffix]
-          options[:content_type] = mime
+      else                                                 # use RDF::Reader
+        options = {base_uri: self}                         # base URI
+        if ext.empty?                                      # suffix undefined
+          name = basename.downcase                         # case-normalized basename
+          if name.index('msg.')==0 || path.index('/sent/cur')==0
+            options[:content_type] = 'message/rfc822'      # mail name-prefix or dir containment
+          elsif %w(changelog license readme todo).member? name
+            options[:content_type] = 'text/plain'          # common textfile names
+          elsif %w(gemfile makefile rakefile).member? name
+            reader = RDF::Reader.for(:sourcecode)          # common buildfile names
+          else
+            puts "format-suffix undefined: #{self}"        # ask FILE(1) for MIME hint
+            options[:content_type] = `file -b --mime-type #{Shellwords.escape fsPath}`.chomp
+          end
+        else                                               # suffix -> MIME map
+          options[:content_type] = Suffixes.invert[suffix] || Rack::Mime::MIME_TYPES[suffix] 
+          options[:file_extension] = ext
         end
-        if reader = (format ? RDF::Reader.for(format) : RDF::Reader.for(**options))
-puts options
-          reader.new(File.open(fsPath).read, **options){|_|graph << _} # read RDF
+        if reader ||= RDF::Reader.for(**options)           # select reader
+          reader.new(File.open(fsPath).read,**options){|_|graph << _} # read RDF
         else
           puts "no RDF reader for #{uri}"                  # no reader found
         end
