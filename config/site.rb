@@ -231,6 +231,8 @@ l.facebook.com l.instagram.com
 
     GET 'teddit.net', -> r {[301, {'Location' => '//www.reddit.com' + r.path}, []]}
 
+    GET 'listman.redhat.com', NoGunk
+
     GET 's4.reutersmedia.net', -> r {
       args = r.query_values || {}
       if args.has_key? 'w'
