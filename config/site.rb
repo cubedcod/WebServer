@@ -7,6 +7,7 @@ module Webize
         '7chan.org' => :Chan,
         '8kun.top' => :Chan,
         'apnews.com' => :AP,
+        'archive.wakarimasen.moe' => :Chan,
         'bunkerchan.net' => :Chan,
         'archive.4plebs.org' => :Chan,
         'boards.4chan.org' => :Chan,

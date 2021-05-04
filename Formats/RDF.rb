@@ -11,7 +11,7 @@ class WebResource
       elsif %w(m4a mp3 ogg opus wav).member? ext           # audio-file metadata
         tag_triples graph
       else                                                 # use RDF::Reader
-        options = {base_uri: self}                         # base URI
+        options = {}
         if ext.empty?                                      # suffix undefined
           name = basename.downcase                         # case-normalized basename
           if name.index('msg.')==0 || path.index('/sent/cur')==0
@@ -29,7 +29,7 @@ class WebResource
           options[:file_extension] = ext
         end
         if reader ||= RDF::Reader.for(**options)           # select reader
-          reader.new(File.open(fsPath).read,**options){|_|graph << _} # read RDF
+          reader.new(File.open(fsPath).read,base_uri: self){|_|graph << _} # read RDF
         else
           puts "no RDF reader for #{uri}"                  # no reader found
         end

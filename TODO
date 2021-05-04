@@ -7,3 +7,5 @@ HTML view for schema.org events https://jewishchronicle.timesofisrael.com/ - dat
 RDFa - investigate HAML template-solution in RDF library
 notification mesh
 browser
+username globbable in ig timeline link
+to/from/title globbable in email timeline link
