@@ -25,6 +25,7 @@ class WebResource
 
     # MIME to extension mapping
     Suffixes = {
+      'application/gzip' => '.gz',
       'application/manifest+json' => '.json',
       'application/octet-stream' => '.bin',
       'application/ruby' => '.rb',

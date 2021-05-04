@@ -4,6 +4,7 @@ module Webize
       content_type 'application/x-tar',
                    aliases: %w(
                    application/x-gzip;q=0.8
+                   application/gzip;q=0.8
 ),
                    extensions: [:gz,:tar]
       content_encoding 'utf-8'
