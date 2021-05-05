@@ -210,10 +210,10 @@ l.facebook.com l.instagram.com
         if status.to_s.match? /^30/
           puts "upstream redirect", head
           [status, head, body]
-        else # find page pointer missing in HEAD/<head> (old+new UI) and HTML/RSS body (new UI)
+        else # read page pointer, missing in HEAD and <head> old and new UI and in HEAD and HTML/RSS <body> in new UI
           links = []
           body[0].scan(/href="([^"]+after=[^"]+)/){|link|links << CGI.unescapeHTML(link[0]).R} # find links
-          [302, {'Location' => (links.empty? ? r : links.sort_by{|r|r.query_values['count'].to_i}[-1]).to_s.sub('old','www')}, []] # goto link with highest count
+          [302, {'Location' => (links.empty? ? r.href : links.sort_by{|r|r.query_values['count'].to_i}[-1]).to_s.sub('old','www')}, []] # goto link with highest count
         end}}
 
     GET 'www.reddit.com', -> r {
