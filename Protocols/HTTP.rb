@@ -139,7 +139,7 @@ class WebResource
       return [304,{},[]] if env[:client_cache] && static_node?        # client has node cached
       ns = nodeSet
       return ns[0].fileResponse if ns.size == 1 && ns[0].static_node? # server has node cached, return it
-      if timestamp = ns.map{|n|n.node.mtime}.sort[0]                  # cache timestamp
+      if timestamp = ns.map{|n|n.node.mtime if n.node.exist?}.compact.sort[0] # cached-version timestamp
         env['HTTP_IF_MODIFIED_SINCE'] = timestamp.httpdate
       end
       fetchHTTP                                                       # fetch over HTTPS, with HTTP fallback
