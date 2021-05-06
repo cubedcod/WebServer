@@ -57,7 +57,7 @@ class WebResource
                     ({_: :a,href: re.href, class: :id, c: '☛', id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} if tCount == 0),    # resource pointer
                     ({class: :abstract, c: resource[Abstract]} if resource.has_key? Abstract),                                           # abstract
                     [Image, Video].map{|t|(resource[t]||[]).map{|i|Markup[t][i,env]}},                                                   # image & video links
-                    ([((env.has_key? :proxy_href) && (resource.has_key? Content)) ? Webize::HTML.proxy_hrefs(resource[Content], env) : resource[Content],
+                    ([((env.has_key? :proxy_href) && (resource.has_key? Content)) ? Webize::HTML.resolve_hrefs(resource[Content], env) : resource[Content],
                       resource[SIOC+'richContent']] unless (resource[Creator]||[]).find{|a|KillFile.member? a.to_s})] # HTML content
                   else
                     if Type == k && resource.has_key?(Type) && [Audio.R, Video.R].member?(resource[Type][0])                             # type represented as icon or shortname

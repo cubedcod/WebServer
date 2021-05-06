@@ -75,17 +75,16 @@ class WebResource < RDF::URI
 
   alias_method :uri, :to_s
 
+  # resource locator - derived from origin URI in proxy scenario
   def href
-    env.has_key?(:proxy_href) ? proxy_href : uri
+    if env.has_key?(:proxy_href) && !local_node? # proxy
+      ['http://', env['HTTP_HOST'], '/', host, path, (query ? ['?', query] : nil), (fragment ? ['#', fragment] : nil) ].join
+    else                                         # direct
+      uri
+    end
   end
 
-  # origin href -> proxy href
-  def proxy_href
-    return self if local_node? # we are the origin, nothing to do
-    ['http://', env['HTTP_HOST'], '/', host, path, (query ? ['?', query] : nil), (fragment ? ['#', fragment] : nil) ].join
-  end
-
-  # proxy href -> origin href
+  # proxy href -> original href
   def remoteURL
       ['https:/' , path.sub(/^\/https?:\/+/, '/'),
        (query ? ['?', query] : nil),

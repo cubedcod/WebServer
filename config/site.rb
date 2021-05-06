@@ -91,7 +91,7 @@ class WebResource
             h[k] = h[k].split('?')[0] if k.downcase == 'location' && h[k].match?(/\?/)}
           [s,h,b]}                        # response
       else                                # URL has qs, redirect to path
-        [302, {'Location' => ['//', r.host, r.path].join.R.proxy_href}, []]
+        [302, {'Location' => ['//', r.host, r.path].join.R(r.env).href}, []]
       end}
 
     Resizer = -> r {

@@ -230,7 +230,7 @@ class WebResource
           env[:resp]['ETag'] ||= h['Etag']                            # ETag header
 
           if env[:notransform]|| !format ||format.match?(FixedFormat) # no transform
-            body = Webize::HTML.proxy_hrefs body, env, true if format == 'text/html' && env.has_key?(:proxy_href) # rebase hrefs as proxy
+            body = Webize::HTML.resolve_hrefs body, env, true if format == 'text/html' && env.has_key?(:proxy_href) # resolve hrefs in proxy scenario
             env[:resp]['Content-Length'] = body.bytesize.to_s         # Content-Length header
             [200, env[:resp], [body]]                                 # response in upstream format
           else                                                        # content-negotiated transform

@@ -202,7 +202,7 @@ class WebResource
               c: [({class: :abstract, c: post.delete(Abstract)} if post.has_key? Abstract),
                   {class: :content,
                    c: [(post.delete(Image) || []).map{|i| Markup[Image][i,env]},
-                       ((env.has_key? :proxy_href) && (post.has_key? Content)) ? Webize::HTML.proxy_hrefs(post.delete(Content), env) : post.delete(Content),
+                       ((env.has_key? :proxy_href) && (post.has_key? Content)) ? Webize::HTML.resolve_hrefs(post.delete(Content), env) : post.delete(Content),
                        post.delete(SIOC + 'richContent')]},
                   MarkupGroup[Link][post.delete(Link) || [], env],
                   (["<br>\n", HTML.keyval(post,env)] unless post.keys.size < 1)]}]}

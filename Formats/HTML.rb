@@ -117,19 +117,19 @@ module Webize
     end
 
     # rebase hrefs in HTML document
-    def self.proxy_hrefs html, env, full=false
+    def self.resolve_hrefs html, env, full=false
       return '' if !html || html.empty?                           # parse
       html = Nokogiri::HTML.send (full ? :parse : :fragment), (html.class==Array ? html.join : html)
 
       html.css('[src]').map{|i|                                   # @src
-        i['src'] = env[:base].join(i['src']).R(env).proxy_href}
+        i['src'] = env[:base].join(i['src']).R(env).href}
 
       html.css('[srcset]').map{|i|                                # @srcset
-        srcset = i['srcset'].scan(SrcSetRegex).map{|ref, size| [ref.R(env).proxy_href, size].join ' '}.join(', ')
+        srcset = i['srcset'].scan(SrcSetRegex).map{|ref, size| [ref.R(env).href, size].join ' '}.join(', ')
         i['srcset'] = srcset unless srcset.empty?}
 
       html.css('[href]').map{|a|
-        a['href'] = env[:base].join(a['href']).R(env).proxy_href} # @href
+        a['href'] = env[:base].join(a['href']).R(env).href} # @href
 
       html.to_html                                                # serialize
     end
@@ -401,7 +401,7 @@ class WebResource
     # arbitrary JSON -> Markup
     def self.markup type, v, env
       if [Abstract, Content, 'http://rdfs.org/sioc/ns#richContent'].member? type
-        (env.has_key?(:proxy_href) && v.class==String) ? Webize::HTML.proxy_hrefs(v, env) : v
+        (env.has_key?(:proxy_href) && v.class==String) ? Webize::HTML.resolve_hrefs(v, env) : v
       elsif Markup[type] # renderer defined for type argument
         Markup[type][v,env]
       elsif v.class == Hash # RDF-in-JSON object
