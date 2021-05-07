@@ -154,7 +154,6 @@ l.facebook.com l.instagram.com
     GET 'google.com', -> r {[301, {'Location' => ['//www.google.com', r.path, '?', r.query].join.R(r.env).href}, []]}
 
     GET 'www.google.com', -> r {
-puts r
       case r.parts[0]
       when 'amp'
         r.path.index('/amp/s/') == 0 ? [302, {'Location' => 'https://' + r.path[7..-1]}, []] : r.deny

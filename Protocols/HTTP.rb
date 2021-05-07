@@ -299,21 +299,21 @@ class WebResource
 
     def GET
       if local_node?
-        env[:proxy_href] = true                # proxy URIs enabled on local host
-        p = parts[0]                           # path selector
-        if !p
-          '/index'.R(env).cacheResponse        # root index
-        elsif p[-1] == ':'
-          (env[:base] = path[1..-1].R(env)).hostHandler      # host handler w/ Proxy URI
-        elsif HostGET.has_key? p
-          (env[:base] = ('https:/'+path).R(env)).hostHandler # host handler w/ Proxy URI (undefined scheme - default HTTPS)
+        env[:proxy_href] = true                # enable proxy URIs
+        p = parts[0]                           # initial path selector
+        if !p                                  # local root-node
+          '/index'.R(env).cacheResponse
+        elsif p[-1] == ':'                     # remote node - proxy URI
+          (env[:base] = [path[1..-1], query ? ['?', query] : nil].join.R(env)).hostHandler
+        elsif HostGET.has_key? p               # remote node - proxy URI - undefined scheme
+          (env[:base] = ['/', path, query ? ['?', query] : nil].join.R(env)).hostHandler
         elsif %w{m d h}.member? p
           dateDir                              # month/day/hour redirect
         else
-          cacheResponse                        # local path
+          cacheResponse                        # local node
         end
       else
-        hostHandler                            # host handler
+        hostHandler                            # remote node
       end
     end
 
