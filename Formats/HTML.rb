@@ -385,7 +385,6 @@ class WebResource
                                [{_: :link, rel: type, href: CGI.escapeHTML(resource.R(env).href)}, "\n"]}]}, "\n",
                         {_: :body, style: "background: repeating-linear-gradient(-45deg, #000, #000 .62em, #{bgcolor} .62em, #{bgcolor} 1em)",
                          c: [uri_toolbar, "\n",
-                             link[:prev, '&#9664;'], "\n", link[:next, '&#9654;'], "\n",
                              groups.map{|type, resources|
                                if MarkupGroup.has_key? type
                                  MarkupGroup[type][resources, env]
@@ -394,7 +393,9 @@ class WebResource
                                else
                                  resources.map{|r|HTML.markup nil, r, env}
                                end},
+                             link[:prev, '&#9664;'], "\n",
                              env[:links][:down] ? {_: :a, id: :expand, c: '&#11206;', href: env[:links][:down]} : nil,
+                             link[:next, '&#9654;'], "\n",
                              {_: :script, c: SiteJS}]}]}]
     end
 
