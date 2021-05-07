@@ -4,7 +4,8 @@ class String
 
   # text -> HTML, yielding found (rel, href) tuples to block
   def hrefs &blk
-    pre, link, post = self.partition(/(https?:\/\/(\([^)>\s]*\)|[,.]\S|[^\s),.”\'\"<>\]])+)/) # wrapping <>()[] and trailing ,. not captured
+    # URIs are sometimes wrapped in (). an opening/closing pair is required for capture of (), '"<>[] never captured. , and . can appear in URL but not at the end
+    pre, link, post = self.partition(/((gemini|https?):\/\/(\([^)>\s]*\)|[,.]\S|[^\s),.”\'\"<>\]])+)/)
     pre.gsub('&','&amp;').gsub('<','&lt;').gsub('>','&gt;').gsub("\n",'<br>') + # pre-match
       (link.empty? && '' ||
        '<a href="' + link.gsub('&','&amp;').gsub('<','&lt;').gsub('>','&gt;') + '">' +

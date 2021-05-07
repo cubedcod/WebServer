@@ -142,7 +142,14 @@ class WebResource
       if timestamp = ns.map{|n|n.node.mtime if n.node.exist?}.compact.sort[0] # cached-version timestamp
         env['HTTP_IF_MODIFIED_SINCE'] = timestamp.httpdate
       end
-      fetchHTTP                                                       # fetch over HTTPS, with HTTP fallback
+      case scheme
+      when 'gemini'
+        puts :Gemni
+      when /^http/
+        fetchHTTP                                                       # fetch over HTTPS, with HTTP fallback
+      else
+        puts "unsupported scheme for fetching: #{uri}"
+      end
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError => e
       if e.class == SocketError && e.message.index('name not')
         [302,{'Location' => 'http://localhost/www.google.com/search' + HTTP.qs({'q' => host})},[]]
