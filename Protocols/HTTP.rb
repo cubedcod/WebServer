@@ -144,7 +144,7 @@ class WebResource
       end
       case scheme
       when 'gemini'
-        puts :Gemni
+        fetchGemini
       when /^http/
         fetchHTTP                                                       # fetch over HTTPS, with HTTP fallback
       else
@@ -307,7 +307,6 @@ class WebResource
         if !p
           '/index'.R(env).cacheResponse        # root index
         elsif p[-1] == ':'
-          puts path[1..-1]
           (env[:base] = path[1..-1].R(env)).hostHandler # host handler
         elsif %w{m d h}.member? p
           dateDir                              # month/day/hour redirect
