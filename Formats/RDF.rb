@@ -16,10 +16,10 @@ class WebResource
           name = basename.downcase                         # case-normalized basename
           if name.index('msg.')==0 || path.index('/sent/cur')==0
             options[:content_type] = 'message/rfc822'      # mail name-prefix or dir containment
-          elsif %w(changelog license readme todo).member? name
+          elsif %w(changelog copying license readme todo).member? name
             options[:content_type] = 'text/plain'          # common textfile names
           elsif %w(gemfile makefile rakefile).member? name
-            reader = RDF::Reader.for(:sourcecode)          # common buildfile names
+            reader = RDF::Reader.for(:code)                # common buildfile names
           else
             puts "format-suffix undefined: #{self}"        # ask FILE(1) for MIME hint
             options[:content_type] = `file -b --mime-type #{Shellwords.escape fsPath}`.chomp
@@ -113,3 +113,6 @@ class WebResource
 
   end
 end
+
+# add 🐢 extension to map
+RDF::Format.file_extensions[:🐢] = RDF::Format.file_extensions[:ttl]

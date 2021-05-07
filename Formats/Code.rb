@@ -28,6 +28,7 @@ module Webize
                    text/x-c;q=0.8
                    text/x-perl;q=0.8
                    text/x-ruby;q=0.8
+                   text/x-script.ruby;q=0.8
                    text/x-shellscript;q=0.8
                    ),
                    extensions: [:bash, :c, :css, :cpp, :erb, :gemspec, :go, :h, :hs, :js, :mk, :nim, :nix, :patch, :pl, :pm, :proto, :py, :rb, :sh, :zsh]
