@@ -158,8 +158,8 @@ class WebResource
       end
     end
 
-    # fetch remote data to RAM and fs-cache
-    def fetchHTTP format: nil, thru: true                             # options: format (to override broken remotes), HTTP response for caller
+    # fetch remote data to in-RAM graph and static file-cache
+    def fetchHTTP format: nil, thru: true                             # options: format (override broken remote), craft HTTP response for caller
       URI.open(uri, headers.merge({redirect: false})) do |response|   # fetch over HTTP from remote
         env[:fetched] = true                                          # mark as fetched for logger
         h = headers response.meta                                     # response headers
@@ -191,10 +191,9 @@ class WebResource
             end                                                       # transcode to UTF-8
             body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace if format.match? /(ht|x)ml|script|text/
             if format == 'application/xml' && body[0..2048].match?(/(<|DOCTYPE )html/i)
-              format = 'text/html';puts 'HTML with XML type declared' # XML format is HTML
+              format = 'text/html'                                    # HTML in XML clothing
             end
             body = Webize.clean self, body, format                    # clean upstream data
-
             if formatExt = Suffixes[format] || Suffixes_Rack[format]  # find format-suffix
               file = fsPath                                           # cache path
               file += '/index' if file[-1] == '/'                     # append dir-index slug
@@ -211,7 +210,7 @@ class WebResource
                   FileUtils.touch file, mtime: ts
                   env[:repository] << RDF::Statement.new(self, Date.R, ts.iso8601) rescue nil
                 else
-                  puts "bad timestamp #{timestamp}"
+                  puts "⚠️ bad timestamp #{timestamp}"
                 end
               end
               reader.new(body, base_uri: self, path: file){|g|env[:repository] << g} # read RDF
@@ -223,7 +222,6 @@ class WebResource
           end
           return unless thru                                          # no HTTP response, done fetching to RAM
           saveRDF                                                     # commit graph-cache
-
           env[:resp]['Access-Control-Allow-Origin'] ||= origin        # CORS header
           h['Link'] && h['Link'].split(',').map{|link|                # Link headers
             ref, type = link.split(';').map &:strip
@@ -235,7 +233,6 @@ class WebResource
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type Last-Modified).map{|k|
             env[:resp][k] ||= h[k] if h[k]}
           env[:resp]['ETag'] ||= h['Etag']                            # ETag header
-
           if env[:notransform]|| !format ||format.match?(FixedFormat) # no transform
             body = Webize::HTML.resolve_hrefs body, env, true if format == 'text/html' && env.has_key?(:proxy_href) # resolve hrefs in proxy scenario
             env[:resp]['Content-Length'] = body.bytesize.to_s         # Content-Length header
