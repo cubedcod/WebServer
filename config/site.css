@@ -40,7 +40,6 @@
 .toolbox {vertical-align: top; margin-left: 2em}
 :target {background-color: #2ef !important; color : #000 !important}
 a {text-decoration: none; border-radius: .14em; color: #eee; font-weight: bold}
-a.blocked {display: none}
 a.date {white-space: nowrap; background-color: #000; vertical-align: bottom; color: #bbb; border-radius: .2em .2em 0 0; font-size: .8em}
 a.fromto:only-child {padding: .1em 64ex 256ex 64ex; margin: 0 -64ex -256ex -64ex}
 a.id {float: right}
