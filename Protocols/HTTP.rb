@@ -152,7 +152,7 @@ class WebResource
       end
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError => e
       if e.class == SocketError && e.message.index('name not')
-        [302,{'Location' => 'http://localhost/www.google.com/search' + HTTP.qs({'q' => host})},[]]
+        [302,{'Location' => 'http://localhost/https://www.google.com/search' + HTTP.qs({'q' => host})},[]]
       else
         ['http://', host, ![nil, 443].member?(port) ? [':', port] : nil, path, query ? ['?', query] : nil].join.R(env).fetchHTTP rescue (env[:status] = 408; notfound)
       end
@@ -307,7 +307,9 @@ class WebResource
         if !p
           '/index'.R(env).cacheResponse        # root index
         elsif p[-1] == ':'
-          (env[:base] = path[1..-1].R(env)).hostHandler # host handler
+          (env[:base] = path[1..-1].R(env)).hostHandler      # host handler w/ Proxy URI
+        elsif HostGET.has_key? p
+          (env[:base] = ('https:/'+path).R(env)).hostHandler # host handler w/ Proxy URI (undefined scheme - default HTTPS)
         elsif %w{m d h}.member? p
           dateDir                              # month/day/hour redirect
         else

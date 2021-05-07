@@ -15,7 +15,7 @@ browser shortcuts for forward-proxy mode in [bin/browse](bin/browse/). for DNS-m
     echo nameserver 127.0.0.1 | sudo tee /etc/resolv.conf
     ./bin/dnsd
 
-bookmarklet to jump to [local UI](javascript:location.href='http://localhost:8000/'+location.hostname+location.pathname+'?cookie='+encodeURIComponent(document.cookie))
+bookmarklet to jump to [local UI](javascript:location.href='http://localhost:8000/https://'+location.hostname+location.pathname+'?cookie='+encodeURIComponent(document.cookie))
 
 ## WHAT
 
