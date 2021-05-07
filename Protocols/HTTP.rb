@@ -144,11 +144,11 @@ class WebResource
       end
       case scheme
       when 'gemini'
-        fetchGemini
+        fetchGemini                                                   # fetch w/ Gemini
       when /^http/
-        fetchHTTP                                                       # fetch over HTTPS, with HTTP fallback
+        fetchHTTP                                                     # fetch w/ HTTPS
       else
-        puts "unsupported scheme for fetching: #{uri}"
+        puts "⚠️ unsupported scheme: #{uri}"
       end
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError => e
       if e.class == SocketError && e.message.index('name not')
