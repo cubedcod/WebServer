@@ -29,7 +29,7 @@ class WebResource
     def self.call env
       return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']    # method
       uri = RDF::URI('//' + env['HTTP_HOST']).                           # host
-              join(env['REQUEST_PATH'].gsub /\/\/+/, '/').R env          # path
+              join(env['REQUEST_PATH']).R env                            # path
       uri.scheme = uri.local_node? ? 'http' : 'https'                    # scheme
       if env['QUERY_STRING'] && !env['QUERY_STRING'].empty?              # query
         uri.query = env['QUERY_STRING'].sub(/^&+/,'').sub(/&+$/,'').gsub(/&&+/,'&') # strip query of excess & chars
@@ -302,18 +302,17 @@ class WebResource
 
     def GET
       if local_node?
-        env[:proxy_href] = true                # proxy remote URLs
+        env[:proxy_href] = true                # proxy URIs enabled on local host
         p = parts[0]                           # path selector
-        if !p                                  # root path
-          '/index'.R(env).cacheResponse
-        elsif %w{m d h}.member? p              # current month/day/hour redirect
-          dateDir
-        elsif path == '/favicon.ico'           # icon handler
-          [200, {'Content-Type' => 'image/png'}, [SiteIcon]]
-        elsif !p.match? /[.:]/                 # no domain-separator chars in path-segment
+        if !p
+          '/index'.R(env).cacheResponse        # root index
+        elsif p[-1] == ':'
+          puts path[1..-1]
+          (env[:base] = path[1..-1].R(env)).hostHandler # host handler
+        elsif %w{m d h}.member? p
+          dateDir                              # month/day/hour redirect
+        else
           cacheResponse                        # local path
-        else                                   # hostname in first path-segment
-          (env[:base] = remoteURL).hostHandler # host handler (rebased on local URI-space)
         end
       else
         hostHandler                            # host handler

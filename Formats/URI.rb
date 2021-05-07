@@ -78,17 +78,10 @@ class WebResource < RDF::URI
   # resource locator - derived from origin URI in proxy scenario
   def href
     if env.has_key?(:proxy_href) && !local_node? # proxy
-      ['http://', env['HTTP_HOST'], '/', host, path, (query ? ['?', query] : nil), (fragment ? ['#', fragment] : nil) ].join
+      ['http://', env['HTTP_HOST'], '/', scheme ? nil : 'https:', uri].join
     else                                         # direct
       uri
     end
-  end
-
-  # proxy href -> original href
-  def remoteURL
-      ['https:/' , path.sub(/^\/https?:\/+/, '/'),
-       (query ? ['?', query] : nil),
-       (fragment ? ['#', fragment] : nil) ].join.R env
   end
 
   module HTML
