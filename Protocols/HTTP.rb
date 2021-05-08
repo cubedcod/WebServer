@@ -143,10 +143,12 @@ class WebResource
         env['HTTP_IF_MODIFIED_SINCE'] = timestamp.httpdate
       end
       case scheme
+      when nil
+        ['https:', uri].join.R(env).fetchHTTP                         # HTTPS fetch (default scheme)
       when 'gemini'
-        fetchGemini                                                   # fetch w/ Gemini
+        fetchGemini                                                   # Gemini fetch
       when /^http/
-        fetchHTTP                                                     # fetch w/ HTTPS
+        fetchHTTP                                                     # HTTPS fetch
       else
         puts "⚠️ unsupported scheme: #{uri}"
       end
@@ -305,7 +307,9 @@ class WebResource
           '/index'.R(env).cacheResponse
         elsif p[-1] == ':'                     # remote node - proxy URI
           (env[:base] = [path[1..-1], query ? ['?', query] : nil].join.R(env)).hostHandler
-        elsif HostGET.has_key? p               # remote node - proxy URI - undefined scheme
+        elsif p == 'favicon.ico'               # local icon
+          [200, {'Content-Type' => 'image/png'}, [SiteIcon]]
+        elsif p.index '.'                      # remote node - proxy URI - undefined scheme
           (env[:base] = ['/', path, query ? ['?', query] : nil].join.R(env)).hostHandler
         elsif %w{m d h}.member? p
           dateDir                              # month/day/hour redirect
