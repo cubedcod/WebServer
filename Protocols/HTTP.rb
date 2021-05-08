@@ -153,10 +153,13 @@ class WebResource
         puts "⚠️ unsupported scheme: #{uri}"
       end
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError => e
-      if e.class == SocketError && e.message.index('name not')
+      if e.class == SocketError && e.message.index('name not')        # likely DNS failure - search terms to hostname from URL bar
         [302,{'Location' => 'http://localhost/https://www.google.com/search' + HTTP.qs({'q' => host})},[]]
+      elsif scheme == 'https'                                         # HTTP fetch on HTTPS failure
+        puts "⚠️  fallback scheme #{uri} -> HTTP"
+        uri.sub('s','').R(env).fetchHTTP rescue (env[:status] = 408; notfound)
       else
-        ['http://', host, ![nil, 443].member?(port) ? [':', port] : nil, path, query ? ['?', query] : nil].join.R(env).fetchHTTP rescue (env[:status] = 408; notfound)
+        env[:status] = 408; notfound
       end
     end
 
