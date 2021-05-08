@@ -253,7 +253,11 @@ l.facebook.com l.instagram.com
         r.deny
       end}
 
-    GET 'mobile.twitter.com', -> r {[301, {'Location' => ('//twitter.com' + r.path).R(r.env).href}, []]}
+    GotoTwitter = -> r {[301, {'Location' => ('//twitter.com' + r.path).R(r.env).href}, []]}
+
+    GET 'nitter.snopyta.org', GotoTwitter
+    GET 'mobile.twitter.com', GotoTwitter
+
     GET 'twitter.com', -> r {
       r.env[:sort] = 'date'
       r.env[:view] = 'table'
