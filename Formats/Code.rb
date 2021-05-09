@@ -43,7 +43,6 @@ module Webize
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri].R
         @path = options[:path]
-        @mime = options[:content_type]
         @doc = (input.respond_to?(:read) ? input.read : input).encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
 
         if block_given?
@@ -64,6 +63,7 @@ module Webize
 
       def source_tuples
         yield Type.R, (Schema + 'Code').R
+        yield Title.R, @base.basename
 
         if @path # fs-path argument given, use pygmentize
           lang = 'html' if @base.ext == 'erb'
@@ -73,10 +73,7 @@ module Webize
           html = `pygmentize #{langtag} -f html #{Shellwords.escape @path}`
 
         else # Rouge
-          #lexer = Rouge::Lexer.guess_by_mimetype(@mime)
           lexer = Rouge::Lexer.guess_by_filename(@base.basename)
-          #puts "Rouge: #{@base.basename} #{lexer}"
-
           html = Rouge::Formatters::HTMLPygments.new(Rouge::Formatters::HTML.new).format(lexer.lex(@doc))
         end
 

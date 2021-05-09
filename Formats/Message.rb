@@ -197,7 +197,7 @@ class WebResource
                       {_: :td,
                        c: [(post.delete(To)||[]).map{|f|Markup[To][f,env]},
                            post.delete(SIOC+'reply_of')],
-                       class: :to}, "\n"]}},
+                       class: :to}, "\n"]}}, "<br>\n",
              {class: :body,
               c: [({class: :abstract, c: post.delete(Abstract)} if post.has_key? Abstract),
                   {class: :content,
