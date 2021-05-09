@@ -1,14 +1,17 @@
 ml mbox extract curl -I https://www.redhat.com/archives/dm-devel/2020-November.txt.gz
 path visualization (how did i get here? referer history)
 https://forum.solidproject.org/ blank nodes
-git
+git RDFize
 fix reverse-dns output binarycrap and/or switch to rubydns
 HTML view for schema.org events https://jewishchronicle.timesofisrael.com/ - datetimeline vis
 RDFa - investigate HAML template-solution in RDF library
 notification mesh
-browser
+browser - hTMl renderer for lagrange,maybe http or just  use full HTTP-URI via gemini protocol
 username globbable in ig timeline link
 to/from/title globbable in email timeline link
 #down link on google for all results inlined
 soundcloud RDF http://l/https://api-v2.soundcloud.com/stream/users/752705?limit=20&client_id=vFImNkLVyrDxqzOjhw0lL0ZPUsf4KfEo&app_version=1620048099&app_locale=en
 
+symlink to canonical location,  http://localhost/https://avatars-02.gitter.im/gh/uv/4/timbl  maps  to  turtle and image  file ,  causing  RDF response from merged sources:
+-rw-r--r-- 1 user user 62538 Apr 17  2014 web/im/gitter/avatars-02/gh/uv/4/timbl.png
+-rw-r--r-- 2 user user   103 May  4 22:16 web/im/gitter/avatars-02/gh/uv/4/timbl.🐢
