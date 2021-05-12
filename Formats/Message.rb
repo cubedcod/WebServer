@@ -170,7 +170,7 @@ class WebResource
       resource = (post.delete('uri') || ('#' + Digest::SHA2.hexdigest(rand.to_s))).R env
       authors = post.delete(Creator) || []
       date = (post.delete(Date) || [])[0]
-      id = 'r' + Digest::SHA2.hexdigest(resource.uri) # local identifier for nonlocal-resource representation
+      id = 'r' + Digest::SHA2.hexdigest(resource.uri) # local identifier for representation
       hasPointer = false
       if authors.find{|a| KillFile.member? a.to_s}
         authors.map{|a| CGI.escapeHTML a.R.display_name if a.respond_to? :R}
@@ -179,14 +179,12 @@ class WebResource
          c: ["\n",
              (post.delete(Title)||[]).map(&:to_s).map(&:strip).compact.-([""]).uniq.map{|title|
                title = title.to_s.sub(/\/u\/\S+ on /,'')
-               unless env[:title] == title
+               unless env[:title] == title # hide title if unchanged from previous post in group
                  env[:title] = title
-                 hasPointer = true
-                 [{_: :a, id: 't' + id, class: :title,
-                   href: resource.href, c: [(post.delete(Schema+'icon')||[]).map{|i|{_: :img, src: i.href}},CGI.escapeHTML(title)]}, " \n"]
+                 {_: :a, class: :title, href: resource.href, c: [(post.delete(Schema+'icon')||[]).map{|i|{_: :img, src: i.href}},CGI.escapeHTML(title)]}.update(hasPointer ? {} : (hasPointer = true; {id: 't' + id}))
                end},
              {class: :pointer,
-              c: [({_: :a, class: :date, href: 'http://localhost:8000/' + date[0..13].gsub(/[-T:]/,'/') + '#' + id, c: date} if date), ' ',
+              c: [({_: :a, class: :date, href: 'http://localhost:8000/' + date[0..13].gsub(/[-T:]/,'/') + '#' + id, c: date} if date), ' ', # timestamp link to representation in temporal index
                   ({_: :a, c: '☚', href: resource.href, id: 'p' + id} unless hasPointer)]},
              {_: :table, class: :fromto,
               c: {_: :tr,
