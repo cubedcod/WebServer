@@ -60,7 +60,7 @@ h1,h2,h3,h4,h5,h6 {margin: 0}
 iframe, .preembed {border: .2em solid #fff}
 iframe.main_player {border: .25em solid red}
 img, video {max-width: 100%}
-p {max-width: 100ex}
+p, ul {max-width: 100ex}
 p[style] {background-color: #fff; color: #000}
 pre, code {white-space: pre-wrap; font-family: monospace; max-width: 255ex}
 pre, p {margin: .125em}
