@@ -1,17 +1,21 @@
 #!/bin/sh
-conf=~/src/WebServer/config
 
-# we listen on high ports, use iptables to direct low-port traffic to high port:
+# configuration
+conf=~/src/WebServer/config
+cd $conf
+
+# redirect low-port traffic to high-port
 sudo iptables -t nat -A OUTPUT -p tcp -d 127.0.0.1 --dport 53 -j REDIRECT --to-ports 1053
 sudo iptables -t nat -A OUTPUT -p udp -d 127.0.0.1 --dport 53 -j REDIRECT --to-ports 1053
 sudo iptables -t nat -A OUTPUT -p tcp -d 127.0.0.1 --dport 80 -j REDIRECT --to-ports 8000
 sudo iptables -t nat -A OUTPUT -p tcp -d 127.0.0.1 --dport 443 -j REDIRECT --to-ports 8443
 
-# configure DNS server
+# DNS server
 echo nameserver 127.0.0.1  |  sudo tee /etc/resolv.conf
+foot ../bin/dnsd &
 
-# launch HTTPS-terminating reverse proxy
-cd $conf && squid -f squid.conf
+# HTTPS proxy
+squid -f squid.conf
 
-# launch web server
+# HTTP server
 cd $HOME/web && unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c $conf/unicorn.rb $conf/rack.ru
