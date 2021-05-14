@@ -5,7 +5,7 @@
 #prev, #next, #expand {font-size: 1.9em; color: #eee}
 #prev:hover, #next:hover {background-color: #333}
 .abstract {background-color: #2c2c2c; color: #eee; border-width: 0 0 0 .5em; border-style: solid; border-color: #555; padding: .2em}
-.blocked, .blocked.post .body {background: repeating-linear-gradient(-45deg, #000, #000 .5em, #f00 .5em, #f00 1em)}
+.blocked, .blocked.post .body, a.blocked.uri {background: repeating-linear-gradient(-45deg, #000, #000 .5em, #f00 .5em, #f00 1em); color: #fff}
 .breadcrumb > span {font-size: 1.4em; color: #aaa}
 .breadcrumb {color: #eee}
 .container .body {border-radius: 0 .4em .4em .4em; width: 100%; border-width: .1em; margin: 0}
