@@ -37,11 +37,5 @@ gem install unicorn
 gem install bundler
 bundle install
 
-## initial filesystem state - so mutt thinks it's a maildir and logtail works on first-run even if squid hasn't launched yet
-mkdir -p ~/web/mail/cur
-mkdir ~/web/mail/new
-mkdir ~/web/mail/tmp
-touch ~/web/web.log
-
 ## install HTTPS certificate
 ./bin/certificate
