@@ -39,3 +39,8 @@ bundle install
 
 ## install HTTPS certificate
 ./bin/certificate
+
+## install homepage
+mkdir ~/web ; cd ~/web
+ln -s ../src/WebServer/config/bookmarks.u index.u
+ln -s ../src/WebServer/config/search.html index.html
