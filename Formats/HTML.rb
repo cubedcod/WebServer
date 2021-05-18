@@ -356,25 +356,34 @@ class WebResource
   module HTML
 
     # Graph -> HTML
-    def htmlDocument graph=nil
-      graph ||= env[:graph] = treeFromGraph
-      qs = query_values || {}
-      env[:colors] ||= {}
+    def htmlDocument graph = nil
+      graph ||= env[:graph] = treeFromGraph                                                        # treeify graph
+      env[:colors] ||= {}                                                                          # named color(s) container
       env[:links][:up] ||= [File.dirname(env['REQUEST_PATH']), '/', (query ? ['?', query] : nil)].join unless path == '/'
-      link = -> key, content { # render Link reference
-        if url = env[:links] && env[:links][key]
-          [{_: :a, href: url.R(env).href, id: key, class: :icon, c: content},
-           "\n"]
-        end}
-      bgcolor = {401 => :orange, 403 => :yellow, 404 => :gray, 408 => '#f0c'}[env[:status]] || '#333'
-      htmlGrep if local_node?
-      groups = {}
-      graph.map{|uri, resource| # group resources by type
+      icon = ('//'+(host||'localhost:8000')+'/favicon.ico').R env                                  # well-known icon location
+      if env[:links][:icon]                                                                        # icon reference in metadata
+        env[:links][:icon] = env[:links][:icon].R env unless env[:links][:icon].class==WebResource # normalize reference
+        if !env[:links][:icon].data? && env[:links][:icon].path != icon.path && !icon.node.exist? && !icon.node.symlink?
+          FileUtils.mkdir_p File.dirname icon.fsPath                                               # unlinked well-known location
+          FileUtils.ln_s (env[:links][:icon].node.relative_path_from icon.node.dirname), icon.node # link to well-known location
+        end
+      end
+      env[:links][:icon] ||= icon.node.exist? ? icon : '//localhost:8000/favicon.ico'.R(env)       # default well-known icon
+      bgcolor = {401 => :orange,403 => :yellow,404 => :gray,408 => '#f0c'}[env[:status]] || '#333' # background color
+      htmlGrep if local_node?                                                                      # HTMLify grep results
+      groups = {}                                                                                  # group(s) container
+      graph.map{|uri, resource|                                                                    # group resources by type
         (resource[Type]||[:untyped]).map{|type|
           type = type.to_s
           type = MarkupMap[type] || type
           groups[type] ||= []
           groups[type].push resource }}
+
+      link = -> key, content {                                                                     # lambda: render Link reference
+        if url = env[:links] && env[:links][key]
+          [{_: :a, href: url.R(env).href, id: key, class: :icon, c: content},
+           "\n"]
+        end}
 
       HTML.render ["<!DOCTYPE html>\n",
                    {_: :html,

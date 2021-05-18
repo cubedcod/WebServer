@@ -44,6 +44,10 @@ class WebResource < RDF::URI
 
     def basename; File.basename path end
 
+    def data?
+      (uri.index 'data:') == 0
+    end
+
     def display_name
       return fragment if fragment && !fragment.empty?                    # fragment
       return query_values['id'] if queryvals.has_key? 'id'               # query
@@ -90,22 +94,7 @@ class WebResource < RDF::URI
     def uri_toolbar
       qs = queryvals
       bc = '' # breadcrumb trail
-      favicon = ('//' + (host || 'localhost') + '/favicon.ico').R env # icon at well-known location
-      icon = if env[:links][:icon]                       # icon reference in metadata
-               env[:links][:icon] = env[:links][:icon].R env # use icon reference
-               if env[:links][:icon].uri.index('data:') == 0 # data URI?
-                 env[:links][:icon].uri                      # data URI
-               else
-                 if env[:links][:icon].path != favicon.path && !favicon.node.exist? && !favicon.node.symlink? # well-known location unlinked?
-                   FileUtils.mkdir_p File.dirname favicon.fsPath
-                   FileUtils.ln_s (env[:links][:icon].node.relative_path_from favicon.node.dirname), favicon.node # link to well-known location
-                 end
-                 env[:links][:icon].href                 # referenced icon
-               end
-             elsif favicon.node.exist?                   # icon at well-known location
-               favicon.href
-             end
-
+      icon = env[:links][:icon]
       {class: :toolbox,
        c: [({_: :span, c: env[:status], style: 'font-weight: bold', class: :icon} if env[:status]),                                                              # status code
            ({_: :a, class: :icon, c: '↨', href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless env[:view] == 'table'),                         # link to tabular view
@@ -113,7 +102,7 @@ class WebResource < RDF::URI
            ({_: :a,href: HTTP.qs(qs.merge({'download' => 'audio'})),c: '&darr;',class: :icon} if host&.match?(/(^|\.)(bandcamp|(mix|sound)cloud|youtube).com/)), # download link
            env[:feeds].map{|feed|                                                                                                                                # feed links
              {_: :a, href: feed.R(env).href,title: feed.path,class: :icon,c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {id: :sitefeed, style: 'border: .08em solid orange; background-color: orange'} : {})}, "\n",
-           {_: :a, class: :host, href: env[:base].join('/').R(env).href, c: icon ? {_: :img, src: icon, style: DarkLogo.member?(host) ? 'background-color: #fff' : ''} : '🏠'},# link to path root
+           {_: :a, class: :host, href: env[:base].join('/').R(env).href, c: icon ? {_: :img, src: icon.data? ? icon.uri : icon.href, style: DarkLogo.member?(host) ? 'background-color: #fff' : ''} : '🏠'},# link to path root
            {class: :path, c: env[:base].parts.map{|p| bc += '/' + p                                                                                              # path breadcrumbs
               {_: :a, class: :breadcrumb, href: env[:base].join(bc).R(env).href, c: [{_: :span, c: '/'}, (CGI.escapeHTML Rack::Utils.unescape p)]}}},
            (if SearchableHosts.member? host
