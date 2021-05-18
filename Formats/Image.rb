@@ -216,6 +216,7 @@ class WebResource
       DC + 'identifier' => '☸',
       DC + 'rights' => '⚖️',
       Date => '⌚', 'http://purl.org/dc/terms/created' => '⌚', 'http://purl.org/dc/terms/modified' => '⌚',
+      DOAP+'license' => '⚖️',
       Image => '🖼️',
       LDP + 'Container' => '📁',
       LDP + 'contains' => '📁',
