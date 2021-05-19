@@ -10,7 +10,6 @@ browser - hTMl renderer for lagrange,maybe http or just  use full HTTP-URI via g
 username globbable in ig timeline link
 to/from/title globbable in email timeline link
 #down link on google for all results inlined
-soundcloud RDF http://l/https://api-v2.soundcloud.com/stream/users/752705?limit=20&client_id=vFImNkLVyrDxqzOjhw0lL0ZPUsf4KfEo&app_version=1620048099&app_locale=en
 gack (gemini) server
 rdfization in gemini  client  - generalize w/  http?
 fosstodon posts ending up in mnoth dir - fix our or their error and filter/warn bad timestamps at link-time

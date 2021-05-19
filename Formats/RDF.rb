@@ -48,15 +48,17 @@ class WebResource
       fsBase = graphURI.fsPath                                                                  # storage path
       fsBase += '/index' if fsBase[-1] == '/'
       f = fsBase + '.🐢'
+
       unless File.exist? f
         FileUtils.mkdir_p File.dirname f
         RDF::Writer.for(:turtle).open(f){|f|f << graph}                                         # write 🐢
         puts "\e[38;5;48m#{'%2d' % graph.size}⋮🐢 \e[1m#{'http://localhost:8000' if !graphURI.host}#{graphURI}\e[0m" if path != graphURI.path
       end
-      if !graphURI.to_s.match?(/^\/\d\d\d\d\/\d\d\/\d\d/) && (ts = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value) && ts.match?(/^\d\d\d\d-/) # find timestamp if graph URI not located on timeline
-        🕒 = [ts.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'),          # hour-dir slug
+
+      if !graphURI.to_s.match?(/^\/\d\d\d\d\/\d\d\/\d\d/) && (ts = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value) && ts.match?(/^\d\d\d\d-/) # canonical location is not on timeline and graph has timestamp
+        🕒 = [ts.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'),          # hour-dir
               %w{host path query}.map{|a|graphURI.send(a).yield_self{|p|p&&p.split(/[\W_]/)}}]. # name slugs
-               flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.')[0..123] + '.🐢'   # timeline URI
+               flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.')[0..125] + '.🐢'   # timeline URI
         puts ['🕒', ts, 🕒].join ' ' if Verbose
         unless File.exist? 🕒                                                                   # link 🐢 to timeline
           FileUtils.mkdir_p File.dirname 🕒
@@ -76,9 +78,9 @@ class WebResource
     miniGraph = RDF::Repository.new                                            # summary graph
     loadRDF graph: fullGraph                                                   # load graph
     treeFromGraph(fullGraph).map{|subject, resource|                           # summarizable resources
-      tiny = (resource[Type]||[]).member? (SIOC + 'MicroblogPost').R           # is micropost?
+      tiny = (resource[Type]||[]).member? (SIOC + 'MicroblogPost').R           # full content preserved on micropost
       predicates = [Abstract, Audio, Creator, Date, Image, LDP+'contains', Link, Title, To, Type, Video]
-      predicates.push Content if tiny                                          # content included on microposts
+      predicates.push Content if tiny
       predicates.map{|predicate|                                               # summary predicate(s)
         if o = resource[predicate]
           (o.class == Array ? o : [o]).map{|o|                                 # summary object(s)
@@ -114,5 +116,5 @@ class WebResource
   end
 end
 
-# add 🐢 extension to map
+# 🐢 file-extension
 RDF::Format.file_extensions[:🐢] = RDF::Format.file_extensions[:ttl]
