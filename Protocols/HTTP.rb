@@ -310,11 +310,11 @@ class WebResource
         if !p                                  # local root-node
           '/index'.R(env).cacheResponse
         elsif p[-1] == ':'                     # remote node - proxy URI
-          (env[:base] = [path[1..-1], query ? ['?', query] : nil].join.R(env)).hostHandler
+          unproxy.hostHandler
         elsif p == 'favicon.ico'               # local icon
           [200, {'Content-Type' => 'image/png'}, [SiteIcon]]
         elsif p.index '.'                      # remote node - proxy URI - undefined scheme
-          (env[:base] = ['/', path, query ? ['?', query] : nil].join.R(env)).hostHandler
+          unproxy(true).hostHandler
         elsif %w{m d h}.member? p
           dateDir                              # month/day/hour redirect
         else
@@ -536,6 +536,10 @@ class WebResource
              ['application/atom+xml','text/html'].member?(fmt)}} # native writer available
 
       format                                                     # default format
+    end
+
+    def unproxy schemeless = false
+      env[:base] = [schemeless ? ['/', path] : path[1..-1], query ? ['?', query] : nil].join.R(env)
     end
 
   end

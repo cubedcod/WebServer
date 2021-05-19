@@ -99,7 +99,7 @@ class WebResource < RDF::URI
        c: [({_: :span, c: env[:status], style: 'font-weight: bold', class: :icon} if env[:status]),                                                              # status code
            ({_: :a, class: :icon, c: '↨', href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless env[:view] == 'table'),                         # link to tabular view
            {_: :a, href: (env[:proxy_href] && !local_node?) ? env[:base].uri : HTTP.qs(qs.merge({'notransform' => nil})), c: '⚗️', id: :UI, class: :icon},        # link to upstream UX
-           ({_: :a,href: HTTP.qs(qs.merge({'download' => 'audio'})),c: '&darr;',class: :icon} if host&.match?(/(^|\.)(bandcamp|(mix|sound)cloud|youtube).com/)), # download link
+           ({_: :a,href: HTTP.qs(qs.merge({'download' => 'audio'})),c: '&darr;',class: :icon} if host&.match?(AudioHosts)), # download link
            env[:feeds].map{|feed|                                                                                                                                # feed links
              {_: :a, href: feed.R(env).href,title: feed.path,class: :icon,c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {id: :sitefeed, style: 'border: .08em solid orange; background-color: orange'} : {})}, "\n",
            {_: :a, class: :host, href: env[:base].join('/').R(env).href, c: icon ? {_: :img, src: icon.data? ? icon.uri : icon.href, style: DarkLogo.member?(host) ? 'background-color: #fff' : ''} : '🏠'},# link to path root
