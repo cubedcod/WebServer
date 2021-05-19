@@ -247,6 +247,18 @@ l.facebook.com l.instagram.com
 
     GET 'cdn.shortpixel.ai', ImgRehost
 
+    GET 'soundcloud.com', -> r {
+      if !r.path || r.path == '/'
+        r.env[:sort] = 'date'
+        r.env[:view] = 'table'
+        SiteDir.join('soundcloud').readlines.map(&:chomp).map{|chan|
+          print "🔊"
+          "https://api-v2.soundcloud.com/stream/users/#{chan}?limit=20&client_id=vFImNkLVyrDxqzOjhw0lL0ZPUsf4KfEo".R(r.env).fetchHTTP thru: false}
+        r.saveRDF.graphResponse
+      else
+       NoGunk[r]
+      end}
+
     GET 'go.theregister.com', -> r {
       if r.parts[0] == 'feed'
         [301, {'Location' => 'https://' + r.path[6..-1]}, []]
