@@ -409,10 +409,10 @@ class WebResource
         [302, {'Location' => storageURI.href + '?offline'}, []]
       elsif parts[-1]&.match? /^(gen(erate)?|log)_?204$/           # 204 response, skip roundtrip to origin
         [204, {}, []]
+      elsif query&.match? Gunk                                     # query-gunk
+        [301,{'Location' => ['//',host,path].join.R(env).href},[]] # redirect to queryless
       elsif handler = HostGET[host]                                # custom handler: lambda
         handler[self]
-      elsif query&.match? Gunk
-        [301,{'Location' => ['//',host,path].join.R(env).href},[]] # strip query-gunk
       elsif deny?                                                  # block request
         deny
       else                                                         # generic handler: remote node cache
