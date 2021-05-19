@@ -68,7 +68,7 @@ class WebResource
       # append non-date components of path, and trailing slash
       remainder = ps.empty? ? '' : ['', *ps].join('/')
       remainder += '/' if env['REQUEST_PATH'] && env['REQUEST_PATH'][-1] == '/'
-      q = query ? ('?'+query) : ''
+      q = (env['QUERY_STRING'] && !env['QUERY_STRING'].empty?) ? ('?' + env['QUERY_STRING']) : ''
 
       # set metadata
       env[:links][:prev] = p + remainder + q + '#prev' if p

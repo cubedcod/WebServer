@@ -33,6 +33,7 @@
 .thumb, .thumb * {float: left; max-width: 22em}
 .title {background-color: #000; color: #fff; font-size: 1.08em; font-weight: bold; vertical-align: top; border-radius: 0; border-style: dotted; border-width: 0 0 1px 0 }
 .toolbox .host {position: fixed; top: 0; left: 1em; z-index: -1}
+.toolbox .host img {border-radius: .5em}
 .toolbox .icon {font-size: 1.6em; color: #fff; text-shadow: 1px 1px #000000; float: right}
 .toolbox a.icon:target {text-shadow: 0px 0px #000000}
 .toolbox form input {background-color: #000; color: #fff; border-radius: .5em; border: 1px solid #444}
