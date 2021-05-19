@@ -39,7 +39,7 @@ class WebResource
       end
       env[:client_cache] = env.has_key?('HTTP_IF_NONE_MATCH') || env.has_key?('HTTP_IF_MODIFIED_SINCE')
       env.update({base: uri, feeds: [], links: {}, resp: {}})            # init environment storage
-     #Pry::ColorPrinter.pp env  if Verbose                               # log request
+     #Pry::ColorPrinter.pp env if Verbose                                # log request
       uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body|    # dispatch request
         format = uri.format_icon head['Content-Type']                    # log response
         color = if env[:deny]
