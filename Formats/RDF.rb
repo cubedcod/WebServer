@@ -75,11 +75,12 @@ class WebResource
     summary_node = join(['.preview', basename, ['🐢','ttl'].member?(ext) ? nil : '🐢'].compact.join '.').R env # summary URI
     file = summary_node.fsPath                                                 # summary file
     return summary_node if File.exist?(file) && File.mtime(file) >= node.mtime # summary up to date
-    fullGraph = RDF::Repository.new                                            # graph
-    miniGraph = RDF::Repository.new                                            # summary graph
-    loadRDF graph: fullGraph                                                   # load graph
+    fullGraph = RDF::Repository.new                                            # full RDF
+    miniGraph = RDF::Repository.new                                            # summary RDF
+    loadRDF graph: fullGraph                                                   # read RDF
+    saveRDF fullGraph if basename.index('msg.') == 0                           # store RDF read from non-RDF
     treeFromGraph(fullGraph).map{|subject, resource|                           # summarizable resources
-      tiny = (resource[Type]||[]).member? (SIOC + 'MicroblogPost').R           # full content preserved on micropost
+      tiny = (resource[Type]||[]).member? (SIOC + 'MicroblogPost').R           # retain full content if micropost
       predicates = [Abstract, Audio, Creator, Date, Image, LDP+'contains', Link, Title, To, Type, Video]
       predicates.push Content if tiny
       predicates.map{|predicate|                                               # summary predicate(s)
@@ -87,7 +88,7 @@ class WebResource
           (o.class == Array ? o : [o]).map{|o|                                 # summary object(s)
             miniGraph << RDF::Statement.new(subject.R,predicate.R,o)} # triple to summary-graph
         end} if [Image, Abstract, Title, Link, Video].find{|p|resource.has_key? p} || tiny}
-    summary_node.writeFile miniGraph.dump(:turtle, base_uri: self, standard_prefixes: true) # cache summary
+    summary_node.writeFile miniGraph.dump(:turtle, base_uri: self, standard_prefixes: true) # store summary RDF
     summary_node                                                                            # summary
   end
 
