@@ -101,7 +101,6 @@ class WebResource
                 pathbase = host_parts.join('/').size
                 (if node.directory?
                  if qs['f'] && !qs['f'].empty?                         # FIND
-#puts "find #{qs['f']}"
                    `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
                  elsif qs['find'] && !qs['find'].empty? && path != '/' # FIND substring
                    `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
@@ -124,9 +123,8 @@ class WebResource
                     globPath += '.*'
                     Pathname.glob globPath
                   end
-                 end).map{|p|
-#puts p
-                  join(p.to_s[pathbase..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env} # resolve path to URI
+                 end).map{|p| # resolve path (relative to host-base) to full URI
+                  join(p.to_s[pathbase..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env}
               end
       summarize ? nodes.map(&:summary) : nodes
     end
