@@ -69,9 +69,9 @@ class WebResource
     self
   end
 
-  # file -> 🐢 file (overview metadata)
+  # file -> 🐢 file (data-reduced preview)
   def summary
-    return self if basename.match(/^(index|README)/) || !node.exist? # don't summarize index or README files
+    return self if basename.match(/^(index|README)/) || !node.exist?           # don't summarize index or README
     summary_node = join(['.preview', basename, ['🐢','ttl'].member?(ext) ? nil : '🐢'].compact.join '.').R env # summary URI
     file = summary_node.fsPath                                                 # summary file
     return summary_node if File.exist?(file) && File.mtime(file) >= node.mtime # summary up to date
@@ -93,13 +93,13 @@ class WebResource
 
   # file -> 🐢 file
   def 🐢
-    return self if ['🐢','ttl'].member? ext
-    turtle_node = join(['', basename, '🐢'].join '.').R env
-    file = turtle_node.fsPath                                                 # summary file
-    return turtle_node if File.exist?(file) && File.mtime(file) >= node.mtime # summary up to date
-    graph = RDF::Repository.new                                               # read RDF
-    loadRDF graph: graph
-    turtle_node.writeFile graph.dump(:turtle, base_uri: self, standard_prefixes: true) # store turtle
+    return self if ['🐢','ttl'].member? ext                                   # data already 🐢 format
+    turtle_node = join(basename + '.🐢').R env; file = turtle_node.fsPath     # 🐢 file
+    return turtle_node if File.exist?(file) && File.mtime(file) >= node.mtime # 🐢 up-to-date
+    puts "#{uri} -> 🐢"
+    graph = RDF::Repository.new                                               # init RDF storage
+    loadRDF graph: graph                                                      # read RDF
+    saveRDF graph                                                             # save RDF transcode
     turtle_node
   end
 

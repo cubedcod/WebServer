@@ -17,7 +17,6 @@ module Webize
 
       def initialize(input = $stdin, options = {}, &block)
         @base = options[:base_uri]
-        @base.env[:updates] = true # mark graph as updated to trigger save to canonical location
         @doc = (input.respond_to?(:read) ? input.read : input).encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
         if block_given?
           case block.arity

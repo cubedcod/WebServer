@@ -15,14 +15,13 @@ class WebResource
     end
 
     def cacheResponse
-      timeMeta                    # reference temporally-adjacent nodes
-      nodes = nodeSet             # find local nodes
+      timeMeta                        # reference temporally-adjacent nodes
+      nodes = nodeSet                 # find local nodes
       if nodes.size == 1 && (env[:notransform] || nodes[0].static_node? || nodes[0].suffix == Suffixes[selectFormat])
-        nodes[0].fileResponse     # no transform required
+        nodes[0].fileResponse         # no transform needed
       else
-        nodes.map{|_|_.🐢.loadRDF}# load RDF to graph
-        saveRDF if env[:updates]  # cache RDF found in non-RDF reads
-        graphResponse             # response
+        nodes.map(&:🐢).map &:loadRDF # load RDF
+        graphResponse                 # response
       end
     end
 
