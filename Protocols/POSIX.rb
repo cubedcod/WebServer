@@ -66,7 +66,7 @@ class WebResource
     def nodeGrep files = nil
       files = [fsPath] if !files || files.empty?
       qs = queryvals
-      q = (qs['Q'] || qs['q']).to_s
+      q = qs['q'].to_s
       return [] if q.empty?
       args = q.shellsplit rescue q.split(/\W/)
       file_arg = files.map{|file| Shellwords.escape file.to_s }.join ' '
@@ -88,11 +88,9 @@ class WebResource
     # URI -> nodes
     def nodeSet
       qs = queryvals
-
-      # glob-chars and grep-arg only magic on offline local cache
-      do_local_search = local_node? || offline?
-      do_grep = (qs.has_key?('Q')||qs.has_key?('q')) && do_local_search
-      summarize = !do_grep  # keep full-content for grepping
+      local_search = local_node? || offline?
+      grep = local_search && (qs.has_key? 'q')
+      summarize = !(env[:fullContent] || grep) # full-content by request and for grep-filtering
       nodes = if node.file? # direct map to node
                 summarize = false unless qs.has_key? 'abbr'
                 [self]
@@ -103,7 +101,7 @@ class WebResource
                    `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
                  elsif qs['find'] && !qs['find'].empty? && path != '/' # FIND substring
                    `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
-                 elsif do_grep                                         # GREP
+                 elsif grep                                            # GREP
                    nodeGrep
                  else                                                  # LS
                    env[:links][:down] ||= '*'
@@ -111,8 +109,8 @@ class WebResource
                  end
                 else
                   globPath = fsPath
-                  if globPath.match?(GlobChars) && do_local_search
-                    if do_grep
+                  if globPath.match?(GlobChars) && local_search
+                    if grep
                       nodeGrep Pathname.glob globPath                  # GREP in GLOB
                     else
                       Pathname.glob globPath                           # arbitrary GLOB
@@ -125,7 +123,12 @@ class WebResource
                  end).map{|p| # resolve path (relative to host-base) to full URI
                   join(p.to_s[pathbase..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env}
               end
-      summarize ? nodes.map(&:summary) : nodes
+      if summarize
+        env[:links][:down] = HTTP.qs qs.merge({'fullContent' => nil})
+        nodes.map &:summary
+      else
+        nodes
+      end
     end
 
   end
