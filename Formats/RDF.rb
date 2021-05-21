@@ -91,18 +91,6 @@ class WebResource
     summary_node                                                                            # summary
   end
 
-  # file -> 🐢 file
-  def 🐢
-    return self if ['🐢','ttl'].member? ext                                   # data already 🐢 format
-    turtle_node = join(basename + '.🐢').R env; file = turtle_node.fsPath     # 🐢 file
-    return turtle_node if File.exist?(file) && File.mtime(file) >= node.mtime # 🐢 up-to-date
-    puts "#{uri} -> 🐢"
-    graph = RDF::Repository.new                                               # init RDF storage
-    loadRDF graph: graph                                                      # read RDF
-    saveRDF graph                                                             # save RDF transcode
-    turtle_node
-  end
-
   include URIs
 
   module HTML

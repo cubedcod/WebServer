@@ -18,9 +18,9 @@ class WebResource
       timeMeta                        # reference temporally-adjacent nodes
       nodes = nodeSet                 # find local nodes
       if nodes.size == 1 && (env[:notransform] || nodes[0].static_node? || nodes[0].suffix == Suffixes[selectFormat])
-        nodes[0].fileResponse         # no transform needed
+        nodes[0].fileResponse         # suitable static-representation found
       else
-        nodes.map(&:🐢).map &:loadRDF # load RDF
+        nodes.map &:loadRDF           # load graph
         graphResponse                 # response
       end
     end
