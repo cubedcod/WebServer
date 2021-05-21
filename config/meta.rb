@@ -17,6 +17,7 @@ class WebResource
       'https://schema.org/NewsArticle' => Post,
       'https://schema.org/Person' => Person,
       FOAF + 'Image' => Image,
+      SIOC + 'MailMessage' => Post,
       SIOC + 'MicroblogPost' => Post,
       SIOC + 'BlogPost' => Post,
       SIOC + 'UserAccount' => Person,

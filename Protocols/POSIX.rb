@@ -90,39 +90,43 @@ class WebResource
       qs = queryvals
 
       # glob-chars and grep-arg only magic on offline local cache
-      do_local_searches = local_node? || offline?
-      do_grep = (qs.has_key?('Q')||qs.has_key?('q')) && do_local_searches
+      do_local_search = local_node? || offline?
+      do_grep = (qs.has_key?('Q')||qs.has_key?('q')) && do_local_search
 
-      summarize = qs.has_key? 'abbr'
-      nodes = if node.file? # direct map - single node
+      summarize = true
+      nodes = if node.file? # direct map to node
+                summarize = false unless qs.has_key? 'abbr'
                 [self]
-              else          # indirect map - one or more nodes
+              else          # indirect map to node(s)
                 pathbase = host_parts.join('/').size
-                (if node.directory?                                    # directory
-                 if qs['f'] && !qs['f'].empty?                         # FIND - full match
+                (if node.directory?
+                 if qs['f'] && !qs['f'].empty?                         # FIND
+#puts "find #{qs['f']}"
                    `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
-                 elsif qs['find'] && !qs['find'].empty? && path != '/' # FIND - substring match
+                 elsif qs['find'] && !qs['find'].empty? && path != '/' # FIND substring
                    `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
                  elsif do_grep                                         # GREP
                    nodeGrep
                  else                                                  # LS
-                   summarize = true
                    env[:links][:down] ||= '*'
                    (path=='/' && local_node?) ? [node] : [node, *node.children.select{|n|n.basename.to_s[0] != '.'}]
                  end
-                else                                                   # file(s)
+                else
                   globPath = fsPath
-                  if globPath.match?(GlobChars) && do_local_searches
+                  if globPath.match?(GlobChars) && do_local_search
                     if do_grep
-                      nodeGrep Pathname.glob globPath                  # GREP
+                      nodeGrep Pathname.glob globPath                  # GREP in GLOB
                     else
-                      Pathname.glob globPath                           # GLOB
+                      Pathname.glob globPath                           # arbitrary GLOB
                     end
                   else                                                 # default-set GLOB
+                    summarize = false unless qs.has_key? 'abbr'
                     globPath += '.*'
                     Pathname.glob globPath
                   end
-                 end).map{|p|join(p.to_s[pathbase..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env} # escape reserved-chars and resolve path to URI
+                 end).map{|p|
+#puts p
+                  join(p.to_s[pathbase..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env} # resolve path to URI
               end
       summarize ? nodes.map(&:summary) : nodes
     end
