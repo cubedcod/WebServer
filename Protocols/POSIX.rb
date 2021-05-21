@@ -92,8 +92,7 @@ class WebResource
       # glob-chars and grep-arg only magic on offline local cache
       do_local_search = local_node? || offline?
       do_grep = (qs.has_key?('Q')||qs.has_key?('q')) && do_local_search
-
-      summarize = true
+      summarize = !do_grep  # keep full-content for grepping
       nodes = if node.file? # direct map to node
                 summarize = false unless qs.has_key? 'abbr'
                 [self]
