@@ -3,25 +3,14 @@
 class WebResource
 
   def dir_triples graph
-    subject = self                           # directory URI
-    subject += '/' unless subject.to_s[-1] == '/' # enforce trailing-slash on directory name
+    subject = self                                # directory URI
+    subject += '/' unless subject.to_s[-1] == '/' # enforce trailing slash on dirname
     graph << RDF::Statement.new(subject, Type.R, (LDP + 'Container').R)
     graph << RDF::Statement.new(subject, Title.R, basename)
     graph << RDF::Statement.new(subject, Date.R, node.stat.mtime.iso8601)
     nodes = node.children.select{|n|n.basename.to_s[0] != '.'}
-    if nodes.size <= 8
-      nodes.map{|child|                      # point to all child-nodes
-        graph << RDF::Statement.new(subject, (LDP+'contains').R, (subject.join child.basename.to_s.gsub(' ','%20').gsub('#','%23')))}
-    else                                     # abbreviated pointers
-      slugs = {}
-      nodes.map{|n|
-        n.basename.to_s.split(/[\W_]/).grep(/^\D/).map{|t|
-          slugs[t] ||= 0
-          slugs[t] += 1}}
-      slugs.select{|s,count| count > 2}.sort_by{|s,c|c}.reverse[0..16].map{|slug,c|
-        graph << RDF::Statement.new(subject, (LDP+'contains').R, (subject.join '*' + slug + '*'))
-      }
-    end
+    nodes.map{|child|                             # point to contained nodes
+      graph << RDF::Statement.new(subject, (LDP+'contains').R, (subject.join child.basename.to_s.gsub(' ','%20').gsub('#','%23')))}
   end
 
   module URIs
