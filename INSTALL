@@ -4,6 +4,7 @@ uid=$(id -u)
 ## install Distro packages
 
 # Alpine https://www.alpinelinux.org/
+# apk add alpine-conf foot yambar fuzzel sway swayidle light chromium firefox build-base emacs networkmanager elogind wpa_supplicant wireless-regdb wireless-tools nano mpv pipewire-pulse pipewire-jack pavucontrol mosh linux-firmware neofetch sudo intel-ucode intel-media-driver libva-intel-driver linux-firmware-intel xf86-video-intel mesa-vulkan-intel bash terminus-font pulseaudio-ctl colordiff fonts-noto-all rsync tmux font-noto-all font-noto-emoji ttf-font-awesome
 which apk && sudo apk add alpine-sdk build-base linux-headers ruby ruby-dev ruby-json ruby-bigdecimal ruby-bundler openssl-dev parallel py3-pip findutils grep socat libexif-dev libxslt-dev poppler-utils squid taglib-dev tmux py3-pygments p11-kit-trust
 which apk && sudo /usr/lib/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB && sudo chown -R $uid:$uid /var/cache/squid
 
