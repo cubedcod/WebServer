@@ -118,20 +118,6 @@ module Webize
 
   module Plaintext
 
-    BasicSlugs = %w{
- amp article archives articles
- blog blogs blogspot
- columns co com comment comments
- edu entry
- feed feedburner feeds feedproxy forum forums
- go google gov
- html http https id in index irc is item local medium
- net news org p php post
- r reddit rs rss rssfeed
- s sports source status story
- t the thread threads to top topic twitter type
- uk user utm www}
-
     class Format < RDF::Format
       content_type 'text/plain', :extensions => [:conf, :irc, :log, :txt]
       content_encoding 'utf-8'
@@ -185,6 +171,24 @@ module Webize
 end
 
 class WebResource
+
+  module URIs
+
+    BasicSlugs = [nil, '', *%w{
+ amp article archives articles
+ blog blogs blogspot
+ columns co com comment comments
+ edu entry
+ feed feedburner feeds feedproxy forum forums
+ go google gov
+ html http https id in index irc is item local medium
+ net news org p php post
+ r reddit rs rss rssfeed
+ s sports source status story
+ t the thread threads to top topic twitter type
+ uk user utm www}]
+
+  end
 
   module HTML
 

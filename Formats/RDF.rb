@@ -46,35 +46,34 @@ class WebResource
 
   # Repository -> 🐢 file(s)
   def saveRDF repository = nil
-    return self unless repository || env[:repository]                                         # repository to store
-    (repository || env[:repository]).each_graph.map{|graph|                                   # graph
-      graphURI = (graph.name || self).R                                                       # graph URI
-      fsBase = graphURI.fsPath                                                                # storage path
+    return self unless repository || env[:repository]                               # repository
+    (repository || env[:repository]).each_graph.map{|graph|                         # graph
+      graphURI = (graph.name || self).R                                             # graph URI
+      fsBase = graphURI.fsPath                                                      # storage path
       fsBase += '/index' if fsBase[-1] == '/'
       f = fsBase + '.🐢'
       log = []
 
       unless File.exist? f
         FileUtils.mkdir_p File.dirname f
-        RDF::Writer.for(:turtle).open(f){|f|f << graph}                                       # write 🐢
+        RDF::Writer.for(:turtle).open(f){|f|f << graph}                             # store 🐢 to canonical location
         log << "\e[38;5;48m#{'%2d' % graph.size}⋮🐢 \e[1m#{'http://localhost:8000' if !graphURI.host}#{graphURI}\e[0m" if path != graphURI.path
       end
 
+      # if canonical location is not on timeline and graph has a timestamp, link graph to timeline
       if !graphURI.to_s.match?(/^\/\d\d\d\d\/\d\d\/\d\d/) && (ts = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value) && ts.match?(/^\d\d\d\d-/)
-        # canonical location is not on timeline and graph has timestamp, derive timeline location
-        🕒 = [ts.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'),        # hour-dir
-              %w{host path query}.map{|a|                                                     # graph-URI slugs
-                graphURI.send(a).yield_self{|p| p&.split(/[\W_]/)}},
-              graph.query(RDF::Query::Pattern.new(:s, Creator.R, :o)).objects.map{|o|         # creator slugs
-                if o.respond_to?(:R)
-                  o = o.R
-                  [o.parts, o.fragment]
-                else
-                  o.to_s.split(/[\W_]/)
-                end}].
-               flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.')[0..125] + '.🐢' # timeline path
+        🕒 = [ts.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-+:]/,'.'),# timeslice container
+              [%w{host path query}.map{|a|                                          # graph URI-slugs
+                 graphURI.send(a).yield_self{|p| p&.split(/[\W_]/)}},
+               graph.query(RDF::Query::Pattern.new(:s,Creator.R,:o)).objects.map{|o|# creator slugs
+                 if o.respond_to?(:R)
+                   o = o.R
+                   [o.parts, o.fragment]                                            # creator URI
+                 else
+                   o.to_s.split(/[\W_]/)                                            # creator text
+                 end}].flatten.uniq - BasicSlugs].join('.')[0..125] + '.🐢'         # timeline path
 
-        unless File.exist? 🕒                                                                 # link 🐢 to timeline
+        unless File.exist? 🕒                                                       # link 🐢 to timeline
           FileUtils.mkdir_p File.dirname 🕒
           FileUtils.ln f, 🕒 rescue nil
           log << ['🕒', 🕒]

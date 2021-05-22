@@ -182,8 +182,6 @@ l.facebook.com l.instagram.com
       end}
 
     GET 'instagram.com', -> r {[301, {'Location' => ['//www.instagram.com', r.path].join.R(r.env).href}, []]}
-    GET 'www.instagram.com', -> r {(!r.path || r.path=='/') ? r.cacheResponse : NoGunk[r].yield_self{|status,head,body|
-                                     status==302 ? r.cacheResponse : [status,head,body] }}
 
     GET 'api.mixcloud.com', -> r {r.fetchHTTP format: 'application/json'}
     GET 'mixcloud.com', -> r {[301, {'Location' => ['//www.mixcloud.com', r.path].join.R(r.env).href}, []]}
@@ -604,7 +602,7 @@ l.facebook.com l.instagram.com
           if date = Chronic.parse(comments_row.css('.age > a')[0].inner_text.sub(/^on /,''))
             subject = join subject
             date = date.iso8601
-            graph = ['/' + date.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:+]/,'.'), (subject.to_s.split(/[:\/?&=]+/) - Webize::Plaintext::BasicSlugs)].join('.').R # graph URI
+            graph = ['/' + date.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:+]/,'.'), (subject.to_s.split(/[:\/?&=]+/) - BasicSlugs)].join('.').R # graph URI
             yield subject, Type, Post.R, graph
             yield subject, Title, story.inner_text, graph
             yield subject, Link, story['href'], graph
@@ -623,7 +621,7 @@ l.facebook.com l.instagram.com
       comment.css('.reply').remove
       if time = Chronic.parse(date.inner_text.sub(/^on /,''))
         time = time.iso8601
-        graph = ['/' + time.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:+]/,'.'), (subject.to_s.split(/[:\/?&=]+/) - Webize::Plaintext::BasicSlugs)].join('.').R # graph URI
+        graph = ['/' + time.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:+]/,'.'), (subject.to_s.split(/[:\/?&=]+/) - BasicSlugs)].join('.').R # graph URI
         yield subject, Date, time, graph
       end
       yield subject, Type, Post.R, graph
