@@ -52,11 +52,12 @@ class WebResource
       fsBase = graphURI.fsPath                                                                # storage path
       fsBase += '/index' if fsBase[-1] == '/'
       f = fsBase + '.🐢'
+      log = []
 
       unless File.exist? f
         FileUtils.mkdir_p File.dirname f
         RDF::Writer.for(:turtle).open(f){|f|f << graph}                                       # write 🐢
-        puts "\e[38;5;48m#{'%2d' % graph.size}⋮🐢 \e[1m#{'http://localhost:8000' if !graphURI.host}#{graphURI}\e[0m" if path != graphURI.path
+        log << "\e[38;5;48m#{'%2d' % graph.size}⋮🐢 \e[1m#{'http://localhost:8000' if !graphURI.host}#{graphURI}\e[0m" if path != graphURI.path
       end
 
       if !graphURI.to_s.match?(/^\/\d\d\d\d\/\d\d\/\d\d/) && (ts = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value) && ts.match?(/^\d\d\d\d-/)
@@ -76,9 +77,10 @@ class WebResource
         unless File.exist? 🕒                                                                 # link 🐢 to timeline
           FileUtils.mkdir_p File.dirname 🕒
           FileUtils.ln f, 🕒 rescue nil
-          puts ['🕒', 🕒].join ' '
+          log << ['🕒', 🕒]
         end
-      end}
+      end
+      puts log.join ' ' unless log.empty?}
     self
   end
 

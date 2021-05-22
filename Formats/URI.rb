@@ -60,7 +60,7 @@ class WebResource < RDF::URI
     def suffix; '.' + ext end
 
     def host_parts
-      local_node? ? ['.'] : host.split('.').-(%w(com net org www)).reverse
+      local_node? ? ['.'] : host.split('.').reverse
     end
 
     def insecure; ['http://', host, path, query].join.R env end
