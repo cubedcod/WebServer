@@ -130,7 +130,7 @@ module Webize
  r reddit rs rss rssfeed
  s sports source status story
  t the thread threads to top topic twitter type
- uk utm www}
+ uk user utm www}
 
     class Format < RDF::Format
       content_type 'text/plain', :extensions => [:conf, :irc, :log, :txt]
