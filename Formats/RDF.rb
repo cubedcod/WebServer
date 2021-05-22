@@ -64,19 +64,20 @@ class WebResource
         🕒 = [ts.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'),          # hour-dir
               %w{host path query}.map{|a|graphURI.send(a).yield_self{|p|p&&p.split(/[\W_]/)}}]. # name slugs
                flatten.-([nil, '', *Webize::Plaintext::BasicSlugs]).join('.')[0..125] + '.🐢'   # timeline URI
-        puts ['🕒', ts, 🕒].join ' ' if Verbose
+
         unless File.exist? 🕒                                                                   # link 🐢 to timeline
           FileUtils.mkdir_p File.dirname 🕒
           FileUtils.ln f, 🕒 rescue nil
+          puts ['🕒', ts, 🕒].join ' '
         end
       end}
     self
   end
 
   # file -> 🐢 file (data-reduced preview)
-  def summary
+  def preview
     return self if basename.match(/^(index|README)/) || !node.exist?           # don't summarize index or README
-    summary_node = join(['.preview', basename, ['🐢','ttl'].member?(ext) ? nil : '🐢'].compact.join '.').R env # summary URI
+    summary_node = join(['.', basename, ['🐢','ttl'].member?(ext) ? nil : '🐢'].compact.join '.').R env # summary URI
     file = summary_node.fsPath                                                 # summary file
     return summary_node if File.exist?(file) && File.mtime(file) >= node.mtime # summary up to date
     fullGraph = RDF::Repository.new                                            # full RDF

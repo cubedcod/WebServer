@@ -125,7 +125,7 @@ class WebResource
               end
       if summarize
         env[:links][:down] ||= HTTP.qs qs.merge({'fullContent' => nil})
-        nodes.map &:summary
+        nodes.map &:preview
       else
         nodes
       end
