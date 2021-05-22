@@ -663,17 +663,16 @@ l.facebook.com l.instagram.com
         uid = tl["edges"][0]["node"]["owner"]["id"] rescue nil
         env[:links][:prev] ||= 'https://www.instagram.com/graphql/query/' + HTTP.qs({query_hash: :e769aa130647d2354c40ea6a439bfc08, variables: {id: uid, first: 12, after: end_cursor}.to_json}) if uid && end_cursor
       end
-      yield ('https://www.instagram.com/' + h['username']).R, Type, Person.R if h['username']
       if h['shortcode']
-        s = 'https://www.instagram.com/p/' + h['shortcode'] + '/'
-        yield s, Type, Post.R
-        yield s, Image, h['display_url'].R if h['display_url']
+        s = graph = ['https://www.instagram.com/p/', h['shortcode'], '/'].join.R
+        yield s, Type, Post.R, graph
+        yield s, Image, h['display_url'].R, graph if h['display_url']
         if owner = h['owner']
-          yield s, Creator, ('https://www.instagram.com/' + owner['username']).R if owner['username']
-          yield s, To, 'https://www.instagram.com/'.R
+          yield s, Creator, ('https://www.instagram.com/' + owner['username']).R, graph if owner['username']
+          yield s, To, 'https://www.instagram.com/'.R, graph
         end
         if time = h['taken_at_timestamp']
-          yield s, Date, Time.at(time).iso8601
+          yield s, Date, Time.at(time).iso8601, graph
         end
         if text = h['edge_media_to_caption']['edges'][0]['node']['text']
           yield s, Content, Webize::HTML.format(CGI.escapeHTML(text).split(' ').map{|t|
@@ -681,7 +680,7 @@ l.facebook.com l.instagram.com
                                                     "<a class='uri' href='https://www.instagram.com/#{match[1]}'>#{match[1]}</a>#{match[2]}"
                                                   else
                                                     t
-                                                  end}.join(' '), self)
+                                                  end}.join(' '), self), graph
         end rescue nil
       end}
   end

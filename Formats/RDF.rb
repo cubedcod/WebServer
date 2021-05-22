@@ -62,7 +62,7 @@ class WebResource
 
       # if canonical location is not on timeline and graph has a timestamp, link graph to timeline
       if !graphURI.to_s.match?(/^\/\d\d\d\d\/\d\d\/\d\d/) && (ts = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value) && ts.match?(/^\d\d\d\d-/)
-        🕒 = [ts.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-+:]/,'.'),# timeslice container
+        🕒 = [ts.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-+:]/,'.').sub(/Z$/,''),# timeslice container
               [%w{host path query}.map{|a|                                          # graph URI-slugs
                  graphURI.send(a).yield_self{|p| p&.split(/[\W_]/)}},
                graph.query(RDF::Query::Pattern.new(:s,Creator.R,:o)).objects.map{|o|# creator slugs
