@@ -124,7 +124,7 @@ class WebResource
                   join(p.to_s[pathbase..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env}
               end
       if summarize
-        env[:links][:down] = HTTP.qs qs.merge({'fullContent' => nil})
+        env[:links][:down] ||= HTTP.qs qs.merge({'fullContent' => nil})
         nodes.map &:summary
       else
         nodes

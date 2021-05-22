@@ -6,9 +6,12 @@ class WebResource
     if node.file?
       if %w(info pack part svg ytdl).member? ext           # incomplete/tmpfiles, ignore
         puts "no RDF reader for file #{fsPath}"
-      elsif %w(mp4 mkv webm).member? ext                   # video-file metadata
+      elsif %w(gif jpg png webp).member? ext               # image
+        graph << RDF::Statement.new(self, Type.R, Image.R)
+        graph << RDF::Statement.new(self, Title.R, basename)
+      elsif %w(mp4 mkv webm).member? ext                   # video
         graph << RDF::Statement.new(self, Type.R, Video.R)
-      elsif %w(m4a mp3 ogg opus wav).member? ext           # audio-file metadata
+      elsif %w(m4a mp3 ogg opus wav).member? ext           # audio
         tag_triples graph
       else                                                 # read w/ RDF::Reader
         options = {}
