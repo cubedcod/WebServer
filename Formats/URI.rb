@@ -101,7 +101,7 @@ class WebResource < RDF::URI
            {_: :a, href: (env[:proxy_href] && !local_node?) ? env[:base].uri : HTTP.qs(qs.merge({'notransform' => nil})), c: '⚗️', id: :UI, class: :icon},        # link to upstream UX
            ({_: :a,href: HTTP.qs(qs.merge({'download' => 'audio'})),c: '&darr;',class: :icon} if host&.match?(AudioHosts)), # download link
            env[:feeds].map{|feed|                                                                                                                                # feed links
-             {_: :a, href: feed.R(env).href,title: feed.path,class: :icon,c: FeedIcon}.update(feed.path.match?(/^\/feed\/?$/) ? {id: :sitefeed, style: 'border: .08em solid orange; background-color: orange'} : {})}, "\n",
+             {_: :a, href: feed.R(env).href,title: feed.path,class: :icon,c: FeedIcon}.update((feed.path||'/').match?(/^\/feed\/?$/) ? {id: :sitefeed, style: 'border: .08em solid orange; background-color: orange'} : {})}, "\n",
            {_: :a, class: :host, href: env[:base].join('/').R(env).href, c: icon ? {_: :img, src: icon.data? ? icon.uri : icon.href, style: DarkLogo.member?(host) ? 'background-color: #fff' : ''} : '🏠'},# link to path root
            {class: :path, c: env[:base].parts.map{|p| bc += '/' + p                                                                                              # path breadcrumbs
               {_: :a, class: :breadcrumb, href: env[:base].join(bc).R(env).href, c: [{_: :span, c: '/'}, (CGI.escapeHTML Rack::Utils.unescape p)]}}},
