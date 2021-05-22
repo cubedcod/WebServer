@@ -254,7 +254,7 @@ class WebResource
         img = env[:base].join(img).R env
         src = img.href
         {_: :a, class: :thumb, id: 'i'+Digest::SHA2.hexdigest(rand.to_s), href: src,
-         c: [{_: :img, src: src},
+         c: [{_: :img, src: src},'<br>',
              {_: :span, c: (CGI.escapeHTML img.basename)}]}
       end}
 
