@@ -62,7 +62,8 @@ class WebResource
       if !graphURI.to_s.match?(/^\/\d\d\d\d\/\d\d\/\d\d/) && (ts = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value) && ts.match?(/^\d\d\d\d-/)
         # canonical location is not on timeline and graph has timestamp, derive timeline location
         🕒 = [ts.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'),        # hour-dir
-              %w{host path query}.map{|a|graphURI.send(a).yield_self{|p| p&.split(/[\W_]/)}}, # graph-URI slugs
+              %w{host path query}.map{|a|                                                     # graph-URI slugs
+                graphURI.send(a).yield_self{|p| p&.split(/[\W_]/)}},
               graph.query(RDF::Query::Pattern.new(:s, Creator.R, :o)).objects.map{|o|         # creator slugs
                 if o.respond_to?(:R)
                   o = o.R
