@@ -47,35 +47,36 @@ class WebResource
   # Repository -> 🐢 file(s)
   def saveRDF repository = nil
     return self unless repository || env[:repository]                               # repository
+    timestamp = RDF::Query::Pattern.new :s, Date.R, :o                              # timestamp query-pattern
+    creator = RDF::Query::Pattern.new :s, Creator.R, :o                             # creator query-pattern
     (repository || env[:repository]).each_graph.map{|graph|                         # graph
       graphURI = (graph.name || self).R                                             # graph URI
       fsBase = graphURI.fsPath                                                      # storage path
       fsBase += '/index' if fsBase[-1] == '/'
       f = fsBase + '.🐢'
       log = []
-
       unless File.exist? f
         FileUtils.mkdir_p File.dirname f
         RDF::Writer.for(:turtle).open(f){|f|f << graph}                             # store 🐢 to canonical location
         log << "\e[38;5;48m#{'%2d' % graph.size}⋮🐢 \e[1m#{'http://localhost:8000' if !graphURI.host}#{graphURI}\e[0m" if path != graphURI.path
       end
-
       # if canonical location is not on timeline and graph has a timestamp, link graph to timeline
-      if !graphURI.to_s.match?(/^\/\d\d\d\d\/\d\d\/\d\d/) && (ts = graph.query(RDF::Query::Pattern.new(:s, Date.R, :o)).first_value) && ts.match?(/^\d\d\d\d-/)
-        🕒 = [ts.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-+:]/,'.').sub(/Z$/,''),# timeslice container
-              [%w{host path query}.map{|a|                                          # graph URI-slugs
+      if !graphURI.to_s.match?(HourDir) && (ts = graph.query(timestamp).first_value) && ts.match?(/^\d\d\d\d-/)
+        ts = ts.split /\D/                                                          # slice time-segments
+        🕒 = [ts[0..3],                                                             # timeslice containers
+              [ts[4..-1],                                                           # remaining timeslices in basename
+               ([%w{host path query}.map{|a|                                        # graph-URI slugs
                  graphURI.send(a).yield_self{|p| p&.split(/[\W_]/)}},
-               graph.query(RDF::Query::Pattern.new(:s,Creator.R,:o)).objects.map{|o|# creator slugs
+               graph.query(creator).objects.map{|o|                                 # find creator
                  if o.respond_to?(:R)
                    o = o.R
-                   [o.parts, o.fragment]                                            # creator URI
+                   [o.parts, o.fragment]                                            # creator-URI slugs
                  else
-                   o.to_s.split(/[\W_]/)                                            # creator text
-                 end}].flatten.uniq - BasicSlugs].join('.')[0..125] + '.🐢'         # timeline path
-
-        unless File.exist? 🕒                                                       # link 🐢 to timeline
-          FileUtils.mkdir_p File.dirname 🕒
-          FileUtils.ln f, 🕒 rescue nil
+                   o.to_s.split(/[\W_]/)                                            # creator text slugs
+                 end}].flatten.uniq-BasicSlugs)].join('.')[0..125]+'.🐢'].join('/') # timeline path, limiting basename to 128 chars for compatibility
+        unless File.exist? 🕒
+          FileUtils.mkdir_p File.dirname 🕒                                         # create missing timeslice containers
+          FileUtils.ln f, 🕒 rescue nil                                             # link 🐢 to timeline
           log << ['🕒', 🕒]
         end
       end
