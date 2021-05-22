@@ -30,6 +30,7 @@
 .preembed {position: relative; vertical-align: top}
 .quote {background-color: #ddd; color: #000; padding-left: .2em}
 .thumb {float: left; max-width: 22em; margin: .2em}
+.thumb span {font-weight: normal; font-size: .8em; color: #999}
 .title {background-color: #000; color: #fff; font-size: 1.08em; font-weight: bold; vertical-align: top; border-radius: 0; border-style: dotted; border-width: 0 0 1px 0 }
 .toolbox .host {position: fixed; top: 0; left: 1em; z-index: -1}
 .toolbox .host img {border-radius: .5em}

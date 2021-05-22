@@ -182,7 +182,8 @@ l.facebook.com l.instagram.com
       end}
 
     GET 'instagram.com', -> r {[301, {'Location' => ['//www.instagram.com', r.path].join.R(r.env).href}, []]}
-    GET 'www.instagram.com', -> r {(!r.path || r.path=='/') ? r.cacheResponse : NoGunk[r]}
+    GET 'www.instagram.com', -> r {(!r.path || r.path=='/') ? r.cacheResponse : NoGunk[r].yield_self{|status,head,body|
+                                     status==302 ? r.cacheResponse : [status,head,body] }}
 
     GET 'api.mixcloud.com', -> r {r.fetchHTTP format: 'application/json'}
     GET 'mixcloud.com', -> r {[301, {'Location' => ['//www.mixcloud.com', r.path].join.R(r.env).href}, []]}
