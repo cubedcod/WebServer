@@ -181,7 +181,8 @@ class WebResource
  edu entry
  feed feedburner feeds feedproxy forum forums
  go google gov
- html http https id in index irc is item local medium
+ html http https id in index irc is item local
+ media medium
  net news org p php post profile
  r reddit rs rss rssfeed
  s sports source status statuses story

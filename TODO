@@ -12,4 +12,3 @@ to/from/title globbable in email timeline link
 #down link on google for all results inlined
 gack (gemini) server
 rdfization in gemini  client  - generalize w/  http?
-fosstodon posts ending up in mnoth dir - fix our or their error and filter/warn bad timestamps at link-time
