@@ -175,18 +175,23 @@ class WebResource
   module URIs
 
     BasicSlugs = [nil, '', *%w{
- amp article archives articles
+ a amp and article archives articles
  blog blogs blogspot
  columns co com comment comments
  edu entry
  feed feedburner feeds feedproxy forum forums
  go google gov
  html http https id in index irc is item local medium
- net news org p php post
+ net news org p php post profile
  r reddit rs rss rssfeed
- s sports source status story
+ s sports source status statuses story
  t the thread threads to top topic twitter type
- uk user utm www}]
+ uk user users utm www}]
+
+    def slugs
+      re = /[\W_]/
+      [(host&.split re), parts.map{|p| p.split re}, (query&.split re), (fragment&.split re)]
+    end
 
   end
 
