@@ -66,8 +66,8 @@ class WebResource
         🕒 = [ts[0..3], ts.size < 4 ? '0' : nil,                               # timeslice containers
               [ts[4..-1],                                                      # remaining timeslices in basename
                ([graphURI.slugs, graph.query(creator).objects.map{|o|          # graph-URI slugs
-              o.respond_to?(:R) ? o.R.slugs : o.to_s.downcase.split(/[\W_]/)}].# creator slugs
-               flatten.uniq - BasicSlugs)].compact.join('.')[0..125] + '.🐢']. # limit basename to 128 chars for fs compatibility
+                   o.respond_to?(:R) ? o.R.slugs : o.to_s.split(/[\W_]/)}].    # creator slugs
+                  flatten.compact.map(&:downcase).uniq-BasicSlugs)].compact.join('.')[0..125]+'.🐢']. # clean basename
                compact.join('/')                                               # timeline path
         unless File.exist? 🕒
           FileUtils.mkdir_p File.dirname 🕒                                    # create missing timeslice containers
