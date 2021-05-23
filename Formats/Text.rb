@@ -183,7 +183,8 @@ class WebResource
  go google gov
  html http https id in index irc is item local
  media medium
- net news org p people photos php post profile
+ net news node org
+ p people photos php post posts profile
  r reddit rs rss rssfeed
  s sports source status statuses story
  t the thread threads to top topic twitter type
