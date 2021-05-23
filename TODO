@@ -7,8 +7,6 @@ HTML view for schema.org events https://jewishchronicle.timesofisrael.com/ - dat
 RDFa - investigate HAML template-solution in RDF library
 notification mesh
 browser - hTMl renderer for lagrange,maybe http or just  use full HTTP-URI via gemini protocol
-username globbable in ig timeline link
-to/from/title globbable in email timeline link
 #down link on google for all results inlined
 gack (gemini) server
 rdfization in gemini  client  - generalize w/  http?
