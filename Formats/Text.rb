@@ -175,15 +175,15 @@ class WebResource
   module URIs
 
     BasicSlugs = [nil, '', *%w{
- a amp and article archives articles
- blog blogs blogspot
+ a amp and anonymous article archives articles
+ blog blogger blogs blogspot
  columns co com comment comments
  edu entry
  feed feedburner feeds feedproxy forum forums
  go google gov
  html http https id in index irc is item local
  media medium
- net news org p php post profile
+ net news org p people photos php post profile
  r reddit rs rss rssfeed
  s sports source status statuses story
  t the thread threads to top topic twitter type
