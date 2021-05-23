@@ -255,7 +255,7 @@ class WebResource
         src = img.href
         {_: :a, class: :thumb, href: src, # id: 'i'+Digest::SHA2.hexdigest(rand.to_s),
          c: [{_: :img, src: src},'<br>',
-             {_: :span, c: (CGI.escapeHTML img.basename)}]}
+             {_: :span, c: (CGI.escapeHTML img.basename)}]} if img.path
       end}
 
   end

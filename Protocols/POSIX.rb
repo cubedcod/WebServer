@@ -87,6 +87,7 @@ class WebResource
 
     # URI -> nodes
     def nodeSet
+      env[:links] ||= {}
       qs = queryvals
       local_search = local_node? || offline?
       grep = local_search && (qs.has_key? 'q')
