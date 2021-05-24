@@ -108,12 +108,12 @@ class WebResource
         v = v.R env
         if v.uri.match? /youtu/      # youtube
           env[:tubes] ||= {}
-          q = v.queryvals
+          q = v.query_values || {}
           id = q['v'] || v.parts[-1]
           t = q['start'] || q['t']
           unless env[:tubes].has_key?(id)
             env[:tubes][id] = id
-            if id == (env[:base].queryvals)['v'] # navigated to video URL
+            if id == env[:qs]['v']   # navigated to video
               {_: :iframe, class: :main_player, width: 640, height: 480, src: "https://www.youtube.com/embed/#{id}#{t ? '?start='+t : nil}", frameborder: 0, allow: 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture', allowfullscreen: :true}
             else
               player = 'embed' + Digest::SHA2.hexdigest(rand.to_s)

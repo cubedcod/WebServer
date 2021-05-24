@@ -50,7 +50,7 @@ class WebResource < RDF::URI
 
     def display_name
       return fragment if fragment && !fragment.empty?                    # fragment
-      return query_values['id'] if queryvals.has_key? 'id'               # query
+      return query_values['id'] if query_values&.has_key? 'id'           # query
       return basename if path && basename && !['','/'].member?(basename) # basename
       return host.sub(/^www\./,'').sub(/\.com$/,'') if host              # hostname
       'user'
@@ -68,12 +68,6 @@ class WebResource < RDF::URI
     def local_node?; !host || LocalAddress.member?(host) end
 
     def parts; path ? (path.split('/') - ['']) : [] end
-
-    def queryvals
-      return {} unless query
-      (puts 'bad query: '+query; return {}) if query.match? /^&|&&|&$/ # TODO fix upstream URI library
-      query_values
-    end
 
   end
 

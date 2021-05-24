@@ -34,7 +34,7 @@ class WebResource
 
       if env['QUERY_STRING'] && !env['QUERY_STRING'].empty?              # non-empty query
         uri.query = env['QUERY_STRING'].sub(/^&+/,'').sub(/&+$/,'').gsub(/&&+/,'&') # query stripped of excess & chars
-        env[:qs] = uri.queryvals; qs = uri.queryvals                     # parse client args
+        env[:qs] = uri.query_values; qs = uri.query_values               # parse client args
         Args.map{|k|env[k.to_sym] = qs.delete(k)||true if qs.has_key? k} # set local (client <> proxy) args
         qs.empty? ? (uri.query = nil) : (uri.query_values = qs)          # set external (proxy <> origin) query string
       else

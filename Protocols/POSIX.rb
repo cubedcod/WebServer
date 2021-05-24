@@ -65,8 +65,7 @@ class WebResource
     # URI -> pathnames
     def nodeGrep files = nil
       files = [fsPath] if !files || files.empty?
-      qs = queryvals
-      q = qs['q'].to_s
+      q = env[:qs]['q'].to_s
       return [] if q.empty?
       args = q.shellsplit rescue q.split(/\W/)
       file_arg = files.map{|file| Shellwords.escape file.to_s }.join ' '
@@ -88,20 +87,19 @@ class WebResource
     # URI -> nodes
     def nodeSet
       env[:links] ||= {}
-      qs = queryvals
       local_search = local_node? || offline?
-      grep = local_search && (qs.has_key? 'q')
+      grep = local_search && env[:qs].has_key?('q')
       summarize = !(env[:fullContent] || grep) # full-content by request and for grep-filtering
       nodes = if node.file? # direct map to node
-                summarize = false unless qs.has_key? 'abbr'
+                summarize = false unless env[:qs].has_key? 'abbr'
                 [self]
               else          # indirect map to node(s)
                 pathbase = host_parts.join('/').size
                 (if node.directory?
-                 if qs['f'] && !qs['f'].empty?                         # FIND
-                   `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape qs['f']}`.lines.map &:chomp
-                 elsif qs['find'] && !qs['find'].empty? && path != '/' # FIND substring
-                   `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape '*' + qs['find'] + '*'}`.lines.map &:chomp
+                 if env[:qs]['f'] && !env[:qs]['f'].empty?                         # FIND
+                   `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape env[:qs]['f']}`.lines.map &:chomp
+                 elsif env[:qs]['find'] && !env[:qs]['find'].empty? && path != '/' # FIND substring
+                   `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape '*' + env[:qs]['find'] + '*'}`.lines.map &:chomp
                  elsif grep                                            # GREP
                    nodeGrep
                  else                                                  # LS
@@ -117,7 +115,7 @@ class WebResource
                       Pathname.glob globPath                           # arbitrary GLOB
                     end
                   else                                                 # default-set GLOB
-                    summarize = false unless qs.has_key? 'abbr'
+                    summarize = false unless env[:qs].has_key? 'abbr'
                     globPath += '.*'
                     Pathname.glob globPath
                   end
@@ -125,7 +123,7 @@ class WebResource
                   join(p.to_s[pathbase..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env}
               end
       if summarize
-        env[:links][:down] ||= HTTP.qs qs.merge({'fullContent' => nil})
+        env[:links][:down] ||= HTTP.qs env[:qs].merge({'fullContent' => nil})
         nodes.map &:preview
       else
         nodes
