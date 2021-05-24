@@ -86,7 +86,7 @@ class WebResource
 
     # URI -> nodes
     def nodeSet
-      env[:links] ||= {}
+      [:links,:qs].map{|e| env[e] ||= {}}
       local_search = local_node? || offline?
       grep = local_search && env[:qs].has_key?('q')
       summarize = !(env[:fullContent] || grep) # full-content by request and for grep-filtering
