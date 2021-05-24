@@ -26,19 +26,25 @@ class WebResource
     end
 
     def self.call env
-      return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']    # method
+      return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']    # allow HTTP methods
       uri = RDF::URI('//' + env['HTTP_HOST']).                           # host
               join(env['REQUEST_PATH']).R env                            # path
+
       uri.scheme = uri.local_node? ? 'http' : 'https'                    # scheme
-      if env['QUERY_STRING'] && !env['QUERY_STRING'].empty?              # query
-        uri.query = env['QUERY_STRING'].sub(/^&+/,'').sub(/&+$/,'').gsub(/&&+/,'&') # strip query of excess & chars
-        qs = uri.query_values || {}                                      # parse query args
+
+      if env['QUERY_STRING'] && !env['QUERY_STRING'].empty?              # non-empty query
+        uri.query = env['QUERY_STRING'].sub(/^&+/,'').sub(/&+$/,'').gsub(/&&+/,'&') # query stripped of excess & chars
+        env[:qs] = uri.queryvals; qs = uri.queryvals                     # parse client args
         Args.map{|k|env[k.to_sym] = qs.delete(k)||true if qs.has_key? k} # set local (client <> proxy) args
-        qs.empty? ? (uri.query = nil) : (uri.query_values = qs)          # set remote (proxy <> origin) args
+        qs.empty? ? (uri.query = nil) : (uri.query_values = qs)          # set external (proxy <> origin) query string
+      else
+        env[:qs] = {}                                                    # no query-args
       end
-      env[:client_cache] = env.has_key?('HTTP_IF_NONE_MATCH') || env.has_key?('HTTP_IF_MODIFIED_SINCE')
-      env.update({base: uri, feeds: [], links: {}, resp: {}})            # init environment storage
+
+      env[:client_cache] = env.has_key?('HTTP_IF_NONE_MATCH') || env.has_key?('HTTP_IF_MODIFIED_SINCE') # client-cache existence flag. origin 304 validation becomes 200 for fill from local cache when unset
+      env.update({base: uri, feeds: [], links: {}, resp: {}})            # rsponse-environment storage
      #Pry::ColorPrinter.pp env if Verbose                                # log request
+
       uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body|    # dispatch request
         format = uri.format_icon head['Content-Type']                    # log response
         color = if env[:deny]

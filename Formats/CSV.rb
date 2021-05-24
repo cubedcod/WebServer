@@ -22,7 +22,6 @@ class WebResource
     # graph -> ( property -> column, resource -> row) table
     def self.tabular graph, env
       graph = graph.values if graph.class == Hash
-      qs = env[:base].query_values || {}
       keys = graph.select{|r|r.respond_to? :keys}.map{|r|r.keys}.flatten.uniq - [Abstract, Content, DC+'identifier', Image, Video, SIOC+'richContent', Title] # fields in main column
       keys = [Creator, *(keys - [Creator])] if keys.member? Creator
       ascending = env[:order] == 'asc'
@@ -40,7 +39,7 @@ class WebResource
                   p = p.R; slug = p.display_name
                   icon = Icons[p.uri] || slug
                   [{_: :th,
-                    c: {_: :a, href: HTTP.qs(qs.merge({'sort' => p.uri, 'order' => ascending ? 'desc' : 'asc'})), c: icon}}, "\n"]}}}, "\n", # pointer to sorted column
+                    c: {_: :a, href: HTTP.qs(env[:qs].merge({'sort' => p.uri, 'order' => ascending ? 'desc' : 'asc'})), c: icon}}, "\n"]}}}, "\n", # pointer to sorted column
            {_: :tbody,
             c: graph.map{|resource|
               re = (resource['uri'] || ('#'+Digest::SHA2.hexdigest(rand.to_s))).to_s.R env                   # URI

@@ -92,23 +92,21 @@ class WebResource < RDF::URI
     include URIs
 
     def uri_toolbar
-      qs = queryvals
       bc = '' # breadcrumb trail
       icon = env[:links][:icon]
       {class: :toolbox,
-       c: [({_: :span, c: env[:status], style: 'font-weight: bold', class: :icon} if env[:status]),                                                              # status code
-           ({_: :a, class: :icon, c: '↨', href: HTTP.qs(qs.merge({'view' => 'table', 'sort' => 'date'}))} unless env[:view] == 'table'),                         # link to tabular view
-           {_: :a, href: (env[:proxy_href] && !local_node?) ? env[:base].uri : HTTP.qs(qs.merge({'notransform' => nil})), c: '⚗️', id: :UI, class: :icon},        # link to upstream UX
-           ({_: :a,href: HTTP.qs(qs.merge({'download' => 'audio'})),c: '&darr;',class: :icon} if host&.match?(AudioHosts)), # download link
-           env[:feeds].map{|feed|                                                                                                                                # feed links
+       c: [({_: :span, c: env[:status], style: 'font-weight: bold', class: :icon} if env[:status]),                                                             # status code
+           ({_: :a, class: :icon, c: '↨', href: HTTP.qs(env[:qs].merge({'view' => 'table', 'sort' => 'date'}))} unless env[:view] == 'table'),                  # link to tabular view
+           {_: :a, href: (env[:proxy_href] && !local_node?) ? env[:base].uri : HTTP.qs(env[:qs].merge({'notransform' => nil})), c: '⚗️', id: :UI, class: :icon}, # link to upstream UX
+           ({_: :a,href: HTTP.qs(env[:qs].merge({'download' => 'audio'})),c: '&darr;',class: :icon} if host&.match?(AudioHosts)),                               # download link
+           env[:feeds].map{|feed|                                                                                                                               # feed link(s)
              {_: :a, href: feed.R(env).href,title: feed.path,class: :icon,c: FeedIcon}.update((feed.path||'/').match?(/^\/feed\/?$/) ? {id: :sitefeed, style: 'border: .08em solid orange; background-color: orange'} : {})}, "\n",
            {_: :a, class: :host, href: env[:base].join('/').R(env).href, c: icon ? {_: :img, src: icon.data? ? icon.uri : icon.href, style: DarkLogo.member?(host) ? 'background-color: #fff' : ''} : '🏠'},# link to path root
-           {class: :path, c: env[:base].parts.map{|p| bc += '/' + p                                                                                              # path breadcrumbs
+           {class: :path, c: env[:base].parts.map{|p| bc += '/' + p                                                                                             # path breadcrumbs
               {_: :a, class: :breadcrumb, href: env[:base].join(bc).R(env).href, c: [{_: :span, c: '/'}, (CGI.escapeHTML Rack::Utils.unescape p)]}}},
-           (if SearchableHosts.member? host
-            search_arg = %w(f find q search_query).find{|k|qs.has_key? k} || ([nil, '/'].member?(path) ? 'find' : 'q') # query argument
-            qs[search_arg] ||= ''                                                                                      # initial query value
-            {_: :form, c: qs.map{|k,v| ["\n", {_: :input, name: k, value: v}.update(k == search_arg ? {} : {type: :hidden})]}} # search box
+           (if SearchableHosts.member? host                                                                                                                     # search box:
+            {_: :form, c: [env[:qs].map{|k,v| {_: :input, name: k, value: v}.update(k == 'q' ? {} : {type: :hidden})},                                          # populate existing query
+                           env[:qs].has_key?('q') ? nil : {_: :input, name: :q}]}                                                                               # initialize blank search box
             end), "\n"]}
     end
     
