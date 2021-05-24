@@ -60,7 +60,9 @@ module Webize
 
   module Opus
     class Format < RDF::Format
-      content_type 'audio/ogg', :extension => :opus, aliases: %w(audio/opus;q=0.8)
+      content_type 'audio/ogg', extensions: [:ogg, :opus],
+                   aliases: %w(audio/opus;q=0.8
+                          application/ogg;q=0.8)
       reader { Reader }
     end
 

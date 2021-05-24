@@ -176,11 +176,11 @@ class WebResource
 
     BasicSlugs = [nil, '', *%w{
  a amp and anonymous article archives articles
- blog blogger blogs blogspot
+ blog blogger blogs blogspot boards
  columns co com comment comments
  edu entry
  feed feedburner feeds feedproxy forum forums
- go google gov
+ g go google gov
  html http https id in index irc is item local
  media medium
  net news node org
