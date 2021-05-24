@@ -7,7 +7,7 @@ class WebResource
 
     HostGET = {}
     Methods = %w(GET HEAD OPTIONS POST PUT)
-    Args = %w(fullContent notransform offline order sort view)
+    Args = %w(find fullContent notransform offline order sort view)
 
     def allow_domain?
       c = AllowDomains                                              # start cursor at root

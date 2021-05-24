@@ -96,13 +96,13 @@ class WebResource
               else          # indirect map to node(s)
                 pathbase = host_parts.join('/').size
                 (if node.directory?
-                 if env[:qs]['f'] && !env[:qs]['f'].empty?                         # FIND
+                 if env[:qs]['f'] && !env[:qs]['f'].empty?          # FIND
                    `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape env[:qs]['f']}`.lines.map &:chomp
-                 elsif env[:qs]['find'] && !env[:qs]['find'].empty? && path != '/' # FIND substring
+                 elsif env[:qs]['find'] && !env[:qs]['find'].empty? # FIND substring
                    `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape '*' + env[:qs]['find'] + '*'}`.lines.map &:chomp
-                 elsif grep                                            # GREP
+                 elsif grep                                         # GREP
                    nodeGrep
-                 else                                                  # LS
+                 else                                               # LS
                    env[:links][:down] ||= '*'
                    (path=='/' && local_node?) ? [node] : [node, *node.children.select{|n|n.basename.to_s[0] != '.'}]
                  end
@@ -110,16 +110,16 @@ class WebResource
                   globPath = fsPath
                   if globPath.match?(GlobChars) && local_search
                     if grep
-                      nodeGrep Pathname.glob globPath                  # GREP in GLOB
+                      nodeGrep Pathname.glob globPath               # GREP in GLOB
                     else
-                      Pathname.glob globPath                           # arbitrary GLOB
+                      Pathname.glob globPath                        # arbitrary GLOB
                     end
-                  else                                                 # default-set GLOB
+                  else                                              # default-set GLOB
                     summarize = false unless env[:qs].has_key? 'abbr'
                     globPath += '.*'
                     Pathname.glob globPath
                   end
-                 end).map{|p| # resolve path (relative to host-base) to full URI
+                 end).map{|p|                                       # resolve relative-to-hostbase path to URI
                   join(p.to_s[pathbase..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env}
               end
       if summarize
