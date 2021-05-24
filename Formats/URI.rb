@@ -98,10 +98,8 @@ class WebResource < RDF::URI
            {_: :a, class: :host, href: env[:base].join('/').R(env).href, c: icon ? {_: :img, src: icon.data? ? icon.uri : icon.href, style: DarkLogo.member?(host) ? 'background-color: #fff' : ''} : '🏠'},# link to path root
            {class: :path, c: env[:base].parts.map{|p| bc += '/' + p                                                                                             # path breadcrumbs
               {_: :a, class: :breadcrumb, href: env[:base].join(bc).R(env).href, c: [{_: :span, c: '/'}, (CGI.escapeHTML Rack::Utils.unescape p)]}}},
-           (if SearchableHosts.member? host                                                                                                                     # search box:
-            {_: :form, c: [env[:qs].map{|k,v| {_: :input, name: k, value: v}.update(k == 'q' ? {} : {type: :hidden})},                                          # populate existing query
-                           env[:qs].has_key?('q') ? nil : {_: :input, name: :q}]}                                                                               # initialize blank search box
-            end), "\n"]}
+           {_: :form, c: [env[:qs].map{|k,v| {_: :input, name: k, value: v}.update(k == 'q' ? {} : {type: :hidden})},                                           # populate existing seqrch query
+                          env[:qs].has_key?('q') ? nil : {_: :input, name: :q}]}, "\n"]}                                                                        # initialize blank search box
     end
     
     # URI -> renderer lambda
