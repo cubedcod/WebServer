@@ -65,7 +65,8 @@ class WebResource
         ts = ts.split /\D/                                                     # slice time-segments
         🕒 = [ts[0..3], ts.size < 4 ? '0' : nil,                               # timeslice containers
               [ts[4..-1],                                                      # remaining timeslices in basename
-               ([graphURI.slugs, graph.query(creator).objects.map{|o|          # graph-URI slugs
+               ([graphURI.slugs,                                               # graph-URI slugs
+                 graph.query(creator).objects.map{|o|
                    o.respond_to?(:R) ? o.R.slugs : o.to_s.split(/[\W_]/)}].    # creator slugs
                   flatten.compact.map(&:downcase).uniq-BasicSlugs)].compact.join('.')[0..125]+'.🐢']. # clean basename
                compact.join('/')                                               # timeline path
@@ -81,8 +82,8 @@ class WebResource
 
   # file -> 🐢 file (data-reduced preview)
   def preview
-    return self if basename.match(/^(index|README)/) || !node.exist?           # don't summarize index or README
-    summary_node = join(['.', basename, ['🐢','ttl'].member?(ext) ? nil : '🐢'].compact.join '.').R env # summary URI
+    return self if !path || basename.match(/^(\/|index|README)/) || !node.exist? # don't summarize index.*, READMEs
+    summary_node = join(['', basename, ext=='🐢' ? nil : '🐢'].compact.join '.').R env # summary URI
     file = summary_node.fsPath                                                 # summary file
     return summary_node if File.exist?(file) && File.mtime(file) >= node.mtime # summary up to date
     fullGraph = RDF::Repository.new                                            # full RDF
