@@ -359,7 +359,11 @@ class WebResource
     def htmlDocument graph = nil
       graph ||= env[:graph] = treeFromGraph                                                        # treeify graph
       env[:colors] ||= {}                                                                          # named color(s) container
-      env[:links][:up] ||= (!path || path=='/') ? '//' + host.split('.')[1..-1].join('.') : [File.dirname(env['REQUEST_PATH']), '/', (query ? ['?', query] : nil)].join
+      env[:links][:up] ||= if !path || path == '/'
+                             '//' + host.split('.')[1..-1].join('.')
+                           else
+                             [File.dirname(env['REQUEST_PATH']), '/', (env['QUERY_STRING'] && !env['QUERY_STRING'].empty?) ? ['?',env['QUERY_STRING']] : nil].join
+                           end
       icon = ('//'+(host||'localhost:8000')+'/favicon.ico').R env                                  # well-known icon location
       if env[:links][:icon]                                                                        # icon reference in metadata
         env[:links][:icon] = env[:links][:icon].R env unless env[:links][:icon].class==WebResource # normalize reference

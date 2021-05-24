@@ -29,7 +29,7 @@ class WebResource
                             '/%Y/%m/%d/%H/'
                           else
                           end)
-      [303, env[:resp].update({'Location' => loc + parts[1..-1].join('/') + (query ? ('?'+query) : '')}), []]
+      [303, env[:resp].update({'Location' => loc + parts[1..-1].join('/') + ((env['QUERY_STRING'] && !env['QUERY_STRING'].empty?) ? ('?'+env['QUERY_STRING']) : '')}), []]
     end
 
     def timeMeta
@@ -68,7 +68,7 @@ class WebResource
       # append non-date components of path, and trailing slash
       remainder = ps.empty? ? '' : ['', *ps].join('/')
       remainder += '/' if env['REQUEST_PATH'] && env['REQUEST_PATH'][-1] == '/'
-      q = (env['QUERY_STRING'] && !env['QUERY_STRING'].empty?) ? ('?' + env['QUERY_STRING']) : ''
+      q = (env['QUERY_STRING'] && !env['QUERY_STRING'].empty?) ? ('?'+env['QUERY_STRING']) : ''
 
       # set metadata
       env[:links][:prev] = p + remainder + q + '#prev' if p
