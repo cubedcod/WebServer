@@ -10,6 +10,7 @@ cd ~/src/WebServer/bin
 sudo ./ports # optional, route ports 53 + 80
 # DNS
 ./dnsd
+# Gemini
 # HTTP
 cd ~/web/ && unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c ~/src/WebServer/config/unicorn.rb ~/src/WebServer/config/rack.ru
 # HTTPS
