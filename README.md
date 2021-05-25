@@ -1,18 +1,19 @@
 # INSTALL
 ``` sh
-mkdir -p ~/src && cd ~/src && git clone https://gitlab.com/ix/WebServer.git
-cd WebServer && ./INSTALL
+mkdir -p ~/src && cd ~/src && git clone https://gitlab.com/ix/WebServer.git && cd WebServer && ./INSTALL
 ```
 # USAGE
 
 ## SERVERS
 ``` sh
+cd ~/src/WebServer/bin
+sudo ./ports # optional, route ports 53 + 80
+# DNS
+./dnsd
 # HTTP
 cd ~/web/ && unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c ~/src/WebServer/config/unicorn.rb ~/src/WebServer/config/rack.ru
-# DNS
-cd ~/src/WebServer/bin
-./ports # optional, enable port 53/80
-./dnsd
+# HTTPS
+cd ~/src/WebServer/config && squid -f squid.conf
 ```
 ## CLIENTS
 
