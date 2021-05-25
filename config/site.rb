@@ -157,7 +157,7 @@ l.facebook.com l.instagram.com
     GET 'www.google.com', -> r {
       case r.parts[0]
       when 'amp'
-        r.path.index('/amp/s/') == 0 ? [302, {'Location' => 'https://' + r.path[7..-1]}, []] : r.deny
+        r.path.index('/amp/s/') == 0 ? [301, {'Location' => ('https://' + r.path[7..-1]).R(r.env).href}, []] : r.deny
       when /^(images|x?js|maps)$/
         r.env[:scripts] = true
         NoGunk[r]
