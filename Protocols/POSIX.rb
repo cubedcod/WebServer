@@ -103,7 +103,6 @@ class WebResource
                  elsif grep                                         # GREP
                    nodeGrep
                  else                                               # LS
-                   env[:links][:down] ||= '*'
                    (path=='/' && local_node?) ? [node] : [node, *node.children.select{|n|n.basename.to_s[0] != '.'}]
                  end
                 else
@@ -123,7 +122,7 @@ class WebResource
                   join(p.to_s[pathbase..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env}
               end
       if summarize
-        env[:links][:down] ||= HTTP.qs env[:qs].merge({'fullContent' => nil})
+        env[:links][:down] = HTTP.qs env[:qs].merge({'fullContent' => nil})
         nodes.map &:preview
       else
         nodes
