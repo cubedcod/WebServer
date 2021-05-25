@@ -322,6 +322,8 @@ class WebResource
           unproxy(true).hostHandler
         elsif %w{m d h}.member? p
           dateDir                              # month/day/hour redirect
+        elsif p == 'mailto' && parts.size == 2
+          [302, {'Location' => ['/m/*/*/*', (parts[1].split(/[\W_]/) - BasicSlugs).map(&:downcase).join('.'), '*'].join}, []]
         else
           cacheResponse                        # local node
         end

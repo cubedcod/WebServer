@@ -175,7 +175,7 @@ class WebResource
   module URIs
 
     BasicSlugs = [nil, '', *%w{
- a amp and anonymous article archives articles
+ a account accounts alerts amp and anonymous article archives articles
  blog blogger blogs blogspot boards
  columns co com comment comments
  edu email entry
@@ -184,7 +184,7 @@ class WebResource
  html http https id in index irc is item
  lists local
  mail mailto media medium msg
- net news node org
+ net news node noreply notifications org
  p people photos php post posts profile protonmail
  r reddit reply rs rss rssfeed
  s sendgrid sports source status statuses story
