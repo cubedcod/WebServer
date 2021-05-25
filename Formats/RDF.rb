@@ -58,7 +58,7 @@ class WebResource
       unless File.exist? f
         FileUtils.mkdir_p File.dirname f
         RDF::Writer.for(:turtle).open(f){|f|f << graph}                        # store 🐢 to canonical location
-        log << "\e[38;5;48m#{'%2d' % graph.size}⋮🐢 \e[1m#{'http://localhost:8000' if !graphURI.host}#{graphURI}\e[0m" if path != graphURI.path
+        log << "\e[38;5;48m#{'%2d' % graph.size}⋮🐢 \e[1m#{'http://localhost:8000' if !graphURI.host}#{graphURI}\e[0m"
       end
       # if canonical location is not on timeline and graph has a timestamp, link graph to timeline
       if !graphURI.to_s.match?(HourDir) && (ts = graph.query(timestamp).first_value) && ts.match?(/^\d\d\d\d-/)
