@@ -1,47 +1,45 @@
 #!/bin/sh
 uid=$(id -u)
 
-## install Distro packages
+# Distro packages
 
-# Alpine https://www.alpinelinux.org/
-# apk add alpine-conf foot yambar fuzzel sway swayidle light chromium firefox build-base emacs networkmanager elogind wpa_supplicant wireless-regdb wireless-tools nano mpv pipewire-pulse pipewire-jack pavucontrol mosh linux-firmware neofetch sudo intel-ucode intel-media-driver libva-intel-driver linux-firmware-intel xf86-video-intel mesa-vulkan-intel bash terminus-font pulseaudio-ctl colordiff fonts-noto-all rsync tmux font-noto-all font-noto-emoji ttf-font-awesome
+## Alpine https://www.alpinelinux.org/
+# apk add alpine-conf foot yambar fuzzel sway swayidle light chromium firefox castor lagrange build-base emacs networkmanager elogind wpa_supplicant wireless-regdb wireless-tools nano mpv pipewire-pulse pipewire-jack pavucontrol mosh linux-firmware neofetch sudo intel-ucode intel-media-driver libva-intel-driver linux-firmware-intel xf86-video-intel mesa-vulkan-intel bash terminus-font pulseaudio-ctl colordiff fonts-noto-all rsync tmux font-noto-all font-noto-emoji ttf-font-awesome
 which apk && sudo apk add alpine-sdk build-base linux-headers ruby ruby-dev ruby-json ruby-bigdecimal ruby-bundler openssl-dev parallel py3-pip findutils grep socat libexif-dev libxslt-dev poppler-utils squid taglib-dev tmux py3-pygments p11-kit-trust
 which apk && sudo /usr/lib/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB && sudo chown -R $uid:$uid /var/cache/squid
 
-# Arch https://www.archlinux.org/
+## Arch https://www.archlinux.org/
 which pacman && sudo pacman -S --needed base-devel git libexif parallel pygmentize ruby ruby-bundler socat squid taglib tmux
-which pacman && sudo /usr/lib/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB
+which pacman && sudo /usr/lib/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB && sudo chown -R $uid:$uid /var/cache/squid && sudo setcap cap_net_bind_service=+ep /usr/sbin/squid
 
-# Chromebrew https://github.com/skycocker/chromebrew
+## Chromebrew https://github.com/skycocker/chromebrew
 which crew && crew install buildessential libexif parallel socat taglib tmux
 
-# Debian https://www.debian.org/
+## Debian https://www.debian.org/
 which apt-add-repository && sudo apt-get install build-essential git parallel ruby ruby-dev bundler grep file libexif-dev libssl-dev libtag1-dev libxslt-dev libzip-dev socat squid make tmux libffi-dev
 
-# Termux https://termux.com/
+## Termux https://termux.com/
 which pkg && pkg install git ruby grep file findutils pkg-config libiconv libexif libprotobuf libxslt parallel poppler clang taglib squid make libffi libcap libcrypt openssl-tool tmux tsu zlib
 
-# Void https://voidlinux.org
+## Void https://voidlinux.org
 which xbps-install && sudo xbps-install -S base-devel curl git libexif-devel libltdl-devel libressl-devel parallel poppler-utils python3-Pygments ruby ruby-devel socat squid taglib-devel tmux
 which xbps-install && sudo /usr/libexec/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB
 
-sudo setcap cap_net_bind_service=+ep /usr/sbin/squid
+# Language packages
 
-## install Language packages
-
-# Python
+## Python
 which pygmentize || pip install pygments
 
-# Ruby
+## Ruby
 gem install nokogiri -- --use-system-libraries
 gem install unicorn
 gem install bundler
 bundle install
 
-## install HTTPS certificate
+# HTTPS certificate
 ./bin/certificate
 
-## install homepage
-mkdir ~/web ; cd ~/web
+# initial filesystem state
+mkdir -p ~/web && cd ~/web
 ln -s ../src/WebServer/config/bookmarks.u index.u
 ln -s ../src/WebServer/config/search.html index.html

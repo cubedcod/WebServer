@@ -7,7 +7,7 @@ mkdir -p ~/src && cd ~/src && git clone https://gitlab.com/ix/WebServer.git && c
 ## SERVERS
 ``` sh
 cd ~/src/WebServer/bin
-sudo ./ports # optional, route ports 53 + 80
+sudo ./ports # optional, route ports 53, 80 and 443
 # DNS
 ./dnsd
 # Gemini
