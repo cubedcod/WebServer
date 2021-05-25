@@ -178,15 +178,16 @@ class WebResource
  a amp and anonymous article archives articles
  blog blogger blogs blogspot boards
  columns co com comment comments
- edu entry
+ edu email entry
  feed feedburner feeds feedproxy forum forums
- g go google gov
- html http https id in index irc is item local
- media medium
+ g gmail go google gov
+ html http https id in index irc is item
+ lists local
+ mail mailto media medium msg
  net news node org
- p people photos php post posts profile
- r reddit rs rss rssfeed
- s sports source status statuses story
+ p people photos php post posts profile protonmail
+ r reddit reply rs rss rssfeed
+ s sendgrid sports source status statuses story
  t the thread threads to top topic twitter type
  uk user users utm www}]
 

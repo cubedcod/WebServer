@@ -47,8 +47,9 @@ class WebResource
   # Repository -> 🐢 file(s)
   def saveRDF repository = nil
     return self unless repository || env[:repository]                          # repository
-    timestamp = RDF::Query::Pattern.new :s, Date.R, :o                         # timestamp query-pattern
-    creator = RDF::Query::Pattern.new :s, Creator.R, :o                        # creator query-pattern
+    timestamp = RDF::Query::Pattern.new :s, Date.R, :o                         # timestamp pattern
+    creator = RDF::Query::Pattern.new :s, Creator.R, :o                        # sender pattern
+    to = RDF::Query::Pattern.new :s, To.R, :o                                  # receiver pattern
     (repository || env[:repository]).each_graph.map{|graph|                    # graph
       graphURI = (graph.name || self).R                                        # graph URI
       fsBase = graphURI.fsPath                                                 # storage path
@@ -66,10 +67,11 @@ class WebResource
         🕒 = [ts[0..3], ts.size < 4 ? '0' : nil,                               # timeslice containers
               [ts[4..-1],                                                      # remaining timeslices in basename
                ([graphURI.slugs,                                               # graph-URI slugs
-                 graph.query(creator).objects.map{|o|
-                   o.respond_to?(:R) ? o.R.slugs : o.to_s.split(/[\W_]/)}].    # creator slugs
-                  flatten.compact.map(&:downcase).uniq-BasicSlugs)].compact.join('.')[0..125]+'.🐢']. # clean basename
-               compact.join('/')                                               # timeline path
+                 [creator,to].map{|pattern|
+                   graph.query(pattern).objects.map{|o|
+                  o.respond_to?(:R) ? o.R.slugs : o.to_s.split(/[\W_]/)}}].    # RDF-derived slugs
+                  flatten.compact.map(&:downcase).uniq - BasicSlugs)].         # clean basename
+                compact.join('.')[0..125].sub(/\.$/,'')+'.🐢'].compact.join '/'# build timeline path
         unless File.exist? 🕒
           FileUtils.mkdir_p File.dirname 🕒                                    # create missing timeslice containers
           FileUtils.ln f, 🕒 rescue nil                                        # link 🐢 to timeline

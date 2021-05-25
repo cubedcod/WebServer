@@ -43,8 +43,7 @@ module Webize
 
         # Message resource
         id = m.message_id || m.resent_message_id || Digest::SHA2.hexdigest(rand.to_s)
-        graph = ('/msg/' + Rack::Utils.escape_path(id)).R
-        mail = (graph + '#msg').R
+        mail = graph = ('/msg/' + Rack::Utils.escape_path(id)).R
 
         yield mail, Type, (SIOC + 'MailMessage').R, graph
 
@@ -88,7 +87,7 @@ module Webize
           ((f.class == Array || f.class == ::Mail::AddressContainer) ? f : [f]).compact.map{|f|
             noms = f.split ' '
             f = "#{noms[0]}@#{noms[2]}" if noms.size > 2 && noms[1] == 'at'
-            yield mail, Creator, ('/m/*/*/msg*?q=' + f + '#' + f).R, graph
+            yield mail, Creator, ('/mailto/' + f).R, graph
           }}
         m[:from] && m[:from].yield_self{|fr|
           fr.addrs.map{|a|
@@ -100,12 +99,12 @@ module Webize
         %w{to cc bcc resent_to}.map{|p|      # recipient accessor-methods
           m.send(p).yield_self{|r|           # recipient(s)
             ((r.class == Array || r.class == ::Mail::AddressContainer) ? r : [r]).compact.map{|r| # recipient
-              yield mail, To, ('/m/*/*/msg*?q=' + r + '#' + r).R, graph
+              yield mail, To, ('/mailto/' + r).R, graph
             }}}
         m['X-BeenThere'].yield_self{|b|      # anti-loop recipient property
           (b.class == Array ? b : [b]).compact.map{|r|
             r = r.to_s
-            yield mail, To, ('/m/*/*/msg*?q=' + r + '#' + r).R, graph
+            yield mail, To, ('/mailto/' + r).R, graph
           }}
         m['List-Id'] && m['List-Id'].yield_self{|name|
           yield mail, To, name.decoded.sub(/<[^>]+>/,'').gsub(/[<>&]/,''), graph} # mailinglist name
