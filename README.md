@@ -1,9 +1,7 @@
 ## INSTALL
 ``` sh
-cd ~/src
-git clone https://gitlab.com/ix/WebServer.git
-cd WebServer
-./INSTALL
+mkdir -p ~/src && cd ~/src && git clone https://gitlab.com/ix/WebServer.git
+cd WebServer && ./INSTALL
 ```
 ## USAGE
 
