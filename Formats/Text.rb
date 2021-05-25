@@ -180,7 +180,7 @@ class WebResource
  columns co com comment comments
  edu email entry
  feed feedburner feeds feedproxy forum forums
- g gmail go google gov
+ g gmail go gov
  html http https id in index irc is item
  lists local
  mail mailto media medium msg

@@ -617,11 +617,10 @@ l.facebook.com l.instagram.com
     doc.css('div.comment').map{|comment|
       post = comment.parent
       date = post.css('.age > a')[0]
-      subject = base + date['href']
+      graph = subject = base + date['href']
       comment.css('.reply').remove
       if time = Chronic.parse(date.inner_text.sub(/^on /,''))
         time = time.iso8601
-        graph = ['/' + time.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:+]/,'.'), (subject.to_s.split(/[:\/?&=]+/) - BasicSlugs)].join('.').R # graph URI
         yield subject, Date, time, graph
       end
       yield subject, Type, Post.R, graph

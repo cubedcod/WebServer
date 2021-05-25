@@ -323,7 +323,7 @@ class WebResource
         elsif %w{m d h}.member? p
           dateDir                              # month/day/hour redirect
         elsif p == 'mailto' && parts.size == 2
-          [302, {'Location' => ['/m/*/*/*', (parts[1].split(/[\W_]/) - BasicSlugs).map(&:downcase).join('.'), '*'].join}, []]
+          [302, {'Location' => ['/m/*/*/*', (parts[1].split(/[\W_]/) - BasicSlugs).map(&:downcase).join('.'), '*?view=table&sort=date'].join}, []]
         else
           cacheResponse                        # local node
         end
