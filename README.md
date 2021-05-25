@@ -1,15 +1,17 @@
 ## INSTALL
-
-    git clone https://gitlab.com/ix/WebServer.git
-    cd WebServer
-    ./INSTALL
-
+``` sh
+cd ~/src
+git clone https://gitlab.com/ix/WebServer.git
+cd WebServer
+./INSTALL
+```
 ## USAGE
 
 ### SERVERS
 ``` sh
+# HTTP
 cd ~/web/ && unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c ~/src/WebServer/config/unicorn.rb ~/src/WebServer/config/rack.ru
-
+# DNS
 cd ~/src/WebServer/bin
 ./ports # optional, enable port 53/80
 ./dnsd
