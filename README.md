@@ -6,16 +6,19 @@
 
 ## USAGE
 
-launch web server and proxy
+### SERVERS
+``` sh
+cd ~/web/ && unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c ~/src/WebServer/config/unicorn.rb ~/src/WebServer/config/rack.ru
 
-    ./bin/daemons
+cd ~/src/WebServer/bin
+./ports # optional, enable port 53/80
+./dnsd
+```
+### CLIENTS
 
-browser shortcuts for forward-proxy mode in [bin/browse](bin/browse/). for DNS-mode, configure and launch a DNS server
+shortcuts in [bin/browse](bin/browse/)
 
-    echo nameserver 127.0.0.1 | sudo tee /etc/resolv.conf
-    ./bin/dnsd
-
-bookmarklet to jump to [local UI](javascript:location.href='http://localhost:8000/https://'+location.hostname+location.pathname+'?cookie='+encodeURIComponent(document.cookie))
+[local UI bookmark](javascript:location.href='http://localhost:8000/https://'+location.hostname+location.pathname+'?cookie='+encodeURIComponent(document.cookie))
 
 ## WHAT
 
