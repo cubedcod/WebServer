@@ -117,10 +117,10 @@ class WebResource
     end
 
     def deny?
-      return true  if uri.match? Gunk # URI filter
-      return true  if %w(viber whatsapp).member? scheme
+      return true  if uri.match? Gunk                   # URI-pattern filter
+      return true  if %w(viber whatsapp).member? scheme # scheme filter
       return false if !host || allow_domain? || ScriptHosts.member?(host) # explicit allow
-      return true  if deny_domain?    # DNS filter
+      return true  if deny_domain?                      # DNS filter
              false
     end
 
