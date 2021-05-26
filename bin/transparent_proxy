@@ -1,7 +1,6 @@
 #!/bin/sh
-# on systems with 'rogue' apps ignoring system proxy or DNS settings,
-# we can enforce traffic via transparent proxy for egress
-# call with your uid as first argument. (find it with 'id')
+# on systems with apps ignoring system proxy or DNS settings, we enforce transparent proxy for egress
+# run as sudo w/ proxy uid in first arg
 
 open_UDP () {
     iptables  -A INPUT  -p udp --sport $1 -j ACCEPT
@@ -28,7 +27,7 @@ open_port () {
     open_TCP $1 $2
 }
 
-# default policy
+# policy
 iptables  -A INPUT -p icmp -j ACCEPT
 ip6tables -A INPUT -p icmp -j ACCEPT
 iptables  -A INPUT -i lo   -j ACCEPT
@@ -45,16 +44,8 @@ open_TCP     22 SSH
 open_port    67 DHCP
 open_port    68 DHCP
 
-iptables  -t nat -A OUTPUT -p tcp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1 # redirect DNS traffic not originating from proxy
-ip6tables -t nat -A OUTPUT -p tcp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
-iptables  -t nat -A OUTPUT -p udp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
-ip6tables -t nat -A OUTPUT -p udp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
-iptables  -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8000 -m owner ! --uid-owner $1 # redirect HTTP traffic not originating from proxy
-ip6tables -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8000 -m owner ! --uid-owner $1
-iptables  -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8443 -m owner ! --uid-owner $1 # redirect HTTPS traffic not originating from proxy
-ip6tables -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8443 -m owner ! --uid-owner $1
-
-iptables  -A OUTPUT -p tcp --sport 53 -j ACCEPT -m owner --uid-owner $1 # allow DNS traffic for proxy uid
+## DNS
+iptables  -A OUTPUT -p tcp --sport 53 -j ACCEPT -m owner --uid-owner $1 # traffic from proxy
 ip6tables -A OUTPUT -p tcp --sport 53 -j ACCEPT -m owner --uid-owner $1
 iptables  -A OUTPUT -p tcp --dport 53 -j ACCEPT -m owner --uid-owner $1
 ip6tables -A OUTPUT -p tcp --dport 53 -j ACCEPT -m owner --uid-owner $1
@@ -62,14 +53,27 @@ iptables  -A OUTPUT -p udp --sport 53 -j ACCEPT -m owner --uid-owner $1
 ip6tables -A OUTPUT -p udp --sport 53 -j ACCEPT -m owner --uid-owner $1
 iptables  -A OUTPUT -p udp --dport 53 -j ACCEPT -m owner --uid-owner $1
 ip6tables -A OUTPUT -p udp --dport 53 -j ACCEPT -m owner --uid-owner $1
-iptables  -A OUTPUT -p tcp --sport 80 -j ACCEPT -m owner --uid-owner $1 # allow HTTP traffic for proxy uid
+iptables  -t nat -A OUTPUT -p tcp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1 # traffic not from proxy
+ip6tables -t nat -A OUTPUT -p tcp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
+iptables  -t nat -A OUTPUT -p udp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
+ip6tables -t nat -A OUTPUT -p udp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
+
+## HTTP
+iptables  -A OUTPUT -p tcp --sport 80 -j ACCEPT -m owner --uid-owner $1 # traffic from proxy
 ip6tables -A OUTPUT -p tcp --sport 80 -j ACCEPT -m owner --uid-owner $1
 iptables  -A OUTPUT -p tcp --dport 80 -j ACCEPT -m owner --uid-owner $1
 ip6tables -A OUTPUT -p tcp --dport 80 -j ACCEPT -m owner --uid-owner $1
-iptables  -A OUTPUT -p tcp --sport 443 -j ACCEPT -m owner --uid-owner $1 # allow HTTPS traffic for proxy uid
-ip6tables -A OUTPUT -p tcp --sport 443 -j ACCEPT -m owner --uid-owner $1
-iptables  -A OUTPUT -p tcp --dport 443 -j ACCEPT -m owner --uid-owner $1
-ip6tables -A OUTPUT -p tcp --dport 443 -j ACCEPT -m owner --uid-owner $1
+iptables  -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8000 -m owner ! --uid-owner $1 # traffic not from proxy
+ip6tables -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8000 -m owner ! --uid-owner $1
+
+## HTTPS (uncomment and launch squid for MITM)
+open_port   443 HTTPS
+#iptables  -A OUTPUT -p tcp --sport 443 -j ACCEPT -m owner --uid-owner $1 # traffic from proxy
+#ip6tables -A OUTPUT -p tcp --sport 443 -j ACCEPT -m owner --uid-owner $1
+#iptables  -A OUTPUT -p tcp --dport 443 -j ACCEPT -m owner --uid-owner $1
+#ip6tables -A OUTPUT -p tcp --dport 443 -j ACCEPT -m owner --uid-owner $1
+#iptables  -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8443 -m owner ! --uid-owner $1 # traffic not from proxy
+#ip6tables -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8443 -m owner ! --uid-owner $1
 
 open_TCP    587 SMTP
 open_port  1053 DNS
