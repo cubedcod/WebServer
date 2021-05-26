@@ -32,12 +32,12 @@ iptables  -A INPUT -p icmp -j ACCEPT
 ip6tables -A INPUT -p icmp -j ACCEPT
 iptables  -A INPUT -i lo   -j ACCEPT
 ip6tables -A INPUT -i lo   -j ACCEPT
-iptables  -P OUTPUT DROP
-ip6tables -P OUTPUT DROP
 iptables  -A OUTPUT -p icmp -j ACCEPT
 ip6tables -A OUTPUT -p icmp -j ACCEPT
 iptables  -A OUTPUT -o lo   -j ACCEPT
 ip6tables -A OUTPUT -o lo   -j ACCEPT
+#iptables  -P OUTPUT DROP
+#ip6tables -P OUTPUT DROP
 
 # services
 open_TCP     22 SSH

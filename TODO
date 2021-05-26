@@ -9,4 +9,4 @@ notification mesh
 browser - hTMl renderer for lagrange,maybe http or just  use full HTTP-URI via gemini protocol
 #down link on google for all results inlined
 gack (gemini) server
-rdfization in gemini  client  - generalize w/  http?
+rdfization in gemini  client  - generalize w/  http? gemini://oppen.digital/memex/places/colonsay/20171103/
