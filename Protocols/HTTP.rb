@@ -266,10 +266,10 @@ class WebResource
         end
       when /304/ # upstream Not Modified
         env[:client_cache] ? [304, {}, []] : cacheResponse
-      when /300|[45]\d\d/ # Not Found, Not Allowed or general upstream error
+      when /300|[45]\d\d/ # Not Found, Not Allowed and misc upstream errors
         env[:status] = status.to_i
         head = headers e.io.meta
-        body = HTTP.decompress head, e.io.read
+        body = HTTP.decompress(head, e.io.read).encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
         if head['Content-Type']&.index 'html'
           body = Webize::HTML.clean body, self
           env[:repository] ||= RDF::Repository.new
