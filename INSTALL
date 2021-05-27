@@ -9,7 +9,7 @@ which apk && sudo apk add alpine-sdk build-base linux-headers ruby ruby-dev ruby
 which apk && sudo /usr/lib/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB && sudo chown -R $uid:$uid /var/cache/squid
 
 ## Arch https://www.archlinux.org/
-which pacman && sudo pacman -S --needed base-devel git libexif parallel pygmentize ruby ruby-bundler socat squid taglib tmux
+which pacman && sudo pacman -S --needed base-devel git libexif parallel python ruby ruby-bundler socat squid taglib tmux
 which pacman && sudo /usr/lib/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB && sudo chown -R $uid:$uid /var/cache/squid && sudo setcap cap_net_bind_service=+ep /usr/sbin/squid
 
 ## Chromebrew https://github.com/skycocker/chromebrew
@@ -19,10 +19,10 @@ which crew && crew install buildessential libexif parallel socat taglib tmux
 which apt-add-repository && sudo apt-get install build-essential git parallel ruby ruby-dev bundler grep file libexif-dev libssl-dev libtag1-dev libxslt-dev libzip-dev socat squid make tmux libffi-dev
 
 ## Termux https://termux.com/
-which pkg && pkg install git ruby grep file findutils pkg-config libiconv libexif libprotobuf libxslt parallel poppler clang taglib squid make libffi libcap libcrypt openssl-tool tmux tsu zlib
+which pkg && pkg install git ruby grep file findutils pkg-config libiconv libexif libprotobuf libxslt parallel poppler clang taglib squid make libffi libcap libcrypt openssl-tool python tmux tsu zlib
 
 ## Void https://voidlinux.org
-which xbps-install && sudo xbps-install -S base-devel curl git libexif-devel libltdl-devel libressl-devel parallel poppler-utils python3-Pygments ruby ruby-devel socat squid taglib-devel tmux
+which xbps-install && sudo xbps-install -S base-devel curl git libexif-devel libltdl-devel libressl-devel parallel poppler-utils python ruby ruby-devel socat squid taglib-devel tmux
 which xbps-install && sudo /usr/libexec/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB
 
 # Language packages
