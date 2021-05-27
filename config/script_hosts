@@ -10,7 +10,6 @@ cdn.dashjs.org
 cdn.jwplayer.com
 cdnjs.cloudflare.com
 connectivitycheck.gstatic.com
-docs.google.com
 encrypted-tbn0.gstatic.com
 encrypted-tbn1.gstatic.com
 encrypted-tbn2.gstatic.com
@@ -31,6 +30,7 @@ static.parastorage.com
 static.twitchcdn.net
 static01.nyt.com
 static01.nytimes.com
+storage.googleapis.com
 tse4.mm.bing.net
 twitter.com
 w3.cdn.anvato.net
