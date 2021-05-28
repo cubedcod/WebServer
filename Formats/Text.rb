@@ -178,7 +178,7 @@ class WebResource
  a account accounts alerts amp and anonymous article archives articles
  blog blogger blogs blogspot boards
  columns co com comment comments
- edu email entry
+ edu email entry episode episodes
  feed feedburner feeds feedproxy forum forums
  g gmail go gov
  html http https id in index irc is item
