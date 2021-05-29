@@ -56,14 +56,9 @@ class WebResource < RDF::URI
       'user'
     end
 
-    def ext; path ? (File.extname(path)[1..-1] || '') : '' end
-    def suffix; '.' + ext end
-
     def host_parts
       local_node? ? ['.'] : host.split('.').reverse
     end
-
-    def insecure; ['http://', host, path, query].join.R env end
 
     def local_node?; !host || LocalAddress.member?(host) end
 

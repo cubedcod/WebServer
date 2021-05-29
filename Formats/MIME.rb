@@ -19,11 +19,13 @@ end
 
 class WebResource
   module HTTP
+    # formats we don't offer transcoding for. could hook into ffmpeg/imagemagick for webized A/V transcoding..
     FixedFormat = /audio|css|image|script|video/
   end
   module URIs
 
-    # MIME to extension mapping
+    # MIME extension map - adjunct to Rack's list
+
     Suffixes = {
       'application/gzip' => '.gz',
       'application/manifest+json' => '.json',
@@ -51,11 +53,8 @@ class WebResource
       'text/x-c' => '.cc',
       'text/xml' => '.rss',
       'video/MP2T' => '.ts'}
-    Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
 
-    def static_node? # no transcodes or invalidation (mint new URI for new version)
-      %w(bin c cc css geojson gif h ico jpeg jpg js m3u8 m4a mp3 mp4 oga ogg opus pem png rb svg tar ts wav webm webp).member? ext.downcase
-    end
+    Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
 
   end
 end

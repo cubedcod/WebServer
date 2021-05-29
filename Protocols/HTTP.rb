@@ -95,15 +95,16 @@ class WebResource
  
     def deny status = 200, type = nil
       env[:deny] = true
-      type, content = if type == :stylesheet || ext == 'css'
+      ext = File.extname basename if path
+      type, content = if type == :stylesheet || ext == '.css'
                         ['text/css', '']
-                      elsif type == :font || %w(eot otf ttf woff woff2).member?(ext)
+                      elsif type == :font || %w(.eot .otf .ttf .woff .woff2).member?(ext)
                         ['font/woff2', SiteFont]
-                      elsif type == :image || %w(bmp gif png).member?(ext)
+                      elsif type == :image || %w(.bmp .gif .png).member?(ext)
                         ['image/png', SiteIcon]
-                      elsif type == :script || ext == 'js'
+                      elsif type == :script || ext == '.js'
                         ['application/javascript', "// URI: #{uri.match(Gunk) || host}"]
-                      elsif type == :JSON || ext == 'json'
+                      elsif type == :JSON || ext == '.json'
                         ['application/json','{}']
                       else
                         ['text/html; charset=utf-8',
@@ -141,8 +142,8 @@ class WebResource
     # fetch data from cache or remote
     def fetch
       return cacheResponse if offline?                                # offline, respond from cache
-      return [304,{},[]] if env[:client_cache] && static_node?        # client has node cached
       ns = nodeSet
+      return [304,{},[]] if env[:client_cache] && static_node?        # client has node cached
       return ns[0].fileResponse if ns.size == 1 && ns[0].static_node? # server has node cached, return it
       if timestamp = ns.map{|n|n.node.mtime if n.node.exist?}.compact.sort[0] # cached-version timestamp
         env['HTTP_IF_MODIFIED_SINCE'] = timestamp.httpdate
@@ -159,7 +160,7 @@ class WebResource
       end
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError => e
       puts [e.class, e.message].join ' '
-     #if e.class == SocketError && e.message.index('name not known')  # DNS failure
+     #if e.class == SocketError && e.message.index('name not known')  # DNS lookup failure
      #  [302,{'Location' => 'http://localhost/https://www.google.com/search' + HTTP.qs({'q' => host})},[]]
       if scheme == 'https'                                            # HTTP fetch on HTTPS failure
         puts "⚠️  fallback scheme #{uri} -> HTTP"
@@ -292,7 +293,7 @@ class WebResource
           if h['Content-Type'] == 'application/javascript'
             h['Content-Type'] = 'application/javascript; charset=utf-8' # add charset 
           elsif !h.has_key?('Content-Type')                             # format missing?
-            if mime = Rack::Mime::MIME_TYPES[suffix]                    # format via Rack extension-map
+            if mime = Rack::Mime::MIME_TYPES[File.extname path]         # format via Rack extension-map
               h['Content-Type'] = mime
             elsif RDF::Format.file_extensions.has_key? ext.to_sym       # format via RDF extension-map
               h['Content-Type'] = RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
@@ -310,25 +311,25 @@ class WebResource
 
     def GET
       if local_node?
-        env[:proxy_href] = true                # enable proxy URIs
-        p = parts[0]                           # initial path selector
-        if !p                                  # local root-node
+        env[:proxy_href] = true  # enable proxy URIs
+        p = parts[0]             # initial path selector
+        if !p                    # local root-node
           '/index'.R(env).cacheResponse
-        elsif p[-1] == ':'                     # remote node - proxy URI
+        elsif p[-1] == ':'       # remote node - proxy URI
           unproxy.hostHandler
-        elsif p == 'favicon.ico'               # local icon
+        elsif p == 'favicon.ico' # local icon
           [200, {'Content-Type' => 'image/png'}, [SiteIcon]]
-        elsif p.index '.'                      # remote node - proxy URI - undefined scheme
+        elsif p.index '.'        # remote node - proxy URI, undefined scheme
           unproxy(true).hostHandler
         elsif %w{m d h}.member? p
-          dateDir                              # month/day/hour redirect
+          dateDir                # month/day/hour redirect
         elsif p == 'mailto' && parts.size == 2
           [302, {'Location' => ['/m/*/*/*', (parts[1].split(/[\W_]/) - BasicSlugs).map(&:downcase).join('.'), '*?view=table&sort=date'].join}, []]
         else
-          cacheResponse                        # local node
+          cacheResponse          # local node
         end
       else
-        hostHandler                            # remote node
+        hostHandler              # remote node
       end
     end
 
@@ -365,7 +366,7 @@ class WebResource
                           [s, h, []]} # return status and header
     end
 
-    # client<>proxy connection-specific and Rack-internal headers not repeated on proxy<>origin connection
+    # client<>proxy connection-specific headers not reused on proxy<>origin connection
     SingleHopHeaders = %w(connection host keep-alive path-info query-string
  remote-addr request-method request-path request-uri script-name server-name server-port server-protocol server-software
  te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for)
@@ -387,7 +388,7 @@ class WebResource
         end}
 
       head['Referer'] = 'http://drudgereport.com/' if host.match? /wsj\.com$/
-      head['Referer'] = 'https://' + host + '/' if %w(gif jpeg jpg png svg webp).member?(ext.downcase) || parts.member?('embed')
+      head['Referer'] = 'https://' + host + '/' if (path && %w(.gif .jpeg .jpg .png .svg .webp).member?(File.extname(path)&.downcase)) || parts.member?('embed')
       head['User-Agent'] = if %w(po.st t.co).member? host # we want shortlink-expansion via HTTP-redirect, not Javascript, so advertise a basic user-agent
                              'curl/7.65.1'
                            else
@@ -428,7 +429,6 @@ class WebResource
     end
 
     def notfound
-      env[Image] = self if %w(gif jpg png webp).member? ext
       [env[:status] || 404, {'Content-Type' => 'text/html'}, [htmlDocument({'#req'=>env})]]
     end
 

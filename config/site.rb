@@ -119,7 +119,7 @@ c212.net gate.sc googleweblight.com
 l.facebook.com l.instagram.com
 ).map{|s| GET s, GotoURL}
 
-    GET 'bos.gl', -> r {r.insecure.fetch}
+    GET 'bos.gl', -> r {r.scheme = 'http'; r.fetch}
 
     GET 'www.amazon.com', NoGunk
     GET 'www.dropbox.com', NoGunk

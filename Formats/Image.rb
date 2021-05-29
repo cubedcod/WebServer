@@ -264,26 +264,26 @@ class WebResource
 
     def format_icon mime=nil
       mime ||= ''
-      x = path ? ext.downcase : ''
-      if x == 'css' || mime.match?(/text\/css/)
+      ext = File.extname(path).downcase if path
+      if ext == '.css' || mime.match?(/text\/css/)
         '🎨'
-      elsif x == 'js' || mime.match?(/script/)
+      elsif ext == '.js' || mime.match?(/script/)
         '📜'
-      elsif x == 'json' || mime.match?(/json/)
+      elsif ext == '.json' || mime.match?(/json/)
         '🗒'
-      elsif %w(gif jpeg jpg png svg webp).member?(x) || mime.match?(/^image/)
+      elsif %w(.gif .jpeg .jpg .png .svg .webp).member?(ext) || mime.match?(/^image/)
         '🖼️'
-      elsif %w(aac flac m4a mp3 ogg opus).member?(x) || mime.match?(/^audio/)
+      elsif %w(.aac .flac .m4a .mp3 .ogg .opus).member?(ext) || mime.match?(/^audio/)
         '🔉'
-      elsif %w(mkv mp4 ts webm).member?(x) || mime.match?(/^video/)
+      elsif %w(.mkv .mp4 .ts .webm).member?(ext) || mime.match?(/^video/)
         '🎞️'
-      elsif %w(m3u8).member? x
+      elsif %w(.m3u8).member? ext
         '🎬'
-      elsif x == 'txt' || mime.match?(/text\/plain/)
+      elsif ext == '.txt' || mime.match?(/text\/plain/)
         '🇹'
-      elsif x == 'ttl' || mime.match?(/text\/turtle/)
+      elsif %w(.ttl .🐢).member?(ext) || mime.match?(/text\/turtle/)
         '🐢'
-      elsif %w(htm html).member?(x) || mime.match?(/html/)
+      elsif %w(.htm .html).member?(ext) || mime.match?(/html/)
         '📃'
       elsif mime.match? /atom|rss|xml/
         '📰'

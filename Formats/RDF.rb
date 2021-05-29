@@ -86,7 +86,8 @@ class WebResource
   # file -> 🐢 file (data-reduced preview)
   def preview
     return self if !path || basename.match(/^(\/|index|README)/) || !node.exist? # don't summarize index.*, READMEs
-    summary_node = join(['', basename, ext=='🐢' ? nil : '🐢'].compact.join '.').R env # summary URI
+    summary_node = join(['', basename,
+                         File.extname(path)=='.🐢' ? nil : '🐢'].compact.join '.').R env # summary URI
     file = summary_node.fsPath                                                 # summary file
     return summary_node if File.exist?(file) && File.mtime(file) >= node.mtime # summary up to date
     fullGraph = RDF::Repository.new                                            # full RDF
