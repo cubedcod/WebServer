@@ -60,7 +60,7 @@ class WebResource
       'www.youtube.com' => '#f00',
       'youtube.com' => '#f00',
     }
-    NoInvalidate = %w(bin css gif ico jpeg jpg m3u8 m4a mp3 mp4 ogg opus png svg wav webm webp) # static-media resources, mint new URI for new version
+    NoInvalidate = %w(.bin .css .gif .ico .jpeg .jpg .m3u8 .m4a .mp3 .mp4 .ogg .opus .png .svg .wav .webm .webp) # new version requires new URI, for these formats
 
     # site resources
 
