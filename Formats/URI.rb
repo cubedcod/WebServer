@@ -56,6 +56,10 @@ class WebResource < RDF::URI
       'user'
     end
 
+    def extname
+      File.extname path if path
+    end
+
     def host_parts
       local_node? ? ['.'] : host.split('.').reverse
     end
