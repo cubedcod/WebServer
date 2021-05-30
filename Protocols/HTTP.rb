@@ -19,7 +19,7 @@ class WebResource
       if nodes.size == 1  # one node. determine if it suits content-negotiated preferences
         static = nodes[0]
         return static.fileResponse if env[:notransform]                  # no transformation per request
-        suffix = File.extname static.path                                # format-suffix
+        suffix = static.extname                                          # format suffix
         format = MIME_Types[suffix] || Rack::Mime::MIME_TYPES[suffix]    # format
         return static.fileResponse if format&.match? FixedFormat         # no transformations available
         return static.fileResponse if format == (selectFormat format)    # already in preferred format
