@@ -187,7 +187,7 @@ module Webize
                 rel = e[1].match reRel
                 rel = rel ? rel[1] : 'link'
                 o = (@base.join url[2]).R
-                p = case File.extname(o).downcase
+                p = case o.extname
                     when /jpg|png|webp/i
                       WebResource::Image
                     else

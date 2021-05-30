@@ -291,10 +291,9 @@ class WebResource
           if h['Content-Type'] == 'application/javascript'
             h['Content-Type'] = 'application/javascript; charset=utf-8' # add charset 
           elsif !h.has_key?('Content-Type')                             # format missing?
-            if mime = Rack::Mime::MIME_TYPES[File.extname path]         # format via Rack extension-map
+            ext = extname
+            if mime = MIME_Types[ext] || Rack::Mime::MIME_TYPES[ext]    # format via extension-map
               h['Content-Type'] = mime
-            elsif RDF::Format.file_extensions.has_key? ext.to_sym       # format via RDF extension-map
-              h['Content-Type'] = RDF::Format.file_extensions[ext.to_sym][0].content_type[0]
             end
           end
           env[:resp]['Access-Control-Allow-Origin'] ||= origin

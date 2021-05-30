@@ -61,7 +61,7 @@ module Webize
             when 'attachments'
               o.map{|a|
                 attachment = @base.join(a['url']).R
-                type = case File.extname attachment
+                type = case attachment.extname
                        when /m4a|mp3|ogg|opus/i
                          Audio
                        when /mkv|mp4|webm/i
@@ -112,7 +112,7 @@ module Webize
                       when Content
                         o = Webize::HTML.format o, @base if o.class == String                   # format HTML
                       when Link
-                        p = Image if o.class==RDF::URI && %w(.jpg .png .webp).member?(File.extname o) # image pointer
+                        p = Image if o.class==RDF::URI && %w(.jpg .png .webp).member?(o.R.extname) # image pointer
                       end
                       yield s, p, o
                     end} unless p == :drop
