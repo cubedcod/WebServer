@@ -66,10 +66,8 @@ module Webize
         yield Title.R, @base.basename
 
         if @path # fs-path argument given, use pygmentize
-          lang = 'html' if @base.ext == 'erb'
-          lang = 'ruby' if @mime == 'text/x-ruby'
-          lang = 'shell' if @mime == 'text/x-shellscript'
-          langtag = "-l #{lang}" if lang
+          #lang = 'html' if File.extname(@path) == 'erb'
+          #langtag = "-l #{lang}" if lang
           html = `pygmentize #{langtag} -f html #{Shellwords.escape @path}`
 
         else # Rouge

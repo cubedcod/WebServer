@@ -60,10 +60,11 @@ module Webize
                 # resolve URIs
                 link = subject.join href
                 a.set_attribute 'href', link.to_s
+                ext = (File.extname link.path).downcase if link.path
                 # emit hyperlinks as RDF
-                if link.path && %w{gif jpeg jpg png webp}.member?(link.R.ext.downcase)
+                if %w{gif jpeg jpg png webp}.member? ext
                   yield subject, Image, link
-                elsif link.path && (%w{mp4 webm}.member? link.R.ext.downcase) || (link.host && link.host.match(/v.redd.it|vimeo|youtu/))
+                elsif %w{mp4 webm}.member?(ext) || link.host&.match(/v.redd.it|vimeo|youtu/)
                   yield subject, Video, link
                 elsif link != subject
                   yield subject, DC+'link', link
@@ -186,7 +187,7 @@ module Webize
                 rel = e[1].match reRel
                 rel = rel ? rel[1] : 'link'
                 o = (@base.join url[2]).R
-                p = case o.ext.downcase
+                p = case File.extname(o).downcase
                     when 'jpg'
                       WebResource::Image
                     when 'jpeg'

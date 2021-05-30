@@ -69,7 +69,7 @@ module Webize
       def source_tuples
         yield Type.R, (Schema + 'Document').R
         yield Title.R, @base.basename
-        converter = @base.ext == 'doc' ? :antiword : :docx2txt
+        converter = File.extname(@path) == 'doc' ? :antiword : :docx2txt
         html = RDF::Literal '<pre>' + `#{converter} #{Shellwords.escape @path}` + '</pre>'
         html.datatype = RDF.XMLLiteral
         yield Content.R, html
@@ -155,7 +155,7 @@ module Webize
         basename = File.basename (@base.path || '/'), '.txt'
         if basename == 'twtxt'
           twtxt_triples &f
-        elsif @base.ext == 'irc'
+        elsif File.extname(@base) == 'irc'
           chat_triples &f
         else
           yield @base, Content, Webize::HTML.format(WebResource::HTML.render({_: :pre,
