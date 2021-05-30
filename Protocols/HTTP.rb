@@ -15,14 +15,18 @@ class WebResource
     end
 
     def cacheResponse
-      timeMeta                        # reference temporally-adjacent nodes
-      nodes = nodeSet                 # find local nodes
-      if nodes.size == 1 && (env[:notransform] || nodes[0].static_node? || nodes[0].suffix == Suffixes[selectFormat])
-        nodes[0].fileResponse         # suitable static-representation found
-      else
-        nodes.map &:loadRDF           # load graph
-        graphResponse                 # response
+      timeMeta            # reference temporally-adjacent nodes
+      nodes = nodeSet     # find local nodes
+      if nodes.size == 1  # one static node. determine if it suits content-negotiated preferences
+        static = nodes[0]
+        return static.fileResponse if env[:notransform]                  # no transformations per request
+        suffix = File.extname static.path                                # format-suffix
+        format = MIME_Types[suffix] || Rack::Mime::MIME_TYPES[suffix]    # format
+        return static.fileResponse if format&.match? FixedFormat         # no transformations available
+        return static.fileResponse if format == (selectFormat format)    # data already in preferred format
       end
+      nodes.map &:loadRDF # load graph-data for merging and/or transcoding
+      graphResponse       # response
     end
 
     def self.call env
@@ -371,25 +375,24 @@ class WebResource
  remote-addr request-method request-path request-uri script-name server-name server-port server-protocol server-software
  te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for)
 
-    # headers case-normalized
     def headers raw = nil
-      raw ||= env || {}        # raw headers
-      head = {}                # cleaned headers
-      raw.map{|k,v|            # inspect (k,v) pairs
-        unless k.class != String || k.index('rack.') == 0 # strip Rack-internal headers
+      raw ||= env || {}                                     # raw headers
+      head = {}                                             # cleaned headers
+      raw.map{|k,v|                                         # inspect (k,v) pairs
+        unless k.class != String || k.index('rack.') == 0   # strip Rack-internal headers
           key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|t| # strip Rack prefix and tokenize
             if %w{cf cl csrf ct dfe dnt id spf utc xss xsrf}.member? t # acronyms
-              t = t.upcase     # upcase acronym
+              t = t.upcase                                  # upcase acronym
             else
-              t[0] = t[0].upcase # capitalize
+              t[0] = t[0].upcase                            # capitalize
             end
-            t}.join '-'        # join tokens
+            t}.join '-'                                     # join tokens
           head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless SingleHopHeaders.member? key.downcase # set header
         end}
 
       head['Referer'] = 'http://drudgereport.com/' if host.match? /wsj\.com$/
       head['Referer'] = 'https://' + host + '/' if (path && %w(.gif .jpeg .jpg .png .svg .webp).member?(File.extname(path).downcase)) || parts.member?('embed')
-      head['User-Agent'] = if %w(po.st t.co).member? host # we want shortlink-expansion via HTTP-redirect, not Javascript, so advertise a basic user-agent
+      head['User-Agent'] = if %w(po.st t.co).member? host   # prefer shortlink-expansion in HTTP-headers over procedural Javascript, advertise a basic user-agent
                              'curl/7.65.1'
                            else
                              'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36'
@@ -398,14 +401,14 @@ class WebResource
     end
 
     def hostHandler
-      URIs.denylist                                                # refresh denylist
-      qs = query_values || {}                                      # parse query
-      cookie = join('/cookie').R                                   # cookie-jar URI
+      URIs.denylist                                         # refresh denylist
+      qs = query_values || {}                               # parse query
+      cookie = join('/cookie').R                            # cookie-jar URI
       cookie.writeFile qs['cookie'] if qs['cookie'] && !qs['cookie'].empty? # store cookie to jar
       env['HTTP_COOKIE'] = cookie.readFile if cookie.node.exist? # read cookie from jar
-      if path == '/favicon.ico'                                    # icon handler
+      if path == '/favicon.ico'                             # icon handler
         node.exist? ? fileResponse : fetch
-      elsif qs['download'] == 'audio'                              # download from remote
+      elsif qs['download'] == 'audio'                       # download from remote
         slug = qs['list'] || qs['v'] || 'audio'
         storageURI = join([basename, slug].join '.').R
         storage = storageURI.fsPath
@@ -415,15 +418,15 @@ class WebResource
           Process.detach pid
         end
         [302, {'Location' => storageURI.href + '?offline'}, []]
-      elsif parts[-1]&.match? /^(gen(erate)?|log)_?204$/           # 204 response, skip roundtrip to origin
+      elsif parts[-1]&.match? /^(gen(erate)?|log)_?204$/    # 204 response, skip roundtrip to origin
         [204, {}, []]
-      elsif query&.match? Gunk                                     # query-gunk
+      elsif query&.match? Gunk                              # query-gunk
         [301,{'Location' => ['//',host,path].join.R(env).href},[]] # redirect to queryless
-      elsif handler = HostGET[host]                                # custom handler: lambda
+      elsif handler = HostGET[host]                         # custom handler: lambda
         handler[self]
-      elsif deny?                                                  # block request
+      elsif deny?                                           # block request
         deny
-      else                                                         # generic handler: remote node cache
+      else                                                  # generic handler: remote node cache
         fetch
       end
     end
@@ -466,7 +469,7 @@ class WebResource
           puts '>>>>>>>>', body
         end
 
-        r = HTTParty.options uri, headers: head, body: body    # OPTIONS request to origin
+        r = HTTParty.options uri, headers: head, body: body # OPTIONS request to origin
         head = headers r.headers                            # response headers
         body = r.body
 
@@ -526,23 +529,26 @@ class WebResource
       end
     end
 
-    def selectFormat format=nil
-      format ||= 'text/html'                # default format
-      return format unless env.has_key? 'HTTP_ACCEPT' # unspecified preference
-      category = format.split('/')[0]+'/*'  # format-category wildcard
-      index = {}                            # (q-val -> format) table
-      env['HTTP_ACCEPT'].split(/,/).map{|e| # build sorted index:
-        fmt, q = e.split /;/                # (MIME, qval) pair
-        i = q && q.split(/=/)[1].to_f || 1  # qval default
-        index[i] ||= []                     # initialize entry
-        index[i].push fmt.strip}            # add format at q-val
-      index.sort.reverse.map{|_, formats|   # search:
-        return format if formats.member?(category) || formats.include?('*/*') # wildcard on format-category or anything
-        formats.map{|fmt|
-          return fmt if RDF::Writer.for(:content_type => fmt) || # RDF writer available
-             ['application/atom+xml','text/html'].member?(fmt)}} # native writer available
+    def selectFormat default = nil                          # default-format argument
+      default ||= 'text/html'                               # default when unspecified
+      return default unless env.has_key? 'HTTP_ACCEPT'      # no preference specified
+      category = default.split('/')[0]+'/*'                 # format-category wildcard symbol
+      all = '*/*'                                           # any-format wildcard symbol
 
-      format                                                     # default format
+      index = {}                                            # build (q-value -> format) index
+      env['HTTP_ACCEPT'].split(/,/).map{|e|                 # header values
+        fmt, q = e.split /;/                                # (MIME, q-value) pair
+        i = q && q.split(/=/)[1].to_f || 1                  # default q-value
+        index[i] ||= []                                     # q-value entry
+        index[i].push fmt.strip}                            # insert format at q-value
+
+      index.sort.reverse.map{|_, accepted|                  # search in descending q-value order
+        return default if accepted.member? all              # anything accepted here
+        return default if accepted.member? category         # category accepted here
+        accepted.map{|format|
+          return format if RDF::Writer.for(:content_type => format) || # RDF writer available for format
+             ['application/atom+xml','text/html'].member?(format)}}    # non-RDF writer available
+      default                                                          # search failure
     end
 
     def unproxy schemeless = false
