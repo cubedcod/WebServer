@@ -6,14 +6,14 @@ class WebResource
     if node.file?
       location = fsPath                                    # map to filesystem path
       suffix = File.extname location                       # format suffix
-      if %w(info pack part svg ytdl).member? suffix        # incomplete/tmpfiles, ignore
-        puts "no RDF reader for #{location}"
-      elsif %w(gif jpg png webp).member? suffix            # image
+      if %w(.pack .part .ytdl).member? suffix              # incomplete/tmpfiles, ignore
+        #puts "no RDF reader for #{location}"
+      elsif %w(.gif .jpg .png .webp).member? suffix        # image
         graph << RDF::Statement.new(self, Type.R, Image.R)
         graph << RDF::Statement.new(self, Title.R, basename)
-      elsif %w(mp4 mkv webm).member? suffix                # video
+      elsif %w(.mp4 .mkv .webm).member? suffix             # video
         graph << RDF::Statement.new(self, Type.R, Video.R)
-      elsif %w(m4a mp3 ogg opus wav).member? suffix        # audio
+      elsif %w(.m4a .mp3 .ogg .opus .wav).member? suffix   # audio
         tag_triples graph
       else                                                 # read w/ RDF::Reader
         options = {}
@@ -31,7 +31,7 @@ class WebResource
           options[:content_type] = 'message/rfc822'        # mail prefix or maildir-contained
         else                                               # suffix -> MIME map
           options[:content_type] = Suffixes.invert[suffix] || Rack::Mime::MIME_TYPES[suffix] 
-          options[:file_extension] = suffix
+          options[:file_extension] = suffix[1..-1]
         end
         if reader ||= RDF::Reader.for(**options)           # select reader
           reader.new(File.open(location).read,base_uri: self){|_|graph << _} # read

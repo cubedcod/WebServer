@@ -388,7 +388,7 @@ class WebResource
         end}
 
       head['Referer'] = 'http://drudgereport.com/' if host.match? /wsj\.com$/
-      head['Referer'] = 'https://' + host + '/' if (path && %w(.gif .jpeg .jpg .png .svg .webp).member?(File.extname(path)&.downcase)) || parts.member?('embed')
+      head['Referer'] = 'https://' + host + '/' if (path && %w(.gif .jpeg .jpg .png .svg .webp).member?(File.extname(path).downcase)) || parts.member?('embed')
       head['User-Agent'] = if %w(po.st t.co).member? host # we want shortlink-expansion via HTTP-redirect, not Javascript, so advertise a basic user-agent
                              'curl/7.65.1'
                            else

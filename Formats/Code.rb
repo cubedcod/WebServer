@@ -66,9 +66,7 @@ module Webize
         yield Title.R, @base.basename
 
         if @path # fs-path argument given, use pygmentize
-          #lang = 'html' if File.extname(@path) == 'erb'
-          #langtag = "-l #{lang}" if lang
-          html = `pygmentize #{langtag} -f html #{Shellwords.escape @path}`
+          html = `pygmentize -f html #{Shellwords.escape @path}`
 
         else # Rouge
           lexer = Rouge::Lexer.guess_by_filename(@base.basename)

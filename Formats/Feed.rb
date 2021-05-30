@@ -62,9 +62,9 @@ module Webize
                 a.set_attribute 'href', link.to_s
                 ext = (File.extname link.path).downcase if link.path
                 # emit hyperlinks as RDF
-                if %w{gif jpeg jpg png webp}.member? ext
+                if %w{.gif .jpeg .jpg .png .webp}.member? ext
                   yield subject, Image, link
-                elsif %w{mp4 webm}.member?(ext) || link.host&.match(/v.redd.it|vimeo|youtu/)
+                elsif %w{.mp4 .webm}.member?(ext) || link.host&.match(/v.redd.it|vimeo|youtu/)
                   yield subject, Video, link
                 elsif link != subject
                   yield subject, DC+'link', link
@@ -188,11 +188,7 @@ module Webize
                 rel = rel ? rel[1] : 'link'
                 o = (@base.join url[2]).R
                 p = case File.extname(o).downcase
-                    when 'jpg'
-                      WebResource::Image
-                    when 'jpeg'
-                      WebResource::Image
-                    when 'png'
+                    when /jpg|png|webp/i
                       WebResource::Image
                     else
                       Atom + rel
