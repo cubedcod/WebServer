@@ -139,16 +139,16 @@ class WebResource
     # fetch data from cache or remote
     def fetch
       return cacheResponse if offline?                                # offline, respond from cache
-      return [304,{},[]] if %w(HTTP_IF_NONE_MATCH HTTP_IF_MODIFIED_SINCE).find{|k|env.has_key? k} && NoInvalidate.member?(extname) # client cache-hit
-      ns = nodeSet; return ns[0].fileResponse if ns.size == 1 && (NoInvalidate.member? ns[0].extname) # server cache-hit
-
+      return [304,{},[]] if %w(HTTP_IF_NONE_MATCH HTTP_IF_MODIFIED_SINCE).find{|k|env.has_key? k} && NoInvalidate.member?(extname) # client cache is valid, tell it
+      ns = nodeSet                                                    # find cached nodes
+      return ns[0].fileResponse if ns.size == 1 && (NoInvalidate.member? ns[0].extname) # proxy/server cache is valid, return to client
       if timestamp = ns.map{|n|n.node.mtime if n.node.exist?}.compact.sort[0]
-        env['HTTP_IF_MODIFIED_SINCE'] = timestamp.httpdate            # request entity newer than oldest cached node
+        env['HTTP_IF_MODIFIED_SINCE'] = timestamp.httpdate            # request entities newer than oldest in cache
       end
 
       case scheme
-      when nil
-        ['https:', uri].join.R(env).fetchHTTP                         # HTTPS fetch (default scheme)
+      when nil                                                        # undefined scheme
+        ['https:', uri].join.R(env).fetchHTTP                         # HTTPS fetch via default
       when 'gemini'
         fetchGemini                                                   # Gemini fetch
       when /^http/
