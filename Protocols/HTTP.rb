@@ -39,7 +39,7 @@ class WebResource
         Args.map{|k|env[k.to_sym] = qs.delete(k)||true if qs.has_key? k} # set local (client <> proxy) args
         qs.empty? ? (uri.query = nil) : (uri.query_values = qs)          # set external (proxy <> origin) query string
       else
-        env[:qs] = {}                                                    # no query args
+        env[:qs] = {}                                                    # no query-args
       end
       env.update({base: uri, feeds: [], links: {}, resp: {}})            # response environment
       uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body|    # dispatch request
@@ -139,9 +139,8 @@ class WebResource
     # fetch data from cache or remote
     def fetch
       return cacheResponse if offline?                                # offline, respond from cache
-      ns = nodeSet
       return [304,{},[]] if %w(HTTP_IF_NONE_MATCH HTTP_IF_MODIFIED_SINCE).find{|k|env.has_key? k} && NoInvalidate.member?(extname) # client cache-hit
-      return ns[0].fileResponse if ns.size==1 && NoInvalidate.member?(ns[0].extname) # server cache-hit
+      ns = nodeSet; return ns[0].fileResponse if ns.size == 1 && (NoInvalidate.member? ns[0].extname) # server cache-hit
 
       if timestamp = ns.map{|n|n.node.mtime if n.node.exist?}.compact.sort[0]
         env['HTTP_IF_MODIFIED_SINCE'] = timestamp.httpdate            # request entity newer than oldest cached node
