@@ -24,7 +24,7 @@ class WebResource
   end
   module URIs
 
-    # MIME extension map - adjunct to Rack's list
+    # MIME -> extension map - adjunct to Rack's list
 
     Suffixes = {
       'application/gzip' => '.gz',
@@ -55,6 +55,8 @@ class WebResource
       'video/MP2T' => '.ts'}
 
     Suffixes_Rack = Rack::Mime::MIME_TYPES.invert
+
+    MIME_Types = Suffixes.invert
 
   end
 end

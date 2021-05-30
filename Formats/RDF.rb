@@ -30,7 +30,7 @@ class WebResource
         elsif name.index('msg.')==0 || path.index('/sent/cur')==0
           options[:content_type] = 'message/rfc822'        # mail prefix or maildir-contained
         else                                               # suffix -> MIME map
-          options[:content_type] = Suffixes.invert[suffix] || Rack::Mime::MIME_TYPES[suffix] 
+          options[:content_type] = MIME_Types[suffix] || Rack::Mime::MIME_TYPES[suffix] 
           options[:file_extension] = suffix[1..-1]
         end
         if reader ||= RDF::Reader.for(**options)           # select reader
