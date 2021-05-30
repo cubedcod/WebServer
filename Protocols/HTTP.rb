@@ -16,14 +16,14 @@ class WebResource
 
     def cacheResponse
       timeMeta            # reference temporally-adjacent nodes
-      nodes = nodeSet     # find local nodes
-      if nodes.size == 1  # one static node. determine if it suits content-negotiated preferences
+      nodes = nodeSet     # find nodes
+      if nodes.size == 1  # one node. determine if it suits content-negotiated preferences
         static = nodes[0]
-        return static.fileResponse if env[:notransform]                  # no transformations per request
+        return static.fileResponse if env[:notransform]                  # no transformation per request
         suffix = File.extname static.path                                # format-suffix
         format = MIME_Types[suffix] || Rack::Mime::MIME_TYPES[suffix]    # format
         return static.fileResponse if format&.match? FixedFormat         # no transformations available
-        return static.fileResponse if format == (selectFormat format)    # data already in preferred format
+        return static.fileResponse if format == (selectFormat format)    # already in preferred format
       end
       nodes.map &:loadRDF # load graph-data for merging and/or transcoding
       graphResponse       # response
