@@ -39,7 +39,7 @@ module Webize
       def each_triple &block; each_statement{|s| block.call *s.to_triple} end
 
       def each_statement &fn
-        scanContent(:normalizeDates, :normalizePredicates,:rawTriples){|s,p,o| # triples flow (left ← right) in filter stack
+        scanContent(:normalizeDates, :normalizePredicates,:rawTriples){|s,p,o| # triples bubble up (left ← right) in transformer stack
           fn.call RDF::Statement.new(s.R, p.R,
                                      (o.class == WebResource || o.class == RDF::URI) ? o : (l = RDF::Literal (if p == Content
                                                                                                               Webize::HTML.format o, @base

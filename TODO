@@ -10,3 +10,12 @@ browser - hTMl renderer for lagrange,maybe http or just  use full HTTP-URI via g
 #down link on google for all results inlined
 gack (gemini) server
 rdfization in gemini  client  - generalize w/  http? gemini://oppen.digital/memex/places/colonsay/20171103/
+cacheresponse offline validation
+client_cache?
+more  304 stuff on everything
+set more headers so less 304 reqs come in 
+mixcloud data reduction
+loop on favico  ~/web/hr/morh/znakovlje 
+encoding on quotes in http://localhost:8000/https://tommorris.org/index.xml
+strip sized mixcloud images to one per post
+missing linebreaks in reddit feed <code> blocks
