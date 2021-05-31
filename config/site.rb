@@ -755,7 +755,7 @@ l.facebook.com l.instagram.com
       yield subject, Creator, mix['user']['name'].R,graph
       yield subject, To, mix['user']['url'].R,graph
       mix['pictures'].map{|_,i|
-        yield subject, Image, i.R, graph}
+        yield subject, Image, i.R, graph if i.match? /1024x1024/}
       yield subject, Schema+'duration', mix['audio_length'], graph
       mix['tags'].map{|tag|
         yield subject, Abstract, tag['name'], graph}}
