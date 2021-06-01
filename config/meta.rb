@@ -812,6 +812,7 @@ class WebResource
       Schema + 'potentialAction' => :drop,
       Schema + 'primaryImageOfPage' => Image,
       Schema + 'published' => Date,
+      Schema + 'regionsAllowed' => :drop,
       Schema + 'reviewBody' => Content,
       Schema + 'text' => Content,
       Schema + 'thumbnailUrl' => Image,
