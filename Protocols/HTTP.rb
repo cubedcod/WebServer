@@ -201,7 +201,7 @@ class WebResource
               charset = 'UTF-8' if charset.match? /utf.?8/i           # normalize UTF-8 charset symbols
               charset = 'Shift_JIS' if charset.match? /s(hift)?.?jis/i# normalize Shift-JIS charset symbols
             end                                                       # convert to UTF-8 using HTTP and document header charset/encoding hints
-            body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace if format.match? /(ht|x)ml|script|text/
+            body.encode! 'UTF-8', charset || 'UTF-8', invalid: :replace, undef: :replace if format.match? /(ht|x)ml|script|text/
             if format == 'application/xml' && body[0..2048].match?(/(<|DOCTYPE )html/i)
               format = 'text/html'                                    # HTML served w/ XML MIME, update format symbol
             end
