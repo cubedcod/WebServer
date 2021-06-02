@@ -139,11 +139,12 @@ class WebResource
     # fetch data from cache or remote
     def fetch
       return cacheResponse if offline?                                # offline, respond from cache
-      return [304,{},[]] if %w(HTTP_IF_NONE_MATCH HTTP_IF_MODIFIED_SINCE).find{|k|env.has_key? k} && NoInvalidate.member?(extname) # client cache is valid, tell it
+      return [304,{},[]] if %w(HTTP_IF_NONE_MATCH HTTP_IF_MODIFIED_SINCE).find{|k|env.has_key? k} && NoInvalidate.member?(extname) # client cache is valid
       ns = nodeSet                                                    # find cached nodes
-      return ns[0].fileResponse if ns.size == 1 && (NoInvalidate.member? ns[0].extname) # proxy/server cache is valid, return to client
+      return ns[0].fileResponse if ns.size == 1 && (NoInvalidate.member? ns[0].extname) # proxy/server cached entity is valid, return it to client
+
       if timestamp = ns.map{|n|n.node.mtime if n.node.exist?}.compact.sort[0]
-        env['HTTP_IF_MODIFIED_SINCE'] = timestamp.httpdate            # request entities newer than oldest in cache
+        env['HTTP_IF_MODIFIED_SINCE'] = timestamp.httpdate            # send our cache timestamp to origin
       end
 
       case scheme
@@ -169,7 +170,7 @@ class WebResource
     end
 
     # fetch remote data to in-RAM graph and static file-cache
-    def fetchHTTP format: nil, thru: true                             # options: format (override broken remote), craft HTTP response for caller
+    def fetchHTTP format: nil, thru: true                             # options: format (override broken remote), HTTP response to caller
       URI.open(uri, headers.merge({redirect: false})) do |response|   # fetch over HTTP from remote
         env[:fetched] = true                                          # mark as fetched for logger
         h = headers response.meta                                     # response headers
@@ -181,7 +182,7 @@ class WebResource
           [206, h, [response.read]]
         else                                                          # full content
           body = HTTP.decompress h, response.read                     # decompress content
-          format ||= if path == '/feed'                               # format fixed on remote feed to ignore erroneous text/html headers
+          format ||= if path == '/feed'                               # format fixed on remote /feed due to many erroneous text/html responses. if you want full conneg on remote /feed URLs you could remove this and sniff
                        'application/atom+xml'
                      elsif content_type = h['Content-Type']           # format defined in HTTP header
                        ct = content_type.split(/;/)
@@ -191,28 +192,32 @@ class WebResource
                        end
                        ct[0]
                      end
-          if format                                                   # format defined
+
+          if format                                                   # format defined?
             if !charset && format.index('html') && metatag = body[0..4096].encode('UTF-8', undef: :replace, invalid: :replace).match(/<meta[^>]+charset=['"]?([^'">]+)/i)
-              charset = metatag[1]                                    # charset defined in <head>
+              charset = metatag[1]                                    # charset defined in document header
             end
-            if charset
-              charset = 'UTF-8' if charset.match? /utf.?8/i           # normalize UTF-8 charset symbol
-              charset = 'Shift_JIS' if charset.match? /s(hift)?.?jis/i# normalize Shift-JIS charset symbol
-            end                                                       # transcode to UTF-8
+            if charset                                                # charset defined?
+              charset = 'UTF-8' if charset.match? /utf.?8/i           # normalize UTF-8 charset symbols
+              charset = 'Shift_JIS' if charset.match? /s(hift)?.?jis/i# normalize Shift-JIS charset symbols
+            end                                                       # convert to UTF-8 using HTTP and document header charset/encoding hints
             body.encode! 'UTF-8', charset, invalid: :replace, undef: :replace if format.match? /(ht|x)ml|script|text/
             if format == 'application/xml' && body[0..2048].match?(/(<|DOCTYPE )html/i)
-              format = 'text/html'                                    # HTML in XML clothing
+              format = 'text/html'                                    # HTML served w/ XML MIME, update format symbol
             end
-            body = Webize.clean self, body, format                    # clean upstream data
-            if formatExt = Suffixes[format] || Suffixes_Rack[format]  # find format-suffix
+
+            body = Webize.clean self, body, format                    # sanitize upstream content
+
+            if formatExt = Suffixes[format] || Suffixes_Rack[format]  # lookup format suffix
               file = fsPath                                           # cache path
-              file += '/index' if file[-1] == '/'                     # append dir-index slug
-              file += formatExt unless File.extname(file)==formatExt  # append format-suffix
+              file += '/index' if file[-1] == '/'                     # append directory-data slug
+              file += formatExt unless File.extname(file)==formatExt  # append format suffix
               FileUtils.mkdir_p File.dirname file                     # create container
-              File.open(file, 'w'){|f| f << body }                    # update data-cache
+              File.open(file, 'w'){|f| f << body }                    # fill static cache
             else
               puts "⚠️ extension undefined for #{format}"              # ⚠️ undefined format-suffix
             end
+
             if reader = RDF::Reader.for(content_type: format)         # reader defined for format?
               env[:repository] ||= RDF::Repository.new                # initialize RDF repository
               if timestamp = h['Last-Modified']                       # HTTP timestamp
@@ -227,11 +232,14 @@ class WebResource
             else
               puts "⚠️ Reader undefined for #{format}"                 # ⚠️ undefined Reader
             end unless format.match? /octet-stream/                   # can't parse binary blobs
+
           else
             puts "⚠️ format undefined on #{uri}"                       # ⚠️ undefined format
           end
-          return unless thru                                          # no HTTP response, done fetching to RAM
-          saveRDF                                                     # commit graph-cache
+
+          return unless thru                                          # pass HTTP response through to caller? (default: Y)
+
+          saveRDF                                                     # commit graph cache
           env[:resp]['Access-Control-Allow-Origin'] ||= origin        # CORS header
           h['Link'] && h['Link'].split(',').map{|link|                # Link headers
             ref, type = link.split(';').map &:strip
@@ -239,10 +247,11 @@ class WebResource
               ref = ref.sub(/^</,'').sub />$/, ''
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
-            end}                                                      # upstream headers
+            end}                                                      # more upstream headers
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type Last-Modified).map{|k|
             env[:resp][k] ||= h[k] if h[k]}
           env[:resp]['ETag'] ||= h['Etag']                            # ETag header
+
           if env[:notransform]|| !format ||format.match?(FixedFormat) # no transform
             body = Webize::HTML.resolve_hrefs body, env, true if format == 'text/html' && env.has_key?(:proxy_href) # resolve hrefs in proxy scenario
             env[:resp]['Content-Length'] = body.bytesize.to_s         # Content-Length header
