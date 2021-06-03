@@ -141,7 +141,7 @@ class WebResource
       return cacheResponse if offline?                                # offline, respond from cache
       return [304,{},[]] if %w(HTTP_IF_NONE_MATCH HTTP_IF_MODIFIED_SINCE).find{|k|env.has_key? k} && NoInvalidate.member?(extname) # client cache is valid
       ns = nodeSet                                                    # find cached nodes
-      return ns[0].fileResponse if ns.size == 1 && (NoInvalidate.member? ns[0].extname) # proxy/server cached entity is valid, return it to client
+      return ns[0].fileResponse if ns.size == 1 && (NoInvalidate.member? ns[0].extname) # proxy/server cache is valid, return it to client
 
       if timestamp = ns.map{|n|n.node.mtime if n.node.exist?}.compact.sort[0]
         env['HTTP_IF_MODIFIED_SINCE'] = timestamp.httpdate            # send our cache timestamp to origin
@@ -200,7 +200,7 @@ class WebResource
             if charset                                                # charset defined?
               charset = 'UTF-8' if charset.match? /utf.?8/i           # normalize UTF-8 charset symbols
               charset = 'Shift_JIS' if charset.match? /s(hift)?.?jis/i# normalize Shift-JIS charset symbols
-            end                                                       # convert to UTF-8 using HTTP and document header charset/encoding hints
+            end                                                       # convert to UTF-8 using HTTP and document header hints
             body.encode! 'UTF-8', charset || 'UTF-8', invalid: :replace, undef: :replace if format.match? /(ht|x)ml|script|text/
             if format == 'application/xml' && body[0..2048].match?(/(<|DOCTYPE )html/i)
               format = 'text/html'                                    # HTML served w/ XML MIME, update format symbol
