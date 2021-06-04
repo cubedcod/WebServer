@@ -30,12 +30,12 @@ class WebResource
                                   else
                                   end)
 
-      slug = ps.size == 2 ? ['*/' * hdepth,           # glob dirs within time-slice
-                             '*.', ps[1], '.*'] : nil # glob slug in hour-dir
+      glob = ps.size == 2 ? ['*/' * hdepth,           # glob less-significant timeslices inside slice
+                             '*.', ps[1], '.*'] : nil # glob slug at hour-dir
 
       qs = (env['QUERY_STRING'] && !env['QUERY_STRING'].empty?) ? ['?',env['QUERY_STRING']] : nil
 
-      [303, env[:resp].update({'Location' => [loc, slug, qs].join}), []]
+      [303, env[:resp].update({'Location' => [loc, glob, qs].join}), []]
     end
 
     def timeMeta
