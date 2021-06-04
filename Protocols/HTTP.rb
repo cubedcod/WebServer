@@ -327,8 +327,8 @@ class WebResource
           [200, {'Content-Type' => 'image/png'}, [SiteIcon]]
         elsif p.index '.'        # remote node - proxy URI, undefined scheme
           unproxy(true).hostHandler
-        elsif %w{m d h}.member? p
-          dateDir                # month/day/hour redirect
+        elsif %w{m d h y}.member? p
+          dateDir                # month/day/hour/year directory
         elsif p == 'mailto' && parts.size == 2
           [302, {'Location' => ['/m/*/*/*', (parts[1].split(/[\W_]/) - BasicSlugs).map(&:downcase).join('.'), '*?view=table&sort=date'].join}, []]
         else

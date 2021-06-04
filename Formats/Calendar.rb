@@ -17,19 +17,25 @@ class WebResource
   module HTTP
 
     def dateDir
-      time = Time.now.utc
-      loc = time.strftime(case parts[0][0].downcase
-                          when 'y'
-                            '/%Y/'
-                          when 'm'
-                            '/%Y/%m/'
-                          when 'd'
-                            '/%Y/%m/%d/'
-                          when 'h'
-                            '/%Y/%m/%d/%H/'
-                          else
-                          end)
-      [303, env[:resp].update({'Location' => loc + parts[1..-1].join('/') + ((env['QUERY_STRING'] && !env['QUERY_STRING'].empty?) ? ('?'+env['QUERY_STRING']) : '')}), []]
+      ps = parts
+      loc = Time.now.utc.strftime(case ps[0].downcase
+                                  when 'y'
+                                    hdepth = 3 ; '/%Y/'
+                                  when 'm'
+                                    hdepth = 2 ; '/%Y/%m/'
+                                  when 'd'
+                                    hdepth = 1 ; '/%Y/%m/%d/'
+                                  when 'h'
+                                    hdepth = 0 ; '/%Y/%m/%d/%H/'
+                                  else
+                                  end)
+
+      slug = ps.size == 2 ? ['*/' * hdepth,           # glob dirs within time-slice
+                             '*.', ps[1], '.*'] : nil # glob slug in hour-dir
+
+      qs = (env['QUERY_STRING'] && !env['QUERY_STRING'].empty?) ? ['?',env['QUERY_STRING']] : nil
+
+      [303, env[:resp].update({'Location' => [loc, slug, qs].join}), []]
     end
 
     def timeMeta
