@@ -1,6 +1,6 @@
 #expand {display: block}
-#next {right: 0}
-#prev {left: 0}
+#next {right: 0; top: 2em}
+#prev {left: 0; top: 2em}
 #prev, #next {position: fixed; height: 100%; background-color: #222}
 #prev, #next, #expand {font-size: 1.9em; color: #eee}
 #prev:hover, #next:hover {background-color: #333}
