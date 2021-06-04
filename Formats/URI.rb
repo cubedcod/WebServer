@@ -49,10 +49,10 @@ class WebResource < RDF::URI
     end
 
     def display_name
-      return fragment if fragment && !fragment.empty?                    # fragment
-      return query_values['id'] if query_values&.has_key? 'id'           # query
-      return basename if path && basename && !['','/'].member?(basename) # basename
-      return host.sub(/^www\./,'').sub(/\.com$/,'') if host              # hostname
+      return fragment if fragment && !fragment.empty?                     # fragment
+      return query_values['id'] if query_values&.has_key? 'id' rescue nil # query
+      return basename if path && basename && !['','/'].member?(basename)  # basename
+      return host.sub(/^www\./,'').sub(/\.com$/,'') if host               # hostname
       'user'
     end
 
