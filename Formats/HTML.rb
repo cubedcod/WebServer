@@ -355,7 +355,14 @@ class WebResource
 
   module HTML
 
-    # Graph -> HTML
+    StatusColor = {
+      401 => :orange,
+      403 => :yellow,
+      404 => :gray,
+      408 => '#f0c',
+    }
+
+    # RDF::Repository -> HTML
     def htmlDocument graph = nil
       graph ||= env[:graph] = treeFromGraph                                                        # treeify graph
       env[:colors] ||= {}                                                                          # named color(s) container
@@ -373,7 +380,7 @@ class WebResource
         end
       end
       env[:links][:icon] ||= icon.node.exist? ? icon : '//localhost:8000/favicon.ico'.R(env)       # default well-known icon
-      bgcolor = {401 => :orange,403 => :yellow,404 => :gray,408 => '#f0c'}[env[:status]] || '#333' # background color
+      bgcolor = StatusColor[env[:status]] || '#333' # background color
       htmlGrep if local_node?                                                                      # HTMLify grep results
       groups = {}                                                                                  # group(s) container
       graph.map{|uri, resource|                                                                    # group resources by type
