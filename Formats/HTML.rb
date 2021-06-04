@@ -373,14 +373,14 @@ class WebResource
                            end
       icon = ('//'+(host||'localhost:8000')+'/favicon.ico').R env                                  # well-known icon location
       if env[:links][:icon]                                                                        # icon reference in metadata
-        env[:links][:icon] = env[:links][:icon].R env unless env[:links][:icon].class==WebResource # normalize reference
-        if !env[:links][:icon].data? && env[:links][:icon].path != icon.path && !icon.node.exist? && !icon.node.symlink?
-          FileUtils.mkdir_p File.dirname icon.fsPath                                               # unlinked well-known location
+        env[:links][:icon] = env[:links][:icon].R env unless env[:links][:icon].class==WebResource # normalize iconref class
+        if !env[:links][:icon].data? && env[:links][:icon].path != icon.path && env[:links][:icon] != self && !env[:links][:icon].node.directory? && !icon.node.exist? && !icon.node.symlink? # icon URL not linked to well-known location, and no dangling symlinks or links to directories
+          FileUtils.mkdir_p File.dirname icon.fsPath                                               # container for well-known location
           FileUtils.ln_s (env[:links][:icon].node.relative_path_from icon.node.dirname), icon.node # link to well-known location
         end
       end
       env[:links][:icon] ||= icon.node.exist? ? icon : '//localhost:8000/favicon.ico'.R(env)       # default well-known icon
-      bgcolor = StatusColor[env[:status]] || '#333' # background color
+      bgcolor = StatusColor[env[:status]] || '#333'                                                # background color
       htmlGrep if local_node?                                                                      # HTMLify grep results
       groups = {}                                                                                  # group(s) container
       graph.map{|uri, resource|                                                                    # group resources by type
