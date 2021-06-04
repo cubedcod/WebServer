@@ -40,8 +40,9 @@ ip6tables -A OUTPUT -o lo   -j ACCEPT
 iptables  -P OUTPUT DROP
 ip6tables -P OUTPUT DROP
 
-# services
+# misc services
 open_TCP     22 SSH
+open_TCP     43 whois
 open_port    67 DHCP
 open_port    68 DHCP
 
