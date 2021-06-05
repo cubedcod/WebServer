@@ -82,7 +82,9 @@ open_port  1053 DNS
 open_TCP   4860 WZBC
 open_TCP   8000 HTTP
 open_TCP   8080 HTTP
+open_port  8073 KiwiSDR
 open_TCP   8443 HTTP
+open_port  8901 WebSDR
 open_TCP   9418 Git
 open_UDP  60001 Mosh
 open_UDP  60002 Mosh
