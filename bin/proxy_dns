@@ -9,6 +9,7 @@ iptables  -A OUTPUT -p udp --sport 53 -j ACCEPT -m owner --uid-owner $1
 ip6tables -A OUTPUT -p udp --sport 53 -j ACCEPT -m owner --uid-owner $1
 iptables  -A OUTPUT -p udp --dport 53 -j ACCEPT -m owner --uid-owner $1
 ip6tables -A OUTPUT -p udp --dport 53 -j ACCEPT -m owner --uid-owner $1
+
 iptables  -t nat -A OUTPUT -p tcp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1 # traffic not from proxy
 ip6tables -t nat -A OUTPUT -p tcp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
 iptables  -t nat -A OUTPUT -p udp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
