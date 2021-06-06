@@ -116,7 +116,8 @@ class DNSServer
         newHost = true
         reverse = domain.index 'in-addr.arpa'
         domain = domain[0..reverse-2].split('.').reverse.join('.') if reverse
-        result = Cache[domain] = ['//', hostname].join.R.deny? ? LocalHost : Resolv.send((reverse ? :getname : :getaddress), domain) rescue LocalHost
+#        result = Cache[domain] = ['//', hostname].join.R.deny? ? LocalHost : Resolv.send((reverse ? :getname : :getaddress), domain) rescue LocalHost
+        result = Cache[domain] = Resolv.send((reverse ? :getname : :getaddress), domain) rescue LocalHost
       end
 
       local = result == LocalHost

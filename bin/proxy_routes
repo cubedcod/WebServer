@@ -1,6 +1,6 @@
 #!/bin/sh
-# configure transparent proxy for DNS/HTTP/HTTPS egress
-# run with iptable privileges, proxy uid is first arg: ./proxy_routes 1000
+# configure transparent proxy for DNS/HTTP/HTTPS
+# run with iptable privileges, proxy uid as first arg: ./proxy_routes 1000
 
 open_UDP () {
     iptables  -A INPUT  -p udp --sport $1 -j ACCEPT
@@ -55,10 +55,10 @@ iptables  -A OUTPUT -p udp --sport 53 -j ACCEPT -m owner --uid-owner $1
 ip6tables -A OUTPUT -p udp --sport 53 -j ACCEPT -m owner --uid-owner $1
 iptables  -A OUTPUT -p udp --dport 53 -j ACCEPT -m owner --uid-owner $1
 ip6tables -A OUTPUT -p udp --dport 53 -j ACCEPT -m owner --uid-owner $1
-#iptables  -t nat -A OUTPUT -p tcp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1 # traffic not from proxy
-#ip6tables -t nat -A OUTPUT -p tcp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
-#iptables  -t nat -A OUTPUT -p udp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
-#ip6tables -t nat -A OUTPUT -p udp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
+iptables  -t nat -A OUTPUT -p tcp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1 # traffic not from proxy
+ip6tables -t nat -A OUTPUT -p tcp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
+iptables  -t nat -A OUTPUT -p udp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
+ip6tables -t nat -A OUTPUT -p udp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
 
 ## HTTP
 iptables  -A OUTPUT -p tcp --sport 80 -j ACCEPT -m owner --uid-owner $1 # traffic from proxy
