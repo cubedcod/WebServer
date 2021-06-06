@@ -2,5 +2,3 @@
 # redirect low-port traffic to high-port service
 iptables -t nat -A OUTPUT -p tcp -d 127.0.0.1 --dport 53 -j REDIRECT --to-ports 1053
 iptables -t nat -A OUTPUT -p udp -d 127.0.0.1 --dport 53 -j REDIRECT --to-ports 1053
-
-
