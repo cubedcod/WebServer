@@ -1,6 +1,6 @@
 #!/bin/sh
-# on systems with apps ignoring system proxy or DNS settings, we enforce transparent proxy for egress
-# run as sudo w/ proxy uid in first arg
+# configure transparent proxy for DNS/HTTP/HTTPS egress
+# run with iptable priveleges, proxy uid is first arg: ./proxy_routes 1000
 
 open_UDP () {
     iptables  -A INPUT  -p udp --sport $1 -j ACCEPT
@@ -70,20 +70,18 @@ ip6tables -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8000 -m own
 
 ## HTTPS
 open_TCP   443 HTTPS
-# MITM browser uid only
-iptables  -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8443 -m owner --uid-owner 10093 # traffic from browser
-# Full MITM on everything but the proxy:
-#iptables  -A OUTPUT -p tcp --sport 443 -j ACCEPT -m owner --uid-owner $1 # traffic from proxy
-#ip6tables -A OUTPUT -p tcp --sport 443 -j ACCEPT -m owner --uid-owner $1
-#iptables  -A OUTPUT -p tcp --dport 443 -j ACCEPT -m owner --uid-owner $1
-#ip6tables -A OUTPUT -p tcp --dport 443 -j ACCEPT -m owner --uid-owner $1
-#iptables  -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8443 -m owner ! --uid-owner $1 # traffic not from proxy
-#ip6tables -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8443 -m owner ! --uid-owner $1
+iptables  -A OUTPUT -p tcp --sport 443 -j ACCEPT -m owner --uid-owner $1 # traffic from proxy
+ip6tables -A OUTPUT -p tcp --sport 443 -j ACCEPT -m owner --uid-owner $1
+iptables  -A OUTPUT -p tcp --dport 443 -j ACCEPT -m owner --uid-owner $1
+ip6tables -A OUTPUT -p tcp --dport 443 -j ACCEPT -m owner --uid-owner $1
+iptables  -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8443 -m owner ! --uid-owner $1 # traffic not from proxy
+ip6tables -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-ports 8443 -m owner ! --uid-owner $1
 
 open_TCP    587 SMTP
 open_port  1053 DNS
 open_TCP   4860 WZBC
 open_TCP   8000 HTTP
+open_TCP   8022 SSH
 open_TCP   8080 HTTP
 open_port  8073 KiwiSDR
 open_TCP   8443 HTTP
