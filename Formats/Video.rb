@@ -102,7 +102,7 @@ class WebResource
 
         if v.to_s.match? /v.redd.it/ # reddit
           v += '/DASHPlaylist.mpd'   # append playlist suffix for dash.js
-          dash = true
+          dashJS = 'https://cdn.dashjs.org/latest/dash.all.min.js'.R env
         end
 
         v = v.R env
@@ -120,13 +120,13 @@ class WebResource
             else
               player = 'embed' + Digest::SHA2.hexdigest(rand.to_s)
               [{class: :preembed, onclick: "inlineplayer(\"##{player}\",\"#{id}\"); this.remove()",
-                c: [{_: :img, src: "https://i.ytimg.com/vi_webp/#{id}/sddefault.webp"},{class: :icon, c: '&#9654;'}]}, {id: player}]
+                c: [{_: :img, src: "https://i.ytimg.com/vi_webp/#{id}/sddefault.webp".R(env).href},{class: :icon, c: '&#9654;'}]}, {id: player}]
             end
           end
-        else                         # generic video reference
-          [dash ? '<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>' : nil,
+        else                         # generic video
+          [dashJS ? "<script src='#{dashJS.href}'></script>" : nil,
            {class: :video,
-            c: [{_: :video, src: v.uri, controls: :true}.update(dash ? {'data-dashjs-player' => 1} : {}), '<br>',
+            c: [{_: :video, src: v.uri, controls: :true}.update(dashJS ? {'data-dashjs-player' => 1} : {}), '<br>',
                 {_: :a, href: v.uri, c: v.display_name}]}]
         end
       end}
