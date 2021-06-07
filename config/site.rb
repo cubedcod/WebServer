@@ -828,7 +828,7 @@ l.facebook.com l.instagram.com
         uid = tweet['user_id_str']
         userinfo = users[uid] || {}
         username = userinfo['screen_name'] || 'anonymous'
-        user = 'https://twitter.com/' + username
+        user = ['https://', env[:base].host, '/', username].join
         uri = user + '/status/' + id
         yield uri, Type, (SIOC + 'MicroblogPost').R
         yield uri, To, 'https://twitter.com'.R
