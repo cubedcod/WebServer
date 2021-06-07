@@ -1,10 +1,5 @@
 #!/bin/sh
 
 # HTTPS
-iptables  -A OUTPUT -p tcp --sport 443 -j ACCEPT -m owner --uid-owner $1                            # traffic from proxy
-ip6tables -A OUTPUT -p tcp --sport 443 -j ACCEPT -m owner --uid-owner $1
-iptables  -A OUTPUT -p tcp --dport 443 -j ACCEPT -m owner --uid-owner $1
-ip6tables -A OUTPUT -p tcp --dport 443 -j ACCEPT -m owner --uid-owner $1
-
-iptables -t nat -A OUTPUT -p tcp -d 127.0.0.1 --dport 443 -j REDIRECT --to-ports 8443 -m owner ! --uid-owner $1 # proxied traffic
+iptables -t nat -A OUTPUT -p tcp -d 127.0.0.1 --dport 443 -j REDIRECT --to-ports 8443 -m owner ! --uid-owner $1 # route traffic to proxy
 ip6tables -t nat -A OUTPUT -p tcp -d ::1 --dport 443 -j REDIRECT --to-ports 8443 -m owner ! --uid-owner $1

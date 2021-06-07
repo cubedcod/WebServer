@@ -2,10 +2,5 @@
 
 iptables -t nat -A OUTPUT -p tcp -d 127.0.0.1 --dport 80 -j REDIRECT --to-ports 8000                # simulate a low-port listener
 
-iptables  -A OUTPUT -p tcp --sport 80 -j ACCEPT -m owner --uid-owner $1                             # allow traffic from proxy out to net
-ip6tables -A OUTPUT -p tcp --sport 80 -j ACCEPT -m owner --uid-owner $1
-iptables  -A OUTPUT -p tcp --dport 80 -j ACCEPT -m owner --uid-owner $1
-ip6tables -A OUTPUT -p tcp --dport 80 -j ACCEPT -m owner --uid-owner $1
-
 iptables  -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8000 -m owner ! --uid-owner $1 # route traffic to proxy
 ip6tables -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8000 -m owner ! --uid-owner $1
