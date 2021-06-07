@@ -11,4 +11,4 @@ browser - hTMl renderer for lagrange,maybe http or just  use full HTTP-URI via g
 gack (gemini) server
 rdfization in gemini  client  - generalize w/  http? gemini://oppen.digital/memex/places/colonsay/20171103/
 more  304 and cache-header stuff on everything
-opensearch desc https://developer.mozilla.org/en-US/docs/Web/OpenSearch https://www.chromium.org/tab-to-search
+
