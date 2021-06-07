@@ -266,10 +266,7 @@ l.facebook.com l.instagram.com
 
     GotoTwitter = -> r {[301, {'Location' => ('//twitter.com' + r.path).R(r.env).href}, []]}
 
-    GET 'nitter.snopyta.org', GotoTwitter
-    GET 'mobile.twitter.com', GotoTwitter
-
-    GET 'twitter.com', -> r {
+    Twitter = -> r {
       r.env[:sort] = 'date'
       r.env[:view] = 'table'
       parts = r.parts
@@ -348,6 +345,10 @@ l.facebook.com l.instagram.com
           [s,h,b]
         end}}
 
+    GET 'nitter.snopyta.org', GotoTwitter
+    GET 'twitter.com', Twitter
+    GET 'mobile.twitter.com', Twitter
+
     GET 'www.walmart.com', NoGunk
 
     GET 'finance.yahoo.com', NoGunk
@@ -392,7 +393,7 @@ l.facebook.com l.instagram.com
             end
             [s,h,b]}
         when 'get_video_info'
-          if r.query_values['el'] == 'adunit' # TODO ad insertion
+          if r.query_values['el'] == 'adunit' # TODO customised ad insertion
             [200, {"Access-Control-Allow-Origin"=>"https://www.youtube.com", "Content-Type"=>"application/x-www-form-urlencoded", "Content-Length"=>"0"}, ['']]
           else
             r.env[:notransform] = true
