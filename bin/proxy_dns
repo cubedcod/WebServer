@@ -1,7 +1,9 @@
 #!/bin/sh
 
-## DNS
-iptables  -A OUTPUT -p tcp --sport 53 -j ACCEPT -m owner --uid-owner $1 # traffic from proxy
+iptables -t nat -A OUTPUT -p tcp -d 127.0.0.1 --dport 53 -j REDIRECT --to-ports 1053                # simulate a low-port listener
+iptables -t nat -A OUTPUT -p udp -d 127.0.0.1 --dport 53 -j REDIRECT --to-ports 1053
+
+iptables  -A OUTPUT -p tcp --sport 53 -j ACCEPT -m owner --uid-owner $1                             # allow traffic from proxy out to net
 ip6tables -A OUTPUT -p tcp --sport 53 -j ACCEPT -m owner --uid-owner $1
 iptables  -A OUTPUT -p tcp --dport 53 -j ACCEPT -m owner --uid-owner $1
 ip6tables -A OUTPUT -p tcp --dport 53 -j ACCEPT -m owner --uid-owner $1
@@ -10,7 +12,7 @@ ip6tables -A OUTPUT -p udp --sport 53 -j ACCEPT -m owner --uid-owner $1
 iptables  -A OUTPUT -p udp --dport 53 -j ACCEPT -m owner --uid-owner $1
 ip6tables -A OUTPUT -p udp --dport 53 -j ACCEPT -m owner --uid-owner $1
 
-iptables  -t nat -A OUTPUT -p tcp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1 # traffic not from proxy
+iptables  -t nat -A OUTPUT -p tcp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1 # route traffic to proxy
 ip6tables -t nat -A OUTPUT -p tcp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
 iptables  -t nat -A OUTPUT -p udp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
 ip6tables -t nat -A OUTPUT -p udp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
