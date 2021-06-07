@@ -62,7 +62,7 @@ class WebResource
         RDF::Writer.for(:turtle).open(f){|f|f << graph}                        # store 🐢 to canonical location
         log << "\e[38;5;48m#{'%2d' % graph.size}⋮🐢 \e[1m#{'http://localhost:8000' if !graphURI.host}#{graphURI}\e[0m"
       end
-      # if canonical location is not on timeline and graph has a timestamp, link graph to timeline
+      # if graph location is not on timeline and graph has a timestamp, link to timeline
       if !graphURI.to_s.match?(HourDir) && (ts = graph.query(timestamp).first_value) && ts.match?(/^\d\d\d\d-/)
         ts = ts.split /\D/                                                     # slice time-segments
         🕒 = [ts[0..3], ts.size < 4 ? '0' : nil,                               # timeslice containers
