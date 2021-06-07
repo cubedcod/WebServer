@@ -29,13 +29,14 @@ class WebResource
                                     hdepth = 0 ; '/%Y/%m/%d/%H/'
                                   else
                                   end)
-
-      glob = ps.size == 2 ? ['*/' * hdepth,           # glob less-significant timeslices inside slice
-                             '*.', ps[1], '.*'] : nil # glob slug at hour-dir
+      globbed = ps[1]&.match? GlobChars
+      pattern = ['*/' * hdepth,                        # glob less-significant slices within segment
+                 globbed ? nil : '*.', ps[1],          # glob query-slug for name-matching if bare
+                 globbed ? nil : '.*'] if ps.size == 2 # query-slug provided as second arg
 
       qs = (env['QUERY_STRING'] && !env['QUERY_STRING'].empty?) ? ['?',env['QUERY_STRING']] : nil
 
-      [303, env[:resp].update({'Location' => [loc, glob, qs].join}), []]
+      [303, env[:resp].update({'Location' => [loc, pattern, qs].join}), []]
     end
 
     def timeMeta
