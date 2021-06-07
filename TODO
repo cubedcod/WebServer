@@ -1,6 +1,5 @@
 ml mbox extract curl -I https://www.redhat.com/archives/dm-devel/2020-November.txt.gz
-path visualization (how did i get here? referer history)
-https://forum.solidproject.org/ blank nodes
+path visualization (how did i get here? referer logging / backlink history)
 git RDFize
 fix reverse-dns output binarycrap and/or switch to rubydns
 HTML view for schema.org events https://jewishchronicle.timesofisrael.com/ - datetimeline vis
