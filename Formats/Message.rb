@@ -181,7 +181,7 @@ class WebResource
                title = title.to_s.sub(/\/u\/\S+ on /,'')
                unless env[:title] == title # hide title if unchanged from previous post in group
                  env[:title] = title
-                 {_: :a, class: :title, href: resource.href, c: [(post.delete(Schema+'icon')||[]).map{|i|{_: :img, src: i.href}},CGI.escapeHTML(title)]}.update(hasPointer ? {} : (hasPointer = true; {id: 't' + id}))
+                 [{_: :a, class: :title, href: resource.href, c: [(post.delete(Schema+'icon')||[]).map{|i|{_: :img, src: i.href}},CGI.escapeHTML(title)]}.update(hasPointer ? {} : (hasPointer = true; {id: 't' + id})), '<br>']
                end},
              {class: :pointer,
               c: [({_: :a, class: :date, href: 'http://localhost:8000/' + date[0..13].gsub(/[-T:]/,'/') + '#' + id, c: date} if date), ' ', # timestamp link to representation in temporal index
