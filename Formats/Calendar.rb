@@ -34,7 +34,7 @@ class WebResource
                  globbed ? nil : '*.', ps[1],          # glob query-slug for name-matching if bare
                  globbed ? nil : '.*'] if ps.size == 2 # query-slug provided as second arg
 
-      qs = (env['QUERY_STRING'] && !env['QUERY_STRING'].empty?) ? ['?',env['QUERY_STRING']] : nil
+      qs = (env['QUERY_STRING'] && !env['QUERY_STRING'].empty?) ? ['?',env['QUERY_STRING']] : '?sort=date&view=table'
 
       [303, env[:resp].update({'Location' => [loc, pattern, qs].join}), []]
     end
