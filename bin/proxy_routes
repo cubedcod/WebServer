@@ -1,15 +1,18 @@
 #!/bin/sh
+
 #DNS
 iptables -t nat -A OUTPUT -p tcp -d 127.0.0.1 --dport 53 -j REDIRECT --to-ports 1053                # simulate a low-port listener
 iptables -t nat -A OUTPUT -p udp -d 127.0.0.1 --dport 53 -j REDIRECT --to-ports 1053
-iptables  -t nat -A OUTPUT -p tcp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1 # route traffic to proxy
+iptables  -t nat -A OUTPUT -p tcp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1 # route DNS traffic to proxy
 ip6tables -t nat -A OUTPUT -p tcp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
 iptables  -t nat -A OUTPUT -p udp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
 ip6tables -t nat -A OUTPUT -p udp --dport  53 -j REDIRECT --to-ports 1053 -m owner ! --uid-owner $1
+
 #HTTP
 iptables -t nat -A OUTPUT -p tcp -d 127.0.0.1 --dport 80 -j REDIRECT --to-ports 8000                # simulate a low-port listener
-iptables  -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8000 -m owner ! --uid-owner $1 # route traffic to proxy
+iptables  -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8000 -m owner ! --uid-owner $1 # route outgoing HTTP traffic thru proxy
 ip6tables -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8000 -m owner ! --uid-owner $1
+
 # HTTPS
-iptables -t nat -A OUTPUT -p tcp -d 127.0.0.1 --dport 443 -j REDIRECT --to-ports 8443 -m owner ! --uid-owner $1 # route traffic to proxy
+iptables -t nat -A OUTPUT -p tcp -d 127.0.0.1 --dport 443 -j REDIRECT --to-ports 8443 -m owner ! --uid-owner $1 # route traffic to proxy. since HTTPS MITM is fragile and often not supported in distro squids, it's sparingly applied for hosts mapped to localhost addresses via DNS
 ip6tables -t nat -A OUTPUT -p tcp -d ::1 --dport 443 -j REDIRECT --to-ports 8443 -m owner ! --uid-owner $1
