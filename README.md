@@ -4,10 +4,9 @@ mkdir -p ~/src && cd ~/src && git clone https://gitlab.com/ix/WebServer.git && c
 ```
 # USAGE
 
-## SERVERS
+## SERVER
 ``` sh
-cd ~/src/WebServer/bin
-sudo ./ports # optional, route ports 53, 80 and 443
+cd bin
 # DNS
 ./dnsd
 # Gemini
@@ -16,11 +15,23 @@ cd ~/web/ && unicorn -N -l 127.0.0.1:8000 -l [::1]:8000 -c ~/src/WebServer/confi
 # HTTPS
 cd ~/src/WebServer/config && squid -f squid.conf
 ```
-## CLIENTS
+## CLIENT
 
-shortcuts in [bin/browse](bin/browse/)
-
+shortcuts in [browse/](bin/browse/)
 [local UI bookmark](javascript:location.href='http://localhost:8000/https://'+location.hostname+location.pathname+'?cookie='+encodeURIComponent(document.cookie))
+
+## NETWORK
+a lightweight set of iptable rules to enable servicing of port 53 DNS requests on a high-port daemon, eliminate :8000 port specification on local URLs and redirect flagged HTTPS requests to a local proxy for rewriting or custom substitutions:
+
+``` sh
+./proxy
+```
+to undo the above and reset to default configuration:
+
+``` sh
+iptables -F -t nat
+```
+flag sites for custom handling by simply pointing their DNS to localhost, and the rest happens automagically via the routing rules and DNS server. you can jump right to editing the web's behavior in [site.rb](config/site.rb). do note UID/GID seperation between the proxy and browser is required for the above rules to fully work. if you're on an OS with modern per-app uid/gid sandboxing like Android, there's nothing to do. on classic "insecure by design" desktop distros you will want to create a seperate proxy uid.
 
 # WHAT
 
