@@ -1,4 +1,4 @@
 #!/bin/sh
 id=$(id -u)
-rules=$(which proxy_all)
+rules=$(which proxy_routes)
 su -c "$rules $id"
