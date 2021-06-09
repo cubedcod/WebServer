@@ -51,7 +51,7 @@ class WebResource
                       title = title.to_s.sub(/\/u\/\S+ on /, '').sub /^Re: /, ''                             # clean title
                       unless env[:title] == title                                                            # omit title if repeated on subsequent resource
                         env[:title] = title; tCount += 1
-                        [{_: :a,href: re.href, class: :title, c: CGI.escapeHTML(title), id: 'r'+Digest::SHA2.hexdigest(rand.to_s)}, ' '] # title
+                        [{_: :a,href: re.href, class: :title, c: CGI.escapeHTML(title), id: 'r'+Digest::SHA2.hexdigest(rand.to_s)}, '<br>'] # title
                       end},
                     ({_: :a,href: re.href, class: :id, c: '☛', id: 'r' + Digest::SHA2.hexdigest(rand.to_s)} if tCount == 0),    # resource pointer
                     ({class: :abstract, c: resource[Abstract]} if resource.has_key? Abstract),                                           # abstract
