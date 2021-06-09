@@ -1,6 +1,0 @@
-#!/bin/sh
-
-iptables -t nat -A OUTPUT -p tcp -d 127.0.0.1 --dport 80 -j REDIRECT --to-ports 8000                # simulate a low-port listener
-
-iptables  -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8000 -m owner ! --uid-owner $1 # route traffic to proxy
-ip6tables -t nat -A OUTPUT -p tcp --dport  80 -j REDIRECT --to-ports 8000 -m owner ! --uid-owner $1

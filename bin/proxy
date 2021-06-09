@@ -1,10 +1,4 @@
 #!/bin/sh
 id=$(id -u)
-
-dns=$(which proxy_dns)
-http=$(which proxy_http)
-https=$(which proxy_https)
-
-su -c "$dns $id"
-su -c "$http $id"
-su -c "$https $id"
+rules=$(which proxy_routes)
+su -c "$rules $id"
