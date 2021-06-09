@@ -31,7 +31,7 @@ to undo the above, returning to default config:
 ``` sh
 sudo iptables -F -t nat
 ```
-flag sites for custom handling by simply pointing their DNS to localhost, and the rest happens automagically via the routing rules and DNS proxy. you can jump right to editing the web's behavior in [site.rb](config/site.rb). do note UID/GID seperation between the proxy and browser is required for the above rules to work. if you're on an OS with modern per-app uid/gid sandboxing like Android, there's nothing to do. on classic "insecure by design" desktop distros you will want to create a seperate proxy uid.
+flag sites for custom handling by simply pointing their DNS to localhost, and the rest happens automagically via routing rules and DNS. you can jump right to editing the web's behavior in [site.rb](config/site.rb). do note UID/GID seperation between the proxy and browser is required for the above rules to work. if you're on an OS with modern per-app uid/gid sandboxing like Android, there's nothing to do. on classic "insecure by design" desktop distros you will want to create a seperate proxy uid.
 
 # WHAT
 
