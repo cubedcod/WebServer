@@ -8,7 +8,7 @@ class WebResource
     HostGET = {}
     Methods = %w(GET HEAD OPTIONS POST PUT)
     Args = %w(find fullContent notransform offline order sort view)
-
+    #Pry::ColorPrinter.pp env
     def allow_domain?
       c = AllowDomains                                              # start cursor at root
       host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # search for leaf in domain tree
@@ -59,6 +59,12 @@ class WebResource
     rescue Exception => e                                                # error handler
       puts uri, e.class, e.message, e.backtrace
       [500, {'Content-Type' => 'text/html; charset=utf-8'}, env['REQUEST_METHOD'] == 'HEAD' ? [] : ["<html><body class='error'>#{HTML.render [{_: :style, c: SiteCSS}, {_: :script, c: SiteJS}, uri.uri_toolbar]}500</body></html>"]]
+    end
+
+    def client_cached?
+      %w(HTTP_IF_NONE_MATCH
+         HTTP_IF_MODIFIED_SINCE).find{|k|
+        env.has_key? k}
     end
 
     def client_etags
@@ -139,9 +145,9 @@ class WebResource
     # fetch data from cache or remote
     def fetch
       return cacheResponse if offline?                                # offline, respond from cache
-      return [304,{},[]] if %w(HTTP_IF_NONE_MATCH HTTP_IF_MODIFIED_SINCE).find{|k|env.has_key? k} && NoInvalidate.member?(extname) # client cache is valid
+      return [304,{},[]] if client_cached? && NoVersions.member?(extname) # client cache is valid
       ns = nodeSet                                                    # find cached nodes
-      return ns[0].fileResponse if ns.size == 1 && (NoInvalidate.member? ns[0].extname) # proxy/server cache is valid, return it to client
+      return ns[0].fileResponse if ns.size == 1 && (NoVersions.member? ns[0].extname) # proxy/server cache is valid, return it to client
 
       if timestamp = ns.map{|n|n.node.mtime if n.node.exist?}.compact.sort[0]
         env['HTTP_IF_MODIFIED_SINCE'] = timestamp.httpdate            # send our cache timestamp to origin
