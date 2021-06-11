@@ -142,6 +142,10 @@ class WebResource
       end
     end
 
+    def etag_hit?
+      client_etags.include? env[:resp]['ETag']
+    end
+
     # fetch data from cache or remote
     def fetch
       return cacheResponse if offline?                                # offline, respond from cache
@@ -298,7 +302,7 @@ class WebResource
 
     def fileResponse
       env[:resp]['ETag'] ||= Digest::SHA2.hexdigest [uri, node.stat.mtime, node.size].join
-      return [304,{},[]] if client_etags.include? env[:resp]['ETag']    # client has file
+      return [304,{},[]] if etag_hit?                                   # client has file
       Rack::Files.new('.').serving(Rack::Request.new(env), fsPath).yield_self{|s,h,b|
         if 304 == s
           [304, {}, []]                                                 # unmodified file
@@ -348,7 +352,7 @@ class WebResource
 
     def graphResponse defaultFormat='text/html'
       return notfound if !env.has_key?(:repository)||env[:repository].empty? # empty graph
-      return [304,{},[]] if client_etags.include? env[:resp]['ETag']         # client has file
+      return [304,{},[]] if etag_hit?                                        # client has file
       status = env[:status] || 200                                           # response status
       format = selectFormat defaultFormat                                    # response format
       env[:resp]['Access-Control-Allow-Origin'] ||= origin                   # response headers
