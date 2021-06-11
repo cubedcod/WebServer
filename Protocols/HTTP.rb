@@ -8,6 +8,8 @@ class WebResource
     HostGET = {}
     Methods = %w(GET HEAD OPTIONS POST PUT)
     Args = %w(find fullContent notransform offline order sort view)
+    R304 = [304, {}, []]
+
     #Pry::ColorPrinter.pp env
     def allow_domain?
       c = AllowDomains                                              # start cursor at root
@@ -151,25 +153,25 @@ class WebResource
 
     # fetch data from cache or remote
     def fetch
-      return cacheResponse if offline?                                   # offline always a response from cache
-      return [304,{},[]] if client_cached? && StaticExt.member?(extname) # client cache hit, nothing to return
-      ns = nodeSet                                                       # find cached nodes
+      return cacheResponse if offline?                                # offline always a response from cache
+      return R304 if client_cached? && StaticExt.member?(extname)     # client cache hit, no content
+      ns = nodeSet                                                    # find cached nodes
       return ns[0].fileResponse if ns.size == 1 && StaticExt.member?(ns[0].extname) # proxy cache hit, return content
       if timestamp = ns.map{|n|n.node.mtime if n.node.exist?}.compact.sort[0]
-        env[:cache_timestamp] = timestamp.httpdate                       # cache timestamp for conditional fetch
+        env[:cache_timestamp] = timestamp.httpdate                    # cache timestamp for conditional fetch
       end
-      case scheme                                                        # scheme-specific fetch
-      when nil                                                           # undefined scheme
-        ['https:', uri].join.R(env).fetchHTTP                            # HTTPS fetch by default
+      case scheme                                                     # scheme-specific fetch
+      when nil                                                        # undefined scheme
+        ['https:', uri].join.R(env).fetchHTTP                         # HTTPS fetch by default
       when 'gemini'
-        fetchGemini                                                      # Gemini fetch
+        fetchGemini                                                   # Gemini fetch
       when /^http/
-        fetchHTTP                                                        # HTTPS fetch
+        fetchHTTP                                                     # HTTPS fetch
       else
-        puts "⚠️ unsupported scheme: #{uri}"                              # unknown scheme
+        puts "⚠️ unsupported scheme: #{uri}"                           # unknown scheme
       end
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError => e
-      if scheme == 'https'                                               # HTTP fetch after HTTPS failure
+      if scheme == 'https'                                            # HTTP fetch after HTTPS failure
         puts "⚠️  fallback scheme #{uri} -> HTTP"
         uri.sub('s','').R(env).fetchHTTP rescue (env[:status] = 408; notfound)
       else
@@ -259,7 +261,7 @@ class WebResource
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag Last-Modified).map{|k| env[:resp][k] ||= h[k] if h[k]}
 
           if etag_match?                                              # caller has entity
-            [304, {}, []]                                             # no content
+            R304                                                      # no content
           elsif env[:notransform]||!format||format.match?(FixedFormat)# no transform
             body = Webize::HTML.resolve_hrefs body, env, true if format == 'text/html' && env.has_key?(:proxy_href) # resolve hrefs in proxy-href mode
             env[:resp]['Content-Type'] = format                       # Content-Type metadata
@@ -304,10 +306,10 @@ class WebResource
                         'ETag' => etag,
                         'Content-Length' => node.size.to_s,
                         'Content-Type' => mime})
-      return [304,{},[]] if etag_match?                            # client has file version
+      return R304 if etag_match?                                   # client has file version
       Rack::Files.new('.').serving(Rack::Request.new(env), fsPath).yield_self{|s,h,b|
         if 304 == s
-          [304, {}, []]                                            # client has unmodified file
+          R304                                                     # client has unmodified file
         else
           h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type']=='application/javascript' # add charset
           puts h
