@@ -148,30 +148,25 @@ class WebResource
 
     # fetch data from cache or remote
     def fetch
-      return cacheResponse if offline?                                # offline, respond from cache
-      return [304,{},[]] if client_cached? && NoVersions.member?(extname) # client cache is valid
-      ns = nodeSet                                                    # find cached nodes
-      return ns[0].fileResponse if ns.size == 1 && (NoVersions.member? ns[0].extname) # proxy/server cache is valid, return it to client
-
+      return cacheResponse if offline?                                   # offline always a response from cache
+      return [304,{},[]] if client_cached? && StaticExt.member?(extname) # client cache hit, nothing to return
+      ns = nodeSet                                                       # find cached nodes
+      return ns[0].fileResponse if ns.size == 1 && StaticExt.member?(ns[0].extname) # proxy cache hit, return content
       if timestamp = ns.map{|n|n.node.mtime if n.node.exist?}.compact.sort[0]
-        env['HTTP_IF_MODIFIED_SINCE'] = timestamp.httpdate            # send our cache timestamp to origin
+        env[:cache_timestamp] = timestamp.httpdate                       # cache timestamp for conditional fetch
       end
-
-      case scheme
-      when nil                                                        # undefined scheme
-        ['https:', uri].join.R(env).fetchHTTP                         # HTTPS fetch via default
+      case scheme                                                        # scheme-specific fetch
+      when nil                                                           # undefined scheme
+        ['https:', uri].join.R(env).fetchHTTP                            # HTTPS fetch by default
       when 'gemini'
-        fetchGemini                                                   # Gemini fetch
+        fetchGemini                                                      # Gemini fetch
       when /^http/
-        fetchHTTP                                                     # HTTPS fetch
+        fetchHTTP                                                        # HTTPS fetch
       else
-        puts "⚠️ unsupported scheme: #{uri}"
+        puts "⚠️ unsupported scheme: #{uri}"                              # unknown scheme
       end
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError => e
-      puts [e.class, e.message].join ' '
-     #if e.class == SocketError && e.message.index('name not known')  # DNS lookup failure
-     #  [302,{'Location' => 'http://localhost/https://www.google.com/search' + HTTP.qs({'q' => host})},[]]
-      if scheme == 'https'                                            # HTTP fetch on HTTPS failure
+      if scheme == 'https'                                               # HTTP fetch after HTTPS failure
         puts "⚠️  fallback scheme #{uri} -> HTTP"
         uri.sub('s','').R(env).fetchHTTP rescue (env[:status] = 408; notfound)
       else
@@ -257,17 +252,18 @@ class WebResource
               ref = ref.sub(/^</,'').sub />$/, ''
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
-            end}                                                      # more upstream headers
-          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials Content-Type Last-Modified).map{|k|
-            env[:resp][k] ||= h[k] if h[k]}
-          env[:resp]['ETag'] ||= h['Etag']                            # ETag header
+            end}                                                      # upstream headers
+          %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag Last-Modified).map{|k| env[:resp][k] ||= h[k] if h[k]}
 
-          if env[:notransform]|| !format ||format.match?(FixedFormat) # no transform
-            body = Webize::HTML.resolve_hrefs body, env, true if format == 'text/html' && env.has_key?(:proxy_href) # resolve hrefs in proxy scenario
-            env[:resp]['Content-Length'] = body.bytesize.to_s         # Content-Length header
-            [200, env[:resp], [body]]                                 # response in upstream format
+          if etag_hit?                                                # caller has entity
+            [304, {}, []]                                             # no content
+          elsif env[:notransform]||!format||format.match?(FixedFormat)# no transform
+            body = Webize::HTML.resolve_hrefs body, env, true if format == 'text/html' && env.has_key?(:proxy_href) # resolve hrefs in proxy-href mode
+            env[:resp]['Content-Type'] = format                       # Content-Type metadata
+            env[:resp]['Content-Length'] = body.bytesize.to_s         # Content-Length metadata
+            [200, env[:resp], [body]]                                 # content in upstream format
           else                                                        # content-negotiated transform
-            graphResponse format                                      # response in requested format
+            graphResponse format                                      # content in preferred format
           end
         end
       end
@@ -383,21 +379,24 @@ class WebResource
                           [s, h, []]} # return status and header
     end
 
-    # client<>proxy connection-specific headers not reused on proxy<>origin connection
+    # client<>proxy headers not repeated verbatim on proxy<>origin connection
     SingleHopHeaders = %w(connection host keep-alive path-info query-string
  remote-addr request-method request-path request-uri script-name server-name server-port server-protocol server-software
  te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for)
 
+    # headers for export to origin call or client response
     def headers raw = nil
       raw ||= env || {}                                     # raw headers
       head = {}                                             # cleaned headers
       raw.map{|k,v|                                         # inspect (k,v) pairs
-        unless k.class != String || k.index('rack.') == 0   # strip Rack-internal headers
+        unless k.class != String || k.index('rack.') == 0   # hide internal headers
           key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|t| # strip Rack prefix and tokenize
             if %w{cf cl csrf ct dfe dnt id spf utc xss xsrf}.member? t # acronyms
-              t = t.upcase                                  # upcase acronym
+              t = t.upcase                                  # acronym
+            elsif 'etag' == t
+              'ETag'                                        # partial acronymm
             else
-              t[0] = t[0].upcase                            # capitalize
+              t[0] = t[0].upcase                            # capitalized word
             end
             t}.join '-'                                     # join tokens
           head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless SingleHopHeaders.member? key.downcase # set header

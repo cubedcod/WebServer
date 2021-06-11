@@ -61,7 +61,7 @@ class WebResource
       'youtube.com' => '#f00',
     }
 
-    NoVersions = %w(.bin .css .gif .ico .jpeg .jpg .m3u8 .m4a .mp3 .mp4 .ogg .opus .png .svg .wav .webm .webp) # new version requires new URI, for these extensions. used for 'existence means cache is valid' strategy
+    StaticExt = %w(.bin .css .gif .ico .jpeg .jpg .m3u8 .m4a .mp3 .mp4 .ogg .opus .png .svg .wav .webm .webp) # new version requires new URI for static-cache validation purposes
 
     # site resources
 
