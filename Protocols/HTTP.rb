@@ -300,18 +300,18 @@ class WebResource
     end
 
     def fileResponse
-      env[:resp].update({'Access-Control-Allow-Origin'] => origin,      # response metadata
+      env[:resp].update({'Access-Control-Allow-Origin'] => origin, # response metadata
                         'ETag' => etag,
                         'Content-Length' => node.size.to_s,
                         'Content-Type' => mime})
-      return [304,{},[]] if etag_match?                                 # client has file version
+      return [304,{},[]] if etag_match?                            # client has file version
       Rack::Files.new('.').serving(Rack::Request.new(env), fsPath).yield_self{|s,h,b|
         if 304 == s
-          [304, {}, []]                                                 # client has unmodified file
+          [304, {}, []]                                            # client has unmodified file
         else
-          h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type'] == 'application/javascript' # add charset 
+          h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type']=='application/javascript' # add charset
           puts h
-          [s, h.update(env[:resp]), b]                                  # file response
+          [s, env[:resp].update(h), b]                             # file response
         end}
     end
 
