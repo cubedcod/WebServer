@@ -175,7 +175,8 @@ class WebResource
         puts "⚠️  fallback scheme #{uri} -> HTTP"
         uri.sub('s','').R(env).fetchHTTP rescue (env[:status] = 408; notfound)
       else
-        env[:status] = 408; notfound
+        env[:status] = 408
+        notfound
       end
     end
 
@@ -302,17 +303,20 @@ class WebResource
     end
 
     def fileResponse
-      env[:resp].update({'Access-Control-Allow-Origin'] => origin, # response metadata
-                        'ETag' => etag,
-                        'Content-Length' => node.size.to_s,
-                        'Content-Type' => mime})
+      env[:resp].update({'Access-Control-Allow-Origin' => origin, # response metadata
+                         'ETag' => etag,
+                         'Content-Length' => node.size.to_s,
+                         'Content-Type' => mime,
+                         'Last-Modified' => node.mtime.httpdate})
+
       return R304 if etag_match?                                   # client has file version
+
       Rack::Files.new('.').serving(Rack::Request.new(env), fsPath).yield_self{|s,h,b|
         if 304 == s
           R304                                                     # client has unmodified file
         else
           h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type']=='application/javascript' # add charset
-          puts h
+          puts :rackmeta, h
           [s, env[:resp].update(h), b]                             # file response
         end}
     end
@@ -346,15 +350,14 @@ class WebResource
       end
     end
 
-    def graphResponse defaultFormat='text/html'
+    def graphResponse defaultFormat = 'text/html'
       return notfound if !env.has_key?(:repository)||env[:repository].empty? # empty graph
       return [304,{},[]] if etag_match?                                      # client has entity
-      status = env[:status] || 200                                           # response status
       format = selectFormat defaultFormat                                    # response format
-      env[:resp]['Access-Control-Allow-Origin'] ||= origin                   # response headers
-      env[:resp].update({'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format})
-      env[:resp].update({'Link' => env[:links].map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')}) unless !env[:links] || env[:links].empty?
-      return [status, env[:resp], nil] if env['REQUEST_METHOD'] == 'HEAD'    # header-only response
+      env[:resp].update({'Access-Control-Allow-Origin' => origin,            # response metadata
+                         'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format,
+                         'Link' => (env[:links]||{}).map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')})
+      return [status, env[:resp], nil] if env['REQUEST_METHOD'] == 'HEAD'    # metadata response
 
       body = case format                                                     # response body
              when /html/
@@ -371,7 +374,7 @@ class WebResource
              end
       env[:resp]['Content-Length'] = body.bytesize.to_s                      # response size
 
-      [status, env[:resp], [body]]                                           # graph response
+      [env[:status] || 200, env[:resp], [body]]                              # graph response
     end
 
     def HEAD
