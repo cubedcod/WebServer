@@ -278,9 +278,9 @@ class WebResource
         else
           [302, {'Location' => dest.href}, []]
         end
-      when /304/ # Not Modified
+      when /304/ # upstream not modified
         cacheResponse
-      when /300|[45]\d\d/ # Not Found, Not Allowed and misc upstream errors
+      when /300|[45]\d\d/ # not allowed, not found and misc origin errors
         env[:status] = status.to_i
         head = headers e.io.meta
         body = HTTP.decompress(head, e.io.read).encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
