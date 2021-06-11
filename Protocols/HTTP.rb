@@ -263,10 +263,10 @@ class WebResource
 
           if etag_match?                                              # caller has entity
             R304                                                      # no content
-          elsif env[:notransform]||!format||format.match?(FixedFormat)# no transform
+          elsif env[:notransform] || format&.match?(FixedFormat)      # no transform
             body = Webize::HTML.resolve_hrefs body, env, true if format == 'text/html' && env.has_key?(:proxy_href) # resolve hrefs in proxy-href mode
-            env[:resp]['Content-Type'] = format                       # Content-Type metadata
-            env[:resp]['Content-Length'] = body.bytesize.to_s         # Content-Length metadata
+            env[:resp].update({'Content-Type' => format,              # Content-Type metadata
+                             'Content-Length' => body.bytesize.to_s}) # Content-Length metadata
             [200, env[:resp], [body]]                                 # content in upstream format
           else                                                        # content-negotiated transform
             graphResponse format                                      # content in preferred format
@@ -356,7 +356,7 @@ class WebResource
       format = selectFormat defaultFormat                                    # response format
       env[:resp].update({'Access-Control-Allow-Origin' => origin,            # response metadata
                          'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format,
-                         'Link' => (env[:links]||{}).map{|type,uri|"<#{uri}>; rel=#{type}"}.join(', ')})
+                         'Link' => linkHeader})
       return [status, env[:resp], nil] if env['REQUEST_METHOD'] == 'HEAD'    # metadata response
 
       body = case format                                                     # response body
@@ -444,6 +444,12 @@ class WebResource
       else                                                  # generic handler: remote node cache
         fetch
       end
+    end
+
+    def linkHeader
+      return unless env.has_key? :links
+      env[:links].map{|type,uri|
+        "<#{uri}>; rel=#{type}"}.join(', ')
     end
 
     def mime
