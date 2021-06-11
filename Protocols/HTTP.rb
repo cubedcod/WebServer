@@ -19,8 +19,7 @@ class WebResource
       if nodes.size == 1  # one node. determine if it suits content-negotiated preferences
         static = nodes[0]
         return static.fileResponse if env[:notransform]                  # no transformation per request
-        suffix = static.extname                                          # format suffix
-        format = MIME_Types[suffix] || Rack::Mime::MIME_TYPES[suffix]    # format
+        format = static.mime                                             # cache format
         return static.fileResponse if format&.match? FixedFormat         # no transformations available
         return static.fileResponse if format == (selectFormat format)    # already in preferred format
       end
@@ -142,7 +141,11 @@ class WebResource
       end
     end
 
-    def etag_hit?
+    def etag
+      Digest::SHA2.hexdigest [uri, node.stat.mtime, node.size].join
+    end
+
+    def etag_match?
       client_etags.include? env[:resp]['ETag']
     end
 
@@ -255,7 +258,7 @@ class WebResource
             end}                                                      # upstream headers
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag Last-Modified).map{|k| env[:resp][k] ||= h[k] if h[k]}
 
-          if etag_hit?                                                # caller has entity
+          if etag_match?                                              # caller has entity
             [304, {}, []]                                             # no content
           elsif env[:notransform]||!format||format.match?(FixedFormat)# no transform
             body = Webize::HTML.resolve_hrefs body, env, true if format == 'text/html' && env.has_key?(:proxy_href) # resolve hrefs in proxy-href mode
@@ -297,22 +300,17 @@ class WebResource
     end
 
     def fileResponse
-      env[:resp]['ETag'] ||= Digest::SHA2.hexdigest [uri, node.stat.mtime, node.size].join
-      return [304,{},[]] if etag_hit?                                   # client has file
+      env[:resp].update({'Access-Control-Allow-Origin'] => origin,      # response metadata
+                        'ETag' => etag,
+                        'Content-Length' => node.size.to_s,
+                        'Content-Type' => mime})
+      return [304,{},[]] if etag_match?                                 # client has file version
       Rack::Files.new('.').serving(Rack::Request.new(env), fsPath).yield_self{|s,h,b|
         if 304 == s
-          [304, {}, []]                                                 # unmodified file
+          [304, {}, []]                                                 # client has unmodified file
         else
-          if h['Content-Type'] == 'application/javascript'
-            h['Content-Type'] = 'application/javascript; charset=utf-8' # add charset 
-          elsif !h.has_key?('Content-Type')                             # format missing?
-            ext = extname
-            if mime = MIME_Types[ext] || Rack::Mime::MIME_TYPES[ext]    # format via extension-map
-              h['Content-Type'] = mime
-            end
-          end
-          env[:resp]['Access-Control-Allow-Origin'] ||= origin
-          env[:resp]['Content-Length'] = node.size.to_s
+          h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type'] == 'application/javascript' # add charset 
+          puts h
           [s, h.update(env[:resp]), b]                                  # file response
         end}
     end
@@ -348,7 +346,7 @@ class WebResource
 
     def graphResponse defaultFormat='text/html'
       return notfound if !env.has_key?(:repository)||env[:repository].empty? # empty graph
-      return [304,{},[]] if etag_hit?                                        # client has file
+      return [304,{},[]] if etag_match?                                      # client has entity
       status = env[:status] || 200                                           # response status
       format = selectFormat defaultFormat                                    # response format
       env[:resp]['Access-Control-Allow-Origin'] ||= origin                   # response headers
@@ -380,7 +378,7 @@ class WebResource
     end
 
     # client<>proxy headers not repeated verbatim on proxy<>origin connection
-    SingleHopHeaders = %w(connection host keep-alive path-info query-string
+    SingleHopHeaders = %w(connection host if-modified-since if-none-match keep-alive path-info query-string
  remote-addr request-method request-path request-uri script-name server-name server-port server-protocol server-software
  te transfer-encoding unicorn.socket upgrade upgrade-insecure-requests version via x-forwarded-for)
 
@@ -441,6 +439,11 @@ class WebResource
       else                                                  # generic handler: remote node cache
         fetch
       end
+    end
+
+    def mime
+      suffix = extname
+      MIME_Types[suffix] || Rack::Mime::MIME_TYPES[suffix]
     end
 
     def notfound
