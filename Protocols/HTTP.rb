@@ -47,7 +47,9 @@ class WebResource
       env.update({base: uri, feeds: [], links: {}, resp: {}})            # response environment
       uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body|    # dispatch request
         format = uri.format_icon head['Content-Type']                    # log response
+        client_status = status_icon status
         origin_format = uri.format_icon env[:origin_format] if env[:origin_format]
+        origin_status = status_icon env[:origin_status]
         color = if env[:deny]
                   '38;5;196'
                 elsif env[:filtered]
@@ -55,9 +57,9 @@ class WebResource
                 else
                   format_color format
                 end
-        puts [[format == origin_format ? nil : format, (status_icon status),
+        puts [[format == origin_format ? nil : format, client_status == origin_status ? nil : client_status,
                env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]),
-               origin_format, (status_icon env[:origin_status]),
+               origin_format, origin_status,
                ([env[:repository].size,'⋮'].join if env[:repository] && env[:repository].size > 0)].join,
               env['HTTP_REFERER'] ? ["\e[#{color}m", env['HTTP_REFERER'], "\e[0m→"] : nil, "\e[#{color}#{env['HTTP_REFERER'] && !env['HTTP_REFERER'].index(env[:base].host) && ';7' || ''}m",
               env[:base], "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil, Verbose ? [env['HTTP_ACCEPT'], head['Content-Type']].compact.join(' → ') : nil,
