@@ -162,9 +162,9 @@ class WebResource
     # fetch data from cache or remote
     def fetch
       return cacheResponse if offline?                                # offline always a response from cache
-      return R304 if client_cached? && static_content?                # client has node
+      return R304 if client_cached? && StaticExt.member?(extname)     # client has node
       ns = nodeSet                                                    # find cached nodes
-      return ns[0].fileResponse if ns.size==1 && ns[0].static_content? # proxy has node
+      return ns[0].fileResponse if ns.size==1 && StaticExt.member?(ns[0].extname) # proxy has node
       if timestamp = ns.map{|n|n.node.mtime if n.node.file?}.compact.sort[0]
         env[:cache_timestamp] = timestamp.httpdate                    # cache timestamp for conditional fetch
       end
@@ -280,7 +280,7 @@ class WebResource
             body = Webize::HTML.resolve_hrefs body, env, true if format == 'text/html' && env.has_key?(:proxy_href) # resolve hrefs in proxy-href mode
             env[:resp].update({'Content-Type' => format,              # response metadata
                              'Content-Length' => body.bytesize.to_s})
-            env[:resp]['Expires'] = Time.at(3e10).httpdate if static_content?
+            env[:resp]['Expires'] = (Time.now + 3e7).httpdate if file && (StaticExt.member? File.extname file)
             [200, env[:resp], [body]]                                 # content in upstream format
           else                                                        # content-negotiated transform
             graphResponse format                                      # content in preferred format
@@ -325,9 +325,11 @@ class WebResource
                          'Last-Modified' => node.mtime.httpdate})
 
       return R304 if etag_match?                                   # client has file version
-      env[:resp]['Expires'] = Time.at(3e10).httpdate if static_content?
 
-      Rack::Files.new('.').serving(Rack::Request.new(env), fsPath).yield_self{|s,h,b|
+      location = fsPath
+      env[:resp]['Expires'] = (Time.now + 3e7).httpdate if StaticExt.member?(File.extname location)
+
+      Rack::Files.new('.').serving(Rack::Request.new(env), location).yield_self{|s,h,b|
         if 304 == s
           R304                                                     # client has unmodified file
         else
@@ -593,10 +595,6 @@ class WebResource
           return format if RDF::Writer.for(:content_type => format) || # RDF writer available for format
              ['application/atom+xml','text/html'].member?(format)}}    # non-RDF writer available
       default                                                          # search failure
-    end
-
-    def static_content?
-      StaticExt.member? extname
     end
 
     def unproxy schemeless = false

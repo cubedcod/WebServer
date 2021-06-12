@@ -61,7 +61,7 @@ class WebResource
       'youtube.com' => '#f00',
     }
 
-    StaticExt = %w(.bin .css .gif .ico .jpeg .jpg .js .m3u8 .m4a .mp3 .mp4 .ogg .opus .png .svg .wav .webm .webp) # new version requires new URI for cache-invalidation
+    StaticExt = %w(.bin .css .gif .ico .jpeg .jpg .js .m3u8 .m4a .mp3 .mp4 .ogg .opus .png .svg .wav .webm .webp) # long-cached extensions. new version requires new URI
 
     # site resources
 
