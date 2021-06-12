@@ -19,15 +19,15 @@ class WebResource
 
     def cacheResponse
       nodes = nodeSet     # find nodes
-      if nodes.size == 1  # one node. determine if it suits content-negotiated preferences
+      if nodes.size == 1  # a node. determine if it suits content-negotiated preference
         static = nodes[0]
-        return static.fileResponse if env[:notransform]                  # no transformation per request
-        if format = static.mime_type                                        # cache format
-          return static.fileResponse if format.match? FixedFormat         # no transformations available
-          return static.fileResponse if format != 'text/html' && format==selectFormat(format) # already in desired format
+        return static.fileResponse if env[:notransform]                                           # no transformations allowed
+        if format = static.mime_type                                                              # look up cache MIME
+          return static.fileResponse if format.match? FixedFormat                                 # no transformations available
+          return static.fileResponse if !ReFormat.member?(format) && format==selectFormat(format) # cache is in preferred format, return
         end
       end
-      nodes.map &:loadRDF # load graph-data for merging and/or transcoding
+      nodes.map &:loadRDF # read data for merging and/or transcoding
       graphResponse       # response
     end
 
