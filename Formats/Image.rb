@@ -339,7 +339,8 @@ class WebResource
     end
 
     def self.status_icon status
-      {202 => '➕',
+      {200 => ' ',
+       202 => '➕',
        204 => '✅',
        301 => '➡️',
        302 => '➡️',
@@ -351,7 +352,7 @@ class WebResource
        408 => '🔌',
        410 => '❌',
        500 => '🚩',
-       503 => '🔌'}[status] || (status == 200 ? nil : status)
+       503 => '🔌'}[status] || status
     end
 
   end

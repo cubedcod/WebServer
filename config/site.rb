@@ -196,7 +196,8 @@ l.facebook.com l.instagram.com
           "https://api.mixcloud.com/#{chan}/cloudcasts/".R(r.env).fetchHTTP format: 'application/json', thru: false}
         r.saveRDF.graphResponse
       else
-       NoGunk[r]
+        r.env[:feeds].push "https://api.mixcloud.com/#{r.parts[0]}/cloudcasts/"
+        NoGunk[r]
       end}
 
     GET 'www.msn.com', NoGunk
