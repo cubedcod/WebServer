@@ -165,7 +165,7 @@ class WebResource
       return R304 if client_cached? && static_content?                # client has node
       ns = nodeSet                                                    # find cached nodes
       return ns[0].fileResponse if ns.size==1 && ns[0].static_content? # proxy has node
-      if timestamp = ns.map{|n|n.node.mtime if n.node.exist?}.compact.sort[0]
+      if timestamp = ns.map{|n|n.node.mtime if n.node.file?}.compact.sort[0]
         env[:cache_timestamp] = timestamp.httpdate                    # cache timestamp for conditional fetch
       end
       case scheme                                                     # scheme-specific fetch
@@ -368,11 +368,12 @@ class WebResource
     def graphResponse defaultFormat = 'text/html'
       return notfound if !env.has_key?(:repository)||env[:repository].empty? # empty graph
       return [304,{},[]] if etag_match?                                      # client has entity
+      env[:status] ||= 200
       format = selectFormat defaultFormat                                    # response format
       env[:resp].update({'Access-Control-Allow-Origin' => origin,            # response metadata
                          'Content-Type' => %w{text/html text/turtle}.member?(format) ? (format+'; charset=utf-8') : format,
                          'Link' => linkHeader})
-      return [status, env[:resp], nil] if env['REQUEST_METHOD'] == 'HEAD'    # metadata response
+      return [env[:status], env[:resp], nil] if env['REQUEST_METHOD']=='HEAD'# metadata response
 
       body = case format                                                     # response body
              when /html/
@@ -389,7 +390,7 @@ class WebResource
              end
       env[:resp]['Content-Length'] = body.bytesize.to_s                      # response size
 
-      [env[:status] || 200, env[:resp], [body]]                              # graph response
+      [env[:status], env[:resp], [body]]                              # graph response
     end
 
     def HEAD
