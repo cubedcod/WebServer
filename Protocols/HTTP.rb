@@ -22,9 +22,10 @@ class WebResource
       if nodes.size == 1  # one node. determine if it suits content-negotiated preferences
         static = nodes[0]
         return static.fileResponse if env[:notransform]                  # no transformation per request
-        format = static.mime_type                                        # cache format
-        return static.fileResponse if format&.match? FixedFormat         # no transformations available
-        return static.fileResponse if format == (selectFormat format)    # already in preferred format
+        if format = static.mime_type                                        # cache format
+          return static.fileResponse if format.match? FixedFormat         # no transformations available
+          return static.fileResponse if format != 'text/html' && format==selectFormat(format) # already in desired format
+        end
       end
       nodes.map &:loadRDF # load graph-data for merging and/or transcoding
       graphResponse       # response
@@ -56,8 +57,8 @@ class WebResource
                 end
         puts [[format == origin_format ? nil : format, (status_icon status),
                env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]),
-               origin_format, (status_icon env[:origin_status])].join,
-              ([env[:repository].size,'⋮'].join if env[:repository] && env[:repository].size > 0),
+               origin_format, (status_icon env[:origin_status]),
+               ([env[:repository].size,'⋮'].join if env[:repository] && env[:repository].size > 0)].join,
               env['HTTP_REFERER'] ? ["\e[#{color}m", env['HTTP_REFERER'], "\e[0m→"] : nil, "\e[#{color}#{env['HTTP_REFERER'] && !env['HTTP_REFERER'].index(env[:base].host) && ';7' || ''}m",
               env[:base], "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil, Verbose ? [env['HTTP_ACCEPT'], head['Content-Type']].compact.join(' → ') : nil,
              ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
@@ -284,8 +285,9 @@ class WebResource
         end
       end
     rescue Exception => e
-      status = e.respond_to?(:io) ? e.io.status[0] : ''
-      case status
+      raise unless e.respond_to? :io
+      env[:origin_status] = e.io.status[0].to_i
+      case env[:origin_status].to_s
       when /30[12378]/ # redirected
         dest = (join e.io.meta['location']).R env
         if scheme == 'https' && dest.scheme == 'http'
@@ -297,7 +299,7 @@ class WebResource
       when /304/ # upstream not modified
         cacheResponse
       when /300|[45]\d\d/ # not allowed, not found and misc origin errors
-        env[:status] = status.to_i
+        env[:status] = env[:origin_status]
         head = headers e.io.meta
         body = HTTP.decompress(head, e.io.read).encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
         if head['Content-Type']&.index 'html'
@@ -326,7 +328,6 @@ class WebResource
           R304                                                     # client has unmodified file
         else
           h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type']=='application/javascript' # add charset
-          puts :rackmeta, h
           [s, env[:resp].update(h), b]                             # file response
         end}
     end
