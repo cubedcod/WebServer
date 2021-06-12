@@ -47,6 +47,7 @@ class WebResource
       env.update({base: uri, feeds: [], links: {}, resp: {}})            # response environment
       uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body|    # dispatch request
         format = uri.format_icon head['Content-Type']                    # log response
+        origin_format = uri.format_icon env[:origin_format] if env[:origin_format]
         color = if env[:deny]
                   '38;5;196'
                 elsif env[:filtered]
@@ -54,7 +55,12 @@ class WebResource
                 else
                   format_color format
                 end
-        puts [env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]), (status_icon status), format, env[:repository] ? (env[:repository].size.to_s + '⋮') : nil,
+        puts [[(status_icon status),
+               format == origin_format ? ' ' : format,
+               env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]),
+               env[:origin_status] ? (status_icon env[:origin_status]) : ' ',
+               origin_format || ' '].join,
+              env[:repository] ? (env[:repository].size.to_s + '⋮') : nil,
               env['HTTP_REFERER'] ? ["\e[#{color}m", env['HTTP_REFERER'], "\e[0m→"] : nil, "\e[#{color}#{env['HTTP_REFERER'] && !env['HTTP_REFERER'].index(env[:base].host) && ';7' || ''}m",
               env[:base], "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil, Verbose ? [env['HTTP_ACCEPT'], head['Content-Type']].compact.join(' → ') : nil,
              ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
@@ -184,10 +190,11 @@ class WebResource
 
     # fetch node to request-graph and fill static cache
     def fetchHTTP format: nil, thru: true                             # options: format (override broken remote), HTTP response to caller
-      URI.open(uri, headers.merge({redirect: false})) do |response|   # fetch over HTTP from remote
-        env[:fetched] = true                                          # mark as fetched for logger
-        h = headers response.meta                                     # response headers
-        case response.status[0].to_i                                  # response status
+      env[:fetched] = true                                            # note network-fetch for log
+      URI.open(uri, headers.merge({redirect: false})) do |response|   # HTTP fetch
+        h = headers response.meta                                     # response metadata
+        env[:origin_status] = response.status[0].to_i                 # response status
+        case env[:origin_status]
         when 204                                                      # no content
           [204, {}, []]
         when 206                                                      # partial content
@@ -218,6 +225,7 @@ class WebResource
             if format == 'application/xml' && body[0..2048].match?(/(<|DOCTYPE )html/i)
               format = 'text/html'                                    # HTML served w/ XML MIME, update format symbol
             end
+            env[:origin_format] = format                              # note original format for log
 
             body = Webize.clean self, body, format                    # sanitize upstream content
 
