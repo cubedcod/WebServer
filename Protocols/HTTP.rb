@@ -1,4 +1,6 @@
 # coding: utf-8
+
+# coding: utf-8
 %w(brotli cgi digest/sha2 httparty open-uri pry rack).map{|_| require _}
 
 class WebResource
@@ -21,7 +23,7 @@ class WebResource
       if nodes.size == 1  # one node. determine if it suits content-negotiated preferences
         static = nodes[0]
         return static.fileResponse if env[:notransform]                  # no transformation per request
-        format = static.mime                                             # cache format
+        format = static.mime_type                                        # cache format
         return static.fileResponse if format&.match? FixedFormat         # no transformations available
         return static.fileResponse if format == (selectFormat format)    # already in preferred format
       end
@@ -156,7 +158,7 @@ class WebResource
       return cacheResponse if offline?                                # offline always a response from cache
       return R304 if client_cached? && StaticExt.member?(extname)     # client cache hit, no content
       ns = nodeSet                                                    # find cached nodes
-      return ns[0].fileResponse if ns.size == 1 && StaticExt.member?(ns[0].extname) # proxy cache hit, return content
+      return ns[0].fileResponse if ns.size == 1 && StaticExt.member?(ns[0].extname) # proxy cache hit, static content
       if timestamp = ns.map{|n|n.node.mtime if n.node.exist?}.compact.sort[0]
         env[:cache_timestamp] = timestamp.httpdate                    # cache timestamp for conditional fetch
       end
@@ -180,7 +182,7 @@ class WebResource
       end
     end
 
-    # fetch remote data to in-RAM graph and static file-cache
+    # fetch node to request-graph and fill static cache
     def fetchHTTP format: nil, thru: true                             # options: format (override broken remote), HTTP response to caller
       URI.open(uri, headers.merge({redirect: false})) do |response|   # fetch over HTTP from remote
         env[:fetched] = true                                          # mark as fetched for logger
@@ -306,7 +308,7 @@ class WebResource
       env[:resp].update({'Access-Control-Allow-Origin' => origin, # response metadata
                          'ETag' => etag,
                          'Content-Length' => node.size.to_s,
-                         'Content-Type' => mime,
+                         'Content-Type' => mime_type,
                          'Last-Modified' => node.mtime.httpdate})
 
       return R304 if etag_match?                                   # client has file version
@@ -452,7 +454,7 @@ class WebResource
         "<#{uri}>; rel=#{type}"}.join(', ')
     end
 
-    def mime
+    def mime_type
       suffix = extname
       MIME_Types[suffix] || Rack::Mime::MIME_TYPES[suffix]
     end
