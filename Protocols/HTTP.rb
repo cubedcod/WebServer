@@ -12,7 +12,6 @@ class WebResource
     Args = %w(find fullContent notransform offline order sort view)
     R304 = [304, {}, []]
 
-    #Pry::ColorPrinter.pp env
     def allow_domain?
       c = AllowDomains                                              # start cursor at root
       host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # search for leaf in domain tree
@@ -55,10 +54,10 @@ class WebResource
                 else
                   format_color format
                 end
-        puts [format == origin_format ? nil : format, (status_icon status),
-              env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]),
-              origin_format, (status_icon env[:origin_status]),
-              env[:repository] ? (env[:repository].size.to_s + '⋮') : nil,
+        puts [[format == origin_format ? nil : format, (status_icon status),
+               env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]),
+               origin_format, (status_icon env[:origin_status])].join,
+              ([env[:repository].size,'⋮'].join if env[:repository] && env[:repository].size > 0),
               env['HTTP_REFERER'] ? ["\e[#{color}m", env['HTTP_REFERER'], "\e[0m→"] : nil, "\e[#{color}#{env['HTTP_REFERER'] && !env['HTTP_REFERER'].index(env[:base].host) && ';7' || ''}m",
               env[:base], "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil, Verbose ? [env['HTTP_ACCEPT'], head['Content-Type']].compact.join(' → ') : nil,
              ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
@@ -189,7 +188,10 @@ class WebResource
     # fetch node to request-graph and fill static cache
     def fetchHTTP format: nil, thru: true                             # options: format (override broken remote), HTTP response to caller
       env[:fetched] = true                                            # note network-fetch for log
-      URI.open(uri, headers.merge({redirect: false})) do |response|   # HTTP fetch
+      head = headers.merge({redirect: false})                         # client headers
+      head['If-Modified-Since'] = env[:cache_timestamp] if env[:cache_timestamp] # cache headers
+      Pry::ColorPrinter.pp head if Verbose
+      URI.open(uri, head) do |response|                               # HTTP fetch
         h = headers response.meta                                     # response metadata
         env[:origin_status] = response.status[0].to_i                 # response status
         case env[:origin_status]
