@@ -76,7 +76,7 @@ class WebResource
         unless File.exist? 🕒
           FileUtils.mkdir_p File.dirname 🕒                                    # create missing timeslice containers
           FileUtils.ln f, 🕒 rescue nil                                        # link 🐢 to timeline
-          log << ['🕒', 🕒]
+          log << ["\t🕒", 🕒]
         end
       end
       puts log.join ' ' unless log.empty?}

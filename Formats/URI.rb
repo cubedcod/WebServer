@@ -88,7 +88,7 @@ class WebResource < RDF::URI
       bc = '' # breadcrumb trail
       icon = env[:links][:icon]
       {class: :toolbox,
-       c: [({_: :span, c: env[:status], style: 'font-weight: bold', class: :icon} if env[:status]),                                                             # status code
+       c: [({_: :span, c: env[:status], style: 'font-weight: bold', class: :icon} if env[:status] != 200),                                                             # status code
            ({_: :a, class: :icon, c: '↨', href: HTTP.qs(env[:qs].merge({'view' => 'table', 'sort' => 'date'}))} unless env[:view] == 'table'),                  # link to tabular view
            {_: :a, href: (env[:proxy_href] && !local_node?) ? env[:base].uri : HTTP.qs(env[:qs].merge({'notransform' => nil})), c: '⚗️', id: :UI, class: :icon}, # link to upstream UX
            ({_: :a,href: HTTP.qs(env[:qs].merge({'download' => 'audio'})),c: '&darr;',class: :icon} if host&.match?(AudioHosts)),                               # download link
