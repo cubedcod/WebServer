@@ -474,7 +474,9 @@ class WebResource
     end
 
     def notfound
-      [env[:status] || 404, {'Content-Type' => 'text/html'}, [htmlDocument({'#req'=>env})]]
+      env[:status] ||= 404
+      env.delete :view
+      [env[:status], {'Content-Type' => 'text/html'}, [htmlDocument({'#req'=>env})]]
     end
 
     def offline?
