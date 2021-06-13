@@ -287,21 +287,21 @@ class WebResource
           end
         end
       end
-    rescue Exception => e
+    rescue Exception => e                                             # some response codes mapped to exceptions
       raise unless e.respond_to? :io
       env[:origin_status] = e.io.status[0].to_i
       case env[:origin_status].to_s
-      when /30[12378]/ # redirected
+      when /30[12378]/                                                # redirection
         dest = (join e.io.meta['location']).R env
-        if scheme == 'https' && dest.scheme == 'http'
+        if scheme == 'https' && dest.scheme == 'http'                 # redirected to HTTP from HTTPS
           puts "⚠️ HTTPS downgraded to HTTP: #{uri} -> #{dest}"
           dest.fetchHTTP
         else
           [302, {'Location' => dest.href}, []]
         end
-      when /304/ # upstream not modified
+      when /304/                                                      # origin not modified
         cacheResponse
-      when /300|[45]\d\d/ # not allowed, not found and misc origin errors
+      when /300|[45]\d\d/                                             # not allowed, not found, misc errors
         env[:status] = env[:origin_status]
         head = headers e.io.meta
         body = HTTP.decompress(head, e.io.read).encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
