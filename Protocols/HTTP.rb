@@ -151,10 +151,6 @@ class WebResource
       end
     end
 
-    def etag
-      Digest::SHA2.hexdigest [uri, node.stat.mtime, node.size].join
-    end
-
     def etag_match?
       client_etags.include? env[:resp]['ETag']
     end
@@ -319,7 +315,7 @@ class WebResource
 
     def fileResponse
       env[:resp].update({'Access-Control-Allow-Origin' => origin, # response metadata
-                         'ETag' => etag,
+                         'ETag' => Digest::SHA2.hexdigest([uri, node.stat.mtime, node.size].join),
                          'Content-Length' => node.size.to_s,
                          'Content-Type' => mime_type,
                          'Last-Modified' => node.mtime.httpdate})
