@@ -109,7 +109,9 @@ class WebResource
                   globPath = fsPath
                   if globPath.match?(GlobChars) && local_search
                     if grep
-                      nodeGrep Pathname.glob globPath               # GREP in GLOB
+                      glob = Pathname.glob globPath
+                      puts "glob too large - dropping #{glob.size - 2048} results"
+                      nodeGrep glob[0..2047]                        # GREP in GLOB
                     else
                       Pathname.glob globPath                        # arbitrary GLOB
                     end
