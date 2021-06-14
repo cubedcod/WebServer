@@ -234,20 +234,24 @@ class WebResource
               file += formatExt unless File.extname(file)==formatExt  # append format suffix
               FileUtils.mkdir_p File.dirname file                     # create container
               File.open(file, 'w'){|f| f << body }                    # fill static cache
+              if timestamp = h['Last-Modified']                       # HTTP timestamp
+                timestamp.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,'')   # clean timestamp
+                if ts = Time.httpdate(timestamp) rescue nil           # parse timestamp
+                  FileUtils.touch file, mtime: ts                     # cache mtime
+                else
+                  puts ['⚠️ bad timestamp:', h['Last-Modified'], '->', timestamp].join ' '
+                end
+              end
+              if etag = h['ETag']
+                puts [:etag, etag].join ' '
+              end
             else
               puts "⚠️ extension undefined for #{format}"              # ⚠️ undefined format-suffix
             end
 
             if reader = RDF::Reader.for(content_type: format)         # reader defined for format?
               env[:repository] ||= RDF::Repository.new                # initialize RDF repository
-              if timestamp = h['Last-Modified']                       # HTTP timestamp
-                if ts = Time.httpdate(timestamp.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,'')) rescue nil
-                  FileUtils.touch file, mtime: ts                     # cache mtime
-                  env[:repository] << RDF::Statement.new(self, Date.R, ts.iso8601) if format.index 'text' # timestamp RDF
-                else
-                  puts "⚠️ bad timestamp #{timestamp}"
-                end
-              end
+              env[:repository] << RDF::Statement.new(self, Date.R, ts.iso8601) if ts && format.index('text') # timestamp RDF
               reader.new(body, base_uri: self, path: file){|g|env[:repository] << g} # read RDF
             else
               puts "⚠️ Reader undefined for #{format}"                 # ⚠️ undefined Reader
@@ -406,16 +410,15 @@ class WebResource
       raw ||= env || {}                                     # raw headers
       head = {}                                             # cleaned headers
       raw.map{|k,v|                                         # inspect (k,v) pairs
-        unless k.class != String || k.index('rack.') == 0   # hide internal headers
-          key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|t| # strip Rack prefix and tokenize
-            if %w{cf cl csrf ct dfe dnt id spf utc xss xsrf}.member? t # acronyms
-              t = t.upcase                                  # acronym
+        unless k.class != String || k.index('rack.') == 0   # skip internal headers
+          key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|t| # strip prefix and tokenize
+            if %w{cf cl csrf ct dfe dnt id spf utc xss xsrf}.member? t
+              t.upcase                                      # full acronym
             elsif 'etag' == t
               'ETag'                                        # partial acronymm
             else
-              t[0] = t[0].upcase                            # capitalized word
-            end
-            t}.join '-'                                     # join tokens
+              t.capitalize                                  # capitalized word
+            end}.join '-'                                   # join words
           head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless SingleHopHeaders.member? key.downcase # set header
         end}
 
