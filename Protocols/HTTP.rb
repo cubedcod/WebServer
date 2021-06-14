@@ -234,16 +234,17 @@ class WebResource
               file += formatExt unless File.extname(file)==formatExt  # append format suffix
               FileUtils.mkdir_p File.dirname file                     # create container
               File.open(file, 'w'){|f| f << body }                    # fill static cache
-              if timestamp = h['Last-Modified']                       # HTTP timestamp
+              if timestamp = h['Last-Modified']                       # HTTP provided timestamp
                 timestamp.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,'')   # clean timestamp
                 if ts = Time.httpdate(timestamp) rescue nil           # parse timestamp
-                  FileUtils.touch file, mtime: ts                     # cache mtime
+                  FileUtils.touch file, mtime: ts                     # cache timestamp
                 else
                   puts ['⚠️ bad timestamp:', h['Last-Modified'], '->', timestamp].join ' '
                 end
               end
               if etag = h['ETag']
                 puts [:etag, etag].join ' '
+                `attr -s ETag -V #{Shellwords.escape etag} #{Shellwords.escape file}`
               end
             else
               puts "⚠️ extension undefined for #{format}"              # ⚠️ undefined format-suffix
