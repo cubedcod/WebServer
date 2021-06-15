@@ -150,11 +150,11 @@ class WebResource
     end
 
     def eTag
-      etag = `attr -qg ETag #{n.shellPath} 2> /dev/null`          # read ETag file-attribute
+      etag = `attr -qg ETag #{shellPath} 2> /dev/null`            # read ETag file-attribute
       if $?.success?
-        etag                                                      # origin ETag in cache
+        etag                                                      # explicit ETag specified
       else
-        Digest::SHA2.hexdigest [uri, mtime, node.size].join       # local-minted ETag
+        Digest::SHA2.hexdigest [uri, mtime, node.size].join       # mint an ETag
       end
     end
 
@@ -171,7 +171,7 @@ class WebResource
       end
       if n = nodeSet.sort_by(&:mtime)[0]                          # find node w/ origin timestamp
         return n.fileResponse if n.static?                        # server has static node, return it
-        env[:cache_etag] = eTag                                   # etag for conditional fetch
+        env[:cache_etag] = n.eTag                                 # etag for conditional fetch
         env[:cache_timestamp] = n.mtime.httpdate                  # timestamp for conditional fetch
       end
       case scheme                                                 # scheme-specific fetch
