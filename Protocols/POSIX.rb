@@ -87,42 +87,39 @@ class WebResource
     # URI -> nodes
     def nodeSet
       [:links,:qs].map{|e| env[e] ||= {}}
-      local_search = local_node? || offline?
-      grep = local_search && env[:qs].has_key?('q')
-      summarize = !(env[:fullContent] || grep) # full-content by request and for grep-filtering
-      nodes = if node.file? # direct map to node
-                summarize = false unless env[:qs].has_key? 'abbr'
-                [self]
-              else          # indirect map to node(s)
-                pathbase = host_parts.join('/').size
-                (if node.directory?
-                 if env[:qs]['f'] && !env[:qs]['f'].empty?          # FIND
-                   `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape env[:qs]['f']}`.lines.map &:chomp
-                 elsif env[:qs]['find'] && !env[:qs]['find'].empty? # FIND substring
-                   `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape '*' + env[:qs]['find'] + '*'}`.lines.map &:chomp
-                 elsif grep                                         # GREP
-                   nodeGrep
-                 else                                               # LS
-                   (path=='/' && local_node?) ? [node] : [node, *node.children.select{|n|n.basename.to_s[0] != '.'}]
-                 end
-                else
-                  globPath = fsPath
-                  if globPath.match?(GlobChars) && local_search
-                    if grep
-                      glob = Pathname.glob globPath
-                      puts "glob too large - dropping #{glob.size - 2048} results"
-                      nodeGrep glob[0..2047]                        # GREP in GLOB
-                    else
-                      Pathname.glob globPath                        # arbitrary GLOB
-                    end
-                  else                                              # default-set GLOB
-                    summarize = false unless env[:qs].has_key? 'abbr'
-                    globPath += '.*'
-                    Pathname.glob globPath
+      local = local_node? || offline?
+      f    = env[:qs]['f']    && !env[:qs]['f'].empty?
+      find = env[:qs]['find'] && !env[:qs]['find'].empty? 
+      grep = env[:qs]['q']    && !env[:qs]['q'].empty?
+      pathbase = host_parts.join('/').size
+
+      nodes = (if local && node.directory? && (f || find || grep) # search directory
+               if f                                               # FIND exact
+                 summarize = !env.has_key? :fullContent
+                 `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape env[:qs]['f']}`.lines.map &:chomp
+               elsif find                                         # FIND substring
+                 summarize = !env.has_key? :fullContent
+                 `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape '*' + env[:qs]['find'] + '*'}`.lines.map &:chomp
+               elsif grep                                         # GREP
+                 nodeGrep
+               end
+              else
+                globPath = fsPath
+                if globPath.match?(GlobChars) && local
+                  if grep
+                    glob = Pathname.glob globPath
+                    puts "glob too large - dropping #{glob.size - 2048} results"
+                    nodeGrep glob[0..2047]                        # GREP in GLOB
+                  else
+                    Pathname.glob globPath                        # arbitrary GLOB
                   end
-                 end).map{|p|                                       # resolve relative-to-hostbase path to URI
-                  join(p.to_s[pathbase..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env}
-              end
+                else                                              # default-set GLOB
+                  globPath += '*'
+                  Pathname.glob globPath
+                end
+               end).map{|p|                                       # resolve relative-to-host path to full URI
+        join(p.to_s[pathbase..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env}
+
       if summarize
         env[:links][:down] = HTTP.qs env[:qs].merge({'fullContent' => nil})
         nodes.map &:preview
@@ -130,6 +127,5 @@ class WebResource
         nodes
       end
     end
-
   end
 end
