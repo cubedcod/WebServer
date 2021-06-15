@@ -166,15 +166,18 @@ class WebResource
     # fetch data from cache or remote
     def fetch
       return cacheResponse if offline?                            # offline, respond from cache
+
       if static?                                                  # static nodes aren't updated, always valid when exist
         return R304 if client_cached?                             # client has static node
         return fileResponse if node.file?                         # server has static node, return it
       end
+
       if n = nodeSet.sort_by(&:mtime)[0]                          # find node w/ origin timestamp
         return n.fileResponse if n.static?                        # server has static node, return it
         env[:cache_etag] = n.eTag(false)                          # etag for conditional fetch
         env[:cache_timestamp] = n.mtime.httpdate                  # timestamp for conditional fetch
       end
+
       case scheme                                                 # scheme-specific fetch
       when nil                                                    # undefined scheme
         ['https:', uri].join.R(env).fetchHTTP                     # HTTPS fetch by default
@@ -185,6 +188,7 @@ class WebResource
       else
         puts "⚠️ unsupported scheme: #{uri}"                       # unknown scheme
       end
+
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError => e
       if scheme == 'https'                                        # HTTP fetch after HTTPS failure
         puts "⚠️  fallback scheme #{uri} -> HTTP"
@@ -195,7 +199,7 @@ class WebResource
       end
     end
 
-    # fetch node to request-graph and fill static cache
+    # fetch node to request-graph and update cache
     def fetchHTTP format: nil, thru: true                         # options: format (override broken remote), HTTP response to caller
       env[:fetched] = true                                        # note network-fetch for log
       head = headers.merge({redirect: false})                     # client headers
@@ -213,7 +217,7 @@ class WebResource
           [206, h, [response.read]]
         else                                                      # full content
           body = HTTP.decompress h, response.read                 # decompress content
-          format ||= if path == '/feed'                           # format fixed on remote /feed due to many erroneous text/html responses. if you want full conneg on remote /feed URLs you could remove this and sniff
+          format ||= if path == '/feed'                           # format fixed on remote /feed due to many erroneous text/html responses
                        'application/atom+xml'
                      elsif content_type = h['Content-Type']       # format defined in HTTP header
                        ct = content_type.split(/;/)
