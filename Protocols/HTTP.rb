@@ -18,7 +18,7 @@ class WebResource
     end
 
     def cacheResponse
-      if node.file?         # determine if cached node suits content-negotiated preference
+      if node.file?         # determine if cached representation suits content-negotiated preference
         return fileResponse if env[:notransform]                         # no transformation allowed in request
         if format = mime_type                                            # find cache MIME
           return fileResponse if format.match? FixedFormat               # no transformation available for format
@@ -165,7 +165,6 @@ class WebResource
         etag = `attr -qg ETag #{Shellwords.escape n.fsPath}`      # read etag from extended file-attributes
         env[:cache_etag] = etag if $?.success? && !etag.empty?    # etag for conditional fetch
         env[:cache_timestamp] = n.mtime.httpdate                  # timestamp for conditional fetch
-        puts "#{n.mtime} etag: #{etag}" if $?.success? && !etag.empty?
       end
       case scheme                                                 # scheme-specific fetch
       when nil                                                    # undefined scheme
@@ -246,8 +245,7 @@ class WebResource
                   puts ['⚠️ bad timestamp:', h['Last-Modified'], '->', timestamp].join ' '
                 end
               end
-              if etag = h['ETag']
-                puts [:etag, etag].join ' '
+              if etag = h['ETag']                                 # cache etag
                 `attr -s ETag -V #{Shellwords.escape etag} #{Shellwords.escape file}`
               end
             else
