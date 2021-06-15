@@ -95,10 +95,10 @@ class WebResource
 
       nodes = (if local && node.directory? && (f || find || grep) # search directory
                if f                                               # FIND exact
-                 summarize = !env.has_key? :fullContent
+                 summarize = !env[:fullContent]
                  `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape env[:qs]['f']}`.lines.map &:chomp
                elsif find                                         # FIND substring
-                 summarize = !env.has_key? :fullContent
+                 summarize = !env[:fullContent]
                  `find #{Shellwords.escape fsPath} -iname #{Shellwords.escape '*' + env[:qs]['find'] + '*'}`.lines.map &:chomp
                elsif grep                                         # GREP
                  nodeGrep

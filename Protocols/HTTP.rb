@@ -156,11 +156,11 @@ class WebResource
     # fetch data from cache or remote
     def fetch
       return cacheResponse if offline?                            # offline, respond from cache
-      if static?                                                  # static nodes aren't updated, always valid when existing
+      if static?                                                  # static nodes aren't updated, always valid when exist
         return R304 if client_cached?                             # client has static node
         return fileResponse if node.file?                         # server has static node, return it
       end
-      if n = nodeSet.sort_by(&:mtime)[0]                          # cached node w/ origin timestamp
+      if n = nodeSet.sort_by(&:mtime)[0]                          # find node w/ origin timestamp
         return n.fileResponse if n.static?                        # server has static node, return it
         etag = `attr -qg ETag #{Shellwords.escape n.fsPath}`      # read etag from extended file-attributes
         env[:cache_etag] = etag if $?.success? && !etag.empty?    # etag for conditional fetch
