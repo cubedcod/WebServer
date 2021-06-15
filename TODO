@@ -9,3 +9,4 @@ browser - hTMl renderer for lagrange,maybe http or just  use full HTTP-URI via g
 #down link on google for all results inlined
 gack (gemini) server
 rdfization in gemini  client  - generalize w/  http? gemini://oppen.digital/memex/places/colonsay/20171103/
+up arrow to abbreviated content on http://l/2021/06/13/?f=msg%2A&view=table&sort=date&fullContent#prev
