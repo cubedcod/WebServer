@@ -93,7 +93,7 @@ class WebResource
       [:links,:qs].map{|e| env[e] ||= {}}
       local = local_node? || offline?
       f    = env[:qs]['f']    && !env[:qs]['f'].empty?
-      find = env[:qs]['find'] && !env[:qs]['find'].empty? 
+      find = env[:qs]['find'] && !env[:qs]['find'].empty?
       grep = env[:qs]['q']    && !env[:qs]['q'].empty?
       pathbase = host_parts.join('/').size
 
