@@ -174,8 +174,8 @@ class WebResource
 
       if n = nodeSet.sort_by(&:mtime)[0]                          # find node w/ origin timestamp
         return n.fileResponse if n.static?                        # server has static node, return it
-        env[:cache_etag] = n.eTag(false)                          # etag for conditional fetch
-        env[:cache_timestamp] = n.mtime.httpdate                  # timestamp for conditional fetch
+        env[:ETag] = n.eTag(false)                                # ETag for conditional fetch
+        env[:timestamp] = n.mtime.httpdate                        # timestamp for conditional fetch
       end
 
       case scheme                                                 # scheme-specific fetch
@@ -203,8 +203,8 @@ class WebResource
     def fetchHTTP format: nil, thru: true                         # options: format (override broken remote), HTTP response to caller
       env[:fetched] = true                                        # note network-fetch for log
       head = headers.merge({redirect: false})                     # client headers
-      head['If-Modified-Since'] = env[:cache_timestamp] if env[:cache_timestamp] # cache headers
-      head['If-None-Match'] = env[:cache_etag] if env[:cache_etag]# cache headers
+      head['If-Modified-Since'] = env[:timestamp] if env[:timestamp] # cache timestamp
+      head['If-None-Match'] = env[:ETag] if env[:ETag]            # cache ETag
       Pry::ColorPrinter.pp head if Verbose
       URI.open(uri, head) do |response|                           # HTTP fetch
         h = headers response.meta                                 # response metadata
