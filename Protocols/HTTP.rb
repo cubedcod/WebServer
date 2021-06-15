@@ -162,7 +162,7 @@ class WebResource
       end
       if n = nodeSet.sort_by(&:mtime)[0]                          # find node w/ origin timestamp
         return n.fileResponse if n.static?                        # server has static node, return it
-        etag = `attr -qg ETag #{Shellwords.escape n.fsPath}`      # read etag from extended file-attributes
+        etag = `attr -qg ETag #{n.shellPath} 2> /dev/null`        # read etag from extended file-attributes
         env[:cache_etag] = etag if $?.success? && !etag.empty?    # etag for conditional fetch
         env[:cache_timestamp] = n.mtime.httpdate                  # timestamp for conditional fetch
       end

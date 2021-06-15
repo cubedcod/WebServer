@@ -54,6 +54,10 @@ class WebResource
 
   def readFile; node.exist? ? node.read : nil end
 
+  def shellPath
+    Shellwords.escape fsPath
+  end
+
   def writeFile o
     FileUtils.mkdir_p node.dirname
     File.open(fsPath,'w'){|f| f << o }
