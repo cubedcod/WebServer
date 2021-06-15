@@ -18,15 +18,16 @@ class WebResource
     end
 
     def cacheResponse
-      if node.file?         # determine if cached representation suits content-negotiated preference
-        return fileResponse if env[:notransform]                         # no transformation allowed in request
-        if format = mime_type                                            # find cache MIME
-          return fileResponse if format.match? FixedFormat               # no transformation available for format
-          return fileResponse if !ReFormat.member?(format) && format==selectFormat(format) # node is in preferred format
-        end
+      nodes = nodeSet                                                   # find cached nodes
+      if f = if node.file?
+               self                                                     # direct file hit
+             elsif nodes.size == 1
+               nodes[0]                                                 # one file in set
+             end
+        return f.fileResponse if env[:notransform] || f.preferred_format? # static response available and preferred
       end
-      nodeSet.map &:loadRDF # read nodes for RDF-facilitated merge/transcode
-      graphResponse         # response
+      nodes.map &:loadRDF                                               # load data for RDF-facilitated merge and/or transcode
+      graphResponse                                                     # graph-data response
     end
 
     def self.call env
@@ -587,6 +588,15 @@ class WebResource
         [202, {'Access-Control-Allow-Credentials' => 'true',
                'Access-Control-Allow-Origin' => origin}, []]
       end
+    end
+
+    # decide if representation at this URI is suitable for response
+    def preferred_format?
+      if format = mime_type                                 # representation MIME
+        return true if format.match? FixedFormat            # no MIME-transform available for format
+        return true if !ReFormat.member?(format) && format==selectFormat(format) # no MIME-transform requested, and no reformat-preference for MIME
+      end
+      false                                                 # transform
     end
 
     def selectFormat default = nil                          # default-format argument
