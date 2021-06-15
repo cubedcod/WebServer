@@ -149,7 +149,16 @@ class WebResource
       end
     end
 
-    def etag_match?
+    def eTag
+      etag = `attr -qg ETag #{n.shellPath} 2> /dev/null`          # read ETag file-attribute
+      if $?.success?
+        etag                                                      # origin ETag in cache
+      else
+        Digest::SHA2.hexdigest [uri, mtime, node.size].join       # local-minted ETag
+      end
+    end
+
+    def eTag_match?
       client_etags.include? env[:resp]['ETag']
     end
 
@@ -162,8 +171,7 @@ class WebResource
       end
       if n = nodeSet.sort_by(&:mtime)[0]                          # find node w/ origin timestamp
         return n.fileResponse if n.static?                        # server has static node, return it
-        etag = `attr -qg ETag #{n.shellPath} 2> /dev/null`        # read etag from extended file-attributes
-        env[:cache_etag] = etag if $?.success? && !etag.empty?    # etag for conditional fetch
+        env[:cache_etag] = eTag                                   # etag for conditional fetch
         env[:cache_timestamp] = n.mtime.httpdate                  # timestamp for conditional fetch
       end
       case scheme                                                 # scheme-specific fetch
@@ -277,7 +285,7 @@ class WebResource
             end}                                                  # upstream headers
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag Last-Modified).map{|k| env[:resp][k] ||= h[k] if h[k]}
 
-          if etag_match?                                          # caller has entity
+          if eTag_match?                                          # caller has entity
             R304                                                  # no content
           elsif env[:notransform] || format&.match?(FixedFormat)  # no transform
             body = Webize::HTML.resolve_hrefs body, env, true if format == 'text/html' && env.has_key?(:proxy_href) # resolve hrefs in proxy-href mode
@@ -322,12 +330,12 @@ class WebResource
 
     def fileResponse
       env[:resp].update({'Access-Control-Allow-Origin' => origin, # response metadata
-                         'ETag' => Digest::SHA2.hexdigest([uri, node.stat.mtime, node.size].join),
+                         'ETag' => eTag,
                          'Content-Length' => node.size.to_s,
                          'Content-Type' => mime_type,
-                         'Last-Modified' => node.mtime.httpdate})
+                         'Last-Modified' => mtime.httpdate})
 
-      return R304 if etag_match?                                  # client has entity matching tag, nothing to return
+      return R304 if eTag_match?                                  # client has entity matching tag, nothing to return
 
       location = fsPath
       env[:resp]['Expires'] = (Time.now + 3e7).httpdate if StaticExt.member?(File.extname location)
@@ -372,7 +380,7 @@ class WebResource
 
     def graphResponse defaultFormat = 'text/html'
       return notfound if !env.has_key?(:repository)||env[:repository].empty? # empty graph
-      return [304,{},[]] if etag_match?                                      # client has entity
+      return [304,{},[]] if eTag_match?                                      # client has entity
       env[:status] ||= 200
       format = selectFormat defaultFormat                                    # response format
       env[:resp].update({'Access-Control-Allow-Origin' => origin,            # response metadata
