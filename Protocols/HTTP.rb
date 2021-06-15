@@ -1,6 +1,4 @@
 # coding: utf-8
-
-# coding: utf-8
 %w(brotli cgi digest/sha2 httparty open-uri pry rack).map{|_| require _}
 
 class WebResource
@@ -172,7 +170,7 @@ class WebResource
         return fileResponse if node.file?                         # server has static node, return it
       end
 
-      if n = nodeSet.sort_by(&:mtime)[0]                          # find node w/ origin timestamp
+      if n = nodeSet.sort_by(&:mtime)[0]                          # find cache node w/ original timestamp
         return n.fileResponse if n.static?                        # server has static node, return it
         env[:ETag] = n.eTag(false)                                # ETag for conditional fetch
         env[:ts] = n.mtime.httpdate                               # timestamp for conditional fetch
