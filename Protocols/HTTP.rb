@@ -200,10 +200,13 @@ class WebResource
     # fetch node to request-graph and update cache
     def fetchHTTP format: nil, thru: true                         # options: format (override broken remote), HTTP response to caller
       env[:fetched] = true                                        # note network-fetch for log
+
       head = headers.merge({redirect: false})                     # client headers
       head['If-Modified-Since'] = env[:ts] if env[:ts]            # cache timestamp
       head['If-None-Match'] = env[:ETag] if env[:ETag]            # cache ETag
+
       Pry::ColorPrinter.pp head if Verbose
+
       URI.open(uri, head) do |response|                           # HTTP fetch
         h = headers response.meta                                 # response metadata
         env[:origin_status] = response.status[0].to_i             # response status
