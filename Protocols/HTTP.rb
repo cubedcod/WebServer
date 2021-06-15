@@ -13,22 +13,21 @@ class WebResource
     R304 = [304, {}, []]
 
     def allow_domain?
-      c = AllowDomains                                              # start cursor at root
-      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?} # search for leaf in domain tree
+      c = AllowDomains                                                  # cursor at domain-tree base
+      host.split('.').reverse.find{|n| c && (c = c[n]) && c.empty?}     # find leaf in domain-tree
     end
 
     def cacheResponse
-      nodes = nodeSet     # find nodes
-      if nodes.size == 1  # a node. determine if it suits content-negotiated preference
-        static = nodes[0]
-        return static.fileResponse if env[:notransform]                                           # no transformations allowed
-        if format = static.mime_type                                                              # look up cache MIME
-          return static.fileResponse if format.match? FixedFormat                                 # no transformations available
-          return static.fileResponse if !ReFormat.member?(format) && format==selectFormat(format) # cache is in preferred format, return
-        end
+      nodes = nodeSet                                                   # find cached nodes
+      if f = if node.file?
+               self                                                     # direct file hit
+             elsif nodes.size == 1
+               nodes[0]                                                 # one file in set
+             end
+        return f.fileResponse if env[:notransform] || f.preferred_format? # static response available and preferred
       end
-      nodes.map &:loadRDF # read data for merging and/or transcoding
-      graphResponse       # response
+      nodes.map &:loadRDF                                               # load data for RDF-facilitated merge and/or transcode
+      graphResponse                                                     # graph-data response
     end
 
     def self.call env
@@ -151,31 +150,43 @@ class WebResource
       end
     end
 
-    def etag_match?
+    def eTag mint = true
+      etag = `attr -qg ETag #{shellPath} 2> /dev/null`            # read file-attribute
+      if $?.success?
+        etag                                                      # explicit ETag, likely from cache origin
+      elsif mint
+        Digest::SHA2.hexdigest [uri, mtime, node.size].join       # create ETag
+      end
+    end
+
+    def eTag_match?
       client_etags.include? env[:resp]['ETag']
     end
 
     # fetch data from cache or remote
     def fetch
-      return cacheResponse if offline?                                # offline always a response from cache
-      return R304 if client_cached? && StaticExt.member?(extname)     # client has node
-      ns = nodeSet                                                    # find cached nodes
-      return ns[0].fileResponse if ns.size==1 && StaticExt.member?(ns[0].extname) # proxy has node
-      if timestamp = ns.map{|n|n.node.mtime if n.node.file?}.compact.sort[0]
-        env[:cache_timestamp] = timestamp.httpdate                    # cache timestamp for conditional fetch
+      return cacheResponse if offline?                            # offline, respond from cache
+      if static?                                                  # static nodes aren't updated, always valid when exist
+        return R304 if client_cached?                             # client has static node
+        return fileResponse if node.file?                         # server has static node, return it
       end
-      case scheme                                                     # scheme-specific fetch
-      when nil                                                        # undefined scheme
-        ['https:', uri].join.R(env).fetchHTTP                         # HTTPS fetch by default
+      if n = nodeSet.sort_by(&:mtime)[0]                          # find node w/ origin timestamp
+        return n.fileResponse if n.static?                        # server has static node, return it
+        env[:cache_etag] = n.eTag(false)                          # etag for conditional fetch
+        env[:cache_timestamp] = n.mtime.httpdate                  # timestamp for conditional fetch
+      end
+      case scheme                                                 # scheme-specific fetch
+      when nil                                                    # undefined scheme
+        ['https:', uri].join.R(env).fetchHTTP                     # HTTPS fetch by default
       when 'gemini'
-        fetchGemini                                                   # Gemini fetch
+        fetchGemini                                               # Gemini fetch
       when /^http/
-        fetchHTTP                                                     # HTTPS fetch
+        fetchHTTP                                                 # HTTPS fetch
       else
-        puts "⚠️ unsupported scheme: #{uri}"                           # unknown scheme
+        puts "⚠️ unsupported scheme: #{uri}"                       # unknown scheme
       end
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError => e
-      if scheme == 'https'                                            # HTTP fetch after HTTPS failure
+      if scheme == 'https'                                        # HTTP fetch after HTTPS failure
         puts "⚠️  fallback scheme #{uri} -> HTTP"
         uri.sub('s','').R(env).fetchHTTP rescue (env[:status] = 408; notfound)
       else
@@ -185,119 +196,124 @@ class WebResource
     end
 
     # fetch node to request-graph and fill static cache
-    def fetchHTTP format: nil, thru: true                             # options: format (override broken remote), HTTP response to caller
-      env[:fetched] = true                                            # note network-fetch for log
-      head = headers.merge({redirect: false})                         # client headers
+    def fetchHTTP format: nil, thru: true                         # options: format (override broken remote), HTTP response to caller
+      env[:fetched] = true                                        # note network-fetch for log
+      head = headers.merge({redirect: false})                     # client headers
       head['If-Modified-Since'] = env[:cache_timestamp] if env[:cache_timestamp] # cache headers
+      head['If-None-Match'] = env[:cache_etag] if env[:cache_etag]# cache headers
       Pry::ColorPrinter.pp head if Verbose
-      URI.open(uri, head) do |response|                               # HTTP fetch
-        h = headers response.meta                                     # response metadata
-        env[:origin_status] = response.status[0].to_i                 # response status
+      URI.open(uri, head) do |response|                           # HTTP fetch
+        h = headers response.meta                                 # response metadata
+        env[:origin_status] = response.status[0].to_i             # response status
         case env[:origin_status]
-        when 204                                                      # no content
+        when 204                                                  # no content
           [204, {}, []]
-        when 206                                                      # partial content
+        when 206                                                  # partial content
           h['Access-Control-Allow-Origin'] ||= origin
           [206, h, [response.read]]
-        else                                                          # full content
-          body = HTTP.decompress h, response.read                     # decompress content
-          format ||= if path == '/feed'                               # format fixed on remote /feed due to many erroneous text/html responses. if you want full conneg on remote /feed URLs you could remove this and sniff
+        else                                                      # full content
+          body = HTTP.decompress h, response.read                 # decompress content
+          format ||= if path == '/feed'                           # format fixed on remote /feed due to many erroneous text/html responses. if you want full conneg on remote /feed URLs you could remove this and sniff
                        'application/atom+xml'
-                     elsif content_type = h['Content-Type']           # format defined in HTTP header
+                     elsif content_type = h['Content-Type']       # format defined in HTTP header
                        ct = content_type.split(/;/)
-                       if ct.size == 2 && ct[1].index('charset')      # charset defined in HTTP header
+                       if ct.size == 2 && ct[1].index('charset')  # charset defined in HTTP header
                          charset = ct[1].sub(/.*charset=/i,'')
                          charset = nil if charset.empty? || charset == 'empty'
                        end
                        ct[0]
                      end
 
-          if format                                                   # format defined?
+          if format                                               # format defined?
             if !charset && format.index('html') && metatag = body[0..4096].encode('UTF-8', undef: :replace, invalid: :replace).match(/<meta[^>]+charset=['"]?([^'">]+)/i)
-              charset = metatag[1]                                    # charset defined in document header
+              charset = metatag[1]                                # charset defined in document header
             end
-            if charset                                                # charset defined?
-              charset = 'UTF-8' if charset.match? /utf.?8/i           # normalize UTF-8 charset symbols
+            if charset                                            # charset defined?
+              charset = 'UTF-8' if charset.match? /utf.?8/i       # normalize UTF-8 charset symbols
               charset = 'Shift_JIS' if charset.match? /s(hift)?.?jis/i# normalize Shift-JIS charset symbols
-            end                                                       # convert to UTF-8 using HTTP and document header hints
+            end                                                   # convert to UTF-8 using HTTP and document header hints
             body.encode! 'UTF-8', charset || 'UTF-8', invalid: :replace, undef: :replace if format.match? /(ht|x)ml|script|text/
             if format == 'application/xml' && body[0..2048].match?(/(<|DOCTYPE )html/i)
-              format = 'text/html'                                    # HTML served w/ XML MIME, update format symbol
+              format = 'text/html'                                # HTML served w/ XML MIME, update format symbol
             end
-            env[:origin_format] = format                              # note original format for log
+            env[:origin_format] = format                          # note original format for log
 
-            body = Webize.clean self, body, format                    # sanitize upstream content
+            body = Webize.clean self, body, format                # sanitize upstream content
 
-            if formatExt = Suffixes[format] || Suffixes_Rack[format]  # lookup format suffix
-              file = fsPath                                           # cache path
-              file += '/index' if file[-1] == '/'                     # append directory-data slug
-              file += formatExt unless File.extname(file)==formatExt  # append format suffix
-              FileUtils.mkdir_p File.dirname file                     # create container
-              File.open(file, 'w'){|f| f << body }                    # fill static cache
-            else
-              puts "⚠️ extension undefined for #{format}"              # ⚠️ undefined format-suffix
-            end
-
-            if reader = RDF::Reader.for(content_type: format)         # reader defined for format?
-              env[:repository] ||= RDF::Repository.new                # initialize RDF repository
-              if timestamp = h['Last-Modified']                       # HTTP timestamp
-                if ts = Time.httpdate(timestamp.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,'')) rescue nil
-                  FileUtils.touch file, mtime: ts                     # cache mtime
-                  env[:repository] << RDF::Statement.new(self, Date.R, ts.iso8601) if format.index 'text' # timestamp RDF
+            if formatExt = Suffixes[format]||Suffixes_Rack[format]# lookup format suffix
+              file = fsPath                                       # cache path
+              file += '/index' if file[-1] == '/'                 # append directory-data slug
+              file += formatExt unless File.extname(file)==formatExt # append format suffix
+              FileUtils.mkdir_p File.dirname file                 # create container
+              File.open(file, 'w'){|f| f << body }                # fill static cache
+              if timestamp = h['Last-Modified']                   # HTTP provided timestamp
+                timestamp.gsub('-',' ').sub(/((ne|r)?s|ur)?day/,'') # clean timestamp
+                if ts = Time.httpdate(timestamp) rescue nil       # parse timestamp
+                  FileUtils.touch file, mtime: ts                 # cache timestamp
                 else
-                  puts "⚠️ bad timestamp #{timestamp}"
+                  puts ['⚠️ bad timestamp:', h['Last-Modified'], '->', timestamp].join ' '
                 end
               end
+              if etag = h['ETag']                                 # cache etag
+                `attr -s ETag -V #{Shellwords.escape etag} #{Shellwords.escape file}`
+              end
+            else
+              puts "⚠️ extension undefined for #{format}"          # ⚠️ undefined format-suffix
+            end
+
+            if reader = RDF::Reader.for(content_type: format)     # reader defined for format?
+              env[:repository] ||= RDF::Repository.new            # initialize RDF repository
+              env[:repository] << RDF::Statement.new(self, Date.R, ts.iso8601) if ts && format.index('text') # timestamp RDF
               reader.new(body, base_uri: self, path: file){|g|env[:repository] << g} # read RDF
             else
-              puts "⚠️ Reader undefined for #{format}"                 # ⚠️ undefined Reader
-            end unless format.match? /octet-stream/                   # can't parse binary blobs
+              puts "⚠️ Reader undefined for #{format}"             # ⚠️ undefined Reader
+            end unless format.match? /octet-stream/               # can't parse binary blobs
 
           else
-            puts "⚠️ format undefined on #{uri}"                       # ⚠️ undefined format
+            puts "⚠️ format undefined on #{uri}"                   # ⚠️ undefined format
           end
 
-          return unless thru                                          # pass HTTP response through to caller? (default: Y)
+          return unless thru                                      # pass HTTP response through to caller? (default: Y)
 
-          saveRDF                                                     # commit graph cache
-          env[:resp]['Access-Control-Allow-Origin'] ||= origin        # CORS header
-          h['Link'] && h['Link'].split(',').map{|link|                # Link headers
+          saveRDF                                                 # commit graph cache
+          env[:resp]['Access-Control-Allow-Origin'] ||= origin    # CORS header
+          h['Link'] && h['Link'].split(',').map{|link|            # Link headers
             ref, type = link.split(';').map &:strip
             if ref && type
               ref = ref.sub(/^</,'').sub />$/, ''
               type = type.sub(/^rel="?/,'').sub /"$/, ''
               env[:links][type.to_sym] = ref
-            end}                                                      # upstream headers
+            end}                                                  # upstream headers
           %w(Access-Control-Allow-Origin Access-Control-Allow-Credentials ETag Last-Modified).map{|k| env[:resp][k] ||= h[k] if h[k]}
 
-          if etag_match?                                              # caller has entity
-            R304                                                      # no content
-          elsif env[:notransform] || format&.match?(FixedFormat)      # no transform
+          if eTag_match?                                          # caller has entity
+            R304                                                  # no content
+          elsif env[:notransform] || format&.match?(FixedFormat)  # no transform
             body = Webize::HTML.resolve_hrefs body, env, true if format == 'text/html' && env.has_key?(:proxy_href) # resolve hrefs in proxy-href mode
-            env[:resp].update({'Content-Type' => format,              # response metadata
+            env[:resp].update({'Content-Type' => format,          # response metadata
                              'Content-Length' => body.bytesize.to_s})
             env[:resp]['Expires'] = (Time.now + 3e7).httpdate if file && (StaticExt.member? File.extname file)
-            [200, env[:resp], [body]]                                 # content in upstream format
-          else                                                        # content-negotiated transform
-            graphResponse format                                      # content in preferred format
+            [200, env[:resp], [body]]                             # content in upstream format
+          else                                                    # content-negotiated transform
+            graphResponse format                                  # content in preferred format
           end
         end
       end
-    rescue Exception => e                                             # some response codes mapped to exceptions
+    rescue Exception => e                                         # some response codes mapped to exceptions
       raise unless e.respond_to? :io
       env[:origin_status] = e.io.status[0].to_i
       case env[:origin_status].to_s
-      when /30[12378]/                                                # redirection
+      when /30[12378]/                                            # redirection
         dest = (join e.io.meta['location']).R env
-        if scheme == 'https' && dest.scheme == 'http'                 # redirected to HTTP from HTTPS
+        if scheme == 'https' && dest.scheme == 'http'             # redirected to HTTP from HTTPS
           puts "⚠️ HTTPS downgraded to HTTP: #{uri} -> #{dest}"
           dest.fetchHTTP
         else
           [302, {'Location' => dest.href}, []]
         end
-      when /304/                                                      # origin not modified
+      when /304/                                                  # origin not modified
         cacheResponse
-      when /300|[45]\d\d/                                             # not allowed, not found, misc errors
+      when /300|[45]\d\d/                                         # not allowed, not found, misc errors
         env[:status] = env[:origin_status]
         head = headers e.io.meta
         body = HTTP.decompress(head, e.io.read).encode 'UTF-8', undef: :replace, invalid: :replace, replace: ' '
@@ -315,22 +331,22 @@ class WebResource
 
     def fileResponse
       env[:resp].update({'Access-Control-Allow-Origin' => origin, # response metadata
-                         'ETag' => Digest::SHA2.hexdigest([uri, node.stat.mtime, node.size].join),
+                         'ETag' => eTag,
                          'Content-Length' => node.size.to_s,
                          'Content-Type' => mime_type,
-                         'Last-Modified' => node.mtime.httpdate})
+                         'Last-Modified' => mtime.httpdate})
 
-      return R304 if etag_match?                                   # client has file version
+      return R304 if eTag_match?                                  # client has entity matching tag, nothing to return
 
       location = fsPath
       env[:resp]['Expires'] = (Time.now + 3e7).httpdate if StaticExt.member?(File.extname location)
 
       Rack::Files.new('.').serving(Rack::Request.new(env), location).yield_self{|s,h,b|
         if 304 == s
-          R304                                                     # client has unmodified file
+          R304                                                    # client has unmodified file, nothing to return
         else
           h['Content-Type'] = 'application/javascript; charset=utf-8' if h['Content-Type']=='application/javascript' # add charset
-          [s, env[:resp].update(h), b]                             # file response
+          [s, env[:resp].update(h), b]                            # file response
         end}
     end
 
@@ -365,7 +381,7 @@ class WebResource
 
     def graphResponse defaultFormat = 'text/html'
       return notfound if !env.has_key?(:repository)||env[:repository].empty? # empty graph
-      return [304,{},[]] if etag_match?                                      # client has entity
+      return [304,{},[]] if eTag_match?                                      # client has entity
       env[:status] ||= 200
       format = selectFormat defaultFormat                                    # response format
       env[:resp].update({'Access-Control-Allow-Origin' => origin,            # response metadata
@@ -406,16 +422,15 @@ class WebResource
       raw ||= env || {}                                     # raw headers
       head = {}                                             # cleaned headers
       raw.map{|k,v|                                         # inspect (k,v) pairs
-        unless k.class != String || k.index('rack.') == 0   # hide internal headers
-          key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|t| # strip Rack prefix and tokenize
-            if %w{cf cl csrf ct dfe dnt id spf utc xss xsrf}.member? t # acronyms
-              t = t.upcase                                  # acronym
+        unless k.class != String || k.index('rack.') == 0   # skip internal headers
+          key = k.downcase.sub(/^http_/,'').split(/[-_]/).map{|t| # strip prefix and tokenize
+            if %w{cf cl csrf ct dfe dnt id spf utc xss xsrf}.member? t
+              t.upcase                                      # full acronym
             elsif 'etag' == t
               'ETag'                                        # partial acronymm
             else
-              t[0] = t[0].upcase                            # capitalized word
-            end
-            t}.join '-'                                     # join tokens
+              t.capitalize                                  # capitalized word
+            end}.join '-'                                   # join words
           head[key] = (v.class == Array && v.size == 1 && v[0] || v) unless SingleHopHeaders.member? key.downcase # set header
         end}
 
@@ -469,6 +484,10 @@ class WebResource
     def mime_type
       suffix = extname
       MIME_Types[suffix] || Rack::Mime::MIME_TYPES[suffix]
+    end
+
+    def mtime
+      node.mtime
     end
 
     def notfound
@@ -571,6 +590,15 @@ class WebResource
       end
     end
 
+    # decide if representation at this URI is suitable for response
+    def preferred_format?
+      if format = mime_type                                 # representation MIME
+        return true if format.match? FixedFormat            # no MIME-transform available for format
+        return true if !ReFormat.member?(format) && format==selectFormat(format) # no MIME-transform requested, and no reformat-preference for MIME
+      end
+      false                                                 # transform
+    end
+
     def selectFormat default = nil                          # default-format argument
       default ||= 'text/html'                               # default when unspecified
       return default unless env.has_key? 'HTTP_ACCEPT'      # no preference specified
@@ -591,6 +619,10 @@ class WebResource
           return format if RDF::Writer.for(:content_type => format) || # RDF writer available for format
              ['application/atom+xml','text/html'].member?(format)}}    # non-RDF writer available
       default                                                          # search failure
+    end
+
+    def static?
+      StaticExt.member? extname
     end
 
     def unproxy schemeless = false
