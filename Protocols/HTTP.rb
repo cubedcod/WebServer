@@ -165,9 +165,9 @@ class WebResource
     def fetch
       return cacheResponse if offline?                            # offline, respond from cache
 
-      if static?                                                  # static nodes aren't updated, always valid when exist
-        return R304 if client_cached?                             # client has static node
-        return fileResponse if node.file?                         # server has static node, return it
+      if static?                                                  # static node requested?
+        return R304 if client_cached?                             # client has node
+        return fileResponse if node.file?                         # server has node, return it
       end
 
       if n = nodeSet.sort_by(&:mtime)[0]                          # find cache node w/ original timestamp
@@ -626,6 +626,7 @@ class WebResource
       default                                                          # search failure
     end
 
+    # static node means no updates to URI, next version has new identity
     def static?
       StaticExt.member? extname
     end
