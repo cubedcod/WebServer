@@ -560,7 +560,7 @@ l.facebook.com l.instagram.com
       graph = ['/' + date.sub('-','/').sub('-','/').sub('T','/').sub(':','/').gsub(/[-:]/,'.'), 'gitter', user['username'], id].join('.').R # graph on timeline
       subject = 'http://gitter.im' + path + '?at=' + id # subject URI
       yield subject, Date, date, graph
-      yield subject, Type, Post.R, graph
+      yield subject, Type, (SIOC + 'MicroblogPost').R, graph
       yield subject, Creator, join(user['url']), graph
       yield subject, Creator, user['displayName'], graph
       yield subject, To, room, graph
