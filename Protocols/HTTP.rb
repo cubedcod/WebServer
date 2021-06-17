@@ -341,7 +341,7 @@ class WebResource
                          'Content-Type' => mime_type,
                          'Last-Modified' => mtime.httpdate})
 
-      return R304 if eTag_match?                                  # client has entity matching tag, nothing to return
+      return R304 if eTag_match?                                  # client has entity, nothing to return
 
       location = fsPath
       env[:resp]['Expires'] = (Time.now + 3e7).httpdate if StaticExt.member?(File.extname location)
