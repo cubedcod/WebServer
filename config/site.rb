@@ -234,7 +234,9 @@ l.facebook.com l.instagram.com
         r.deny
       end}
 
-    GET 'teddit.net', -> r {[301, {'Location' => '//www.reddit.com' + r.path}, []]}
+    GotoReddit =  -> r {[301, {'Location' => ('//www.reddit.com' + r.path).R(r.env).href}, []]}
+    GET 'teddit.net', GotoReddit
+    GET 'np.reddit.com', GotoReddit
 
     GET 's4.reutersmedia.net', -> r {
       args = r.query_values || {}
