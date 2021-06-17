@@ -164,14 +164,12 @@ class WebResource
     # fetch data from cache or remote
     def fetch
       return cacheResponse if offline?                            # offline, respond from cache
-
-      if static?                                                  # static node requested?
-        return R304 if client_cached?                             # client has node
-        return fileResponse if node.file?                         # server has node, return it
+      if static?                                                  # static node requested
+        return R304 if client_cached?                             # client has static node
+        return fileResponse if node.file?                         # server has static node
       end
-
-      if n = nodeSet.sort_by(&:mtime)[0]                          # find cache node w/ original timestamp
-        return n.fileResponse if n.static?                        # server has static node, return it
+      if n = (nodes = nodeSet).sort_by(&:mtime)[0]                # cached node w/ upstream timestamp
+        return n.fileResponse if nodes.size==1 && n.static?       # server has static node
         env[:ETag] = n.eTag(false)                                # ETag for conditional fetch
         env[:ts] = n.mtime.httpdate                               # timestamp for conditional fetch
       end
@@ -186,7 +184,6 @@ class WebResource
       else
         puts "⚠️ unsupported scheme: #{uri}"                       # unknown scheme
       end
-
     rescue Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenURI::HTTPError, OpenSSL::SSL::SSLError, RuntimeError, SocketError => e
       if scheme == 'https'                                        # HTTP fetch after HTTPS failure
         puts "⚠️  fallback scheme #{uri} -> HTTP"
