@@ -47,6 +47,10 @@ class WebResource
        end].join '/'
     end
 
+    def host_parts
+      local_node? ? ['.'] : host.split('.').reverse
+    end
+
     # URI -> Pathname
     def node; Pathname.new fsPath end
 

@@ -60,10 +60,6 @@ class WebResource < RDF::URI
       File.extname path if path
     end
 
-    def host_parts
-      local_node? ? ['.'] : host.split('.').reverse
-    end
-
     def local_node?; !host || LocalAddress.member?(host) end
 
     def parts; path ? (path.split('/') - ['']) : [] end
