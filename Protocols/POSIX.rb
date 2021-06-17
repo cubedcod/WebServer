@@ -56,8 +56,6 @@ class WebResource
 
   end
 
-  def readFile; node.exist? ? node.read : nil end
-
   def shellPath
     Shellwords.escape fsPath
   end

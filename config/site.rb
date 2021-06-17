@@ -131,7 +131,7 @@ l.facebook.com l.instagram.com
       if r.parts[0] == 'api'
         token = r.join('/token').R
         if !r.env.has_key?('x-access-token') && token.node.exist?
-          r.env['x-access-token'] = token.readFile
+          r.env['x-access-token'] = token.node.read
         end
       end
       NoGunk[r]}
@@ -513,7 +513,7 @@ l.facebook.com l.instagram.com
         if token = text.match(/accessToken":"([^"]+)/)
           token = token[1]
           tFile = join('/token').R
-          unless tFile.node.exist? && tFile.readFile == token
+          unless tFile.node.exist? && tFile.node.read == token
             tFile.writeFile token                  # save updated client-token
             puts ['🎫 ', host, token].join ' '
           end
