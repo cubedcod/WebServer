@@ -168,7 +168,7 @@ class WebResource
         return R304 if client_cached?                             # client has static node
         return fileResponse if node.file?                         # server has static node
       end
-      if n = (nodes = nodeSet).sort_by(&:mtime)[0]                # cached node w/ upstream timestamp
+      if n=(nodes=nodeSet).select(&:exist?).sort_by(&:mtime)[0]   # cached node(s) with upstream timestamp
         return n.fileResponse if nodes.size==1 && n.static?       # server has static node
         env[:ETag] = n.eTag(false)                                # ETag for conditional fetch
         env[:ts] = n.mtime.httpdate                               # timestamp for conditional fetch

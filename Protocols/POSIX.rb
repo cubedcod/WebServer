@@ -66,6 +66,10 @@ class WebResource
 
   module HTTP
 
+    def exist?
+      node.exist?
+    end
+
     # URI -> pathnames
     def nodeGrep files = nil
       files = [fsPath] if !files || files.empty?
@@ -115,6 +119,7 @@ class WebResource
                     puts "glob too large - dropping #{glob.size - 2048} results"
                     nodeGrep glob[0..2047]                        # GREP in GLOB
                   else
+                    summarize = !env[:fullContent]
                     Pathname.glob globPath                        # arbitrary GLOB
                   end
                 else                                              # default-set GLOB
