@@ -5,8 +5,6 @@ class WebResource < RDF::URI
 
     GlobChars = /[\*\{\[]/
 
-    LocalAddress = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).concat(ENV.has_key?('HOSTNAME') ? [ENV['HOSTNAME']] : []).uniq
-
     # common URIs
 
     W3       = 'http://www.w3.org/'
@@ -60,19 +58,16 @@ class WebResource < RDF::URI
       File.extname path if path
     end
 
-    def local_node?; !host || LocalAddress.member?(host) end
-
     def parts; path ? (path.split('/') - ['']) : [] end
 
   end
 
   alias_method :uri, :to_s
 
-  # resource locator - derived from origin URI in proxy scenario
   def href
-    if env.has_key?(:proxy_href) && !local_node? # proxy
+    if env.has_key?(:proxy_href) && host # proxy location
       ['http://', env['HTTP_HOST'], '/', scheme ? nil : 'https:', uri].join
-    else                                         # direct
+    else                                 # direct URI ->  URL map
       uri
     end
   end
@@ -84,11 +79,11 @@ class WebResource < RDF::URI
       bc = '' # breadcrumb trail
       icon = env[:links][:icon]
       {class: :toolbox,
-       c: [({_: :span, c: env[:status], style: 'font-weight: bold', class: :icon} if env[:status] != 200),                                                             # status code
-           ({_: :a, class: :icon, c: '↨', href: HTTP.qs(env[:qs].merge({'view' => 'table', 'sort' => 'date'}))} unless env[:view] == 'table'),                  # link to tabular view
-           {_: :a, href: (env[:proxy_href] && !local_node?) ? env[:base].uri : HTTP.qs(env[:qs].merge({'notransform' => nil})), c: '⚗️', id: :UI, class: :icon}, # link to upstream UX
-           ({_: :a,href: HTTP.qs(env[:qs].merge({'download' => 'audio'})),c: '&darr;',class: :icon} if host&.match?(AudioHosts)),                               # download link
-           env[:feeds].map{|feed|                                                                                                                               # feed link(s)
+       c: [({_: :span, c: env[:status], style: 'font-weight: bold', class: :icon} if env[:status] != 200),                                              # status code
+           ({_: :a, class: :icon, c: '↨', href: HTTP.qs(env[:qs].merge({'view' => 'table', 'sort' => 'date'}))} unless env[:view] == 'table'),          # pointer to tabular view
+           {_: :a, href: (env[:proxy_href] && host) ? env[:base].uri : HTTP.qs(env[:qs].merge({'notransform' => nil})), c: '⚗️', id: :UI, class: :icon}, # pointer to upstream UX
+           #({_: :a,href: HTTP.qs(env[:qs].merge({'download' => 'audio'})),c: '&darr;',class: :icon} if host&.match?(AudioHosts)),                       # download link
+           env[:feeds].map{|feed|                                                                                                                       # feed pointer(s)
              feed = feed.R(env)
              {_: :a, href: feed.href, title: feed.path, class: :icon, c: FeedIcon}.update((feed.path||'/').match?(/^\/feed\/?$/) ? {id: :sitefeed, style: 'border: .08em solid orange; background-color: orange'} : {})}, "\n",
            {_: :a, class: :host, href: env[:base].join('/').R(env).href, c: icon ? {_: :img, src: icon.data? ? icon.uri : icon.href, style: DarkLogo.member?(host) ? 'background-color: #fff' : ''} : '🏠'},# link to path root

@@ -287,7 +287,7 @@ module Webize
 
         # <body>
         if body = n.css('body')[0]
-          unless @base.local_node? || @base.env[:fullContent] # summarize to new content
+          unless !@base.host || @base.env[:fullContent] || @base.offline? # summarize new content
             @base.env[:links][:down] ||= WebResource::HTTP.qs @base.env[:qs].merge({'offline' => nil})
             hashed_nodes = 'div, footer, h1,h2,h3, nav, p, section, span, ul, li'
             hashs = {}
@@ -381,7 +381,7 @@ class WebResource
       end
       env[:links][:icon] ||= icon.node.exist? ? icon : '//localhost:8000/favicon.ico'.R(env)       # default well-known icon
       bgcolor = StatusColor[env[:status]] || '#333'                                                # background color
-      htmlGrep if local_node?                                                                      # HTMLify grep results
+      htmlGrep if !host || offline?                                                                # HTMLize local grep results
       groups = {}                                                                                  # group(s) container
       graph.map{|uri, resource|                                                                    # group resources by type
         (resource[Type]||[:untyped]).map{|type|

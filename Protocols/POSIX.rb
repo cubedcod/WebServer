@@ -17,38 +17,33 @@ class WebResource
 
     # URI -> path (String)
     def fsPath
-      [host_parts,            # host directory
-       if local_node?         # local path
-         if parts[0] == 'msg' # Message-ID -> sharded message storage
-           id = Digest::SHA2.hexdigest Rack::Utils.unescape_path parts[1]
-           ['mail', id[0..1], id[2..-1]]
-         else                 # direct mapping
-           parts.map{|part| Rack::Utils.unescape_path part}
-         end
-       else                   # remote path - qs differentiates local storage path
-         ps = if (path && path.size > 496) || parts.find{|p|p.size > 127} # oversized, hash and shard
-                hash = Digest::SHA2.hexdigest path
-                [hash[0..1], hash[2..-1]]
-              else            # direct mapping
-                parts.map{|part| Rack::Utils.unescape_path part}
-              end
-         if query                            # querystring exists
-           qh = Digest::SHA2.hexdigest(query)[0..15] # hash query
-           if ps.size > 0
-             name = ps.pop                   # get basename
-             x = File.extname name           # find extension
-             base = File.basename name, x    # strip extension
-             ps.push [base, '.', qh, x].join # basename w/ queryhash before extension
-           else
-             ps.push qh                      # queryhash as basename
-           end
-         end
-         ps
-       end].join '/'
-    end
-
-    def host_parts
-      local_node? ? ['.'] : host.split('.').reverse
+      if !host         # local path
+        if parts[0] == 'msg' # Message-ID -> sharded message storage
+          id = Digest::SHA2.hexdigest Rack::Utils.unescape_path parts[1]
+          ['mail', id[0..1], id[2..-1]]
+        else                 # direct mapping
+          parts.map{|part| Rack::Utils.unescape_path part}
+        end
+      else                   # remote path - qs differentiates local storage path
+        ps = if (path && path.size > 496) || parts.find{|p|p.size > 127} # oversized, hash and shard
+               hash = Digest::SHA2.hexdigest path
+               [hash[0..1], hash[2..-1]]
+             else            # direct mapping
+               parts.map{|part| Rack::Utils.unescape_path part}
+             end
+        if query                            # querystring exists
+          qh = Digest::SHA2.hexdigest(query)[0..15] # hash query
+          if ps.size > 0
+            name = ps.pop                   # get basename
+            x = File.extname name           # find extension
+            base = File.basename name, x    # strip extension
+            ps.push [base, '.', qh, x].join # basename w/ queryhash before extension
+          else
+            ps.push qh                      # queryhash as basename
+          end
+        end
+        [host.split('.').reverse, ps]
+      end.join '/'
     end
 
     # URI -> Pathname
@@ -97,11 +92,11 @@ class WebResource
     # URI -> nodes
     def nodeSet
       [:links,:qs].map{|e| env[e] ||= {}}
-      local = local_node? || offline?
+      local = !host || offline?
       f    = env[:qs]['f']    && !env[:qs]['f'].empty?
       find = env[:qs]['find'] && !env[:qs]['find'].empty?
       grep = env[:qs]['q']    && !env[:qs]['q'].empty?
-      pathbase = host_parts.join('/').size
+      pathbase = host ? host.size : 0
 
       nodes = (if local && node.directory? && (f || find || grep) # search directory
                if f                                               # FIND exact
@@ -129,7 +124,7 @@ class WebResource
                   Pathname.glob globPath
                 end
                end).map{|p|                                       # resolve relative-to-host path to full URI
-        join(p.to_s[pathbase..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env}
+        (host ? self : '/'.R).join(p.to_s[pathbase..-1].gsub(':','%3A').gsub(' ','%20').gsub('#','%23')).R env}
 
       if summarize
         env[:links][:down] = HTTP.qs env[:qs].merge({'fullContent' => nil})

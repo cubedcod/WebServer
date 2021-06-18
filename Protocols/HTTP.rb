@@ -5,9 +5,10 @@ class WebResource
   module HTTP
     include URIs
 
-    HostGET = {}
-    Methods = %w(GET HEAD OPTIONS POST PUT)
     Args = %w(find fullContent notransform offline order sort view)
+    HostGET = {}
+    Localhosts = %w{l [::1] 127.0.0.1 localhost}.concat(Socket.ip_address_list.map(&:ip_address)).concat(ENV.has_key?('HOSTNAME') ? [ENV['HOSTNAME']] : []).uniq
+    Methods = %w(GET HEAD OPTIONS POST PUT)
     R304 = [304, {}, []]
 
     def allow_domain?
@@ -30,19 +31,24 @@ class WebResource
 
     def self.call env
       return [405,{},[]] unless Methods.member? env['REQUEST_METHOD']    # allow HTTP methods
-      uri = RDF::URI('//' + env['HTTP_HOST']).                           # host
+#      Pry::ColorPrinter.pp env
+
+      uri = RDF::URI(Localhosts.member?(env['SERVER_NAME']) ? '/' : ('https://'+env['HTTP_HOST'])). # host and scheme
               join(env['REQUEST_PATH']).R env                            # path
-      uri.scheme = uri.local_node? ? 'http' : 'https'                    # scheme
-      if env['QUERY_STRING'] && !env['QUERY_STRING'].empty?              # non-empty query
-        uri.query = env['QUERY_STRING'].sub(/^&+/,'').sub(/&+$/,'').gsub(/&&+/,'&') # query stripped of excess & chars
-        env[:qs] = uri.query_values; qs = uri.query_values               # parse client args
-        Args.map{|k|env[k.to_sym] = qs.delete(k)||true if qs.has_key? k} # set local (client <> proxy) args
-        qs.empty? ? (uri.query = nil) : (uri.query_values = qs)          # set external (proxy <> origin) query string
+
+      if env['QUERY_STRING'] && !env['QUERY_STRING'].empty?              # query
+        uri.query = env['QUERY_STRING'].sub(/^&+/,'').sub(/&+$/,'').gsub(/&&+/,'&') # strip qs of extra & chars
+        env[:qs] = uri.query_values; qs = uri.query_values               # parse query, memoize in environment
+        Args.map{|k|env[k.to_sym] = qs.delete(k)||true if qs.has_key? k} # local (client <> proxy) query
+        qs.empty? ? (uri.query = nil) : (uri.query_values = qs)          # global (proxy <> origin) query
       else
-        env[:qs] = {}                                                    # no query-args
+        env[:qs] = {}                                                    # no query
       end
+
       env.update({base: uri, feeds: [], links: {}, resp: {}})            # response environment
+
       uri.send(env['REQUEST_METHOD']).yield_self{|status, head, body|    # dispatch request
+
         format = uri.format_icon head['Content-Type']                    # log response
         client_status = status_icon status
         origin_format = uri.format_icon env[:origin_format] if env[:origin_format]
@@ -54,6 +60,7 @@ class WebResource
                 else
                   format_color format
                 end
+
         puts [[format == origin_format ? nil : format, client_status == origin_status ? nil : client_status,
                env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]),
                origin_format, origin_status,
@@ -61,6 +68,7 @@ class WebResource
               env['HTTP_REFERER'] ? ["\e[#{color}m", env['HTTP_REFERER'], "\e[0m→"] : nil, "\e[#{color}#{env['HTTP_REFERER'] && !env['HTTP_REFERER'].index(env[:base].host) && ';7' || ''}m",
               env[:base], "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil, Verbose ? [env['HTTP_ACCEPT'], head['Content-Type']].compact.join(' → ') : nil,
              ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
+
         [status, head, body]}                                            # response
     rescue Exception => e                                                # error handler
       puts uri, e.class, e.message, e.backtrace
@@ -357,7 +365,7 @@ class WebResource
     end
 
     def GET
-      if local_node?
+      if !host
         env[:proxy_href] = true  # enable proxy URIs
         p = parts[0]             # initial path selector
         if !p                    # local root-node
