@@ -113,7 +113,7 @@ class WebResource
                 if globPath.match?(GlobChars) && local
                   if grep
                     glob = Pathname.glob globPath
-                    puts "glob too large - dropping #{glob.size - 2048} results"
+                    puts "glob too large - dropping #{glob.size - 2048} results" if glob.size > 2048
                     nodeGrep glob[0..2047]                        # GREP in GLOB
                   else
                     summarize = !env[:fullContent]

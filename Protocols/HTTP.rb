@@ -65,7 +65,7 @@ class WebResource
                env[:deny] ? '🛑' : (action_icon env['REQUEST_METHOD'], env[:fetched]),
                origin_format, origin_status,
                ([env[:repository].size,'⋮'].join if env[:repository] && env[:repository].size > 0)].join,
-              env['HTTP_REFERER'] ? ["\e[#{color}m", env['HTTP_REFERER'], "\e[0m→"] : nil, "\e[#{color}#{env['HTTP_REFERER'] && !env['HTTP_REFERER'].index(env[:base].host) && ';7' || ''}m",
+              env['HTTP_REFERER'] ? ["\e[#{color}m", env['HTTP_REFERER'], "\e[0m→"] : nil, "\e[#{color}#{env[:base].host && env['HTTP_REFERER'] && !env['HTTP_REFERER'].index(env[:base].host) && ';7' || ''}m",
               env[:base], "\e[0m", head['Location'] ? ["→\e[#{color}m", head['Location'], "\e[0m"] : nil, Verbose ? [env['HTTP_ACCEPT'], head['Content-Type']].compact.join(' → ') : nil,
              ].flatten.compact.map{|t|t.to_s.encode 'UTF-8'}.join ' '
 
